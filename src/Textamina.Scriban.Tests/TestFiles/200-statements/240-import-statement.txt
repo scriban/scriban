@@ -1,0 +1,7 @@
+Evaluate <import> statement
+
+{{
+x = {member1: "This is the member1", member2: 150 }
+import x
+member1 + " " + member2
+}}

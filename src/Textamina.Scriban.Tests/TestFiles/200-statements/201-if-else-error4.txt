@@ -1,0 +1,9 @@
+if true
+else test # Should be EOF instead of test
+end
+===
+{{
+if true
+else test # Should be EOF instead of test
+end
+}}

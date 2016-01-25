@@ -1,0 +1,3 @@
+text(5,7) : error : Error while parsing assign expression: Expression is only allowed for a top level assignment in: <target_expression> = <value_expression>
+text(5,11) : error : Error while parsing assign expression: Expression is only allowed for a top level assignment in: <target_expression> = <value_expression>
+text(5,20) : error : Error while parsing assign expression: Expression is only allowed for a top level assignment in: <target_expression> = <value_expression>

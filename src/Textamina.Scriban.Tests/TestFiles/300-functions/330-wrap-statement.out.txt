@@ -1,0 +1,19 @@
+func wrapped
+	for $i in 1..<$0
+		$$
+	end
+end
+
+wrap wrapped 10
+	"[$i] This is inside the wrap!"
+end
+===
+1 -> This is inside the wrap!
+2 -> This is inside the wrap!
+3 -> This is inside the wrap!
+4 -> This is inside the wrap!
+5 -> This is inside the wrap!
+6 -> This is inside the wrap!
+7 -> This is inside the wrap!
+8 -> This is inside the wrap!
+9 -> This is inside the wrap!

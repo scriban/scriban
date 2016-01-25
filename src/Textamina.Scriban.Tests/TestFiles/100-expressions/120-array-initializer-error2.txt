@@ -1,0 +1,5 @@
+[1,2,  # an array that is not closed after last comma
+===
+{{
+[1,2, 
+}}

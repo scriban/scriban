@@ -1,0 +1,9 @@
+x = { z: 10 }    # x is initialized
+x.y              # x.y will work
+x.z              # x.z should print 10
+===
+{{
+x = { z: 10 }    # x is initialized
+x.y              # x.y will work
+x.z              # x.z should print 10
+}}

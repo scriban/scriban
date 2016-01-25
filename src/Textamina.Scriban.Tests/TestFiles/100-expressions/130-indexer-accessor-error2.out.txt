@@ -1,0 +1,1 @@
+text(8,3) : error : Cannot access target [x] with a null indexer: x[]

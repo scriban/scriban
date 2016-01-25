@@ -1,0 +1,23 @@
+Evaluate for with range statements
+
+# inclusive range [1,2,3,4]
+for i in 1..4
+	i
+end
+===
+{{
+for i in 1..4
+	i
+end
+}}
+
+# exclude range [1,2,3]
+for i in 1..<4
+	i
+end
+===
+{{
+for i in 1..<4
+	i
+end
+}}

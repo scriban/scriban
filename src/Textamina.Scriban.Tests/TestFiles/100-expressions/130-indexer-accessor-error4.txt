@@ -1,0 +1,7 @@
+x = 5    # x is initialized to an integer
+x[0]     # accessing x as it was an array
+===
+{{
+x = 5    # x is initialized to an integer
+x[0]     # accessing x as it was an array
+}}

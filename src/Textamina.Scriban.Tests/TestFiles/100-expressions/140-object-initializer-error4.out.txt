@@ -1,0 +1,1 @@
+text(3,2) : error : Unexpected member type [test 1/function call expression] found for object initializer member name

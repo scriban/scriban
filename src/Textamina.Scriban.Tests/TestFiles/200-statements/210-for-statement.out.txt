@@ -1,0 +1,29 @@
+Evaluate for statements
+
+x = [1,2,3,4]
+for y in x
+	y
+end
+===
+1234
+
+x = [1,2,3,4]
+for y in x
+	if y == 1
+		continue
+	else if y == 4
+		break
+	end
+	y
+end
+===
+23
+
+for y in [1,2,3,4]
+	(y-1) + " => [" + for.index + "] " + for.first + "," + for.last + "," + for.even + "," + for.odd + "\r\n"
+end
+===
+0 => [0] true,false,true,false
+1 => [1] false,false,false,true
+2 => [2] false,false,true,false
+3 => [3] false,true,false,true

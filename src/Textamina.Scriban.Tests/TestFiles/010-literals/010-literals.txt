@@ -1,0 +1,11 @@
+This file use Unix \n end of line instead of windows
+This is a {{ "Hello \" World" }}
+This is a {{ "Hello\r\nWorld" }}
+This is a {{ 'Hello \' World' }}
+This is a the number {{ 1 }}
+This is a the long number {{ 100000000000 }}
+This is a the float {{ 2.5 }}
+This is a double {{ 2.123456789123 }}
+These are booleans {{ true }} and {{ false }}
+This is a null value <{{ null }}>
+This is a string with unicode chars {{ "\u00B1\u010C" }}

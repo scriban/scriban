@@ -1,0 +1,1 @@
+text(14,3) : error : Cannot set a value for the readonly member: x.y

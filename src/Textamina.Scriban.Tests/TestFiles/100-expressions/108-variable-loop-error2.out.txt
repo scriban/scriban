@@ -1,0 +1,1 @@
+text(4,1) : error : The loop variable <while.last> is invalid

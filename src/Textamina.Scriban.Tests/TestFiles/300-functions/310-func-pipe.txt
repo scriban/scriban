@@ -1,0 +1,23 @@
+func inc 
+	return $0 + 1
+end
+((2 | inc | inc | inc) + 5) | inc
+===
+{{
+func inc 
+	ret $0 + 1
+end
+((2 | inc | inc | inc) + 5) | inc
+}}
+
+func inc_multi
+	ret $0 + $1 + $2 + $3
+end
+inc_multi (^[1,2,3,4] | inc_multi) (100 | inc) 7 8
+===
+{{
+func inc_multi
+	ret $0 + $1 + $2 + $3
+end
+inc_multi (^[1,2,3,4] | inc_multi) (100 | inc) 7 8
+}}

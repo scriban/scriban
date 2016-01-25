@@ -1,0 +1,1 @@
+text(5,1) : error : Error while parsing for statement: Expecting a variable instead of [Integer] in: for <variable> in <expression> ... end

@@ -1,0 +1,6 @@
+func inc_multi
+	ret $0 + $1 + $2 + $3
+end
+inc_multi ^[1,2,3,4]   # Use of the operator ^ to expand the parameters
+===
+10

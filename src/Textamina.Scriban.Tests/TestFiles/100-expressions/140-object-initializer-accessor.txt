@@ -1,0 +1,47 @@
+object
+
+{member1: 1, member2: 2, member3: 3, member4: 4} -> {{ x = {member1: 1, member2: 2, member3: 3, member4: 4}
+x.member1
+x.member2
+x.member3
+x.member4
+}}
+
+{member1: 1, } -> {{ x = {member1: 1, }
+x.member1
+}}
+
+{member1: ["a", "b", "c"], } -> {{ x = {member1: ["a", "b", "c"], }
+x.member1[0]
+x.member1[1]
+x.member1[2]
+}}
+
+{member1: {submember: "yes"} } -> {{ x = {member1: {submember: "yes"} }
+x.member1.submember
+}}
+
+array access on object:
+x = {member1: {submember: "no"} } x["member1"]["submember"] -> {{ x = {member1: {submember: "no"} }
+x["member1"]["submember"]
+}}
+
+Test multilines
+x = {
+member1: 1, member2:
+3,
+member3: 3
+,
+member4: 4} ->
+{{
+x = {
+member1: 1, member2:
+2,
+member3: 3
+,
+member4: 4}
+x.member1
+x.member2
+x.member3
+x.member4
+}}

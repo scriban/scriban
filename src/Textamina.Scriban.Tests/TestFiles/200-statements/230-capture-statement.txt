@@ -1,0 +1,4 @@
+Evaluate <capture> statement
+
+{{y = 150}}{{capture x}}This is the text captured with the value {{y}}{{end}}{{ "This is the capture = " + x}}
+{{x={}}}{{capture x.y}}This is the text captured with the value {{y}}{{end}}{{ "This is the capture = " + x.y}}

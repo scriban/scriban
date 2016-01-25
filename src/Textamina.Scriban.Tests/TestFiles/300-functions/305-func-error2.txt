@@ -1,0 +1,11 @@
+func recursive
+	recursive   # Check that the recursive limit will be reached
+end
+recursive
+===
+{{
+func recursive
+	recursive   # Check that the recursive limit will be reached
+end
+recursive
+}}

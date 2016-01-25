@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8A58A7E2-627C-4F41-933F-5AC92ADFAB48}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Textamina.Scriban</RootNamespace>
+    <AssemblyName>Textamina.Scriban</AssemblyName>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <FileAlignment>512</FileAlignment>
+    <ProjectTypeGuids>{786C830F-07A1-408B-BD7F-6EE04809D6DB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <TargetFrameworkVersion>v5.0</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="Helpers\ArrayFunctions.cs" />
+    <Compile Include="Helpers\BuiltinFunctions.cs" />
+    <Compile Include="Helpers\MathFunctions.cs" />
+    <Compile Include="Helpers\ObjectFunctions.cs" />
+    <Compile Include="Helpers\ScriptTimeSpan.cs" />
+    <Compile Include="Helpers\StringFunctions.cs" />
+    <Compile Include="Parsing\Parser.Terminals.cs" />
+    <Compile Include="Parsing\Parser.Expressions.cs" />
+    <Compile Include="Parsing\ParserOptions.cs" />
+    <Compile Include="Parsing\ParsingMode.cs" />
+    <Compile Include="Runtime\IMemberRenamer.cs" />
+    <Compile Include="Runtime\IScriptCustomType.cs" />
+    <Compile Include="Runtime\ScriptCaptureStatement.cs" />
+    <Compile Include="Runtime\ScriptContinueStatement.cs" />
+    <Compile Include="Runtime\ScriptErrorStatement.cs" />
+    <Compile Include="Runtime\ScriptFunctionIgnoreAttribute.cs" />
+    <Compile Include="Runtime\ScriptMemberImportFlags.cs" />
+    <Compile Include="Runtime\ScriptReadOnlyStatement.cs" />
+    <Compile Include="Runtime\ScriptImportStatement.cs" />
+    <Compile Include="Runtime\ScriptSyntaxAttribute.cs" />
+    <Compile Include="Runtime\ITemplateLoader.cs" />
+    <Compile Include="Helpers\IncludeFunction.cs" />
+    <Compile Include="Runtime\IScriptCustomFunction.cs" />
+    <Compile Include="Helpers\ScriptDate.cs" />
+    <Compile Include="Runtime\ScriptPipeCall.cs" />
+    <Compile Include="Runtime\ScriptRuntimeException.cs" />
+    <Compile Include="Runtime\ScriptVariablePath.cs" />
+    <Compile Include="Runtime\ScriptWrapStatement.cs" />
+    <Compile Include="Runtime\StandardMemberRenamer.cs" />
+    <Compile Include="Template.cs" />
+    <Compile Include="TemplateOptions.cs" />
+    <!-- A reference to the entire .NET Framework is automatically included -->
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Parsing\Lexer.cs" />
+    <Compile Include="Parsing\Parser.cs" />
+    <Compile Include="Parsing\LogMessage.cs" />
+    <Compile Include="Parsing\Util.cs" />
+    <Compile Include="Runtime\ScriptArray.cs" />
+    <Compile Include="Runtime\ScriptArrayInitializerExpression.cs" />
+    <Compile Include="Runtime\ScriptObjectInitializerExpression.cs" />
+    <Compile Include="Runtime\ScriptWithStatement.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Runtime\ArrayAccessor.cs" />
+    <Compile Include="Runtime\DictionaryAccessor.cs" />
+    <Compile Include="Runtime\IListAccessor.cs" />
+    <Compile Include="Runtime\IMemberAccessor.cs" />
+    <Compile Include="Runtime\ListAccessor.cs" />
+    <Compile Include="Runtime\ScriptAssignExpression.cs" />
+    <Compile Include="Runtime\ScriptBinaryExpression.cs" />
+    <Compile Include="Runtime\ScriptBinaryOperator.cs" />
+    <Compile Include="Runtime\ScriptBlockStatement.cs" />
+    <Compile Include="Runtime\ScriptBreakStatement.cs" />
+    <Compile Include="Runtime\ScriptIfStatement.cs" />
+    <Compile Include="TemplateContext.cs" />
+    <Compile Include="Runtime\ScriptExpression.cs" />
+    <Compile Include="Runtime\ScriptExpressionStatement.cs" />
+    <Compile Include="Runtime\ScriptFlowState.cs" />
+    <Compile Include="Runtime\ScriptFunction.cs" />
+    <Compile Include="Runtime\ScriptFunctionCall.cs" />
+    <Compile Include="Runtime\ScriptIndexerExpression.cs" />
+    <Compile Include="Runtime\ScriptLiteral.cs" />
+    <Compile Include="Runtime\ScriptForStatement.cs" />
+    <Compile Include="Runtime\ScriptWhileStatement.cs" />
+    <Compile Include="Runtime\ScriptLoopStatementBase.cs" />
+    <Compile Include="Runtime\ScriptMemberExpression.cs" />
+    <Compile Include="Runtime\ScriptNestedExpression.cs" />
+    <Compile Include="Runtime\ScriptNode.cs" />
+    <Compile Include="Runtime\ScriptObject.cs" />
+    <Compile Include="Runtime\ScriptPage.cs" />
+    <Compile Include="Runtime\ScriptRawStatement.cs" />
+    <Compile Include="Runtime\ScriptReturnStatement.cs" />
+    <Compile Include="Runtime\ScriptStatement.cs" />
+    <Compile Include="Runtime\ScriptUnaryExpression.cs" />
+    <Compile Include="Runtime\ScriptUnaryOperator.cs" />
+    <Compile Include="Runtime\ScriptVariable.cs" />
+    <Compile Include="Runtime\ScriptVariableScope.cs" />
+    <Compile Include="Runtime\TypedMemberAccessor.cs" />
+    <Compile Include="Runtime\ScriptValueConverter.cs" />
+    <Compile Include="Parsing\TextPosition.cs" />
+    <Compile Include="Parsing\SourceSpan.cs" />
+    <Compile Include="Parsing\Token.cs" />
+    <Compile Include="Parsing\TokenTextAttribute.cs" />
+    <Compile Include="Parsing\TokenType.cs" />
+    <Compile Include="Parsing\TokenTypeExtensions.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="project.json" />
+  </ItemGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

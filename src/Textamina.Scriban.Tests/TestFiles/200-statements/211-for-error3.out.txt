@@ -1,0 +1,1 @@
+text(5,46) : error : Error while parsing for statement: Expecting <expression> instead of [NewLine] in: for <variable> in <expression> ... end

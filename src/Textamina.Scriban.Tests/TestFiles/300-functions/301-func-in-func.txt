@@ -1,0 +1,17 @@
+func inc
+	func $inc2
+		ret $0 + 1
+	end
+	ret $inc2 $0 
+end
+inc 1
+===
+{{
+func inc
+	func $inc2
+		ret $0 + 1
+	end
+	ret $inc2 $0 
+end
+inc 1
+}}

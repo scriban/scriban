@@ -1,0 +1,7 @@
+a = 1
+2 | a      # Trying to call a variable as a function
+===
+{{
+a = 1
+2 | a      # Trying to call a variable as a function
+}}

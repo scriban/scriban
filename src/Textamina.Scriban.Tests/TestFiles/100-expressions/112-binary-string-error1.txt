@@ -1,0 +1,5 @@
+"xxx" * "yyy"    # Should only work for string x int
+===
+{{
+"xxx" * "yyy"    # Should only work for string x int
+}}

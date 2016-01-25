@@ -1,0 +1,2 @@
+Test object initializer with string members instead of variable name (json like):
+3

@@ -1,0 +1,46 @@
+Evaluate <while> statement
+
+while x < 9
+	x = x + 1
+	x
+end
+===
+123456789
+
+while true
+	x = x + 1
+	if x > 9
+		break
+	end
+	x
+end
+===
+123456789
+
+while x < 9
+	x = x + 1
+	if (x % 2) == 0
+		continue
+	end
+	# Display only odd numbers
+	x
+end
+===
+13579
+
+while false
+	"No"
+end
+===
+
+
+x = 0
+while x < 4
+	x = x + 1
+	(x-1) + " => [" + while.index + "] " + while.first + "," + while.even + "," + while.odd + "\r\n"
+end
+===
+0 => [0] true,true,false
+1 => [1] false,false,true
+2 => [2] false,true,false
+3 => [3] false,false,true

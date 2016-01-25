@@ -1,0 +1,114 @@
+// Copyright (c) Alexandre Mutel. All rights reserved.
+// Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
+using System;
+using System.Collections.Generic;
+using System.Reflection;
+using System.Text;
+
+namespace Textamina.Scriban.Runtime
+{
+    class TypedMemberAccessor : IMemberAccessor
+    {
+        private readonly TypeInfo type;
+        private readonly IMemberRenamer renamer;
+        private readonly Dictionary<string, MemberInfo> members;
+
+        public TypedMemberAccessor(Type targetType, IMemberRenamer renamer)
+        {
+            if (targetType == null) throw new ArgumentNullException(nameof(targetType));
+            this.type = targetType.GetTypeInfo();
+            this.renamer = renamer ?? StandardMemberRenamer.Default;
+            members = new Dictionary<string, MemberInfo>();
+            PrepareMembers();
+        }
+
+        public bool HasMember(object target, string member)
+        {
+            return members.ContainsKey(member);
+        }
+
+        public object GetValue(object target, string member)
+        {
+            MemberInfo memberAccessor;
+            if (members.TryGetValue(member, out memberAccessor))
+            {
+                var fieldAccessor = memberAccessor as FieldInfo;
+                if (fieldAccessor != null)
+                {
+                    return fieldAccessor.GetValue(target);
+                }
+                else
+                {
+                    var propertyAccessor = (PropertyInfo) memberAccessor;
+                    return propertyAccessor.GetValue(target);
+                }
+            }
+            return null;
+        }
+
+        public bool HasReadonly => false;
+
+        public bool TrySetValue(object target, string member, object value)
+        {
+            MemberInfo memberAccessor;
+            if (members.TryGetValue(member, out memberAccessor))
+            {
+                var fieldAccessor = memberAccessor as FieldInfo;
+                if (fieldAccessor != null)
+                {
+                    fieldAccessor.SetValue(target, value);
+                }
+                else
+                {
+                    var propertyAccessor = (PropertyInfo)memberAccessor;
+                    propertyAccessor.SetValue(target, value);
+                }
+            }
+            return true;
+        }
+
+        public void SetReadOnly(object target, string member, bool isReadOnly)
+        {
+        }
+
+        private void PrepareMembers()
+        {
+            foreach (var field in type.DeclaredFields)
+            {
+                if (!field.IsStatic && field.IsPublic)
+                {
+                    var newFieldName = Rename(field.Name);
+                    if (string.IsNullOrEmpty(newFieldName))
+                    {
+                        newFieldName = field.Name;
+                    }
+                    if (!members.ContainsKey(newFieldName))
+                    {
+                        members.Add(newFieldName, field);
+                    }
+                }
+            }
+
+            foreach (var property in type.DeclaredProperties)
+            {
+                if (property.CanRead && !property.GetMethod.IsStatic && property.GetMethod.IsPublic)
+                {
+                    var newPropertyName = Rename(property.Name);
+                    if (string.IsNullOrEmpty(newPropertyName))
+                    {
+                        newPropertyName = property.Name;
+                    }
+                    if (!members.ContainsKey(newPropertyName))
+                    {
+                        members.Add(newPropertyName, property);
+                    }
+                }
+            }
+        }
+
+        private string Rename(string name)
+        {
+            return renamer.GetName(name);
+        }
+    }
+}

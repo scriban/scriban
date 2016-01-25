@@ -1,0 +1,13 @@
+func inc
+	ret $0 + 1
+end
+inc2 = @inc  # alias the function inc to inc2
+inc2 1
+===
+{{
+func inc
+	ret $0 + 1
+end
+inc2 = @inc  # alias the function inc to inc2
+inc2 1
+}}

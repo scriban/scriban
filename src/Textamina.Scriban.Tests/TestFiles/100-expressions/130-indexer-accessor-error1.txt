@@ -1,0 +1,8 @@
+Access an array variable that has not been initialized
+
+# x = []  # x should be initialized before
+x[0]      # accessing x without initializing it will produce an error
+===
+{{
+x[0]
+}}

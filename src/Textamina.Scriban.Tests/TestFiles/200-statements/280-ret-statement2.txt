@@ -1,0 +1,9 @@
+{{
+func test
+	"This text is inside the function"
+	ret
+	"This text is inside the function but should not be executed"
+end
+test
+}}
+This text should also appear outside of the function

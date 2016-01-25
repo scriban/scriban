@@ -1,0 +1,1 @@
+This is a but the assignment should not be outputed, only the access to the variable 'string assignment'

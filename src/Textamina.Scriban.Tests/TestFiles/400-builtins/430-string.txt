@@ -1,0 +1,20 @@
+{{ "test" | string.capitalize }}
+{{ "TeSt" | string.downcase }}
+{{ "This & is a @@^^&%%%%% value" | string.handleize }}
+{{ "    test" | string.lstrip }}
+{{ 5 | string.pluralize 'item' 'items' }}
+{{ "This is a test with a test" | string.remove 'test' }}
+{{ "This is a test with a test" | string.remove_first 'test' }}
+{{ "This is a test with a test" | string.replace 'test' 'boom'}}
+{{ "This is a test with a test" | string.replace_first 'test' 'boom'}}
+{{ "test     " | string.rstrip }}
+{{ "test" | string.slice 1 }}
+{{ "test" | string.slice (-2) }}
+{{ "a/b/c/d/e//f" | string.split '/' | array.join ' | ' }}
+{{ "test" | string.starts_with 'test'}}
+{{ "test" | string.starts_with 'toto'}}
+{{ "   test   " | string.strip }}
+{{ "test\r\ntest\r\n" | string.strip_newlines }}
+{{ "This is a long test with several chars in it but going to be truncated" | string.truncate 15 }}
+{{ "This is a test truncated at 5" | string.truncatewords 5 }}
+{{ "test" | string.upcase }}

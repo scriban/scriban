@@ -1,0 +1,9 @@
+Evaluate <import> and <readonly> statement
+
+{{
+member1 = "This is a readonly variable"
+readonly member1
+x = {member1: "This is the member1", member2: 150 }
+import x
+member1 + " " + member2
+}}

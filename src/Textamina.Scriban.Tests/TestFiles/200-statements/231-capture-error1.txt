@@ -1,0 +1,9 @@
+# using capture without a target expression is not valid
+capture
+end
+===
+{{
+# using capture without a target expression is not valid
+capture
+end
+}}

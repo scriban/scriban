@@ -1,0 +1,1 @@
+This is a {{ x = "string assignment" }}but the assignment should not be outputed, only the access to the variable '{{ x }}'

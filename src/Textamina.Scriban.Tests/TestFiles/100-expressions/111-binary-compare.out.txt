@@ -1,0 +1,28 @@
+1 == 2 = false
+1 == 2.5 = false
+2.5 == 1 = false
+"a" == "b" = false
+1 == 1 = true
+2.5 == 2.5 true
+"a" == "a" true
+
+1 != 2 -> true
+1.5 != 2 -> true
+1 != 2.5 -> true
+"a" != "b" true
+1 != 1 -> false
+
+1 < 2 = true
+1 > 2 = false
+1 <= 2 = true
+1 >= 2 = false
+
+1.5 < 2 = true
+1.5 > 2 = false
+1.5 <= 2 = true
+1.5 >= 2 = false
+
+"aaa" <= "aaa" true
+"aaa" < "abb" true
+"aaa" > "abb" false
+"aaa" >= "abb" false

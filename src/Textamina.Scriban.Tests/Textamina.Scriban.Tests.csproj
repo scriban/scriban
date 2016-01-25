@@ -1,0 +1,261 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{A0C5CB5F-5568-40AB-B945-D6D2664D51B0}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Textamina.Scriban.Tests</RootNamespace>
+    <AssemblyName>Textamina.Scriban.Tests</AssemblyName>
+    <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
+      <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TextAssert.cs" />
+    <Compile Include="TestLexer.cs" />
+    <Compile Include="TestParser.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config" />
+    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Textamina.Scriban\Textamina.Scriban.csproj">
+      <Project>{8a58a7e2-627c-4f41-933f-5ac92adfab48}</Project>
+      <Name>Textamina.Scriban</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="TestFiles\000-basic\000-script-empty.out.txt" />
+    <Content Include="TestFiles\000-basic\000-script-empty.txt" />
+    <Content Include="TestFiles\000-basic\003-whitespaces.out.txt" />
+    <Content Include="TestFiles\000-basic\003-whitespaces.txt" />
+    <Content Include="TestFiles\000-basic\002-comment.out.txt" />
+    <Content Include="TestFiles\000-basic\002-comment.txt" />
+    <Content Include="TestFiles\010-literals\010-literals.out.txt" />
+    <Content Include="TestFiles\010-literals\010-literals.txt" />
+    <Content Include="TestFiles\000-basic\001-helloworld.out.txt" />
+    <Content Include="TestFiles\000-basic\001-helloworld.txt" />
+    <Content Include="TestFiles\000-basic\000-noscript.out.txt" />
+    <Content Include="TestFiles\000-basic\000-noscript.txt" />
+    <Content Include="TestFiles\100-expressions\100-assign-local-var.out.txt" />
+    <Content Include="TestFiles\100-expressions\100-assign-local-var.txt" />
+    <Content Include="TestFiles\100-expressions\101-assign-complex-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\101-assign-complex-error1.txt" />
+    <Content Include="TestFiles\100-expressions\108-variable-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\108-variable-error1.txt" />
+    <Content Include="TestFiles\100-expressions\108-variable-loop-error2.out.txt" />
+    <Content Include="TestFiles\100-expressions\108-variable-loop-error2.txt" />
+    <Content Include="TestFiles\100-expressions\108-variable-loop-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\108-variable-loop-error1.txt" />
+    <Content Include="TestFiles\100-expressions\106-parenthesis-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\106-parenthesis-error1.txt" />
+    <Content Include="TestFiles\100-expressions\106-parenthesis.out.txt" />
+    <Content Include="TestFiles\100-expressions\106-parenthesis.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-error3.out.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-error3.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-error2.out.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-error2.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-error1.txt" />
+    <Content Include="TestFiles\100-expressions\110-binary-simple-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\110-binary-simple-error1.txt" />
+    <Content Include="TestFiles\100-expressions\112-binary-string-error2.out.txt" />
+    <Content Include="TestFiles\100-expressions\112-binary-string-error2.txt" />
+    <Content Include="TestFiles\100-expressions\112-binary-string-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\112-binary-string-error1.txt" />
+    <Content Include="TestFiles\100-expressions\115-unary-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\115-unary-error1.txt" />
+    <Content Include="TestFiles\100-expressions\113-unary.out.txt" />
+    <Content Include="TestFiles\100-expressions\113-unary.txt" />
+    <Content Include="TestFiles\100-expressions\120-array-initializer-error2.out.txt" />
+    <Content Include="TestFiles\100-expressions\120-array-initializer-error2.txt" />
+    <Content Include="TestFiles\100-expressions\120-array-initializer-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\120-array-initializer-error1.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error5.out.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error5.txt" />
+    <Content Include="TestFiles\100-expressions\131-member-accessor-error3.out.txt" />
+    <Content Include="TestFiles\100-expressions\131-member-accessor-error3.txt" />
+    <Content Include="TestFiles\100-expressions\131-member-accessor-error2.out.txt" />
+    <Content Include="TestFiles\100-expressions\131-member-accessor-error2.txt" />
+    <Content Include="TestFiles\100-expressions\131-member-accessor-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\131-member-accessor-error1.txt" />
+    <Content Include="TestFiles\100-expressions\131-member-accessor-accept1.out.txt" />
+    <Content Include="TestFiles\100-expressions\131-member-accessor-accept1.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-accept1.out.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-accept1.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error3.out.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error3.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error4.out.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error4.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error2.out.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error2.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\130-indexer-accessor-error1.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-accessor2.out.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-accessor2.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error6.out.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error6.txt" />
+    <Content Include="TestFiles\100-expressions\150-range-expression-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\150-range-expression-error1.txt" />
+    <Content Include="TestFiles\100-expressions\150-range-expression.out.txt" />
+    <Content Include="TestFiles\100-expressions\150-range-expression.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error5.out.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error5.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error4.out.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error4.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error3.out.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error3.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error2.out.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error2.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-error1.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-accessor.out.txt" />
+    <Content Include="TestFiles\100-expressions\140-object-initializer-accessor.txt" />
+    <Content Include="TestFiles\100-expressions\120-array-initializer-accessor.out.txt" />
+    <Content Include="TestFiles\100-expressions\120-array-initializer-accessor.txt" />
+    <Content Include="TestFiles\100-expressions\112-binary-bool.out.txt" />
+    <Content Include="TestFiles\100-expressions\112-binary-bool.txt" />
+    <Content Include="TestFiles\100-expressions\111-binary-compare.out.txt" />
+    <Content Include="TestFiles\100-expressions\111-binary-compare.txt" />
+    <Content Include="TestFiles\100-expressions\110-binary-simple.out.txt" />
+    <Content Include="TestFiles\100-expressions\110-binary-simple.txt" />
+    <Content Include="TestFiles\100-expressions\100-assign-string.out.txt" />
+    <Content Include="TestFiles\100-expressions\100-assign-string.txt" />
+    <Content Include="TestFiles\200-statements\201-if-else-error4.out.txt" />
+    <Content Include="TestFiles\200-statements\201-if-else-error4.txt" />
+    <Content Include="TestFiles\200-statements\201-if-else-error3.out.txt" />
+    <Content Include="TestFiles\200-statements\201-if-else-error3.txt" />
+    <Content Include="TestFiles\200-statements\201-if-else-error2.out.txt" />
+    <Content Include="TestFiles\200-statements\201-if-else-error2.txt" />
+    <Content Include="TestFiles\200-statements\201-if-else-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\201-if-else-error1.txt" />
+    <Content Include="TestFiles\200-statements\211-for-error3.out.txt" />
+    <Content Include="TestFiles\200-statements\211-for-error3.txt" />
+    <Content Include="TestFiles\200-statements\211-for-error2.out.txt" />
+    <Content Include="TestFiles\200-statements\211-for-error2.txt" />
+    <Content Include="TestFiles\200-statements\211-for-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\211-for-error1.txt" />
+    <Content Include="TestFiles\200-statements\215-for-special-var-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\215-for-special-var-error1.txt" />
+    <Content Include="TestFiles\200-statements\216-break-continue-error2.out.txt" />
+    <Content Include="TestFiles\200-statements\216-break-continue-error2.txt" />
+    <Content Include="TestFiles\200-statements\216-break-continue-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\216-break-continue-error1.txt" />
+    <Content Include="TestFiles\200-statements\215-for-statement-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\215-for-statement-error1.txt" />
+    <Content Include="TestFiles\200-statements\211-for-range-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\211-for-range-statement.txt" />
+    <Content Include="TestFiles\200-statements\221-while-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\221-while-error1.txt" />
+    <Content Include="TestFiles\200-statements\231-capture-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\231-capture-error1.txt" />
+    <Content Include="TestFiles\200-statements\255-with-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\255-with-error1.txt" />
+    <Content Include="TestFiles\200-statements\280-ret-statement2.out.txt" />
+    <Content Include="TestFiles\200-statements\280-ret-statement2.txt" />
+    <Content Include="TestFiles\200-statements\280-ret-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\280-ret-statement.txt" />
+    <Content Include="TestFiles\200-statements\261-error-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\261-error-error1.txt" />
+    <Content Include="TestFiles\300-functions\302-func-param-expands.out.txt" />
+    <Content Include="TestFiles\300-functions\302-func-param-expands.txt" />
+    <Content Include="TestFiles\300-functions\302-func-alias.out.txt" />
+    <Content Include="TestFiles\300-functions\302-func-alias.txt" />
+    <Content Include="TestFiles\300-functions\301-func-in-func.out.txt" />
+    <Content Include="TestFiles\300-functions\301-func-in-func.txt" />
+    <Content Include="TestFiles\300-functions\305-func-error2.out.txt" />
+    <Content Include="TestFiles\300-functions\305-func-error2.txt" />
+    <Content Include="TestFiles\300-functions\305-func-error1.out.txt" />
+    <Content Include="TestFiles\300-functions\305-func-error1.txt" />
+    <Content Include="TestFiles\300-functions\310-func-pipe.out.txt" />
+    <Content Include="TestFiles\300-functions\310-func-pipe.txt" />
+    <Content Include="TestFiles\300-functions\311-func-pipe-error2.out.txt" />
+    <Content Include="TestFiles\300-functions\311-func-pipe-error2.txt" />
+    <Content Include="TestFiles\300-functions\331-wrap-error2.out.txt" />
+    <Content Include="TestFiles\300-functions\331-wrap-error2.txt" />
+    <Content Include="TestFiles\300-functions\331-wrap-error1.out.txt" />
+    <Content Include="TestFiles\300-functions\331-wrap-error1.txt" />
+    <Content Include="TestFiles\300-functions\330-wrap-statement.out.txt" />
+    <Content Include="TestFiles\300-functions\330-wrap-statement.txt" />
+    <Content Include="TestFiles\200-statements\260-error-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\260-error-statement.txt" />
+    <Content Include="TestFiles\200-statements\250-with-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\250-with-statement.txt" />
+    <Content Include="TestFiles\200-statements\241-import-and-readonly.out.txt" />
+    <Content Include="TestFiles\200-statements\241-import-and-readonly.txt" />
+    <Content Include="TestFiles\200-statements\240-import-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\240-import-statement.txt" />
+    <Content Include="TestFiles\200-statements\230-capture-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\230-capture-statement.txt" />
+    <Content Include="TestFiles\200-statements\220-while-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\220-while-statement.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement.txt" />
+    <Content Include="TestFiles\200-statements\200-if-else-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\200-if-else-statement.txt" />
+    <Content Include="TestFiles\300-functions\311-func-pipe-error1.out.txt" />
+    <Content Include="TestFiles\300-functions\311-func-pipe-error1.txt" />
+    <Content Include="TestFiles\300-functions\300-func-simple.out.txt" />
+    <Content Include="TestFiles\300-functions\300-func-simple.txt" />
+    <Content Include="TestFiles\400-builtins\400-builtins.out.txt" />
+    <Content Include="TestFiles\400-builtins\400-builtins.txt" />
+    <Content Include="TestFiles\400-builtins\450-object.out.txt" />
+    <Content Include="TestFiles\400-builtins\450-object.txt" />
+    <Content Include="TestFiles\400-builtins\440-date.out.txt" />
+    <Content Include="TestFiles\400-builtins\440-date.txt" />
+    <Content Include="TestFiles\400-builtins\430-string.out.txt" />
+    <Content Include="TestFiles\400-builtins\430-string.txt" />
+    <Content Include="TestFiles\400-builtins\420-math.out.txt" />
+    <Content Include="TestFiles\400-builtins\420-math.txt" />
+    <Content Include="TestFiles\400-builtins\410-array.out.txt" />
+    <Content Include="TestFiles\400-builtins\410-array.txt" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

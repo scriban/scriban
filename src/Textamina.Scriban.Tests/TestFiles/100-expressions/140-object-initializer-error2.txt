@@ -1,0 +1,4 @@
+{for: 1} # Cannot use a keyword as a variable
+{{
+{for: 1}
+}}

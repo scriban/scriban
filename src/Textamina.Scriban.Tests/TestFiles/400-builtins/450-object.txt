@@ -1,0 +1,9 @@
+{{ null | object.typeof }}
+{{ true | object.typeof }}
+{{ 1 | object.typeof }}
+{{ 1.0 | object.typeof }}
+{{ "text" | object.typeof }}
+{{ 1..5 | object.typeof }}
+{{ [1,2,3,4,5] | object.typeof }}
+{{ {} | object.typeof }}
+{{ object | object.typeof }}

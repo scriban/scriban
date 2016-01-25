@@ -1,0 +1,9 @@
+x = {}
+wrap x           # invalid: x is not a function
+end
+===
+{{
+x = {}
+wrap x
+end
+}}

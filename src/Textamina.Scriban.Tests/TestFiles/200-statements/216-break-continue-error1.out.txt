@@ -1,0 +1,1 @@
+text(4,1) : error : The <break> statement can only be used inside for/while loops

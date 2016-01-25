@@ -1,0 +1,1 @@
+text(4,1) : error : Invalid usage of the loop variable [for.index] in the current context

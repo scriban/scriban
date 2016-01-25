@@ -1,0 +1,9 @@
+x = 1       # declare a readonly variable
+readonly x
+x = 2       # Try to set it
+===
+{{
+x = 1       # declare a readonly variable
+readonly x
+x = 2       # Try to set it
+}}

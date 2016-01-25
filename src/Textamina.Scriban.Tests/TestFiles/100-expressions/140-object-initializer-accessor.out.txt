@@ -1,0 +1,21 @@
+object
+
+{member1: 1, member2: 2, member3: 3, member4: 4} -> 1234
+
+{member1: 1, } -> 1
+
+{member1: ["a", "b", "c"], } -> abc
+
+{member1: {submember: "yes"} } -> yes
+
+array access on object:
+x = {member1: {submember: "no"} } x["member1"]["submember"] -> no
+
+Test multilines
+x = {
+member1: 1, member2:
+3,
+member3: 3
+,
+member4: 4} ->
+1234

@@ -1,0 +1,11 @@
+func test
+end
+wrap (test)   # invalid: (test) is not a direct function
+end
+===
+{{
+func test
+end
+wrap (test)   # invalid: (test) is not a direct function
+end
+}}

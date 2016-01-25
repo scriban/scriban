@@ -1,0 +1,34 @@
+Evaluate <func> statement
+
+func inc
+	ret $0 + 1
+end
+func $dec
+	ret $0 - 1
+end
+inc 1
+$dec 3
+2 | inc
+0 | $dec
+===
+2
+2
+3
+-1
+
+func with_output_and_return
+	do some output here
+	ret 256
+end
+x = with_output_and_return
+x
+===
+do some output here
+256
+
+func inc3
+	ret $0 + $1[0] + $2.member1
+end
+inc3 (1) [1] {member1: 1}
+===
+3

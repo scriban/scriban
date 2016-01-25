@@ -1,0 +1,2 @@
+text(3,2) : error : Unexpected token [IdentifierSpecial] while parsing object initializer. Expecting a simple identifier for the member name instead of [$test]
+text(3,1) : error : Error while parsing expression statement: Expecting <EOL>/end of line after: <expression>

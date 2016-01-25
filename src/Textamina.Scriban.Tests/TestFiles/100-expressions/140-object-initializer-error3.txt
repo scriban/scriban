@@ -1,0 +1,4 @@
+{$test: 1} # Cannot use a local variable as a member
+{{
+{$test: 1} # Cannot use a local variable as a member
+}}

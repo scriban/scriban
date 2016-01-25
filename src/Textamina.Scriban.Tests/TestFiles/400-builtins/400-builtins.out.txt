@@ -1,0 +1,62 @@
+List of all the builtin <array> functions:
+ add
+ add_range
+ first
+ insert_at
+ join
+ last
+ map
+ remove_at
+ reverse
+ size
+ sort
+ uniq
+
+List of all the builtin <math> functions:
+ ceil
+ floor
+ round
+
+List of all the builtin <string> functions:
+ capitalize
+ downcase
+ handleize
+ lstrip
+ pluralize
+ remove
+ remove_first
+ replace
+ replace_first
+ rstrip
+ slice
+ split
+ starts_with
+ strip
+ strip_newlines
+ truncate
+ truncatewords
+ upcase
+
+List of all the builtin <date> functions:
+ add_days
+ add_hours
+ add_milliseconds
+ add_minutes
+ add_months
+ add_seconds
+ add_years
+ now
+ parse
+ to_string
+
+List of all the builtin <timespan> functions:
+ from_days
+ from_hours
+ from_milliseconds
+ from_minutes
+ from_seconds
+ parse
+ zero
+
+List of all the builtin <object> functions:
+ typeof

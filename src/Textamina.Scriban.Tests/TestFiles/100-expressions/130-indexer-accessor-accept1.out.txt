@@ -1,0 +1,12 @@
+x = []    # x is initialized
+x[0]      # accessing x with an acessor will not throw an error
+
+y = [["yes"]] # y is a double array
+y[0][0]   # Should display "yes"
+
+func zzz
+	ret $0[0]
+end
+zzz ["ok"]   # Should display "ok"
+===
+yesok

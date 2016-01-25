@@ -1,0 +1,77 @@
+Evaluate <while> statement
+
+while x < 9
+	x = x + 1
+	x
+end
+===
+{{
+while x < 9
+	x = x + 1
+	x
+end
+}}
+
+while true
+	x = x + 1
+	if x > 9
+		break
+	end
+	x
+end
+===
+{{
+x = 0
+while true
+	x = x + 1
+	if x > 9
+		break
+	end
+	x
+end
+}}
+
+while x < 9
+	x = x + 1
+	if (x % 2) == 0
+		continue
+	end
+	# Display only odd numbers
+	x
+end
+===
+{{
+x = 0
+while x < 9
+	x = x + 1
+	if (x % 2) == 0
+		continue
+	end
+	# Display only odd numbers
+	x
+end
+}}
+
+while false
+	"No"
+end
+===
+{{
+while false
+	"No"
+end
+}}
+
+x = 0
+while x < 4
+	x = x + 1
+	(x-1) + " => [" + while.index + "] " + while.first + "," + while.even + "," + while.odd + "\r\n"
+end
+===
+{{
+x = 0
+while x < 4
+	x = x + 1
+	(x-1) + " => [" + while.index + "] " + while.first + "," + while.even + "," + while.odd + "\r\n"
+end
+}}

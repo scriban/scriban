@@ -1,0 +1,7 @@
+func a.b.c   # Cannot declare a function with a non-variable as a name
+end
+===
+{{
+func a.b.c   # Cannot declare a function with a non-variable as a name
+end
+}}

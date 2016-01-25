@@ -1,0 +1,2 @@
+This text is inside the function
+This text should also appear outside of the function

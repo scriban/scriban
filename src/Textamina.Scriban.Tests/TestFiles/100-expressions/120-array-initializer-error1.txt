@@ -1,0 +1,5 @@
+[1,2,3  # an array that is not closed
+===
+{{
+[1,2,3 
+}}

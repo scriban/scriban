@@ -1,0 +1,27 @@
+Evaluate if statements
+
+if true 
+  "Yes"
+end
+===
+Yes
+
+if false
+  "Boo!"
+else
+  "Yes"
+end
+===
+Yes
+
+if false
+  "Boo!"
+else if false
+  "Boo2"
+else if null
+  "Boo3"
+else
+  "Yes"
+end
+===
+Yes

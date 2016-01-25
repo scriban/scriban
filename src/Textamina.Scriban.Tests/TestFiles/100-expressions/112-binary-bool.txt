@@ -1,0 +1,29 @@
+!true -> {{ !true }}
+!false -> {{ !false }}
+
+true && true -> {{ true && true }}
+true && false -> {{ true && false }}
+false && true -> {{ false && true }}
+
+0 && true -> {{ 0 && true }}
+1 && true -> {{ 1 && true }}
+"" && true -> {{ "" && true }}
+"a" && true -> {{ "a" && true }}
+null && true -> {{ null && true }}
+
+true && 0 -> {{ true && 0 }}
+true && 1 -> {{ true && 1 }}
+true && "" -> {{ true && "" }}
+true && "a" -> {{ true && "a" }}
+true && null -> {{ true && null }}
+
+!(true && 0) -> {{ !(true && 0 )}}
+!(true && 1) -> {{ !(true && 1 )}}
+
+true || false -> {{ true || false }}
+false || true -> {{ false || true }}
+
+true && true && true && false -> {{ true && true && true && false }}
+!(false && false && false) && true -> {{ !(false && false && false) && true }}
+
+true && false || !false && true -> {{ true && false || !false && true }}

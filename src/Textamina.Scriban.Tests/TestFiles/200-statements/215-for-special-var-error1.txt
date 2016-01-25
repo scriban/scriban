@@ -1,0 +1,5 @@
+for.index           # invalid usage of this variable outside a loop
+===
+{{
+for.index           # invalid usage of this variable outside a loop
+}}

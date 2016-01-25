@@ -1,0 +1,15 @@
+Evaluate <with> statement
+
+root = {}
+x = 10
+with root
+	member1 = "This is a member"
+	memberTemp = 5
+	member2 = x + memberTemp + 1
+end
+if member1
+	"Unexpected member1 should not appear at global scope"
+end
+root.member1 + " " + root.member2
+===
+This is a member 16

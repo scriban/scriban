@@ -1,0 +1,18 @@
+List of all the builtin <array> functions:
+{{
+func dump_members
+	for member in $0 | array.map 'key' | array.sort
+		" " + member + "\r\n"
+	end
+end~}}
+{{dump_members array}}
+List of all the builtin <math> functions:
+{{dump_members math}}
+List of all the builtin <string> functions:
+{{dump_members string}}
+List of all the builtin <date> functions:
+{{dump_members date}}
+List of all the builtin <timespan> functions:
+{{dump_members timespan}}
+List of all the builtin <object> functions:
+{{dump_members object}}

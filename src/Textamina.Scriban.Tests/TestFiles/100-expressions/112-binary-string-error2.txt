@@ -1,0 +1,5 @@
+"xxx" % "yyy"    # Invalid operator
+===
+{{
+"xxx" % "yyy"    # Invalid operator
+}}

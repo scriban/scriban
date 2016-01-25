@@ -1,0 +1,2 @@
+text(5,1) : error : Unexpected token [CodeExit]. Expecting a closing ] for the array initializer
+text(4,1) : error : Error while parsing expression statement: Expecting <EOL>/end of line after: <expression>

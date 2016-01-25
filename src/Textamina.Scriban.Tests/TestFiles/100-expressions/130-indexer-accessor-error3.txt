@@ -1,0 +1,15 @@
+x = {}   # x is an object
+with x
+	y = 1		# We declare the member x.y
+	readonly y	# and make the member y readonly
+end
+x['y'] = 1      # accessing y should fail
+===
+{{
+x = {}   # x is an object
+with x
+	y = 1		# We declare the member x.y
+	readonly y	# and make the member y readonly
+end
+x['y'] = 1      # accessing y should fail
+}}

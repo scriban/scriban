@@ -1,0 +1,1 @@
+text(4,7) : error : Operator [*] is not supported for the expression [xxx * yyy]. Only working on string x int or int x string

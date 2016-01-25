@@ -1,0 +1,1 @@
+text(5,1) : error : Error while parsing function statement: Expecting <EOL>/end of line after: func <variable> ... end
