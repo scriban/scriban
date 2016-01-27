@@ -1,5 +1,7 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
+
+using Textamina.Scriban.Helpers;
 using Textamina.Scriban.Parsing;
 using Textamina.Scriban.Runtime;
 
@@ -30,6 +32,11 @@ namespace Textamina.Scriban
         public int LoopLimit { get; set; }
 
         public int RecursiveLimit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the builtint object that provides all default builtin methods. If null, it will use by default created using <see cref="BuiltinFunctions.Register"/> on a new <see cref="ScriptObject"/>.
+        /// </summary>
+        public ScriptObject BuiltintObject { get; set; }
 
         public TemplateOptions Clone()
         {

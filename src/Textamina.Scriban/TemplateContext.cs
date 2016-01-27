@@ -587,17 +587,22 @@ namespace Textamina.Scriban
 
         private void RegisterBuiltins()
         {
-            // TODO: Move this code in a better place
-            lock (BuiltinObject)
+            // Allow to use builtin object provided by options
+            var builtinObject = Options.BuiltintObject;
+            if (builtinObject == null)
             {
-                if (BuiltinObject.Count == 0)
+                builtinObject = BuiltinObject;
+                lock (BuiltinObject)
                 {
-                    BuiltinFunctions.Register(BuiltinObject);
+                    if (BuiltinObject.Count == 0)
+                    {
+                        BuiltinFunctions.Register(BuiltinObject);
+                    }
                 }
             }
 
             // Register include function
-            CurrentGlobal.Import(BuiltinObject);
+            CurrentGlobal.Import(builtinObject);
         }
     }
 }
