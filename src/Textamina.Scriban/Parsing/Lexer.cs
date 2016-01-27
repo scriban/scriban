@@ -369,6 +369,12 @@ namespace Textamina.Scriban.Parsing
                     // consume all remaining space including new lines
                     ConsumeWhitespace(false);
                     break;
+                case ';':
+                    token = new Token(TokenType.SemiColon, start, position);
+                    NextChar();
+                    // consume all remaining space including new lines
+                    ConsumeWhitespace(false);
+                    break;
                 case '\r':
                     NextChar();
                     if (c == '\n')

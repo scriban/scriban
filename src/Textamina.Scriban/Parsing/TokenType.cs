@@ -46,6 +46,9 @@ namespace Textamina.Scriban.Parsing
         /// </summary>
         String,
 
+        [TokenText(";")]
+        SemiColon,
+
         [TokenText("@")]
         Arroba,
 
