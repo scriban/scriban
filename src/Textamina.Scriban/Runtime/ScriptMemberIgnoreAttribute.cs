@@ -4,7 +4,7 @@ using System;
 
 namespace Textamina.Scriban.Runtime
 {
-    [AttributeUsage(AttributeTargets.Method)]
+    [AttributeUsage(AttributeTargets.Field| AttributeTargets.Property|AttributeTargets.Method)]
     public class ScriptMemberIgnoreAttribute : Attribute
     {
 
