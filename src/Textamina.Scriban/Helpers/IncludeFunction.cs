@@ -18,7 +18,7 @@ namespace Textamina.Scriban.Helpers
         /// </summary>
         /// <param name="builtins">The builtins object.</param>
         /// <exception cref="System.ArgumentNullException">If builtins is null</exception>
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static void Register(ScriptObject builtins)
         {
             if (builtins == null) throw new ArgumentNullException(nameof(builtins));

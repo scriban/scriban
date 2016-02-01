@@ -75,7 +75,8 @@ namespace Textamina.Scriban.Runtime
         {
             foreach (var field in type.DeclaredFields)
             {
-                if (!field.IsStatic && field.IsPublic)
+                var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                if (keep && !field.IsStatic && field.IsPublic)
                 {
                     var newFieldName = Rename(field.Name);
                     if (string.IsNullOrEmpty(newFieldName))
@@ -91,7 +92,8 @@ namespace Textamina.Scriban.Runtime
 
             foreach (var property in type.DeclaredProperties)
             {
-                if (property.CanRead && !property.GetMethod.IsStatic && property.GetMethod.IsPublic)
+                var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                if (keep && property.CanRead && !property.GetMethod.IsStatic && property.GetMethod.IsPublic)
                 {
                     var newPropertyName = Rename(property.Name);
                     if (string.IsNullOrEmpty(newPropertyName))

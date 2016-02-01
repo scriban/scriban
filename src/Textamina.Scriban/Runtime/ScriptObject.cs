@@ -269,7 +269,8 @@ namespace Textamina.Scriban.Runtime
                         continue;
                     }
 
-                    if ((field.IsStatic && useStatic) || useInstance)
+                    var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                    if (keep && ((field.IsStatic && useStatic) || useInstance))
                     {
                         var newFieldName = renamer.GetName(field.Name);
                         if (string.IsNullOrEmpty(newFieldName))
@@ -292,7 +293,8 @@ namespace Textamina.Scriban.Runtime
                         continue;
                     }
 
-                    if (((property.GetMethod.IsStatic && useStatic) || useInstance))
+                    var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                    if (keep && (((property.GetMethod.IsStatic && useStatic) || useInstance)))
                     {
                         var newPropertyName = renamer.GetName(property.Name);
                         if (string.IsNullOrEmpty(newPropertyName))
@@ -309,7 +311,7 @@ namespace Textamina.Scriban.Runtime
             {
                 foreach (var method in typeInfo.DeclaredMethods)
                 {
-                    var keep = method.GetCustomAttribute<ScriptFunctionIgnoreAttribute>() == null;
+                    var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && method.IsPublic && method.IsStatic && !method.IsSpecialName)
                     {
                         var newMethodName = renamer.GetName(method.Name);

@@ -76,19 +76,19 @@ namespace Textamina.Scriban.Helpers
             return TimeSpan.Parse(text);
         }
 
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static implicit operator ScriptTimeSpan(TimeSpan timeSpan)
         {
             return new ScriptTimeSpan(timeSpan);
         }
 
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static implicit operator TimeSpan(ScriptTimeSpan timeSpan)
         {
             return timeSpan.value;
         }
 
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static void Register(ScriptObject builtins)
         {
             if (builtins == null) throw new ArgumentNullException(nameof(builtins));

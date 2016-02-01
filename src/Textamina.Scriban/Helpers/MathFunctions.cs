@@ -20,7 +20,7 @@ namespace Textamina.Scriban.Helpers
             return Math.Floor(value);
         }
 
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static object Round(int precision, double value)
         {
             return Math.Round(value, precision);
@@ -31,7 +31,7 @@ namespace Textamina.Scriban.Helpers
         /// </summary>
         /// <param name="builtins">The builtins object.</param>
         /// <exception cref="System.ArgumentNullException">If builtins is null</exception>
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static void Register(ScriptObject builtins)
         {
             if (builtins == null) throw new ArgumentNullException(nameof(builtins));

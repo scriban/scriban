@@ -329,7 +329,7 @@ namespace Textamina.Scriban.Helpers
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static implicit operator ScriptDate(DateTime date)
         {
             return new ScriptDate(date);
@@ -342,13 +342,13 @@ namespace Textamina.Scriban.Helpers
         /// <returns>
         /// The result of the conversion.
         /// </returns>
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static implicit operator DateTime(ScriptDate date)
         {
             return date.value;
         }
 
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static void Register(ScriptObject builtins)
         {
             if (builtins == null) throw new ArgumentNullException(nameof(builtins));

@@ -187,7 +187,7 @@ namespace Textamina.Scriban.Helpers
             return list;
         }
 
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static IEnumerable Sort(TemplateContext context, object input, string member = null)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
@@ -226,7 +226,7 @@ namespace Textamina.Scriban.Helpers
             return list;
         }
 
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static IEnumerable Map(TemplateContext context, object input, string member)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
@@ -258,7 +258,7 @@ namespace Textamina.Scriban.Helpers
         /// </summary>
         /// <param name="builtins">The builtins object.</param>
         /// <exception cref="System.ArgumentNullException">If builtins is null</exception>
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static void Register(ScriptObject builtins)
         {
             if (builtins == null) throw new ArgumentNullException(nameof(builtins));

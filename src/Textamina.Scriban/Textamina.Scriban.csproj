@@ -50,7 +50,7 @@
     <Compile Include="Runtime\ScriptCaptureStatement.cs" />
     <Compile Include="Runtime\ScriptContinueStatement.cs" />
     <Compile Include="Runtime\ScriptErrorStatement.cs" />
-    <Compile Include="Runtime\ScriptFunctionIgnoreAttribute.cs" />
+    <Compile Include="Runtime\ScriptMemberIgnoreAttribute.cs" />
     <Compile Include="Runtime\ScriptMemberImportFlags.cs" />
     <Compile Include="Runtime\ScriptReadOnlyStatement.cs" />
     <Compile Include="Runtime\ScriptImportStatement.cs" />

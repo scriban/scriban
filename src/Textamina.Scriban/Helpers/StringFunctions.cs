@@ -177,7 +177,7 @@ namespace Textamina.Scriban.Helpers
         /// </summary>
         /// <param name="builtins">The builtins object.</param>
         /// <exception cref="System.ArgumentNullException">If builtins is null</exception>
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static void Register(ScriptObject builtins)
         {
             if (builtins == null) throw new ArgumentNullException(nameof(builtins));
@@ -204,7 +204,7 @@ namespace Textamina.Scriban.Helpers
             return text.StartsWith(start);
         }
 
-        [ScriptFunctionIgnore]
+        [ScriptMemberIgnore]
         public static string Slice(string text, int start, int length = -1)
         {
             if (text == null || start > text.Length)
