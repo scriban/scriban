@@ -12,7 +12,7 @@ namespace Textamina.Scriban.Runtime
     /// Base runtime object used to store properties.
     /// </summary>
     /// <seealso cref="System.Collections.IEnumerable" />
-    public class ScriptObject : IEnumerable
+    public class ScriptObject : IDictionary<string, object>, IEnumerable
     {
         internal static readonly IMemberAccessor Accessor = new ScriptObjectAccessor();
 
@@ -25,6 +25,7 @@ namespace Textamina.Scriban.Runtime
         {
             store = new Dictionary<string, InternalValue>();
         }
+
 
         /// <summary>
         /// Clears all members stored in this object.
@@ -63,6 +64,29 @@ namespace Textamina.Scriban.Runtime
             var result = store.TryGetValue(member, out internalValue);
             value = internalValue.Value;
             return result;
+        }
+
+        public object this[string key]
+        {
+            get
+            {
+                if (key == null) throw new ArgumentNullException(nameof(key));
+                object value;
+                TryGetValue(key, out value);
+                return value;
+            }
+            set
+            {
+                if (key == null) throw new ArgumentNullException(nameof(key));
+                SetValue(key, value, false);
+            }
+        }
+
+        public ICollection<string> Keys => store.Keys;
+
+        public ICollection<object> Values
+        {
+            get { return store.Values.Select(val => val.Value).ToList(); }
         }
 
         /// <summary>
@@ -107,6 +131,16 @@ namespace Textamina.Scriban.Runtime
         public void SetValue(string member, object value, bool readOnly)
         {
             store[member] = new InternalValue(value, readOnly);
+        }
+
+        public void Add(string key, object value)
+        {
+            SetValue(key, value, false);
+        }
+
+        public bool ContainsKey(string key)
+        {
+            return Contains(key);
         }
 
         /// <summary>
@@ -370,6 +404,11 @@ namespace Textamina.Scriban.Runtime
             public bool IsReadOnly { get; set; }
         }
 
+        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
+        {
+            throw new NotImplementedException();
+        }
+
         public IEnumerator GetEnumerator()
         {
             return store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value)).GetEnumerator();
@@ -420,5 +459,29 @@ namespace Textamina.Scriban.Runtime
                 }
             }
         }
+
+        // Methods for ICollection<KeyValuePair<string, object>> that we don't care to implement
+
+        void ICollection<KeyValuePair<string, object>>.Add(KeyValuePair<string, object> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool ICollection<KeyValuePair<string, object>>.Contains(KeyValuePair<string, object> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        void ICollection<KeyValuePair<string, object>>.CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool ICollection<KeyValuePair<string, object>>.Remove(KeyValuePair<string, object> item)
+        {
+            throw new NotImplementedException();
+        }
+
+        bool ICollection<KeyValuePair<string, object>>.IsReadOnly => false;
     }
 }
