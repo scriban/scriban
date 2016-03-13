@@ -26,11 +26,6 @@
   },
 
   "frameworks": {
-    "net45": {
-      "compilationOptions": {
-        "define": [ "CLASSIC" ]
-      }
-    },
     ".NETPortable,Version=v4.5,Profile=Profile259": {
       "frameworkAssemblies": {
         "Microsoft.CSharp": "",
