@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Textamina.Scriban.Helpers;
 
 namespace Textamina.Scriban.Parsing
 {
@@ -640,13 +641,13 @@ namespace Textamina.Scriban.Parsing
             token = new Token(special ? TokenType.IdentifierSpecial : TokenType.Identifier, start, beforePosition);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         private static bool IsFirstIdentifierLetter(char c)
         {
             return c == '_' || char.IsLetter(c);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         private static bool IsIdentifierLetter(char c)
         {
             return IsFirstIdentifierLetter(c) || char.IsDigit(c);
@@ -873,7 +874,7 @@ namespace Textamina.Scriban.Parsing
             token = new Token(isMulti ? TokenType.CommentMulti : TokenType.Comment, start, end);
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         private char PeekChar(int count = 1)
         {
             var offset = position.Offset + count;
@@ -881,7 +882,7 @@ namespace Textamina.Scriban.Parsing
             return offset >= 0 && offset < Text.Length ? Text[offset] : '\0';
         }
 
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         private void NextChar()
         {
             position.Offset++;

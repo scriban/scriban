@@ -3,6 +3,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Textamina.Scriban.Helpers;
 
 namespace Textamina.Scriban.Parsing
 {
@@ -12,7 +13,7 @@ namespace Textamina.Scriban.Parsing
 
         static TokenTypeExtensions()
         {
-            foreach (var field in typeof (TokenType).GetTypeInfo().DeclaredFields.Where(field => field.IsPublic && field.IsStatic))
+            foreach (var field in typeof(TokenType).GetTypeInfo().GetDeclaredFields().Where(field => field.IsPublic && field.IsStatic))
             {
                 var tokenText = field.GetCustomAttribute<TokenTextAttribute>();
                 if (tokenText != null)

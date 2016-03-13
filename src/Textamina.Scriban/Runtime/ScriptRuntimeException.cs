@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using Textamina.Scriban.Helpers;
 using Textamina.Scriban.Parsing;
 
 namespace Textamina.Scriban.Runtime
@@ -42,7 +43,7 @@ namespace Textamina.Scriban.Runtime
 
         public override string ToString()
         {
-            var messagesAsText = string.Join("\n", ParserMessages);
+            var messagesAsText = StringHelper.Join("\n", ParserMessages);
 
             return $"{base.ToString()} Parser messages:\n {messagesAsText}";
         }

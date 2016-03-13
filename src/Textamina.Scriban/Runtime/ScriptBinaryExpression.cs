@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Textamina.Scriban.Helpers;
 
 namespace Textamina.Scriban.Runtime
 {

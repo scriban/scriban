@@ -4,19 +4,20 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using Textamina.Scriban.Helpers;
 
 namespace Textamina.Scriban.Runtime
 {
     class TypedMemberAccessor : IMemberAccessor
     {
-        private readonly TypeInfo type;
+        private readonly Type type;
         private readonly IMemberRenamer renamer;
         private readonly Dictionary<string, MemberInfo> members;
 
         public TypedMemberAccessor(Type targetType, IMemberRenamer renamer)
         {
             if (targetType == null) throw new ArgumentNullException(nameof(targetType));
-            this.type = targetType.GetTypeInfo();
+            this.type = targetType;
             this.renamer = renamer ?? StandardMemberRenamer.Default;
             members = new Dictionary<string, MemberInfo>();
             PrepareMembers();
@@ -73,7 +74,7 @@ namespace Textamina.Scriban.Runtime
 
         private void PrepareMembers()
         {
-            foreach (var field in type.DeclaredFields)
+            foreach (var field in type.GetTypeInfo().GetDeclaredFields())
             {
                 var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                 if (keep && !field.IsStatic && field.IsPublic)
@@ -90,10 +91,10 @@ namespace Textamina.Scriban.Runtime
                 }
             }
 
-            foreach (var property in type.DeclaredProperties)
+            foreach (var property in type.GetTypeInfo().GetDeclaredProperties())
             {
                 var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                if (keep && property.CanRead && !property.GetMethod.IsStatic && property.GetMethod.IsPublic)
+                if (keep && property.CanRead && !property.GetGetMethod().IsStatic && property.GetGetMethod().IsPublic)
                 {
                     var newPropertyName = Rename(property.Name);
                     if (string.IsNullOrEmpty(newPropertyName))

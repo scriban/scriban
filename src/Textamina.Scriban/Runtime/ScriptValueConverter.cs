@@ -5,6 +5,7 @@ using System.Collections;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using Textamina.Scriban.Helpers;
 using Textamina.Scriban.Parsing;
 
 namespace Textamina.Scriban.Runtime

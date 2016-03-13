@@ -39,12 +39,7 @@ namespace Textamina.Scriban.Helpers
                 return Enumerable.Empty<object>();
             }
 
-            var set = new SortedSet<object>();
-            foreach (var item in iterator)
-            {
-                set.Add(item);
-            }
-            return set;
+            return iterator.Cast<object>().Distinct();
         }
 
         public static int Size(IEnumerable list)

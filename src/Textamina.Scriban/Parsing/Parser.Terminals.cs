@@ -233,7 +233,7 @@ namespace Textamina.Scriban.Parsing
                                             (text[i++].HexToInt() << 4) +
                                             text[i].HexToInt();
                                 // Is it correct?
-                                builder.Append(char.ConvertFromUtf32(value));
+                                builder.Append(ConvertFromUtf32(value));
                             break;
                         }
                         case 'x':
@@ -260,6 +260,18 @@ namespace Textamina.Scriban.Parsing
 
             NextToken();
             return Close(literal);
+        }
+
+        private static string ConvertFromUtf32(int utf32)
+        {
+            if (utf32 < 65536)
+                return ((char)utf32).ToString();
+            utf32 -= 65536;
+            return new string(new char[2]
+            {
+        (char) (utf32 / 1024 + 55296),
+        (char) (utf32 % 1024 + 56320)
+            });
         }
     }
 }

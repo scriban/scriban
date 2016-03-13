@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Textamina.Scriban.Helpers;
 
 namespace Textamina.Scriban.Runtime
 {
@@ -247,15 +248,7 @@ namespace Textamina.Scriban.Runtime
                 return true;
             }
 
-            TypeInfo typeInfo = null;
-            if (obj is Type)
-            {
-                typeInfo = ((Type) obj).GetTypeInfo();
-            }
-            else
-            {
-                typeInfo = obj.GetType().GetTypeInfo();
-            }
+            var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();
             return !(obj is string || typeInfo.IsPrimitive || typeInfo.IsEnum || typeInfo.IsArray);
         }
 
@@ -277,26 +270,24 @@ namespace Textamina.Scriban.Runtime
                 throw new ArgumentOutOfRangeException(nameof(obj), $"Unsupported object type [{obj.GetType()}]. Expecting plain class or struct");
             }
 
-            TypeInfo typeInfo = null;
+            var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();
             bool useStatic = false;
             bool useInstance = false;
             if (obj is Type)
             {
                 useStatic = true;
-                typeInfo = ((Type)obj).GetTypeInfo();
                 obj = null;
             }
             else
             {
                 useInstance = true;
-                typeInfo = obj.GetType().GetTypeInfo();
             }
 
             renamer = renamer ?? StandardMemberRenamer.Default;
 
             if ((flags & ScriptMemberImportFlags.Field) != 0)
             {
-                foreach (var field in typeInfo.DeclaredFields)
+                foreach (var field in typeInfo.GetDeclaredFields())
                 {
                     if (!field.IsPublic)
                     {
@@ -320,15 +311,15 @@ namespace Textamina.Scriban.Runtime
 
             if ((flags & ScriptMemberImportFlags.Property) != 0)
             {
-                foreach (var property in typeInfo.DeclaredProperties)
+                foreach (var property in typeInfo.GetDeclaredProperties())
                 {
-                    if (!property.CanRead || !property.GetMethod.IsPublic)
+                    if (!property.CanRead || !property.GetGetMethod().IsPublic)
                     {
                         continue;
                     }
 
                     var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                    if (keep && (((property.GetMethod.IsStatic && useStatic) || useInstance)))
+                    if (keep && (((property.GetGetMethod().IsStatic && useStatic) || useInstance)))
                     {
                         var newPropertyName = renamer.GetName(property.Name);
                         if (string.IsNullOrEmpty(newPropertyName))
@@ -336,14 +327,14 @@ namespace Textamina.Scriban.Runtime
                             newPropertyName = property.Name;
                         }
                         
-                        SetValue(newPropertyName, property.GetValue(obj), property.SetMethod == null || !property.SetMethod.IsPublic);
+                        SetValue(newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
                     }
                 }
             }
 
             if ((flags & ScriptMemberImportFlags.Method) != 0 && useStatic)
             {
-                foreach (var method in typeInfo.DeclaredMethods)
+                foreach (var method in typeInfo.GetDeclaredMethods())
                 {
                     var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && method.IsPublic && method.IsStatic && !method.IsSpecialName)

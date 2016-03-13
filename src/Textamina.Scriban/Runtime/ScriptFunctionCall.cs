@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Textamina.Scriban.Helpers;
 
 namespace Textamina.Scriban.Runtime
 {
@@ -34,7 +35,7 @@ namespace Textamina.Scriban.Runtime
 
         public override string ToString()
         {
-            var args = string.Join(" ", Arguments);
+            var args = StringHelper.Join(" ", Arguments);
             return $"{Target} {args}";
         }
 
