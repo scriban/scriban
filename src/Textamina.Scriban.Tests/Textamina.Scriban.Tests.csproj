@@ -33,6 +33,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Textamina.Scriban">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\artifacts\bin\Textamina.Scriban\$(Configuration)\net45\Textamina.Scriban.dll</HintPath>
+    </Reference>
     <Reference Include="nunit.framework, Version=3.0.5813.39031, Culture=neutral, PublicKeyToken=2638cd05610744eb, processorArchitecture=MSIL">
       <HintPath>..\packages\NUnit.3.0.1\lib\net45\nunit.framework.dll</HintPath>
       <Private>True</Private>
@@ -57,13 +61,6 @@
     <None Include="App.config" />
     <None Include="packages.config" />
   </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Textamina.Scriban\Textamina.Scriban.csproj">
-      <Project>{8a58a7e2-627c-4f41-933f-5ac92adfab48}</Project>
-      <Name>Textamina.Scriban</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
     <Content Include="TestFiles\000-basic\000-script-empty.out.txt" />
     <Content Include="TestFiles\000-basic\000-script-empty.txt" />
