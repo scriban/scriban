@@ -16,11 +16,15 @@ namespace Textamina.Scriban.Helpers
         }
         public static IEnumerable<FieldInfo> GetDeclaredFields(this Type type)
         {
-            return type.GetFields(BindingFlags.DeclaredOnly);
+            return
+                type.GetFields(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance |
+                               BindingFlags.Static);
         }
         public static IEnumerable<PropertyInfo> GetDeclaredProperties(this Type type)
         {
-            return type.GetProperties(BindingFlags.DeclaredOnly);
+            return
+                type.GetProperties(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance |
+                                   BindingFlags.Static);
         }
         public static object GetValue(this PropertyInfo propInfo, object obj)
         {
@@ -32,7 +36,7 @@ namespace Textamina.Scriban.Helpers
         }
         public static IEnumerable<MethodInfo> GetDeclaredMethods(this Type type)
         {
-            return type.GetMethods(BindingFlags.DeclaredOnly);
+            return type.GetMethods(BindingFlags.Public|BindingFlags.Static|BindingFlags.DeclaredOnly);
         }
         public static T GetCustomAttribute<T>(this MemberInfo memberInfo) where T : Attribute
         {
