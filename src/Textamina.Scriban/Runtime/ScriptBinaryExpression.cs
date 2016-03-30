@@ -24,7 +24,11 @@ namespace Textamina.Scriban.Runtime
             var rightValueOriginal = context.Evaluate(Right);
             object rightValue = rightValueOriginal;
 
-            if (Operator == ScriptBinaryOperator.And || Operator == ScriptBinaryOperator.Or)
+            if (Operator == ScriptBinaryOperator.EmptyCoalescing)
+            {
+                context.Result = leftValue ?? rightValue;
+            }
+            else if (Operator == ScriptBinaryOperator.And || Operator == ScriptBinaryOperator.Or)
             {
                 var leftBoolValue = ScriptValueConverter.ToBool(leftValue);
                 var rightBoolValue = ScriptValueConverter.ToBool(rightValue);

@@ -444,6 +444,18 @@ namespace Textamina.Scriban.Parsing
                     // & is an invalid char alone
                     token = new Token(TokenType.Invalid, start, start);
                     break;
+                case '?':
+                    NextChar();
+                    if (c == '?')
+                    {
+                        token = new Token(TokenType.EmptyCoalescing, start, position);
+                        NextChar();
+                        break;
+                    }
+
+                    // ? is an invalid char alone
+                    token = new Token(TokenType.Invalid, start, start);
+                    break;
                 case '|':
                     NextChar();
                     if (c == '|')

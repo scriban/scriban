@@ -4,6 +4,11 @@ namespace Textamina.Scriban.Runtime
 {
     public enum ScriptBinaryOperator
     {
+        /// <summary>
+        /// The empty coalescing operator ??
+        /// </summary>
+        EmptyCoalescing, 
+
         Add,
 
         Substract,

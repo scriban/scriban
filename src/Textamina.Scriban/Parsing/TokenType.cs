@@ -73,6 +73,9 @@ namespace Textamina.Scriban.Parsing
         [TokenText("||")]
         Or,  // ||
 
+        [TokenText("??")]
+        EmptyCoalescing,
+
         [TokenText("==")]
         CompareEqual,
 

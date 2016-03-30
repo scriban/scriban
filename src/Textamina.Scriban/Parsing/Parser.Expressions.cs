@@ -21,6 +21,7 @@ namespace Textamina.Scriban.Parsing
             BinaryOperators.Add(TokenType.Plus, ScriptBinaryOperator.Add);
             BinaryOperators.Add(TokenType.Minus, ScriptBinaryOperator.Substract);
             BinaryOperators.Add(TokenType.Modulus, ScriptBinaryOperator.Modulus);
+            BinaryOperators.Add(TokenType.EmptyCoalescing, ScriptBinaryOperator.EmptyCoalescing);
             BinaryOperators.Add(TokenType.And, ScriptBinaryOperator.And);
             BinaryOperators.Add(TokenType.Or, ScriptBinaryOperator.Or);
             BinaryOperators.Add(TokenType.CompareEqual, ScriptBinaryOperator.CompareEqual);
@@ -494,29 +495,31 @@ namespace Textamina.Scriban.Parsing
         {
             switch (op)
             {
-                case ScriptBinaryOperator.Or:
+                case ScriptBinaryOperator.EmptyCoalescing:
                     return 2;
-                case ScriptBinaryOperator.And:
+                case ScriptBinaryOperator.Or:
                     return 3;
+                case ScriptBinaryOperator.And:
+                    return 4;
                 case ScriptBinaryOperator.CompareEqual:
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return 4;
+                    return 5;
                 case ScriptBinaryOperator.CompareLess:
                 case ScriptBinaryOperator.CompareLessOrEqual:
                 case ScriptBinaryOperator.CompareGreater:
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return 5;
+                    return 6;
                 case ScriptBinaryOperator.Add:
                 case ScriptBinaryOperator.Substract:
-                    return 6;
+                    return 7;
                 case ScriptBinaryOperator.Multiply:
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
-                    return 7;
+                    return 8;
                 case ScriptBinaryOperator.RangeInclude:
                 case ScriptBinaryOperator.RangeExclude:
-                    return 8;
+                    return 9;
                 default:
                     return 0;
             }

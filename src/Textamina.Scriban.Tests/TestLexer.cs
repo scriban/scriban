@@ -253,6 +253,7 @@ a";
                 {">=", TokenType.CompareGreaterOrEqual},
                 {"<=", TokenType.CompareLessOrEqual},
                 {"&&", TokenType.And},
+                {"??", TokenType.EmptyCoalescing},
                 {"||", TokenType.Or},
                 {"..", TokenType.DoubleDot},
                 {"..<", TokenType.DoubleDotLess},
