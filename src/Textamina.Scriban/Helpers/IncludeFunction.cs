@@ -72,7 +72,12 @@ namespace Textamina.Scriban.Helpers
 
                 string templateFilePath;
 
-                var templateText = context.Options.TemplateLoader.Load(context, templateName, out templateFilePath);
+                var templateText = context.Options.TemplateLoader.Load(context, callerContext.Span, templateName, out templateFilePath);
+
+                if (templateText == null)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"The result of including <{templateName}> cannot be null");
+                }
 
                 // IF template file path is not defined, we use the template name instead
                 templateFilePath = templateFilePath ?? templateName;
@@ -81,22 +86,31 @@ namespace Textamina.Scriban.Helpers
                 var templateOptions = context.Options.Clone();
 
                 // Parse include in default modes (while top page can be using front matter)
-                templateOptions.Parser.Mode = ParsingMode.Default;
+                templateOptions.Parser.Mode = templateOptions.Parser.Mode == ParsingMode.ScriptOnly
+                    ? ParsingMode.ScriptOnly
+                    : ParsingMode.Default;
 
                 template = Template.Parse(templateText, templateFilePath, templateOptions);
 
                 // If the template has any errors, throw an exception
                 if (template.HasErrors)
                 {
-                    throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template [{templateName}] from [{templateFilePath}]", template.Messages);
+                    throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template <{templateName}> from [{templateFilePath}]", template.Messages);
                 }
 
                 context.CachedTemplates.Add(templateName, template);
             }
 
             context.PushOutput();
-            template.Render(context);
-            var result = context.PopOutput();
+            object result = null;
+            try
+            {
+                template.Render(context);
+            }
+            finally
+            {
+                result = context.PopOutput();
+            }
 
             return result;
         }

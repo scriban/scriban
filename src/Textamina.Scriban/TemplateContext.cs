@@ -28,6 +28,7 @@ namespace Textamina.Scriban
         private readonly Stack<ScriptObject> loopStores;
         private readonly Dictionary<Type, IMemberAccessor> memberAccessors;
         private readonly Stack<StringBuilder> outputs;
+        private readonly Stack<string> sourceFiles;
         private int functionDepth = 0;
         private bool isFunctionCallDisabled;
         private int loopStep = 0;
@@ -55,6 +56,8 @@ namespace Textamina.Scriban
 
             globalStore = new Stack<ScriptObject>();
             globalStore.Push(pageObject);
+
+            sourceFiles = new Stack<string>();
 
             localStores = new Stack<ScriptObject>();
             localStores.Push(new ScriptObject());
@@ -100,6 +103,11 @@ namespace Textamina.Scriban
         /// </summary>
         public Dictionary<string, Template> CachedTemplates { get; }
 
+        /// <summary>
+        /// Gets the current source file.
+        /// </summary>
+        public string CurrentSourceFile => sourceFiles.Peek();
+
         internal Stack<ScriptExpression> PipeArguments { get; }
 
         internal ScriptFlowState FlowState { get; set; }
@@ -111,6 +119,30 @@ namespace Textamina.Scriban
         ///   <c>true</c> if [in loop]; otherwise, <c>false</c>.
         /// </value>
         internal bool IsInLoop => loops.Count > 0;
+
+        /// <summary>
+        /// Pushes the source file path being executed. This should have enough information so that template loading/include can work correctly.
+        /// </summary>
+        /// <param name="sourceFile">The source file.</param>
+        public void PushSourceFile(string sourceFile)
+        {
+            if (sourceFile == null) throw new ArgumentNullException(nameof(sourceFile));
+            sourceFiles.Push(sourceFile);
+        }
+
+        /// <summary>
+        /// Pops the source file being executed.
+        /// </summary>
+        /// <returns>The source file that was executed</returns>
+        /// <exception cref="System.InvalidOperationException">Cannot PopSourceFile more than PushSourceFile</exception>
+        public string PopSourceFile()
+        {
+            if (sourceFiles.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot PopSourceFile more than PushSourceFile");
+            }
+            return sourceFiles.Pop();
+        }
 
         /// <summary>
         /// Gets the value from the specified expression using the current <see cref="ScriptObject"/> bound to the model context.

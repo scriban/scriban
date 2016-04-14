@@ -6,6 +6,6 @@ namespace Textamina.Scriban.Runtime
 {
     public interface ITemplateLoader
     {
-        string Load(TemplateContext context, string templateName, out string templateFilePath);
+        string Load(TemplateContext context, SourceSpan callerSpan, string templateName, out string templateFilePath);
     }
 }

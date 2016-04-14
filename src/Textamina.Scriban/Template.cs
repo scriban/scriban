@@ -12,11 +12,17 @@ namespace Textamina.Scriban
     /// </summary>
     public class Template
     {
-        private Template(TemplateOptions options)
+        private Template(TemplateOptions options, string sourceFilePath)
         {
             Messages = new List<LogMessage>();
             Options = options ?? new TemplateOptions();
+            this.SourceFilePath = sourceFilePath;
         }
+
+        /// <summary>
+        /// Gets the source file path.
+        /// </summary>
+        public string SourceFilePath { get; }
 
         /// <summary>
         /// Gets the current options of this template.
@@ -47,7 +53,7 @@ namespace Textamina.Scriban
         /// <returns>A template</returns>
         public static Template Parse(string text, string sourceFilePath = null, TemplateOptions options = null)
         {
-            var template = new Template(options);
+            var template = new Template(options, sourceFilePath);
             template.ParseInternal(text, sourceFilePath);
             return template;
         }
@@ -68,8 +74,22 @@ namespace Textamina.Scriban
 
             // Make sure that we are using the same options
             context.Options = Options;
+            if (SourceFilePath != null)
+            {
+                context.PushSourceFile(SourceFilePath);
+            }
 
-            Page?.Evaluate(context);
+            try
+            {
+                Page?.Evaluate(context);
+            }
+            finally
+            {
+                if (SourceFilePath != null)
+                {
+                    context.PopSourceFile();
+                }
+            }
         }
 
         /// <summary>
