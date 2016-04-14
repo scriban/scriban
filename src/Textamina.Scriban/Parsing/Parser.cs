@@ -414,7 +414,7 @@ namespace Textamina.Scriban.Parsing
 
         private bool ExpectEndOfStatement(ScriptNode statement)
         {
-            if (Current.Type == TokenType.NewLine || Current.Type == TokenType.CodeExit || Current.Type == TokenType.SemiColon)
+            if (Current.Type == TokenType.NewLine || Current.Type == TokenType.CodeExit || Current.Type == TokenType.SemiColon || Current.Type == TokenType.Eof)
             {
                 return true;
             }
