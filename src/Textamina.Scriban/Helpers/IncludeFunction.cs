@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
+using System.Collections.Generic;
 using Textamina.Scriban.Parsing;
 using Textamina.Scriban.Runtime;
 
@@ -11,8 +12,6 @@ namespace Textamina.Scriban.Helpers
     /// </summary>
     public sealed class IncludeFunction : IScriptCustomFunction
     {
-        private static readonly IncludeFunction Default = new IncludeFunction();
-
         /// <summary>
         /// Registers the builtins provided by this class to the specified <see cref="ScriptObject"/>.
         /// </summary>
@@ -22,7 +21,7 @@ namespace Textamina.Scriban.Helpers
         public static void Register(ScriptObject builtins)
         {
             if (builtins == null) throw new ArgumentNullException(nameof(builtins));
-            builtins.SetValue("include", Default, true);
+            builtins.SetValue("include", new IncludeFunction(), true);
         }
 
         private IncludeFunction()
@@ -46,7 +45,8 @@ namespace Textamina.Scriban.Helpers
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while converting first parameter for <include> function. Expecting a string", ex);
             }
 
-            if (string.IsNullOrEmpty(templateName))
+            // If template name is empty, throw an exception
+            if (templateName == null || string.IsNullOrEmpty(templateName = templateName.Trim()))
             {
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template name cannot be null or empty");
             }
@@ -101,6 +101,26 @@ namespace Textamina.Scriban.Helpers
                 context.CachedTemplates.Add(templateName, template);
             }
 
+            // Query the pending includes stored in the context
+            HashSet<string> pendingIncludes;
+            object pendingIncludesObject;
+            if (!context.Tags.TryGetValue(typeof(IncludeFunction), out pendingIncludesObject))
+            {
+                pendingIncludesObject = pendingIncludes = new HashSet<string>();
+                context.Tags[typeof (IncludeFunction)] = pendingIncludesObject;
+            }
+            else
+            {
+                pendingIncludes = (HashSet<string>) pendingIncludesObject;
+            }
+
+            // Make sure that we cannot recursively include a template
+            if (pendingIncludes.Contains(templateName))
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"The include [{templateName}] cannot be used recursively");
+            }
+            pendingIncludes.Add(templateName);
+
             context.PushOutput();
             object result = null;
             try
@@ -110,6 +130,7 @@ namespace Textamina.Scriban.Helpers
             finally
             {
                 result = context.PopOutput();
+                pendingIncludes.Remove(templateName);
             }
 
             return result;

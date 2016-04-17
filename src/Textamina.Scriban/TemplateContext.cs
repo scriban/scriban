@@ -75,6 +75,8 @@ namespace Textamina.Scriban
 
             CachedTemplates = new Dictionary<string, Template>();
 
+            Tags = new Dictionary<object, object>();
+
             RegisterBuiltins();
         }
 
@@ -107,6 +109,11 @@ namespace Textamina.Scriban
         /// Gets the current source file.
         /// </summary>
         public string CurrentSourceFile => sourceFiles.Peek();
+
+        /// <summary>
+        /// Allows to store data within this context.
+        /// </summary>
+        public Dictionary<object, object> Tags { get; }
 
         internal Stack<ScriptExpression> PipeArguments { get; }
 
