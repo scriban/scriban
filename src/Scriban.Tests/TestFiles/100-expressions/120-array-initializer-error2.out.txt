@@ -1,0 +1,1 @@
+text(5,1) : error : Error while parsing array initializer: Expecting <expression> instead of [CodeExit] in: [item1, item2,...]
