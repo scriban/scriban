@@ -36,7 +36,7 @@ namespace Scriban.Helpers
         }
         public static IEnumerable<MethodInfo> GetDeclaredMethods(this Type type)
         {
-            return type.GetMethods(BindingFlags.Public|BindingFlags.Static|BindingFlags.DeclaredOnly);
+            return type.GetMethods(BindingFlags.Public| BindingFlags.Instance|BindingFlags.Static|BindingFlags.DeclaredOnly);
         }
         public static T GetCustomAttribute<T>(this MemberInfo memberInfo) where T : Attribute
         {
