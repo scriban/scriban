@@ -51,7 +51,7 @@ namespace Scriban.Tests
         [Test]
         public void TestFrontMatter()
         {
-            var options = new TemplateOptions() {Parser = {Mode = ParsingMode.FrontMatter}};
+            var options = new ParserOptions() {Mode = ScriptMode.FrontMatter};
             var template = ParseTemplate(@"{{ 
 variable = 1
 name = 'yes'
@@ -64,7 +64,7 @@ variable + 1
             // Make sure that we have a front matter
             Assert.NotNull(template.Page.FrontMatter);
 
-            var context = new TemplateContext(new ScriptObject(), template.Options);
+            var context = new TemplateContext();
 
             // Evaluate front-matter
             var frontResult = context.Evaluate(template.Page.FrontMatter);
@@ -80,13 +80,13 @@ variable + 1
         [Test]
         public void TestScriptOnly()
         {
-            var options = new TemplateOptions() { Parser = { Mode = ParsingMode.ScriptOnly } };
+            var options = new ParserOptions() { Mode = ScriptMode.ScriptOnly };
             var template = ParseTemplate(@"
 variable = 1
 name = 'yes'
 ", options);
 
-            var context = new TemplateContext(new ScriptObject(), template.Options);
+            var context = new TemplateContext();
 
             template.Render(context);
 
@@ -102,9 +102,9 @@ name = 'yes'
             Assert.AreEqual(1, value);
         }
 
-        private static Template ParseTemplate(string text, TemplateOptions options = null)
+        private static Template ParseTemplate(string text, ParserOptions options = null)
         {
-            var template = Template.Parse(text, null, options);
+            var template = Template.Parse(text, "text", options);
             foreach (var message in template.Messages)
             {
                 Console.WriteLine(message);
@@ -135,8 +135,10 @@ end
             var rootObject = new ScriptObject();
             rootObject.SetValue("math", ScriptObject.From(typeof(MathObject)), true);
 
-            var context = new TemplateContext(rootObject);
+            var context = new TemplateContext();
+            context.PushGlobal(rootObject);
             scriptPage.Evaluate(context);
+            context.PopGlobal();
 
             // Result
             var result = context.Output.ToString();
@@ -157,19 +159,16 @@ end
             Assert.True(File.Exists(expectedOutputFile), $"Expecting output result file [{expectedOutputFile}] for input file [{inputName}]");
             var expectedOutputText = File.ReadAllText(expectedOutputFile, Encoding.UTF8);
 
-            var lexer = new Lexer(inputText, "text");
 
-            var parser = new Parser(lexer);
-
-            var scriptPage = parser.Run();
+            var template = Template.Parse(inputText, "text");
 
             var result = string.Empty;
 
-            if (parser.HasErrors)
+            if (template.HasErrors)
             {
-                for (int i = 0; i < parser.Messages.Count; i++)
+                for (int i = 0; i < template.Messages.Count; i++)
                 {
-                    var message = parser.Messages[i];
+                    var message = template.Messages[i];
                     if (i > 0)
                     {
                         result += "\r\n";
@@ -180,15 +179,11 @@ end
             else
             {
 
-                Assert.NotNull(scriptPage);
+                Assert.NotNull(template.Page);
 
                 try
                 {
-                    var context = new TemplateContext();
-                    scriptPage.Evaluate(context);
-
-                    // Result
-                    result = context.Output.ToString();
+                    result = template.Render();
                 }
                 catch (ScriptRuntimeException exception)
                 {

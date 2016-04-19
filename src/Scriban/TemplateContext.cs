@@ -18,7 +18,6 @@ namespace Scriban
     /// </summary>
     public class TemplateContext
     {
-        private static readonly ScriptObject BuiltinObject = new ScriptObject();
         private readonly Stack<ScriptObject> availableStores;
         internal readonly Stack<ScriptBlockStatement> BlockDelegates;
         private readonly Stack<ScriptObject> globalStore;
@@ -34,28 +33,25 @@ namespace Scriban
         private int loopStep = 0;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TemplateContext"/> class.
+        /// Initializes a new instance of the <see cref="TemplateContext" /> class.
         /// </summary>
-        public TemplateContext() : this(null, null)
+        public TemplateContext()
         {
-        }
+            BuiltinObject = new ScriptObject();
+            BuiltinFunctions.Register(BuiltinObject);
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="TemplateContext"/> class.
-        /// </summary>
-        /// <param name="pageObject">The page object providing variables to the page.</param>
-        /// <param name="options">The template options.</param>
-        public TemplateContext(ScriptObject pageObject = null, TemplateOptions options = null)
-        {
-            pageObject = pageObject ?? new ScriptObject();
+            EnableOutput = true;
+            LoopLimit = 1000;
+            RecursiveLimit = 100;
+            MemberRenamer = StandardMemberRenamer.Default;
 
-            Options = options ?? new TemplateOptions();
+            TemplateLoaderParserOptions = new ParserOptions();
 
             outputs = new Stack<StringBuilder>();
             outputs.Push(new StringBuilder());
 
             globalStore = new Stack<ScriptObject>();
-            globalStore.Push(pageObject);
+            globalStore.Push(BuiltinObject);
 
             sourceFiles = new Stack<string>();
 
@@ -76,9 +72,19 @@ namespace Scriban
             CachedTemplates = new Dictionary<string, Template>();
 
             Tags = new Dictionary<object, object>();
-
-            RegisterBuiltins();
         }
+
+        public ITemplateLoader TemplateLoader { get; set; }
+
+        public ParserOptions TemplateLoaderParserOptions { get; set; }
+
+        public IMemberRenamer MemberRenamer { get; set; }
+
+        public int LoopLimit { get; set; }
+
+        public int RecursiveLimit { get; set; }
+
+        public bool EnableOutput { get; set; }
 
         /// <summary>
         /// Gets the current output of the template being rendered (via <see cref="Template.Render(Scriban.TemplateContext)")/>.
@@ -90,15 +96,12 @@ namespace Scriban
         /// </summary>
         public object Result { get; set; }
 
+        public ScriptObject BuiltinObject { get; }
+
         /// <summary>
         /// Gets the current global <see cref="ScriptObject"/>.
         /// </summary>
         public ScriptObject CurrentGlobal => globalStore.Peek();
-
-        /// <summary>
-        /// Gets the template options.
-        /// </summary>
-        public TemplateOptions Options { get; internal set; }
 
         /// <summary>
         /// Gets the cached templates, used by the include function.
@@ -353,7 +356,7 @@ namespace Scriban
                 }
                 else
                 {
-                    accessor = new TypedMemberAccessor(type, Options.MemberRenamer);
+                    accessor = new TypedMemberAccessor(type, MemberRenamer);
                 }
                 memberAccessors.Add(type, accessor);
             }
@@ -363,9 +366,9 @@ namespace Scriban
         internal void EnterFunction(ScriptNode caller)
         {
             functionDepth++;
-            if (functionDepth > Options.RecursiveLimit)
+            if (functionDepth > RecursiveLimit)
             {
-                throw new ScriptRuntimeException(caller.Span, $"Exceeding number of recursive depth limit [{Options.RecursiveLimit}] for function call: [{caller}]"); // unit test: 305-func-error2.txt
+                throw new ScriptRuntimeException(caller.Span, $"Exceeding number of recursive depth limit [{RecursiveLimit}] for function call: [{caller}]"); // unit test: 305-func-error2.txt
             }
 
             PushVariableScope(ScriptVariableScope.Local);
@@ -417,11 +420,11 @@ namespace Scriban
             Debug.Assert(loops.Count > 0);
 
             loopStep++;
-            if (loopStep > Options.LoopLimit)
+            if (loopStep > LoopLimit)
             {
                 var currentLoopStatement = loops.Peek();
 
-                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit [{Options.LoopLimit}] for statement: {currentLoopStatement}"); // unit test: 215-for-statement-error1.txt
+                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit [{LoopLimit}] for statement: {currentLoopStatement}"); // unit test: 215-for-statement-error1.txt
             }
             return true;
         }
@@ -622,26 +625,6 @@ namespace Scriban
             {
                 throw new NotImplementedException($"Variable scope [{scope}] is not implemented");
             }
-        }
-
-        private void RegisterBuiltins()
-        {
-            // Allow to use builtin object provided by options
-            var builtinObject = Options.BuiltintObject;
-            if (builtinObject == null)
-            {
-                builtinObject = BuiltinObject;
-                lock (BuiltinObject)
-                {
-                    if (BuiltinObject.Count == 0)
-                    {
-                        BuiltinFunctions.Register(BuiltinObject);
-                    }
-                }
-            }
-
-            // Register include function
-            CurrentGlobal.Import(builtinObject);
         }
     }
 }

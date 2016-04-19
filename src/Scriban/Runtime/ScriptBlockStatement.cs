@@ -1,6 +1,7 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System.Collections.Generic;
+using Scriban.Parsing;
 
 namespace Scriban.Runtime
 {
@@ -31,7 +32,7 @@ namespace Scriban.Runtime
                 {
                     context.Result = null;
                 }
-                else if (context.Result != null && context.FlowState != ScriptFlowState.Return)
+                else if (context.Result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
                 {
                     context.Write(Span, context.Result);
                     context.Result = null;

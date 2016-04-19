@@ -8,6 +8,13 @@ namespace Scriban.Runtime
     public class ScriptPage : ScriptBlockStatement
     {
         /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptPage"/> class.
+        /// </summary>
+        public ScriptPage()
+        {
+        }
+
+        /// <summary>
         /// Gets or sets the front matter. May be <c>null</c> if script is not parsed using <see cref=ParsingModeParsingMode.FrontMatter"/>. See remarks.
         /// </summary>
         /// <remarks>

@@ -64,7 +64,7 @@ namespace Scriban.Helpers
 
             if (!context.CachedTemplates.TryGetValue(templateName, out template))
             {
-                if (context.Options.TemplateLoader == null)
+                if (context.TemplateLoader == null)
                 {
                     throw new ScriptRuntimeException(callerContext.Span,
                         $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.Options.TemplateLoader");
@@ -72,7 +72,7 @@ namespace Scriban.Helpers
 
                 string templateFilePath;
 
-                var templateText = context.Options.TemplateLoader.Load(context, callerContext.Span, templateName, out templateFilePath);
+                var templateText = context.TemplateLoader.Load(context, callerContext.Span, templateName, out templateFilePath);
 
                 if (templateText == null)
                 {
@@ -83,14 +83,14 @@ namespace Scriban.Helpers
                 templateFilePath = templateFilePath ?? templateName;
 
                 // Clone parser options
-                var templateOptions = context.Options.Clone();
+                var parserOptions = context.TemplateLoaderParserOptions.Clone();
 
                 // Parse include in default modes (while top page can be using front matter)
-                templateOptions.Parser.Mode = templateOptions.Parser.Mode == ParsingMode.ScriptOnly
-                    ? ParsingMode.ScriptOnly
-                    : ParsingMode.Default;
+                parserOptions.Mode = parserOptions.Mode == ScriptMode.ScriptOnly
+                    ? ScriptMode.ScriptOnly
+                    : ScriptMode.Default;
 
-                template = Template.Parse(templateText, templateFilePath, templateOptions);
+                template = Template.Parse(templateText, templateFilePath, parserOptions);
 
                 // If the template has any errors, throw an exception
                 if (template.HasErrors)

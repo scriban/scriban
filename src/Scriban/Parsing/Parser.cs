@@ -57,7 +57,7 @@ namespace Scriban.Parsing
 
         private SourceSpan CurrentSpan => GetSpanForToken(Current);
 
-        private ParsingMode CurrentParsingMode { get; set; }
+        private ScriptMode CurrentParsingMode { get; set; }
 
         public ScriptPage Run()
         {
@@ -70,7 +70,7 @@ namespace Scriban.Parsing
 
             switch (CurrentParsingMode)
             {
-                case ParsingMode.FrontMatter:
+                case ScriptMode.FrontMatter:
                     if (Current.Type != TokenType.CodeEnter)
                     {
                         LogError($"When [{CurrentParsingMode}] is enabled, expecting a {{ at the beginning of the text");
@@ -79,7 +79,7 @@ namespace Scriban.Parsing
                     // Parse the front matter
                     frontMatter = ParseBlockStatement(null);
                     break;
-                case ParsingMode.ScriptOnly:
+                case ScriptMode.ScriptOnly:
                     inCodeSection = true;
                     break;
             }
@@ -178,7 +178,7 @@ namespace Scriban.Parsing
                     {
                         LogError("Unexpected code block exit '}}' while no code block enter '{{' has been found");
                     }
-                    else if (CurrentParsingMode == ParsingMode.ScriptOnly)
+                    else if (CurrentParsingMode == ScriptMode.ScriptOnly)
                     {
                         LogError("Unexpected code clock exit '}}' while parsing in script only mode. '}}' is not allowed.");
                     }
@@ -186,11 +186,11 @@ namespace Scriban.Parsing
                     inCodeSection = false;
                     NextToken();
 
-                    if (CurrentParsingMode == ParsingMode.FrontMatter)
+                    if (CurrentParsingMode == ScriptMode.FrontMatter)
                     {
                         // Once the FrontMatter has been parsed, we can switch to default parsing mode.
                         
-                        CurrentParsingMode = ParsingMode.Default;
+                        CurrentParsingMode = ScriptMode.Default;
                         nextStatement = false;
                         break;
                     }

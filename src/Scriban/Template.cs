@@ -12,10 +12,12 @@ namespace Scriban
     /// </summary>
     public class Template
     {
-        private Template(TemplateOptions options, string sourceFilePath)
+        private readonly ParserOptions options;
+
+        private Template(ParserOptions options, string sourceFilePath)
         {
+            this.options = options == null ? new ParserOptions() : options.Clone();
             Messages = new List<LogMessage>();
-            Options = options ?? new TemplateOptions();
             this.SourceFilePath = sourceFilePath;
         }
 
@@ -23,11 +25,6 @@ namespace Scriban
         /// Gets the source file path.
         /// </summary>
         public string SourceFilePath { get; }
-
-        /// <summary>
-        /// Gets the current options of this template.
-        /// </summary>
-        public TemplateOptions Options { get; }
 
         /// <summary>
         /// Gets the resulting compiled <see cref="ScriptPage"/>. May be null if this template <see cref="HasErrors"/> 
@@ -51,7 +48,7 @@ namespace Scriban
         /// <param name="sourceFilePath">The source file path. Optional, used for better error reporting if the source file has a location on the disk</param>
         /// <param name="options">The templating parsing options.</param>
         /// <returns>A template</returns>
-        public static Template Parse(string text, string sourceFilePath = null, TemplateOptions options = null)
+        public static Template Parse(string text, string sourceFilePath = null, ParserOptions options = null)
         {
             var template = new Template(options, sourceFilePath);
             template.ParseInternal(text, sourceFilePath);
@@ -73,7 +70,6 @@ namespace Scriban
             if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Messages> property for more details");
 
             // Make sure that we are using the same options
-            context.Options = Options;
             if (SourceFilePath != null)
             {
                 context.PushSourceFile(SourceFilePath);
@@ -81,7 +77,14 @@ namespace Scriban
 
             try
             {
+                context.Result = null;
                 Page?.Evaluate(context);
+
+                if (Page != null && context.EnableOutput && context.Result != null)
+                {
+                    context.Write(Page.Span, context.Result);
+                    context.Result = null;
+                }
             }
             finally
             {
@@ -105,8 +108,10 @@ namespace Scriban
                 scriptObject.Import(model);
             }
 
-            var context = new TemplateContext(scriptObject, Options);
+            var context = new TemplateContext();
+            context.PushGlobal(scriptObject);
             Render(context);
+            context.PopGlobal();
 
             return context.Output.ToString();
         }
@@ -121,8 +126,8 @@ namespace Scriban
                 return;
             }
 
-            var lexer = new Lexer(text, sourceFilePath, Options.Parser.Mode == ParsingMode.ScriptOnly);
-            var parser = new Parser(lexer, Options.Parser);
+            var lexer = new Lexer(text, sourceFilePath, options.Mode == ScriptMode.ScriptOnly);
+            var parser = new Parser(lexer, options);
 
             Page = parser.Run();
 
