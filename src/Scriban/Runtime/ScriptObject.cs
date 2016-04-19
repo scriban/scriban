@@ -20,6 +20,13 @@ namespace Scriban.Runtime
         private readonly Dictionary<string, InternalValue> store;
 
         /// <summary>
+        /// Allows to filter a member.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <returns></returns>
+        public delegate bool FilterMemberDelegate(string member);
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="ScriptObject"/> class.
         /// </summary>
         public ScriptObject()
@@ -277,13 +284,25 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
+        /// Imports a specific member from the specified object.
+        /// </summary>
+        /// <param name="obj">The object.</param>
+        /// <param name="memberName">Name of the member.</param>
+        /// <param name="exportName">Name of the member name replacement. If null, use the default renamer will be used.</param>
+        public void ImportMember(object obj, string memberName, string exportName = null)
+        {
+            Import(obj, ScriptMemberImportFlags.All | ScriptMemberImportFlags.MethodInstance, member => member == memberName, exportName != null ? new DelegateMemberRenamer(name => exportName) : null);
+        }
+
+        /// <summary>
         /// Imports the specified object.
         /// </summary>
         /// <param name="obj">The object.</param>
         /// <param name="flags">The import flags.</param>
+        /// <param name="filter">A filter applied on each member</param>
         /// <param name="renamer">The member renamer.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
-        public void Import(object obj, ScriptMemberImportFlags flags, IMemberRenamer renamer = null)
+        public void Import(object obj, ScriptMemberImportFlags flags, FilterMemberDelegate filter = null, IMemberRenamer renamer = null)
         {
             if (obj == null)
             {
@@ -297,6 +316,7 @@ namespace Scriban.Runtime
             var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();
             bool useStatic = false;
             bool useInstance = false;
+            bool useMethodInstance = false;
             if (obj is Type)
             {
                 useStatic = true;
@@ -305,6 +325,7 @@ namespace Scriban.Runtime
             else
             {
                 useInstance = true;
+                useMethodInstance = (flags & ScriptMemberImportFlags.MethodInstance) != 0;
             }
 
             renamer = renamer ?? StandardMemberRenamer.Default;
@@ -314,6 +335,10 @@ namespace Scriban.Runtime
                 foreach (var field in typeInfo.GetDeclaredFields())
                 {
                     if (!field.IsPublic)
+                    {
+                        continue;
+                    }
+                    if (filter != null && !filter(field.Name))
                     {
                         continue;
                     }
@@ -342,6 +367,11 @@ namespace Scriban.Runtime
                         continue;
                     }
 
+                    if (filter != null && !filter(property.Name))
+                    {
+                        continue;
+                    }
+
                     var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && (((property.GetGetMethod().IsStatic && useStatic) || useInstance)))
                     {
@@ -356,12 +386,17 @@ namespace Scriban.Runtime
                 }
             }
 
-            if ((flags & ScriptMemberImportFlags.Method) != 0 && useStatic)
+            if ((flags & ScriptMemberImportFlags.Method) != 0 && (useStatic || useMethodInstance))
             {
                 foreach (var method in typeInfo.GetDeclaredMethods())
                 {
+                    if (filter != null && !filter(method.Name))
+                    {
+                        continue;
+                    }
+
                     var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                    if (keep && method.IsPublic && method.IsStatic && !method.IsSpecialName)
+                    if (keep && method.IsPublic && ((useMethodInstance && !method.IsStatic) || (useStatic && method.IsStatic)) && !method.IsSpecialName)
                     {
                         var newMethodName = renamer.GetName(method.Name);
                         if (string.IsNullOrEmpty(newMethodName))
@@ -369,10 +404,24 @@ namespace Scriban.Runtime
                             newMethodName =  method.Name;
                         }
 
-                        SetValue(newMethodName, new StaticFunctionWrapper(method), true);
+                        SetValue(newMethodName, new ObjectFunctionWrapper(obj, method), true);
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Imports the delegate to the specified member.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <param name="function">The function delegate.</param>
+        /// <exception cref="System.ArgumentNullException">if member or function are null</exception>
+        public void Import(string member, Delegate function)
+        {
+            if (member == null) throw new ArgumentNullException(nameof(member));
+            if (function == null) throw new ArgumentNullException(nameof(function));
+
+            SetValue(member, new ObjectFunctionWrapper(function.Target, function.GetMethodInfo()), true);
         }
 
         private class ScriptObjectAccessor : IMemberAccessor
@@ -429,12 +478,14 @@ namespace Scriban.Runtime
             return store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value)).GetEnumerator();
         }
 
-        private class StaticFunctionWrapper : IScriptCustomFunction
+        private class ObjectFunctionWrapper : IScriptCustomFunction
         {
+            private readonly object target;
             private readonly MethodInfo method;
             private readonly ParameterInfo[] parametersInfo;
-            public StaticFunctionWrapper(MethodInfo method)
+            public ObjectFunctionWrapper(object target, MethodInfo method)
             {
+                this.target = target;
                 this.method = method;
                 parametersInfo = method.GetParameters();
             }
@@ -465,7 +516,7 @@ namespace Scriban.Runtime
                 // Call method
                 try
                 {
-                    var result = method.Invoke(null, arguments);
+                    var result = method.Invoke(target, arguments);
                     return result;
                 }
                 catch (Exception exception)

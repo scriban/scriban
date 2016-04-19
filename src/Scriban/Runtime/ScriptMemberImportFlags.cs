@@ -13,6 +13,8 @@ namespace Scriban.Runtime
 
         Method = 4,
 
+        MethodInstance = 8,
+
         All = Field | Property | Method
     }
 }
