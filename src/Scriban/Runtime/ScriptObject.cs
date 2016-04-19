@@ -67,6 +67,30 @@ namespace Scriban.Runtime
             return result;
         }
 
+        /// <summary>
+        /// Gets the value for the specified member and type.
+        /// </summary>
+        /// <typeparam name="T">Type of the expected member</typeparam>
+        /// <param name="name">The name of the member.</param>
+        /// <returns>The value or default{T} is the value is different. Note that this method will override the value in this instance if the value doesn't match the type {T} </returns>
+        public T GetSafeValue<T>(string name)
+        {
+            if (name == null) throw new ArgumentNullException(nameof(name));
+            var obj = this[name];
+            // If value is null, the property does no exist, 
+            // so we can safely return immediately with the default value
+            if (obj == null)
+            {
+                return default(T);
+            }
+            if (!(obj is T))
+            {
+                obj = default(T);
+                this[name] = obj;
+            }
+            return (T)obj;
+        }
+
         public object this[string key]
         {
             get
