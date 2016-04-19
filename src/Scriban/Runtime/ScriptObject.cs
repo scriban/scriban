@@ -475,7 +475,7 @@ namespace Scriban.Runtime
 
         public IEnumerator GetEnumerator()
         {
-            return store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value)).GetEnumerator();
+            return store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value.Value)).GetEnumerator();
         }
 
         private class ObjectFunctionWrapper : IScriptCustomFunction

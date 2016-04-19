@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
@@ -29,6 +30,29 @@ namespace Scriban.Runtime
                 return (string) value;
             }
 
+            // Dump a script object
+            var scriptObject = value as ScriptObject;
+            if (scriptObject != null)
+            {
+                var result = new StringBuilder();
+                result.Append("{");
+                bool isFirst = true;
+                foreach (var item in scriptObject)
+                {
+                    if (!isFirst)
+                    {
+                        result.Append(", ");
+                    }
+                    var keyPair = (KeyValuePair<string, object>) item;
+                    result.Append(keyPair.Key);
+                    result.Append(": ");
+                    result.Append(ToString(span, keyPair.Value));
+                    isFirst = false;
+                }
+                result.Append("}");
+                return result.ToString();
+            }
+
             var type = value.GetType();
             if (type.GetTypeInfo().IsPrimitive)
             {
@@ -42,14 +66,23 @@ namespace Scriban.Runtime
                 }
             }
 
+            // Dump an enumeration
             var enumerable = value as IEnumerable;
             if (enumerable != null)
             {
                 var result = new StringBuilder();
+                result.Append("[");
+                bool isFirst = true;
                 foreach (var item in enumerable)
                 {
+                    if (!isFirst)
+                    {
+                        result.Append(", ");
+                    }
                     result.Append(ToString(span, item));
+                    isFirst = false;
                 }
+                result.Append("]");
                 return result.ToString();
             }
 

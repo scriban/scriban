@@ -159,7 +159,6 @@ end
             Assert.True(File.Exists(expectedOutputFile), $"Expecting output result file [{expectedOutputFile}] for input file [{inputName}]");
             var expectedOutputText = File.ReadAllText(expectedOutputFile, Encoding.UTF8);
 
-
             var template = Template.Parse(inputText, "text");
 
             var result = string.Empty;
@@ -190,7 +189,12 @@ end
                     result = exception.ToString();
                 }
             }
-            Console.Write(result);
+            Console.WriteLine("Result");
+            Console.WriteLine("======================================");
+            Console.WriteLine(result);
+            Console.WriteLine("Expected");
+            Console.WriteLine("======================================");
+            Console.WriteLine(expectedOutputText);
 
             TextAssert.AreEqual(expectedOutputText, result);
         }
