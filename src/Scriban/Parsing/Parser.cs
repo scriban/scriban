@@ -253,9 +253,6 @@ namespace Scriban.Parsing
                                     case "import":
                                         statement = ParseImportStatement();
                                         break;
-                                    case "error":
-                                        statement = ParseErrorStatement();
-                                        break;
                                     case "readonly":
                                         statement = ParseReadOnlyStatement();
                                         break;
@@ -332,16 +329,6 @@ namespace Scriban.Parsing
             }
 
             return nextStatement;
-        }
-
-        private ScriptErrorStatement ParseErrorStatement()
-        {
-            // unit test: 260-error-statement.txt
-            var errorStatement = Open<ScriptErrorStatement>();
-            NextToken(); // skip error keyword
-            errorStatement.Expression = ExpectAndParseExpression(errorStatement);
-            ExpectEndOfStatement(errorStatement);
-            return Close(errorStatement);
         }
 
         private ScriptReadOnlyStatement ParseReadOnlyStatement()
@@ -763,7 +750,6 @@ namespace Scriban.Parsing
                 case "readonly":
                 case "with":
                 case "capture":
-                case "error":
                 case "ret":
                 case "wrap":
                     return true;

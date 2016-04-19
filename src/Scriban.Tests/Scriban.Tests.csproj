@@ -192,8 +192,6 @@
     <Content Include="TestFiles\200-statements\280-ret-statement2.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.out.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.txt" />
-    <Content Include="TestFiles\200-statements\261-error-error1.out.txt" />
-    <Content Include="TestFiles\200-statements\261-error-error1.txt" />
     <Content Include="TestFiles\300-functions\302-func-param-expands.out.txt" />
     <Content Include="TestFiles\300-functions\302-func-param-expands.txt" />
     <Content Include="TestFiles\300-functions\302-func-alias.out.txt" />
@@ -214,8 +212,6 @@
     <Content Include="TestFiles\300-functions\331-wrap-error1.txt" />
     <Content Include="TestFiles\300-functions\330-wrap-statement.out.txt" />
     <Content Include="TestFiles\300-functions\330-wrap-statement.txt" />
-    <Content Include="TestFiles\200-statements\260-error-statement.out.txt" />
-    <Content Include="TestFiles\200-statements\260-error-statement.txt" />
     <Content Include="TestFiles\200-statements\250-with-statement.out.txt" />
     <Content Include="TestFiles\200-statements\250-with-statement.txt" />
     <Content Include="TestFiles\200-statements\241-import-and-readonly.out.txt" />

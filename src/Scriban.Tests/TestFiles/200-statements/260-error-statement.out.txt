@@ -1,1 +1,0 @@
-text(3,1) : error : This is an error 1

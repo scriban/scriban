@@ -1,1 +1,0 @@
-text(3,41) : error : Error while parsing error statement: Expecting <expression> instead of [NewLine] in: error <message>
