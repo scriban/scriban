@@ -483,29 +483,61 @@ namespace Scriban.Runtime
             private readonly object target;
             private readonly MethodInfo method;
             private readonly ParameterInfo[] parametersInfo;
+            private readonly bool hasObjectParams;
+            private readonly int lastParamsIndex;
+
             public ObjectFunctionWrapper(object target, MethodInfo method)
             {
                 this.target = target;
                 this.method = method;
                 parametersInfo = method.GetParameters();
+                lastParamsIndex = parametersInfo.Length - 1;
+                if (parametersInfo.Length > 0)
+                {
+                    var lastParam = parametersInfo[lastParamsIndex];
+
+                    if (lastParam.ParameterType == typeof(object[]))
+                    {
+                        foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
+                        {
+                            hasObjectParams = true;
+                            break;
+                        }
+                    }
+                }
             }
 
             public object Evaluate(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
             {
                 // Check parameters
-                if (parameters.Count != parametersInfo.Length)
+                if ((hasObjectParams && parameters.Count < parametersInfo.Length) || (!hasObjectParams && parameters.Count != parametersInfo.Length))
                 {
                     throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{parametersInfo.Length}] for [{callerContext}]");
                 }
 
                 // Convert arguments
-                var arguments = new object[parameters.Count];
+                var arguments = new object[parametersInfo.Length];
+                object[] paramArguments = null;
+                if (hasObjectParams)
+                {
+                    paramArguments = new object[parameters.Count - lastParamsIndex];
+                    arguments[lastParamsIndex] = paramArguments;
+                }
+
                 for (int i = 0; i < parameters.Count; i++)
                 {
-                    var destType = parametersInfo[i].ParameterType;
+                    var destType = hasObjectParams && i >= lastParamsIndex ? typeof(object) : parametersInfo[i].ParameterType;
                     try
                     {
-                        arguments[i] = ScriptValueConverter.ToObject(callerContext.Span, parameters[i], destType);
+                        var argValue = ScriptValueConverter.ToObject(callerContext.Span, parameters[i], destType);
+                        if (hasObjectParams && i >= lastParamsIndex)
+                        {
+                            paramArguments[i - lastParamsIndex] = argValue;
+                        }
+                        else
+                        {
+                            arguments[i] = argValue;
+                        }
                     }
                     catch (Exception exception)
                     {
