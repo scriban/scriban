@@ -10,7 +10,6 @@
   "description": "A text templating language and engine for .NET",
   "copyright": "Alexandre Mutel",
   "language": "en-US",
-
   "configurations": {
     "Debug": {
       "compilationOptions": {
@@ -24,7 +23,6 @@
       }
     }
   },
-
   "frameworks": {
     "net20": {
       "compilationOptions": {
@@ -61,16 +59,15 @@
         "define": [ "CORE" ]
       },
       "dependencies": {
-        "Microsoft.NETCore": "5.0.1-beta-23516",
         "Microsoft.NETCore.Platforms": "1.0.1-beta-23516",
-        "Microsoft.NETCore.Portable.Compatibility": "1.0.1-beta-23516",
-        "System.Runtime.Extensions": "4.0.11-beta-23516",
-        "System.Reflection": "4.1.0-beta-23516",
-        "System.Collections": "4.0.11-beta-23516",
-        "System.Linq": "4.0.1-beta-23516",
-        "System.Threading": "4.0.11-beta-23516",
-        "System.Runtime": "4.0.21-beta-23516",
-        "Microsoft.CSharp": "4.0.1-beta-23516"
+        "System.Runtime.Extensions": "4.0.10",
+        "System.Reflection": "4.0.0",
+        "System.Collections": "4.0.10",
+        "System.Linq": "4.0.0",
+        "System.Text.RegularExpressions": "4.0.0",
+        "System.Threading": "4.0.0",
+        "System.Runtime": "4.0.20",
+        "Microsoft.CSharp": "4.0.0"
       }
     }
   }
