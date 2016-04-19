@@ -50,12 +50,15 @@ namespace Scriban.Helpers
             }
             return (T)null;
         }
+        public static MethodInfo GetMethodInfo(this Delegate del)
+        {
+            return del.Method;
+        }
 #else
         public static IEnumerable<FieldInfo> GetDeclaredFields(this TypeInfo type)
         {
             return type.DeclaredFields;
         }
-
         public static IEnumerable<PropertyInfo> GetDeclaredProperties(this TypeInfo type)
         {
             return type.DeclaredProperties;
