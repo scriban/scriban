@@ -30,6 +30,11 @@ namespace Scriban.Runtime
                 return (string) value;
             }
 
+            if (value is IScriptCustomFunction)
+            {
+                return "<function>";
+            }
+
             // Dump a script object
             var scriptObject = value as ScriptObject;
             if (scriptObject != null)
