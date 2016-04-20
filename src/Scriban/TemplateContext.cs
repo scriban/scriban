@@ -552,6 +552,12 @@ namespace Scriban
                             }
                         }
                     }
+                    else if (!setter)
+                    {
+                        targetExpression.Evaluate(this);
+                        value = this.Result;
+                        this.Result = null;
+                    }
                     else
                     {
                         throw new ScriptRuntimeException(targetExpression.Span, $"Unsupported expression for target for assignment: {targetExpression} = ..."); // unit test: 105-assign-error1.txt
