@@ -510,7 +510,7 @@ namespace Scriban.Runtime
             public object Evaluate(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
             {
                 // Check parameters
-                if ((hasObjectParams && parameters.Count < parametersInfo.Length) || (!hasObjectParams && parameters.Count != parametersInfo.Length))
+                if ((hasObjectParams && parameters.Count < parametersInfo.Length - 1) || (!hasObjectParams && parameters.Count != parametersInfo.Length))
                 {
                     throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{parametersInfo.Length}] for [{callerContext}]");
                 }
