@@ -468,14 +468,16 @@ namespace Scriban.Runtime
             public bool IsReadOnly { get; set; }
         }
 
-        IEnumerator<KeyValuePair<string, object>> IEnumerable<KeyValuePair<string, object>>.GetEnumerator()
+        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            throw new NotImplementedException();
+            var list = store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value.Value))
+                    .ToList();
+            return list.GetEnumerator();
         }
 
-        public IEnumerator GetEnumerator()
+        IEnumerator IEnumerable.GetEnumerator()
         {
-            return store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value.Value)).GetEnumerator();
+            return GetEnumerator();
         }
 
         private class ObjectFunctionWrapper : IScriptCustomFunction
