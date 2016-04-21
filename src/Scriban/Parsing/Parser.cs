@@ -575,7 +575,11 @@ namespace Scriban.Parsing
             bool hasEnd;
             while (TryParseStatement(parentStatement, out statement, out hasEnd))
             {
-                blockStatement.Statements.Add(statement);
+                // statement may be null if we have parsed an else continuation of a previous block
+                if (statement != null)
+                {
+                    blockStatement.Statements.Add(statement);
+                }
                 if (hasEnd)
                 {
                     break;
