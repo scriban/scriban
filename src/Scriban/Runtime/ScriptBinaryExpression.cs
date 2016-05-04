@@ -1,6 +1,7 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
@@ -40,6 +41,12 @@ namespace Scriban.Runtime
                 {
                     context.Result = leftBoolValue || rightBoolValue;
                 }
+            }
+            else if (leftValue is IList || rightValue is IList)
+            {
+                // Special path for IList to allow custom binary expression
+                context.Result = ScriptArray.CustomOperator.EvaluateBinaryExpression(this, leftValue,
+                    rightValue);
             }
             else
             {
@@ -303,7 +310,7 @@ namespace Scriban.Runtime
 
         private object Calculate(ScriptBinaryOperator op, object leftValue, Type leftType, object rightValue, Type rightType)
         {
-            var customType = (leftValue ?? rightValue) as IScriptCustomType;
+            var customType = leftValue as IScriptCustomType ?? rightValue as IScriptCustomType;
             if (customType != null)
             {
                 return customType.EvaluateBinaryExpression(this, leftValue, rightValue);

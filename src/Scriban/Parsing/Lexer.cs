@@ -514,6 +514,12 @@ namespace Scriban.Parsing
                         NextChar();
                         break;
                     }
+                    if (c == '<')
+                    {
+                        token = new Token(TokenType.ShiftLeft, start, position);
+                        NextChar();
+                        break;
+                    }
                     token = new Token(TokenType.CompareLess, start, start);
                     break;
                 case '>':
@@ -521,6 +527,12 @@ namespace Scriban.Parsing
                     if (c == '=')
                     {
                         token = new Token(TokenType.CompareGreaterOrEqual, start, position);
+                        NextChar();
+                        break;
+                    }
+                    if (c == '>')
+                    {
+                        token = new Token(TokenType.ShiftRight, start, position);
                         NextChar();
                         break;
                     }

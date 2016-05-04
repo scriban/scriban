@@ -21,6 +21,8 @@ namespace Scriban.Parsing
             BinaryOperators.Add(TokenType.Plus, ScriptBinaryOperator.Add);
             BinaryOperators.Add(TokenType.Minus, ScriptBinaryOperator.Substract);
             BinaryOperators.Add(TokenType.Modulus, ScriptBinaryOperator.Modulus);
+            BinaryOperators.Add(TokenType.ShiftLeft, ScriptBinaryOperator.ShiftLeft);
+            BinaryOperators.Add(TokenType.ShiftRight, ScriptBinaryOperator.ShiftRight);
             BinaryOperators.Add(TokenType.EmptyCoalescing, ScriptBinaryOperator.EmptyCoalescing);
             BinaryOperators.Add(TokenType.And, ScriptBinaryOperator.And);
             BinaryOperators.Add(TokenType.Or, ScriptBinaryOperator.Or);
@@ -496,30 +498,33 @@ namespace Scriban.Parsing
             switch (op)
             {
                 case ScriptBinaryOperator.EmptyCoalescing:
-                    return 2;
+                    return 20;
+                case ScriptBinaryOperator.ShiftLeft:
+                case ScriptBinaryOperator.ShiftRight:
+                    return 25;
                 case ScriptBinaryOperator.Or:
-                    return 3;
+                    return 30;
                 case ScriptBinaryOperator.And:
-                    return 4;
+                    return 40;
                 case ScriptBinaryOperator.CompareEqual:
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return 5;
+                    return 50;
                 case ScriptBinaryOperator.CompareLess:
                 case ScriptBinaryOperator.CompareLessOrEqual:
                 case ScriptBinaryOperator.CompareGreater:
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return 6;
+                    return 60;
                 case ScriptBinaryOperator.Add:
                 case ScriptBinaryOperator.Substract:
-                    return 7;
+                    return 70;
                 case ScriptBinaryOperator.Multiply:
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
-                    return 8;
+                    return 80;
                 case ScriptBinaryOperator.RangeInclude:
                 case ScriptBinaryOperator.RangeExclude:
-                    return 9;
+                    return 90;
                 default:
                     return 0;
             }

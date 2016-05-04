@@ -21,6 +21,10 @@ namespace Scriban.Runtime
 
         Modulus,
 
+        ShiftLeft,
+
+        ShiftRight,
+
         RangeInclude,
 
         RangeExclude,

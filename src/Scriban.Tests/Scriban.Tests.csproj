@@ -132,6 +132,8 @@
     <Content Include="TestFiles\100-expressions\140-object-initializer-accessor2.txt" />
     <Content Include="TestFiles\100-expressions\140-object-initializer-error6.out.txt" />
     <Content Include="TestFiles\100-expressions\140-object-initializer-error6.txt" />
+    <Content Include="TestFiles\100-expressions\160-array-expression.out.txt" />
+    <Content Include="TestFiles\100-expressions\160-array-expression.txt" />
     <Content Include="TestFiles\100-expressions\150-range-expression-error1.out.txt" />
     <Content Include="TestFiles\100-expressions\150-range-expression-error1.txt" />
     <Content Include="TestFiles\100-expressions\150-range-expression.out.txt" />

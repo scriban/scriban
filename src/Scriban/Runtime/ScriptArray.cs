@@ -14,6 +14,8 @@ namespace Scriban.Runtime
     /// <seealso cref="System.Collections.IList" />
     public sealed class ScriptArray : IList<object>, IList
     {
+        internal static readonly IScriptCustomType CustomOperator = new ListCustomOperator();
+
         private readonly List<object> values;
 
         /// <summary>
@@ -143,6 +145,43 @@ namespace Scriban.Runtime
         void ICollection.CopyTo(Array array, int index)
         {
             ((ICollection)values).CopyTo(array, index);
+        }
+
+        private class ListCustomOperator : IScriptCustomType
+        {
+            bool IScriptCustomType.TryConvertTo(Type destinationType, out object value)
+            {
+                value = null;
+                return false;
+            }
+
+            object IScriptCustomType.EvaluateUnaryExpression(ScriptUnaryExpression expression)
+            {
+                throw new ScriptRuntimeException(expression.Span,
+                    $"Operator [{expression.Operator}] is not supported for an array");
+            }
+
+            object IScriptCustomType.EvaluateBinaryExpression(ScriptBinaryExpression expression, object left,
+                object right)
+            {
+                var listLeft = left as IList;
+                var listRight = right as IList;
+                if (expression.Operator == ScriptBinaryOperator.ShiftLeft && listLeft != null)
+                {
+                    listLeft.Add(right);
+                }
+                else if (expression.Operator == ScriptBinaryOperator.ShiftRight && listRight != null)
+                {
+                    listRight.Insert(0, left);
+                }
+                else
+                {
+                    throw new ScriptRuntimeException(expression.Span,
+                        $"Operator [{expression.Operator}] is not supported for an array");
+                }
+
+                return listLeft ?? listRight;
+            }
         }
     }
 }

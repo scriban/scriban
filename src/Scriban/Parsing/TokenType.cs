@@ -112,6 +112,12 @@ namespace Scriban.Parsing
         [TokenText("%")]
         Modulus,
 
+        [TokenText("<<")]
+        ShiftLeft,
+
+        [TokenText(">>")]
+        ShiftRight,
+
         [TokenText(",")]
         Comma,
 
