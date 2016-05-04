@@ -28,6 +28,7 @@ namespace Scriban.Runtime
             if (Operator == ScriptBinaryOperator.EmptyCoalescing)
             {
                 context.Result = leftValue ?? rightValue;
+                return;
             }
             else if (Operator == ScriptBinaryOperator.And || Operator == ScriptBinaryOperator.Or)
             {
@@ -41,17 +42,23 @@ namespace Scriban.Runtime
                 {
                     context.Result = leftBoolValue || rightBoolValue;
                 }
-            }
-            else if (leftValue is IList || rightValue is IList)
-            {
-                // Special path for IList to allow custom binary expression
-                context.Result = ScriptArray.CustomOperator.EvaluateBinaryExpression(this, leftValue,
-                    rightValue);
+
+                return;
             }
             else
             {
                 switch (Operator)
                 {
+                    case ScriptBinaryOperator.ShiftLeft:
+                    case ScriptBinaryOperator.ShiftRight:
+                        if (leftValue is IList || rightValue is IList)
+                        {
+                            // Special path for IList to allow custom binary expression
+                            context.Result = ScriptArray.CustomOperator.EvaluateBinaryExpression(this, leftValue,
+                                rightValue);
+                            return;
+                        }
+                        break;
                     case ScriptBinaryOperator.CompareEqual:
                     case ScriptBinaryOperator.CompareNotEqual:
                     case ScriptBinaryOperator.CompareGreater:
@@ -81,11 +88,11 @@ namespace Scriban.Runtime
                         {
                             context.Result = Calculate(Operator, leftValue, leftType, rightValue, rightType);
                         }
-                        break;
-                    default:
-                        throw new InvalidOperationException($"Operator [{Operator}] is not implemented");
+                        return;
                 }
             }
+
+            throw new ScriptRuntimeException(Span, $"Operator [{Operator.ToText()}] is not implemented for the left [{Left}] / right [{Right}]");
         }
 
         public override string ToString()
