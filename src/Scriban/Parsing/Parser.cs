@@ -370,7 +370,7 @@ namespace Scriban.Parsing
         {
             var withStatement = Open<ScriptWithStatement>();
             NextToken();
-            withStatement.Name = ExpectAndParseVariable(withStatement);
+            withStatement.Name = ExpectAndParseExpression(withStatement);
 
             if (ExpectEndOfStatement(withStatement))
             {

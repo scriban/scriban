@@ -2,10 +2,10 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 namespace Scriban.Runtime
 {
-    [ScriptSyntax("with statement", "while <variable> ... end")]
+    [ScriptSyntax("with statement", "with <variable> ... end")]
     public class ScriptWithStatement : ScriptStatement
     {
-        public ScriptVariable Name { get; set; }
+        public ScriptExpression Name { get; set; }
 
         public ScriptBlockStatement Body { get; set; }
 
