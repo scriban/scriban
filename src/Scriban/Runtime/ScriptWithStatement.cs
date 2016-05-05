@@ -14,7 +14,8 @@ namespace Scriban.Runtime
             var target = context.GetValue(Name);
             if (!(target is ScriptObject))
             {
-                throw new ScriptRuntimeException(Name.Span, $"Invalid variable used for with. Must be a ScriptObject instead of [{target?.GetType().Name}");
+                var targetName = target?.GetType().Name ?? "null";
+                throw new ScriptRuntimeException(Name.Span, $"Invalid target property [{Name}] used for [with] statement. Must be a ScriptObject instead of [{targetName}]");
             }
 
             context.PushGlobal((ScriptObject)target);

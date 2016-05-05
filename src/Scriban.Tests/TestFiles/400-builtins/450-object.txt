@@ -7,3 +7,6 @@
 {{ [1,2,3,4,5] | object.typeof }}
 {{ {} | object.typeof }}
 {{ object | object.typeof }}
+
+{{ { a: 1, b: 2} | object.values }}
+{{ { a: 1, b: 2} | object.keys }}

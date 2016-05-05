@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using Scriban.Runtime;
 
@@ -12,6 +13,32 @@ namespace Scriban.Helpers
     /// </summary>
     public static class ObjectFunctions
     {
+        public static IEnumerable<object> Keys(IDictionary<string, object> dictionary)
+        {
+            if (dictionary == null)
+            {
+                yield break;
+            }
+
+            foreach (var entry in dictionary)
+            {
+                yield return entry.Key;
+            }
+        }
+
+        public static IEnumerable<object> Values(IDictionary<string, object> dictionary)
+        {
+            if (dictionary == null)
+            {
+                yield break;
+            }
+
+            foreach (var entry in dictionary)
+            {
+                yield return entry.Value;
+            }
+        }
+
         public static string Typeof(object value)
         {
             if (value == null)

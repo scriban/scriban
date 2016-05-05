@@ -7,3 +7,6 @@ iterator
 array
 object
 object
+
+[1, 2]
+[a, b]
