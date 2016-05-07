@@ -75,6 +75,15 @@ namespace Scriban.Runtime
             values.Add(item);
         }
 
+        public void AddRange(IEnumerable<T> items)
+        {
+            if (items == null) throw new ArgumentNullException(nameof(items));
+            foreach (var item in items)
+            {
+                Add(item);
+            }
+        }
+
         int IList.Add(object value)
         {
             return ((IList)values).Add(value);
