@@ -12,7 +12,7 @@ namespace Scriban.Runtime
     /// </summary>
     /// <seealso cref="object" />
     /// <seealso cref="System.Collections.IList" />
-    public sealed class ScriptArray : IList<object>, IList, IScriptObject
+    public class ScriptArray : IList<object>, IList, IScriptObject
     {
         internal static readonly IScriptCustomType CustomOperator = new ListCustomOperator();
 
