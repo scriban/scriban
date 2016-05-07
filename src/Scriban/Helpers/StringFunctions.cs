@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -33,6 +34,33 @@ namespace Scriban.Helpers
 
             var builder = new StringBuilder(text);
             builder[0] = char.ToUpper(builder[0]);
+            return builder.ToString();
+        }
+
+        public static string Capitalizewords(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return string.Empty;
+            }
+
+            var builder = new StringBuilder(text.Length);
+            var previousSpace = true;
+            for (int i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (char.IsWhiteSpace(c))
+                {
+                    previousSpace = true;
+                }
+                else if (previousSpace && char.IsLetter(c))
+                {
+                    // TODO: Handle culture
+                    c = char.ToUpper(c);
+                    previousSpace = false;
+                }
+                builder.Append(c);
+            }
             return builder.ToString();
         }
 
