@@ -1,0 +1,66 @@
+// Copyright (c) Alexandre Mutel. All rights reserved.
+// Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
+namespace Scriban.Runtime
+{
+    /// <summary>
+    /// Base interface for a scriptable object.
+    /// </summary>
+    public interface IScriptObject
+    {
+        /// <summary>
+        /// Determines whether this object contains the specified member.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <returns><c>true</c> if this object contains the specified member; <c>false</c> otherwise</returns>
+        /// <exception cref="System.ArgumentNullException">If member is null</exception>
+        bool Contains(string member);
+
+        /// <summary>
+        /// Tries the get the value of the specified member.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <param name="value">The value.</param>
+        /// <returns><c>true</c> if the value was retrieved</returns>
+        bool TryGetValue(string member, out object value);
+
+        object this[string key] { get; set; }
+
+        /// <summary>
+        /// Determines whether the specified member is read-only.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <returns><c>true</c> if the specified member is read-only</returns>
+        bool IsReadOnly(string member);
+
+        /// <summary>
+        /// Tries to set the value and readonly state of the specified member.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
+        /// <returns><c>true</c> if the value could be set; <c>false</c> if a value already exist an is readonly</returns>
+        bool TrySetValue(string member, object value, bool readOnly);
+
+        /// <summary>
+        /// Sets the value and readonly state of the specified member. This method overrides previous readonly state.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
+        void SetValue(string member, object value, bool readOnly);
+
+        /// <summary>
+        /// Removes the specified member from this object.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <returns><c>true</c> if it was removed</returns>
+        bool Remove(string member);
+
+        /// <summary>
+        /// Sets to read only the specified member.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
+        void SetReadOnly(string member, bool readOnly);
+    }
+}

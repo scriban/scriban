@@ -1,0 +1,13 @@
+# Show hybrid array/object usage of an array with properties
+x1 = []
+x1.test = 5
+x1[0] = x1.test
+x1
+===
+{{
+# Show hybrid array/object usage of an array with properties
+x1 = []
+x1.test = 5
+x1[0] = x1.test
+x1
+}}

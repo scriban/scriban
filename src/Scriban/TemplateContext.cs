@@ -346,13 +346,13 @@ namespace Scriban
             IMemberAccessor accessor;
             if (!memberAccessors.TryGetValue(type, out accessor))
             {
-                if (target is IDictionary)
+                if (target is IScriptObject)
+                {
+                    accessor = ScriptObjectExtensions.Accessor;
+                }
+                else if (target is IDictionary)
                 {
                     accessor = DictionaryAccessor.Default;
-                }
-                else if (target is ScriptObject)
-                {
-                    accessor = ScriptObject.Accessor;
                 }
                 else
                 {

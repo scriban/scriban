@@ -12,11 +12,14 @@ namespace Scriban.Runtime
     /// </summary>
     /// <seealso cref="object" />
     /// <seealso cref="System.Collections.IList" />
-    public sealed class ScriptArray : IList<object>, IList
+    public sealed class ScriptArray : IList<object>, IList, IScriptObject
     {
         internal static readonly IScriptCustomType CustomOperator = new ListCustomOperator();
 
         private readonly List<object> values;
+
+        // Attached ScriptObject is only created if needed
+        private ScriptObject script;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptArray"/> class.
@@ -34,6 +37,8 @@ namespace Scriban.Runtime
         {
             values = new List<object>(capacity);
         }
+
+        public ScriptObject ScriptObject => script ?? (script = new ScriptObject());
 
         public int Count => values.Count;
 
@@ -182,6 +187,47 @@ namespace Scriban.Runtime
 
                 return listLeft ?? listRight;
             }
+        }
+
+        public bool Contains(string member)
+        {
+            return ScriptObject.Contains(member);
+        }
+
+        public bool TryGetValue(string member, out object value)
+        {
+            return ScriptObject.TryGetValue(member, out value);
+        }
+
+        object IScriptObject.this[string key]
+        {
+            get { return ScriptObject[key]; }
+            set { ScriptObject[key] = value; }
+        }
+
+        public bool IsReadOnly(string member)
+        {
+            return ScriptObject.IsReadOnly(member);
+        }
+
+        public bool TrySetValue(string member, object value, bool readOnly)
+        {
+            return ScriptObject.TrySetValue(member, value, readOnly);
+        }
+
+        public void SetValue(string member, object value, bool readOnly)
+        {
+            ScriptObject.SetValue(member, value, readOnly);
+        }
+
+        public bool Remove(string member)
+        {
+            return ScriptObject.Remove(member);
+        }
+
+        public void SetReadOnly(string member, bool readOnly)
+        {
+            ScriptObject.SetReadOnly(member, readOnly);
         }
     }
 }
