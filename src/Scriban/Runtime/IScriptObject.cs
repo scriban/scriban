@@ -33,15 +33,6 @@ namespace Scriban.Runtime
         bool IsReadOnly(string member);
 
         /// <summary>
-        /// Tries to set the value and readonly state of the specified member.
-        /// </summary>
-        /// <param name="member">The member.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        /// <returns><c>true</c> if the value could be set; <c>false</c> if a value already exist an is readonly</returns>
-        bool TrySetValue(string member, object value, bool readOnly);
-
-        /// <summary>
         /// Sets the value and readonly state of the specified member. This method overrides previous readonly state.
         /// </summary>
         /// <param name="member">The member.</param>

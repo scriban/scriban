@@ -211,11 +211,6 @@ namespace Scriban.Runtime
             return ScriptObject.IsReadOnly(member);
         }
 
-        public bool TrySetValue(string member, object value, bool readOnly)
-        {
-            return ScriptObject.TrySetValue(member, value, readOnly);
-        }
-
         public void SetValue(string member, object value, bool readOnly)
         {
             ScriptObject.SetValue(member, value, readOnly);

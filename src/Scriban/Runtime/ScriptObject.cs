@@ -125,27 +125,6 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
-        /// Tries to set the value and readonly state of the specified member.
-        /// </summary>
-        /// <param name="member">The member.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        /// <returns><c>true</c> if the value could be set; <c>false</c> if a value already exist an is readonly</returns>
-        public bool TrySetValue(string member, object value, bool readOnly)
-        {
-            InternalValue internalValue;
-            if (store.TryGetValue(member, out internalValue))
-            {
-                if (internalValue.IsReadOnly)
-                {
-                    return false;
-                }
-            }
-            store[member] = new InternalValue(value) {IsReadOnly = readOnly};
-            return true;
-        }
-
-        /// <summary>
         /// Sets the value and readonly state of the specified member. This method overrides previous readonly state.
         /// </summary>
         /// <param name="member">The member.</param>

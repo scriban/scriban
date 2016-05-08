@@ -45,6 +45,23 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
+        /// Tries to set the value and readonly state of the specified member.
+        /// </summary>
+        /// <param name="member">The member.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
+        /// <returns><c>true</c> if the value could be set; <c>false</c> if a value already exist an is readonly</returns>
+        public static bool TrySetValue(this IScriptObject @this, string member, object value, bool readOnly)
+        {
+            if (@this.IsReadOnly(member))
+            {
+                return false;
+            }
+            @this.SetValue(member, value, readOnly);
+            return true;
+        }
+
+        /// <summary>
         /// Imports the specified <see cref="ScriptObject"/> into this instance by copying the member values into this object.
         /// </summary>
         /// <param name="other">The other <see cref="ScriptObject"/>.</param>

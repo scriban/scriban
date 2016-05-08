@@ -20,7 +20,7 @@ namespace Scriban
     {
         private readonly Stack<ScriptObject> availableStores;
         internal readonly Stack<ScriptBlockStatement> BlockDelegates;
-        private readonly Stack<ScriptObject> globalStore;
+        private readonly Stack<IScriptObject> globalStore;
         private readonly Dictionary<Type, IListAccessor> listAccessors;
         private readonly Stack<ScriptObject> localStores;
         private readonly Stack<ScriptLoopStatementBase> loops;
@@ -50,7 +50,7 @@ namespace Scriban
             outputs = new Stack<StringBuilder>();
             outputs.Push(new StringBuilder());
 
-            globalStore = new Stack<ScriptObject>();
+            globalStore = new Stack<IScriptObject>();
             globalStore.Push(BuiltinObject);
 
             sourceFiles = new Stack<string>();
@@ -101,7 +101,7 @@ namespace Scriban
         /// <summary>
         /// Gets the current global <see cref="ScriptObject"/>.
         /// </summary>
-        public ScriptObject CurrentGlobal => globalStore.Peek();
+        public IScriptObject CurrentGlobal => globalStore.Peek();
 
         /// <summary>
         /// Gets the cached templates, used by the include function.
@@ -218,7 +218,7 @@ namespace Scriban
         /// </summary>
         /// <param name="scriptObject">The script object.</param>
         /// <exception cref="System.ArgumentNullException"></exception>
-        public void PushGlobal(ScriptObject scriptObject)
+        public void PushGlobal(IScriptObject scriptObject)
         {
             if (scriptObject == null) throw new ArgumentNullException(nameof(scriptObject));
             globalStore.Push(scriptObject);
@@ -230,7 +230,7 @@ namespace Scriban
         /// </summary>
         /// <returns>The previous model context</returns>
         /// <exception cref="System.InvalidOperationException">Unexpected PopGlobal() not matching a PushGlobal</exception>
-        public ScriptObject PopGlobal()
+        public IScriptObject PopGlobal()
         {
             if (globalStore.Count == 1)
             {
@@ -594,7 +594,7 @@ namespace Scriban
             return accessor;
         }
 
-        private IEnumerable<ScriptObject> GetStoreForSet(ScriptVariable variable)
+        private IEnumerable<IScriptObject> GetStoreForSet(ScriptVariable variable)
         {
             var scope = variable.Scope; 
             if (scope == ScriptVariableScope.Global)
