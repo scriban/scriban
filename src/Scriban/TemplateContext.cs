@@ -20,7 +20,7 @@ namespace Scriban
     {
         private readonly Stack<ScriptObject> availableStores;
         internal readonly Stack<ScriptBlockStatement> BlockDelegates;
-        private readonly Stack<IScriptObject> globalStore;
+        private readonly Stack<IScriptObject> globalStores;
         private readonly Dictionary<Type, IListAccessor> listAccessors;
         private readonly Stack<ScriptObject> localStores;
         private readonly Stack<ScriptLoopStatementBase> loops;
@@ -33,13 +33,19 @@ namespace Scriban
         private int loopStep = 0;
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateContext"/> class.
+        /// </summary>
+        public TemplateContext() : this(null)
+        {
+        }
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TemplateContext" /> class.
         /// </summary>
-        public TemplateContext()
+        /// <param name="builtin">The builtin object used to expose builtin functions, default is <see cref="GetDefaultBuiltinObject"/>.</param>
+        public TemplateContext(ScriptObject builtin)
         {
-            BuiltinObject = new ScriptObject();
-            BuiltinFunctions.Register(BuiltinObject);
-
+            BuiltinObject = builtin ?? GetDefaultBuiltinObject();
             EnableOutput = true;
             LoopLimit = 1000;
             RecursiveLimit = 100;
@@ -50,16 +56,13 @@ namespace Scriban
             outputs = new Stack<StringBuilder>();
             outputs.Push(new StringBuilder());
 
-            globalStore = new Stack<IScriptObject>();
-            globalStore.Push(BuiltinObject);
+            globalStores = new Stack<IScriptObject>();
+            localStores = new Stack<ScriptObject>();
+            loopStores = new Stack<ScriptObject>();
+            availableStores = new Stack<ScriptObject>();
 
             sourceFiles = new Stack<string>();
 
-            localStores = new Stack<ScriptObject>();
-            localStores.Push(new ScriptObject());
-
-            loopStores = new Stack<ScriptObject>();
-            availableStores = new Stack<ScriptObject>();
             memberAccessors = new Dictionary<Type, IMemberAccessor>();
             listAccessors = new Dictionary<Type, IListAccessor>();
             loops = new Stack<ScriptLoopStatementBase>();
@@ -72,6 +75,9 @@ namespace Scriban
             CachedTemplates = new Dictionary<string, Template>();
 
             Tags = new Dictionary<object, object>();
+
+            // Ensure that builtin is registered first
+            PushGlobal(BuiltinObject);
         }
 
         public ITemplateLoader TemplateLoader { get; set; }
@@ -101,7 +107,7 @@ namespace Scriban
         /// <summary>
         /// Gets the current global <see cref="ScriptObject"/>.
         /// </summary>
-        public IScriptObject CurrentGlobal => globalStore.Peek();
+        public IScriptObject CurrentGlobal => globalStores.Peek();
 
         /// <summary>
         /// Gets the cached templates, used by the include function.
@@ -221,7 +227,7 @@ namespace Scriban
         public void PushGlobal(IScriptObject scriptObject)
         {
             if (scriptObject == null) throw new ArgumentNullException(nameof(scriptObject));
-            globalStore.Push(scriptObject);
+            globalStores.Push(scriptObject);
             PushVariableScope(ScriptVariableScope.Local);
         }
 
@@ -232,11 +238,11 @@ namespace Scriban
         /// <exception cref="System.InvalidOperationException">Unexpected PopGlobal() not matching a PushGlobal</exception>
         public IScriptObject PopGlobal()
         {
-            if (globalStore.Count == 1)
+            if (globalStores.Count == 1)
             {
                 throw new InvalidOperationException("Unexpected PopGlobal() not matching a PushGlobal");
             }
-            var store = globalStore.Pop();
+            var store = globalStores.Pop();
             PopVariableScope(ScriptVariableScope.Local);
             return store;
         }
@@ -361,6 +367,17 @@ namespace Scriban
                 memberAccessors.Add(type, accessor);
             }
             return accessor;
+        }
+
+        /// <summary>
+        /// Gets a <see cref="ScriptObject"/> with all default builtins registered.
+        /// </summary>
+        /// <returns>A <see cref="ScriptObject"/> with all default builtins registered</returns>
+        public static ScriptObject GetDefaultBuiltinObject()
+        {
+            var builtinObject = new ScriptObject();
+            BuiltinFunctions.Register(builtinObject);
+            return builtinObject;
         }
 
         internal void EnterFunction(ScriptNode caller)
@@ -599,7 +616,7 @@ namespace Scriban
             var scope = variable.Scope; 
             if (scope == ScriptVariableScope.Global)
             {
-                foreach (var store in globalStore)
+                foreach (var store in globalStores)
                 {
                     yield return store;
                 }
