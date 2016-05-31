@@ -378,6 +378,7 @@ namespace Scriban.Parsing
                     break;
                 case '\r':
                     NextChar();
+                    // case of: \r\n
                     if (c == '\n')
                     {
                         token = new Token(TokenType.NewLine, start, position);
@@ -386,7 +387,8 @@ namespace Scriban.Parsing
                         ConsumeWhitespace(false);
                         break;
                     }
-                    token = new Token(TokenType.Invalid, start, start);
+                    // case of \r
+                    token = new Token(TokenType.NewLine, start, start);
                     // consume all remaining space including new lines
                     ConsumeWhitespace(false);
                     break;
@@ -760,10 +762,7 @@ namespace Scriban.Parsing
                             {
                                 end = position;
                                 NextChar();
-                                continue;
                             }
-
-                            AddError($"Unexpected character after \\r character [{c}]. Expecting \\n", position, position);
                             continue;
                         case '0':
                         case '\'':
