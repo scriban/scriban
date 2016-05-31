@@ -9,7 +9,7 @@
 {{[1,2,3,4] | array.remove_at 0 | array.add 5}}
 {{[1,2,3,4] | array.insert_at 1 9}}
 {{[1,2,3,4] | array.reverse }}
-{{[1,2,3,4] | array.remove_at (-1) }}
+{{[1,2,3,4] | array.remove_at (-1) # use parenthesis to avoid confusion with binary operator - }}
 {{1..5 | array.first}}
 {{1..5 | array.last}}
 {{1..5 | array.join ' | '}}
