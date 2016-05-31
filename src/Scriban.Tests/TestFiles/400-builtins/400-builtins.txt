@@ -2,7 +2,7 @@ List of all the builtin <array> functions:
 {{
 func dump_members
 	for member in $0 | array.map 'key' | array.sort
-		" " + member + "\r\n"
+		" " + member + "\n"
 	end
 end~}}
 {{dump_members array}}

@@ -35,11 +35,11 @@ end
 }}
 
 for y in [1,2,3,4]
-	(y-1) + " => [" + for.index + "] " + for.first + "," + for.last + "," + for.even + "," + for.odd + "\r\n"
+	(y-1) + " => [" + for.index + "] " + for.first + "," + for.last + "," + for.even + "," + for.odd + "\n"
 end
 ===
 {{
 for y in [1,2,3,4]
-	(y-1) + " => [" + for.index + "] " + for.first + "," + for.last + "," + for.even + "," + for.odd + "\r\n"
+	(y-1) + " => [" + for.index + "] " + for.first + "," + for.last + "," + for.even + "," + for.odd + "\n"
 end
 }}

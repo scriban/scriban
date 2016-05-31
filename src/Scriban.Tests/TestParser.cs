@@ -170,7 +170,7 @@ end
                     var message = template.Messages[i];
                     if (i > 0)
                     {
-                        result += "\r\n";
+                        result += "\n";
                     }
                     result += message;
                 }

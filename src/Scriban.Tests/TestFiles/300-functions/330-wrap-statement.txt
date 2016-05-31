@@ -16,6 +16,6 @@ func wrapped
 end
 
 wrap wrapped 10
-	$i + " -> This is inside the wrap!\r\n"
+	$i + " -> This is inside the wrap!\n"
 end
 }}

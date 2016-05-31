@@ -1,6 +1,6 @@
 This file use Unix \n end of line instead of windows
 This is a {{ "Hello \" World" }}
-This is a {{ "Hello\r\nWorld" }}
+This is a {{ "Hello\nWorld" }}
 This is a {{ 'Hello \' World' }}
 This is a the number {{ 1 }}
 This is a the long number {{ 100000000000 }}
