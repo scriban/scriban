@@ -1,4 +1,4 @@
-# scriban
+# scriban [![Build status](https://ci.appveyor.com/api/projects/status/ig5kv8r63bqjsd9a?svg=true)](https://ci.appveyor.com/project/xoofx/scriban)   [![NuGet](https://img.shields.io/nuget/v/Scriban.svg)](https://www.nuget.org/packages/Scriban/)
 
 Scriban is a fast, powerful and lightweight text templating language and engine for .NET
 
