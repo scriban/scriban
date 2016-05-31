@@ -1,0 +1,13 @@
+Evaluate <func> with anonymous do...end function parameter
+
+x = do
+  ret $0 + $1
+end
+x 1 2
+===
+{{
+x = do
+  ret $0 + $1
+end
+x 1 2
+}}

@@ -291,7 +291,7 @@ namespace Scriban.Parsing
                                         ExpectEndOfStatement(statement);
                                         break;
                                     case "func":
-                                        statement = ParseFunctionStatement();
+                                        statement = ParseFunctionStatement(false);
                                         break;
                                     case "ret":
                                         statement = ParseReturnStatement();
@@ -302,7 +302,6 @@ namespace Scriban.Parsing
                                     default:
                                         // Otherwise it is an expression statement
                                         statement = ParseExpressionStatement();
-                                        ExpectEndOfStatement(statement);
                                         break;
                                 }
                                 break;
@@ -409,12 +408,15 @@ namespace Scriban.Parsing
             return false;
         }
 
-        private ScriptFunction ParseFunctionStatement()
+        private ScriptFunction ParseFunctionStatement(bool isAnonymous)
         {
             var scriptFunction = Open<ScriptFunction>();
-            NextToken(); // skip func
+            NextToken(); // skip func or do
 
-            scriptFunction.Name = ExpectAndParseVariable(scriptFunction);
+            if (!isAnonymous)
+            {
+                scriptFunction.Name = ExpectAndParseVariable(scriptFunction);
+            }
             ExpectEndOfStatement(scriptFunction);
 
             scriptFunction.Body = ParseBlockStatement(scriptFunction);
@@ -490,6 +492,18 @@ namespace Scriban.Parsing
             LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of [{Current.Type}]" );
             return null;
         }
+
+
+        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ref bool hasAnonymousExpression, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null)
+        {
+            if (StartAsExpression())
+            {
+                return ParseExpression(parentNode, ref hasAnonymousExpression, parentExpression, newPrecedence);
+            }
+            LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of [{Current.Type}]");
+            return null;
+        }
+
 
         private ScriptConditionStatement ParseElseStatement()
         {
@@ -756,6 +770,7 @@ namespace Scriban.Parsing
                 case "capture":
                 case "ret":
                 case "wrap":
+                case "do":
                     return true;
             }
             return false;

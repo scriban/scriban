@@ -196,6 +196,12 @@
     <Content Include="TestFiles\200-statements\280-ret-statement2.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.out.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.txt" />
+    <Content Include="TestFiles\300-functions\320-func-anonymous2.out.txt" />
+    <Content Include="TestFiles\300-functions\320-func-anonymous2.txt" />
+    <Content Include="TestFiles\300-functions\320-func-anonymous1.out.txt" />
+    <Content Include="TestFiles\300-functions\320-func-anonymous1.txt" />
+    <Content Include="TestFiles\300-functions\320-func-anonymous.out.txt" />
+    <Content Include="TestFiles\300-functions\320-func-anonymous.txt" />
     <Content Include="TestFiles\300-functions\302-func-param-expands.out.txt" />
     <Content Include="TestFiles\300-functions\302-func-param-expands.txt" />
     <Content Include="TestFiles\300-functions\302-func-alias.out.txt" />

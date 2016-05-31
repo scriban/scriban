@@ -139,7 +139,7 @@ namespace Scriban.Helpers
 
             var builder = new StringBuilder();
             bool isFirstWord = true;
-            foreach (var word in text.Split(' '))
+            foreach (var word in Regex.Split(text, @"\s+"))
             {
                 if (count <= 0)
                 {

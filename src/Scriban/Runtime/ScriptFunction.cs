@@ -11,7 +11,10 @@ namespace Scriban.Runtime
 
         public override void Evaluate(TemplateContext context)
         {
-            context.SetValue(Name, this);
+            if (Name != null)
+            {
+                context.SetValue(Name, this);
+            }
         }
 
         public override string ToString()

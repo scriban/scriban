@@ -1,0 +1,11 @@
+Evaluate <func> with anonymous do...end function parameter
+
+func eval_bin
+	$[-1] 1 2
+end
+
+x = eval_bin do
+  ret $0 + $1
+end
+===
+3

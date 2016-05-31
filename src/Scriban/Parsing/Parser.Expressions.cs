@@ -59,7 +59,7 @@ namespace Scriban.Parsing
             return false;
         }
 
-        private ScriptExpression ParseUnaryExpression()
+        private ScriptExpression ParseUnaryExpression(ref bool hasAnonymousFunction)
         {
             // unit test: 113-unary.txt
             var unaryExpression = Open<ScriptUnaryExpression>();
@@ -87,11 +87,17 @@ namespace Scriban.Parsing
             var newPrecedence = GetOperatorPrecedence(unaryExpression.Operator);
             NextToken();
             // unit test: 115-unary-error1.txt
-            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence);
+            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, ref hasAnonymousFunction, null, newPrecedence);
             return Close(unaryExpression);
         }
 
         private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0)
+        {
+            bool hasAnonymousFunction = false;
+            return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence);
+        }
+
+        private ScriptExpression ParseExpression(ScriptNode parentNode, ref bool hasAnonymousFunction, ScriptExpression parentExpression = null, int precedence = 0)
         {
             int expressionCount = 0;
             expressionLevel++;
@@ -133,7 +139,7 @@ namespace Scriban.Parsing
                         leftOperand = ParseString();
                         break;
                     case TokenType.OpenParent:
-                        leftOperand = ParseParenthesis();
+                        leftOperand = ParseParenthesis(ref hasAnonymousFunction);
                         break;
                     case TokenType.OpenBrace:
                         leftOperand = ParseObjectInitializer();
@@ -146,7 +152,7 @@ namespace Scriban.Parsing
                     case TokenType.Arroba:
                     case TokenType.Plus:
                     case TokenType.Caret:
-                        leftOperand = ParseUnaryExpression();
+                        leftOperand = ParseUnaryExpression(ref hasAnonymousFunction);
                         break;
                 }
 
@@ -157,7 +163,12 @@ namespace Scriban.Parsing
                     return null;
                 }
 
-                while (true)
+                if (leftOperand is ScriptAnonymousFunction)
+                {
+                    hasAnonymousFunction = true;
+                }
+
+                while (!hasAnonymousFunction)
                 {
                     // Parse Member expression are expected to be followed only by an identifier
                     if (Current.Type == TokenType.Dot)
@@ -194,8 +205,7 @@ namespace Scriban.Parsing
                         var indexerExpression = Open<ScriptIndexerExpression>();
                         indexerExpression.Target = leftOperand;
                         // unit test: 130-indexer-accessor-error5.txt
-                        indexerExpression.Index = ExpectAndParseExpression(indexerExpression, functionCall, 0,
-                            $"Expecting <index_expression> instead of [{Current.Type}]");
+                        indexerExpression.Index = ExpectAndParseExpression(indexerExpression, ref hasAnonymousFunction, functionCall, 0, $"Expecting <index_expression> instead of [{Current.Type}]");
 
                         if (Current.Type != TokenType.CloseBracket)
                         {
@@ -224,7 +234,7 @@ namespace Scriban.Parsing
                         assignExpression.Target = leftOperand;
 
                         // unit test: 105-assign-error3.txt
-                        assignExpression.Value = ExpectAndParseExpression(assignExpression, parentExpression);
+                        assignExpression.Value = ExpectAndParseExpression(assignExpression, ref hasAnonymousFunction, parentExpression);
 
                         leftOperand = Close(assignExpression);
                         continue;
@@ -247,7 +257,7 @@ namespace Scriban.Parsing
                         NextToken(); // skip the operator
 
                         // unit test: 110-binary-simple-error1.txt
-                        binaryExpression.Right = ExpectAndParseExpression(binaryExpression,
+                        binaryExpression.Right = ExpectAndParseExpression(binaryExpression, ref hasAnonymousFunction,
                             functionCall ?? parentExpression, newPrecedence,
                             $"Expecting an <expression> to the right of the operator instead of [{Current.Type}]");
                         leftOperand = Close(binaryExpression);
@@ -293,7 +303,7 @@ namespace Scriban.Parsing
                         NextToken(); // skip |
 
                         // unit test: 310-func-pipe-error1.txt
-                        pipeCall.To = ExpectAndParseExpression(pipeCall);
+                        pipeCall.To = ExpectAndParseExpression(pipeCall, ref hasAnonymousFunction);
                         return Close(pipeCall);
                     }
 
@@ -464,12 +474,12 @@ namespace Scriban.Parsing
             return Close(scriptObject);
         }
 
-        private ScriptExpression ParseParenthesis()
+        private ScriptExpression ParseParenthesis(ref bool hasAnonymousFunction)
         {
             // unit test: 106-parenthesis.txt
             var expression = Open<ScriptNestedExpression>();
             NextToken(); // Skip (
-            expression.Expression = ExpectAndParseExpression(expression);
+            expression.Expression = ExpectAndParseExpression(expression, ref hasAnonymousFunction);
 
             if (Current.Type == TokenType.CloseParent)
             {

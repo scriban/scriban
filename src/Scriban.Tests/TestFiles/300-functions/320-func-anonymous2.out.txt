@@ -1,0 +1,11 @@
+Evaluate <func> with anonymous do...end function parameter
+
+func eval_test
+	$[-1] ^($ | array.remove_at (-1))
+end
+
+x = eval_test "1" "2" "3" "4" do
+  ret $0 + $1 + $2 + $3
+end
+===
+1234

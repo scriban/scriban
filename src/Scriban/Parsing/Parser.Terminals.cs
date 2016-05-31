@@ -16,6 +16,7 @@ namespace Scriban.Parsing
             var text = GetAsText(currentToken);
 
             // Return ScriptLiteral for null, true, false
+            // Return ScriptAnonymousFunction 
             switch (text)
             {
                 case "null":
@@ -32,6 +33,10 @@ namespace Scriban.Parsing
                     falseValue.Value = false;
                     NextToken();
                     return Close(falseValue);
+                case "do":
+                    var functionExp = Open<ScriptAnonymousFunction>();
+                    functionExp.Function = ParseFunctionStatement(true);
+                    return Close(functionExp);
             }
 
             NextToken();
