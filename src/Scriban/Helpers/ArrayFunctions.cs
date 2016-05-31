@@ -122,6 +122,12 @@ namespace Scriban.Helpers
                 return null;
             }
 
+            // If index is negative, start from the end
+            if (index < 0)
+            {
+                index = list.Count + index;
+            }
+
             if (index >= 0 && index < list.Count)
             {
                 list.RemoveAt(index);

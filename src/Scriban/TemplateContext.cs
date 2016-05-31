@@ -556,13 +556,23 @@ namespace Scriban
                                     else
                                     {
                                         int i = ScriptValueConverter.ToInt(nextIndexer.Index.Span, index);
-                                        if (setter)
+
+                                        // Allow negative index from the end of the array
+                                        if (i < 0)
                                         {
-                                            accessor.SetValue(targetObject, i, valueToSet);
+                                            i = accessor.GetLength(targetObject) + i;
                                         }
-                                        else
+
+                                        if (i >= 0)
                                         {
-                                            value = accessor.GetValue(targetObject, i);
+                                            if (setter)
+                                            {
+                                                accessor.SetValue(targetObject, i, valueToSet);
+                                            }
+                                            else
+                                            {
+                                                value = accessor.GetValue(targetObject, i);
+                                            }
                                         }
                                     }
                                 }
