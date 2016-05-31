@@ -118,7 +118,6 @@ namespace Scriban.Parsing
 
             var startOffset = rawStatement.Span.Start.Offset;
             var endOffset = rawStatement.Span.End.Offset;
-            bool expectNewLine = false;
             for (int i = startOffset; i <= endOffset; i++)
             {
                 var c = rawStatement.Text[i];
@@ -128,17 +127,18 @@ namespace Scriban.Parsing
                 }
                 if (c == '\r')
                 {
-                    expectNewLine = true;
+                    if (i + 1 <= endOffset && rawStatement.Text[i+1] == '\n')
+                    {
+                        rawStatement.Span.Start = new TextPosition(i + 2, rawStatement.Span.Start.Line + 1, 0);
+                    }
+                    break;
                 }
-                else if (expectNewLine && c == '\n')
+
+                if (c == '\n')
                 {
                     rawStatement.Span.Start = new TextPosition(i + 1, rawStatement.Span.Start.Line + 1, 0);
-                    break;
                 }
-                else
-                {
-                    break;
-                }
+                break;
             }
         }
 

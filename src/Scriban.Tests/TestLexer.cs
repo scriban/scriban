@@ -33,10 +33,7 @@ namespace Scriban.Tests
         [Test]
         public void ParseRawWithNewLines()
         {
-            var text = @"te
-
-
-";
+            var text = "te\r\n\r\n\r\n";
             var tokens = ParseTokens(text);
             Assert.AreEqual(new List<Token>
             {
@@ -78,8 +75,7 @@ namespace Scriban.Tests
         public void ParseCodeEnterAndCodeExitWithNewLineAndTextInRaw()
         {
             // In this case a raw token is generated
-            var text = @"{{}}
-a";
+            var text = "{{}}\r\na";
             var tokens = ParseTokens(text);
             Assert.AreEqual(new List<Token>
             {
@@ -112,10 +108,7 @@ a";
         public void ParseCodeEnterAndCodeExitWithNewLines()
         {
             // A New line is always generated only for a first statement (even empty), but subsequent empty white-space/new-lines are skipped
-            var text = @"{{ 
-
-
-}}";
+            var text = "{{ \r\n\r\n\r\n}}";
             var tokens = ParseTokens(text);
             Assert.AreEqual(new List<Token>
             {
