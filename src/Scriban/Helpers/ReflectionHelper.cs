@@ -67,6 +67,14 @@ namespace Scriban.Helpers
         {
             return type.DeclaredMethods;
         }
+        public static MethodInfo GetGetMethod(this PropertyInfo prop)
+        {
+            return prop.GetMethod;
+        }
+        public static MethodInfo GetSetMethod(this PropertyInfo prop)
+        {
+            return prop.SetMethod;
+        }
 #endif
     }
 }

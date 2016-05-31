@@ -1,41 +1,34 @@
 ﻿{
   "title": "Scriban",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "authors": [ "Alexandre Mutel" ],
-  "owners": [ "Alexandre Mutel" ],
-  "licenseUrl": "https://github.com/lunet-io/scriban/blob/master/license.txt",
-  "projectUrl": "https://github.com/lunet-io/scriban",
-  "iconUrl": "https://raw.githubusercontent.com/lunet-io/scriban/master/scriban.png",
-  "requireLicenseAcceptance": false,
-  "description": "A text templating language and engine for .NET",
+  "description": "A fast and powerful text templating language and engine for .NET",
   "copyright": "Alexandre Mutel",
   "language": "en-US",
+  "packOptions": {
+    "owners": [ "Alexandre Mutel" ],
+    "licenseUrl": "https://github.com/lunet-io/scriban/blob/master/license.txt",
+    "projectUrl": "https://github.com/lunet-io/scriban",
+    "iconUrl": "https://raw.githubusercontent.com/lunet-io/scriban/master/scriban.png",
+    "requireLicenseAcceptance": false,
+    "tags": [ "templating handlebars liquid" ]
+  },
   "configurations": {
     "Debug": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "DEBUG", "TRACE" ]
       }
     },
     "Release": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "RELEASE", "TRACE" ],
         "optimize": true
       }
     }
   },
   "frameworks": {
-    "net20": {
-      "compilationOptions": {
-        "define": [ "NETPRE45" ]
-      },
-      "frameworkAssemblies": {
-        "mscorlib": "",
-        "System": "",
-        "System.Core": ""
-      }
-    },
     "net35": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "NETPRE45" ]
       },
       "frameworkAssemblies": {
@@ -45,7 +38,7 @@
       }
     },
     ".NETPortable,Version=v4.0,Profile=Profile328": {
-      "compilationOptions": {
+      "buildOptions": {
         "define": [ "NETPRE45" ]
       },
       "frameworkAssemblies": {
@@ -54,20 +47,12 @@
         "System.Core": ""
       }
     },
-    "dotnet5.4": {
-      "compilationOptions": {
+    "netstandard1.1": {
+      "buildOptions": {
         "define": [ "CORE" ]
       },
       "dependencies": {
-        "Microsoft.NETCore.Platforms": "1.0.1-beta-23516",
-        "System.Runtime.Extensions": "4.0.10",
-        "System.Reflection": "4.0.0",
-        "System.Collections": "4.0.10",
-        "System.Linq": "4.0.0",
-        "System.Text.RegularExpressions": "4.0.0",
-        "System.Threading": "4.0.0",
-        "System.Runtime": "4.0.20",
-        "Microsoft.CSharp": "4.0.0"
+        "NETStandard.Library": "1.5.0-rc2-24027"
       }
     }
   }
