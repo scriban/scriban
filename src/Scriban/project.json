@@ -1,6 +1,6 @@
 ﻿{
   "title": "Scriban",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "authors": [ "Alexandre Mutel" ],
   "description": "A fast and powerful text templating language and engine for .NET",
   "copyright": "Alexandre Mutel",
@@ -10,6 +10,7 @@
     "licenseUrl": "https://github.com/lunet-io/scriban/blob/master/license.txt",
     "projectUrl": "https://github.com/lunet-io/scriban",
     "iconUrl": "https://raw.githubusercontent.com/lunet-io/scriban/master/scriban.png",
+    "releaseNotes": ">0.2.0\n- Update to latest NETStandard.Library 1.6.0",
     "requireLicenseAcceptance": false,
     "tags": [ "templating handlebars liquid" ]
   },
@@ -52,8 +53,8 @@
         "define": [ "CORE" ]
       },
       "dependencies": {
-        "NETStandard.Library": "1.5.0-rc2-24027"
-      }
+       "NETStandard.Library": "1.6.0"
+       }
     }
   }
 }
