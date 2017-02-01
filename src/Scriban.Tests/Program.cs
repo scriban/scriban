@@ -3,6 +3,7 @@
 using System;
 using NUnit.Framework;
 using Scriban.Parsing;
+using Scriban.Runtime;
 
 namespace Scriban.Tests
 {

@@ -1,5 +1,7 @@
 {{ "test" | string.capitalize }}
+{{ "Test" | string.capitalize }}
 {{ "TeSt" | string.downcase }}
+{{ "teSt" | string.downcase }}
 {{ "This & is a @@^^&%%%%% value" | string.handleize }}
 {{ "    test" | string.lstrip }}
 {{ 5 | string.pluralize 'item' 'items' }}

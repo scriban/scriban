@@ -29,7 +29,7 @@ namespace Scriban.Helpers
         {
             if (string.IsNullOrEmpty(text) || char.IsUpper(text[0]))
             {
-                return string.Empty;
+                return text ?? string.Empty;
             }
 
             var builder = new StringBuilder(text);
