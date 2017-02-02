@@ -356,11 +356,7 @@ namespace Scriban
                 {
                     accessor = ScriptObjectExtensions.Accessor;
                 }
-                else if (target is IDictionary)
-                {
-                    accessor = DictionaryAccessor.Default;
-                }
-                else
+                else if (!DictionaryAccessor.TryGet(type, out accessor))
                 {
                     accessor = new TypedMemberAccessor(type, MemberRenamer);
                 }

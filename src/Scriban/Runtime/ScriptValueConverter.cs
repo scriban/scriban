@@ -71,7 +71,14 @@ namespace Scriban.Runtime
                 }
             }
 
-            // Dump an enumeration
+            // If the value is formattable, use the formatter directly
+            var fomattable = value as IFormattable;
+            if (fomattable != null)
+            {
+                return fomattable.ToString();
+            }
+
+            // If we have an enumeration, we dump it
             var enumerable = value as IEnumerable;
             if (enumerable != null)
             {
@@ -91,6 +98,7 @@ namespace Scriban.Runtime
                 return result.ToString();
             }
 
+            // Else just end-up trying to emit the ToString
             return value.ToString();
         }
 
