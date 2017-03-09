@@ -1,20 +1,25 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
+
 using System;
 using System.Collections;
-using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using Scriban.Runtime;
 
-namespace Scriban.Helpers
+namespace Scriban.Runtime
 {
     /// <summary>
     /// String functions available through the object 'string' in scriban.
     /// </summary>
-    public static class StringFunctions
+    public class StringFunctions : ScriptObject
     {
+        public StringFunctions()
+        {
+            // We need to handle "slice"/"truncate" differently as we have an optional parameters
+            this.SetValue("slice", new DelegateCustomFunction(Slice), true);
+        }
+
         public static string Upcase(string text)
         {
             return text?.ToUpperInvariant();
@@ -198,24 +203,6 @@ namespace Scriban.Helpers
             builder.Append(text.Substring(indexOfMatch + match.Length));
 
             return builder.ToString();
-        }
-
-        /// <summary>
-        /// Registers the builtins provided by this class to the specified <see cref="ScriptObject"/>.
-        /// </summary>
-        /// <param name="builtins">The builtins object.</param>
-        /// <exception cref="System.ArgumentNullException">If builtins is null</exception>
-        [ScriptMemberIgnore]
-        public static void Register(ScriptObject builtins)
-        {
-            if (builtins == null) throw new ArgumentNullException(nameof(builtins));
-
-            var stringObject = ScriptObject.From(typeof(StringFunctions));
-
-            // We need to handle "slice"/"truncate" differently as we have an optional parameters
-            stringObject.SetValue("slice", new DelegateCustomFunction(Slice), true);
-
-            builtins.SetValue("string", stringObject, true);
         }
 
         public static bool StartsWith(string start, string text)

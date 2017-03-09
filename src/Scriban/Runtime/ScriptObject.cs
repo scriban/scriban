@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Scriban.Helpers;
 using System.Reflection;
+using System.Text;
+using Scriban.Parsing;
 
 namespace Scriban.Runtime
 {
@@ -20,11 +22,24 @@ namespace Scriban.Runtime
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptObject"/> class.
         /// </summary>
-        public ScriptObject()
+        public ScriptObject() : this(true)
         {
-            store = new Dictionary<string, InternalValue>();
         }
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptObject"/> class.
+        /// </summary>
+        /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
+        public ScriptObject(bool autoImportStaticsFromThisType)
+        {
+            store = new Dictionary<string, InternalValue>();
+
+            // Only import if we are asked for and we have a derived type
+            if (autoImportStaticsFromThisType || this.GetType() != typeof(ScriptObject))
+            {
+                this.Import(this.GetType());
+            }
+        }
 
         /// <summary>
         /// Clears all members stored in this object.
@@ -170,6 +185,32 @@ namespace Scriban.Runtime
             store[member] = internalValue;
         }
 
+        /// <summary>
+        /// Returns a <see cref="System.String" /> that represents this instance.
+        /// </summary>
+        /// <param name="span">The span.</param>
+        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
+        public virtual string ToString(SourceSpan span)
+        {
+            var result = new StringBuilder();
+            result.Append("{");
+            bool isFirst = true;
+            foreach (var item in this)
+            {
+                if (!isFirst)
+                {
+                    result.Append(", ");
+                }
+                var keyPair = (KeyValuePair<string, object>)item;
+                result.Append(keyPair.Key);
+                result.Append(": ");
+                result.Append(ScriptValueConverter.ToString(span, keyPair.Value));
+                isFirst = false;
+            }
+            result.Append("}");
+            return result.ToString();
+        }
+
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
             var list = store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value.Value))
@@ -194,6 +235,7 @@ namespace Scriban.Runtime
         /// <li>If <paramref name="obj"/> is a plain object, this method will import the public fields/properties of the specified object into the <see cref="ScriptObject"/>.</li>
         /// </ul>
         /// </remarks>
+        [ScriptMemberIgnore]
         public static ScriptObject From(object obj)
         {
             var scriptObject = new ScriptObject();
@@ -206,6 +248,7 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="obj">The object.</param>
         /// <returns><c>true</c> if the object is importable; <c>false</c> otherwise</returns>
+        [ScriptMemberIgnore]
         public static bool IsImportable(object obj)
         {
             if (obj == null)

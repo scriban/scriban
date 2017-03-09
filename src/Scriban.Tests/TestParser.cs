@@ -2,11 +2,13 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using NUnit.Framework;
+using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 
@@ -39,6 +41,24 @@ namespace Scriban.Tests
         private const string RelativeBasePath = @"..\..\TestFiles";
         private const string InputFilePattern = "*.txt";
         private const string OutputEndFileExtension = ".out.txt";
+
+        [Test]
+        public void TestDateNow()
+        {
+            // default is dd MM yyyy
+            var dateNow = DateTime.Now.ToString("dd MMM yyyy", CultureInfo.CurrentCulture);
+            var template = ParseTemplate(@"{{ date.now }}");
+            var result = template.Render();
+            Assert.AreEqual(dateNow, result);
+
+            template = ParseTemplate(@"{{ date.format = '%Y'; date.now }}");
+            result = template.Render();
+            Assert.AreEqual(DateTime.Now.ToString("yyyy", CultureInfo.CurrentCulture), result);
+
+            template = ParseTemplate(@"{{ date.format = '%Y'; date.now | date.add_years 1 }}");
+            result = template.Render();
+            Assert.AreEqual(DateTime.Now.AddYears(1).ToString("yyyy", CultureInfo.CurrentCulture), result);
+        }
 
         [Test]
         public void TestHelloWorld()

@@ -39,23 +39,7 @@ namespace Scriban.Runtime
             var scriptObject = value as ScriptObject;
             if (scriptObject != null)
             {
-                var result = new StringBuilder();
-                result.Append("{");
-                bool isFirst = true;
-                foreach (var item in scriptObject)
-                {
-                    if (!isFirst)
-                    {
-                        result.Append(", ");
-                    }
-                    var keyPair = (KeyValuePair<string, object>) item;
-                    result.Append(keyPair.Key);
-                    result.Append(": ");
-                    result.Append(ToString(span, keyPair.Value));
-                    isFirst = false;
-                }
-                result.Append("}");
-                return result.ToString();
+                return scriptObject.ToString(span);
             }
 
             var type = value.GetType();

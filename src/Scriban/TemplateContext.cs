@@ -371,8 +371,7 @@ namespace Scriban
         /// <returns>A <see cref="ScriptObject"/> with all default builtins registered</returns>
         public static ScriptObject GetDefaultBuiltinObject()
         {
-            var builtinObject = new ScriptObject();
-            BuiltinFunctions.Register(builtinObject);
+            var builtinObject = new BuiltinFunctions();
             return builtinObject;
         }
 

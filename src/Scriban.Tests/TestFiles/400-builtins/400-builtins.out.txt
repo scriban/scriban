@@ -46,6 +46,8 @@ List of all the builtin <date> functions:
  add_months
  add_seconds
  add_years
+ default_format
+ format
  now
  parse
  to_string

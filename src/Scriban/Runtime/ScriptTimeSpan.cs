@@ -1,9 +1,9 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
-using System;
-using Scriban.Runtime;
 
-namespace Scriban.Helpers
+using System;
+
+namespace Scriban.Runtime
 {
     /// <summary>
     /// Represents a timespan equivalent to <see cref="TimeSpan"/>.
@@ -22,8 +22,6 @@ namespace Scriban.Helpers
         {
             this.value = value;
         }
-
-        public static TimeSpan Zero => TimeSpan.Zero;
 
         public int Days => value.Days;
 
@@ -45,37 +43,6 @@ namespace Scriban.Helpers
 
         public double TotalMilliseconds => value.TotalMilliseconds;
 
-
-        public static ScriptTimeSpan FromDays(double days)
-        {
-            return TimeSpan.FromDays(days);
-        }
-
-        public static ScriptTimeSpan FromHours(double hours)
-        {
-            return TimeSpan.FromHours(hours);
-        }
-
-        public static ScriptTimeSpan FromMinutes(double minutes)
-        {
-            return TimeSpan.FromMinutes(minutes);
-        }
-
-        public static ScriptTimeSpan FromSeconds(double seconds)
-        {
-            return TimeSpan.FromSeconds(seconds);
-        }
-
-        public static ScriptTimeSpan FromMilliseconds(double milli)
-        {
-            return TimeSpan.FromMilliseconds(milli);
-        }
-
-        public static ScriptTimeSpan Parse(string text)
-        {
-            return TimeSpan.Parse(text);
-        }
-
         [ScriptMemberIgnore]
         public static implicit operator ScriptTimeSpan(TimeSpan timeSpan)
         {
@@ -86,13 +53,6 @@ namespace Scriban.Helpers
         public static implicit operator TimeSpan(ScriptTimeSpan timeSpan)
         {
             return timeSpan.value;
-        }
-
-        [ScriptMemberIgnore]
-        public static void Register(ScriptObject builtins)
-        {
-            if (builtins == null) throw new ArgumentNullException(nameof(builtins));
-            builtins.SetValue("timespan", ScriptObject.From(typeof(ScriptTimeSpan)), true);
         }
 
         bool IScriptCustomType.TryConvertTo(Type destinationType, out object outValue)
@@ -173,7 +133,7 @@ namespace Scriban.Helpers
             switch (expression.Operator)
             {
                 case ScriptBinaryOperator.Add:
-                    return new ScriptDate((DateTime)right + left.value);
+                    return new ScriptDate(right.Global, right.Value + left.value);
             }
 
             throw new ScriptRuntimeException(expression.Span, $"Operator [{expression.Operator}] is not supported for between <timespan> and <date>");

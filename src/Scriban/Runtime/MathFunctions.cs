@@ -1,15 +1,20 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
-using System;
-using Scriban.Runtime;
 
-namespace Scriban.Helpers
+using System;
+
+namespace Scriban.Runtime
 {
     /// <summary>
     /// Math functions available through the object 'math' in scriban.
     /// </summary>
-    public static class MathFunctions
+    public class MathFunctions : ScriptObject
     {
+        public MathFunctions()
+        {
+            SetValue("round", new DelegateCustomFunction(Round), true);
+        }
+
         public static double Ceil(double value)
         {
             return Math.Ceiling(value);
@@ -24,21 +29,6 @@ namespace Scriban.Helpers
         public static object Round(int precision, double value)
         {
             return Math.Round(value, precision);
-        }
-
-        /// <summary>
-        /// Registers the builtins provided by this class to the specified <see cref="ScriptObject"/>.
-        /// </summary>
-        /// <param name="builtins">The builtins object.</param>
-        /// <exception cref="System.ArgumentNullException">If builtins is null</exception>
-        [ScriptMemberIgnore]
-        public static void Register(ScriptObject builtins)
-        {
-            if (builtins == null) throw new ArgumentNullException(nameof(builtins));
-            var mathObject = ScriptObject.From(typeof(MathFunctions));
-            mathObject.SetValue("round", new DelegateCustomFunction(Round), true);
-
-            builtins.SetValue("math", mathObject, true);
         }
 
         private static object Round(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
