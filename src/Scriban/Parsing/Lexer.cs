@@ -593,6 +593,9 @@ namespace Scriban.Parsing
                 case '\'':
                     ReadString();
                     break;
+                case '`':
+                    ReadVerbatimString();
+                    break;
                 case '\0':
                     token = Token.Eof;
                     break;
@@ -842,6 +845,40 @@ namespace Scriban.Parsing
             }
 
             token = new Token(TokenType.String, start, end);
+        }
+
+        private void ReadVerbatimString()
+        {
+            var start = position;
+            var end = position;
+            char startChar = c;
+            NextChar(); // Skip `
+            while (true)
+            {
+                if (c == '\0')
+                {
+                    AddError($"Unexpected end of file while parsing a string not terminated by a {startChar}", end, end);
+                    return;
+                }
+                else if (c == startChar)
+                {
+                    end = position;
+                    NextChar(); // Do we have an escape?
+                    if (c != startChar)
+                    {
+                        break;
+                    }
+                    end = position;
+                    NextChar();
+                }
+                else
+                {
+                    end = position;
+                    NextChar();
+                }
+            }
+
+            token = new Token(TokenType.VerbatimString, start, end);
         }
 
         private void ReadComment()

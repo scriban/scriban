@@ -46,6 +46,11 @@ namespace Scriban.Parsing
         /// </summary>
         String,
 
+        /// <summary>
+        /// A verbatim string
+        /// </summary>
+        VerbatimString,
+
         [TokenText(";")]
         SemiColon,
 

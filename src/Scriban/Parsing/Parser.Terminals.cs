@@ -267,6 +267,54 @@ namespace Scriban.Parsing
             return Close(literal);
         }
 
+        private ScriptLiteral ParseVerbatimString()
+        {
+            var literal = Open<ScriptLiteral>();
+            var text = lexer.Text;
+
+            StringBuilder builder = null;
+
+            // startOffset start at the first character (`a` in the string `abc`)
+            var startOffset = Current.Start.Offset + 1;
+            // endOffset is at the last character (`c` in the string `abc`)
+            var endOffset = Current.End.Offset - 1;
+
+            int offset = startOffset;
+            while (true)
+            {
+                // Go to the next escape (the lexer verified that there was a following `)
+                var nextOffset = text.IndexOf("`", offset, endOffset - offset + 1, StringComparison.OrdinalIgnoreCase);
+                if (nextOffset < 0)
+                {
+                    break;
+                }
+                if (builder == null)
+                {
+                    builder = new StringBuilder(endOffset - startOffset + 1);
+                }
+                builder.Append(text.Substring(offset, nextOffset - offset + 1));
+                // Skip the escape ``
+                offset = nextOffset + 2;
+            }
+            if (builder != null)
+            {
+                var count = endOffset - offset + 1;
+                if (count > 0)
+                {
+                    builder.Append(text.Substring(offset, count));
+                }
+                literal.Value = builder.ToString();
+            }
+            else
+            {
+                literal.Value = text.Substring(offset, endOffset - offset + 1);
+            }
+
+            NextToken();
+            return Close(literal);
+        }
+
+
         private static string ConvertFromUtf32(int utf32)
         {
             if (utf32 < 65536)

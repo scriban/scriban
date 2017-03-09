@@ -109,19 +109,28 @@ comment ## }}
 
 ### 3.1 Strings
 
-A string in scriban `{{ "Hello String" }}` is similar to a javascript string, enclosed by double quotes `"..."` or single quotes `'...'`. The difference is that scriban strings support multilines (character `\n` inside a string)
+Scriban supports two types of strings:
 
-A string supports the following escape characters:
-
-- `\'` single quote
-- `\"` double quote
-- `\\` backslash
-- `\n` new line
-- `\r` carriage return
-- `\t` tab
-- `\b` backspace
-- `\f` form feed
-- `\uxxxx` where xxxx is a unicode hexa code number `0000` to `ffff` 
+- **regular strings** enclosed by double quotes `"..."` or simple quotes `'...'`. Regular strings supports multiline and will interpret the following escape sequences:
+  - `\'` single quote
+  - `\"` double quote
+  - `\\` backslash
+  - `\n` new line
+  - `\r` carriage return
+  - `\t` tab
+  - `\b` backspace
+  - `\f` form feed
+  - `\uxxxx` where xxxx is a unicode hexa code number `0000` to `ffff` 
+- **verbatim strings** enclosed by backstick quotes `` `...` ``. They are, for example, useful to use with for regex patterns :
+  ``` 
+  {{ "this is a text" | regex.split `\s+` }}
+  ``` 
+  
+  will output:
+  
+  ``` 
+  [this, is, a, test]
+  ``` 
 
 ### 3.2 Numbers
 

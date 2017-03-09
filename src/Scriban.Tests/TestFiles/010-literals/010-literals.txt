@@ -2,6 +2,11 @@ This file use Unix \n end of line instead of windows
 This is a {{ "Hello \" World" }}
 This is a {{ "Hello\nWorld" }}
 This is a {{ 'Hello \' World' }}
+This is a {{ `Verbatim string` }}
+This is a {{ `Verbatim `` string` }}
+This is a {{ ```` }}
+This is a {{ `0``` }}
+This is a {{ ```1` }}
 This is a the number {{ 1 }}
 This is a the long number {{ 100000000000 }}
 This is a the float {{ 2.5 }}

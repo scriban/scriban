@@ -45,6 +45,7 @@ namespace Scriban.Parsing
                 case TokenType.Integer:
                 case TokenType.Float:
                 case TokenType.String:
+                case TokenType.VerbatimString:
                 case TokenType.OpenParent:
                 case TokenType.OpenBrace:
                 case TokenType.OpenBracket:
@@ -137,6 +138,9 @@ namespace Scriban.Parsing
                         break;
                     case TokenType.String:
                         leftOperand = ParseString();
+                        break;
+                    case TokenType.VerbatimString:
+                        leftOperand = ParseVerbatimString();
                         break;
                     case TokenType.OpenParent:
                         leftOperand = ParseParenthesis(ref hasAnonymousFunction);
