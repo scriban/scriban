@@ -1,0 +1,6 @@
+this is a text
+[this, is, a, text]
+\.\.\.
+...
+[is a text123, is, text123]
+[]

@@ -65,3 +65,10 @@ List of all the builtin <object> functions:
  keys
  typeof
  values
+
+List of all the builtin <regex> functions:
+ escape
+ match
+ replace
+ split
+ unescape

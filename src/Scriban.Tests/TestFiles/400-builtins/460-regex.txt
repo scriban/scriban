@@ -1,0 +1,6 @@
+{{ "this is a teeext" | regex.replace "te+xt" "text" }}
+{{ "this   is  \t   a  \t   text" | regex.split `\s+` }}
+{{ "..." | regex.escape }}
+{{ `\.\.\.` | regex.unescape }}
+{{ "this is a text123" | regex.match `(\w+) a ([a-z]+\d+)` }}
+{{ regex.match `regex pattern` "string not matched" }}

@@ -16,3 +16,5 @@ List of all the builtin <timespan> functions:
 {{dump_members timespan}}
 List of all the builtin <object> functions:
 {{dump_members object}}
+List of all the builtin <regex> functions:
+{{dump_members regex}}

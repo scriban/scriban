@@ -14,6 +14,7 @@ namespace Scriban.Runtime
             SetValue("array", new ArrayFunctions(), true);
             SetValue("string", new StringFunctions(), true);
             SetValue("math", new MathFunctions(), true);
+            SetValue("regex", new RegexFunctions(), true);
         }
     }
 }

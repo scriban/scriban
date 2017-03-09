@@ -285,5 +285,13 @@ namespace Scriban.Runtime
         public ScriptArray(int capacity) : base(capacity)
         {
         }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptArray"/> class.
+        /// </summary>
+        /// <param name="values">The values.</param>
+        public ScriptArray(IEnumerable<object> values) : base(values)
+        {
+        }
     }
 }

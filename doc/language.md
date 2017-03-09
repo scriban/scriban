@@ -1138,7 +1138,70 @@ Will output:
 This is a test truncated...
 ```
 
-### 10.4 Object
+### 10.4 Regex
+
+
+#### `regex.replace <pattern> <replacement> <input>`
+
+Allows to replace a string by matching with a regex pattern. The replacement string can use replacement groups `\1` if the pattern was using groups.
+
+``` 
+{{ "this is a teeeeeeeeeeext" | regex.replace "te+xt" "text" }}
+``` 
+
+Will output:
+
+``` 
+this is a text
+``` 
+
+#### `regex.split <pattern> <input>`
+
+Split an input string using a regex pattern.
+
+``` 
+{{ "this   is  \t   a  \t   text" | regex.split `\s+` }}
+``` 
+
+Will output:
+
+``` 
+[this, is, a, text]
+``` 
+
+#### `regex.match <pattern> <input>`
+
+Matches a string against a regex pattern and returns an array of strings matched. The first element in the array is the full string being matched and above the groups matched.
+
+```
+{{ "this is a text123" | regex.match `(\w+) a ([a-z]+\d+)` }}
+```
+
+Will output:
+
+``` 
+[is a text123, is, text123]
+``` 
+
+If no match are found, an empty array `[]` is returned.
+
+#### `regex.escape <input>` and `regex.unescape <input>` 
+
+Respectively escape and unescape a regex pattern.
+
+```
+{{ "..." | regex.escape }}
+{{ `\.\.\.` | regex.unescape }}
+```
+
+Will output:
+
+```
+\.\.\.
+...
+```
+
+### 10.5 Object
 
 #### `typeof <value>`
 
@@ -1170,7 +1233,7 @@ object
 object
 ```
 
-### 10.4 Datetime
+### 10.6 Datetime
 
 #### Datetime object
 
@@ -1297,7 +1360,7 @@ will output:
 5 Jan 2016
 ```
 
-### 10.5 Timespan
+### 10.7 Timespan
 
 #### Timespan object
 
