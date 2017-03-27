@@ -12,13 +12,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.Tests", "Scriban.Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{061866E2-005C-4D13-A338-EA464BBEC60F}"
 	ProjectSection(SolutionItems) = preProject
+		global.json = global.json
 		..\doc\language.md = ..\doc\language.md
 		..\license.txt = ..\license.txt
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{0D9F08E4-1834-40A5-BC82-65D9B04B123A}"
-	ProjectSection(SolutionItems) = preProject
-		Scriban\global.json = Scriban\global.json
 	EndProjectSection
 EndProject
 Global
