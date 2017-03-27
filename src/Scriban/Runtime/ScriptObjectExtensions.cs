@@ -256,12 +256,11 @@ namespace Scriban.Runtime
                 return ((IScriptObject)target).Contains(member);
             }
 
-            public object GetValue(object target, string member)
+            public bool TryGetValue(object target, string member, out object value)
             {
-                object value;
-                ((IScriptObject)target).TryGetValue(member, out value);
-                return value;
+                return ((IScriptObject)target).TryGetValue(member, out value);
             }
+
             public bool HasReadonly => true;
 
             public bool TrySetValue(object target, string member, object value)

@@ -225,8 +225,26 @@ namespace Scriban.Runtime
                     var leftAccessor = context.GetMemberAccessor(a);
                     var rightAccessor = context.GetMemberAccessor(b);
 
-                    return Comparer<object>.Default.Compare(leftAccessor?.GetValue(a, member),
-                        rightAccessor?.GetValue(b, member));
+
+                    object leftValue = null;
+                    object rightValue = null;
+                    if (leftAccessor != null)
+                    {
+                        if (!leftAccessor.TryGetValue(a, member, out leftValue))
+                        {
+                            context.TryGetMember?.Invoke(a, member, out leftValue);
+                        }
+                    }
+
+                    if (rightAccessor != null)
+                    {
+                        if (!rightAccessor.TryGetValue(b, member, out rightValue))
+                        {
+                            context.TryGetMember?.Invoke(b, member, out rightValue);
+                        }
+                    }
+
+                    return Comparer<object>.Default.Compare(leftValue, rightValue);
                 });
             }
 
@@ -255,7 +273,10 @@ namespace Scriban.Runtime
                 var itemAccessor = context.GetMemberAccessor(item);
                 if (itemAccessor.HasMember(item, member))
                 {
-                    yield return itemAccessor.GetValue(item, member);
+                    object value = null;
+                    itemAccessor.TryGetValue(item, member, out value);
+
+                    yield return value;
                 }
             }
         }

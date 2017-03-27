@@ -33,6 +33,15 @@ namespace Scriban
         private int loopStep = 0;
 
         /// <summary>
+        /// A delegate used to late binding <see cref="TryGetMember"/>
+        /// </summary>
+        /// <param name="target">The target.</param>
+        /// <param name="member">The member.</param>
+        /// <param name="value">The value.</param>
+        /// <returns><c>true</c> if the member on the target , <c>false</c> otherwise.</returns>
+        public delegate bool TryGetMemberDelegate(object target, string member, out object value);
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="TemplateContext"/> class.
         /// </summary>
         public TemplateContext() : this(null)
@@ -118,6 +127,16 @@ namespace Scriban
         /// Gets the current source file.
         /// </summary>
         public string CurrentSourceFile => sourceFiles.Peek();
+
+        /// <summary>
+        /// Gets or sets a callback function that is called when a variable is being resolved and was not found from any scopes.
+        /// </summary>
+        public Func<ScriptVariable, object> TryGetVariable { get; set; }
+
+        /// <summary>
+        /// Gets or sets the fallback accessor when accessing a member of an object and the member was not found, this accessor will be called.
+        /// </summary>
+        public TryGetMemberDelegate TryGetMember { get; set; }
 
         /// <summary>
         /// Allows to store data within this context.
@@ -453,6 +472,12 @@ namespace Scriban
                     return value;
                 }
             }
+
+            if (TryGetVariable != null)
+            {
+                value = TryGetVariable(variable);
+            }
+
             return value;
         }
 
@@ -502,7 +527,10 @@ namespace Scriban
                     }
                     else
                     {
-                        value = accessor.GetValue(targetObject, memberName);
+                        if (!accessor.TryGetValue(targetObject, memberName, out value))
+                        {
+                            TryGetMember?.Invoke(targetObject, memberName, out value);
+                        }
                     }
                 }
                 else
@@ -538,7 +566,10 @@ namespace Scriban
                                     }
                                     else
                                     {
-                                        value = accessor.GetValue(targetObject, indexAsString);
+                                        if (!accessor.TryGetValue(targetObject, indexAsString, out value))
+                                        {
+                                            TryGetMember?.Invoke(targetObject, indexAsString, out value);
+                                        }
                                     }
                                 }
                                 else

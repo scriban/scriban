@@ -12,6 +12,55 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestDynamicVariable()
+        {
+            var template = Template.Parse("Test with a dynamic {{ myvar }}");
+
+            var context = new TemplateContext
+            {
+                TryGetVariable = variable =>
+                {
+                    Assert.AreEqual("myvar", variable.Name);
+                    return "yes";
+                }
+            };
+
+            context.Evaluate(template.Page);
+            var result = context.Output.ToString();
+
+            TextAssert.AreEqual("Test with a dynamic yes", result);
+        }
+
+        [Test]
+        public void TestDynamicMember()
+        {
+            var template = Template.Parse("Test with a dynamic {{ a.myvar }}");
+
+            var globalObject = new ScriptObject();
+            globalObject.SetValue("a", new ScriptObject(), true);
+
+            var context = new TemplateContext
+            {
+                TryGetMember = (object target, string member, out object value) =>
+                {
+                    value = null;
+                    if (member == "myvar")
+                    {
+                        value = "yes";
+                        return true;
+                    }
+                    return false;
+                }
+            };
+
+            context.PushGlobal(globalObject);
+            context.Evaluate(template.Page);
+            var result = context.Output.ToString();
+
+            TextAssert.AreEqual("Test with a dynamic yes", result);
+        }
+
+        [Test]
         public void TestJson()
         {
             // issue: https://github.com/lunet-io/scriban/issues/11

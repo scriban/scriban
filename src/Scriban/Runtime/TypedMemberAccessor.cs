@@ -28,23 +28,26 @@ namespace Scriban.Runtime
             return members.ContainsKey(member);
         }
 
-        public object GetValue(object target, string member)
+        public bool TryGetValue(object target, string member, out object value)
         {
+            value = null;
             MemberInfo memberAccessor;
             if (members.TryGetValue(member, out memberAccessor))
             {
                 var fieldAccessor = memberAccessor as FieldInfo;
                 if (fieldAccessor != null)
                 {
-                    return fieldAccessor.GetValue(target);
+                    value = fieldAccessor.GetValue(target);
+                    return true;
                 }
                 else
                 {
                     var propertyAccessor = (PropertyInfo) memberAccessor;
-                    return propertyAccessor.GetValue(target);
+                    value = propertyAccessor.GetValue(target);
+                    return true;
                 }
             }
-            return null;
+            return false;
         }
 
         public bool HasReadonly => false;

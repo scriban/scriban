@@ -10,7 +10,7 @@ namespace Scriban.Runtime
     {
         bool HasMember(object target, string member);
 
-        object GetValue(object target, string member);
+        bool TryGetValue(object target, string member, out object value);
 
         bool HasReadonly { get; }
 

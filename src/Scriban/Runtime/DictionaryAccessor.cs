@@ -19,9 +19,10 @@ namespace Scriban.Runtime
             return false;
         }
 
-        public object GetValue(object target, string member)
+        public bool TryGetValue(object target, string member, out object value)
         {
-            return null;
+            value = null;
+            return false;
         }
 
         public bool HasReadonly => false;
@@ -64,14 +65,20 @@ namespace Scriban.Runtime
             return true;
         }
 
-        public bool HasMember(object value, string member)
+        public bool HasMember(object target, string member)
         {
-            return ((IDictionary) value).Contains(member);
+            return ((IDictionary) target).Contains(member);
         }
 
-        public object GetValue(object target, string member)
+        public bool TryGetValue(object target, string member, out object value)
         {
-            return ((IDictionary) target)[member];
+            value = null;
+            if (((IDictionary) target).Contains(member))
+            {
+                value = ((IDictionary)target)[member];
+                return true;
+            }
+            return false;
         }
 
         public bool HasReadonly => false;
@@ -98,9 +105,12 @@ namespace Scriban.Runtime
             return ((IDictionary<TKey, TValue>) value).ContainsKey(TransformToKey(member));
         }
 
-        public object GetValue(object target, string member)
+        public bool TryGetValue(object target, string member, out object value)
         {
-            return ((IDictionary<TKey, TValue>)target)[TransformToKey(member)];
+            TValue tvalue;
+            var result = ((IDictionary<TKey, TValue>) target).TryGetValue(TransformToKey(member), out tvalue);
+            value = tvalue;
+            return result;
         }
 
         public bool HasReadonly => false;
