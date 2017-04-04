@@ -7,7 +7,7 @@ using Scriban.Helpers;
 
 namespace Scriban.Parsing
 {
-    internal static class TokenTypeExtensions
+    public static class TokenTypeExtensions
     {
         private static readonly Dictionary<TokenType, string> TokenTexts = new Dictionary<TokenType, string>();
 

@@ -1,0 +1,65 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Description>A fast and powerful text templating language and engine for .NET</Description>
+    <Copyright>Alexandre Mutel</Copyright>
+    <AssemblyTitle>Scriban</AssemblyTitle>
+    <NeutralLanguage>en-US</NeutralLanguage>
+    <VersionPrefix>0.3.1</VersionPrefix>
+    <Authors>Alexandre Mutel</Authors>
+    <TargetFrameworks>net35;portable-net40+sl5+win8+wpa81+wp8;netstandard1.1</TargetFrameworks>
+    <AssemblyName>Scriban</AssemblyName>
+    <PackageId>Scriban</PackageId>
+    <PackageTags>templating;handlebars;liquid</PackageTags>
+    <PackageReleaseNotes>
+&gt; 0.3.1
+ - Rewrite support for frontmatter to allow usage of +++ instead of code block {{...}}
+&gt; 0.3.0
+ - Add support date.format (global date default format)
+ - Add support for verbatim string escaped by backsticks `...`
+ - Add support for regex functions (regex.split, regex.replace, regex.match)
+&gt; 0.2.2
+ - Add support for accessing generic dictionary
+&gt; 0.2.1
+ - Fix issue with string.capitalize returning an empty string when the string is already capitalized.
+&gt; 0.2.0
+- Update to latest NETStandard.Library 1.6.0</PackageReleaseNotes>
+    <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/scriban.png</PackageIconUrl>
+    <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/lunet-io/scriban/blob/master/license.txt</PackageLicenseUrl>
+    <NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.1' ">1.6.0</NetStandardImplicitPackageVersion>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net35' ">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'portable-net40+sl5+win8+wpa81+wp8' ">
+    <Reference Include="mscorlib" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+  </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' ">
+    <DefineConstants>$(DefineConstants);NETPRE45</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
+    <DefineConstants>$(DefineConstants);CORE</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TargetFramework)' == 'portable-net40+sl5+win8+wpa81+wp8'">
+    <DefineConstants>$(DefineConstants);NETPRE45</DefineConstants>
+    <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
+
+</Project>
