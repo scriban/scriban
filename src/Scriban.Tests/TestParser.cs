@@ -51,14 +51,16 @@ namespace Scriban.Tests
         public void TestFrontMatter()
         {
             var options = new LexerOptions() {Mode = ScriptMode.FrontMatterAndContent};
-            var template = ParseTemplate(@"+++
+            var input = @"+++
 variable = 1
 name = 'yes'
 +++
 This is after the frontmatter: {{ name }}
 {{
 variable + 1
-}}", options);
+}}";
+            input = input.Replace("\r\n", "\n");
+            var template = ParseTemplate(input, options);
 
             // Make sure that we have a front matter
             Assert.NotNull(template.Page.FrontMatter);
@@ -72,8 +74,7 @@ variable + 1
             // Evaluate page-content
             context.Evaluate(template.Page);
             var pageResult = context.Output.ToString();
-            Assert.AreEqual(@"This is after the frontmatter: yes
-2", pageResult);
+            TextAssert.AreEqual("This is after the frontmatter: yes\n2", pageResult);
         }
 
 
@@ -90,6 +91,8 @@ This is after the frontmatter: {{ name }}
 {{
 variable + 1
 }}";
+            input = input.Replace("\r\n", "\n");
+
             var lexer = new Lexer(input, null, new LexerOptions() { Mode = ScriptMode.FrontMatterOnly });
             var parser = new Parser(lexer, options);
 
@@ -102,8 +105,8 @@ variable + 1
 
             // Check that the parser finished parsing on the first code exit }}
             // and hasn't tried to run the lexer on the remaining text
-            Assert.AreEqual(new TextPosition(33, 3, 0), parser.CurrentSpan.Start);
-            Assert.AreEqual(new TextPosition(37, 3, 4), parser.CurrentSpan.End);
+            Assert.AreEqual(new TextPosition(30, 3, 0), parser.CurrentSpan.Start);
+            Assert.AreEqual(new TextPosition(33, 3, 3), parser.CurrentSpan.End);
 
             var startPositionAfterFrontMatter = parser.CurrentSpan.End.NextLine();
 
@@ -127,8 +130,7 @@ variable + 1
             Assert.False(parser.HasErrors);
             context.Evaluate(page);
             var pageResult = context.Output.ToString();
-            Assert.AreEqual(@"This is after the frontmatter: yes
-2", pageResult);
+            TextAssert.AreEqual("This is after the frontmatter: yes\n2", pageResult);
         }
 
         [Test]
