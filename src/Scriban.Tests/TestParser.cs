@@ -50,11 +50,11 @@ namespace Scriban.Tests
         [Test]
         public void TestFrontMatter()
         {
-            var options = new ParserOptions() {Mode = ScriptMode.FrontMatter};
-            var template = ParseTemplate(@"{{ 
+            var options = new LexerOptions() {Mode = ScriptMode.FrontMatterAndContent};
+            var template = ParseTemplate(@"+++
 variable = 1
 name = 'yes'
-}}
++++
 This is after the frontmatter: {{ name }}
 {{
 variable + 1
@@ -76,10 +76,65 @@ variable + 1
 2", pageResult);
         }
 
+
+        [Test]
+        public void TestFrontMatterOnly()
+        {
+            var options = new ParserOptions();
+
+            var input = @"+++
+variable = 1
+name = 'yes'
++++
+This is after the frontmatter: {{ name }}
+{{
+variable + 1
+}}";
+            var lexer = new Lexer(input, null, new LexerOptions() { Mode = ScriptMode.FrontMatterOnly });
+            var parser = new Parser(lexer, options);
+
+            var page = parser.Run();
+            foreach (var message in parser.Messages)
+            {
+                Console.WriteLine(message);
+            }
+            Assert.False(parser.HasErrors);
+
+            // Check that the parser finished parsing on the first code exit }}
+            // and hasn't tried to run the lexer on the remaining text
+            Assert.AreEqual(new TextPosition(33, 3, 0), parser.CurrentSpan.Start);
+            Assert.AreEqual(new TextPosition(37, 3, 4), parser.CurrentSpan.End);
+
+            var startPositionAfterFrontMatter = parser.CurrentSpan.End.NextLine();
+
+            // Make sure that we have a front matter
+            Assert.NotNull(page.FrontMatter);
+            Assert.AreEqual(0, page.Statements.Count);
+
+            var context = new TemplateContext();
+
+            // Evaluate front-matter
+            var frontResult = context.Evaluate(page.FrontMatter);
+            Assert.Null(frontResult);
+
+            lexer = new Lexer(input, null, new LexerOptions() { StartPosition =  startPositionAfterFrontMatter });
+            parser = new Parser(lexer);
+            page = parser.Run();
+            foreach (var message in parser.Messages)
+            {
+                Console.WriteLine(message);
+            }
+            Assert.False(parser.HasErrors);
+            context.Evaluate(page);
+            var pageResult = context.Output.ToString();
+            Assert.AreEqual(@"This is after the frontmatter: yes
+2", pageResult);
+        }
+
         [Test]
         public void TestScriptOnly()
         {
-            var options = new ParserOptions() { Mode = ScriptMode.ScriptOnly };
+            var options = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
             var template = ParseTemplate(@"
 variable = 1
 name = 'yes'
@@ -101,9 +156,9 @@ name = 'yes'
             Assert.AreEqual(1, value);
         }
 
-        private static Template ParseTemplate(string text, ParserOptions options = null)
+        private static Template ParseTemplate(string text, LexerOptions lexerOptions = default(LexerOptions), ParserOptions parserOptions = null)
         {
-            var template = Template.Parse(text, "text", options);
+            var template = Template.Parse(text, "text", parserOptions, lexerOptions);
             foreach (var message in template.Messages)
             {
                 Console.WriteLine(message);

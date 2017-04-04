@@ -6,7 +6,9 @@ namespace Scriban.Parsing
     {
         Default,
 
-        FrontMatter,
+        FrontMatterOnly,
+
+        FrontMatterAndContent,
 
         ScriptOnly,
     }

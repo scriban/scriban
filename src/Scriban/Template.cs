@@ -12,11 +12,13 @@ namespace Scriban
     /// </summary>
     public class Template
     {
-        private readonly ParserOptions options;
+        private readonly ParserOptions parserOptions;
+        private readonly LexerOptions lexerOptions;
 
-        private Template(ParserOptions options, string sourceFilePath)
+        private Template(ParserOptions parserOptions, LexerOptions lexerOptions, string sourceFilePath)
         {
-            this.options = options == null ? new ParserOptions() : options.Clone();
+            this.parserOptions = parserOptions == null ? new ParserOptions() : parserOptions.Clone();
+            this.lexerOptions = lexerOptions;
             Messages = new List<LogMessage>();
             this.SourceFilePath = sourceFilePath;
         }
@@ -46,11 +48,11 @@ namespace Scriban
         /// </summary>
         /// <param name="text">The scripting text.</param>
         /// <param name="sourceFilePath">The source file path. Optional, used for better error reporting if the source file has a location on the disk</param>
-        /// <param name="options">The templating parsing options.</param>
+        /// <param name="parserOptions">The templating parsing parserOptions.</param>
         /// <returns>A template</returns>
-        public static Template Parse(string text, string sourceFilePath = null, ParserOptions options = null)
+        public static Template Parse(string text, string sourceFilePath = null, ParserOptions parserOptions = null, LexerOptions lexerOptions = default(LexerOptions))
         {
-            var template = new Template(options, sourceFilePath);
+            var template = new Template(parserOptions, lexerOptions, sourceFilePath);
             template.ParseInternal(text, sourceFilePath);
             return template;
         }
@@ -69,7 +71,7 @@ namespace Scriban
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Messages> property for more details");
 
-            // Make sure that we are using the same options
+            // Make sure that we are using the same parserOptions
             if (SourceFilePath != null)
             {
                 context.PushSourceFile(SourceFilePath);
@@ -126,8 +128,8 @@ namespace Scriban
                 return;
             }
 
-            var lexer = new Lexer(text, sourceFilePath, options.Mode == ScriptMode.ScriptOnly);
-            var parser = new Parser(lexer, options);
+            var lexer = new Lexer(text, sourceFilePath, lexerOptions);
+            var parser = new Parser(lexer, parserOptions);
 
             Page = parser.Run();
 

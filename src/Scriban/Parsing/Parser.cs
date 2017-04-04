@@ -19,6 +19,7 @@ namespace Scriban.Parsing
         private Token token;
         private bool inCodeSection = false;
         private int blockLevel;
+        private bool inFrontMatter = false;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -34,7 +35,7 @@ namespace Scriban.Parsing
             Messages = new List<LogMessage>();
 
             Options = options ?? new ParserOptions();
-            CurrentParsingMode = Options.Mode;
+            CurrentParsingMode = lexer.Options.Mode;
 
             Blocks = new Stack<ScriptNode>();
 
@@ -55,7 +56,7 @@ namespace Scriban.Parsing
 
         private Token Previous => previousToken;
 
-        private SourceSpan CurrentSpan => GetSpanForToken(Current);
+        public SourceSpan CurrentSpan => GetSpanForToken(Current);
 
         private ScriptMode CurrentParsingMode { get; set; }
 
@@ -66,30 +67,46 @@ namespace Scriban.Parsing
             blockLevel = 0;
             Blocks.Clear();
 
-            ScriptBlockStatement frontMatter = null;
-
-            switch (CurrentParsingMode)
+            var page = Open<ScriptPage>();
+            var parsingMode = CurrentParsingMode;
+            switch (parsingMode)
             {
-                case ScriptMode.FrontMatter:
-                    if (Current.Type != TokenType.CodeEnter)
+                case ScriptMode.FrontMatterAndContent:
+                case ScriptMode.FrontMatterOnly:
+                    if (Current.Type != TokenType.FrontMatterMarker)
                     {
-                        LogError($"When [{CurrentParsingMode}] is enabled, expecting a {{ at the beginning of the text");
+                        LogError($"When [{CurrentParsingMode}] is enabled, expecting a `{lexer.Options.FrontMatterMarker}` at the beginning of the text instead of `{Current.GetText(lexer.Text)}`");
                         return null;
                     }
+
+                    inFrontMatter = true;
+                    inCodeSection = true;
+
+                    // Skip the frontmatter marker
+                    NextToken();
+
                     // Parse the front matter
-                    frontMatter = ParseBlockStatement(null);
+                    page.FrontMatter = ParseBlockStatement(null);
+
+                    // We should not be in a frontmatter after parsing the statements
+                    if (inFrontMatter)
+                    {
+                        LogError($"End of frontmatter `{lexer.Options.FrontMatterMarker}` not found");
+                    }
+
+                    if (parsingMode == ScriptMode.FrontMatterOnly)
+                    {
+                        return page;
+                    }
                     break;
                 case ScriptMode.ScriptOnly:
                     inCodeSection = true;
                     break;
             }
 
-            var page = Open<ScriptPage>();
             ParseBlockStatement(page);
 
-            // Store the frontMatter if any
-            page.FrontMatter = frontMatter;
-            if (frontMatter != null)
+            if (page.FrontMatter != null)
             {
                 FixRawStatementAfterFrontMatter(page);
             }
@@ -173,6 +190,33 @@ namespace Scriban.Parsing
                     NextToken();
                     goto continueParsing;
 
+                case TokenType.FrontMatterMarker:
+                    if (inFrontMatter)
+                    {
+                        inFrontMatter = false;
+                        inCodeSection = false;
+                        // When we expect to parse only the front matter, don't try to tokenize the following text
+                        // Keep the current token as the code exit of the front matter
+                        if (CurrentParsingMode != ScriptMode.FrontMatterOnly)
+                        {
+                            NextToken();
+                        }
+
+                        if (CurrentParsingMode == ScriptMode.FrontMatterAndContent || CurrentParsingMode == ScriptMode.FrontMatterOnly)
+                        {
+                            // Once the FrontMatter has been parsed, we can switch to default parsing mode.
+
+                            CurrentParsingMode = ScriptMode.Default;
+                            nextStatement = false;
+                        }
+                    }
+                    else
+                    {
+                        LogError($"Unexpected frontmatter marker `{lexer.Options.FrontMatterMarker}` while not inside a frontmatter");
+                        NextToken();
+                    }
+                    break;
+
                 case TokenType.CodeExit:
                     if (!inCodeSection)
                     {
@@ -185,15 +229,6 @@ namespace Scriban.Parsing
 
                     inCodeSection = false;
                     NextToken();
-
-                    if (CurrentParsingMode == ScriptMode.FrontMatter)
-                    {
-                        // Once the FrontMatter has been parsed, we can switch to default parsing mode.
-                        
-                        CurrentParsingMode = ScriptMode.Default;
-                        nextStatement = false;
-                        break;
-                    }
                     goto continueParsing;
 
                 default:

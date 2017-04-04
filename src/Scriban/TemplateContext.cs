@@ -93,6 +93,8 @@ namespace Scriban
 
         public ParserOptions TemplateLoaderParserOptions { get; set; }
 
+        public LexerOptions TemplateLoaderLexerOptions { get; set; }
+
         public IMemberRenamer MemberRenamer { get; set; }
 
         public int LoopLimit { get; set; }

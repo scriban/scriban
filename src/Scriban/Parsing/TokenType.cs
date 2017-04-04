@@ -7,6 +7,10 @@ namespace Scriban.Parsing
     /// </summary>
     public enum TokenType
     {
+        Invalid,
+
+        FrontMatterMarker,
+
         [TokenText("{{")]
         CodeEnter,
 
@@ -149,8 +153,6 @@ namespace Scriban.Parsing
         OpenBracket,
         [TokenText("]")]
         CloseBracket,
-
-        Invalid,
 
         Eof,
     }

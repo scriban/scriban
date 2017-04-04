@@ -13,7 +13,7 @@ namespace Scriban.Runtime
     /// </summary>
     public class ObjectFunctions : ScriptObject
     {
-        public static IEnumerable<object> Keys(IDictionary<string, object> dictionary)
+        public new static IEnumerable<object> Keys(IDictionary<string, object> dictionary)
         {
             if (dictionary == null)
             {
@@ -26,7 +26,7 @@ namespace Scriban.Runtime
             }
         }
 
-        public static IEnumerable<object> Values(IDictionary<string, object> dictionary)
+        public new static IEnumerable<object> Values(IDictionary<string, object> dictionary)
         {
             if (dictionary == null)
             {

@@ -73,12 +73,13 @@ namespace Scriban.Runtime
                 // Clone parser options
                 var parserOptions = context.TemplateLoaderParserOptions.Clone();
 
+                var lexerOptions = context.TemplateLoaderLexerOptions;
                 // Parse include in default modes (while top page can be using front matter)
-                parserOptions.Mode = parserOptions.Mode == ScriptMode.ScriptOnly
+                lexerOptions.Mode = lexerOptions.Mode == ScriptMode.ScriptOnly
                     ? ScriptMode.ScriptOnly
                     : ScriptMode.Default;
 
-                template = Template.Parse(templateText, templateFilePath, parserOptions);
+                template = Template.Parse(templateText, templateFilePath, parserOptions, lexerOptions);
 
                 // If the template has any errors, throw an exception
                 if (template.HasErrors)

@@ -7,12 +7,9 @@ namespace Scriban.Parsing
         public ParserOptions()
         {
             StatementDepthLimit = 100;
-            Mode = ScriptMode.Default;
         }
 
         public int StatementDepthLimit { get; set; }
-
-        public ScriptMode Mode { get; set; }
 
         public ParserOptions Clone()
         {

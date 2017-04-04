@@ -9,6 +9,17 @@ using Scriban.Helpers;
 
 namespace Scriban.Parsing
 {
+
+    public struct LexerOptions
+    {
+        public ScriptMode Mode;
+
+        public string FrontMatterMarker;
+
+        public TextPosition StartPosition;
+    }
+
+
     /// <summary>
     /// Lexer enumerator that generates <see cref="Token"/>, to use in a foreach.
     /// </summary>
@@ -17,30 +28,49 @@ namespace Scriban.Parsing
         private TextPosition position;
         private Token token;
         private char c;
-        private readonly bool scriptOnly;
         private BlockType blockType;
         private List<LogMessage> errors;
         private int openBraceCount;
         private int escapeRawCharCount;
+        private bool _isExpectingFrontMatter;
 
         private const char StripWhiteSpaceSpecialChar = '~';
         private const char RawEscapeSpecialChar = '%';
 
         /// <summary>
+        /// Lexer options.
+        /// </summary>
+        public readonly LexerOptions Options;
+
+        /// <summary>
         /// Initialize a new instance of this <see cref="Lexer" />.
         /// </summary>
         /// <param name="text">The text to analyze</param>
-        /// <param name="sourcePath">The file path used for error reporting only.</param>
-        /// <param name="scriptOnly">if set to <c>true</c> the text is directly a script without raw statements.</param>
+        /// <param name="sourcePath">The sourcePath</param>
+        /// <param name="options">The options for the lexer</param>
         /// <exception cref="ArgumentNullException"></exception>
-        /// <exception cref="System.ArgumentNullException">If text is null</exception>
-        public Lexer(string text, string sourcePath = null, bool scriptOnly = false)
+        /// <exception cref="System.ArgumentNullException"></exception>
+        public Lexer(string text, string sourcePath = null, LexerOptions options = default(LexerOptions))
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
             Text = text;
+            if (options.FrontMatterMarker == null)
+            {
+                options.FrontMatterMarker = "+++";
+            }
+            Options = options;
+            position = Options.StartPosition;
+
+            if (position.Offset >= text.Length)
+            {
+                throw new ArgumentOutOfRangeException($"The starting position [{position.Offset}] of range [0, {text.Length - 1}]");
+            }
+
             SourcePath = sourcePath ?? "<input>";
-            blockType = scriptOnly ? BlockType.Code : BlockType.Raw;
-            this.scriptOnly = scriptOnly;
+            blockType = Options.Mode == ScriptMode.ScriptOnly ? BlockType.Code : BlockType.Raw;
+
+            _isExpectingFrontMatter = Options.Mode == ScriptMode.FrontMatterOnly ||
+                                     Options.Mode == ScriptMode.FrontMatterAndContent;
         }
 
         /// <summary>
@@ -100,14 +130,22 @@ namespace Scriban.Parsing
                 isFirstLoop = false;
                 previousPosition = position;
 
-                if (!scriptOnly)
+                if (Options.Mode != ScriptMode.ScriptOnly)
                 {
-                    bool skipPreviousSpaces;
-                    if (blockType == BlockType.Raw && IsCodeEnterOrEscape(out skipPreviousSpaces))
+                    if (blockType == BlockType.Raw)
                     {
-                        ReadCodeEnterOrEscape();
-                        if (blockType == BlockType.Code)
+                        bool skipPreviousSpaces;
+                        if (IsCodeEnterOrEscape(out skipPreviousSpaces))
                         {
+                            ReadCodeEnterOrEscape();
+                            if (blockType == BlockType.Code)
+                            {
+                                return true;
+                            }
+                        }
+                        else if (_isExpectingFrontMatter && TryParseFrontMatterMarker())
+                        {
+                            blockType = BlockType.Code;
                             return true;
                         }
 
@@ -124,6 +162,14 @@ namespace Scriban.Parsing
                         }
                         // We are exiting from a BlockType.EscapeRaw, so we are back to a raw block or code, so we loop again
                         continue;
+                    }
+
+                    if (blockType == BlockType.Code && _isExpectingFrontMatter && TryParseFrontMatterMarker())
+                    {
+                        // Once we have parsed a front matter, we don't expect them any longer
+                        blockType = BlockType.Raw;
+                        _isExpectingFrontMatter = false;
+                        return true;
                     }
                 }
 
@@ -161,6 +207,57 @@ namespace Scriban.Parsing
             RawEscape,
 
             Raw,
+        }
+
+        private bool TryParseFrontMatterMarker()
+        {
+            var start = position;
+            var end = position;
+
+            var marker = Options.FrontMatterMarker;
+            int i = 0;
+            for (; i < marker.Length; i++)
+            {
+                if (PeekChar(i) != marker[i])
+                {
+                    return false;
+                }
+            }
+            var pc = PeekChar(i);
+            while (pc == ' ' || pc == '\t')
+            {
+                i++;
+                pc = PeekChar(i);
+            }
+
+            bool valid = false;
+
+            if (pc == '\n')
+            {
+                valid = true;
+            }
+            else if (pc == '\r')
+            {
+                valid = true;
+                if (PeekChar(i + 1) == '\n')
+                {
+                    i++;
+                }
+            }
+
+            if (valid)
+            {
+                while (i-- >= 0)
+                {
+                    end = position;
+                    NextChar();
+                }
+
+                token = new Token(TokenType.FrontMatterMarker, start, end);
+                return true;
+            }
+
+            return false;
         }
 
         private bool IsCodeEnterOrEscape(out bool removePreviousSpaces)
@@ -572,7 +669,7 @@ namespace Scriban.Parsing
                     }
                     else
                     {
-                        if (!scriptOnly && IsCodeExit())
+                        if (Options.Mode != ScriptMode.ScriptOnly && IsCodeExit())
                         {
                             // We have no tokens for this ReadCode
                             hasTokens = false;
@@ -989,8 +1086,8 @@ namespace Scriban.Parsing
 
         private void Reset()
         {
-            c = Text.Length > 0 ? Text[0] : '\0';
-            position = new TextPosition();
+            c = Text.Length > 0 ? Text[Options.StartPosition.Offset] : '\0';
+            position = Options.StartPosition;
             errors = null;
         }
 
