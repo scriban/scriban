@@ -1,0 +1,37 @@
+version: 10.0.{build}
+image: Visual Studio 2017
+configuration: Release
+install:
+- ps: >-
+    nuget restore
+
+    $env:SCRIBAN_BUILD_NUMBER = ([int]$env:APPVEYOR_BUILD_NUMBER).ToString("000")
+   
+    $env:SCRIBAN_VERSION_SUFFIX = "pre$env:SCRIBAN_BUILD_NUMBER"
+
+    $env:appveyor_nuget_push = 'false'
+
+    if(-Not $env:APPVEYOR_PULL_REQUEST_NUMBER) {
+      if($env:appveyor_repo_tag -eq 'True') {
+    	  if($env:appveyor_repo_tag_name -match '^v[0-9]') {
+           $env:appveyor_nuget_push = 'true'
+           $env:SCRIBAN_VERSION_SUFFIX = ""
+        }
+      }
+    }
+build:
+  project: src/Scriban.sln
+  verbosity: minimal
+before_package:
+- cmd: >- 
+     cd src
+     msbuild /t:pack /p:VersionSuffix="%SCRIBAN_VERSION_SUFFIX%" /p:Configuration=Release Scriban/Scriban.csproj
+artifacts:
+- path: src\Scriban\Bin\Release\*.nupkg
+  name: Scriban Nugets
+deploy:
+- provider: NuGet
+  api_key:
+    secure: 7cthHh+wYWZjhqxaxR6QObRaRnstvFkQOY7MkxIsC5kpQEBlKZXuinf0IybbYxJt
+  on:
+    appveyor_nuget_push: true
