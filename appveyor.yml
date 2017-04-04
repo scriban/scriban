@@ -4,6 +4,7 @@ configuration: Release
 install:
 - ps: >-
     cd src
+    
     nuget restore Scriban.sln
 
     $env:SCRIBAN_BUILD_NUMBER = ([int]$env:APPVEYOR_BUILD_NUMBER).ToString("000")
