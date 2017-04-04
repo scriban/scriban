@@ -3,7 +3,8 @@ image: Visual Studio 2017
 configuration: Release
 install:
 - ps: >-
-    nuget restore
+    cd src
+    nuget restore Scriban.sln
 
     $env:SCRIBAN_BUILD_NUMBER = ([int]$env:APPVEYOR_BUILD_NUMBER).ToString("000")
    
@@ -23,9 +24,7 @@ build:
   project: src/Scriban.sln
   verbosity: minimal
 before_package:
-- cmd: >- 
-     cd src
-     msbuild /t:pack /p:VersionSuffix="%SCRIBAN_VERSION_SUFFIX%" /p:Configuration=Release Scriban/Scriban.csproj
+- cmd: msbuild /t:pack /p:VersionSuffix="%SCRIBAN_VERSION_SUFFIX%" /p:Configuration=Release Scriban/Scriban.csproj
 artifacts:
 - path: src\Scriban\Bin\Release\*.nupkg
   name: Scriban Nugets
