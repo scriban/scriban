@@ -9,16 +9,15 @@ namespace Scriban.Runtime
 
         public override void Evaluate(TemplateContext context)
         {           
-            var text = Text?.Substring(this.Span.Start.Offset, this.Span.End.Offset - this.Span.Start.Offset + 1);
-            if (text != null)
+            if (Text != null)
             {
-                context.Write(text);
+                context.Output.Append(Text, Span.Start.Offset, Span.End.Offset - Span.Start.Offset + 1);
             }
         }
 
         public override string ToString()
         {
-            return Text?.Substring(this.Span.Start.Offset, this.Span.End.Offset - this.Span.Start.Offset + 1);
+            return Text?.Substring(Span.Start.Offset, Span.End.Offset - Span.Start.Offset + 1);
         }
     }
 }
