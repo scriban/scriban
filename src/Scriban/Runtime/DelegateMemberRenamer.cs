@@ -10,8 +10,7 @@ namespace Scriban.Runtime
 
         public DelegateMemberRenamer(RenameDelegate rename)
         {
-            if (rename == null) throw new ArgumentNullException(nameof(rename));
-            Rename = rename;
+            Rename = rename ?? throw new ArgumentNullException(nameof(rename));
         }
 
         public RenameDelegate Rename { get; }

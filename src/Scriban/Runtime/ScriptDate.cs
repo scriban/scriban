@@ -5,6 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using Scriban.Functions;
+using Scriban.Model;
 using Scriban.Parsing;
 
 namespace Scriban.Runtime

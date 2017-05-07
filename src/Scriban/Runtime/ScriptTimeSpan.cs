@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 
 using System;
+using Scriban.Model;
 
 namespace Scriban.Runtime
 {
@@ -12,7 +13,7 @@ namespace Scriban.Runtime
     /// <seealso cref="System.IComparable" />
     public struct ScriptTimeSpan : IScriptCustomType, IComparable
     {
-        private TimeSpan value;
+        private TimeSpan _value;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptTimeSpan"/> struct.
@@ -20,28 +21,28 @@ namespace Scriban.Runtime
         /// <param name="value">The value.</param>
         public ScriptTimeSpan(TimeSpan value)
         {
-            this.value = value;
+            this._value = value;
         }
 
-        public int Days => value.Days;
+        public int Days => _value.Days;
 
-        public int Hours => value.Hours;
+        public int Hours => _value.Hours;
 
-        public int Minutes => value.Minutes;
+        public int Minutes => _value.Minutes;
 
-        public int Seconds => value.Seconds;
+        public int Seconds => _value.Seconds;
 
-        public int Milliseconds => value.Milliseconds;
+        public int Milliseconds => _value.Milliseconds;
 
-        public double TotalDays => value.TotalDays;
+        public double TotalDays => _value.TotalDays;
 
-        public double TotalHours => value.TotalHours;
+        public double TotalHours => _value.TotalHours;
 
-        public double TotalMinutes => value.TotalMinutes;
+        public double TotalMinutes => _value.TotalMinutes;
 
-        public double TotalSeconds => value.TotalSeconds;
+        public double TotalSeconds => _value.TotalSeconds;
 
-        public double TotalMilliseconds => value.TotalMilliseconds;
+        public double TotalMilliseconds => _value.TotalMilliseconds;
 
         [ScriptMemberIgnore]
         public static implicit operator ScriptTimeSpan(TimeSpan timeSpan)
@@ -52,7 +53,7 @@ namespace Scriban.Runtime
         [ScriptMemberIgnore]
         public static implicit operator TimeSpan(ScriptTimeSpan timeSpan)
         {
-            return timeSpan.value;
+            return timeSpan._value;
         }
 
         bool IScriptCustomType.TryConvertTo(Type destinationType, out object outValue)
@@ -60,13 +61,13 @@ namespace Scriban.Runtime
             outValue = null;
             if (destinationType == typeof (bool))
             {
-                outValue = value != TimeSpan.Zero;
+                outValue = _value != TimeSpan.Zero;
                 return true;
             }
 
             if (destinationType == typeof (double))
             {
-                outValue = value.TotalDays;
+                outValue = _value.TotalDays;
                 return true;
             }
 
@@ -78,9 +79,9 @@ namespace Scriban.Runtime
             switch (expression.Operator)
             {
                 case ScriptUnaryOperator.Negate:
-                    return (ScriptTimeSpan)value.Negate();
+                    return (ScriptTimeSpan)_value.Negate();
                 case ScriptUnaryOperator.Not:
-                    return value == TimeSpan.Zero;
+                    return _value == TimeSpan.Zero;
                 default:
                     throw new ScriptRuntimeException(expression.Span, $"Operator [{expression.Operator}] is not supported for timespan");
             }
@@ -107,21 +108,21 @@ namespace Scriban.Runtime
             switch (expression.Operator)
             {
                 case ScriptBinaryOperator.Add:
-                    return new ScriptTimeSpan(left.value + right.value);
+                    return new ScriptTimeSpan(left._value + right._value);
                 case ScriptBinaryOperator.Substract:
-                    return new ScriptTimeSpan(left.value - right.value);
+                    return new ScriptTimeSpan(left._value - right._value);
                 case ScriptBinaryOperator.CompareEqual:
-                    return left.value == right.value;
+                    return left._value == right._value;
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return left.value != right.value;
+                    return left._value != right._value;
                 case ScriptBinaryOperator.CompareLess:
-                    return left.value < right.value;
+                    return left._value < right._value;
                 case ScriptBinaryOperator.CompareLessOrEqual:
-                    return left.value <= right.value;
+                    return left._value <= right._value;
                 case ScriptBinaryOperator.CompareGreater:
-                    return left.value > right.value;
+                    return left._value > right._value;
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return left.value >= right.value;
+                    return left._value >= right._value;
             }
 
             throw new ScriptRuntimeException(expression.Span, $"Operator [{expression.Operator}] is not supported for timespan");
@@ -133,7 +134,7 @@ namespace Scriban.Runtime
             switch (expression.Operator)
             {
                 case ScriptBinaryOperator.Add:
-                    return new ScriptDate(right.Global, right.Value + left.value);
+                    return new ScriptDate(right.Global, right.Value + left._value);
             }
 
             throw new ScriptRuntimeException(expression.Span, $"Operator [{expression.Operator}] is not supported for between <timespan> and <date>");
@@ -151,13 +152,13 @@ namespace Scriban.Runtime
             }
             var timeSpan = (ScriptTimeSpan)obj;
 
-            return value.CompareTo(timeSpan.value);
+            return _value.CompareTo(timeSpan._value);
         }
 
         public override string ToString()
         {
             // TODO: standardize
-            return value.ToString();
+            return _value.ToString();
         }
     }
 }

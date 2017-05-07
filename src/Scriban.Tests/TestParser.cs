@@ -9,6 +9,7 @@ using System.Reflection;
 using System.Text;
 using NUnit.Framework;
 using Scriban.Helpers;
+using Scriban.Model;
 using Scriban.Parsing;
 using Scriban.Runtime;
 

@@ -17,7 +17,7 @@ namespace Scriban.Runtime
     /// <seealso cref="System.Collections.IEnumerable" />
     public class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject
     {
-        internal readonly Dictionary<string, InternalValue> store;
+        internal readonly Dictionary<string, InternalValue> Store;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptObject"/> class.
@@ -32,7 +32,7 @@ namespace Scriban.Runtime
         /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
         public ScriptObject(bool autoImportStaticsFromThisType)
         {
-            store = new Dictionary<string, InternalValue>();
+            Store = new Dictionary<string, InternalValue>();
 
             // Only import if we are asked for and we have a derived type
             if (autoImportStaticsFromThisType || this.GetType() != typeof(ScriptObject))
@@ -46,13 +46,13 @@ namespace Scriban.Runtime
         /// </summary>
         public void Clear()
         {
-            store.Clear();
+            Store.Clear();
         }
 
         /// <summary>
         /// Gets the number of members.
         /// </summary>
-        public int Count => store.Count;
+        public int Count => Store.Count;
 
         /// <summary>
         /// Determines whether this object contains the specified member.
@@ -63,7 +63,7 @@ namespace Scriban.Runtime
         public bool Contains(string member)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
-            return store.ContainsKey(member);
+            return Store.ContainsKey(member);
         }
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace Scriban.Runtime
         public bool TryGetValue(string member, out object value)
         {
             InternalValue internalValue;
-            var result = store.TryGetValue(member, out internalValue);
+            var result = Store.TryGetValue(member, out internalValue);
             value = internalValue.Value;
             return result;
         }
@@ -120,11 +120,11 @@ namespace Scriban.Runtime
             }
         }
 
-        public ICollection<string> Keys => store.Keys;
+        public ICollection<string> Keys => Store.Keys;
 
         public ICollection<object> Values
         {
-            get { return store.Values.Select(val => val.Value).ToList(); }
+            get { return Store.Values.Select(val => val.Value).ToList(); }
         }
 
         /// <summary>
@@ -135,7 +135,7 @@ namespace Scriban.Runtime
         public bool IsReadOnly(string member)
         {
             InternalValue internalValue;
-            store.TryGetValue(member, out internalValue);
+            Store.TryGetValue(member, out internalValue);
             return internalValue.IsReadOnly;
         }
 
@@ -147,7 +147,7 @@ namespace Scriban.Runtime
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
         public void SetValue(string member, object value, bool readOnly)
         {
-            store[member] = new InternalValue(value, readOnly);
+            Store[member] = new InternalValue(value, readOnly);
         }
 
         public void Add(string key, object value)
@@ -167,7 +167,7 @@ namespace Scriban.Runtime
         /// <returns><c>true</c> if it was removed</returns>
         public bool Remove(string member)
         {
-            return store.Remove(member);
+            return Store.Remove(member);
         }
 
         /// <summary>
@@ -178,11 +178,11 @@ namespace Scriban.Runtime
         public void SetReadOnly(string member, bool readOnly)
         {
             InternalValue internalValue;
-            if (store.TryGetValue(member, out internalValue))
+            if (Store.TryGetValue(member, out internalValue))
             {
             }
             internalValue.IsReadOnly = readOnly;
-            store[member] = internalValue;
+            Store[member] = internalValue;
         }
 
         /// <summary>
@@ -213,7 +213,7 @@ namespace Scriban.Runtime
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            var list = store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value.Value))
+            var list = Store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value.Value))
                     .ToList();
             return list.GetEnumerator();
         }

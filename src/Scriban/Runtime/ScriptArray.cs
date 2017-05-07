@@ -3,6 +3,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Scriban.Model;
 
 namespace Scriban.Runtime
 {
@@ -15,17 +16,17 @@ namespace Scriban.Runtime
     {
         internal static readonly IScriptCustomType CustomOperator = new ListCustomOperator();
 
-        private readonly List<T> values;
+        private readonly List<T> _values;
 
         // Attached ScriptObject is only created if needed
-        private ScriptObject script;
+        private ScriptObject _script;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptArray"/> class.
         /// </summary>
         public ScriptArray()
         {
-            values = new List<T>();
+            _values = new List<T>();
         }
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace Scriban.Runtime
         /// <param name="capacity">The capacity.</param>
         public ScriptArray(int capacity)
         {
-            values = new List<T>(capacity);
+            _values = new List<T>(capacity);
         }
 
         /// <summary>
@@ -43,16 +44,16 @@ namespace Scriban.Runtime
         /// <param name="values">The values.</param>
         public ScriptArray(IEnumerable<T> values)
         {
-            this.values = new List<T>(values);
+            this._values = new List<T>(values);
         }
 
-        public ScriptObject ScriptObject => script ?? (script = new ScriptObject());
+        public ScriptObject ScriptObject => _script ?? (_script = new ScriptObject());
 
-        public int Count => values.Count;
+        public int Count => _values.Count;
 
         public T this[int index]
         {
-            get { return index < 0 || index >= values.Count ? null : values[index]; }
+            get => index < 0 || index >= _values.Count ? null : _values[index];
             set
             {
                 if (index < 0)
@@ -61,18 +62,18 @@ namespace Scriban.Runtime
                 }
 
                 // Auto-expand the array in case of accessing a range outside the current value
-                for (int i = values.Count; i <= index; i++)
+                for (int i = _values.Count; i <= index; i++)
                 {
-                    values.Add(null);
+                    _values.Add(null);
                 }
 
-                values[index] = value;
+                _values[index] = value;
             }
         }
 
         public void Add(T item)
         {
-            values.Add(item);
+            _values.Add(item);
         }
 
         public void AddRange(IEnumerable<T> items)
@@ -86,108 +87,108 @@ namespace Scriban.Runtime
 
         int IList.Add(object value)
         {
-            return ((IList)values).Add(value);
+            return ((IList)_values).Add(value);
         }
 
         bool IList.Contains(object value)
         {
-            return ((IList) values).Contains(value);
+            return ((IList) _values).Contains(value);
         }
 
         public void Clear()
         {
-            values.Clear();
+            _values.Clear();
         }
 
         int IList.IndexOf(object value)
         {
-            return ((IList)values).IndexOf(value);
+            return ((IList)_values).IndexOf(value);
         }
 
         void IList.Insert(int index, object value)
         {
-            ((IList)values).Insert(index, value);
+            ((IList)_values).Insert(index, value);
         }
 
         public bool Contains(T item)
         {
-            return values.Contains(item);
+            return _values.Contains(item);
         }
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            values.CopyTo(array, arrayIndex);
+            _values.CopyTo(array, arrayIndex);
         }
 
         public int IndexOf(T item)
         {
-            return values.IndexOf(item);
+            return _values.IndexOf(item);
         }
 
         public void Insert(int index, T item)
         {
             // Auto-expand the array in case of accessing a range outside the current value
-            for (int i = values.Count; i < index; i++)
+            for (int i = _values.Count; i < index; i++)
             {
-                values.Add(null);
+                _values.Add(null);
             }
 
-            values.Insert(index, item);
+            _values.Insert(index, item);
         }
 
         void IList.Remove(object value)
         {
-            ((IList)values).Remove(value);
+            ((IList)_values).Remove(value);
         }
 
         public void RemoveAt(int index)
         {
-            if (index < 0 || index >= values.Count)
+            if (index < 0 || index >= _values.Count)
             {
                 return;
             }
-            values.RemoveAt(index);
+            _values.RemoveAt(index);
         }
 
         object IList.this[int index]
         {
-            get { return ((IList) values)[index]; }
-            set { ((IList) values)[index] = value; }
+            get => ((IList) _values)[index];
+            set => ((IList) _values)[index] = value;
         }
 
         public bool Remove(T item)
         {
-            return values.Remove(item);
+            return _values.Remove(item);
         }
 
         public List<T>.Enumerator GetEnumerator()
         {
-            return values.GetEnumerator();
+            return _values.GetEnumerator();
         }
 
-        bool IList.IsFixedSize => ((IList)values).IsFixedSize;
+        bool IList.IsFixedSize => ((IList)_values).IsFixedSize;
 
-        bool ICollection.IsSynchronized => ((ICollection)values).IsSynchronized;
+        bool ICollection.IsSynchronized => ((ICollection)_values).IsSynchronized;
 
-        object ICollection.SyncRoot => ((ICollection)values).SyncRoot;
+        object ICollection.SyncRoot => ((ICollection)_values).SyncRoot;
 
-        bool IList.IsReadOnly => ((IList)values).IsReadOnly;
+        bool IList.IsReadOnly => ((IList)_values).IsReadOnly;
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
-            return values.GetEnumerator();
+            return _values.GetEnumerator();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
         {
-            return values.GetEnumerator();
+            return _values.GetEnumerator();
         }
 
         bool ICollection<T>.IsReadOnly => false;
 
         void ICollection.CopyTo(Array array, int index)
         {
-            ((ICollection)values).CopyTo(array, index);
+            ((ICollection)_values).CopyTo(array, index);
         }
 
         public bool Contains(string member)
@@ -202,8 +203,8 @@ namespace Scriban.Runtime
 
         object IScriptObject.this[string key]
         {
-            get { return ScriptObject[key]; }
-            set { ScriptObject[key] = value; }
+            get => ScriptObject[key];
+            set => ScriptObject[key] = value;
         }
 
         public bool IsReadOnly(string member)

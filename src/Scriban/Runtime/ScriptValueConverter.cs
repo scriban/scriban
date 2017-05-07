@@ -7,6 +7,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text;
 using Scriban.Helpers;
+using Scriban.Model;
 using Scriban.Parsing;
 
 namespace Scriban.Runtime
