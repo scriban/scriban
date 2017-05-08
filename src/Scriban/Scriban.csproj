@@ -5,13 +5,15 @@
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.3.1</VersionPrefix>
+    <VersionPrefix>0.4.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
     <TargetFrameworks>net35;portable-net40+sl5+win8+wpa81+wp8;netstandard1.1</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
+&gt; 0.4.0
+ - Breaking changes. Split Runtime namespace into Functions and Model.
 &gt; 0.3.1
  - Rewrite support for frontmatter to allow usage of +++ instead of code block {{...}}
 &gt; 0.3.0
