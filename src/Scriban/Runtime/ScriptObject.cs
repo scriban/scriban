@@ -60,7 +60,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <returns><c>true</c> if this object contains the specified member; <c>false</c> otherwise</returns>
         /// <exception cref="System.ArgumentNullException">If member is null</exception>
-        public bool Contains(string member)
+        public virtual bool Contains(string member)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
             return Store.ContainsKey(member);
@@ -72,7 +72,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if the value was retrieved</returns>
-        public bool TryGetValue(string member, out object value)
+        public virtual bool TryGetValue(string member, out object value)
         {
             InternalValue internalValue;
             var result = Store.TryGetValue(member, out internalValue);
@@ -104,7 +104,7 @@ namespace Scriban.Runtime
             return (T)obj;
         }
 
-        public object this[string key]
+        public virtual object this[string key]
         {
             get
             {
@@ -132,7 +132,7 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="member">The member.</param>
         /// <returns><c>true</c> if the specified member is read-only</returns>
-        public bool IsReadOnly(string member)
+        public virtual bool IsReadOnly(string member)
         {
             InternalValue internalValue;
             Store.TryGetValue(member, out internalValue);
@@ -145,7 +145,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        public void SetValue(string member, object value, bool readOnly)
+        public virtual void SetValue(string member, object value, bool readOnly)
         {
             Store[member] = new InternalValue(value, readOnly);
         }
@@ -165,7 +165,7 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="member">The member.</param>
         /// <returns><c>true</c> if it was removed</returns>
-        public bool Remove(string member)
+        public virtual bool Remove(string member)
         {
             return Store.Remove(member);
         }
