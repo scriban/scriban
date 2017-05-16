@@ -499,137 +499,154 @@ namespace Scriban
         {
             object value = null;
 
-            var nextVariable = targetExpression as ScriptVariable;
-            if (nextVariable != null)
+            try
             {
-                if (setter)
+
+                var nextVariable = targetExpression as ScriptVariable;
+                if (nextVariable != null)
                 {
-                    SetValue(nextVariable, valueToSet, false);
-                }
-                else
-                {
-                    value = GetValueInternal(nextVariable);
-                }
-            }
-            else
-            {
-                var nextDot = targetExpression as ScriptMemberExpression;
-                if (nextDot != null)
-                {
-                    var targetObject = GetOrSetValue(nextDot.Target, valueToSet, false, level + 1);
-
-                    if (targetObject == null)
-                    {
-                        throw new ScriptRuntimeException(nextDot.Span, $"Object [{nextDot.Target}] is null. Cannot access member: {nextDot}"); // unit test: 131-member-accessor-error1.txt
-                    }
-
-                    if (targetObject is string || targetObject.GetType().GetTypeInfo().IsPrimitive)
-                    {
-                        throw new ScriptRuntimeException(nextDot.Span, $"Cannot get or set a member on the primitive [{targetObject}/{targetObject.GetType()}] when accessing member: {nextDot}"); // unit test: 132-member-accessor-error2.txt
-                    }
-
-                    var accessor = GetMemberAccessor(targetObject);
-
-                    var memberName = nextDot.Member.Name;
-
                     if (setter)
                     {
-                        if (!accessor.TrySetValue(targetObject, memberName, valueToSet))
-                        {
-                            throw new ScriptRuntimeException(nextDot.Member.Span, $"Cannot set a value for the readonly member: {nextDot}"); // unit test: 132-member-accessor-error3.txt
-                        }
+                        SetValue(nextVariable, valueToSet, false);
                     }
                     else
                     {
-                        if (!accessor.TryGetValue(targetObject, memberName, out value))
-                        {
-                            TryGetMember?.Invoke(targetObject, memberName, out value);
-                        }
+                        value = GetValueInternal(nextVariable);
                     }
                 }
                 else
                 {
-                    var nextIndexer = targetExpression as ScriptIndexerExpression;
-                    if (nextIndexer != null)
+                    var nextDot = targetExpression as ScriptMemberExpression;
+                    if (nextDot != null)
                     {
-                        var targetObject = GetOrSetValue(nextIndexer.Target, valueToSet, false, level + 1);
+                        var targetObject = GetOrSetValue(nextDot.Target, valueToSet, false, level + 1);
+
                         if (targetObject == null)
                         {
-                            throw new ScriptRuntimeException(nextIndexer.Target.Span, $"Object [{nextIndexer.Target}] is null. Cannot access indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error1.txt
+                            throw new ScriptRuntimeException(nextDot.Span,
+                                $"Object [{nextDot.Target}] is null. Cannot access member: {nextDot}"); // unit test: 131-member-accessor-error1.txt
+                        }
+
+                        if (targetObject is string || targetObject.GetType().GetTypeInfo().IsPrimitive)
+                        {
+                            throw new ScriptRuntimeException(nextDot.Span,
+                                $"Cannot get or set a member on the primitive [{targetObject}/{targetObject.GetType()}] when accessing member: {nextDot}"); // unit test: 132-member-accessor-error2.txt
+                        }
+
+                        var accessor = GetMemberAccessor(targetObject);
+
+                        var memberName = nextDot.Member.Name;
+
+                        if (setter)
+                        {
+                            if (!accessor.TrySetValue(targetObject, memberName, valueToSet))
+                            {
+                                throw new ScriptRuntimeException(nextDot.Member.Span,
+                                    $"Cannot set a value for the readonly member: {nextDot}"); // unit test: 132-member-accessor-error3.txt
+                            }
                         }
                         else
                         {
-                            var index = this.Evaluate(nextIndexer.Index);
-                            if (index == null)
+                            if (!accessor.TryGetValue(targetObject, memberName, out value))
                             {
-                                throw new ScriptRuntimeException(nextIndexer.Index.Span, $"Cannot access target [{nextIndexer.Target}] with a null indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error2.txt
+                                TryGetMember?.Invoke(targetObject, memberName, out value);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var nextIndexer = targetExpression as ScriptIndexerExpression;
+                        if (nextIndexer != null)
+                        {
+                            var targetObject = GetOrSetValue(nextIndexer.Target, valueToSet, false, level + 1);
+                            if (targetObject == null)
+                            {
+                                throw new ScriptRuntimeException(nextIndexer.Target.Span,
+                                    $"Object [{nextIndexer.Target}] is null. Cannot access indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error1.txt
                             }
                             else
                             {
-                                if (targetObject is IDictionary || targetObject is ScriptObject)
+                                var index = this.Evaluate(nextIndexer.Index);
+                                if (index == null)
                                 {
-                                    var accessor = GetMemberAccessor(targetObject);
-                                    var indexAsString = ScriptValueConverter.ToString(nextIndexer.Index.Span, index);
-
-                                    if (setter)
-                                    {
-                                        if (!accessor.TrySetValue(targetObject, indexAsString, valueToSet))
-                                        {
-                                            throw new ScriptRuntimeException(nextIndexer.Index.Span, $"Cannot set a value for the readonly member [{indexAsString}] in the indexer: {nextIndexer.Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
-                                        }
-                                    }
-                                    else
-                                    {
-                                        if (!accessor.TryGetValue(targetObject, indexAsString, out value))
-                                        {
-                                            TryGetMember?.Invoke(targetObject, indexAsString, out value);
-                                        }
-                                    }
+                                    throw new ScriptRuntimeException(nextIndexer.Index.Span,
+                                        $"Cannot access target [{nextIndexer.Target}] with a null indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error2.txt
                                 }
                                 else
                                 {
-                                    var accessor = GetListAccessor(targetObject);
-                                    if (accessor == null)
+                                    if (targetObject is IDictionary || targetObject is ScriptObject)
                                     {
-                                        throw new ScriptRuntimeException(nextIndexer.Target.Span, $"Expecting a list. Invalid value [{targetObject}/{targetObject?.GetType().Name}] for the target [{nextIndexer.Target}] for the indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error4.txt
+                                        var accessor = GetMemberAccessor(targetObject);
+                                        var indexAsString =
+                                            ScriptValueConverter.ToString(nextIndexer.Index.Span, index);
+
+                                        if (setter)
+                                        {
+                                            if (!accessor.TrySetValue(targetObject, indexAsString, valueToSet))
+                                            {
+                                                throw new ScriptRuntimeException(nextIndexer.Index.Span,
+                                                    $"Cannot set a value for the readonly member [{indexAsString}] in the indexer: {nextIndexer.Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
+                                            }
+                                        }
+                                        else
+                                        {
+                                            if (!accessor.TryGetValue(targetObject, indexAsString, out value))
+                                            {
+                                                TryGetMember?.Invoke(targetObject, indexAsString, out value);
+                                            }
+                                        }
                                     }
                                     else
                                     {
-                                        int i = ScriptValueConverter.ToInt(nextIndexer.Index.Span, index);
-
-                                        // Allow negative index from the end of the array
-                                        if (i < 0)
+                                        var accessor = GetListAccessor(targetObject);
+                                        if (accessor == null)
                                         {
-                                            i = accessor.GetLength(targetObject) + i;
+                                            throw new ScriptRuntimeException(nextIndexer.Target.Span,
+                                                $"Expecting a list. Invalid value [{targetObject}/{targetObject?.GetType().Name}] for the target [{nextIndexer.Target}] for the indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error4.txt
                                         }
-
-                                        if (i >= 0)
+                                        else
                                         {
-                                            if (setter)
+                                            int i = ScriptValueConverter.ToInt(nextIndexer.Index.Span, index);
+
+                                            // Allow negative index from the end of the array
+                                            if (i < 0)
                                             {
-                                                accessor.SetValue(targetObject, i, valueToSet);
+                                                i = accessor.GetLength(targetObject) + i;
                                             }
-                                            else
+
+                                            if (i >= 0)
                                             {
-                                                value = accessor.GetValue(targetObject, i);
+                                                if (setter)
+                                                {
+                                                    accessor.SetValue(targetObject, i, valueToSet);
+                                                }
+                                                else
+                                                {
+                                                    value = accessor.GetValue(targetObject, i);
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
                         }
-                    }
-                    else if (!setter)
-                    {
-                        targetExpression.Evaluate(this);
-                        value = this.Result;
-                        this.Result = null;
-                    }
-                    else
-                    {
-                        throw new ScriptRuntimeException(targetExpression.Span, $"Unsupported expression for target for assignment: {targetExpression} = ..."); // unit test: 105-assign-error1.txt
+                        else if (!setter)
+                        {
+                            targetExpression.Evaluate(this);
+                            value = this.Result;
+                            this.Result = null;
+                        }
+                        else
+                        {
+                            throw new ScriptRuntimeException(targetExpression.Span,
+                                $"Unsupported expression for target for assignment: {targetExpression} = ..."); // unit test: 105-assign-error1.txt
+                        }
                     }
                 }
+            }
+            catch (Exception readonlyException) when(level == 0 && !(readonlyException is ScriptRuntimeException))
+            {
+                throw new ScriptRuntimeException(targetExpression.Span, $"Unexpected exception while accessing `{targetExpression}`", readonlyException);
             }
 
             // If the variable being returned is a function, we need to evaluate it
