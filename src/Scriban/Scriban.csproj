@@ -5,13 +5,16 @@
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.4.0</VersionPrefix>
+    <VersionPrefix>0.5.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
     <TargetFrameworks>net35;portable-net40+sl5+win8+wpa81+wp8;netstandard1.1</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
+&gt; 0.5.0
+ - Breaking changes. Rename IScriptObject.IsReadOnly to CanWrite. Add IScriptObject.IsReadOnly for global object locking
+ - Catch exceptions while evaluating an expression and rethrow them wrapped into a ScriptRuntimeExecption if it is not already the case.
 &gt; 0.4.0
  - Breaking changes. Split Runtime namespace into Functions and Model.
 &gt; 0.3.1
