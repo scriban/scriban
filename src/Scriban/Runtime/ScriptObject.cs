@@ -60,7 +60,7 @@ namespace Scriban.Runtime
         /// Gets a value indicating whether this instance is read-only.
         /// </summary>
         /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
-        public bool IsReadOnly { get; set; }
+        public virtual bool IsReadOnly { get; set; }
 
         /// <summary>
         /// Determines whether this object contains the specified member.
