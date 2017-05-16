@@ -18,6 +18,7 @@ namespace Scriban.Runtime
         internal static readonly IScriptCustomType CustomOperator = new ListCustomOperator();
 
         private readonly List<T> _values;
+        private bool _isReadOnly;
 
         // Attached ScriptObject is only created if needed
         private ScriptObject _script;
@@ -48,7 +49,7 @@ namespace Scriban.Runtime
             this._values = new List<T>(values);
         }
 
-        public ScriptObject ScriptObject => _script ?? (_script = new ScriptObject());
+        public ScriptObject ScriptObject => _script ?? (_script = new ScriptObject() { IsReadOnly = IsReadOnly});
 
         public int Count => _values.Count;
 
@@ -62,6 +63,8 @@ namespace Scriban.Runtime
                     return;
                 }
 
+                this.AssertNotReadOnly();
+
                 // Auto-expand the array in case of accessing a range outside the current value
                 for (int i = _values.Count; i <= index; i++)
                 {
@@ -74,6 +77,7 @@ namespace Scriban.Runtime
 
         public void Add(T item)
         {
+            this.AssertNotReadOnly();
             _values.Add(item);
         }
 
@@ -88,6 +92,7 @@ namespace Scriban.Runtime
 
         int IList.Add(object value)
         {
+            this.AssertNotReadOnly();
             return ((IList)_values).Add(value);
         }
 
@@ -98,6 +103,7 @@ namespace Scriban.Runtime
 
         public void Clear()
         {
+            this.AssertNotReadOnly();
             _values.Clear();
         }
 
@@ -108,6 +114,7 @@ namespace Scriban.Runtime
 
         void IList.Insert(int index, object value)
         {
+            this.AssertNotReadOnly();
             ((IList)_values).Insert(index, value);
         }
 
@@ -128,6 +135,7 @@ namespace Scriban.Runtime
 
         public void Insert(int index, T item)
         {
+            this.AssertNotReadOnly();
             // Auto-expand the array in case of accessing a range outside the current value
             for (int i = _values.Count; i < index; i++)
             {
@@ -139,11 +147,13 @@ namespace Scriban.Runtime
 
         void IList.Remove(object value)
         {
+            this.AssertNotReadOnly();
             ((IList)_values).Remove(value);
         }
 
         public void RemoveAt(int index)
         {
+            this.AssertNotReadOnly();
             if (index < 0 || index >= _values.Count)
             {
                 return;
@@ -154,11 +164,16 @@ namespace Scriban.Runtime
         object IList.this[int index]
         {
             get => ((IList) _values)[index];
-            set => ((IList) _values)[index] = value;
+            set
+            {
+                this.AssertNotReadOnly();
+                ((IList) _values)[index] = value;
+            }
         }
 
         public bool Remove(T item)
         {
+            this.AssertNotReadOnly();
             return _values.Remove(item);
         }
 
@@ -197,6 +212,19 @@ namespace Scriban.Runtime
             return ScriptObject.Contains(member);
         }
 
+        public bool IsReadOnly
+        {
+            get => _isReadOnly;
+            set
+            {
+                if (_script != null)
+                {
+                    _script.IsReadOnly = value;
+                }
+                _isReadOnly = value;
+            }
+        }
+
         public bool TryGetValue(string member, out object value)
         {
             return ScriptObject.TryGetValue(member, out value);
@@ -208,9 +236,9 @@ namespace Scriban.Runtime
             set => ScriptObject[key] = value;
         }
 
-        public bool IsReadOnly(string member)
+        public bool CanWrite(string member)
         {
-            return ScriptObject.IsReadOnly(member);
+            return ScriptObject.CanWrite(member);
         }
 
         public void SetValue(string member, object value, bool readOnly)

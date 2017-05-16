@@ -8,6 +8,7 @@ using System.Linq;
 using Scriban.Helpers;
 using System.Reflection;
 using System.Text;
+using Scriban.Model;
 using Scriban.Parsing;
 
 namespace Scriban.Runtime
@@ -54,6 +55,12 @@ namespace Scriban.Runtime
         /// Gets the number of members.
         /// </summary>
         public int Count => Store.Count;
+
+        /// <summary>
+        /// Gets a value indicating whether this instance is read-only.
+        /// </summary>
+        /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
+        public bool IsReadOnly { get; set; }
 
         /// <summary>
         /// Determines whether this object contains the specified member.
@@ -117,6 +124,7 @@ namespace Scriban.Runtime
             set
             {
                 if (key == null) throw new ArgumentNullException(nameof(key));
+                this.AssertNotReadOnly();
                 SetValue(key, value, false);
             }
         }
@@ -133,11 +141,11 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="member">The member.</param>
         /// <returns><c>true</c> if the specified member is read-only</returns>
-        public virtual bool IsReadOnly(string member)
+        public virtual bool CanWrite(string member)
         {
             InternalValue internalValue;
             Store.TryGetValue(member, out internalValue);
-            return internalValue.IsReadOnly;
+            return !internalValue.IsReadOnly;
         }
 
         /// <summary>
@@ -148,6 +156,7 @@ namespace Scriban.Runtime
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
         public virtual void SetValue(string member, object value, bool readOnly)
         {
+            this.AssertNotReadOnly();
             Store[member] = new InternalValue(value, readOnly);
         }
 
@@ -168,6 +177,7 @@ namespace Scriban.Runtime
         /// <returns><c>true</c> if it was removed</returns>
         public virtual bool Remove(string member)
         {
+            this.AssertNotReadOnly();
             return Store.Remove(member);
         }
 
@@ -178,6 +188,7 @@ namespace Scriban.Runtime
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
         public void SetReadOnly(string member, bool readOnly)
         {
+            this.AssertNotReadOnly();
             InternalValue internalValue;
             if (Store.TryGetValue(member, out internalValue))
             {

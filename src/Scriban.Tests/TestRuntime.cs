@@ -4,6 +4,7 @@
 using System;
 using Newtonsoft.Json;
 using NUnit.Framework;
+using Scriban.Model;
 using Scriban.Runtime;
 
 namespace Scriban.Tests
@@ -11,6 +12,26 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+        [Test]
+        public void TestReadOnly()
+        {
+            var template = Template.Parse("Test {{ a.b.c = 1 }}");
+
+            var a = new ScriptObject()
+            {
+                {"b", new ScriptObject() {IsReadOnly = true}}
+            };
+
+            var context = new TemplateContext();
+            context.PushGlobal(new ScriptObject()
+            {
+                {"a", a}
+            });
+            var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
+            var result = exception.ToString();
+            Assert.True(result.Contains("a.b.c"));
+        }
+
         [Test]
         public void TestDynamicVariable()
         {

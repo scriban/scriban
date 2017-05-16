@@ -21,6 +21,19 @@ namespace Scriban.Runtime
         public delegate bool FilterMemberDelegate(string member);
 
         /// <summary>
+        /// Asserts that the specified script object is not readonly or throws a <see cref="ScriptObjectReadOnlyException"/>
+        /// </summary>
+        /// <param name="scriptObject">The script object.</param>
+        /// <exception cref="ScriptObjectReadOnlyException">If the object is not readonly</exception>
+        public static void AssertNotReadOnly(this IScriptObject scriptObject)
+        {
+            if (scriptObject.IsReadOnly)
+            {
+                throw new ScriptObjectReadOnlyException(scriptObject);
+            }
+        }
+
+        /// <summary>
         /// Imports the specified object intto this <see cref="ScriptObject"/> context. See remarks.
         /// </summary>
         /// <param name="obj">The object.</param>
@@ -51,7 +64,7 @@ namespace Scriban.Runtime
         /// <returns><c>true</c> if the value could be set; <c>false</c> if a value already exist an is readonly</returns>
         public static bool TrySetValue(this IScriptObject @this, string member, object value, bool readOnly)
         {
-            if (@this.IsReadOnly(member))
+            if (!@this.CanWrite(member))
             {
                 return false;
             }
@@ -71,12 +84,13 @@ namespace Scriban.Runtime
             }
 
             var thisScript = @this.GetScriptObject();
+            AssertNotReadOnly(thisScript);
             var otherScript = other.GetScriptObject();
 
             foreach (var keyValue in otherScript.Store)
             {
                 var member = keyValue.Key;
-                if (thisScript.IsReadOnly(member))
+                if (!thisScript.CanWrite(member))
                 {
                     continue;
                 }
