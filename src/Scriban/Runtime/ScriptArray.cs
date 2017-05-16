@@ -49,11 +49,24 @@ namespace Scriban.Runtime
             this._values = new List<T>(values);
         }
 
+        public virtual bool IsReadOnly
+        {
+            get => _isReadOnly;
+            set
+            {
+                if (_script != null)
+                {
+                    _script.IsReadOnly = value;
+                }
+                _isReadOnly = value;
+            }
+        }
+
         public ScriptObject ScriptObject => _script ?? (_script = new ScriptObject() { IsReadOnly = IsReadOnly});
 
         public int Count => _values.Count;
 
-        public T this[int index]
+        public virtual T this[int index]
         {
             get => index < 0 || index >= _values.Count ? null : _values[index];
             set
@@ -75,7 +88,7 @@ namespace Scriban.Runtime
             }
         }
 
-        public void Add(T item)
+        public virtual void Add(T item)
         {
             this.AssertNotReadOnly();
             _values.Add(item);
@@ -92,8 +105,8 @@ namespace Scriban.Runtime
 
         int IList.Add(object value)
         {
-            this.AssertNotReadOnly();
-            return ((IList)_values).Add(value);
+            Add((T) value);
+            return 0;
         }
 
         bool IList.Contains(object value)
@@ -101,7 +114,7 @@ namespace Scriban.Runtime
             return ((IList) _values).Contains(value);
         }
 
-        public void Clear()
+        public virtual void Clear()
         {
             this.AssertNotReadOnly();
             _values.Clear();
@@ -114,26 +127,25 @@ namespace Scriban.Runtime
 
         void IList.Insert(int index, object value)
         {
-            this.AssertNotReadOnly();
-            ((IList)_values).Insert(index, value);
+            Insert(index, (T)value);
         }
 
-        public bool Contains(T item)
+        public virtual bool Contains(T item)
         {
             return _values.Contains(item);
         }
 
-        public void CopyTo(T[] array, int arrayIndex)
+        public virtual void CopyTo(T[] array, int arrayIndex)
         {
             _values.CopyTo(array, arrayIndex);
         }
 
-        public int IndexOf(T item)
+        public virtual int IndexOf(T item)
         {
             return _values.IndexOf(item);
         }
 
-        public void Insert(int index, T item)
+        public virtual void Insert(int index, T item)
         {
             this.AssertNotReadOnly();
             // Auto-expand the array in case of accessing a range outside the current value
@@ -147,11 +159,10 @@ namespace Scriban.Runtime
 
         void IList.Remove(object value)
         {
-            this.AssertNotReadOnly();
-            ((IList)_values).Remove(value);
+            Remove((T) value);
         }
 
-        public void RemoveAt(int index)
+        public virtual void RemoveAt(int index)
         {
             this.AssertNotReadOnly();
             if (index < 0 || index >= _values.Count)
@@ -163,15 +174,14 @@ namespace Scriban.Runtime
 
         object IList.this[int index]
         {
-            get => ((IList) _values)[index];
+            get => this[index];
             set
             {
-                this.AssertNotReadOnly();
-                ((IList) _values)[index] = value;
+                this[index] = (T)value;
             }
         }
 
-        public bool Remove(T item)
+        public virtual bool Remove(T item)
         {
             this.AssertNotReadOnly();
             return _values.Remove(item);
@@ -188,7 +198,7 @@ namespace Scriban.Runtime
 
         object ICollection.SyncRoot => ((ICollection)_values).SyncRoot;
 
-        bool IList.IsReadOnly => ((IList)_values).IsReadOnly;
+        bool IList.IsReadOnly => IsReadOnly;
 
         IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
@@ -200,32 +210,19 @@ namespace Scriban.Runtime
             return _values.GetEnumerator();
         }
 
-        bool ICollection<T>.IsReadOnly => false;
+        bool ICollection<T>.IsReadOnly => IsReadOnly;
 
         void ICollection.CopyTo(Array array, int index)
         {
             ((ICollection)_values).CopyTo(array, index);
         }
 
-        public bool Contains(string member)
+        public virtual bool Contains(string member)
         {
             return ScriptObject.Contains(member);
         }
 
-        public bool IsReadOnly
-        {
-            get => _isReadOnly;
-            set
-            {
-                if (_script != null)
-                {
-                    _script.IsReadOnly = value;
-                }
-                _isReadOnly = value;
-            }
-        }
-
-        public bool TryGetValue(string member, out object value)
+        public virtual bool TryGetValue(string member, out object value)
         {
             return ScriptObject.TryGetValue(member, out value);
         }
@@ -236,22 +233,22 @@ namespace Scriban.Runtime
             set => ScriptObject[key] = value;
         }
 
-        public bool CanWrite(string member)
+        public virtual bool CanWrite(string member)
         {
             return ScriptObject.CanWrite(member);
         }
 
-        public void SetValue(string member, object value, bool readOnly)
+        public virtual void SetValue(string member, object value, bool readOnly)
         {
             ScriptObject.SetValue(member, value, readOnly);
         }
 
-        public bool Remove(string member)
+        public virtual bool Remove(string member)
         {
             return ScriptObject.Remove(member);
         }
 
-        public void SetReadOnly(string member, bool readOnly)
+        public virtual void SetReadOnly(string member, bool readOnly)
         {
             ScriptObject.SetReadOnly(member, readOnly);
         }
