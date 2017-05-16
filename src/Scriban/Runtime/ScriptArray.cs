@@ -49,6 +49,15 @@ namespace Scriban.Runtime
             this._values = new List<T>(values);
         }
 
+        public ScriptArray(IEnumerable values)
+        {
+            this._values = new List<T>();
+            foreach (var value in values)
+            {
+                _values.Add((T)value);
+            }
+        }
+
         public virtual bool IsReadOnly
         {
             get => _isReadOnly;
@@ -310,6 +319,14 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="capacity">The capacity.</param>
         public ScriptArray(int capacity) : base(capacity)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptArray"/> class.
+        /// </summary>
+        /// <param name="values">The values.</param>
+        public ScriptArray(IEnumerable values) : base(values)
         {
         }
 

@@ -72,11 +72,7 @@ namespace Scriban.Functions
             var list = iterator as IList;
             if (list != null)
             {
-                if (list.Count > 0)
-                {
-                    return list[0];
-                }
-                return null;
+                return list.Count > 0 ? list[0] : null;
             }
 
             foreach (var item in iterator)
@@ -97,11 +93,7 @@ namespace Scriban.Functions
             var list = iterator as IList;
             if (list != null)
             {
-                if (list.Count > 0)
-                {
-                    return list[list.Count - 1];
-                }
-                return null;
+                return list.Count > 0 ? list[list.Count - 1] : null;
             }
 
             // Slow path, go through the whole list
@@ -130,6 +122,8 @@ namespace Scriban.Functions
                 return null;
             }
 
+            list = new ScriptArray(list);
+
             // If index is negative, start from the end
             if (index < 0)
             {
@@ -150,7 +144,7 @@ namespace Scriban.Functions
                 return null;
             }
 
-            list.Add(value);
+            list = new ScriptArray(list) {value};
             return list;
         }
 
@@ -163,6 +157,7 @@ namespace Scriban.Functions
 
             if (iterator != null)
             {
+                list = new ScriptArray(list);
                 foreach (var value in iterator)
                 {
                     list.Add(value);
@@ -184,6 +179,8 @@ namespace Scriban.Functions
             {
                 index = 0;
             }
+
+            list = new ScriptArray(list);
 
             // Make sure that the list has already inserted elements before the index
             for (int i = list.Count; i < index; i++)
@@ -304,6 +301,5 @@ namespace Scriban.Functions
 
             return Map(context, target, member);
         }
-
     }
 }
