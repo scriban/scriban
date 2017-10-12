@@ -11,8 +11,8 @@ namespace Scriban.Functions
         {
             SetValue("include", new IncludeFunction(), true);
             SetValue("object", new ObjectFunctions(), true);
-            SetValue("date", new ScriptDateFunctions(), true);
-            SetValue("timespan", new ScriptTimeSpanFunctions(), true);
+            SetValue(DateTimeFunctions.DateVariable.Name, new DateTimeFunctions(), true);
+            SetValue("timespan", new TimeSpanFunctions(), true);
             SetValue("array", new ArrayFunctions(), true);
             SetValue("string", new StringFunctions(), true);
             SetValue("math", new MathFunctions(), true);

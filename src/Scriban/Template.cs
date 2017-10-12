@@ -81,13 +81,11 @@ namespace Scriban
 
             try
             {
-                context.Result = null;
-                Page?.Evaluate(context);
+                var result = context.Evaluate(Page);
 
-                if (Page != null && context.EnableOutput && context.Result != null)
+                if (Page != null && context.EnableOutput && result != null)
                 {
-                    context.Write(Page.Span, context.Result);
-                    context.Result = null;
+                    context.Write(Page.Span, result);
                 }
             }
             finally

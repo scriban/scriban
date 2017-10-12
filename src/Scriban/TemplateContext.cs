@@ -20,7 +20,7 @@ namespace Scriban
     /// <summary>
     /// The template context contains the state of the page, the model.
     /// </summary>
-    public class TemplateContext
+    public partial class TemplateContext
     {
         private readonly Stack<ScriptObject> _availableStores;
         internal readonly Stack<ScriptBlockStatement> BlockDelegates;
@@ -111,11 +111,6 @@ namespace Scriban
         /// Gets the current output of the template being rendered (via <see cref="Template.Render(Scriban.TemplateContext)")/>.
         /// </summary>
         public StringBuilder Output => _outputs.Peek();
-
-        /// <summary>
-        /// Gets the result of the last expression.
-        /// </summary>
-        public object Result { get; set; }
 
         public ScriptObject BuiltinObject { get; }
 
@@ -212,7 +207,8 @@ namespace Scriban
             // Try to set the variable
             if (!store.TrySetValue(variable.Name, value, asReadOnly))
             {
-                throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable [{variable}]"); // unit test: 105-assign-error2.txt
+                throw new ScriptRuntimeException(variable.Span,
+                    $"Cannot set value on the readonly variable [{variable}]"); // unit test: 105-assign-error2.txt
             }
         }
 
@@ -304,7 +300,7 @@ namespace Scriban
             {
                 return;
             }
-            var text = ScriptValueConverter.ToString(span, textAsObject);
+            var text = ToString(span, textAsObject);
             Write(text);
         }
 
@@ -348,12 +344,9 @@ namespace Scriban
         {
             var previousFunctionCallState = _isFunctionCallDisabled;
             try
-            {
+            { 
                 _isFunctionCallDisabled = aliasReturnedFunction;
-                scriptNode?.Evaluate(this);
-                var result = Result;
-                Result = null;
-                return result;
+                return scriptNode?.Evaluate(this);
             }
             finally
             {
@@ -474,7 +467,7 @@ namespace Scriban
             return true;
         }
 
-        private object GetValueInternal(ScriptVariable variable)
+        private object GetValueFromVariable(ScriptVariable variable)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
             var stores = GetStoreForSet(variable);
@@ -511,7 +504,7 @@ namespace Scriban
                     }
                     else
                     {
-                        value = GetValueInternal(nextVariable);
+                        value = GetValueFromVariable(nextVariable);
                     }
                 }
                 else
@@ -539,7 +532,7 @@ namespace Scriban
 
                         if (setter)
                         {
-                            if (!accessor.TrySetValue(targetObject, memberName, valueToSet))
+                            if (!accessor.TrySetValue(this, targetObject, memberName, valueToSet))
                             {
                                 throw new ScriptRuntimeException(nextDot.Member.Span,
                                     $"Cannot set a value for the readonly member: {nextDot}"); // unit test: 132-member-accessor-error3.txt
@@ -547,7 +540,7 @@ namespace Scriban
                         }
                         else
                         {
-                            if (!accessor.TryGetValue(targetObject, memberName, out value))
+                            if (!accessor.TryGetValue(this, targetObject, memberName, out value))
                             {
                                 TryGetMember?.Invoke(targetObject, memberName, out value);
                             }
@@ -578,11 +571,11 @@ namespace Scriban
                                     {
                                         var accessor = GetMemberAccessor(targetObject);
                                         var indexAsString =
-                                            ScriptValueConverter.ToString(nextIndexer.Index.Span, index);
+                                            ToString(nextIndexer.Index.Span, index);
 
                                         if (setter)
                                         {
-                                            if (!accessor.TrySetValue(targetObject, indexAsString, valueToSet))
+                                            if (!accessor.TrySetValue(this, targetObject, indexAsString, valueToSet))
                                             {
                                                 throw new ScriptRuntimeException(nextIndexer.Index.Span,
                                                     $"Cannot set a value for the readonly member [{indexAsString}] in the indexer: {nextIndexer.Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
@@ -590,7 +583,7 @@ namespace Scriban
                                         }
                                         else
                                         {
-                                            if (!accessor.TryGetValue(targetObject, indexAsString, out value))
+                                            if (!accessor.TryGetValue(this, targetObject, indexAsString, out value))
                                             {
                                                 TryGetMember?.Invoke(targetObject, indexAsString, out value);
                                             }
@@ -606,7 +599,7 @@ namespace Scriban
                                         }
                                         else
                                         {
-                                            int i = ScriptValueConverter.ToInt(nextIndexer.Index.Span, index);
+                                            int i = ToInt(nextIndexer.Index.Span, index);
 
                                             // Allow negative index from the end of the array
                                             if (i < 0)
@@ -632,9 +625,7 @@ namespace Scriban
                         }
                         else if (!setter)
                         {
-                            targetExpression.Evaluate(this);
-                            value = this.Result;
-                            this.Result = null;
+                            value = Evaluate(targetExpression);
                         }
                         else
                         {

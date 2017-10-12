@@ -202,8 +202,9 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="span">The span.</param>
         /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
-        public virtual string ToString(SourceSpan span)
+        public virtual string ToString(TemplateContext context, SourceSpan span)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
             var result = new StringBuilder();
             result.Append("{");
             bool isFirst = true;
@@ -216,7 +217,7 @@ namespace Scriban.Runtime
                 var keyPair = (KeyValuePair<string, object>)item;
                 result.Append(keyPair.Key);
                 result.Append(": ");
-                result.Append(ScriptValueConverter.ToString(span, keyPair.Value));
+                result.Append(context.ToString(span, keyPair.Value));
                 isFirst = false;
             }
             result.Append("}");

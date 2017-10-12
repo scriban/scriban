@@ -16,8 +16,9 @@ namespace Scriban.Model
 
         public List<ScriptStatement> Statements { get; private set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
+            object result = null;
             for (int i = 0; i < Statements.Count; i++)
             {
                 var statement = Statements[i];
@@ -25,18 +26,17 @@ namespace Scriban.Model
                 var expressionStatement = statement as ScriptExpressionStatement;
                 var isAssign = expressionStatement?.Expression is ScriptAssignExpression;
 
-                context.Result = null;
-                statement.Evaluate(context);
+                result = context.Evaluate(statement);
 
                 // Top-level assignment expression don't output anything
                 if (isAssign)
                 {
-                    context.Result = null;
+                    result = null;
                 }
-                else if (context.Result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
+                else if (result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
                 {
-                    context.Write(Span, context.Result);
-                    context.Result = null;
+                    context.Write(Span, result);
+                    result = null;
                 }
 
                 // If flow state is different, we need to exit this loop
@@ -45,6 +45,7 @@ namespace Scriban.Model
                     break;
                 }
             }
+            return result;
         }
 
         public override string ToString()

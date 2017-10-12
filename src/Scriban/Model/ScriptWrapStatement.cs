@@ -12,7 +12,7 @@ namespace Scriban.Model
 
         public ScriptBlockStatement Body { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             // Check that the Target is actually a function
             var functionCall = Target as ScriptFunctionCall;
@@ -26,12 +26,12 @@ namespace Scriban.Model
                 }
 
                 context.BlockDelegates.Push(Body);
-                context.Result = ScriptFunctionCall.Call(context, this, parameterLessFunction);
+                return ScriptFunctionCall.Call(context, this, parameterLessFunction);
             }
             else
             {
                 context.BlockDelegates.Push(Body);
-                context.Result = context.Evaluate(functionCall);
+                return context.Evaluate(functionCall);
             }
         }
     }

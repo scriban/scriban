@@ -10,16 +10,15 @@ namespace Scriban.Model
     {
         public ScriptExpression Expression { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
-            Expression?.Evaluate(context);
-
-            var codeDelegate = context.Result as ScriptNode;
+            var result = context.Evaluate(Expression);
+            var codeDelegate = result as ScriptNode;
             if (codeDelegate != null)
             {
-                context.Result = null;
-                codeDelegate.Evaluate(context);
+                return context.Evaluate(codeDelegate);
             }
+            return result;
         }
 
         public override string ToString()

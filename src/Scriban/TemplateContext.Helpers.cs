@@ -1,21 +1,23 @@
-// Copyright (c) Alexandre Mutel. All rights reserved.
+﻿// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using System.Text;
+using Scriban.Functions;
 using Scriban.Helpers;
 using Scriban.Model;
 using Scriban.Parsing;
+using Scriban.Runtime;
 
-namespace Scriban.Runtime
+namespace Scriban
 {
-    public static class ScriptValueConverter
+    public partial class TemplateContext
     {
-        public static string ToString(SourceSpan span, object value)
+        public virtual string ToString(SourceSpan span, object value)
         {
             if (value == null)
             {
@@ -24,12 +26,12 @@ namespace Scriban.Runtime
 
             if (value is bool)
             {
-                return ((bool) value) ? "true" : "false";
+                return ((bool)value) ? "true" : "false";
             }
 
             if (value is string)
             {
-                return (string) value;
+                return (string)value;
             }
 
             if (value is IScriptCustomFunction)
@@ -37,11 +39,20 @@ namespace Scriban.Runtime
                 return "<function>";
             }
 
+            if (value is DateTime)
+            {
+                var dateTimeFunctions = GetValueFromVariable(DateTimeFunctions.DateVariable) as DateTimeFunctions;
+                if (dateTimeFunctions != null)
+                {
+                    return dateTimeFunctions.ToString((DateTime) value, dateTimeFunctions.Format);
+                }
+            }
+
             // Dump a script object
             var scriptObject = value as ScriptObject;
             if (scriptObject != null)
             {
-                return scriptObject.ToString(span);
+                return scriptObject.ToString(this, span);
             }
 
             var type = value.GetType();
@@ -88,7 +99,7 @@ namespace Scriban.Runtime
             return value.ToString();
         }
 
-        public static bool ToBool(object value)
+        public virtual bool ToBool(object value)
         {
             // null -> false
             if (value == null)
@@ -102,16 +113,6 @@ namespace Scriban.Runtime
             {
                 // If string is empty, we return false
                 return valueStr != string.Empty;
-            }
-
-            var customType = value as IScriptCustomType;
-            if (customType != null)
-            {
-                object result;
-                if (customType.TryConvertTo(typeof (bool), out result))
-                {
-                    return (bool) result;
-                }
             }
 
             try
@@ -130,7 +131,7 @@ namespace Scriban.Runtime
             return true;
         }
 
-        public static int ToInt(SourceSpan span, object value)
+        public virtual int ToInt(SourceSpan span, object value)
         {
             try
             {
@@ -142,7 +143,7 @@ namespace Scriban.Runtime
             }
         }
 
-        public static double ToDouble(SourceSpan span, object value)
+        public virtual double ToDouble(SourceSpan span, object value)
         {
             try
             {
@@ -154,17 +155,17 @@ namespace Scriban.Runtime
             }
         }
 
-        public static object ToObject(SourceSpan span, object value, Type destinationType)
+        public virtual object ToObject(SourceSpan span, object value, Type destinationType)
         {
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
             if (value == null)
             {
-                if (destinationType == typeof (bool))
+                if (destinationType == typeof(bool))
                 {
                     return false;
                 }
 
-                if (destinationType == typeof (string))
+                if (destinationType == typeof(string))
                 {
                     return string.Empty;
                 }
@@ -199,7 +200,7 @@ namespace Scriban.Runtime
                 return value;
             }
 
-            if (destinationType == typeof (string))
+            if (destinationType == typeof(string))
             {
                 return ToString(span, value);
             }
@@ -213,16 +214,6 @@ namespace Scriban.Runtime
                 catch (FormatException ex)
                 {
                     throw new ScriptRuntimeException(span, $"Unable to convert type [{value.GetType()}] to [{destinationType}]", ex);
-                }
-            }
-
-            var customType = value as IScriptCustomType;
-            if (customType != null)
-            {
-                object result;
-                if (customType.TryConvertTo(destinationType, out result))
-                {
-                    return result;
                 }
             }
 

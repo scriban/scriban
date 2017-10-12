@@ -22,12 +22,12 @@ namespace Scriban.Runtime.Accessors
             PrepareMembers();
         }
 
-        public bool HasMember(object target, string member)
+        public bool HasMember(TemplateContext context, object target, string member)
         {
             return _members.ContainsKey(member);
         }
 
-        public bool TryGetValue(object target, string member, out object value)
+        public bool TryGetValue(TemplateContext context, object target, string member, out object value)
         {
             value = null;
             MemberInfo memberAccessor;
@@ -47,7 +47,7 @@ namespace Scriban.Runtime.Accessors
             return false;
         }
 
-        public bool TrySetValue(object target, string member, object value)
+        public bool TrySetValue(TemplateContext context, object target, string member, object value)
         {
             MemberInfo memberAccessor;
             if (_members.TryGetValue(member, out memberAccessor))

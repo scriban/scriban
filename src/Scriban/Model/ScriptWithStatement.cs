@@ -12,7 +12,7 @@ namespace Scriban.Model
 
         public ScriptBlockStatement Body { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             var target = context.GetValue(Name);
             if (!(target is IScriptObject))
@@ -24,7 +24,8 @@ namespace Scriban.Model
             context.PushGlobal((IScriptObject)target);
             try
             {
-                context.Evaluate(Body);
+                var result = context.Evaluate(Body);
+                return result;
             }
             finally
             {

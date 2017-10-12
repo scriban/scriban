@@ -15,7 +15,7 @@ namespace Scriban.Model
             var index = 0;
             while(context.StepLoop())
             {
-                var conditionResult = ScriptValueConverter.ToBool(context.Evaluate(Condition));
+                var conditionResult = context.ToBool(context.Evaluate(Condition));
                 if (!conditionResult)
                 {
                     break;

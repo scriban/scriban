@@ -23,7 +23,7 @@ namespace Scriban.Functions
             SetValue("map", new DelegateCustomFunction(Map), true);
         }
 
-        public static string Join(string delimiter, IEnumerable enumerable)
+        public static string Join(TemplateContext context, SourceSpan span, string delimiter, IEnumerable enumerable)
         {
             var text = new StringBuilder();
             bool afterFirst = false;
@@ -34,7 +34,7 @@ namespace Scriban.Functions
                     text.Append(delimiter);
                 }
                 // TODO: We need to convert to a string but we don't have a span!
-                text.Append(ScriptValueConverter.ToString(new SourceSpan("unknown", new TextPosition(), new TextPosition()), obj));
+                text.Append(context.ToString(new SourceSpan("unknown", new TextPosition(), new TextPosition()), obj));
                 afterFirst = true;
             }
             return text.ToString();
@@ -225,12 +225,12 @@ namespace Scriban.Functions
 
                     object leftValue = null;
                     object rightValue = null;
-                    if (!leftAccessor.TryGetValue(a, member, out leftValue))
+                    if (!leftAccessor.TryGetValue(context, a, member, out leftValue))
                     {
                         context.TryGetMember?.Invoke(a, member, out leftValue);
                     }
 
-                    if (!rightAccessor.TryGetValue(b, member, out rightValue))
+                    if (!rightAccessor.TryGetValue(context, b, member, out rightValue))
                     {
                         context.TryGetMember?.Invoke(b, member, out rightValue);
                     }
@@ -262,10 +262,10 @@ namespace Scriban.Functions
             foreach (var item in list)
             {
                 var itemAccessor = context.GetMemberAccessor(item);
-                if (itemAccessor.HasMember(item, member))
+                if (itemAccessor.HasMember(context, item, member))
                 {
                     object value = null;
-                    itemAccessor.TryGetValue(item, member, out value);
+                    itemAccessor.TryGetValue(context, item, member, out value);
 
                     yield return value;
                 }
@@ -283,7 +283,7 @@ namespace Scriban.Functions
             string member = null;
             if (parameters.Count == 2)
             {
-               member = ScriptValueConverter.ToString(callerContext.Span, parameters[0]);
+               member = context.ToString(callerContext.Span, parameters[0]);
             }
 
             return Sort(context, target, member);
@@ -296,7 +296,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for map. Expecting at 2 parameters: <property> <array>");
             }
 
-            var member = ScriptValueConverter.ToString(callerContext.Span, parameters[0]);
+            var member = context.ToString(callerContext.Span, parameters[0]);
             var target = parameters[1];
 
             return Map(context, target, member);

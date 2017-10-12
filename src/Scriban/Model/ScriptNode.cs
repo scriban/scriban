@@ -19,6 +19,6 @@ namespace Scriban.Model
         /// Evaluates this instance with the specified context.
         /// </summary>
         /// <param name="context">The template context.</param>
-        public abstract void Evaluate(TemplateContext context);
+        public abstract object Evaluate(TemplateContext context);
     }
 }

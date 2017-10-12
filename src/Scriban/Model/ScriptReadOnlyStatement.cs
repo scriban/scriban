@@ -11,9 +11,10 @@ namespace Scriban.Model
         public ScriptVariable Variable { get; set; }
 
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             context.SetReadOnly(Variable);
+            return null;
         }
     }
 }

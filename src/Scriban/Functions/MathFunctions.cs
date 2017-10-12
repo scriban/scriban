@@ -40,11 +40,11 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for math.round. Expecting at least 1 parameter <precision>? <value>");
             }
 
-            var value = ScriptValueConverter.ToDouble(callerContext.Span, parameters[parameters.Count - 1]);
+            var value = context.ToDouble(callerContext.Span, parameters[parameters.Count - 1]);
             int precision = 0;
             if (parameters.Count == 2)
             {
-                precision = ScriptValueConverter.ToInt(callerContext.Span, parameters[0]);
+                precision = context.ToInt(callerContext.Span, parameters[0]);
             }
 
             return Round(precision, value);

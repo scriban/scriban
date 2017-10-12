@@ -36,16 +36,15 @@ namespace Scriban.Model
             return false;
         }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             switch (Operator)
             {
                 case ScriptUnaryOperator.Not:
                 {
                     var value = context.Evaluate(Right);
-                    context.Result = !ScriptValueConverter.ToBool(value);
+                    return !context.ToBool(value);
                 }
-                    break;
                 case ScriptUnaryOperator.Negate:
                 case ScriptUnaryOperator.Plus:
                 {
@@ -53,28 +52,23 @@ namespace Scriban.Model
 
                     bool negate = Operator == ScriptUnaryOperator.Negate;
 
-                    var customType = value as IScriptCustomType;
-                    if (customType != null)
-                    {
-                        context.Result = customType.EvaluateUnaryExpression(this);
-                    }
-                    else if (value != null)
+                    if (value != null)
                     {
                         if (value is int)
                         {
-                            context.Result = negate ? -((int) value) : value;
+                            return negate ? -((int) value) : value;
                         }
                         else if (value is double)
                         {
-                            context.Result = negate ? -((double) value) : value;
+                            return negate ? -((double) value) : value;
                         }
                         else if (value is float)
                         {
-                            context.Result = negate ? -((float) value) : value;
+                            return negate ? -((float) value) : value;
                         }
                         else if (value is long)
                         {
-                            context.Result = negate ? -((long) value) : value;
+                            return negate ? -((long) value) : value;
                         }
                         else
                         {
@@ -85,16 +79,14 @@ namespace Scriban.Model
                 }
                     break;
                 case ScriptUnaryOperator.FunctionAlias:
-                    context.Result = context.Evaluate(Right, true);
-                    break;
+                    return context.Evaluate(Right, true);
 
                 case ScriptUnaryOperator.FunctionParametersExpand:
                     // Function parameters expand is done at the function level, so here, we simply return the actual list
-                    Right?.Evaluate(context);
-                    break;
-                default:
-                    throw new ScriptRuntimeException(Span, $"Operator [{Operator}] is not supported");
+                    return context.Evaluate(Right);
             }
+
+            throw new ScriptRuntimeException(Span, $"Operator [{Operator}] is not supported");
         }
     }
 }

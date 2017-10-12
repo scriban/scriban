@@ -12,12 +12,13 @@ namespace Scriban.Model
 
         public ScriptStatement Body { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             if (Name != null)
             {
                 context.SetValue(Name, this);
             }
+            return null;
         }
 
         public override string ToString()

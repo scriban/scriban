@@ -7,9 +7,9 @@ namespace Scriban.Model
     {
         public ScriptFunction Function { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
-            context.Result = Function;
+            return Function;
         }
     }
 }

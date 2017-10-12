@@ -5,10 +5,10 @@ namespace Scriban.Runtime
 {
     public interface IObjectAccessor
     {
-        bool HasMember(object target, string member);
+        bool HasMember(TemplateContext context, object target, string member);
 
-        bool TryGetValue(object target, string member, out object value);
+        bool TryGetValue(TemplateContext context, object target, string member, out object value);
 
-        bool TrySetValue(object target, string member, object value);
+        bool TrySetValue(TemplateContext context, object target, string member, object value);
     }
 }

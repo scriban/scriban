@@ -10,12 +10,13 @@ namespace Scriban.Model
     {
         public string Text { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {           
             if (Text != null)
             {
                 context.Output.Append(Text, Span.Start.Offset, Span.End.Offset - Span.Start.Offset + 1);
             }
+            return null;
         }
 
         public override string ToString()

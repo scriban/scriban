@@ -10,36 +10,36 @@ namespace Scriban.Functions
     /// Functions exposed for time object
     /// </summary>
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
-    public class ScriptTimeSpanFunctions : ScriptObject
+    public class TimeSpanFunctions : ScriptObject
     {
         public static TimeSpan Zero => TimeSpan.Zero;
 
-        public static ScriptTimeSpan FromDays(double days)
+        public static TimeSpan FromDays(double days)
         {
             return TimeSpan.FromDays(days);
         }
 
-        public static ScriptTimeSpan FromHours(double hours)
+        public static TimeSpan FromHours(double hours)
         {
             return TimeSpan.FromHours(hours);
         }
 
-        public static ScriptTimeSpan FromMinutes(double minutes)
+        public static TimeSpan FromMinutes(double minutes)
         {
             return TimeSpan.FromMinutes(minutes);
         }
 
-        public static ScriptTimeSpan FromSeconds(double seconds)
+        public static TimeSpan FromSeconds(double seconds)
         {
             return TimeSpan.FromSeconds(seconds);
         }
 
-        public static ScriptTimeSpan FromMilliseconds(double milli)
+        public static TimeSpan FromMilliseconds(double milli)
         {
             return TimeSpan.FromMilliseconds(milli);
         }
 
-        public static ScriptTimeSpan Parse(string text)
+        public static TimeSpan Parse(string text)
         {
             return TimeSpan.Parse(text);
         }

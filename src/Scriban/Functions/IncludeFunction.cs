@@ -28,7 +28,7 @@ namespace Scriban.Functions
             string templateName = null;
             try
             {
-                templateName = ScriptValueConverter.ToString(callerContext.Span, parameters[0]);
+                templateName = context.ToString(callerContext.Span, parameters[0]);
             }
             catch (Exception ex)
             {

@@ -8,13 +8,12 @@ namespace Scriban.Model
     [ScriptSyntax("import statement", "import <expression>")]
     public class ScriptImportStatement : ScriptExpressionStatement
     {
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
-            base.Evaluate(context);
-            var value = context.Result;
+            var value = base.Evaluate(context);
             if (value == null)
             {
-                return;
+                return null;
             }
             var scriptObject = value as ScriptObject;
             if (scriptObject == null)
@@ -23,7 +22,7 @@ namespace Scriban.Model
             }
 
             context.CurrentGlobal.Import(scriptObject);
-            context.Result = null;
+            return null;
         }
     }
 }

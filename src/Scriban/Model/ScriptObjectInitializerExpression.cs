@@ -16,7 +16,7 @@ namespace Scriban.Model
 
         public Dictionary<ScriptExpression, ScriptExpression> Members { get; private set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             var scriptObject = new ScriptObject();
             foreach (var member in Members)
@@ -27,7 +27,7 @@ namespace Scriban.Model
                 var name = variable?.Name ?? literal?.Value?.ToString();
                 scriptObject.SetValue(name, context.Evaluate(member.Value), false);
             }
-            context.Result = scriptObject;
+            return scriptObject;
         }
 
         public override string ToString()

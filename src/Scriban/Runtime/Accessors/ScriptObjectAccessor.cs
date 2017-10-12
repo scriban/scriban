@@ -7,17 +7,17 @@ namespace Scriban.Runtime.Accessors
     {
         public static readonly IObjectAccessor Default = new ScriptObjectAccessor();
 
-        public bool HasMember(object target, string member)
+        public bool HasMember(TemplateContext context, object target, string member)
         {
             return ((IScriptObject)target).Contains(member);
         }
 
-        public bool TryGetValue(object target, string member, out object value)
+        public bool TryGetValue(TemplateContext context, object target, string member, out object value)
         {
             return ((IScriptObject)target).TryGetValue(member, out value);
         }
 
-        public bool TrySetValue(object target, string member, object value)
+        public bool TrySetValue(TemplateContext context, object target, string member, object value)
         {
             return ((IScriptObject)target).TrySetValue(member, value, false);
         }

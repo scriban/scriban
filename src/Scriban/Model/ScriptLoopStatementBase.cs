@@ -25,7 +25,7 @@ namespace Scriban.Model
             context.SetValue(ScriptVariable.LoopOdd, !even);
             context.SetValue(ScriptVariable.LoopIndex, index);
 
-            Body?.Evaluate(context);
+            context.Evaluate(Body);
 
             // Return must bubble up to call site
             if (context.FlowState == ScriptFlowState.Return)
@@ -39,7 +39,7 @@ namespace Scriban.Model
             return result;
         }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             // Notify the context that we enter a loop block (used for variable with scope Loop)
             context.EnterLoop(this);
@@ -58,6 +58,7 @@ namespace Scriban.Model
                     context.FlowState = ScriptFlowState.None;
                 }
             }
+            return null;
         }
         protected abstract void EvaluateImpl(TemplateContext context);
     }

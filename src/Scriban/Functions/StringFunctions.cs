@@ -283,12 +283,12 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for slice. Expecting at least 2 parameters <start> <length>? <text>");
             }
 
-            var text = ScriptValueConverter.ToString(callerContext.Span, parameters[parameters.Count - 1]);
-            var start = ScriptValueConverter.ToInt(callerContext.Span, parameters[0]);
+            var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
+            var start = context.ToInt(callerContext.Span, parameters[0]);
             var length = -1;
             if (parameters.Count == 3)
             {
-                length = ScriptValueConverter.ToInt(callerContext.Span, parameters[1]);
+                length = context.ToInt(callerContext.Span, parameters[1]);
             }
 
             return Slice(text, start, length);

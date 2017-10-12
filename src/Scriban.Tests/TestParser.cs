@@ -194,7 +194,7 @@ end
 
             var context = new TemplateContext();
             context.PushGlobal(rootObject);
-            scriptPage.Evaluate(context);
+            context.Evaluate(scriptPage);
             context.PopGlobal();
 
             // Result

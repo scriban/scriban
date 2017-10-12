@@ -5,6 +5,7 @@ using System;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Model;
+using Scriban.Parsing;
 
 namespace Scriban.Runtime
 {
@@ -268,6 +269,8 @@ namespace Scriban.Runtime
             private readonly ParameterInfo[] parametersInfo;
             private readonly bool hasObjectParams;
             private readonly int lastParamsIndex;
+            private readonly bool hasTemplateContext;
+            private readonly bool hasSpan;
 
             public ObjectFunctionWrapper(object target, MethodInfo method)
             {
@@ -277,6 +280,16 @@ namespace Scriban.Runtime
                 lastParamsIndex = parametersInfo.Length - 1;
                 if (parametersInfo.Length > 0)
                 {
+                    // Check if we have TemplateContext+SourceSpan as first parameters
+                    if (typeof(TemplateContext).GetTypeInfo().IsAssignableFrom(parametersInfo[0].ParameterType.GetTypeInfo()))
+                    {
+                        hasTemplateContext = true;
+                        if (parametersInfo.Length > 1)
+                        {
+                            hasSpan = typeof(SourceSpan).GetTypeInfo().IsAssignableFrom(parametersInfo[1].ParameterType.GetTypeInfo());
+                        }
+                    }
+
                     var lastParam = parametersInfo[lastParamsIndex];
 
                     if (lastParam.ParameterType == typeof(object[]))
@@ -292,10 +305,20 @@ namespace Scriban.Runtime
 
             public object Evaluate(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
             {
-                // Check parameters
-                if ((hasObjectParams && parameters.Count < parametersInfo.Length - 1) || (!hasObjectParams && parameters.Count != parametersInfo.Length))
+                var expectedNumberOfParameters = parametersInfo.Length;
+                if (hasTemplateContext)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{parametersInfo.Length}] for [{callerContext}]");
+                    expectedNumberOfParameters--;
+                    if (hasSpan)
+                    {
+                        expectedNumberOfParameters--;
+                    }
+                }
+
+                // Check parameters
+                if ((hasObjectParams && parameters.Count < expectedNumberOfParameters - 1) || (!hasObjectParams && parameters.Count != expectedNumberOfParameters))
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{expectedNumberOfParameters}] for [{callerContext}]");
                 }
 
                 // Convert arguments
@@ -307,19 +330,32 @@ namespace Scriban.Runtime
                     arguments[lastParamsIndex] = paramArguments;
                 }
 
-                for (int i = 0; i < parameters.Count; i++)
+                // Copy TemplateContext/SourceSpan parameters
+                int argIndex = 0;
+                if (hasTemplateContext)
+                {
+                    arguments[0] = context;
+                    argIndex++;
+                    if (hasSpan)
+                    {
+                        arguments[1] = callerContext.Span;
+                        argIndex++;
+                    }
+                }
+
+                for (int i = 0; i < parameters.Count; i++, argIndex++)
                 {
                     var destType = hasObjectParams && i >= lastParamsIndex ? typeof(object) : parametersInfo[i].ParameterType;
                     try
                     {
-                        var argValue = ScriptValueConverter.ToObject(callerContext.Span, parameters[i], destType);
+                        var argValue = context.ToObject(callerContext.Span, parameters[i], destType);
                         if (hasObjectParams && i >= lastParamsIndex)
                         {
-                            paramArguments[i - lastParamsIndex] = argValue;
+                            paramArguments[argIndex - lastParamsIndex] = argValue;
                         }
                         else
                         {
-                            arguments[i] = argValue;
+                            arguments[argIndex] = argValue;
                         }
                     }
                     catch (Exception exception)

@@ -20,7 +20,7 @@ namespace Scriban.Model
 
         public List<ScriptExpression> Arguments { get; private set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             // Call evaluate on the target, but don't automatically call the function as if it was a parameterless call.
             var targetFunction = context.Evaluate(Target, true);
@@ -31,7 +31,7 @@ namespace Scriban.Model
                 throw new ScriptRuntimeException(Target.Span, $"The target function [{Target}] is null");
             }
 
-            context.Result = Call(context, this, targetFunction, Arguments);
+            return Call(context, this, targetFunction, Arguments);
         }
 
         public override string ToString()

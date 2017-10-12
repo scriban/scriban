@@ -10,9 +10,9 @@ namespace Scriban.Model
     {
         public ScriptConditionStatement Else { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
-            Else?.Evaluate(context);
+            return context.Evaluate(Else);
         }
     }
 
@@ -26,16 +26,16 @@ namespace Scriban.Model
 
         public ScriptBlockStatement Then { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
-            var conditionValue = ScriptValueConverter.ToBool(context.Evaluate(Condition));
+            var conditionValue = context.ToBool(context.Evaluate(Condition));
             if (conditionValue)
             {
-                Then?.Evaluate(context);
+                return context.Evaluate(Then);
             }
             else
             {
-                base.Evaluate(context);
+                return base.Evaluate(context);
             }
         }
 
@@ -50,10 +50,10 @@ namespace Scriban.Model
     {
         public ScriptBlockStatement Body { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
-            Body?.Evaluate(context);
-            base.Evaluate(context);
+            context.Evaluate(Body);
+            return base.Evaluate(context);
         }
     }
 }

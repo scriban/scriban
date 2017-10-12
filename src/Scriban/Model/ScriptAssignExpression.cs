@@ -12,11 +12,11 @@ namespace Scriban.Model
 
         public ScriptExpression Value { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             var valueObject = context.Evaluate(Value);
             context.SetValue(Target, valueObject);
-            context.Result = valueObject;
+            return valueObject;
         }
 
         public override string ToString()

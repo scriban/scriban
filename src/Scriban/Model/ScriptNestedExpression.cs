@@ -10,9 +10,9 @@ namespace Scriban.Model
     {
         public ScriptExpression Expression { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
-            Expression?.Evaluate(context);
+            return context.Evaluate(Expression);
         }
 
         public override string ToString()

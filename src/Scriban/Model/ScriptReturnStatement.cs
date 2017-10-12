@@ -8,10 +8,10 @@ namespace Scriban.Model
     [ScriptSyntax("return statement", "return <expression>?")]
     public class ScriptReturnStatement : ScriptExpressionStatement
     {
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             context.FlowState = ScriptFlowState.Return;
-            base.Evaluate(context);
+            return base.Evaluate(context);
         }
     }
 }

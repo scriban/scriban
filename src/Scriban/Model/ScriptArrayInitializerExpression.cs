@@ -17,7 +17,7 @@ namespace Scriban.Model
 
         public List<ScriptExpression> Values { get; private set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             var scriptArray = new ScriptArray();
             foreach (var value in Values)
@@ -25,7 +25,7 @@ namespace Scriban.Model
                 var valueEval = context.Evaluate(value);
                 scriptArray.Add(valueEval);
             }
-            context.Result = scriptArray;
+            return scriptArray;
         }
 
         public override string ToString()

@@ -12,7 +12,7 @@ namespace Scriban.Model
 
         public ScriptBlockStatement Body { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
             // unit test: 230-capture-statement.txt
             context.PushOutput();
@@ -22,6 +22,7 @@ namespace Scriban.Model
             var result = context.PopOutput();
 
             context.SetValue(Target, result);
+            return null;
         }
     }
 }

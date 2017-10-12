@@ -12,9 +12,9 @@ namespace Scriban.Model
 
         public ScriptVariable Member { get; set; }
 
-        public override void Evaluate(TemplateContext context)
+        public override object Evaluate(TemplateContext context)
         {
-            context.Result = context.GetValue(this);
+            return context.GetValue(this);
         }
 
         public override string ToString()
