@@ -5,3 +5,7 @@
 5
 4
 4.56
+true
+true
+false
+4.24

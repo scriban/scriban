@@ -5,3 +5,7 @@
 {{ 4.6 | math.round }}
 {{ 4.3 | math.round }}
 {{ 4.5612 | math.round 2 }}
+{{ 4.5 | math.is_number }}
+{{ 4 | math.is_number }}
+{{ "toto" | math.is_number }}
+{{ 4.2435 | math.format "0.##" }}

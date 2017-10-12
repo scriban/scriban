@@ -916,6 +916,41 @@ Will output:
 4.56
 ```
 
+#### `math.format <format> <value>`
+
+Formats a value according to a .NET number format (e.g. `"0.##"` or `"0.000"`)
+
+```
+{{ 4.6562 | math.format "0.##" }}
+```
+
+Will output:
+
+```
+4.65
+```
+
+#### `math.is_number <value>`
+
+Returns a boolean indicating whether the input value is a number.
+
+```
+{{ 4.6 | math.is_number }}
+{{ 4 | math.is_number }}
+{{ "yo" | math.is_number }}
+```
+
+Will output:
+
+```
+true
+true
+false
+```
+
+
+
+
 ### 10.3 String functions
 
 #### `string.capitalize`
