@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using Scriban.Helpers;
+using Scriban.Parsing;
 
 namespace Scriban.Runtime.Accessors
 {
@@ -22,12 +23,12 @@ namespace Scriban.Runtime.Accessors
             PrepareMembers();
         }
 
-        public bool HasMember(TemplateContext context, object target, string member)
+        public bool HasMember(TemplateContext context, SourceSpan span, object target, string member)
         {
             return _members.ContainsKey(member);
         }
 
-        public bool TryGetValue(TemplateContext context, object target, string member, out object value)
+        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
         {
             value = null;
             MemberInfo memberAccessor;
@@ -47,7 +48,7 @@ namespace Scriban.Runtime.Accessors
             return false;
         }
 
-        public bool TrySetValue(TemplateContext context, object target, string member, object value)
+        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
             MemberInfo memberAccessor;
             if (_members.TryGetValue(member, out memberAccessor))

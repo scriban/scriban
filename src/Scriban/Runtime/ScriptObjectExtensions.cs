@@ -56,6 +56,11 @@ namespace Scriban.Runtime
             script.Import(obj, ScriptMemberImportFlags.All);
         }
 
+        public static bool TryGetValue(this IScriptObject @this, string key, out object value)
+        {
+            return @this.TryGetValue(null, new SourceSpan(), key, out value);
+        }
+
         /// <summary>
         /// Tries to set the value and readonly state of the specified member.
         /// </summary>
@@ -69,7 +74,7 @@ namespace Scriban.Runtime
             {
                 return false;
             }
-            @this.SetValue(member, value, readOnly);
+            @this.SetValue(null, new SourceSpan(), member, value, readOnly);
             return true;
         }
 
@@ -191,7 +196,7 @@ namespace Scriban.Runtime
                         }
 
                         // If field is init only or literal, it cannot be set back so we mark it as read-only
-                        script.SetValue(newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                        script.SetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
                     }
                 }
             }
@@ -219,7 +224,7 @@ namespace Scriban.Runtime
                             newPropertyName = property.Name;
                         }
 
-                        script.SetValue(newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
+                        script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
                     }
                 }
             }
@@ -242,7 +247,7 @@ namespace Scriban.Runtime
                             newMethodName = method.Name;
                         }
 
-                        script.SetValue(newMethodName, new ObjectFunctionWrapper(obj, method), true);
+                        script.SetValue(null, new SourceSpan(), newMethodName, new ObjectFunctionWrapper(obj, method), true);
                     }
                 }
             }
@@ -259,7 +264,7 @@ namespace Scriban.Runtime
             if (member == null) throw new ArgumentNullException(nameof(member));
             if (function == null) throw new ArgumentNullException(nameof(function));
 
-            script.SetValue(member, new ObjectFunctionWrapper(function.Target, function.GetMethodInfo()), true);
+            script.SetValue(null, new SourceSpan(), member, new ObjectFunctionWrapper(function.Target, function.GetMethodInfo()), true);
         }
 
         private class ObjectFunctionWrapper : IScriptCustomFunction

@@ -43,7 +43,7 @@ namespace Scriban
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if the member on the target , <c>false</c> otherwise.</returns>
-        public delegate bool TryGetMemberDelegate(object target, string member, out object value);
+        public delegate bool TryGetMemberDelegate(TemplateContext context, SourceSpan span, object target, string member, out object value);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TemplateContext"/> class.
@@ -474,7 +474,7 @@ namespace Scriban
             object value = null;
             foreach (var store in stores)
             {
-                if (store.TryGetValue(variable.Name, out value))
+                if (store.TryGetValue(this, variable.Span, variable.Name, out value))
                 {
                     return value;
                 }
@@ -532,7 +532,7 @@ namespace Scriban
 
                         if (setter)
                         {
-                            if (!accessor.TrySetValue(this, targetObject, memberName, valueToSet))
+                            if (!accessor.TrySetValue(this, targetExpression.Span, targetObject, memberName, valueToSet))
                             {
                                 throw new ScriptRuntimeException(nextDot.Member.Span,
                                     $"Cannot set a value for the readonly member: {nextDot}"); // unit test: 132-member-accessor-error3.txt
@@ -540,9 +540,9 @@ namespace Scriban
                         }
                         else
                         {
-                            if (!accessor.TryGetValue(this, targetObject, memberName, out value))
+                            if (!accessor.TryGetValue(this, targetExpression.Span, targetObject, memberName, out value))
                             {
-                                TryGetMember?.Invoke(targetObject, memberName, out value);
+                                TryGetMember?.Invoke(this, targetExpression.Span, targetObject, memberName, out value);
                             }
                         }
                     }
@@ -575,7 +575,7 @@ namespace Scriban
 
                                         if (setter)
                                         {
-                                            if (!accessor.TrySetValue(this, targetObject, indexAsString, valueToSet))
+                                            if (!accessor.TrySetValue(this, targetExpression.Span, targetObject, indexAsString, valueToSet))
                                             {
                                                 throw new ScriptRuntimeException(nextIndexer.Index.Span,
                                                     $"Cannot set a value for the readonly member [{indexAsString}] in the indexer: {nextIndexer.Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
@@ -583,9 +583,9 @@ namespace Scriban
                                         }
                                         else
                                         {
-                                            if (!accessor.TryGetValue(this, targetObject, indexAsString, out value))
+                                            if (!accessor.TryGetValue(this, targetExpression.Span, targetObject, indexAsString, out value))
                                             {
-                                                TryGetMember?.Invoke(targetObject, indexAsString, out value);
+                                                TryGetMember?.Invoke(this, targetExpression.Span, targetObject, indexAsString, out value);
                                             }
                                         }
                                     }

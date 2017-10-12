@@ -39,12 +39,12 @@ namespace Scriban.Runtime.Accessors
             return true;
         }
 
-        public bool HasMember(TemplateContext context, object target, string member)
+        public bool HasMember(TemplateContext context, SourceSpan span, object target, string member)
         {
             return ((IDictionary) target).Contains(member);
         }
 
-        public bool TryGetValue(TemplateContext context, object target, string member, out object value)
+        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
         {
             value = null;
             if (((IDictionary) target).Contains(member))
@@ -55,7 +55,7 @@ namespace Scriban.Runtime.Accessors
             return false;
         }
         
-        public bool TrySetValue(TemplateContext context, object target, string member, object value)
+        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
             ((IDictionary) target)[member] = value;
             return true;
@@ -68,12 +68,12 @@ namespace Scriban.Runtime.Accessors
         {
         }
 
-        public bool HasMember(TemplateContext context, object value, string member)
+        public bool HasMember(TemplateContext context, SourceSpan span, object value, string member)
         {
             return ((IDictionary<TKey, TValue>) value).ContainsKey(TransformToKey(context, member));
         }
 
-        public bool TryGetValue(TemplateContext context, object target, string member, out object value)
+        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
         {
             TValue tvalue;
             var result = ((IDictionary<TKey, TValue>) target).TryGetValue(TransformToKey(context, member), out tvalue);
@@ -81,7 +81,7 @@ namespace Scriban.Runtime.Accessors
             return result;
         }
 
-        public bool TrySetValue(TemplateContext context, object target, string member, object value)
+        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
             ((IDictionary<TKey, TValue>) value)[TransformToKey(context, member)] = (TValue)value;
             return true;

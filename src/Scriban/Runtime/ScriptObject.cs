@@ -77,10 +77,12 @@ namespace Scriban.Runtime
         /// <summary>
         /// Tries the get the value of the specified member.
         /// </summary>
+        /// <param name="context"></param>
+        /// <param name="span"></param>
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if the value was retrieved</returns>
-        public virtual bool TryGetValue(string member, out object value)
+        public virtual bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
         {
             InternalValue internalValue;
             var result = Store.TryGetValue(member, out internalValue);
@@ -112,20 +114,25 @@ namespace Scriban.Runtime
             return (T)obj;
         }
 
+        bool IDictionary<String,Object>.TryGetValue(string key, out object value)
+        {
+            return TryGetValue(null, new SourceSpan(), key, out value);
+        }
+
         public virtual object this[string key]
         {
             get
             {
                 if (key == null) throw new ArgumentNullException(nameof(key));
                 object value;
-                TryGetValue(key, out value);
+                TryGetValue(null, new SourceSpan(), key, out value);
                 return value;
             }
             set
             {
                 if (key == null) throw new ArgumentNullException(nameof(key));
                 this.AssertNotReadOnly();
-                SetValue(key, value, false);
+                SetValue(null, new SourceSpan(), key, value, false);
             }
         }
 
@@ -151,18 +158,24 @@ namespace Scriban.Runtime
         /// <summary>
         /// Sets the value and readonly state of the specified member. This method overrides previous readonly state.
         /// </summary>
+        /// <param name="context"></param>
+        /// <param name="span"></param>
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        public virtual void SetValue(string member, object value, bool readOnly)
+        public virtual void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
         {
             this.AssertNotReadOnly();
             Store[member] = new InternalValue(value, readOnly);
         }
 
+        public void SetValue(string member, object value, bool readOnly)
+        {
+            SetValue(null, new SourceSpan(), member, value, readOnly);
+        }
         public void Add(string key, object value)
         {
-            SetValue(key, value, false);
+            SetValue(null, new SourceSpan(), key, value, false);
         }
 
         public bool ContainsKey(string key)

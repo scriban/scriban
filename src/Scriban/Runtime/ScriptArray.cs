@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Scriban.Model;
+using Scriban.Parsing;
 
 namespace Scriban.Runtime
 {
@@ -229,15 +230,9 @@ namespace Scriban.Runtime
             return ScriptObject.Contains(member);
         }
 
-        public virtual bool TryGetValue(string member, out object value)
+        public virtual bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
         {
-            return ScriptObject.TryGetValue(member, out value);
-        }
-
-        object IScriptObject.this[string key]
-        {
-            get => ScriptObject[key];
-            set => ScriptObject[key] = value;
+            return ScriptObject.TryGetValue(context, span, member, out value);
         }
 
         public virtual bool CanWrite(string member)
@@ -245,9 +240,9 @@ namespace Scriban.Runtime
             return ScriptObject.CanWrite(member);
         }
 
-        public virtual void SetValue(string member, object value, bool readOnly)
+        public virtual void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
         {
-            ScriptObject.SetValue(member, value, readOnly);
+            ScriptObject.SetValue(context, span, member, value, readOnly);
         }
 
         public virtual bool Remove(string member)

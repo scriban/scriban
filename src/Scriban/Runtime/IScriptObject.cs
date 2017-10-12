@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
+using Scriban.Parsing;
 
 namespace Scriban.Runtime
 {
@@ -27,12 +28,12 @@ namespace Scriban.Runtime
         /// <summary>
         /// Tries the get the value of the specified member.
         /// </summary>
+        /// <param name="context"></param>
+        /// <param name="span"></param>
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if the value was retrieved</returns>
-        bool TryGetValue(string member, out object value);
-
-        object this[string key] { get; set; }
+        bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value);
 
         /// <summary>
         /// Determines whether the specified member is read-only.
@@ -44,10 +45,12 @@ namespace Scriban.Runtime
         /// <summary>
         /// Sets the value and readonly state of the specified member. This method overrides previous readonly state.
         /// </summary>
+        /// <param name="context"></param>
+        /// <param name="span"></param>
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        void SetValue(string member, object value, bool readOnly);
+        void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly);
 
         /// <summary>
         /// Removes the specified member from this object.

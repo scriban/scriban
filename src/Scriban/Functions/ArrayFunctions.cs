@@ -20,7 +20,6 @@ namespace Scriban.Functions
         public ArrayFunctions()
         {
             SetValue("sort", new DelegateCustomFunction(Sort), true);
-            SetValue("map", new DelegateCustomFunction(Map), true);
         }
 
         public static string Join(TemplateContext context, SourceSpan span, string delimiter, IEnumerable enumerable)
@@ -194,7 +193,7 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static IEnumerable Sort(TemplateContext context, object input, string member = null)
+        public static IEnumerable Sort(TemplateContext context, SourceSpan span, object input, string member = null)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (input == null)
@@ -225,14 +224,14 @@ namespace Scriban.Functions
 
                     object leftValue = null;
                     object rightValue = null;
-                    if (!leftAccessor.TryGetValue(context, a, member, out leftValue))
+                    if (!leftAccessor.TryGetValue(context, span, a, member, out leftValue))
                     {
-                        context.TryGetMember?.Invoke(a, member, out leftValue);
+                        context.TryGetMember?.Invoke(context, span, a, member, out leftValue);
                     }
 
-                    if (!rightAccessor.TryGetValue(context, b, member, out rightValue))
+                    if (!rightAccessor.TryGetValue(context, span, b, member, out rightValue))
                     {
-                        context.TryGetMember?.Invoke(b, member, out rightValue);
+                        context.TryGetMember?.Invoke(context, span, b, member, out rightValue);
                     }
 
                     return Comparer<object>.Default.Compare(leftValue, rightValue);
@@ -242,8 +241,13 @@ namespace Scriban.Functions
             return list;
         }
 
+        public static object Map(TemplateContext context, SourceSpan span, string member, object input)
+        {
+            return MapInternal(context, span, member, input);
+        }
+
         [ScriptMemberIgnore]
-        public static IEnumerable Map(TemplateContext context, object input, string member)
+        private static IEnumerable MapInternal(TemplateContext context, SourceSpan span, string member, object input)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             if (member == null) throw new ArgumentNullException(nameof(member));
@@ -262,10 +266,10 @@ namespace Scriban.Functions
             foreach (var item in list)
             {
                 var itemAccessor = context.GetMemberAccessor(item);
-                if (itemAccessor.HasMember(context, item, member))
+                if (itemAccessor.HasMember(context, span, item, member))
                 {
                     object value = null;
-                    itemAccessor.TryGetValue(context, item, member, out value);
+                    itemAccessor.TryGetValue(context, span, item, member, out value);
 
                     yield return value;
                 }
@@ -286,20 +290,7 @@ namespace Scriban.Functions
                member = context.ToString(callerContext.Span, parameters[0]);
             }
 
-            return Sort(context, target, member);
-        }
-
-        private static object Map(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
-        {
-            if (parameters.Count != 2)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for map. Expecting at 2 parameters: <property> <array>");
-            }
-
-            var member = context.ToString(callerContext.Span, parameters[0]);
-            var target = parameters[1];
-
-            return Map(context, target, member);
+            return Sort(context, callerContext.Span, target, member);
         }
     }
 }

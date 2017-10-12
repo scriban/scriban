@@ -25,7 +25,7 @@ namespace Scriban.Model
                 var literal = member.Key as ScriptLiteral;
 
                 var name = variable?.Name ?? literal?.Value?.ToString();
-                scriptObject.SetValue(name, context.Evaluate(member.Value), false);
+                scriptObject.SetValue(context, Span, name, context.Evaluate(member.Value), false);
             }
             return scriptObject;
         }

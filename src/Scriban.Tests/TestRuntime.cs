@@ -5,6 +5,7 @@ using System;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Scriban.Model;
+using Scriban.Parsing;
 using Scriban.Runtime;
 
 namespace Scriban.Tests
@@ -62,7 +63,7 @@ namespace Scriban.Tests
 
             var context = new TemplateContext
             {
-                TryGetMember = (object target, string member, out object value) =>
+                TryGetMember = (TemplateContext localContext, SourceSpan span, object target, string member, out object value) =>
                 {
                     value = null;
                     if (member == "myvar")
