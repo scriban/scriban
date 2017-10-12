@@ -7,7 +7,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <VersionPrefix>0.6.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
-    <TargetFrameworks>net35;portable-net40+sl5+win8+wpa81+wp8;netstandard1.1</TargetFrameworks>
+    <TargetFrameworks>net35;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
@@ -45,7 +45,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'portable-net40+sl5+win8+wpa81+wp8' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81' ">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -59,7 +59,7 @@
     <DefineConstants>$(DefineConstants);CORE</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(TargetFramework)' == 'portable-net40+sl5+win8+wpa81+wp8'">
+  <PropertyGroup Condition="'$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81'">
     <DefineConstants>$(DefineConstants);NETPRE45</DefineConstants>
     <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>

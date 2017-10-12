@@ -317,6 +317,19 @@ namespace Scriban.Model
             throw new ScriptRuntimeException(Span, $"The operator [{op.ToText()}] is not implemented for float<->float");
         }
 
+
+        private object Calculate(ScriptBinaryOperator op, bool left, bool right)
+        {
+            switch (op)
+            {
+                case ScriptBinaryOperator.CompareEqual:
+                    return left == right;
+                case ScriptBinaryOperator.CompareNotEqual:
+                    return left != right;
+            }
+            throw new ScriptRuntimeException(Span, $"The operator [{op.ToText()}] is not valid for bool<->bool");
+        }
+
         private object Calculate(ScriptBinaryOperator op, object leftValue, Type leftType, object rightValue, Type rightType)
         {
             var customType = leftValue as IScriptCustomType ?? rightValue as IScriptCustomType;
@@ -373,6 +386,19 @@ namespace Scriban.Model
                 var leftInt = (int) ScriptValueConverter.ToObject(Span, leftValue, typeof (int));
                 return Calculate(op, leftInt, (int) rightValue);
             }
+
+            if (leftType == typeof(bool))
+            {
+                var rightBool = (bool)ScriptValueConverter.ToObject(Span, rightValue, typeof(bool));
+                return Calculate(op, (bool)leftValue, rightBool);
+            }
+
+            if (rightType == typeof(bool))
+            {
+                var leftBool = (bool)ScriptValueConverter.ToObject(Span, leftValue, typeof(bool));
+                return Calculate(op, leftBool, (bool)rightValue);
+            }
+
             throw new ScriptRuntimeException(Span, $"Unsupported types [{leftValue ?? "null"}/{leftType?.ToString() ?? "null"}] {op.ToText()} [{rightValue ?? "null"}/{rightType?.ToString() ?? "null"}] for binary operation");
         }
     }
