@@ -5,13 +5,18 @@
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.6.0</VersionPrefix>
+    <VersionPrefix>0.7.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
     <TargetFrameworks>net35;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
+&gt; 0.7.0
+ - Improve extensibility
+ - Breaking change: Replace ScriptDate by DateTime to avoid conversions
+ - Breaking change: Internals of ScriptNode evaluation changed. TemplateContext is now propagated to ScriptObject when evaluating function
+ - New: Add support for math.format and math.is_number
 &gt; 0.6.0
  - Change ScriptObject.IsReadOnly to virtual
  - Make ScriptArray methods mostly virtual
