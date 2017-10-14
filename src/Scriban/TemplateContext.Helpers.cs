@@ -5,7 +5,7 @@
 using System;
 using System.Collections;
 using System.Globalization;
-using System.Reflection;
+using System.Reflection; // Leave this as it is required by some .NET targets
 using System.Text;
 using Scriban.Functions;
 using Scriban.Helpers;
@@ -17,6 +17,12 @@ namespace Scriban
 {
     public partial class TemplateContext
     {
+        /// <summary>
+        /// Called whenever an objects is converted to a string. This method can be overriden.
+        /// </summary>
+        /// <param name="span">The current span calling this ToString</param>
+        /// <param name="value">The object value to print</param>
+        /// <returns>A string representing the object value</returns>
         public virtual string ToString(SourceSpan span, object value)
         {
             if (value == null)
@@ -41,6 +47,7 @@ namespace Scriban
 
             if (value is DateTime)
             {
+                // Output DateTime only if we have the date builtin object accessible (that provides the implementation of the ToString method)
                 var dateTimeFunctions = GetValueFromVariable(DateTimeFunctions.DateVariable) as DateTimeFunctions;
                 if (dateTimeFunctions != null)
                 {
@@ -55,6 +62,7 @@ namespace Scriban
                 return scriptObject.ToString(this, span);
             }
 
+            // If we have a primitive, we can try to convert it
             var type = value.GetType();
             if (type.GetTypeInfo().IsPrimitive)
             {
@@ -99,6 +107,11 @@ namespace Scriban
             return value.ToString();
         }
 
+        /// <summary>
+        /// Called when evaluating a value to a boolean. Can be overriden for specific object scenarios.
+        /// </summary>
+        /// <param name="value">An object value</param>
+        /// <returns>The boolean representation of the object</returns>
         public virtual bool ToBool(object value)
         {
             // null -> false
@@ -131,6 +144,12 @@ namespace Scriban
             return true;
         }
 
+        /// <summary>
+        /// Called when evaluating a value to an integer. Can be overriden.
+        /// </summary>
+        /// <param name="span">The span requiring this conversion</param>
+        /// <param name="value">The value of the object to convert</param>
+        /// <returns>The integer value</returns>
         public virtual int ToInt(SourceSpan span, object value)
         {
             try
@@ -143,6 +162,12 @@ namespace Scriban
             }
         }
 
+        /// <summary>
+        /// Called when evaluating a value to an double. Can be overriden.
+        /// </summary>
+        /// <param name="span">The span requiring this conversion</param>
+        /// <param name="value">The value of the object to convert</param>
+        /// <returns>The double value</returns>
         public virtual double ToDouble(SourceSpan span, object value)
         {
             try
@@ -155,9 +180,18 @@ namespace Scriban
             }
         }
 
+        /// <summary>
+        /// Called when trying to convert an object to a destination type. Can be overriden.
+        /// </summary>
+        /// <param name="span">The span requiring this conversion</param>
+        /// <param name="value">The value of the object to convert</param>
+        /// <param name="destinationType">The destination type to try to convert to</param>
+        /// <returns>The object value of possibly the destination type</returns>
         public virtual object ToObject(SourceSpan span, object value, Type destinationType)
         {
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
+
+            // Handle null case
             if (value == null)
             {
                 if (destinationType == typeof(bool))

@@ -3,6 +3,9 @@
 // See license.txt file in the project root for full license information.
 namespace Scriban.Parsing
 {
+    /// <summary>
+    /// Defines the precise source location.
+    /// </summary>
     public struct SourceSpan
     {
         public SourceSpan(string fileName, TextPosition start, TextPosition end)

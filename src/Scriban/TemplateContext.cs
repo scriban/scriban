@@ -93,18 +93,39 @@ namespace Scriban
             PushGlobal(BuiltinObject);
         }
 
+        /// <summary>
+        /// Gets or sets the <see cref="ITemplateLoader"/> used by the include directive. Must be set in order for the include directive to work.
+        /// </summary>
         public ITemplateLoader TemplateLoader { get; set; }
 
+        /// <summary>
+        /// The <see cref="ParserOptions"/> used by the <see cref="TemplateLoader"/> via the include directive.
+        /// </summary>
         public ParserOptions TemplateLoaderParserOptions { get; set; }
 
+        /// <summary>
+        /// The <see cref="LexerOptions"/> used by the <see cref="TemplateLoader"/> via the include directive.
+        /// </summary>
         public LexerOptions TemplateLoaderLexerOptions { get; set; }
 
+        /// <summary>
+        /// A global settings used to rename property names of exposed objects.
+        /// </summary>
         public IMemberRenamer MemberRenamer { get; set; }
 
+        /// <summary>
+        /// A loop limit that can be used at runtime to limit the number of loops.
+        /// </summary>
         public int LoopLimit { get; set; }
 
+        /// <summary>
+        /// A function recursive limit count used at runtime to limit the number of recursive calls.
+        /// </summary>
         public int RecursiveLimit { get; set; }
 
+        /// <summary>
+        /// Gets or sets a boolean indicating whether to enable text output via <see cref="Output"/>.
+        /// </summary>
         public bool EnableOutput { get; set; }
 
         /// <summary>
@@ -112,6 +133,9 @@ namespace Scriban
         /// </summary>
         public StringBuilder Output => _outputs.Peek();
 
+        /// <summary>
+        /// Gets the builtin objects (that can be setup via the constructor). Default is retrieved via <see cref="GetDefaultBuiltinObject"/>.
+        /// </summary>
         public ScriptObject BuiltinObject { get; }
 
         /// <summary>
@@ -144,8 +168,14 @@ namespace Scriban
         /// </summary>
         public Dictionary<object, object> Tags { get; }
 
+        /// <summary>
+        /// Store the current stack of pipe arguments used by <see cref="ScriptPipeCall"/> and <see cref="ScriptFunctionCall"/>
+        /// </summary>
         internal Stack<ScriptExpression> PipeArguments { get; }
 
+        /// <summary>
+        /// Gets or sets the internal state of control flow.
+        /// </summary>
         internal ScriptFlowState FlowState { get; set; }
 
         /// <summary>
@@ -241,7 +271,7 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Pushes a new model context accessible to the template.
+        /// Pushes a new object context accessible to the template.
         /// </summary>
         /// <param name="scriptObject">The script object.</param>
         /// <exception cref="System.ArgumentNullException"></exception>
@@ -253,9 +283,9 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Pops the previous model context.
+        /// Pops the previous object context.
         /// </summary>
-        /// <returns>The previous model context</returns>
+        /// <returns>The previous object context</returns>
         /// <exception cref="System.InvalidOperationException">Unexpected PopGlobal() not matching a PushGlobal</exception>
         public IScriptObject PopGlobal()
         {
@@ -376,6 +406,11 @@ namespace Scriban
             return accessor;
         }
 
+        /// <summary>
+        /// Gets the member accessor for the specified object if not already cached. This method can have an override.
+        /// </summary>
+        /// <param name="target"></param>
+        /// <returns></returns>
         protected virtual IObjectAccessor GetMemberAccessorImpl(object target)
         {
             var type = target.GetType();
@@ -401,6 +436,10 @@ namespace Scriban
             return builtinObject;
         }
 
+        /// <summary>
+        /// Called when entering a function.
+        /// </summary>
+        /// <param name="caller"></param>
         internal void EnterFunction(ScriptNode caller)
         {
             _functionDepth++;
@@ -412,18 +451,29 @@ namespace Scriban
             PushVariableScope(ScriptVariableScope.Local);
         }
 
+        /// <summary>
+        /// Called when exiting a function.
+        /// </summary>
         internal void ExitFunction()
         {
             PopVariableScope(ScriptVariableScope.Local);
             _functionDepth--;
         }
 
+        /// <summary>
+        /// Push a new <see cref="ScriptVariableScope"/> for variables
+        /// </summary>
+        /// <param name="scope"></param>
         internal void PushVariableScope(ScriptVariableScope scope)
         {
             var store = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
             (scope == ScriptVariableScope.Local ? _localStores : _loopStores).Push(store);
         }
 
+        /// <summary>
+        /// Pops a previous <see cref="ScriptVariableScope"/>.
+        /// </summary>
+        /// <param name="scope"></param>
         internal void PopVariableScope(ScriptVariableScope scope)
         {
             var stores = (scope == ScriptVariableScope.Local ? _localStores : _loopStores);
@@ -440,6 +490,10 @@ namespace Scriban
             _availableStores.Push(store);
         }
 
+        /// <summary>
+        /// Notifies this context when entering a loop.
+        /// </summary>
+        /// <param name="loop"></param>
         internal void EnterLoop(ScriptLoopStatementBase loop)
         {
             if (loop == null) throw new ArgumentNullException(nameof(loop));
@@ -447,12 +501,19 @@ namespace Scriban
             PushVariableScope(ScriptVariableScope.Loop);
         }
 
+        /// <summary>
+        /// Notifies this context when exiting a loop.
+        /// </summary>
         internal void ExitLoop()
         {
             PopVariableScope(ScriptVariableScope.Loop);
             _loops.Pop();
         }
 
+        /// <summary>
+        /// Notifies this context when a step in a loop is performed.
+        /// </summary>
+        /// <returns></returns>
         internal bool StepLoop()
         {
             Debug.Assert(_loops.Count > 0);
@@ -467,6 +528,11 @@ namespace Scriban
             return true;
         }
 
+        /// <summary>
+        /// Gets the value for the specified variable from the current object context/scope.
+        /// </summary>
+        /// <param name="variable">The variable to retrieve the value</param>
+        /// <returns>Value of the variable</returns>
         private object GetValueFromVariable(ScriptVariable variable)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
@@ -488,6 +554,14 @@ namespace Scriban
             return value;
         }
 
+        /// <summary>
+        /// Evaluates the specified expression
+        /// </summary>
+        /// <param name="targetExpression">The expression to evaluate</param>
+        /// <param name="valueToSet">A value to set in case of a setter</param>
+        /// <param name="setter">true if this a setter</param>
+        /// <param name="level">The indirection level (0 before entering the expression)</param>
+        /// <returns>The value of the targetExpression</returns>
         private object GetOrSetValue(ScriptExpression targetExpression, object valueToSet, bool setter, int level)
         {
             object value = null;
@@ -650,61 +724,82 @@ namespace Scriban
             return value;
         }
 
+        /// <summary>
+        /// Gets the list accessor or a previous cached one.
+        /// </summary>
+        /// <param name="target">The expected object to be a list</param>
+        /// <returns>A list accessor for the specified type of target</returns>
         private IListAccessor GetListAccessor(object target)
         {
             var type = target.GetType();
             IListAccessor accessor;
             if (!_listAccessors.TryGetValue(type, out accessor))
             {
-                if (type.GetTypeInfo().IsArray)
-                {
-                    accessor = ArrayAccessor.Default;
-                }
-                else if (target is IList)
-                {
-                    accessor = ListAccessor.Default;
-                }
+                accessor = GetListAccessorImpl(target, type);
                 _listAccessors.Add(type, accessor);
             }
             return accessor;
         }
 
+        /// <summary>
+        /// Gets the list accessor for the specified target and type, if it hasn't been found yet.
+        /// </summary>
+        /// <param name="target">The expected object to be a list</param>
+        /// <param name="type">Type of the target object</param>
+        /// <returns>A list accessor for the specified type of target</returns>
+        protected virtual IListAccessor GetListAccessorImpl(object target, Type type)
+        {
+            if (type.GetTypeInfo().IsArray)
+            {
+                return ArrayAccessor.Default;
+            }
+
+            if (target is IList)
+            {
+                return ListAccessor.Default;
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the list of <see cref="ScriptObject"/> depending on the scope of the variable.
+        /// </summary>
+        /// <param name="variable"></param>
+        /// <returns></returns>
         private IEnumerable<IScriptObject> GetStoreForSet(ScriptVariable variable)
         {
-            var scope = variable.Scope; 
-            if (scope == ScriptVariableScope.Global)
+            var scope = variable.Scope;
+            switch (scope)
             {
-                foreach (var store in _globalStores)
-                {
-                    yield return store;
-                }
-            }
-            else if (scope == ScriptVariableScope.Local)
-            {
-                if (_localStores.Count > 0)
-                {
-                    yield return _localStores.Peek();
-                }
-                else
-                {
-                    throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable [{variable}] in the current context");
-                }
-            }
-            else if (scope == ScriptVariableScope.Loop)
-            {
-                if (_loopStores.Count > 0)
-                {
-                    yield return _loopStores.Peek();
-                }
-                else
-                {
-                    // unit test: 215-for-special-var-error1.txt
-                    throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable [{variable}] in the current context");
-                }
-            }
-            else
-            {
-                throw new NotImplementedException($"Variable scope [{scope}] is not implemented");
+                case ScriptVariableScope.Global:
+                    foreach (var store in _globalStores)
+                    {
+                        yield return store;
+                    }
+                    break;
+                case ScriptVariableScope.Local:
+                    if (_localStores.Count > 0)
+                    {
+                        yield return _localStores.Peek();
+                    }
+                    else
+                    {
+                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable [{variable}] in the current context");
+                    }
+                    break;
+                case ScriptVariableScope.Loop:
+                    if (_loopStores.Count > 0)
+                    {
+                        yield return _loopStores.Peek();
+                    }
+                    else
+                    {
+                        // unit test: 215-for-special-var-error1.txt
+                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable [{variable}] in the current context");
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException($"Variable scope [{scope}] is not implemented");
             }
         }
     }
