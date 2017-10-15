@@ -5,10 +5,18 @@ using System.Text;
 
 namespace Scriban.Runtime
 {
+    /// <summary>
+    /// The standard rename make a camel/pascalcase name changed by `_` and lowercase. e.g `ThisIsAnExample` becomes `this_is_an_example`.
+    /// </summary>
     public sealed class StandardMemberRenamer
     {
         public static readonly MemberRenamerDelegate Default = Rename;
 
+        /// <summary>
+        /// Renames a camel/pascalcase member to a lowercase and `_` name. e.g `ThisIsAnExample` becomes `this_is_an_example`.
+        /// </summary>
+        /// <param name="member">The member name to rename</param>
+        /// <returns>The member name renamed</returns>
         public static string Rename(string member)
         {
             var builder = new StringBuilder();
