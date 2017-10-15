@@ -10,7 +10,7 @@ using Scriban.Syntax;
 namespace Scriban
 {
     /// <summary>
-    /// Entry point class to parse templates and render them.
+    /// Basic entry point class to parse templates and render them. For more advanced scenario, you should use <see cref="TemplateContext"/> directly.
     /// </summary>
     public class Template
     {
