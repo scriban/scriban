@@ -16,8 +16,8 @@ Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://
 - [Full featured expressions](doc/language.md#8-expressions) (`x = 1 + 2`)
 - [function call and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
 - [Complex objects](doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
-- [Custom functions](doc/language.md#7-functions) via `func` statement
-- Allow to pass [Function pointers/delegates](doc/language.md#98-wrap-function-arg1argn--end) (example with the `wrap` statement)
+- [Custom functions](doc/language.md#7-functions) via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
+- Allow to pass [a block of statements](doc/language.md#98-wrap-function-arg1argn--end) to a function, typically used by the `wrap` statement
 - Several builtins objects/functions:
   - [`arrays functions`](doc/language.md#101-array-functions)
   - [`maths functions`](doc/language.md#102-math-functions)
