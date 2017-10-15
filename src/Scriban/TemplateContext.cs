@@ -668,18 +668,18 @@ namespace Scriban
                                             // Allow negative index from the end of the array
                                             if (i < 0)
                                             {
-                                                i = accessor.GetLength(targetObject) + i;
+                                                i = accessor.GetLength(this, targetExpression.Span, targetObject) + i;
                                             }
 
                                             if (i >= 0)
                                             {
                                                 if (setter)
                                                 {
-                                                    accessor.SetValue(targetObject, i, valueToSet);
+                                                    accessor.SetValue(this, targetExpression.Span, targetObject, i, valueToSet);
                                                 }
                                                 else
                                                 {
-                                                    value = accessor.GetValue(targetObject, i);
+                                                    value = accessor.GetValue(this, targetExpression.Span, targetObject, i);
                                                 }
                                             }
                                         }

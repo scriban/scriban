@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System.Collections;
+using Scriban.Parsing;
 
 namespace Scriban.Runtime.Accessors
 {
@@ -13,12 +14,12 @@ namespace Scriban.Runtime.Accessors
         {
         }
 
-        public int GetLength(object target)
+        public int GetLength(TemplateContext context, SourceSpan span, object target)
         {
             return ((IList) target).Count;
         }
 
-        public object GetValue(object target, int index)
+        public object GetValue(TemplateContext context, SourceSpan span, object target, int index)
         {
             var list = ((IList)target);
             if (index < 0 || index >= list.Count)
@@ -29,7 +30,7 @@ namespace Scriban.Runtime.Accessors
             return list[index];
         }
 
-        public void SetValue(object target, int index, object value)
+        public void SetValue(TemplateContext context, SourceSpan span, object target, int index, object value)
         {
             var list = ((IList) target);
             if (index < 0)

@@ -7,7 +7,7 @@ using Scriban.Parsing;
 namespace Scriban.Runtime
 {
     /// <summary>
-    /// Interface to access an object (either <see cref="ScriptObject"/> or .NET object)
+    /// Generic interface used to access an object (either <see cref="ScriptObject"/> or .NET object), used by <see cref="TemplateContext"/> via <see cref="TemplateContext.GetMemberAccessor"/>
     /// </summary>
     public interface IObjectAccessor
     {
