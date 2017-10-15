@@ -4,8 +4,8 @@
 using System;
 using System.Reflection;
 using Scriban.Helpers;
-using Scriban.Model;
 using Scriban.Parsing;
+using Scriban.Syntax;
 
 namespace Scriban.Runtime
 {
@@ -22,15 +22,15 @@ namespace Scriban.Runtime
         public delegate bool FilterMemberDelegate(string member);
 
         /// <summary>
-        /// Asserts that the specified script object is not readonly or throws a <see cref="ScriptObjectReadOnlyException"/>
+        /// Asserts that the specified script object is not readonly or throws a <see cref="ScriptRuntimeException"/>
         /// </summary>
         /// <param name="scriptObject">The script object.</param>
-        /// <exception cref="ScriptObjectReadOnlyException">If the object is not readonly</exception>
+        /// <exception cref="ScriptRuntimeException">If the object is not readonly</exception>
         public static void AssertNotReadOnly(this IScriptObject scriptObject)
         {
             if (scriptObject.IsReadOnly)
             {
-                throw new ScriptObjectReadOnlyException(scriptObject);
+                throw new InvalidOperationException("The object is readonly");
             }
         }
 
@@ -134,8 +134,9 @@ namespace Scriban.Runtime
         /// <param name="exportName">Name of the member name replacement. If null, use the default renamer will be used.</param>
         public static void ImportMember(this IScriptObject script, object obj, string memberName, string exportName = null)
         {
-            script.Import(obj, ScriptMemberImportFlags.All | ScriptMemberImportFlags.MethodInstance, member => member == memberName, exportName != null ? new DelegateMemberRenamer(name => exportName) : null);
+            script.Import(obj, ScriptMemberImportFlags.All | ScriptMemberImportFlags.MethodInstance, member => member == memberName, exportName != null ? name => exportName: (MemberRenamerDelegate)null);
         }
+
 
         /// <summary>
         /// Imports the specified object.
@@ -145,7 +146,7 @@ namespace Scriban.Runtime
         /// <param name="filter">A filter applied on each member</param>
         /// <param name="renamer">The member renamer.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
-        public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, FilterMemberDelegate filter = null, IMemberRenamer renamer = null)
+        public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, FilterMemberDelegate filter = null, MemberRenamerDelegate renamer = null)
         {
             if (obj == null)
             {
@@ -189,7 +190,7 @@ namespace Scriban.Runtime
                     var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && ((field.IsStatic && useStatic) || useInstance))
                     {
-                        var newFieldName = renamer.GetName(field.Name);
+                        var newFieldName = renamer(field.Name);
                         if (String.IsNullOrEmpty(newFieldName))
                         {
                             newFieldName = field.Name;
@@ -218,7 +219,7 @@ namespace Scriban.Runtime
                     var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && (((property.GetGetMethod().IsStatic && useStatic) || useInstance)))
                     {
-                        var newPropertyName = renamer.GetName(property.Name);
+                        var newPropertyName = renamer(property.Name);
                         if (String.IsNullOrEmpty(newPropertyName))
                         {
                             newPropertyName = property.Name;
@@ -241,7 +242,7 @@ namespace Scriban.Runtime
                     var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && method.IsPublic && ((useMethodInstance && !method.IsStatic) || (useStatic && method.IsStatic)) && !method.IsSpecialName)
                     {
-                        var newMethodName = renamer.GetName(method.Name);
+                        var newMethodName = renamer(method.Name);
                         if (String.IsNullOrEmpty(newMethodName))
                         {
                             newMethodName = method.Name;

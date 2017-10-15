@@ -8,7 +8,6 @@ using System.Linq;
 using Scriban.Helpers;
 using System.Reflection;
 using System.Text;
-using Scriban.Model;
 using Scriban.Parsing;
 
 namespace Scriban.Runtime

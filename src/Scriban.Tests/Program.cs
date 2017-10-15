@@ -61,7 +61,7 @@ namespace Scriban.Tests
                 //var result = template.Render(new {tb = parsed});
                 //Console.WriteLine(result);
                 var context = new TemplateContext();
-                context.MemberRenamer = new DelegateMemberRenamer(name => name);
+                context.MemberRenamer = name => name;
                 var scriptObject = new ScriptObject();
                 scriptObject.Import(new { tb = parsed });
                 context.PushGlobal(scriptObject);
@@ -87,7 +87,7 @@ namespace Scriban.Tests
                 var template = Template.Parse(@"This {{books[0].Title}} {{ ""is"" | string.upcase }} from scriban!");
                 var model = new {books = b};
                 var context = new TemplateContext();
-                context.MemberRenamer = new DelegateMemberRenamer(name => name);
+                context.MemberRenamer = name => name;
                 context.PushGlobal(globalFunction);
 
                 var localFunction = new ScriptObject();

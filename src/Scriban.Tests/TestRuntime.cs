@@ -4,9 +4,9 @@
 using System;
 using Newtonsoft.Json;
 using NUnit.Framework;
-using Scriban.Model;
 using Scriban.Parsing;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Tests
 {
@@ -30,7 +30,7 @@ namespace Scriban.Tests
             });
             var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
             var result = exception.ToString();
-            Assert.True(result.Contains("a.b.c"));
+            Assert.True(result.Contains("a.b.c"), $"The exception string `{result}` does not contain a.b.c");
         }
 
         [Test]
@@ -123,7 +123,7 @@ namespace Scriban.Tests
             var template = Template.Parse(myTemplate);
 
             // Render
-            var context = new TemplateContext { MemberRenamer = new DelegateMemberRenamer(name => name) };
+            var context = new TemplateContext { MemberRenamer = name => name };
             var scriptObject = new ScriptObject();
             scriptObject.Import(new { tb = parsed });
             context.PushGlobal(scriptObject);

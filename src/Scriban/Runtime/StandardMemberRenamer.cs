@@ -5,15 +5,11 @@ using System.Text;
 
 namespace Scriban.Runtime
 {
-    public sealed class StandardMemberRenamer : IMemberRenamer
+    public sealed class StandardMemberRenamer
     {
-        public static readonly StandardMemberRenamer Default = new StandardMemberRenamer();
+        public static readonly MemberRenamerDelegate Default = Rename;
 
-        private StandardMemberRenamer()
-        {
-        }
-
-        public string GetName(string member)
+        public static string Rename(string member)
         {
             var builder = new StringBuilder();
             bool previousUpper = false;

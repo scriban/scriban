@@ -4,8 +4,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Scriban.Model;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Parsing
 {

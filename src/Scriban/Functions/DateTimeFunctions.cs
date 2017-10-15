@@ -5,8 +5,8 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-using Scriban.Model;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Functions
 {

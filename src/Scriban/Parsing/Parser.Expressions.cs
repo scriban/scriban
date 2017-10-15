@@ -3,8 +3,8 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
-using Scriban.Model;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Parsing
 {

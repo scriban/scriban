@@ -4,7 +4,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Scriban.Model;
 using Scriban.Parsing;
 
 namespace Scriban.Runtime

@@ -9,9 +9,9 @@ using System.Reflection; // Leave this as it is required by some .NET targets
 using System.Text;
 using Scriban.Functions;
 using Scriban.Helpers;
-using Scriban.Model;
 using Scriban.Parsing;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban
 {

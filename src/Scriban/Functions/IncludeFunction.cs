@@ -3,9 +3,9 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
-using Scriban.Model;
 using Scriban.Parsing;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Functions
 {
@@ -62,7 +62,7 @@ namespace Scriban.Functions
 
                 string templateFilePath;
 
-                var templateText = context.TemplateLoader.Load(context, callerContext.Span, templateName, out templateFilePath);
+                var templateText = context.TemplateLoader(context, callerContext.Span, templateName, out templateFilePath);
 
                 if (templateText == null)
                 {

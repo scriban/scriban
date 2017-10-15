@@ -12,10 +12,10 @@ namespace Scriban.Runtime.Accessors
     public class TypedObjectAccessor : IObjectAccessor
     {
         private readonly Type _type;
-        private readonly IMemberRenamer _renamer;
+        private readonly MemberRenamerDelegate _renamer;
         private readonly Dictionary<string, MemberInfo> _members;
 
-        public TypedObjectAccessor(Type targetType, IMemberRenamer renamer)
+        public TypedObjectAccessor(Type targetType, MemberRenamerDelegate renamer)
         {
             _type = targetType ?? throw new ArgumentNullException(nameof(targetType));
             _renamer = renamer ?? StandardMemberRenamer.Default;
@@ -106,7 +106,7 @@ namespace Scriban.Runtime.Accessors
 
         private string Rename(string name)
         {
-            return _renamer.GetName(name);
+            return _renamer(name);
         }
     }
 }

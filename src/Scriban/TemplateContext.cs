@@ -10,10 +10,10 @@ using System.Reflection;
 using System.Text;
 using Scriban.Functions;
 using Scriban.Helpers;
-using Scriban.Model;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Runtime.Accessors;
+using Scriban.Syntax;
 
 namespace Scriban
 {
@@ -94,9 +94,9 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="ITemplateLoader"/> used by the include directive. Must be set in order for the include directive to work.
+        /// Gets or sets the <see cref="TemplateLoaderDelegate"/> used by the include directive. Must be set in order for the include directive to work.
         /// </summary>
-        public ITemplateLoader TemplateLoader { get; set; }
+        public TemplateLoaderDelegate TemplateLoader { get; set; }
 
         /// <summary>
         /// The <see cref="ParserOptions"/> used by the <see cref="TemplateLoader"/> via the include directive.
@@ -111,7 +111,7 @@ namespace Scriban
         /// <summary>
         /// A global settings used to rename property names of exposed objects.
         /// </summary>
-        public IMemberRenamer MemberRenamer { get; set; }
+        public MemberRenamerDelegate MemberRenamer { get; set; }
 
         /// <summary>
         /// A loop limit that can be used at runtime to limit the number of loops.

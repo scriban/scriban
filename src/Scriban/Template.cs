@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using Scriban.Parsing;
 using Scriban.Runtime;
-using Scriban.Model;
+using Scriban.Syntax;
 
 namespace Scriban
 {
