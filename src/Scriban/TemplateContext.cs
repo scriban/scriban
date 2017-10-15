@@ -46,7 +46,7 @@ namespace Scriban
         public delegate bool TryGetMemberDelegate(TemplateContext context, SourceSpan span, object target, string member, out object value);
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TemplateContext"/> class.
+        /// Initializes a new instance of the <see cref="T:Scriban.TemplateContext" /> class.
         /// </summary>
         public TemplateContext() : this(null)
         {
@@ -129,7 +129,7 @@ namespace Scriban
         public bool EnableOutput { get; set; }
 
         /// <summary>
-        /// Gets the current output of the template being rendered (via <see cref="Template.Render(Scriban.TemplateContext)")/>.
+        /// Gets the current output of the template being rendered (via <see cref="Template.Render(Scriban.TemplateContext)"/>)/>.
         /// </summary>
         public StringBuilder Output => _outputs.Peek();
 
@@ -353,9 +353,6 @@ namespace Scriban
         /// </summary>
         /// <param name="scriptNode">The script node.</param>
         /// <returns>The result of the evaluation.</returns>
-        /// <remarks>
-        /// <see cref="Result"/> is set to null when calling directly this method.
-        /// </remarks>
         public object Evaluate(ScriptNode scriptNode)
         {
             return Evaluate(scriptNode, false);
@@ -367,9 +364,6 @@ namespace Scriban
         /// <param name="scriptNode">The script node.</param>
         /// <param name="aliasReturnedFunction">if set to <c>true</c> and a function would be evaluated as part of this node, return the object function without evaluating it.</param>
         /// <returns>The result of the evaluation.</returns>
-        /// <remarks>
-        /// <see cref="Result"/> is set to null when calling directly this method.
-        /// </remarks>
         public object Evaluate(ScriptNode scriptNode, bool aliasReturnedFunction)
         {
             var previousFunctionCallState = _isFunctionCallDisabled;
@@ -397,8 +391,7 @@ namespace Scriban
             }
 
             var type = target.GetType();
-            IObjectAccessor accessor;
-            if (!_memberAccessors.TryGetValue(type, out accessor))
+            if (!_memberAccessors.TryGetValue(type, out var accessor))
             {
                 accessor = GetMemberAccessorImpl(target) ?? NullAccessor.Default;
                 _memberAccessors.Add(type, accessor);
@@ -583,8 +576,7 @@ namespace Scriban
                 }
                 else
                 {
-                    var nextDot = targetExpression as ScriptMemberExpression;
-                    if (nextDot != null)
+                    if (targetExpression is ScriptMemberExpression nextDot)
                     {
                         var targetObject = GetOrSetValue(nextDot.Target, valueToSet, false, level + 1);
 
@@ -622,8 +614,7 @@ namespace Scriban
                     }
                     else
                     {
-                        var nextIndexer = targetExpression as ScriptIndexerExpression;
-                        if (nextIndexer != null)
+                        if (targetExpression is ScriptIndexerExpression nextIndexer)
                         {
                             var targetObject = GetOrSetValue(nextIndexer.Target, valueToSet, false, level + 1);
                             if (targetObject == null)
@@ -633,7 +624,7 @@ namespace Scriban
                             }
                             else
                             {
-                                var index = this.Evaluate(nextIndexer.Index);
+                                var index = Evaluate(nextIndexer.Index);
                                 if (index == null)
                                 {
                                     throw new ScriptRuntimeException(nextIndexer.Index.Span,
@@ -668,8 +659,7 @@ namespace Scriban
                                         var accessor = GetListAccessor(targetObject);
                                         if (accessor == null)
                                         {
-                                            throw new ScriptRuntimeException(nextIndexer.Target.Span,
-                                                $"Expecting a list. Invalid value [{targetObject}/{targetObject?.GetType().Name}] for the target [{nextIndexer.Target}] for the indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error4.txt
+                                            throw new ScriptRuntimeException(nextIndexer.Target.Span, $"Expecting a list. Invalid value [{targetObject}/{targetObject.GetType().Name}] for the target [{nextIndexer.Target}] for the indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error4.txt
                                         }
                                         else
                                         {
@@ -732,8 +722,7 @@ namespace Scriban
         private IListAccessor GetListAccessor(object target)
         {
             var type = target.GetType();
-            IListAccessor accessor;
-            if (!_listAccessors.TryGetValue(type, out accessor))
+            if (!_listAccessors.TryGetValue(type, out var accessor))
             {
                 accessor = GetListAccessorImpl(target, type);
                 _listAccessors.Add(type, accessor);
@@ -765,7 +754,8 @@ namespace Scriban
         /// Returns the list of <see cref="ScriptObject"/> depending on the scope of the variable.
         /// </summary>
         /// <param name="variable"></param>
-        /// <returns></returns>
+        /// <exception cref="NotImplementedException"></exception>
+        /// <returns>The list of script objects valid for the specified variable scope</returns>
         private IEnumerable<IScriptObject> GetStoreForSet(ScriptVariable variable)
         {
             var scope = variable.Scope;
