@@ -4,107 +4,107 @@ This document describes the syntax of the scriban templating language.
 
 ## Table of Contents
 
-- [1. Blocks]
-	- [1.1 Code block]
-	- [1.2 Text block]
-	- [1.3 Escape block]
-	- [1.4 Whitespace control]
-- [2 Comments]
-- [3 Literals]
-	- [3.1 Strings]
-	- [3.2 Numbers]
-	- [3.3 Boolean]
-	- [3.4 null]
-- [4 Variables]
-- [5 Objects]
-- [6 Arrays]
-- [7 Functions]
-- [8 Expressions]
-	- [8.1 Variable path expressions]
-	- [8.2 Assign expression]
-	- [8.3 Nested expression]
-	- [8.4 Arithmetic expressions]
-		- [On numbers]
-		- [On strings]
-	- [8.5 Conditional expressions]
-	- [8.6 Unary expressions]
-	- [8.7 Range expressions]
-	- [8.8 Function call expression]
-- [9 Statements]
-	- [9.1 Single expression]
-	- [9.2 if <expression>, else, else if <expression>]
-	- [9.3 Loops]
-		- [for <variable> in <expression> ... end]
-		- [while <expression> ... end]
-		- [Special loop variables]
-		- [break and continue]
-	- [9.4 capture <variable> ... end]
-	- [9.5 readonly <variable>]
-	- [9.6 import <variable_path>]
-	- [9.7 with <variable> ... end]
-	- [9.8 wrap <function> <arg1...argn> ... end]
-	- [9.9 include <name> arg1?...argn?]
-	- [9.10 ret <expression>?]
-- [10 Built-in functions]
-	- [10.1 Array functions]
-		- [array.first]
-		- [array.last]
-		- [array.join <delimiter>]
-		- [array.size]
-		- [array.uniq]
-		- [array.sort]
-		- [array.map <member>]
-		- [array.add <expression>]
-		- [array.add_range <iterator>]
-		- [array.add_range <iterator>]
-		- [array.remove_at <index>]
-		- [array.insert_at <index> <expression>]
-		- [array.reverse]
-	- [10.2 Math functions]
-		- [math.ceil]
-		- [math.floor]
-		- [math.floor <decimals>?]
-		- [math.format <format> <value>]
-		- [math.is_number <value>]
-	- [10.3 String functions]
-		- [string.capitalize]
-		- [string.downcase and string.upcase]
-		- [string.handleize]
-		- [string.pluralize <single> <plural>]
-		- [string.remove <match>]
-		- [string.remove_first <match>]
-		- [string.replace <match> <replace>]
-		- [string.replace_first <match> <replace>]
-		- [string.strip, string.rstrip, string,lstrip]
-		- [string.slice <index> <length>?]
-		- [string.split <delimiter>]
-		- [string.starts_with <match>]
-		- [string.strip_newlines]
-		- [string.truncate <length>]
-		- [string.truncatewords <count>]
-	- [10.4 Regex]
-		- [regex.replace <pattern> <replacement> <input>]
-		- [regex.split <pattern> <input>]
-		- [regex.match <pattern> <input>]
-		- [regex.escape <input> and regex.unescape <input>]
-	- [10.5 Object]
-		- [typeof <value>]
-	- [10.6 Datetime]
-		- [Datetime object]
-		- [Binary operations]
-		- [date.now]
-		- [date.parse]
-		- [date.add_days <days>]
-		- [date.add_months <months>]
-		- [date.add_years <years>]
-		- [date.to_string <format>?]
-	- [10.7 Timespan]
-		- [Timespan object]
-		- [Supported operators]
-		- [timespan.zero]
-		- [timespan.from_days <days>]
-		- [timespan.from_hours <hours>]
-		- [timespan.parse]
+- [1. Blocks](#1-blocks)
+  - [1.1 Code block](#11-code-block)
+  - [1.2 Text block](#12-text-block)
+  - [1.3 Escape block](#13-escape-block)
+  - [1.4 Whitespace control](#14-whitespace-control)
+- [2 Comments](#2-comments)
+- [3 Literals](#3-literals)
+  - [3.1 Strings](#31-strings)
+  - [3.2 Numbers](#32-numbers)
+  - [3.3 Boolean](#33-boolean)
+  - [3.4 null](#34-null)
+- [4 Variables](#4-variables)
+- [5 Objects](#5-objects)
+- [6 Arrays](#6-arrays)
+- [7 Functions](#7-functions)
+- [8 Expressions](#8-expressions)
+  - [8.1 Variable path expressions](#81-variable-path-expressions)
+  - [8.2 Assign expression](#82-assign-expression)
+  - [8.3 Nested expression](#83-nested-expression)
+  - [8.4 Arithmetic expressions](#84-arithmetic-expressions)
+    - [On numbers](#on-numbers)
+    - [On strings](#on-strings)
+  - [8.5 Conditional expressions](#85-conditional-expressions)
+  - [8.6 Unary expressions](#86-unary-expressions)
+  - [8.7 Range expressions](#87-range-expressions)
+  - [8.8 Function call expression](#88-function-call-expression)
+- [9 Statements](#9-statements)
+  - [9.1 Single expression](#91-single-expression)
+  - [9.2 <code>if &lt;expression&gt;</code>, <code>else</code>, <code>else if &lt;expression&gt;</code>]92-if-expression-else-else-if-expression)
+  - [9.3 Loops](#93-loops)
+    - [<code>for &lt;variable&gt; in &lt;expression&gt; ... end</code>](#for-variable-in-expression-end)
+    - [<code>while &lt;expression&gt; ... end</code>](#while-expression-end)
+    - [Special loop variables](#special-loop-variables)
+    - [<code>break</code> and <code>continue</code>](#break-and-continue)
+  - [9.4 <code>capture &lt;variable&gt; ... end</code>](#94-capture-variable-end)
+  - [9.5 <code>readonly &lt;variable&gt;</code>](#95-readonly-variable)
+  - [9.6 <code>import &lt;variable_path&gt;</code>](#96-import-variable_path)
+  - [9.7 <code>with &lt;variable&gt; ... end</code>](#97-with-variable-end)
+  - [9.8 <code>wrap &lt;function&gt; &lt;arg1...argn&gt; ... end</code>](#98-wrap-function-arg1argn-end)
+  - [9.9 <code>include &lt;name&gt; arg1?...argn?</code>](#99-include-name-arg1argn)
+  - [9.10 <code>ret &lt;expression&gt;?</code>](#910-ret-expression)
+- [10 Built-in functions](#10-built-in-functions)
+  - [10.1 Array functions](#101-array-functions)
+    - [<code>array.first</code>](#arrayfirst)
+    - [<code>array.last</code>](#arraylast)
+    - [<code>array.join &lt;delimiter&gt;</code>](#arrayjoin-delimiter)
+    - [<code>array.size</code>](#arraysize)
+    - [<code>array.uniq</code>](#arrayuniq)
+    - [<code>array.sort</code>](#arraysort)
+    - [<code>array.map &lt;member&gt;</code>](#arraymap-member)
+    - [<code>array.add &lt;expression&gt;</code>](#arrayadd-expression)
+    - [<code>array.add_range &lt;iterator&gt;</code>](#arrayadd_range-iterator)
+    - [<code>array.add_range &lt;iterator&gt;</code>](#arrayadd_range-iterator-1)
+    - [<code>array.remove_at &lt;index&gt;</code>](#arrayremove_at-index)
+    - [<code>array.insert_at &lt;index&gt; &lt;expression&gt;</code>](#arrayinsert_at-index-expression)
+    - [<code>array.reverse</code>](#arrayreverse)
+  - [10.2 Math functions](#102-math-functions)
+    - [<code>math.ceil</code>](#mathceil)
+    - [<code>math.floor</code>](#mathfloor)
+    - [<code>math.floor &lt;decimals&gt;?</code>](#mathfloor-decimals)
+    - [<code>math.format &lt;format&gt; &lt;value&gt;</code>](#mathformat-format-value)
+    - [<code>math.is_number &lt;value&gt;</code>](#mathis_number-value)
+  - [10.3 String functions](#103-string-functions)
+    - [<code>string.capitalize</code>](#stringcapitalize)
+    - [<code>string.downcase</code> and <code>string.upcase</code>](#stringdowncase-and-stringupcase)
+    - [<code>string.handleize</code>](#stringhandleize)
+    - [<code>string.pluralize &lt;single&gt; &lt;plural&gt;</code>](#stringpluralize-single-plural)
+    - [<code>string.remove &lt;match&gt;</code>](#stringremove-match)
+    - [<code>string.remove_first &lt;match&gt;</code>](#stringremove_first-match)
+    - [<code>string.replace &lt;match&gt; &lt;replace&gt;</code>](#stringreplace-match-replace)
+    - [<code>string.replace_first &lt;match&gt; &lt;replace&gt;</code>](#stringreplace_first-match-replace)
+    - [<code>string.strip</code>, <code>string.rstrip</code>, <code>string,lstrip</code>]stringstrip-stringrstrip-stringlstrip)
+    - [<code>string.slice &lt;index&gt; &lt;length&gt;?</code>](#stringslice-index-length)
+    - [<code>string.split &lt;delimiter&gt;</code>](#stringsplit-delimiter)
+    - [<code>string.starts_with &lt;match&gt;</code>](#stringstarts_with-match)
+    - [<code>string.strip_newlines</code>](#stringstrip_newlines)
+    - [<code>string.truncate &lt;length&gt;</code>](#stringtruncate-length)
+    - [<code>string.truncatewords &lt;count&gt;</code>](#stringtruncatewords-count)
+  - [10.4 Regex](#104-regex)
+    - [<code>regex.replace &lt;pattern&gt; &lt;replacement&gt; &lt;input&gt;</code>](#regexreplace-pattern-replacement-input)
+    - [<code>regex.split &lt;pattern&gt; &lt;input&gt;</code>](#regexsplit-pattern-input)
+    - [<code>regex.match &lt;pattern&gt; &lt;input&gt;</code>](#regexmatch-pattern-input)
+    - [<code>regex.escape &lt;input&gt;</code> and <code>regex.unescape &lt;input&gt;</code>]regexescape-input-and-regexunescape-input)
+  - [10.5 Object](#105-object)
+    - [<code>typeof &lt;value&gt;</code>](#typeof-value)
+  - [10.6 Datetime](#106-datetime)
+    - [Datetime object](#datetime-object)
+    - [Binary operations](#binary-operations)
+    - [<code>date.now</code>](#datenow)
+    - [<code>date.parse</code>](#dateparse)
+    - [<code>date.add_days &lt;days&gt;</code>](#dateadd_days-days)
+    - [<code>date.add_months &lt;months&gt;</code>](#dateadd_months-months)
+    - [<code>date.add_years &lt;years&gt;</code>](#dateadd_years-years)
+    - [<code>date.to_string &lt;format&gt;?</code>](#dateto_string-format)
+  - [10.7 Timespan](#107-timespan)
+    - [Timespan object](#timespan-object)
+    - [Supported operators](#supported-operators)
+    - [<code>timespan.zero</code>](#timespanzero)
+    - [<code>timespan.from_days &lt;days&gt;</code>](#timespanfrom_days-days)
+    - [<code>timespan.from_hours &lt;hours&gt;</code>](#timespanfrom_hours-hours)
+    - [<code>timespan.parse</code>](#timespanparse)
 
 ## 1. Blocks
 
