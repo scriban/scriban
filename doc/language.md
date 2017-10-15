@@ -108,7 +108,8 @@ This document describes the syntax of the scriban templating language.
     - [<code>timespan.from_hours &lt;hours&gt;</code>](#timespanfrom_hours-hours)
     - [<code>timespan.parse</code>](#timespanparse)
 
-## 1. Blocks [:top:](#top)
+[:top:](#top)
+## 1. Blocks
 
 There are 3 types of block of text in a template:
 
