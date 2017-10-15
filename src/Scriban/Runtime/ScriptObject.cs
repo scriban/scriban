@@ -212,6 +212,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
+        /// <param name="context">The template context requesting this evaluation</param>
         /// <param name="span">The span.</param>
         /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
         public virtual string ToString(TemplateContext context, SourceSpan span)
