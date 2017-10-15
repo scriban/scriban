@@ -1,5 +1,3 @@
-<a id="top"/>
-
 # Language
 
 This document describes the syntax of the scriban templating language.
@@ -108,7 +106,7 @@ This document describes the syntax of the scriban templating language.
     - [<code>timespan.from_hours &lt;hours&gt;</code>](#timespanfrom_hours-hours)
     - [<code>timespan.parse</code>](#timespanparse)
 
-[:top:](#top)
+[:top:](#language)
 ## 1. Blocks
 
 There are 3 types of block of text in a template:
@@ -117,6 +115,7 @@ There are 3 types of block of text in a template:
 - **Text block**: a plain block to output *as is*
 - **Escape block**: a text block that can escape code blocks 
 
+[:top:](#language)
 ### 1.1 Code block
 
 A text enclosed by `{{` and `}}` is a scriban **code block** that will be evaluated by the scriban templating engine.
@@ -136,6 +135,7 @@ A scriban code block may contain:
     ```
 Inside a code block, except for the EOL after each statement, white spaces characters are not affecting the parsing. There is only one case where whitespace is used to disambiguate between an array indexer and an array initializer.   
 
+[:top:](#language)
 ### 1.2 Text block
 
 Otherwise, any text is considered as a **text block** and simply output as is
@@ -147,6 +147,7 @@ Otherwise, any text is considered as a **text block** and simply output as is
 
 ```
 
+[:top:](#language)
 ### 1.3 Escape block
 
 Any code and text block can be escaped to produce a text block by enclosing it with `{%{` and `}%}` 
@@ -163,6 +164,7 @@ Any escape block can be also escaped by increasing the number of `%` in the star
 
 Hence a starting escape block `{%%%%{` will required an ending `}%%%%}`
 
+[:top:](#language)
 ### 1.4 Whitespace control
 
 By default, any whitespace (including new lines) before or after a code/escape block are copied to the output. You can omit whitespace just before or after a code/escape block by using the character `~`:
@@ -199,6 +201,7 @@ This is <
 
 The `~` character can also be used with **escape blocks** `{%%{~` or `~}%%}`
 
+[:top:](#language)
 ## 2 Comments
 
 Within a code block, scriban supports single line comments `#` and multi-line comments `##`:
@@ -212,6 +215,7 @@ line
 comment ## }}
 ```
 
+[:top:](#language)
 ## 3 Literals
 
 ### 3.1 Strings
@@ -239,6 +243,7 @@ Scriban supports two types of strings:
   [this, is, a, test]
   ``` 
 
+[:top:](#language)
 ### 3.2 Numbers
 
 A number in scriban `{{ 100 }}` is similar to a javascript number: 
@@ -246,14 +251,17 @@ A number in scriban `{{ 100 }}` is similar to a javascript number:
 - Integers: `100`, `1e3`
 - Floats: `100.0`, `1.0e3`, `1.0e-3` 
 
+[:top:](#language)
 ### 3.3 Boolean
 
 The boolean value `{{ true }}` or `{{ false }}`
 
+[:top:](#language)
 ### 3.4 null
 
 The null value `{{ null }}` 
 
+[:top:](#language)
 ## 4 Variables
 
 Scriban supports the concept of **global** and **local** variables
