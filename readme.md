@@ -7,12 +7,22 @@ var template = Template.Parse("Hello {{name}}!")
 template.Render(new { name = "foo" }); // => "hi foo!" 
 ```
 
+## Features
+
 Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://handlebarsjs.com/) but provides additional support for:
 
-- Full featured language including expressions, functions as objects (with support for pipes)
-- Multi-line statements without having to embrace each line by `{{...}}`
-- Declare and directly use custom functions via the `func` statement. 
-- Javascript/json like objects `x = {mymember: 1}` and arrays `x = [1,2,3,4]`
+- Real Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than a regex based parser.
+- [Full featured expressions](doc/language.md#8-expressions) (`x = 1 + 2`), [function call and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
+- [Complex objects](doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
+- [Custom functions](doc/language.md#7-functions) via `func` statement and passing function as delegates
+- Several builtins objects/functions:
+  - [`arrays functions`](doc/language.md#101-array-functions)
+  - [`maths functions`](doc/language.md#102-math-functions)
+  - [`string functions`](doc/language.md#103-string-functions)
+  - [`regex functions`](doc/language.md#104-regex)
+  - [`date`](doc/language.md#106-datetime)/[`time`](doc/language.md#107-timespan)
+- [Multi-line statements](doc/language.md#11-code-block) without having to embrace each line by `{{...}}`
+- Safe language and runtime, allowing you to control what objects and functions are exposed
 
 ## Documentation
 
@@ -23,11 +33,12 @@ Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://
 
 Compatible with the following .NET framework profiles:
 
-- `NET46`
-- `UWP 10`
-- `CoreCLR`
+- `.NET3.5`
+- `.NET4.0+` via the PCL profile `portable40-net40+sl5+win8+wp8+wpa81`
+- `NetStandard1.1` running on `CoreCLR`
 
 ## License
+
 This software is released under the [BSD-Clause 2 license](http://opensource.org/licenses/BSD-2-Clause). 
 
 ## Related projects
