@@ -370,12 +370,23 @@ namespace Scriban
             try
             { 
                 _isFunctionCallDisabled = aliasReturnedFunction;
-                return scriptNode?.Evaluate(this);
+                return EvaluateImpl(scriptNode);
             }
             finally
             {
                 _isFunctionCallDisabled = previousFunctionCallState;
             }
+        }
+
+        /// <summary>
+        /// Evaluates the specified script node by calling <see cref="ScriptNode.Evaluate"/>
+        /// </summary>
+        /// <param name="scriptNode">The script node (might be null but should not throw an error)</param>
+        /// <returns>The result of the evaluation</returns>
+        /// <remarks>The purpose of this method is to allow to hook during the evaluation of all ScriptNode. By default calls <see cref="ScriptNode.Evaluate"/></remarks>
+        protected virtual object EvaluateImpl(ScriptNode scriptNode)
+        {
+            return scriptNode?.Evaluate(this);
         }
 
         /// <summary>
