@@ -106,8 +106,8 @@ This document describes the syntax of the scriban templating language.
     - [<code>timespan.from_hours &lt;hours&gt;</code>](#timespanfrom_hours-hours)
     - [<code>timespan.parse</code>](#timespanparse)
 
-## 1. Blocks
 [:top:](#language)
+## 1. Blocks
 
 There are 3 types of block of text in a template:
 
@@ -274,6 +274,7 @@ The **special local variable** `$` alone is an array containing the arguments pa
 
 The special local variables `$0` `$1` ... `$n` is a shorthand of `$[0]`, `$[1]` ... `$[n]`. e.g Using `$0` returns the first argument of the current function or including page.
 
+[:top:](#language)
 ## 5 Objects
 
 Scriban supports javascript like objects `{...}`
@@ -314,6 +315,7 @@ If the object is a "pure" scriban objects (created with a `{...}` or  instantiat
 }}
 ``` 
 
+[:top:](#language)
 ## 6 Arrays
 
 An array can be initialized empty :
@@ -372,6 +374,7 @@ You can also manipulate arrays with the [`array` builtin object](#array-builtin)
 > ```
 
 
+[:top:](#language)
 ## 7 Functions
 
 Scriban allows to define functions:
@@ -411,10 +414,12 @@ x = 1 | myobject.myinc # x = x + 1
 
 The function aliasing operator `@` allows to pass a function as a parameter to another function, enabling powerful function compositions.
 
+[:top:](#language)
 ## 8 Expressions
 
 Scriban supports conventional unary and binary expressions.
 
+[:top:](#language)
 ### 8.1 Variable path expressions
 
 A variable path expression contains the path to a variable:
@@ -425,6 +430,7 @@ A variable path expression contains the path to a variable:
 
 Note that a variable path can either point to a simple variable or can result into calling a parameter less function. 
 
+[:top:](#language)
 ### 8.2 Assign expression
 
 A value can be assigned to a top level variable or to the member of an object/array:
@@ -435,6 +441,7 @@ A value can be assigned to a top level variable or to the member of an object/ar
 
 An assign expression must be a top level expression statement and cannot be used within a sub-expression.
 
+[:top:](#language)
 ### 8.3 Nested expression
 
 An expression enclosed by `(` and `)` 
@@ -442,6 +449,7 @@ An expression enclosed by `(` and `)`
 `{{ name = ('foo' + 'bar') }}`
 
 
+[:top:](#language)
 ### 8.4 Arithmetic expressions
 
 #### On numbers
@@ -459,6 +467,7 @@ The following binary operators are supported for **numbers**:
 
 If left or right is a float and the other is an integer, the result of the operation will be a float.
 
+[:top:](#language)
 #### On strings
 
 The following binary operators are supported for **strings**: 
@@ -478,6 +487,7 @@ The following literals are converted to plain strings:
 * `true -> "true"`
 * `false -> "false"`
 
+[:top:](#language)
 ### 8.5 Conditional expressions
 
 A conditional expression produces a boolean by comparing a left and right value.
@@ -493,6 +503,7 @@ A conditional expression produces a boolean by comparing a left and right value.
 
 They work with both `numbers` and `strings`.
 
+[:top:](#language)
 ### 8.6 Unary expressions
 
 |Operator             | Description
@@ -503,6 +514,7 @@ They work with both `numbers` and `strings`.
 | `^ <expression>`    | Expand an array passed to arguments of a function call (see function call)
 | `@ <expression>`    | Alias the result of an expression that would be evaluated if it was a function call
 
+[:top:](#language)
 ### 8.7 Range expressions
 
 They are special binary expressions that provides an iterator (used usually with the `for` statement)
@@ -514,6 +526,7 @@ The evaluated `left` and `right` expressions must resolve to an integer at runti
 | `left..right`   | Returns an iterator between `left` and `right` with a step of 1, including `right`. e.g: `1..5` iterates from 1 to 5
 | `left..<right`  | Returns an iterator between `left` and `right` with a step of 1, excluding `right`. e.g: `1..<5` iterates from 1 to 4
 
+[:top:](#language)
 ### 8.8 Function call expression
 
 A function can be called by passing parameters separated by a whitespace:
@@ -524,10 +537,12 @@ The pipe operator `|` can also be used to pipe the result of an expression to a 
 
 `{{ date.parse '2016/01/05' | date.to_string '%g' }}` will output `06 Jan 2016`
 
+[:top:](#language)
 ## 9 Statements
 
 Each statement must be terminated by a code block `}}` or an EOL within a code block.
 
+[:top:](#language)
 ### 9.1 Single expression
 
 An expression statement:
@@ -540,6 +555,7 @@ value + 1       # This is a single line expression statement followed by this co
 }}
 ```
 
+[:top:](#language)
 ### 9.2 `if <expression>`, `else`, `else if <expression>`
 
 The general syntax is:
@@ -573,6 +589,7 @@ Example testing a page object:
  
 `{{ if !page }}Page is not null{{ else }}Page is null!{{ end }}` 
 
+[:top:](#language)
 ### 9.3 Loops
 
 #### `for <variable> in <expression> ... end`
@@ -589,6 +606,7 @@ The expression can be an array or a range iterator:
 
 * Loop on a range: `{{ for x in 1..n }}This is the loop step [{{x}}]{{ end }}`  
 
+[:top:](#language)
 #### `while <expression> ... end`
 
 ```
@@ -599,6 +617,7 @@ The expression can be an array or a range iterator:
 
 Like the `if` statement, the `expression` is evaluated to a boolean.
 
+[:top:](#language)
 #### Special loop variables
 
 The following variables are accessible within a `for` block:
@@ -620,6 +639,7 @@ Within a `while` statement, the following variables can be used:
 | `{{while.even}}`      | A boolean indicating whether this is an even row in the loop
 | `{{while.odd}}`       | A boolean indicating whether this is an odd row in the loop
 
+[:top:](#language)
 #### `break` and `continue`
 
 The `break` statement allows to early exit a loop
@@ -653,6 +673,7 @@ Will output:
 [5] step
 ```
 
+[:top:](#language)
 ### 9.4 `capture <variable> ... end`
 
 The `capture <variable> ... end` statement allows to capture the template output to a variable:
@@ -667,6 +688,7 @@ This is the result of a capture {{ date.now }}
 
 will set `myvariable = "This is the result of a capture 06 Jan 2016\n"` 
 
+[:top:](#language)
 ### 9.5 `readonly <variable>`
 
 The `readonly` statement prevents a variable for subsequent assignments:
@@ -677,6 +699,7 @@ The `readonly` statement prevents a variable for subsequent assignments:
 {{ x = 2 }} <- this will result in a runtime error 
 ```
 
+[:top:](#language)
 ### 9.6 `import <variable_path>`
 
 The `import <variable_path>` statement allows to import the members of an object as variables of the current bound: 
@@ -691,6 +714,7 @@ The `import <variable_path>` statement allows to import the members of an object
 
 Note that `readonly` variables won't be override. 
 
+[:top:](#language)
 ### 9.7 `with <variable> ... end`
 
 The `with <variable> ... end` statement will open a new object context with the passed variable, all assignment will result in setting the members of the passed object. 
@@ -702,6 +726,7 @@ with myobject
 end
 ```
 
+[:top:](#language)
 ### 9.8 `wrap <function> <arg1...argn> ... end`
 
 Pass a block of statements to a function that will be able to evaluate it using the special variable `$$`
@@ -732,6 +757,7 @@ will output:
 
 Note that variables declared outside the `with` block are accessible within.
 
+[:top:](#language)
 ### 9.9 `include <name> arg1?...argn?` 
 
 The include is not a statement but actually a function that allows to parse and render the specified template name. In order to use this function, a delegate to an template loader must be setup on the `TemplateOptions.TemplateLoader` property passed to the `Template.Parse` method.
@@ -755,6 +781,7 @@ This is a string with the value 1
 This is a string with the value 2 modified
 ```  
 
+[:top:](#language)
 ### 9.10 `ret <expression>?`
 
 The return statement is used to early exit from a top-level/include page or a function.
@@ -771,6 +798,7 @@ will output:
 This is a text
 ```
 
+[:top:](#language)
 ## 10 Built-in functions
 
 Scriban provides default built-in functions. 
@@ -779,6 +807,7 @@ Scriban provides default built-in functions.
 
 For all array functions, the last argument is expected to be an array or a range iterator. When used with the pipe operator, it is a convenient way to pass the argument to the array funtions.
 
+[:top:](#language)
 #### `array.first`
 
 Returns the first element of an array or a range iterator.
@@ -795,6 +824,7 @@ Will output:
 5
 ```
 
+[:top:](#language)
 #### `array.last`
 
 Returns the last element of an array or a range iterator.
@@ -811,6 +841,7 @@ Will output:
 8
 ```
 
+[:top:](#language)
 #### `array.join <delimiter>`
 
 Concatenates elements of an array or a range iterator separated by a delimter string:
@@ -827,6 +858,7 @@ Will output:
 5 , 6 , 7 , 8
 ```
 
+[:top:](#language)
 #### `array.size`
 
 Returns the number of elements in the array or range iterator.
@@ -843,6 +875,7 @@ Will output:
 4
 ```
 
+[:top:](#language)
 #### `array.uniq`
 
 Filters an array or range iterator by keeping only unique values, returning an iterator.
@@ -857,6 +890,7 @@ Will output:
 123
 ```
 
+[:top:](#language)
 #### `array.sort`
 
 Sorts an array or range iterator by its natural ascending order, returning an iterator.
@@ -871,6 +905,7 @@ Will output:
 12345
 ```
 
+[:top:](#language)
 #### `array.map <member>`
 
 For each object in the input array, extract the specified member and return a new list with the member value, returning an iterator.
@@ -896,6 +931,7 @@ sort
 uniq
 ```
 
+[:top:](#language)
 #### `array.add <expression>` 
 
 Adds the specified value to the input array. Returns the array to allow further piping.
@@ -910,6 +946,7 @@ will output:
 12345
 ```
 
+[:top:](#language)
 #### `array.add_range <iterator>` 
 
 Adds the specified range of values from an array or a range iterator to the input array. Returns the array to allow further piping.
@@ -924,6 +961,7 @@ will output:
 12345678
 ```
 
+[:top:](#language)
 #### `array.add_range <iterator>` 
 
 Adds the specified range of values from an array or a range iterator to the input array. Returns the array to allow further piping.
@@ -938,6 +976,7 @@ will output:
 12345678
 ```
 
+[:top:](#language)
 #### `array.remove_at <index>` 
 
 Removes at the specified `index` an object from the input the array. Returns the array to allow further piping.
@@ -952,6 +991,7 @@ will output:
 234
 ```
 
+[:top:](#language)
 #### `array.insert_at <index> <expression>` 
 
 Inserts a value at the specified index of the input array. Returns the array to allow further piping.
@@ -965,7 +1005,7 @@ will output:
 ```
 19234
 ```
-
+[:top:](#language)[:top:](#language)
 #### `array.reverse` 
 
 Reverse the order of the elements in the input iterator. Returns an iterator (and not an array)
@@ -979,7 +1019,7 @@ will output:
 ```
 4321
 ```
-
+[:top:](#language)
 ### 10.2 Math functions
 
 #### `math.ceil`
@@ -997,7 +1037,7 @@ Will output:
 5
 5
 ```
-
+[:top:](#language)
 #### `math.floor`
 
 Returns the largest integer less than or equal to the specified number.
@@ -1013,7 +1053,7 @@ Will output:
 4
 4
 ```
-
+[:top:](#language)
 #### `math.floor <decimals>?`
 
 Rounds a value to the nearest integer or to the specified number of fractional digits.
@@ -1030,7 +1070,7 @@ Will output:
 4
 4.56
 ```
-
+[:top:](#language)
 #### `math.format <format> <value>`
 
 Formats a value according to a .NET number format (e.g. `"0.##"` or `"0.000"`)
@@ -1044,7 +1084,7 @@ Will output:
 ```
 4.65
 ```
-
+[:top:](#language)
 #### `math.is_number <value>`
 
 Returns a boolean indicating whether the input value is a number.
@@ -1065,7 +1105,7 @@ false
 
 
 
-
+[:top:](#language)
 ### 10.3 String functions
 
 #### `string.capitalize`
@@ -1081,7 +1121,7 @@ Will output:
 ```
 Test
 ```
-
+[:top:](#language)
 #### `string.downcase` and `string.upcase`
 
 Converts the string to lower case (`downcase`) or uppercase (`upcase`)
@@ -1097,7 +1137,7 @@ Will output:
 test
 TEST
 ```
-
+[:top:](#language)
 #### `string.handleize`
 
 Converts a string to a handle by keeping only alpha and digit and replacing other sequence of characters by `-`.
@@ -1111,7 +1151,7 @@ Will output:
 ```
 This-is-a-value
 ```
-
+[:top:](#language)
 #### `string.pluralize <single> <plural>`
 
 Returns the first or second arguments depending whether the input number is == 1 or > 1.
@@ -1125,7 +1165,7 @@ Will output:
 ```
 items
 ```
-
+[:top:](#language)
 #### `string.remove <match>`
 
 Removes all occurrence of the `<match>` string from the input.
@@ -1139,7 +1179,7 @@ Will output:
 ```
 This is a  with a 
 ```
-
+[:top:](#language)
 #### `string.remove_first <match>`
 
 Removes the first occurrence of the `<match>` string from the input.
@@ -1153,7 +1193,7 @@ Will output:
 ```
 This is a  with a test 
 ```
-
+[:top:](#language)
 #### `string.replace <match> <replace>`
 
 Replaces all occurrence of the `<match>` string by the `<replace>` string from the input.
@@ -1167,7 +1207,7 @@ Will output:
 ```
 This is a boom with a boom 
 ```
-
+[:top:](#language)
 #### `string.replace_first <match> <replace>`
 
 Replaces the first occurrence of the `<match>` string by the `<replace>` string from the input.
@@ -1181,7 +1221,7 @@ Will output:
 ```
 This is a boom with a test 
 ```
-
+[:top:](#language)
 #### `string.strip`, `string.rstrip`, `string,lstrip`
 
 Removes any whitespace characters on both side (`strip`), right side only (`rstrip`) or left side only (`lstrip`)
@@ -1199,7 +1239,7 @@ test
 test
 test
 ```
-
+[:top:](#language)
 #### `string.slice <index> <length>?`
 
 Extract a sub-string starting at the specified `index` and optional `length` from the input string. A negative number for the `index` will start backward from the end of the string.
@@ -1215,7 +1255,7 @@ Will output:
 est
 st 
 ```
-
+[:top:](#language)
 #### `string.split <delimiter>`
 
 Splits to an array of string the input string with the matching delimiter and removes empty entries.
@@ -1229,7 +1269,7 @@ Will output:
 ```
 a | b | c | d | e | f
 ```
-
+[:top:](#language)
 #### `string.starts_with <match>`
 
 Returns a boolean indicating whether the input string starts with the specified `match` string.
@@ -1245,7 +1285,7 @@ Will output:
 true
 false
 ```
-
+[:top:](#language)
 #### `string.strip_newlines`
 
 Strips all newlines from the input string.
@@ -1259,7 +1299,7 @@ Will output:
 ```
 testtest
 ```
-
+[:top:](#language)
 #### `string.truncate <length>`
 
 Truncates the input string up to maximum `length` size, including the trailing `...` that would be added to the string in case of truncation. 
@@ -1273,7 +1313,7 @@ Will output:
 ```
 This is a lo...
 ```
-
+[:top:](#language)
 #### `string.truncatewords <count>`
 
 Truncates the input string up to maximum `count` words. 
@@ -1287,7 +1327,7 @@ Will output:
 ```
 This is a test truncated...
 ```
-
+[:top:](#language)
 ### 10.4 Regex
 
 
@@ -1304,7 +1344,7 @@ Will output:
 ``` 
 this is a text
 ``` 
-
+[:top:](#language)
 #### `regex.split <pattern> <input>`
 
 Split an input string using a regex pattern.
@@ -1318,7 +1358,7 @@ Will output:
 ``` 
 [this, is, a, text]
 ``` 
-
+[:top:](#language)
 #### `regex.match <pattern> <input>`
 
 Matches a string against a regex pattern and returns an array of strings matched. The first element in the array is the full string being matched and above the groups matched.
@@ -1334,7 +1374,7 @@ Will output:
 ``` 
 
 If no match are found, an empty array `[]` is returned.
-
+[:top:](#language)
 #### `regex.escape <input>` and `regex.unescape <input>` 
 
 Respectively escape and unescape a regex pattern.
@@ -1350,7 +1390,7 @@ Will output:
 \.\.\.
 ...
 ```
-
+[:top:](#language)
 ### 10.5 Object
 
 #### `typeof <value>`
@@ -1382,7 +1422,7 @@ array
 object
 object
 ```
-
+[:top:](#language)
 ### 10.6 Datetime
 
 #### Datetime object
@@ -1400,6 +1440,7 @@ A datetime object represents an instant in time, expressed as a date and time of
 | `.second`        | Gets the second of the date object
 | `.millisecond`   | Gets the millisecond of the date object
 
+[:top:](#language)
 #### Binary operations
 
 The substract operation `<date1> - <date2>`: Substract `date2` from `date1` and return a timespan internal object (see timespan object below).
@@ -1408,6 +1449,7 @@ Other comparison operators (`==`, `!=`, `<=`, `>=`, `<`, `>`) are also working w
 
 A `timespan` and also the added to a `datetime` object.
 
+[:top:](#language)
 #### `date.now` 
 
 Returns a datetime object of the current time, including the hour, minutes, seconds and milliseconds.
@@ -1419,6 +1461,7 @@ Returns a datetime object of the current time, including the hour, minutes, seco
 
 ```
 
+[:top:](#language)
 #### `date.parse`
 
 Parses the specified input string to a date object. 
@@ -1433,6 +1476,7 @@ Will output:
 5 Jan 2016
 ```
 
+[:top:](#language)
 #### `date.add_days <days>`
 #### `date.add_months <months>`
 #### `date.add_years <years>`
@@ -1454,6 +1498,7 @@ Will output:
 5 Jan 2017
 ```
 
+[:top:](#language)
 #### `date.to_string <format>?`
 
 Converts a datetime object to a textual representation using the specified format string.
@@ -1510,6 +1555,7 @@ will output:
 5 Jan 2016
 ```
 
+[:top:](#language)
 ### 10.7 Timespan
 
 #### Timespan object
@@ -1529,6 +1575,7 @@ A timespan object represents a time interval.
 | `.total_seconds` | Gets the total number of seconds  in fractional part
 | `.total_milliseconds` | Gets the total number of milliseconds  in fractional part
 
+[:top:](#language)
 #### Supported operators
 
 The `+` and `-` are both working with timespan interval objects.
@@ -1537,6 +1584,7 @@ Other comparison operators (`==`, `!=`, `<=`, `>=`, `<`, `>`) are also working w
 
 A `timespan` and also the added to a `datetime` object.
 
+[:top:](#language)
 #### `timespan.zero`
 
 Returns a timespan object that represents a 0 interval
@@ -1551,6 +1599,7 @@ will output:
 5
 ```
 
+[:top:](#language)
 #### `timespan.from_days <days>`
 
 Returns a timespan object that represents a `days` interval
@@ -1565,6 +1614,7 @@ will output:
 5
 ```
 
+[:top:](#language)
 #### `timespan.from_hours <hours>`
 
 Returns a timespan object that represents a `hours` interval
@@ -1581,6 +1631,9 @@ will output:
 
 The same functions exists for `timespan.from_minutes`, `timespan_from_seconds`, `timespan.from_milliseconds`.
 
+[:top:](#language)
 #### `timespan.parse`
 
 Parses the specified input string into a timespan object. 
+
+[:top:](#language)
