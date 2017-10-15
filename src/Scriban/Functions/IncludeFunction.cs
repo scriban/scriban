@@ -18,7 +18,7 @@ namespace Scriban.Functions
         {
         }
 
-        public object Evaluate(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
         {
             if (parameters.Count == 0)
             {

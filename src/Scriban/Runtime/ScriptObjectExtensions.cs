@@ -309,7 +309,7 @@ namespace Scriban.Runtime
                 }
             }
 
-            public object Evaluate(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
             {
                 var expectedNumberOfParameters = parametersInfo.Length;
                 if (hasTemplateContext)

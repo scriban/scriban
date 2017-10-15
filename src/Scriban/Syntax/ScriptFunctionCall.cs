@@ -23,7 +23,7 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            // Call evaluate on the target, but don't automatically call the function as if it was a parameterless call.
+            // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
             var targetFunction = context.Evaluate(Target, true);
 
             // Throw an exception if the target function is null
@@ -106,7 +106,7 @@ namespace Scriban.Syntax
             {
                 if (externFunction != null)
                 {
-                    result = externFunction.Evaluate(context, callerContext, argumentValues, blockDelegate);
+                    result = externFunction.Invoke(context, callerContext, argumentValues, blockDelegate);
                 }
                 else
                 {
