@@ -12,9 +12,12 @@ template.Render(new { name = "foo" }); // => "hi foo!"
 Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://handlebarsjs.com/) but provides additional support for:
 
 - Real Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than a regex based parser.
-- [Full featured expressions](doc/language.md#8-expressions) (`x = 1 + 2`), [function call and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
+- [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
+- [Full featured expressions](doc/language.md#8-expressions) (`x = 1 + 2`)
+- [function call and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
 - [Complex objects](doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
-- [Custom functions](doc/language.md#7-functions) via `func` statement and passing function as delegates
+- [Custom functions](doc/language.md#7-functions) via `func` statement
+- Allow to pass [Function pointers/delegates](doc/language.md#98-wrap-function-arg1argn--end) (example with the `wrap` statement)
 - Several builtins objects/functions:
   - [`arrays functions`](doc/language.md#101-array-functions)
   - [`maths functions`](doc/language.md#102-math-functions)
