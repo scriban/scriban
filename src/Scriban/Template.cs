@@ -14,12 +14,12 @@ namespace Scriban
     /// </summary>
     public class Template
     {
-        private readonly ParserOptions _parserOptions;
-        private readonly LexerOptions _lexerOptions;
+        private readonly ParserOptions? _parserOptions;
+        private readonly LexerOptions? _lexerOptions;
 
-        private Template(ParserOptions parserOptions, LexerOptions lexerOptions, string sourceFilePath)
+        private Template(ParserOptions? parserOptions, LexerOptions? lexerOptions, string sourceFilePath)
         {
-            this._parserOptions = parserOptions == null ? new ParserOptions() : parserOptions.Clone();
+            this._parserOptions = parserOptions;
             this._lexerOptions = lexerOptions;
             Messages = new List<LogMessage>();
             this.SourceFilePath = sourceFilePath;
@@ -51,8 +51,9 @@ namespace Scriban
         /// <param name="text">The scripting text.</param>
         /// <param name="sourceFilePath">The source file path. Optional, used for better error reporting if the source file has a location on the disk</param>
         /// <param name="parserOptions">The templating parsing parserOptions.</param>
+        /// <param name="lexerOptions">The options passed to the lexer</param>
         /// <returns>A template</returns>
-        public static Template Parse(string text, string sourceFilePath = null, ParserOptions parserOptions = null, LexerOptions lexerOptions = default(LexerOptions))
+        public static Template Parse(string text, string sourceFilePath = null, ParserOptions? parserOptions = null, LexerOptions? lexerOptions = null)
         {
             var template = new Template(parserOptions, lexerOptions, sourceFilePath);
             template.ParseInternal(text, sourceFilePath);

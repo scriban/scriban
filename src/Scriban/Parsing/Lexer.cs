@@ -10,29 +10,18 @@ using Scriban.Helpers;
 
 namespace Scriban.Parsing
 {
-
-    public struct LexerOptions
-    {
-        public ScriptMode Mode;
-
-        public string FrontMatterMarker;
-
-        public TextPosition StartPosition;
-    }
-
-
     /// <summary>
     /// Lexer enumerator that generates <see cref="Token"/>, to use in a foreach.
     /// </summary>
     public class Lexer : IEnumerable<Token>
     {
-        private TextPosition position;
-        private Token token;
+        private TextPosition _position;
+        private Token _token;
         private char c;
-        private BlockType blockType;
-        private List<LogMessage> errors;
-        private int openBraceCount;
-        private int escapeRawCharCount;
+        private BlockType _blockType;
+        private List<LogMessage> _errors;
+        private int _openBraceCount;
+        private int _escapeRawCharCount;
         private bool _isExpectingFrontMatter;
 
         private const char StripWhiteSpaceSpecialChar = '~';
@@ -51,24 +40,28 @@ namespace Scriban.Parsing
         /// <param name="options">The options for the lexer</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="System.ArgumentNullException"></exception>
-        public Lexer(string text, string sourcePath = null, LexerOptions options = default(LexerOptions))
+        public Lexer(string text, string sourcePath = null, LexerOptions? options = null)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
             Text = text;
-            if (options.FrontMatterMarker == null)
-            {
-                options.FrontMatterMarker = "+++";
-            }
-            Options = options;
-            position = Options.StartPosition;
 
-            if (position.Offset >= text.Length)
+            // Setup options
+            var localOptions = options ?? LexerOptions.Default;
+            if (localOptions.FrontMatterMarker == null)
             {
-                throw new ArgumentOutOfRangeException($"The starting position [{position.Offset}] of range [0, {text.Length - 1}]");
+                localOptions.FrontMatterMarker = LexerOptions.DefaultFrontMatterMarker;
+            }
+            Options = localOptions;
+
+            _position = Options.StartPosition;
+
+            if (_position.Offset >= text.Length)
+            {
+                throw new ArgumentOutOfRangeException($"The starting position [{_position.Offset}] of range [0, {text.Length - 1}]");
             }
 
             SourcePath = sourcePath ?? "<input>";
-            blockType = Options.Mode == ScriptMode.ScriptOnly ? BlockType.Code : BlockType.Raw;
+            _blockType = Options.Mode == ScriptMode.ScriptOnly ? BlockType.Code : BlockType.Raw;
 
             _isExpectingFrontMatter = Options.Mode == ScriptMode.FrontMatterOnly ||
                                      Options.Mode == ScriptMode.FrontMatterAndContent;
@@ -87,12 +80,12 @@ namespace Scriban.Parsing
         /// <summary>
         /// Gets a boolean indicating whether this lexer has errors.
         /// </summary>
-        public bool HasErrors => errors != null && errors.Count > 0;
+        public bool HasErrors => _errors != null && _errors.Count > 0;
 
         /// <summary>
         /// Gets error messages.
         /// </summary>
-        public IEnumerable<LogMessage> Errors => errors ?? Enumerable.Empty<LogMessage>();
+        public IEnumerable<LogMessage> Errors => _errors ?? Enumerable.Empty<LogMessage>();
 
         /// <summary>
         /// Enumerator. Use simply <code>foreach</code> on this instance to automatically trigger an enumeration of the tokens.
@@ -111,51 +104,51 @@ namespace Scriban.Parsing
             while (true)
             {
                 // If we have errors or we are already at the end of the file, we don't continue
-                if (HasErrors || token.Type == TokenType.Eof)
+                if (HasErrors || _token.Type == TokenType.Eof)
                 {
                     return false;
                 }
 
-                if (position.Offset == Text.Length)
+                if (_position.Offset == Text.Length)
                 {
-                    token = Token.Eof;
+                    _token = Token.Eof;
                     return true;
                 }
 
                 // Safe guard in any case where the lexer has an error and loop forever (in case we forget to eat a token)
-                if (!isFirstLoop && previousPosition == position)
+                if (!isFirstLoop && previousPosition == _position)
                 {
                     throw new InvalidOperationException("Invalid internal state of the lexer in a forever loop");
                 }
 
                 isFirstLoop = false;
-                previousPosition = position;
+                previousPosition = _position;
 
                 if (Options.Mode != ScriptMode.ScriptOnly)
                 {
-                    if (blockType == BlockType.Raw)
+                    if (_blockType == BlockType.Raw)
                     {
                         bool skipPreviousSpaces;
                         if (IsCodeEnterOrEscape(out skipPreviousSpaces))
                         {
                             ReadCodeEnterOrEscape();
-                            if (blockType == BlockType.Code)
+                            if (_blockType == BlockType.Code)
                             {
                                 return true;
                             }
                         }
                         else if (_isExpectingFrontMatter && TryParseFrontMatterMarker())
                         {
-                            blockType = BlockType.Code;
+                            _blockType = BlockType.Code;
                             return true;
                         }
 
                         // Else we have a BlockType.EscapeRaw, so we need to parse the raw block
                     }
 
-                    if (blockType != BlockType.Raw && IsCodeExit())
+                    if (_blockType != BlockType.Raw && IsCodeExit())
                     {
-                        var wasInBlock = blockType == BlockType.Code;
+                        var wasInBlock = _blockType == BlockType.Code;
                         ReadCodeExitOrEscape();
                         if (wasInBlock)
                         {
@@ -165,10 +158,10 @@ namespace Scriban.Parsing
                         continue;
                     }
 
-                    if (blockType == BlockType.Code && _isExpectingFrontMatter && TryParseFrontMatterMarker())
+                    if (_blockType == BlockType.Code && _isExpectingFrontMatter && TryParseFrontMatterMarker())
                     {
                         // Once we have parsed a front matter, we don't expect them any longer
-                        blockType = BlockType.Raw;
+                        _blockType = BlockType.Raw;
                         _isExpectingFrontMatter = false;
                         return true;
                     }
@@ -176,13 +169,13 @@ namespace Scriban.Parsing
 
                 // We may me directly at the end of the EOF without reading anykind of block
                 // So we need to exit here
-                if (position.Offset == Text.Length)
+                if (_position.Offset == Text.Length)
                 {
-                    token = Token.Eof;
+                    _token = Token.Eof;
                     return true;
                 }
 
-                if (blockType == BlockType.Code)
+                if (_blockType == BlockType.Code)
                 {
                     if (ReadCode())
                     {
@@ -212,8 +205,8 @@ namespace Scriban.Parsing
 
         private bool TryParseFrontMatterMarker()
         {
-            var start = position;
-            var end = position;
+            var start = _position;
+            var end = _position;
 
             var marker = Options.FrontMatterMarker;
             int i = 0;
@@ -250,11 +243,11 @@ namespace Scriban.Parsing
             {
                 while (i-- >= 0)
                 {
-                    end = position;
+                    end = _position;
                     NextChar();
                 }
 
-                token = new Token(TokenType.FrontMatterMarker, start, end);
+                _token = new Token(TokenType.FrontMatterMarker, start, end);
                 return true;
             }
 
@@ -287,14 +280,14 @@ namespace Scriban.Parsing
 
         private void ReadCodeEnterOrEscape()
         {
-            var start = position;
-            var end = position;
+            var start = _position;
+            var end = _position;
 
             NextChar(); // Skip {
 
             while (c == RawEscapeSpecialChar)
             {
-                escapeRawCharCount++;
+                _escapeRawCharCount++;
                 end = end.NextColumn();
                 NextChar();
             }
@@ -308,21 +301,21 @@ namespace Scriban.Parsing
                 NextChar();
             }
 
-            if (escapeRawCharCount > 0)
+            if (_escapeRawCharCount > 0)
             {
-                blockType = BlockType.RawEscape;
+                _blockType = BlockType.RawEscape;
             }
             else
             {
-                blockType = BlockType.Code;
-                token = new Token(TokenType.CodeEnter, start, end);
+                _blockType = BlockType.Code;
+                _token = new Token(TokenType.CodeEnter, start, end);
             }
         }
 
         private bool IsCodeExit()
         {
             // Do we have any brace still opened? If yes, let ReadCode handle them
-            if (openBraceCount > 0)
+            if (_openBraceCount > 0)
             {
                 return false;
             }
@@ -341,7 +334,7 @@ namespace Scriban.Parsing
             }
 
             start++;
-            for (int i = 0; i < escapeRawCharCount; i++)
+            for (int i = 0; i < _escapeRawCharCount; i++)
             {
                 if (PeekChar(i + start) != RawEscapeSpecialChar)
                 {
@@ -349,12 +342,12 @@ namespace Scriban.Parsing
                 }
             }
             
-            return PeekChar(escapeRawCharCount + start) == '}';
+            return PeekChar(_escapeRawCharCount + start) == '}';
         }
 
         private void ReadCodeExitOrEscape()
         {
-            var start = position;
+            var start = _position;
 
             var shouldSkipSpacesAfterExit = false;
             if (c == StripWhiteSpaceSpecialChar)
@@ -364,20 +357,20 @@ namespace Scriban.Parsing
             }
 
             NextChar();  // skip }
-            for (int i = 0; i < escapeRawCharCount; i++)
+            for (int i = 0; i < _escapeRawCharCount; i++)
             {
                 NextChar(); // skip !
             }
-            var end = position;
+            var end = _position;
             NextChar(); // skip }
 
-            if (escapeRawCharCount > 0)
+            if (_escapeRawCharCount > 0)
             {
-                escapeRawCharCount = 0;
+                _escapeRawCharCount = 0;
             }
             else
             {
-                token = new Token(TokenType.CodeExit, start, end);
+                _token = new Token(TokenType.CodeExit, start, end);
             }
 
             // Eat spaces after an exit
@@ -386,12 +379,12 @@ namespace Scriban.Parsing
                 ConsumeWhitespace(false);
             }
 
-            blockType = BlockType.Raw;
+            _blockType = BlockType.Raw;
         }
 
         private bool ReadRaw()
         {
-            var start = position;
+            var start = _position;
             var end = start;
             bool nextCodeEnterOrEscapeExit = false;
             bool removePreviousSpaces = false;
@@ -400,13 +393,13 @@ namespace Scriban.Parsing
             {
                 if (PeekChar() != '\0')
                 {
-                    if (blockType == BlockType.Raw && IsCodeEnterOrEscape(out removePreviousSpaces) || blockType == BlockType.RawEscape && IsCodeExit())
+                    if (_blockType == BlockType.Raw && IsCodeEnterOrEscape(out removePreviousSpaces) || _blockType == BlockType.RawEscape && IsCodeExit())
                     {
                         nextCodeEnterOrEscapeExit = true;
                         break;
                     }
 
-                    end = position;
+                    end = _position;
                     NextChar();
                 }
                 else
@@ -445,7 +438,7 @@ namespace Scriban.Parsing
                 }
             }
 
-            token = new Token(TokenType.Raw, start, nextCodeEnterOrEscapeExit ? end : position);
+            _token = new Token(TokenType.Raw, start, nextCodeEnterOrEscapeExit ? end : _position);
 
             // Go to eof
             if (!nextCodeEnterOrEscapeExit)
@@ -459,17 +452,17 @@ namespace Scriban.Parsing
         private bool ReadCode()
         {
             bool hasTokens = true;
-            var start = position;
+            var start = _position;
             switch (c)
             {
                 case '\n':
-                    token = new Token(TokenType.NewLine, start, position);
+                    _token = new Token(TokenType.NewLine, start, _position);
                     NextChar();
                     // consume all remaining space including new lines
                     ConsumeWhitespace(false);
                     break;
                 case ';':
-                    token = new Token(TokenType.SemiColon, start, position);
+                    _token = new Token(TokenType.SemiColon, start, _position);
                     NextChar();
                     // consume all remaining space including new lines
                     ConsumeWhitespace(false);
@@ -479,193 +472,193 @@ namespace Scriban.Parsing
                     // case of: \r\n
                     if (c == '\n')
                     {
-                        token = new Token(TokenType.NewLine, start, position);
+                        _token = new Token(TokenType.NewLine, start, _position);
                         NextChar();
                         // consume all remaining space including new lines
                         ConsumeWhitespace(false);
                         break;
                     }
                     // case of \r
-                    token = new Token(TokenType.NewLine, start, start);
+                    _token = new Token(TokenType.NewLine, start, start);
                     // consume all remaining space including new lines
                     ConsumeWhitespace(false);
                     break;
                 case ':':
-                    token = new Token(TokenType.Colon, start, start);
+                    _token = new Token(TokenType.Colon, start, start);
                     NextChar();
                     break;
                 case '@':
-                    token = new Token(TokenType.Arroba, start, start);
+                    _token = new Token(TokenType.Arroba, start, start);
                     NextChar();
                     break;
                 case '^':
-                    token = new Token(TokenType.Caret, start, start);
+                    _token = new Token(TokenType.Caret, start, start);
                     NextChar();
                     break;
                 case '*':
-                    token = new Token(TokenType.Multiply, start, start);
+                    _token = new Token(TokenType.Multiply, start, start);
                     NextChar();
                     break;
                 case '/':
                     NextChar();
                     if (c == '/')
                     {
-                        token = new Token(TokenType.DoubleDivide, start, position);
+                        _token = new Token(TokenType.DoubleDivide, start, _position);
                         NextChar();
                         break;
                     }
-                    token = new Token(TokenType.Divide, start, start);
+                    _token = new Token(TokenType.Divide, start, start);
                     break;
                 case '+':
-                    token = new Token(TokenType.Plus, start, start);
+                    _token = new Token(TokenType.Plus, start, start);
                     NextChar();
                     break;
                 case '-':
-                    token = new Token(TokenType.Minus, start, start);
+                    _token = new Token(TokenType.Minus, start, start);
                     NextChar();
                     break;
                 case '%':
-                    token = new Token(TokenType.Modulus, start, start);
+                    _token = new Token(TokenType.Modulus, start, start);
                     NextChar();
                     break;
                 case ',':
-                    token = new Token(TokenType.Comma, start, start);
+                    _token = new Token(TokenType.Comma, start, start);
                     NextChar();
                     break;
                 case '&':
                     NextChar();
                     if (c == '&')
                     {
-                        token = new Token(TokenType.And, start, position);
+                        _token = new Token(TokenType.And, start, _position);
                         NextChar();
                         break;
                     }
 
                     // & is an invalid char alone
-                    token = new Token(TokenType.Invalid, start, start);
+                    _token = new Token(TokenType.Invalid, start, start);
                     break;
                 case '?':
                     NextChar();
                     if (c == '?')
                     {
-                        token = new Token(TokenType.EmptyCoalescing, start, position);
+                        _token = new Token(TokenType.EmptyCoalescing, start, _position);
                         NextChar();
                         break;
                     }
 
                     // ? is an invalid char alone
-                    token = new Token(TokenType.Invalid, start, start);
+                    _token = new Token(TokenType.Invalid, start, start);
                     break;
                 case '|':
                     NextChar();
                     if (c == '|')
                     {
-                        token = new Token(TokenType.Or, start, position);
+                        _token = new Token(TokenType.Or, start, _position);
                         NextChar();
                         break;
                     }
-                    token = new Token(TokenType.Pipe, start, start);
+                    _token = new Token(TokenType.Pipe, start, start);
                     break;
                 case '.':
                     NextChar();
                     if (c == '.')
                     {
-                        var index = position;
+                        var index = _position;
                         NextChar();
                         if (c == '<')
                         {
-                            token = new Token(TokenType.DoubleDotLess, start, position);
+                            _token = new Token(TokenType.DoubleDotLess, start, _position);
                             NextChar();
                             break;
                         }
 
-                        token = new Token(TokenType.DoubleDot, start, index);
+                        _token = new Token(TokenType.DoubleDot, start, index);
                         break;
                     }
-                    token = new Token(TokenType.Dot, start, start);
+                    _token = new Token(TokenType.Dot, start, start);
                     break;
 
                 case '!':
                     NextChar();
                     if (c == '=')
                     {
-                        token = new Token(TokenType.CompareNotEqual, start, position);
+                        _token = new Token(TokenType.CompareNotEqual, start, _position);
                         NextChar();
                         break;
                     }
-                    token = new Token(TokenType.Not, start, start);
+                    _token = new Token(TokenType.Not, start, start);
                     break;
 
                 case '=':
                     NextChar();
                     if (c == '=')
                     {
-                        token = new Token(TokenType.CompareEqual, start, position);
+                        _token = new Token(TokenType.CompareEqual, start, _position);
                         NextChar();
                         break;
                     }
-                    token = new Token(TokenType.Equal, start, start);
+                    _token = new Token(TokenType.Equal, start, start);
                     break;
                 case '<':
                     NextChar();
                     if (c == '=')
                     {
-                        token = new Token(TokenType.CompareLessOrEqual, start, position);
+                        _token = new Token(TokenType.CompareLessOrEqual, start, _position);
                         NextChar();
                         break;
                     }
                     if (c == '<')
                     {
-                        token = new Token(TokenType.ShiftLeft, start, position);
+                        _token = new Token(TokenType.ShiftLeft, start, _position);
                         NextChar();
                         break;
                     }
-                    token = new Token(TokenType.CompareLess, start, start);
+                    _token = new Token(TokenType.CompareLess, start, start);
                     break;
                 case '>':
                     NextChar();
                     if (c == '=')
                     {
-                        token = new Token(TokenType.CompareGreaterOrEqual, start, position);
+                        _token = new Token(TokenType.CompareGreaterOrEqual, start, _position);
                         NextChar();
                         break;
                     }
                     if (c == '>')
                     {
-                        token = new Token(TokenType.ShiftRight, start, position);
+                        _token = new Token(TokenType.ShiftRight, start, _position);
                         NextChar();
                         break;
                     }
-                    token = new Token(TokenType.CompareGreater, start, start);
+                    _token = new Token(TokenType.CompareGreater, start, start);
                     break;
                 case '(':
-                    token = new Token(TokenType.OpenParent, position, position);
+                    _token = new Token(TokenType.OpenParent, _position, _position);
                     NextChar();
                     break;
                 case ')':
-                    token = new Token(TokenType.CloseParent, position, position);
+                    _token = new Token(TokenType.CloseParent, _position, _position);
                     NextChar();
                     break;
                 case '[':
-                    token = new Token(TokenType.OpenBracket, position, position);
+                    _token = new Token(TokenType.OpenBracket, _position, _position);
                     NextChar();
                     break;
                 case ']':
-                    token = new Token(TokenType.CloseBracket, position, position);
+                    _token = new Token(TokenType.CloseBracket, _position, _position);
                     NextChar();
                     break;
                 case '{':
                     // We count brace open to match then correctly later and avoid confusing with code exit
-                    openBraceCount++;
-                    token = new Token(TokenType.OpenBrace, position, position);
+                    _openBraceCount++;
+                    _token = new Token(TokenType.OpenBrace, _position, _position);
                     NextChar();
                     break;
                 case '}':
-                    if (openBraceCount > 0)
+                    if (_openBraceCount > 0)
                     {
                         // We match first brace open/close
-                        openBraceCount--;
-                        token = new Token(TokenType.CloseBrace, position, position);
+                        _openBraceCount--;
+                        _token = new Token(TokenType.CloseBrace, _position, _position);
                         NextChar();
                     }
                     else
@@ -678,8 +671,8 @@ namespace Scriban.Parsing
                         else
                         {
                             // Else we have a close brace but it is invalid
-                            token = new Token(TokenType.CloseBrace, position, position);
-                            AddError("Unexpected } while no matching {", position, position);
+                            _token = new Token(TokenType.CloseBrace, _position, _position);
+                            AddError("Unexpected } while no matching {", _position, _position);
                             NextChar();
                         }
                     }
@@ -695,7 +688,7 @@ namespace Scriban.Parsing
                     ReadVerbatimString();
                     break;
                 case '\0':
-                    token = Token.Eof;
+                    _token = Token.Eof;
                     break;
                 default:
                     // Eat any whitespace
@@ -720,7 +713,7 @@ namespace Scriban.Parsing
                     }
 
                     // invalid char
-                    token = new Token(TokenType.Invalid, position, position);
+                    _token = new Token(TokenType.Invalid, _position, _position);
                     NextChar();
                     break;
             }
@@ -730,12 +723,12 @@ namespace Scriban.Parsing
 
         private bool ConsumeWhitespace(bool stopAtNewLine)
         {
-            var start = position;
+            var start = _position;
             while (char.IsWhiteSpace(c) && (!stopAtNewLine || !IsNewLine(c)))
             {
                 NextChar();
             }
-            return start != position;
+            return start != _position;
         }
 
         private static bool IsNewLine(char c)
@@ -745,19 +738,19 @@ namespace Scriban.Parsing
 
         private void ReadIdentifier(bool special)
         {
-            var start = position;
+            var start = _position;
 
             TextPosition beforePosition;
             bool first = true;
             do
             {
-                beforePosition = position;
+                beforePosition = _position;
                 NextChar();
 
                 // Special $$ variable allowed only here
                 if (first && special && c == '$')
                 {
-                    token = new Token(TokenType.IdentifierSpecial, start, position);
+                    _token = new Token(TokenType.IdentifierSpecial, start, _position);
                     NextChar();
                     return;
                 }
@@ -765,7 +758,7 @@ namespace Scriban.Parsing
                 first = false;
             } while (IsIdentifierLetter(c));
 
-            token = new Token(special ? TokenType.IdentifierSpecial : TokenType.Identifier, start, beforePosition);
+            _token = new Token(special ? TokenType.IdentifierSpecial : TokenType.Identifier, start, beforePosition);
         }
 
         [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
@@ -782,14 +775,14 @@ namespace Scriban.Parsing
 
         private void ReadNumber()
         {
-            var start = position;
-            var end = position;
+            var start = _position;
+            var end = _position;
             var hasDot = false;
 
             // Read first part
             do
             {
-                end = position;
+                end = _position;
                 NextChar();
             } while (char.IsDigit(c));
 
@@ -801,11 +794,11 @@ namespace Scriban.Parsing
                 if (PeekChar() != '.')
                 {
                     hasDot = true;
-                    end = position;
+                    end = _position;
                     NextChar();
                     while (char.IsDigit(c))
                     {
-                        end = position;
+                        end = _position;
                         NextChar();
                     }
                 }
@@ -813,55 +806,55 @@ namespace Scriban.Parsing
 
             if (c == 'e' || c == 'E')
             {
-                end = position;
+                end = _position;
                 NextChar();
                 if (c == '+' || c == '-')
                 {
-                    end = position;
+                    end = _position;
                     NextChar();
                 }
 
                 if (!char.IsDigit(c))
                 {
-                    AddError("Expecting at least one digit after the exponent", position, position);
+                    AddError("Expecting at least one digit after the exponent", _position, _position);
                     return;
                 }
 
                 while (char.IsDigit(c))
                 {
-                    end = position;
+                    end = _position;
                     NextChar();
                 }
             }
 
-            token = new Token(hasDot ? TokenType.Float : TokenType.Integer, start, end);
+            _token = new Token(hasDot ? TokenType.Float : TokenType.Integer, start, end);
         }
 
         private void ReadString()
         {
-            var start = position;
-            var end = position;
+            var start = _position;
+            var end = _position;
             char startChar = c;
             NextChar(); // Skip "
             while (true)
             {
                 if (c == '\\')
                 {
-                    end = position;
+                    end = _position;
                     NextChar();
                     // 0 ' " \ b f n r t v u0000-uFFFF x00-xFF
                     switch (c)
                     {
                         case '\n':
-                            end = position;
+                            end = _position;
                             NextChar();
                             continue;
                         case '\r':
-                            end = position;
+                            end = _position;
                             NextChar();
                             if (c == '\n')
                             {
-                                end = position;
+                                end = _position;
                                 NextChar();
                             }
                             continue;
@@ -875,28 +868,28 @@ namespace Scriban.Parsing
                         case 'r':
                         case 't':
                         case 'v':
-                            end = position;
+                            end = _position;
                             NextChar();
                             continue;
                         case 'u':
-                            end = position;
+                            end = _position;
                             NextChar();
                             // Must be followed 4 hex numbers (0000-FFFF)
                             if (c.IsHex()) // 1
                             {
-                                end = position;
+                                end = _position;
                                 NextChar();
                                 if (c.IsHex()) // 2
                                 {
-                                    end = position;
+                                    end = _position;
                                     NextChar();
                                     if (c.IsHex()) // 3
                                     {
-                                        end = position;
+                                        end = _position;
                                         NextChar();
                                         if (c.IsHex()) // 4
                                         {
-                                            end = position;
+                                            end = _position;
                                             NextChar();
                                             continue;
                                         }
@@ -905,16 +898,16 @@ namespace Scriban.Parsing
                             }
                             break;
                         case 'x':
-                            end = position;
+                            end = _position;
                             NextChar();
                             // Must be followed 2 hex numbers (00-FF)
                             if (c.IsHex())
                             {
-                                end = position;
+                                end = _position;
                                 NextChar();
                                 if (c.IsHex())
                                 {
-                                    end = position;
+                                    end = _position;
                                     NextChar();
                                     continue;
                                 }
@@ -922,7 +915,7 @@ namespace Scriban.Parsing
                             break;
 
                     }
-                    AddError($"Unexpected escape character [{c}] in string. Only 0 ' \\ \" b f n r t v u0000-uFFFF x00-xFF are allowed", position, position);
+                    AddError($"Unexpected escape character [{c}] in string. Only 0 ' \\ \" b f n r t v u0000-uFFFF x00-xFF are allowed", _position, _position);
                 }
                 else if (c == '\0')
                 {
@@ -931,24 +924,24 @@ namespace Scriban.Parsing
                 }
                 else if (c == startChar)
                 {
-                    end = position;
+                    end = _position;
                     NextChar();
                     break;
                 }
                 else
                 {
-                    end = position;
+                    end = _position;
                     NextChar();
                 }
             }
 
-            token = new Token(TokenType.String, start, end);
+            _token = new Token(TokenType.String, start, end);
         }
 
         private void ReadVerbatimString()
         {
-            var start = position;
-            var end = position;
+            var start = _position;
+            var end = _position;
             char startChar = c;
             NextChar(); // Skip `
             while (true)
@@ -960,29 +953,29 @@ namespace Scriban.Parsing
                 }
                 else if (c == startChar)
                 {
-                    end = position;
+                    end = _position;
                     NextChar(); // Do we have an escape?
                     if (c != startChar)
                     {
                         break;
                     }
-                    end = position;
+                    end = _position;
                     NextChar();
                 }
                 else
                 {
-                    end = position;
+                    end = _position;
                     NextChar();
                 }
             }
 
-            token = new Token(TokenType.VerbatimString, start, end);
+            _token = new Token(TokenType.VerbatimString, start, end);
         }
 
         private void ReadComment()
         {
-            var start = position;
-            var end = position;
+            var start = _position;
+            var end = _position;
 
             NextChar();
 
@@ -992,7 +985,7 @@ namespace Scriban.Parsing
             {
                 isMulti = true;
 
-                end = position;
+                end = _position;
                 NextChar();
 
                 while (!IsCodeExit())
@@ -1004,12 +997,12 @@ namespace Scriban.Parsing
 
                     var mayBeEndOfComment = c == '#';
 
-                    end = position;
+                    end = _position;
                     NextChar();
 
                     if (mayBeEndOfComment && c == '#')
                     {
-                        end = position;
+                        end = _position;
                         NextChar();
                         break;
                     }
@@ -1024,18 +1017,18 @@ namespace Scriban.Parsing
                     {
                         break;
                     }
-                    end = position;
+                    end = _position;
                     NextChar();
                 }
             }
 
-            token = new Token(isMulti ? TokenType.CommentMulti : TokenType.Comment, start, end);
+            _token = new Token(isMulti ? TokenType.CommentMulti : TokenType.Comment, start, end);
         }
 
         [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         private char PeekChar(int count = 1)
         {
-            var offset = position.Offset + count;
+            var offset = _position.Offset + count;
 
             return offset >= 0 && offset < Text.Length ? Text[offset] : '\0';
         }
@@ -1043,23 +1036,23 @@ namespace Scriban.Parsing
         [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         private void NextChar()
         {
-            position.Offset++;
-            if (position.Offset < Text.Length)
+            _position.Offset++;
+            if (_position.Offset < Text.Length)
             {
                 if (c == '\n')
                 {
-                    position.Column = 0;
-                    position.Line += 1;
+                    _position.Column = 0;
+                    _position.Line += 1;
                 }
                 else
                 {
-                    position.Column++;
+                    _position.Column++;
                 }
-                c = Text[position.Offset];
+                c = Text[_position.Offset];
             }
             else
             {
-                position.Offset = Text.Length;
+                _position.Offset = Text.Length;
                 c = '\0';
             }
         }
@@ -1076,20 +1069,20 @@ namespace Scriban.Parsing
 
         private void AddError(string message, TextPosition start, TextPosition end)
         {
-            token = new Token(TokenType.Invalid, start, end);
-            if (errors == null)
+            _token = new Token(TokenType.Invalid, start, end);
+            if (_errors == null)
             {
-                errors = new List<LogMessage>();
+                _errors = new List<LogMessage>();
             }
-            errors.Add(new LogMessage(ParserMessageType.Error, new SourceSpan(SourcePath, start, end), message));
+            _errors.Add(new LogMessage(ParserMessageType.Error, new SourceSpan(SourcePath, start, end), message));
         }
 
 
         private void Reset()
         {
             c = Text.Length > 0 ? Text[Options.StartPosition.Offset] : '\0';
-            position = Options.StartPosition;
-            errors = null;
+            _position = Options.StartPosition;
+            _errors = null;
         }
 
         /// <summary>
@@ -1115,7 +1108,7 @@ namespace Scriban.Parsing
                 lexer.Reset();
             }
 
-            public Token Current => lexer.token;
+            public Token Current => lexer._token;
 
             object IEnumerator.Current => Current;
 

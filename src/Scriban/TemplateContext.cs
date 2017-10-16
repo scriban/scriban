@@ -65,6 +65,7 @@ namespace Scriban
             MemberRenamer = StandardMemberRenamer.Default;
 
             TemplateLoaderParserOptions = new ParserOptions();
+            TemplateLoaderLexerOptions = LexerOptions.Default;
 
             _outputs = new Stack<StringBuilder>();
             _outputs.Push(new StringBuilder());

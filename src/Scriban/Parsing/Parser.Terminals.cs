@@ -184,7 +184,7 @@ namespace Scriban.Parsing
         private ScriptLiteral ParseString()
         {
             var literal = Open<ScriptLiteral>();
-            var text = lexer.Text;
+            var text = _lexer.Text;
             var builder = new StringBuilder(Current.End.Offset - Current.Start.Offset - 1);
 
             var end = Current.End.Offset;
@@ -272,7 +272,7 @@ namespace Scriban.Parsing
         private ScriptLiteral ParseVerbatimString()
         {
             var literal = Open<ScriptLiteral>();
-            var text = lexer.Text;
+            var text = _lexer.Text;
 
             StringBuilder builder = null;
 

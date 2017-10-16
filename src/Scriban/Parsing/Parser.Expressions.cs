@@ -504,7 +504,7 @@ namespace Scriban.Parsing
             int position = Current.Start.Offset - 1;
             if (position >= 0)
             {
-                return char.IsWhiteSpace(lexer.Text[position]);
+                return char.IsWhiteSpace(_lexer.Text[position]);
             }
             return false;
         }

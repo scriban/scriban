@@ -9,22 +9,22 @@ namespace Scriban.Parsing
     public enum ScriptMode
     {
         /// <summary>
-        /// The template contains a regular content.
+        /// The template contains a regular content (text and script mixed).
         /// </summary>
         Default,
 
         /// <summary>
-        /// The template contains a scriban frontmatter and the parser will parse only this part.
+        /// The template contains a scriban frontmatter (script only) and the parser will parse only this part.
         /// </summary>
         FrontMatterOnly,
 
         /// <summary>
-        /// The template contains a scriban frontmatter and a content and will parse both.
+        /// The template contains a scriban frontmatter (script only) and a content (text and script mixed) and will parse both.
         /// </summary>
         FrontMatterAndContent,
 
         /// <summary>
-        /// The template is directly scriban code (so no necessary {{ }} for entering a code block)
+        /// The template is directly scriban code (script only) so no necessary {{ }} for entering a code block
         /// </summary>
         ScriptOnly,
     }

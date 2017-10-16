@@ -159,7 +159,7 @@ name = 'yes'
             Assert.AreEqual(1, value);
         }
 
-        private static Template ParseTemplate(string text, LexerOptions lexerOptions = default(LexerOptions), ParserOptions parserOptions = null)
+        private static Template ParseTemplate(string text, LexerOptions? lexerOptions = null, ParserOptions? parserOptions = null)
         {
             var template = Template.Parse(text, "text", parserOptions, lexerOptions);
             foreach (var message in template.Messages)

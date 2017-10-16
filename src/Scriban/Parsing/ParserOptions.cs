@@ -3,18 +3,14 @@
 // See license.txt file in the project root for full license information.
 namespace Scriban.Parsing
 {
-    public class ParserOptions
+    /// <summary>
+    /// Defines the options used when parsing a template.
+    /// </summary>
+    public struct ParserOptions
     {
-        public ParserOptions()
-        {
-            StatementDepthLimit = 100;
-        }
-
-        public int StatementDepthLimit { get; set; }
-
-        public ParserOptions Clone()
-        {
-            return (ParserOptions)MemberwiseClone();
-        }
+        /// <summary>
+        /// Sets the depth limit of nested statements (e.g nested if/else) to disallow deep/potential stack-overflow exploits. Default is null, so there is no limit.
+        /// </summary>
+        public int? StatementDepthLimit { get; set; }
     }
 }

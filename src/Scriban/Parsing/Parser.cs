@@ -14,14 +14,15 @@ namespace Scriban.Parsing
     /// </summary>
     public partial class Parser
     {
-        private readonly Lexer lexer;
-        private Lexer.Enumerator tokenIt;
-        private readonly LinkedList<Token> tokensPreview;
-        private Token previousToken;
-        private Token token;
-        private bool inCodeSection = false;
-        private int blockLevel;
-        private bool inFrontMatter = false;
+        private readonly Lexer _lexer;
+        private Lexer.Enumerator _tokenIt;
+        private readonly LinkedList<Token> _tokensPreview;
+        private Token _previousToken;
+        private Token _token;
+        private bool _inCodeSection;
+        private int _blockLevel;
+        private bool _inFrontMatter;
+        private bool _isStatementDepthLimitReached;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -29,11 +30,10 @@ namespace Scriban.Parsing
         /// <param name="lexer">The lexer.</param>
         /// <param name="options">The options.</param>
         /// <exception cref="System.ArgumentNullException"></exception>
-        public Parser(Lexer lexer, ParserOptions options = null)
+        public Parser(Lexer lexer, ParserOptions? options = null)
         {
-            if (lexer == null) throw new ArgumentNullException(nameof(lexer));
-            this.lexer = lexer;
-            tokensPreview = new LinkedList<Token>();
+            _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
+            _tokensPreview = new LinkedList<Token>();
             Messages = new List<LogMessage>();
 
             Options = options ?? new ParserOptions();
@@ -42,11 +42,11 @@ namespace Scriban.Parsing
             Blocks = new Stack<ScriptNode>();
 
             // Initialize the iterator
-            tokenIt = lexer.GetEnumerator();
+            _tokenIt = lexer.GetEnumerator();
             NextToken();
         }
 
-        public ParserOptions Options { get; }
+        public readonly ParserOptions Options;
 
         public List<LogMessage> Messages { get; private set; }
 
@@ -54,9 +54,9 @@ namespace Scriban.Parsing
 
         private Stack<ScriptNode> Blocks { get; }
 
-        private Token Current => token;
+        private Token Current => _token;
 
-        private Token Previous => previousToken;
+        private Token Previous => _previousToken;
 
         public SourceSpan CurrentSpan => GetSpanForToken(Current);
 
@@ -66,7 +66,8 @@ namespace Scriban.Parsing
         {
             Messages = new List<LogMessage>();
             HasErrors = false;
-            blockLevel = 0;
+            _blockLevel = 0;
+            _isStatementDepthLimitReached = false;
             Blocks.Clear();
 
             var page = Open<ScriptPage>();
@@ -77,12 +78,12 @@ namespace Scriban.Parsing
                 case ScriptMode.FrontMatterOnly:
                     if (Current.Type != TokenType.FrontMatterMarker)
                     {
-                        LogError($"When [{CurrentParsingMode}] is enabled, expecting a `{lexer.Options.FrontMatterMarker}` at the beginning of the text instead of `{Current.GetText(lexer.Text)}`");
+                        LogError($"When [{CurrentParsingMode}] is enabled, expecting a `{_lexer.Options.FrontMatterMarker}` at the beginning of the text instead of `{Current.GetText(_lexer.Text)}`");
                         return null;
                     }
 
-                    inFrontMatter = true;
-                    inCodeSection = true;
+                    _inFrontMatter = true;
+                    _inCodeSection = true;
 
                     // Skip the frontmatter marker
                     NextToken();
@@ -91,9 +92,9 @@ namespace Scriban.Parsing
                     page.FrontMatter = ParseBlockStatement(null);
 
                     // We should not be in a frontmatter after parsing the statements
-                    if (inFrontMatter)
+                    if (_inFrontMatter)
                     {
-                        LogError($"End of frontmatter `{lexer.Options.FrontMatterMarker}` not found");
+                        LogError($"End of frontmatter `{_lexer.Options.FrontMatterMarker}` not found");
                     }
 
                     if (parsingMode == ScriptMode.FrontMatterOnly)
@@ -102,7 +103,7 @@ namespace Scriban.Parsing
                     }
                     break;
                 case ScriptMode.ScriptOnly:
-                    inCodeSection = true;
+                    _inCodeSection = true;
                     break;
             }
 
@@ -113,9 +114,9 @@ namespace Scriban.Parsing
                 FixRawStatementAfterFrontMatter(page);
             }
 
-            if (lexer.HasErrors)
+            if (_lexer.HasErrors)
             {
-                foreach (var lexerError in lexer.Errors)
+                foreach (var lexerError in _lexer.Errors)
                 {
                     Log(lexerError);
                 }
@@ -184,19 +185,19 @@ namespace Scriban.Parsing
                     break;
 
                 case TokenType.CodeEnter:
-                    if (inCodeSection)
+                    if (_inCodeSection)
                     {
                         LogError("Unexpected token while already in a code block");
                     }
-                    inCodeSection = true;
+                    _inCodeSection = true;
                     NextToken();
                     goto continueParsing;
 
                 case TokenType.FrontMatterMarker:
-                    if (inFrontMatter)
+                    if (_inFrontMatter)
                     {
-                        inFrontMatter = false;
-                        inCodeSection = false;
+                        _inFrontMatter = false;
+                        _inCodeSection = false;
                         // When we expect to parse only the front matter, don't try to tokenize the following text
                         // Keep the current token as the code exit of the front matter
                         if (CurrentParsingMode != ScriptMode.FrontMatterOnly)
@@ -214,13 +215,13 @@ namespace Scriban.Parsing
                     }
                     else
                     {
-                        LogError($"Unexpected frontmatter marker `{lexer.Options.FrontMatterMarker}` while not inside a frontmatter");
+                        LogError($"Unexpected frontmatter marker `{_lexer.Options.FrontMatterMarker}` while not inside a frontmatter");
                         NextToken();
                     }
                     break;
 
                 case TokenType.CodeExit:
-                    if (!inCodeSection)
+                    if (!_inCodeSection)
                     {
                         LogError("Unexpected code block exit '}}' while no code block enter '{{' has been found");
                     }
@@ -229,12 +230,12 @@ namespace Scriban.Parsing
                         LogError("Unexpected code clock exit '}}' while parsing in script only mode. '}}' is not allowed.");
                     }
 
-                    inCodeSection = false;
+                    _inCodeSection = false;
                     NextToken();
                     goto continueParsing;
 
                 default:
-                    if (inCodeSection)
+                    if (_inCodeSection)
                     {
                         switch (Current.Type)
                         {
@@ -485,7 +486,7 @@ namespace Scriban.Parsing
         private ScriptRawStatement ParseRawStatement()
         {
             var scriptStatement = Open<ScriptRawStatement>();
-            scriptStatement.Text = lexer.Text;
+            scriptStatement.Text = _lexer.Text;
             NextToken(); // Skip raw
             return Close(scriptStatement);
         }
@@ -617,7 +618,13 @@ namespace Scriban.Parsing
         {
             Blocks.Push(parentStatement);
 
-            blockLevel++;
+            _blockLevel++;
+            if (Options.StatementDepthLimit.HasValue && !_isStatementDepthLimitReached && _blockLevel > Options.StatementDepthLimit.Value)
+            {
+                LogError(parentStatement, GetSpanForToken(Previous), $"The statement depth limit `{Options.StatementDepthLimit.Value}` was reached when parsing this statement");
+                _isStatementDepthLimitReached = true;
+            }
+
             var blockStatement = parentStatement is ScriptBlockStatement
                 ? (ScriptBlockStatement) parentStatement
                 : Open<ScriptBlockStatement>();
@@ -640,14 +647,14 @@ namespace Scriban.Parsing
             if (!HasErrors && !hasEnd)
             {
                 // If there are any end block not matching, we have an error
-                if (blockLevel > 1)
+                if (_blockLevel > 1)
                 {
                     // unit test: 201-if-else-error2.txt
                     LogError(parentStatement, GetSpanForToken(Previous), $"The <end> statement was not found");
                 }
             }
 
-            blockLevel--;
+            _blockLevel--;
 
             Blocks.Pop();
             return Close(blockStatement);
@@ -667,7 +674,7 @@ namespace Scriban.Parsing
 
         private T Open<T>() where T : ScriptNode, new()
         {
-            return new T() { Span = {FileName = lexer.SourcePath, Start = Current.Start}};
+            return new T() { Span = {FileName = _lexer.SourcePath, Start = Current.Start}};
         }
 
         private T Close<T>(T statement) where T : ScriptNode
@@ -678,58 +685,58 @@ namespace Scriban.Parsing
 
         private string GetAsText(Token localToken)
         {
-            return localToken.GetText(lexer.Text);
+            return localToken.GetText(_lexer.Text);
         }
 
         private void NextToken()
         {
-            previousToken = token;
+            _previousToken = _token;
             bool result;
 
-            if (tokensPreview.Count > 0)
+            if (_tokensPreview.Count > 0)
             {
-                token = tokensPreview.First.Value;
-                tokensPreview.RemoveFirst();
+                _token = _tokensPreview.First.Value;
+                _tokensPreview.RemoveFirst();
                 return;
             }
 
             // Skip Comments
-            while ((result = tokenIt.MoveNext()) && IsHidden(tokenIt.Current.Type))
+            while ((result = _tokenIt.MoveNext()) && IsHidden(_tokenIt.Current.Type))
             {
             }
 
-            token = result ? tokenIt.Current : Token.Eof;
+            _token = result ? _tokenIt.Current : Token.Eof;
         }
 
         private Token PeekToken(int count = 1)
         {
             if (count < 1) throw new ArgumentOutOfRangeException("count", "Must be > 0");
 
-            for (int i = tokensPreview.Count; i < count; i++)
+            for (int i = _tokensPreview.Count; i < count; i++)
             {
-                if (tokenIt.MoveNext())
+                if (_tokenIt.MoveNext())
                 {
-                    var nextToken = tokenIt.Current;
+                    var nextToken = _tokenIt.Current;
                     if (!IsHidden(nextToken.Type))
                     {
-                        tokensPreview.AddLast(nextToken);
+                        _tokensPreview.AddLast(nextToken);
                     }
                 }
             }
 
-            if (tokensPreview.Count == 0)
+            if (_tokensPreview.Count == 0)
             {
                 return Token.Eof;
             }
 
             // optimized case for last element
-            if (count >= tokensPreview.Count)
+            if (count >= _tokensPreview.Count)
             {
-                return tokensPreview.Last.Value;
+                return _tokensPreview.Last.Value;
             }
 
             // TODO: depending on the count it may be faster to start from the end of the list
-            var node = tokensPreview.First;
+            var node = _tokensPreview.First;
             while (--count != 0)
             {
                 node = node.Next;
@@ -755,7 +762,7 @@ namespace Scriban.Parsing
 
         private SourceSpan GetSpanForToken(Token tokenArg)
         {
-            return new SourceSpan(lexer.SourcePath, tokenArg.Start, tokenArg.End);
+            return new SourceSpan(_lexer.SourcePath, tokenArg.Start, tokenArg.End);
         }
 
         private void LogError(SourceSpan span, string text)

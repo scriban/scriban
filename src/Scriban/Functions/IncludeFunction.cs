@@ -73,7 +73,7 @@ namespace Scriban.Functions
                 templateFilePath = templateFilePath ?? templateName;
 
                 // Clone parser options
-                var parserOptions = context.TemplateLoaderParserOptions.Clone();
+                var parserOptions = context.TemplateLoaderParserOptions;
 
                 var lexerOptions = context.TemplateLoaderLexerOptions;
                 // Parse include in default modes (while top page can be using front matter)
