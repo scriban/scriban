@@ -28,7 +28,7 @@ namespace Scriban.Syntax
 
                 foreach (var value in iterator)
                 {
-                    if (!context.StepLoop())
+                    if (!context.StepLoop(this))
                     {
                         return;
                     }
@@ -50,7 +50,7 @@ namespace Scriban.Syntax
                     index++;
                 }
 
-                if (!escape && index >= 0 && context.StepLoop())
+                if (!escape && index >= 0 && context.StepLoop(this))
                 {
                     context.SetValue(ScriptVariable.LoopLast, true);
                     context.SetValue(Variable, previousValue);

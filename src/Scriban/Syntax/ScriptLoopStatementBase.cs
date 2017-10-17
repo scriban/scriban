@@ -50,7 +50,7 @@ namespace Scriban.Syntax
             finally
             {
                 // Level scope block
-                context.ExitLoop();
+                context.ExitLoop(this);
 
                 // Revert to flow state to none unless we have a return that must be handled at a higher level
                 if (context.FlowState != ScriptFlowState.Return)

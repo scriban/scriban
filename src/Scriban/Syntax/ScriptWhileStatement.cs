@@ -12,7 +12,7 @@ namespace Scriban.Syntax
         protected override void EvaluateImpl(TemplateContext context)
         {
             var index = 0;
-            while(context.StepLoop())
+            while(context.StepLoop(this))
             {
                 var conditionResult = context.ToBool(context.Evaluate(Condition));
                 if (!conditionResult)

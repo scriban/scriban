@@ -504,22 +504,36 @@ namespace Scriban
             if (loop == null) throw new ArgumentNullException(nameof(loop));
             _loops.Push(loop);
             PushVariableScope(ScriptVariableScope.Loop);
+            OnEnterLoop(loop);
+        }
+
+        /// <summary>
+        /// Called when entering a loop.
+        /// </summary>
+        /// <param name="loop">The loop expression object</param>
+        protected virtual void OnEnterLoop(ScriptLoopStatementBase loop)
+        {
         }
 
         /// <summary>
         /// Notifies this context when exiting a loop.
         /// </summary>
-        internal void ExitLoop()
+        internal void ExitLoop(ScriptLoopStatementBase loop)
         {
+            OnExitLoop(loop);
             PopVariableScope(ScriptVariableScope.Loop);
             _loops.Pop();
         }
 
         /// <summary>
-        /// Notifies this context when a step in a loop is performed.
+        /// Called when exiting a loop.
         /// </summary>
-        /// <returns></returns>
-        internal bool StepLoop()
+        /// <param name="loop">The loop expression object</param>
+        protected virtual void OnExitLoop(ScriptLoopStatementBase loop)
+        {
+        }
+
+        internal bool StepLoop(ScriptLoopStatementBase loop)
         {
             Debug.Assert(_loops.Count > 0);
 
@@ -530,6 +544,16 @@ namespace Scriban
 
                 throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit [{LoopLimit}] for statement: {currentLoopStatement}"); // unit test: 215-for-statement-error1.txt
             }
+            return OnStepLoop(loop);
+        }
+
+        /// <summary>
+        /// Called when stepping into a loop.
+        /// </summary>
+        /// <param name="loop">The loop expression object</param>
+        /// <returns><c>true</c> to continue loop; <c>false</c> to break the loop. Default is <c>true</c></returns>
+        protected virtual bool OnStepLoop(ScriptLoopStatementBase loop)
+        {
             return true;
         }
 
