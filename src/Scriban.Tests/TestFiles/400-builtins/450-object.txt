@@ -10,3 +10,5 @@
 
 {{ { a: 1, b: 2} | object.values }}
 {{ { a: 1, b: 2} | object.keys }}
+null | object.keys:{{ null | object.keys }}
+null | object.values:{{ null | object.values }}

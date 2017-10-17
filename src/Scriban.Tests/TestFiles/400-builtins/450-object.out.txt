@@ -10,3 +10,5 @@ object
 
 [1, 2]
 [a, b]
+null | object.keys:[]
+null | object.values:[]
