@@ -16,10 +16,16 @@ namespace Scriban.Tests
         [Test]
         public void TestEvaluateScriptOnly()
         {
-            var lexerOptions = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
-            var template = Template.Parse("y = x + 1; y;", lexerOptions: lexerOptions);
-            var result = template.Evaluate(new { x = 10 });
-            Assert.AreEqual(11, result);
+            {
+                var lexerOptions = new LexerOptions() {Mode = ScriptMode.ScriptOnly};
+                var template = Template.Parse("y = x + 1; y;", lexerOptions: lexerOptions);
+                var result = template.Evaluate(new {x = 10});
+                Assert.AreEqual(11, result);
+            }
+            {
+                var result = Template.Evaluate("y = x + 1; y;", new { x = 10 });
+                Assert.AreEqual(11, result);
+            }
         }
 
         [Test]
@@ -36,7 +42,6 @@ namespace Scriban.Tests
                 Assert.AreEqual(11, result);
             }
         }
-
 
         [Test]
         public void TestReadOnly()

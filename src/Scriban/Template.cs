@@ -61,6 +61,34 @@ namespace Scriban
         }
 
         /// <summary>
+        /// Parse and evaluates a code only expression (without enclosing `{{` and `}}`) within the specified context.
+        /// </summary>
+        /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
+        /// <param name="context">The template context</param>
+        /// <returns>The result of the evaluation of the expression</returns>
+        public static object Evaluate(string expression, TemplateContext context)
+        {
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            var lexerOption = new LexerOptions() {Mode = ScriptMode.ScriptOnly};
+            var template = Parse(expression, lexerOptions: lexerOption);
+            return template.Evaluate(context);
+        }
+
+        /// <summary>
+        /// Parse and evaluates a code only expression (without enclosing `{{` and `}}`) within the specified context.
+        /// </summary>
+        /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
+        /// <param name="model">An object instance used as a model for evaluating this expression</param>
+        /// <returns>The result of the evaluation of the expression</returns>
+        public static object Evaluate(string expression, object model)
+        {
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            var lexerOption = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
+            var template = Parse(expression, lexerOptions: lexerOption);
+            return template.Evaluate(model);
+        }
+
+        /// <summary>
         /// Evaluates the template using the specified context. See remarks.
         /// </summary>
         /// <param name="context">The template context.</param>
