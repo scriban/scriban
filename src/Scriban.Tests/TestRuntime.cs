@@ -14,6 +14,31 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestEvaluateScriptOnly()
+        {
+            var lexerOptions = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
+            var template = Template.Parse("y = x + 1; y;", lexerOptions: lexerOptions);
+            var result = template.Evaluate(new { x = 10 });
+            Assert.AreEqual(11, result);
+        }
+
+        [Test]
+        public void TestEvaluateDefault()
+        {
+            {
+                var template = Template.Parse("{{y = x + 1; y;}} yoyo");
+                var result = template.Evaluate(new {x = 10});
+                Assert.AreEqual(" yoyo", result);
+            }
+            {
+                var template = Template.Parse("{{y = x + 1; y;}} yoyo {{y}}");
+                var result = template.Evaluate(new { x = 10 });
+                Assert.AreEqual(11, result);
+            }
+        }
+
+
+        [Test]
         public void TestReadOnly()
         {
             var template = Template.Parse("Test {{ a.b.c = 1 }}");

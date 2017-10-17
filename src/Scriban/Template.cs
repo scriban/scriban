@@ -61,6 +61,48 @@ namespace Scriban
         }
 
         /// <summary>
+        /// Evaluates the template using the specified context. See remarks.
+        /// </summary>
+        /// <param name="context">The template context.</param>
+        /// <exception cref="System.ArgumentNullException">If context is null</exception>
+        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
+        /// <returns>Returns the result of the last statement</returns>
+        public object Evaluate(TemplateContext context)
+        {
+            var previousOutput = context.EnableOutput;
+            try
+            {
+                context.EnableOutput = false;
+                return EvaluateAndRender(context, false);
+            }
+            finally
+            {
+                context.EnableOutput = previousOutput;
+            }        
+        }
+
+        /// <summary>
+        /// Evaluates the template using the specified context
+        /// </summary>
+        /// <param name="model">An object model to use with the evaluation.</param>
+        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
+        /// <returns>Returns the result of the last statement</returns>
+        public object Evaluate(object model = null)
+        {
+            var scriptObject = new ScriptObject();
+            if (model != null)
+            {
+                scriptObject.Import(model);
+            }
+
+            var context = new TemplateContext {EnableOutput = false};
+            context.PushGlobal(scriptObject);
+            var result = Evaluate(context);
+            context.PopGlobal();
+            return result;
+        }
+        
+        /// <summary>
         /// Renders this template using the specified context. See remarks.
         /// </summary>
         /// <param name="context">The template context.</param>
@@ -71,31 +113,7 @@ namespace Scriban
         /// </remarks>
         public void Render(TemplateContext context)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Messages> property for more details");
-
-            // Make sure that we are using the same parserOptions
-            if (SourceFilePath != null)
-            {
-                context.PushSourceFile(SourceFilePath);
-            }
-
-            try
-            {
-                var result = context.Evaluate(Page);
-
-                if (Page != null && context.EnableOutput && result != null)
-                {
-                    context.Write(Page.Span, result);
-                }
-            }
-            finally
-            {
-                if (SourceFilePath != null)
-                {
-                    context.PopSourceFile();
-                }
-            }
+            EvaluateAndRender(context, true);
         }
 
         /// <summary>
@@ -117,6 +135,44 @@ namespace Scriban
             context.PopGlobal();
 
             return context.Output.ToString();
+        }
+
+        /// <summary>
+        /// Evaluates the template using the specified context. See remarks.
+        /// </summary>
+        /// <param name="context">The template context.</param>
+        /// <exception cref="System.ArgumentNullException">If context is null</exception>
+        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
+        private object EvaluateAndRender(TemplateContext context, bool render)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Messages> property for more details");
+
+            // Make sure that we are using the same parserOptions
+            if (SourceFilePath != null)
+            {
+                context.PushSourceFile(SourceFilePath);
+            }
+
+            try
+            {
+                var result = context.Evaluate(Page);
+                if (render)
+                {
+                    if (Page != null && context.EnableOutput && result != null)
+                    {
+                        context.Write(Page.Span, result);
+                    }
+                }
+                return result;
+            }
+            finally
+            {
+                if (SourceFilePath != null)
+                {
+                    context.PopSourceFile();
+                }
+            }
         }
 
         private void ParseInternal(string text, string sourceFilePath)
