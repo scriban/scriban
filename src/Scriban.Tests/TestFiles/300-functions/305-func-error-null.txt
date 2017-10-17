@@ -1,0 +1,4 @@
+{{
+# Try calling a null function
+null 1 2 3
+}}

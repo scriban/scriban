@@ -1,0 +1,4 @@
+{{
+# Try calling an invalid function (a number)
+1 1 2 3
+}}

@@ -171,6 +171,8 @@
     <Content Include="TestFiles\200-statements\201-if-else-error2.txt" />
     <Content Include="TestFiles\200-statements\201-if-else-error1.out.txt" />
     <Content Include="TestFiles\200-statements\201-if-else-error1.txt" />
+    <Content Include="TestFiles\200-statements\210-for-and-ret.out.txt" />
+    <Content Include="TestFiles\200-statements\210-for-and-ret.txt" />
     <Content Include="TestFiles\200-statements\211-for-error3.out.txt" />
     <Content Include="TestFiles\200-statements\211-for-error3.txt" />
     <Content Include="TestFiles\200-statements\211-for-error2.out.txt" />
@@ -197,6 +199,10 @@
     <Content Include="TestFiles\200-statements\280-ret-statement2.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.out.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.txt" />
+    <Content Include="TestFiles\300-functions\305-func-error-invalid.out.txt" />
+    <Content Include="TestFiles\300-functions\305-func-error-invalid.txt" />
+    <Content Include="TestFiles\300-functions\305-func-error-null.out.txt" />
+    <Content Include="TestFiles\300-functions\305-func-error-null.txt" />
     <Content Include="TestFiles\300-functions\320-func-anonymous2.out.txt" />
     <Content Include="TestFiles\300-functions\320-func-anonymous2.txt" />
     <Content Include="TestFiles\300-functions\320-func-anonymous1.out.txt" />
