@@ -339,7 +339,7 @@ namespace Scriban
         /// Writes the text to the current <see cref="Output"/>
         /// </summary>
         /// <param name="text">The text.</param>
-        public void Write(string text)
+        public virtual void Write(string text)
         {
             if (text == null)
             {
@@ -347,6 +347,22 @@ namespace Scriban
             }
 
             Output.Append(text);
+        }
+
+        /// <summary>
+        /// Writes the text to the current <see cref="Output"/>
+        /// </summary>
+        /// <param name="text">The text.</param>
+        /// <param name="startIndex">The zero-based position of the substring of text</param>
+        /// <param name="count">The number of characters to output starting at <see cref="startIndex"/> position from the text</param>
+        public virtual void Write(string text, int startIndex, int count)
+        {
+            if (text == null)
+            {
+                return;
+            }
+
+            Output.Append(text, startIndex, count);
         }
 
         /// <summary>
