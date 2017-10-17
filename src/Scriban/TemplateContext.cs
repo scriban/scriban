@@ -95,9 +95,9 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="TemplateLoaderDelegate"/> used by the include directive. Must be set in order for the include directive to work.
+        /// Gets or sets the <see cref="ITemplateLoader"/> used by the include directive. Must be set in order for the include directive to work.
         /// </summary>
-        public TemplateLoaderDelegate TemplateLoader { get; set; }
+        public ITemplateLoader TemplateLoader { get; set; }
 
         /// <summary>
         /// The <see cref="ParserOptions"/> used by the <see cref="TemplateLoader"/> via the include directive.

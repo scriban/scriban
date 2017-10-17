@@ -83,6 +83,77 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void TestTemplateLoaderNoArgs()
+        {
+            var template = Template.Parse("Test with a include {{ include }}");
+            var context = new TemplateContext();
+            var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
+            var expectedString = "Expecting at least the name of the template to include for the <include> function";
+            Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
+        }
+
+        [Test]
+        public void TestTemplateLoaderNotSetup()
+        {
+            var template = Template.Parse("Test with a include {{ include 'yoyo' }}");
+            var context = new TemplateContext();
+            var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
+            var expectedString = "No TemplateLoader registered";
+            Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
+        }
+
+        [Test]
+        public void TestTemplateLoaderNotNull()
+        {
+            var template = Template.Parse("Test with a include {{ include null }}");
+            var context = new TemplateContext();
+            var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
+            var expectedString = "Include template name cannot be null or empty";
+            Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
+        }
+
+        [Test]
+        public void TestTemplateLoaderInclude()
+        {
+            var template = Template.Parse("Test with a include {{ include 'yoyo' }}");
+
+            var context = new TemplateContext() { TemplateLoader = new MyTemplateLoader() };
+            context.Evaluate(template.Page);
+            var result = context.Output.ToString();
+
+            Assert.True(result.Contains("of `absolute:yoyo`"), "The result does not contain the expected string after include");
+        }
+
+        [Test]
+        public void TestTemplateLoaderIncludeWithParsingErrors()
+        {
+            var template = Template.Parse("Test with a include {{ include 'invalid' }}");
+
+            var context = new TemplateContext() {TemplateLoader = new MyTemplateLoader()};
+            var exception = Assert.Throws<ScriptParserRuntimeException>(() => context.Evaluate(template.Page));
+            Console.WriteLine(exception);
+            var expectedString = "Error while parsing template";
+            Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
+        }
+
+        private class MyTemplateLoader : ITemplateLoader
+        {
+            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            {
+                return $"absolute:{templateName}";
+            }
+
+            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                if (templatePath == "absolute:invalid")
+                {
+                    return "Invalid script with syntax error: {{ 1 + }}";
+                }
+                return $"Loaded content of `{templatePath}`";
+            }
+        }
+
+        [Test]
         public void TestJson()
         {
             // issue: https://github.com/lunet-io/scriban/issues/11
