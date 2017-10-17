@@ -288,6 +288,7 @@ namespace Scriban.Parsing
                         {
                             functionCall = Open<ScriptFunctionCall>();
                             functionCall.Target = leftOperand;
+                            functionCall.Span.Start = leftOperand.Span.Start;
                         }
                         else
                         {
@@ -319,6 +320,7 @@ namespace Scriban.Parsing
                 if (functionCall != null)
                 {
                     functionCall.Arguments.Add(leftOperand);
+                    functionCall.Span.End = leftOperand.Span.End;
                     return functionCall;
                 }
                 return Close(leftOperand);
