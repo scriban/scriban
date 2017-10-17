@@ -26,3 +26,15 @@
 "aaa" < "abb" true
 "aaa" > "abb" false
 "aaa" >= "abb" false
+
+1.5 < 2 || 3 > 5 = true
+1.5 > 2 || 3 < 5 = true
+1.5 > 2 || 3 > 5 = false
+1.5 < 2 && 3 > 5 = false
+1.5 < 2 && 3 < 5 = true
+
+true || false = true
+true && true && false = false
+true && true && false || true = true
+true && true && false || true && true = true
+true && true && false || true && true && false = false

@@ -26,3 +26,15 @@
 "aaa" < "abb" {{ "aaa" < "abb" }}
 "aaa" > "abb" {{ "aaa" > "abb" }}
 "aaa" >= "abb" {{ "aaa" >= "abb" }}
+
+1.5 < 2 || 3 > 5 = {{ 1.5 < 2 || 3 > 5 }}
+1.5 > 2 || 3 < 5 = {{ 1.5 > 2 || 3 < 5 }}
+1.5 > 2 || 3 > 5 = {{ 1.5 > 2 || 3 > 5 }}
+1.5 < 2 && 3 > 5 = {{ 1.5 < 2 && 3 > 5 }}
+1.5 < 2 && 3 < 5 = {{ 1.5 < 2 && 3 < 5 }}
+
+true || false = {{true || false}}
+true && true && false = {{true && true && false}}
+true && true && false || true = {{true && true && false || true}}
+true && true && false || true && true = {{true && true && false || true && true}}
+true && true && false || true && true && false = {{true && true && false || true && true && false}}
