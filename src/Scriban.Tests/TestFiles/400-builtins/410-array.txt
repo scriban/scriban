@@ -15,3 +15,22 @@
 {{1..5 | array.join ' | '}}
 {{2..4 | array.size}}
 {{4..1 | array.sort}}
+null | array.size:{{null | array.size}}
+null | array.uniq:{{null | array.uniq}}
+null | array.first:{{null | array.first}}
+[] | array.uniq | array.first:{{[]   | array.uniq | array.first}}
+null | array.last:{{null | array.last}}
+null | array.reverse:{{null | array.reverse}}
+null | array.remove_at 0:{{null | array.remove_at 0}}
+null | array.add 5:{{null | array.add 5}}
+null | array.add_range ([5]):{{null | array.add_range ([5])}}
+[5] | array.add_range null:{{[5] | array.add_range null}}
+null | array.map "name":{{null | array.map "name"}}
+[] | array.map "name":{{[] | array.map "name"}}
+null | array.sort:{{null | array.sort}}
+null | array.sort "name":{{null | array.sort "name"}}
+null | array.insert_at (-1) 5:{{null | array.insert_at (-1) 5}}
+null | array.insert_at 1 5:{{null | array.insert_at 1 5}}
+[] | array.insert_at 1 5:{{null | array.insert_at 1 5}}
+[] | array.sort:{{[] | array.sort}}
+[{id: 5}, {id: 1}, {id: 10}]| array.sort "id":{{[{id: 5}, {id: 1}, {id: 10}]| array.sort "id"}}

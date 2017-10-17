@@ -41,16 +41,15 @@ namespace Scriban.Functions
 
         public static IEnumerable Uniq(IEnumerable iterator)
         {
-            if (iterator == null)
-            {
-                return Enumerable.Empty<object>();
-            }
-
-            return iterator.Cast<object>().Distinct();
+            return iterator?.Cast<object>().Distinct();
         }
 
         public static int Size(IEnumerable list)
         {
+            if (list == null)
+            {
+                return 0;
+            }
             var collection = list as ICollection;
             if (collection != null)
             {
@@ -103,7 +102,7 @@ namespace Scriban.Functions
         {
             if (iterator == null)
             {
-                return null;
+                return Enumerable.Empty<object>();
             }
 
             // TODO: provide a special path for IList
@@ -118,7 +117,7 @@ namespace Scriban.Functions
         {
             if (list == null)
             {
-                return null;
+                return new ScriptArray();
             }
 
             list = new ScriptArray(list);
@@ -140,7 +139,7 @@ namespace Scriban.Functions
         {
             if (list == null)
             {
-                return null;
+                return new ScriptArray { value };
             }
 
             list = new ScriptArray(list) {value};
@@ -149,38 +148,28 @@ namespace Scriban.Functions
 
         public static IList AddRange(IEnumerable iterator, IList list)
         {
-            if (list == null)
+            if (iterator == null)
             {
-                return null;
+                return list;
             }
 
-            if (iterator != null)
+            list = list == null ? new ScriptArray() : new ScriptArray(list);
+            foreach (var value in iterator)
             {
-                list = new ScriptArray(list);
-                foreach (var value in iterator)
-                {
-                    list.Add(value);
-                }
+                list.Add(value);
             }
-
             return list;
         }
 
 
         public static IList InsertAt(int index, object value, IList list)
         {
-            if (list == null)
-            {
-                return null;
-            }
-
             if (index < 0)
             {
                 index = 0;
             }
 
-            list = new ScriptArray(list);
-
+            list = list == null ? new ScriptArray() : new ScriptArray(list);
             // Make sure that the list has already inserted elements before the index
             for (int i = list.Count; i < index; i++)
             {
@@ -204,7 +193,7 @@ namespace Scriban.Functions
             var enumerable = input as IEnumerable;
             if (enumerable == null)
             {
-                return new List<object>(1) {input };
+                return new ScriptArray(1) {input};
             }
 
             var list = enumerable.Cast<object>().ToList();
@@ -249,8 +238,6 @@ namespace Scriban.Functions
         [ScriptMemberIgnore]
         private static IEnumerable MapInternal(TemplateContext context, SourceSpan span, string member, object input)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (member == null) throw new ArgumentNullException(nameof(member));
             if (input == null)
             {
                 yield break;

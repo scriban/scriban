@@ -15,3 +15,22 @@
 1 | 2 | 3 | 4 | 5
 3
 [1, 2, 3, 4]
+null | array.size:0
+null | array.uniq:
+null | array.first:
+[] | array.uniq | array.first:
+null | array.last:
+null | array.reverse:[]
+null | array.remove_at 0:[]
+null | array.add 5:[5]
+null | array.add_range ([5]):[5]
+[5] | array.add_range null:[5]
+null | array.map "name":[]
+[] | array.map "name":[]
+null | array.sort:[]
+null | array.sort "name":[]
+null | array.insert_at (-1) 5:[5]
+null | array.insert_at 1 5:[, 5]
+[] | array.insert_at 1 5:[, 5]
+[] | array.sort:[]
+[{id: 5}, {id: 1}, {id: 10}]| array.sort "id":[{id: 1}, {id: 5}, {id: 10}]
