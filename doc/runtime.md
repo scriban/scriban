@@ -24,7 +24,9 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
     - [Accessing nested <code>ScriptObject</code>](#accessing-nested-scriptobject)
     - [Imports a <code>ScriptObject</code> into another <code>ScriptObject</code>](#imports-a-scriptobject-into-another-scriptobject)
     - [Imports a .NET object instance](#imports-a-net-object-instance)
-    - [Accessing a .NET object**](#accessing-a-net-object)
+    - [Accessing a .NET object](#accessing-a-net-object)
+    - [read-only properties](#read-only-properties)
+    - [The builtin functions](#the-builtin-functions)
   - [The stack of <code>ScriptObject</code>](#the-stack-of-scriptobject)
     - [The <code>with</code> statement with the stack](#the-with-statement-with-the-stack)
 - [Advanced usages](#advanced-usages)
@@ -36,6 +38,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
   - [<code>ScriptObject</code> advanced usages](#scriptobject-advanced-usages)
     - [Advanced custom functions](#advanced-custom-functions)
     - [Hyper custom functions<code>IScriptCustomFunction</code>](#hyper-custom-functionsiscriptcustomfunction)
+
       
 [:top:](#runtime)
 ## Parsing a template
@@ -327,7 +330,9 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
   Console.WriteLine(context.Output.ToString());
   ```
 
-- Using **read-only properties** on a `ScriptObject`:
+#### read-only properties
+
+Runtime equivalent of the language `readonly <var>` statement, you can easily define a variable of a ScriptObject as read-only
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -337,6 +342,8 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
   // Or or an existing property/function member:
   scriptObject1.SetReadonly("var1", true);
   ```
+
+#### The builtin functions
 
 For example, all builtin functions object of Scriban are imported easily why inheriting `ScriptObject`:
 
