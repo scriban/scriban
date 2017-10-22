@@ -427,6 +427,7 @@ Note that renaming can be changed at two levels:
 
   It is important to setup this on the `TemplateContext` for any .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the correct naming conventions. 
 
+[:top:](#runtime)
 ### Include and `ITemplateLoader`
 
 The `include` directives requires that a template loader is setup on the `TemplateContext.TemplateLoader` property
@@ -492,6 +493,7 @@ public class MyIncludeFromDisk : ITemplateLoader
 }
 ```
 
+[:top:](#runtime)
 ### The Lexer and Parser
 
 - The [`Lexer`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/Lexer.cs) class is responsible for extracting `Tokens` from a text template.
