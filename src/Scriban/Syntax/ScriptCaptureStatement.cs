@@ -16,12 +16,15 @@ namespace Scriban.Syntax
         {
             // unit test: 230-capture-statement.txt
             context.PushOutput();
+            try
             {
                 context.Evaluate(Body);
             }
-            var result = context.PopOutput();
-
-            context.SetValue(Target, result);
+            finally
+            {
+                var result = context.PopOutput();
+                context.SetValue(Target, result);
+            }
             return null;
         }
     }
