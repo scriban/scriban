@@ -19,13 +19,14 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
   - [The <code>ScriptObject</code>](#the-scriptobject)
   - [The stack of <code>ScriptObject</code>](#the-stack-of-scriptobject)
 - [Advanced usages](#advanced-usages)
+  - [Member renamer](#member-renamer)
+  - [Include and Template Loader](#include-and-itemplateloader)
   - [The Lexer and Parser](#the-lexer-and-parser)
   - [Abstract Syntax Tree](#abstract-syntax-tree)
   - [Extending <code>TemplateContext</code>](#extending-templatecontext)
   - [<code>ScriptObject</code> advanced usages](#scriptobject-advanced-usages)
     - [Advanced custom functions](#advanced-custom-functions)
     - [Hyper custom functions<code>IScriptCustomFunction</code>](#hyper-custom-functionsiscriptcustomfunction)
-    - [Member renamer](#member-renamer)
 
 [:top:](#runtime)
 ## Parsing a template
@@ -381,6 +382,116 @@ Because scriban allows you to define new functions directly into the language an
 [:top:](#runtime)
 ## Advanced usages
 
+### Member renamer
+
+By default, .NET objects accessed through a `ScriptObject` are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of `liquid` templates.
+
+A renamer is simply a delegate that takes an input string (that is a member name) an return a new member name:
+
+```C#
+namespace Scriban.Runtime
+{
+    public delegate string MemberRenamerDelegate(string member);
+}
+```
+
+The [`StandardMemberRenamer`](https://github.com/lunet-io/scriban/blob/d5d0423b0ab587cb67253812a9355c85361096e4/src/Scriban/Runtime/StandardMemberRenamer.cs) is used to convert string camel/pascal case strings to "ruby" like strings.
+
+If you want to import a .NET object without changing the cases, you can use the simple nop member renamer `member => member`.
+
+Note that renaming can be changed at two levels:
+
+- When importing a .NET object into a `ScriptObject` by passing a renamer delegate, before passing an object to a `TemplateContext`:
+
+  ```C#
+  var scriptObject1 = new ScriptObject();
+  // Here the renamer will just return a same member name as the original
+  // hence importing .NET member name as-is
+  scriptObject1.Import(new MyObject(), renamer: member => member);
+  
+  var context = new TemplateContext();
+  context.PushGlobal(scriptObject1);
+  
+  var template = Template.Parse("This is Hello: `{{Hello}}`");
+  template.Render(context);
+  
+  // Prints This is MyFunctions.Hello: `hello from method!`
+  Console.WriteLine(context.Output.ToString());
+  ```
+- By setting the default member renamer on the `TemplateContext`
+
+  ```C#
+  // Setup a default renamer at the `TemplateContext` level
+  var context = new TemplateContext {MemberRenamer = member => member};
+  ```
+
+  It is important to setup this on the `TemplateContext` for any .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the correct naming conventions. 
+
+### Include and `ITemplateLoader`
+
+The `include` directives requires that a template loader is setup on the `TemplateContext.TemplateLoader` property
+
+A template loader is responsible for providing the text template from an include directive. The interface of a [`ITemplateLoader`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Runtime/ITemplateLoader.cs) is defined like this:
+
+```C#
+/// <summary>
+/// Interface used for loading a template.
+/// </summary>
+public interface ITemplateLoader
+{
+    /// <summary>
+    /// Gets an absolute path for the specified include template name. Note that it is not necessarely a path on a disk, 
+    /// but an absolute path that can be used as a dictionary key for caching)
+    /// </summary>
+    /// <param name="context">The current context called from</param>
+    /// <param name="callerSpan">The current span called from</param>
+    /// <param name="templateName">The name of the template to load</param>
+    /// <returns>An absolute path or unique key for the specified template name</returns>
+    string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName);
+
+    /// <summary>
+    /// Loads a template using the specified template path/key.
+    /// </summary>
+    /// <param name="context">The current context called from</param>
+    /// <param name="callerSpan">The current span called from</param>
+    /// <param name="templatePath">The path/key previously returned by <see cref="GetPath"/></param>
+    /// <returns>The content string loaded from the specified template path/key</returns>
+    string Load(TemplateContext context, SourceSpan callerSpan, string templatePath);
+}
+```
+
+In order to use the `include` directive, the template loader should provide:
+
+- The `GetPath` method translates a `templateName` (the argument passed to the `include <templateName>` directive) to a logical/phyisical path that the `ITemplateLoader.Load` method will understand. 
+- The `Load` method to actually load the the text template code from the specified `templatePath` (previously returned by `GetPath` method)
+
+
+The 2 step methods, `GetPath` and then `Load` allows to cache intermediate results. If a template loader returns the same `template path` for a `template name` any existing cached templates will be returned instead. Cached templates are stored in the `TemplateContext.CachedTemplates` property.
+
+A typical implementation of `ITemplateLoader` could read data from the disk:
+
+```C#
+
+```C#
+/// <summary>
+/// A very simple ITemplateLoader loading directly from the disk, without any checks...etc.
+/// </summary>
+public class MyIncludeFromDisk : ITemplateLoader
+{
+    string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+    {
+        return Path.Combine(Environment.CurrentDirectory, templateName);
+    }
+
+    string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+    {
+        // Template path was produced by the `GetPath` method above in case the Template has 
+        // not been loaded yet
+        return File.ReadAllText(templatePath);
+    }
+}
+```
+
 ### The Lexer and Parser
 
 - The [`Lexer`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/Lexer.cs) class is responsible for extracting `Tokens` from a text template.
@@ -480,48 +591,4 @@ As you can see, the `IScriptCustomFunction` gives you access to:
 The `include` expression is typically implemented via a `IScriptCustomFunction`. You can have a look at the details [here](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Functions/IncludeFunction.cs)
 
 [:top:](#runtime)
-### Member renamer
-
-By default, .NET objects accessed through a `ScriptObject` are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of `liquid` templates.
-
-A renamer is simply a delegate that takes an input string (that is a member name) an return a new member name:
-
-```C#
-namespace Scriban.Runtime
-{
-    public delegate string MemberRenamerDelegate(string member);
-}
-```
-
-The [`StandardMemberRenamer`](https://github.com/lunet-io/scriban/blob/d5d0423b0ab587cb67253812a9355c85361096e4/src/Scriban/Runtime/StandardMemberRenamer.cs) is used to convert string camel/pascal case strings to "ruby" like strings.
-
-If you want to import a .NET object without changing the cases, you can use the simple nop member renamer `member => member`.
-
-Note that renaming can be changed at two levels:
-
-- When importing a .NET object into a `ScriptObject` by passing a renamer delegate, before passing an object to a `TemplateContext`:
-
-  ```C#
-  var scriptObject1 = new ScriptObject();
-  // Here the renamer will just return a same member name as the original
-  // hence importing .NET member name as-is
-  scriptObject1.Import(new MyObject(), renamer: member => member);
-  
-  var context = new TemplateContext();
-  context.PushGlobal(scriptObject1);
-  
-  var template = Template.Parse("This is Hello: `{{Hello}}`");
-  template.Render(context);
-  
-  // Prints This is MyFunctions.Hello: `hello from method!`
-  Console.WriteLine(context.Output.ToString());
-  ```
-- By setting the default member renamer on the `TemplateContext`
-
-  ```C#
-  // Setup a default renamer at the `TemplateContext` level
-  var context = new TemplateContext {MemberRenamer = member => member};
-  ```
-
-  It is important to setup this on the `TemplateContext` for any .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the correct naming conventions. 
 
