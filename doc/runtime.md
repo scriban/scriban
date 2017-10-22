@@ -27,6 +27,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
     - [Hyper custom functions<code>IScriptCustomFunction</code>](#hyper-custom-functionsiscriptcustomfunction)
     - [Member renamer](#member-renamer)
 
+[:top:](#runtime)
 ## Parsing a template
 
 The `Scriban.Template` class is a main entry point to easily parse a template and renders it. The action of parsing consist of compiling the template to a faster runtime representation, suitable later for rendering the template.
@@ -389,6 +390,7 @@ The lexer has a few [`LexerOptions`](https://github.com/lunet-io/scriban/blob/ma
 
 The parser has a [`ParserOptions`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/ParserOptions.cs) only used for securing nested statements/blocks to avoid any stack overflow exceptions while parsing a document.
 
+[:top:](#runtime)
 ### Abstract Syntax Tree
 
 The base object used by the syntax for all scriban elements is the class `Scriban.Syntax.ScriptNode`:
@@ -414,6 +416,7 @@ public abstract class ScriptNode
 
 As you can see, each `ScriptNode` contains a method to evaluate it against a `TemplateContext`. You can go through the all the [Syntax classes](https://github.com/lunet-io/scriban/tree/master/src/Scriban/Syntax) in the codebase and you will see that it is very easy to create a new `SyntaxNode`
 
+[:top:](#runtime)
 ### Extending `TemplateContext`
 
 You may need to extend a `TemplateContext` to overrides some methods there, tyically in cases you want:
@@ -424,11 +427,12 @@ You may need to extend a `TemplateContext` to overrides some methods there, tyic
 - To override `ToString(span, object)` method to provide custom `ToString` for specifics .NET objects.
 - ...etc.
 
+[:top:](#runtime)
 ### `ScriptObject` advanced usages
 
 It is sometimes required for a custom function to have access to the current `TemplateContext` or to tha access to original location of the text code, where a particular expression is occurring (via a `SourceSpan` that gives a `line`, `column` and `sourcefile` )
 
-### Advanced custom functions
+#### Advanced custom functions
 
 In the [`ScriptObject`](#the-ScriptObject) section we described how to easily import a custom function either by using a delegate or a pre-defined .NET static/instance functions.
 
@@ -441,7 +445,8 @@ var scriptObject1 = new ScriptObject();
 scriptObject1.Import("contextAccess", new Func<TemplateContext, string>(templateContext => "Yes"));
 ```
 
-### Hyper custom functions`IScriptCustomFunction` 
+[:top:](#runtime)
+#### Hyper custom functions`IScriptCustomFunction` 
 
 Some custom functions can require deeper access to the internals for exposing a function. Scriban provides the interface [`IScriptCustomFunction`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Runtime/IScriptCustomFunction.cs) for this matter. If an object inherits from this interface and is accessed another `ScriptObject`, it will call the method `IScriptCustomFunction.Invoke`.
 
@@ -474,6 +479,7 @@ As you can see, the `IScriptCustomFunction` gives you access to:
 
 The `include` expression is typically implemented via a `IScriptCustomFunction`. You can have a look at the details [here](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Functions/IncludeFunction.cs)
 
+[:top:](#runtime)
 ### Member renamer
 
 By default, .NET objects accessed through a `ScriptObject` are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of `liquid` templates.
