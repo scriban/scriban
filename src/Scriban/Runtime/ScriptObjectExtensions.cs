@@ -38,6 +38,8 @@ namespace Scriban.Runtime
         /// Imports the specified object intto this <see cref="ScriptObject"/> context. See remarks.
         /// </summary>
         /// <param name="obj">The object.</param>
+        /// <param name="filter">Optional member filterer</param>
+        /// <param name="renamer">Optional renamer</param>
         /// <remarks>
         /// <ul>
         /// <li>If <paramref name="obj"/> is a <see cref="System.Type"/>, this method will import only the static field/properties of the specified object.</li>
@@ -45,7 +47,7 @@ namespace Scriban.Runtime
         /// <li>If <paramref name="obj"/> is a plain object, this method will import the public fields/properties of the specified object into the <see cref="ScriptObject"/>.</li>
         /// </ul>
         /// </remarks>
-        public static void Import(this IScriptObject script, object obj)
+        public static void Import(this IScriptObject script, object obj, FilterMemberDelegate filter = null, MemberRenamerDelegate renamer = null)
         {
             if (obj is IScriptObject)
             {
@@ -53,7 +55,7 @@ namespace Scriban.Runtime
                 return;
             }
 
-            script.Import(obj, ScriptMemberImportFlags.All);
+            script.Import(obj, ScriptMemberImportFlags.All, filter, renamer);
         }
 
         public static bool TryGetValue(this IScriptObject @this, string key, out object value)
