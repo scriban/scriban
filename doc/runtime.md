@@ -17,17 +17,26 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
   - [Overview](#overview)
   - [The <code>TemplateContext</code> execution model](#the-templatecontext-execution-model)
   - [The <code>ScriptObject</code>](#the-scriptobject)
+    - [Accessing as regular dictionary objects](#accessing-as-regular-dictionary-objects)
+    - [Imports a .NET delegate](#imports-a-net-delegate)
+    - [Imports functions from a .NET class](#imports-functions-from-a-net-class)
+    - [Automatic import from <code>ScriptObject</code>](#automatic-import-from-scriptobject)
+    - [Accessing nested <code>ScriptObject</code>](#accessing-nested-scriptobject)
+    - [Imports a <code>ScriptObject</code> into another <code>ScriptObject</code>](#imports-a-scriptobject-into-another-scriptobject)
+    - [Imports a .NET object instance](#imports-a-net-object-instance)
+    - [Accessing a .NET object**](#accessing-a-net-object)
   - [The stack of <code>ScriptObject</code>](#the-stack-of-scriptobject)
+    - [The <code>with</code> statement with the stack](#the-with-statement-with-the-stack)
 - [Advanced usages](#advanced-usages)
   - [Member renamer](#member-renamer)
-  - [Include and Template Loader](#include-and-itemplateloader)
+  - [Include and <code>ITemplateLoader</code>](#include-and-itemplateloader)
   - [The Lexer and Parser](#the-lexer-and-parser)
   - [Abstract Syntax Tree](#abstract-syntax-tree)
   - [Extending <code>TemplateContext</code>](#extending-templatecontext)
   - [<code>ScriptObject</code> advanced usages](#scriptobject-advanced-usages)
     - [Advanced custom functions](#advanced-custom-functions)
     - [Hyper custom functions<code>IScriptCustomFunction</code>](#hyper-custom-functionsiscriptcustomfunction)
-
+      
 [:top:](#runtime)
 ## Parsing a template
 
@@ -141,14 +150,16 @@ Note that a `TemplateContext` is not thread safe, so it is recommended to have o
 
 The `ScriptObject` is a special implementation of a `Dictionary<string, object>` that runtime properties and functions accessible to a template:
 
-- **Accessing as regular dictionary objects**:
+#### Accessing as regular dictionary objects
 
   ```C#
   var scriptObject1 = new ScriptObject();
   scriptObject1.Add("var1", "Variable 1");
   ```
 
-- **Imports a delegate** via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
+#### Imports a .NET delegate
+
+Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -164,7 +175,7 @@ The `ScriptObject` is a special implementation of a `Dictionary<string, object>`
   Console.WriteLine(context.Output.ToString());
   ```
 
-- **Imports functions from a .NET class**:
+#### Imports functions from a .NET class
 
   Let's define a class with a static function `Hello`:
 
@@ -194,7 +205,9 @@ The `ScriptObject` is a special implementation of a `Dictionary<string, object>`
   Console.WriteLine(context.Output.ToString());
   ```
 
-- **Automatic import** of all functions and members when **inheriting** from a `ScriptObject`:
+#### Automatic import from `ScriptObject`
+
+When inheriting from a `ScriptObject`, the inherited object will automatically import all instance methods and properties from the class:
 
   ``` C#
   // We simply inherit from ScriptObject
@@ -223,14 +236,27 @@ The `ScriptObject` is a special implementation of a `Dictionary<string, object>`
   Console.WriteLine(context.Output.ToString());
   ```
 
-- Accessing **nested** `ScriptObject`
+#### Accessing nested `ScriptObject`
+
+A nested ScriptObject is simply a value that is another `ScriptObject`:
 
   ```C#
   var scriptObject1 = new ScriptObject();
-  scriptObject1.Add("subObject", new ScriptObject());
+  var nestedObject = new ScriptObject();
+  nestedObject["x"] = 5;
+  scriptObject1.Add("subObject", scriptObject1);
+
+  var context = new TemplateContext();
+  context.PushGlobal(scriptObject1);
+  
+  var template = Template.Parse("This is Hello: `{{subObject.x}}`");
+  template.Render(context);
+
   ```
 
-- **Imports `ScriptObject` instance** into another instance
+#### Imports a `ScriptObject` into another `ScriptObject`
+
+The properties/functions of a `ScriptObject` can be imported to another instance.
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -244,7 +270,9 @@ The `ScriptObject` is a special implementation of a `Dictionary<string, object>`
   scriptObject2.Import(scriptObject1);
   ```
 
-- **Imports a .NET object instance** into another `ScriptObject`
+#### Imports a .NET object instance
+
+You can easily import a .NET object instance (including its properties and methods) into a `ScriptObject`
 
   Let's define a standard .NET object:
 
@@ -277,11 +305,13 @@ The `ScriptObject` is a special implementation of a `Dictionary<string, object>`
 
   > You will notice that the members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
 
-- **Accessing a .NET object** through a `ScriptObject`
+#### Accessing a .NET object**
 
-  This is an important feature of scriban. Every .NET objects made accessible through a ScriptObject is directly accessible without importing it. It means that Scriban will directly work on the .NET object instance instead of a copy (e.g when we do a `ScriptObject.Import` instead)
+This is an important feature of scriban. Every .NET objects made accessible through a ScriptObject is directly accessible without importing it. It means that Scriban will directly work on the .NET object instance instead of a copy (e.g when we do a `ScriptObject.Import` instead)
 
-  For example, if we re-use the previous `MyObject` directly as a variable in a `ScriptObject`:
+> Note that for security reason, only the properties of .NET objects accessed through another `ScriptObject` are made accessible from a Template.
+
+For example, if we re-use the previous `MyObject` directly as a variable in a `ScriptObject`:
 
   ```C#
   var scriptObject1 = new ScriptObject();
