@@ -45,7 +45,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
 
 The `Scriban.Template` class is a main entry point to easily parse a template and renders it. The action of parsing consist of compiling the template to a faster runtime representation, suitable later for rendering the template.
 
-This class is mostly a user friendly frontend to the underlying classes used to parse a template. See [The Lexer and Parser](#TODO) section for advanded usages.
+This class is mostly a user friendly frontend to the underlying classes used to parse a template. See [The Lexer and Parser](#the-lexer-and-parser) section for advanded usages.
 
 The `Template.Parse ` method is a convenient method to parse a template from a string and returns the compiled Template:
 
@@ -69,7 +69,7 @@ if (template.HasErrors)
 The returned `Template` object has the following relevant properties:
 
 - `ScriptPage Page {get;}` that contains the compiled template to a root Abstract Syntax Tree (AST). From this object you can navigate through all the statements parsed from the template if necessary. See the section about the [Abstract Syntax Tree](#abstract-syntax-tree)
-- `bool HasErrors {get;}` to check if the parsed template has any errors. In that case, the `ScriptPage Page` property is null.
+- `bool HasErrors {get;}` to check if the parsed template has any errors. In that case, the `ScriptPage Page` property is `null`.
 - `List<LogMessage> Messages {get;}` contains the list of warning and error messages while parsing the template.
 
 If you are using the `Template.Parse` method, it is important to verify `HasErrors` is `false`, otherwise you will get a null `ScriptPage` object from the `Template.Page` property.
@@ -179,6 +179,7 @@ Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
 
   ```C#
   var scriptObject1 = new ScriptObject();
+  // Declare a function `myfunc` returning the string `Yes`
   scriptObject1.Import("myfunc", new Func<string>(() => "Yes"));
   
   var context = new TemplateContext();
@@ -193,6 +194,8 @@ Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
 
 #### Imports functions from a .NET class
 
+You can easily import static methods declared in a .NET class via `ScriptObject.Import(typeof(MyFunctions))`
+
 Let's define a class with a static function `Hello`:
 
   ```C#
@@ -205,7 +208,7 @@ Let's define a class with a static function `Hello`:
   }
   ```
 
-This function can be imported into a ScriptObject via `ScriptObject.Import(typeof(MyFunctions))`:
+This function can be imported into a ScriptObject:
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -223,7 +226,7 @@ This function can be imported into a ScriptObject via `ScriptObject.Import(typeo
 
 #### Automatic import from `ScriptObject`
 
-When inheriting from a `ScriptObject`, the inherited object will automatically import all static and instance methods and properties from the class:
+When inheriting from a `ScriptObject`, the inherited object will automatically import all public static and instance methods and properties from the class:
 
   ``` C#
   // We simply inherit from ScriptObject
@@ -233,6 +236,12 @@ When inheriting from a `ScriptObject`, the inherited object will automatically i
       public static string Hello()
       {
           return "hello from method!";
+      }
+
+      [ScriptMemberIgnore] // This method won't be imported
+      public static void NotImported()
+      {
+          // ...
       }
   }
   ```
@@ -252,9 +261,11 @@ Then using directly this custom `ScriptObject` as a regular object:
   Console.WriteLine(context.Output.ToString());
   ```
 
+Notice that if you want to ignore a member when importing a .NET object or .NET class, you can use the attribute `ScriptMemberIgnore`
+
 #### Accessing nested `ScriptObject`
 
-A nested ScriptObject is simply a value that is another `ScriptObject`:
+A nested ScriptObject can be accessed indirectly through another `ScriptObject`:
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -272,7 +283,7 @@ A nested ScriptObject is simply a value that is another `ScriptObject`:
 
 #### Imports a `ScriptObject` into another `ScriptObject`
 
-The properties/functions of a `ScriptObject` can be imported to another instance.
+The properties/functions of a `ScriptObject` can be imported into another instance.
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -288,9 +299,9 @@ The properties/functions of a `ScriptObject` can be imported to another instance
 
 #### Imports a .NET object instance
 
-You can easily import a .NET object instance (including its properties and methods) into a `ScriptObject`
+You can easily import a .NET object instance (including its public properties and methods) into a `ScriptObject`
 
-  Let's define a standard .NET object:
+Let's define a standard .NET object:
 
   ```C#
   public class MyObject
@@ -303,7 +314,8 @@ You can easily import a .NET object instance (including its properties and metho
       public string Hello { get; set; }
   }
   ```
-  and import the properties/functions of this object into a ScriptObject, via `ScriptObject.Import(object)`:
+
+and import the properties/functions of this object into a ScriptObject, via `ScriptObject.Import(object)`:
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -333,6 +345,8 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
 
   ```C#
   var scriptObject1 = new ScriptObject();
+  // Notice: MyObject is not imported but accessible through
+  // the variable myobject
   scriptObject1["myobject"] = new MyObject();
   
   var context = new TemplateContext();
@@ -347,7 +361,7 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
 
 #### read-only properties
 
-Runtime equivalent of the language `readonly <var>` statement, you can easily define a variable of a ScriptObject as read-only
+Runtime equivalent of the language `readonly <var>` statement, you can easily define a variable of a `ScriptObject` as read-only
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -360,7 +374,7 @@ Runtime equivalent of the language `readonly <var>` statement, you can easily de
 
 #### The builtin functions
 
-For example, all builtin functions object of Scriban are imported easily why inheriting `ScriptObject`:
+For example, all builtin functions object of Scriban are imported easily by inheriting from a `ScriptObject`:
 
 - The `BuilinsFunctions` object defined [here](https://github.com/lunet-io/scriban/blob/8b374ffde418b8b57714e3be145a66d3085f66e6/src/Scriban/Functions/BuiltinFunctions.cs) and [listed here](https://github.com/lunet-io/scriban/tree/master/src/Scriban/Functions) is directly used as the bottom level stack `ScriptObject` as explained below.
 - Each sub function objects (e.g `array`, `string`) are also regular `ScriptObject`. For example, the [`string` builtin functions](https://github.com/lunet-io/scriban/blob/8b374ffde418b8b57714e3be145a66d3085f66e6/src/Scriban/Functions/StringFunctions.cs)
@@ -372,7 +386,7 @@ See section about [ScriptObject advanced usages](#scriptobject-advanced-usages) 
 
 A `TemplateContext` maintains a stack of `ScriptObject` that defines the state of the variables accessible from the current template. 
 
-When evaluating a template and **resolving a variable**, the `TemplateContext` will lookup to the stack of `ScriptObject` for the specified variable. The first variable found will be returned.
+When evaluating a template and **resolving a variable**, the `TemplateContext` will lookup to the stack of `ScriptObject` for the specified variable. From the top of the stack (the latest `PushGlobal`) to the bottom of the stack, when a variable is accessed from a template, the closest variable in the stack will be returned.
 
 By default, the `TemplateContext` is initialized with a builtin `ScriptObject` which contains all the default builtin functions provided by scriban. You can pass your own builtin object if you want when creating a new `TemplateContext`.
 
@@ -402,11 +416,12 @@ template.Render(context);
 // Prints: "This is var1: `Variable 1` and var2: `Variable 2 - from ScriptObject 2"
 Console.WriteLine(context.Output.ToString());
 ```
+
 The `TemplateContext` stack is setup like this:  `scriptObject2` => `scriptObject1` => `builtins`
 
 As you can see the variable `var1` will be resolved from `scriptObject1` but the variable `var2` will be resolved from `scriptObject2` as there is an override here.
 
-When writing to a variable, only the `ScriptObject` at the top of the `TemplateContext` will be used. It the previous example, if we had something like this in a template:
+When writing to a variable, only the `ScriptObject` at the top of the `TemplateContext` will be used. This top object is accessible through `TemplateContext.CurrentGlobal` property. It the previous example, if we had something like this in a template:
 
 ```C#
 var template2 = Template.Parse("This is var1: `{{var1}}` and var2: `{{var2}}`{{var2 = 5}} and new var2: `{{var2}}");
@@ -616,7 +631,7 @@ As you can see, each `ScriptNode` contains a method to evaluate it against a `Te
 You may need to extend a `TemplateContext` to overrides some methods there, tyically in cases you want:
 
 - To hook into whenever a `ScriptNode` AST node is evaluated
-- To catch if a propery/member is accessed and should not be null
+- To catch if a property/member is accessed and should not be null
 - Provides a `IObjectAccessor` for non .NET, non `Dictionary<string, object>` in case you are looking to expose a specific object to the runtime that requires a specific access pattern. By overriding the method `GetMemberAccessorImpl` you can override this aspect.
 - To override `ToString(span, object)` method to provide custom `ToString` for specifics .NET objects.
 - ...etc.
@@ -630,7 +645,7 @@ It is sometimes required for a custom function to have access to the current `Te
 
 In the [`ScriptObject`](#the-ScriptObject) section we described how to easily import a custom function either by using a delegate or a pre-defined .NET static/instance functions.
 
-In some cases, you also need to have acccess to the current `TemplateContext` and also, the current `SourceSpan` (original location position in the text template code).
+In some cases, you also need to have access to the current `TemplateContext` and also, the current `SourceSpan` (original location position in the text template code).
 By simply adding as a first parameter `TemplateContext`, and optionally as a second parameter, a `SourceSpan` a custom function can have access to the current evaluation context:
 
 ```C#
