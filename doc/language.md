@@ -401,7 +401,15 @@ will output:
 6
 ```
 
-Because functions are object, they can be stored into a property of an object:
+Note that a function can have mixed text statements as well:
+
+``` 
+{{func inc}}
+   This is a text with the following argument {{ $0 + 1 }}
+{{end}}
+``` 
+
+Because functions are object, they can be stored into a property of an object by using the alias `@` operator:
 
 ```
 {{
@@ -767,7 +775,7 @@ Note that variables declared outside the `with` block are accessible within.
 [:top:](#language)
 ### 9.9 `include <name> arg1?...argn?` 
 
-The include is not a statement but actually a function that allows to parse and render the specified template name. In order to use this function, a delegate to an template loader must be setup on the `TemplateOptions.TemplateLoader` property passed to the `Template.Parse` method.
+The include is not a statement but actually a function that allows to parse and render the specified template name. In order to use this function, a delegate to an template loader must be setup on the [`TemplateOptions.TemplateLoader`](runtime.md#include-and-itemplateloader) property passed to the `Template.Parse` method.
  
 ```
 include 'myinclude.html'
