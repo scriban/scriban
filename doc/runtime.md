@@ -392,7 +392,7 @@ When evaluating a template and **resolving a variable**, the `TemplateContext` w
 
 By default, the `TemplateContext` is initialized with a builtin `ScriptObject` which contains all the default builtin functions provided by scriban. You can pass your own builtin object if you want when creating a new `TemplateContext`.
 
-Then, each time you do a `TemplateContext.PushGlobal(scriptObject)`, you push a new `ScriptObject` accessible for ** resolving variable**
+Then, each time you do a `TemplateContext.PushGlobal(scriptObject)`, you push a new `ScriptObject` accessible for **resolving variable**
 
 Let's look at the following example:
 
