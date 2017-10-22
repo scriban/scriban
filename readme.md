@@ -7,6 +7,23 @@ var template = Template.Parse("Hello {{name}}!")
 template.Render(new { name = "foo" }); // => "hi foo!" 
 ```
 
+The language is very versatile and easy to read and use, similar to Liquid but more powerful:
+
+```C#
+var template = Template.Parse(@"
+<ul id='products'>
+  {{ for product in products }}
+    <li>
+      <h2>{{ product.name }}</h2>
+           Price: {{ product.price }}
+           {{ product.description | string.truncate 15 }}
+    </li>
+  {{ end }}
+</ul>
+");
+var result = template.Render(new { products = this.ProductList });
+```
+
 ## Features
 
 Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://handlebarsjs.com/) but provides additional support for:
@@ -14,7 +31,7 @@ Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://
 - Very efficient and fast parser (no regexp) with lightweight runtime. CPU and Garbage Collector friendly. Check the benchmarks below.
 - Real Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than a regex based parser.
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
-- [Full featured expressions](doc/language.md#8-expressions) (`x = 1 + 2`)
+- Full featured language including `if`/`else`/`for`/`while`, [expressions](doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
 - [function call and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
 - [Complex objects](doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
 - [Custom functions](doc/language.md#7-functions) directly into the language via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
