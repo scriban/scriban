@@ -155,10 +155,23 @@ The `ScriptObject` is a special implementation of a `Dictionary<string, object>`
 
 #### Accessing as regular dictionary objects
 
+A `ScriptObject` is mainly an extended version of a `IDictionary<string, object>`:
+
   ```C#
   var scriptObject1 = new ScriptObject();
   scriptObject1.Add("var1", "Variable 1");
+
+  var context = new TemplateContext();
+  context.PushGlobal(scriptObject1);
+  
+  var template = Template.Parse("This is var1: `{{var1}}`");
+  template.Render(context);
+  
+  // Prints: This is var1: `Variable 1`
+  Console.WriteLine(context.Output.ToString());
   ```
+
+Note that any `IDictionary<string, object>` put as a property will be accessible as well.
 
 #### Imports a .NET delegate
 
@@ -180,7 +193,7 @@ Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
 
 #### Imports functions from a .NET class
 
-  Let's define a class with a static function `Hello`:
+Let's define a class with a static function `Hello`:
 
   ```C#
   public static class MyFunctions
@@ -192,7 +205,7 @@ Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
   }
   ```
 
-  This function can be imported into a ScriptObject via `ScriptObject.Import(typeof(MyFunctions))`:
+This function can be imported into a ScriptObject via `ScriptObject.Import(typeof(MyFunctions))`:
 
   ```C#
   var scriptObject1 = new ScriptObject();
@@ -210,7 +223,7 @@ Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
 
 #### Automatic import from `ScriptObject`
 
-When inheriting from a `ScriptObject`, the inherited object will automatically import all instance methods and properties from the class:
+When inheriting from a `ScriptObject`, the inherited object will automatically import all static and instance methods and properties from the class:
 
   ``` C#
   // We simply inherit from ScriptObject
@@ -224,7 +237,7 @@ When inheriting from a `ScriptObject`, the inherited object will automatically i
   }
   ```
 
-  Then using directly this custom `ScriptObject` as a regular object:
+Then using directly this custom `ScriptObject` as a regular object:
 
   ```C#
   var scriptObject1 = new MyCustomFunctions();
@@ -306,7 +319,9 @@ You can easily import a .NET object instance (including its properties and metho
   Console.WriteLine(context.Output.ToString());
   ```
 
-  > You will notice that the members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
+Also any objects inheriting from `IDictionary<TKey, TValue>` or `IDictionary` will be also accessible automatically. Typically, you can usually access directly any generic JSON objects that was parsed by a JSON library.
+
+> You will notice that the members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
 
 #### Accessing a .NET object
 
