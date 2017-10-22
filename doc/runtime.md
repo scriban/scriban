@@ -379,6 +379,30 @@ For example, the following code adds a new property `myprop` to the builtin obje
 
 Because scriban allows you to define new functions directly into the language and also allow to store a function pointer by using the alias `@` operator, you can basically extend an existing object with both properties and functions.
 
+When using the `with` statement with a script object, it is relying on this concept of stack:
+
+```c#
+var scriptObject1 = new ScriptObject();
+var context = new TemplateContext();
+context.PushGlobal(scriptObject1);
+
+var template = Template.Parse(@"
+   Create a variable 
+{{
+    myvar = {} 
+    with myvar   # Equivalent of calling context.PushGlobal(myvar)
+        x = 5    # Equivalent to set myvar.x = 5
+        y = 6    
+    end          # Equivalent of calling context.PopGlobal()
+template.Render(context);
+}}");
+
+template.Render(context);
+
+// Prints: "This is var1: `Variable 1` and var2: `Variable 2 - from ScriptObject 2 and new var2: `5`"
+Console.WriteLine(context.Output.ToString());
+```
+
 [:top:](#runtime)
 ## Advanced usages
 
