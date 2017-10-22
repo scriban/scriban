@@ -11,12 +11,14 @@ template.Render(new { name = "foo" }); // => "hi foo!"
 
 Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://handlebarsjs.com/) but provides additional support for:
 
+- Very efficient and fast parser (no regexp) with lightweight runtime. CPU and Garbage Collector friendly. Check the benchmarks below.
 - Real Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than a regex based parser.
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
 - [Full featured expressions](doc/language.md#8-expressions) (`x = 1 + 2`)
 - [function call and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
 - [Complex objects](doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
-- [Custom functions](doc/language.md#7-functions) via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
+- [Custom functions](doc/language.md#7-functions) directly into the language via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
+  - But also easily bind [.NET custom functions](doc/runtime.md#imports-functions-from-a-net-class) from the runtime API with [many options](doc/runtime.md#the-scriptobject) for interfacing with .NET objects.
 - Allow to pass [a block of statements](doc/language.md#98-wrap-function-arg1argn--end) to a function, typically used by the `wrap` statement
 - Several builtins objects/functions:
   - [`arrays functions`](doc/language.md#101-array-functions)
