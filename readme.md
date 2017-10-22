@@ -1,5 +1,7 @@
 # scriban [![Build status](https://ci.appveyor.com/api/projects/status/ig5kv8r63bqjsd9a?svg=true)](https://ci.appveyor.com/project/xoofx/scriban)   [![NuGet](https://img.shields.io/nuget/v/Scriban.svg)](https://www.nuget.org/packages/Scriban/)
 
+<img align="right" width="160px" height="160px" src="img/scriban.png">
+
 Scriban is a fast, powerful and lightweight text templating language and engine for .NET
 
 ```C#
@@ -67,6 +69,10 @@ This software is released under the [BSD-Clause 2 license](http://opensource.org
 
 * [dotliquid](https://github.com/dotliquid/dotliquid): .NET port of the liquid templating engine by @tgjones
 * [Handlebars.Net](https://github.com/rexm/Handlebars.Net): .NET port of handlebars.js by @rexm
+
+## Credits
+
+Adapted logo `Puzzle` by [Andrew Doane](https://thenounproject.com/andydoane/) from the Noun Project
 
 ## Author
 
