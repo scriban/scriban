@@ -379,6 +379,8 @@ For example, all builtin functions object of Scriban are imported easily by inhe
 - The `BuilinsFunctions` object defined [here](https://github.com/lunet-io/scriban/blob/8b374ffde418b8b57714e3be145a66d3085f66e6/src/Scriban/Functions/BuiltinFunctions.cs) and [listed here](https://github.com/lunet-io/scriban/tree/master/src/Scriban/Functions) is directly used as the bottom level stack `ScriptObject` as explained below.
 - Each sub function objects (e.g `array`, `string`) are also regular `ScriptObject`. For example, the [`string` builtin functions](https://github.com/lunet-io/scriban/blob/8b374ffde418b8b57714e3be145a66d3085f66e6/src/Scriban/Functions/StringFunctions.cs)
 
+The current builtin `ScriptObject` defined for a `TemplateContext` is accessible through the `TemplateContext.BuiltinObject` property.
+
 See section about [ScriptObject advanced usages](#scriptobject-advanced-usages) also for more specific usages.
 
 [:top:](#runtime)
