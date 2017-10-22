@@ -305,7 +305,7 @@ You can easily import a .NET object instance (including its properties and metho
 
   > You will notice that the members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
 
-#### Accessing a .NET object**
+#### Accessing a .NET object
 
 This is an important feature of scriban. Every .NET objects made accessible through a ScriptObject is directly accessible without importing it. It means that Scriban will directly work on the .NET object instance instead of a copy (e.g when we do a `ScriptObject.Import` instead)
 
