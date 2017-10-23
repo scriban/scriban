@@ -141,7 +141,7 @@ Or the pseudo-equivalent Mustache script:
   {{/products}}
 </ul>
 ```
-See the [criban.Benchmark/Program.cs](blob/master/src/Scriban.Benchmarks/Program.cs) for details.
+See the [Scriban.Benchmark/Program.cs](src/Scriban.Benchmarks/Program.cs) for details.
 
 The raw results of the benchmarks are:
 
