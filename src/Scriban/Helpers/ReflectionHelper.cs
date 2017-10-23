@@ -131,6 +131,7 @@ namespace Scriban.Helpers
         {
             return type.DeclaredMethods;
         }
+#if !UAP
         public static MethodInfo GetGetMethod(this PropertyInfo prop)
         {
             return prop.GetMethod;
@@ -139,6 +140,7 @@ namespace Scriban.Helpers
         {
             return prop.SetMethod;
         }
+#endif
 #endif
     }
 }

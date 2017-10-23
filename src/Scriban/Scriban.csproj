@@ -5,13 +5,15 @@
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.7.0</VersionPrefix>
+    <VersionPrefix>0.9.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
-    <TargetFrameworks>net35;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1</TargetFrameworks>
+    <TargetFrameworks>net35;net40;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1;uap10.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
+&gt; 0.9.0
+ - Improve API with some breaking changes, work towards 1.0
 &gt; 0.7.0
  - Improve extensibility
  - Breaking change: Replace ScriptDate by DateTime to avoid conversions
@@ -21,30 +23,14 @@
  - Change ScriptObject.IsReadOnly to virtual
  - Make ScriptArray methods mostly virtual
  - Make array functions modifying an IList to instead return a modified copy of it
-&gt; 0.5.0
- - Breaking changes. Rename IScriptObject.IsReadOnly to CanWrite. Add IScriptObject.IsReadOnly for global object locking
- - Catch exceptions while evaluating an expression and rethrow them wrapped into a ScriptRuntimeExecption if it is not already the case.
-&gt; 0.4.0
- - Breaking changes. Split Runtime namespace into Functions and Model.
-&gt; 0.3.1
- - Rewrite support for frontmatter to allow usage of +++ instead of code block {{...}}
-&gt; 0.3.0
- - Add support date.format (global date default format)
- - Add support for verbatim string escaped by backsticks `...`
- - Add support for regex functions (regex.split, regex.replace, regex.match)
-&gt; 0.2.2
- - Add support for accessing generic dictionary
-&gt; 0.2.1
- - Fix issue with string.capitalize returning an empty string when the string is already capitalized.
-&gt; 0.2.0
- - Update to latest NETStandard.Library 1.6.0</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/scriban.png</PackageIconUrl>
+    </PackageReleaseNotes>
+    <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/markdig/master/img/scriban.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/lunet-io/scriban/blob/master/license.txt</PackageLicenseUrl>
     <NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.1' ">1.6.0</NetStandardImplicitPackageVersion>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net35' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -56,7 +42,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
     <DefineConstants>$(DefineConstants);NETPRE45</DefineConstants>
   </PropertyGroup>
 
@@ -64,11 +50,19 @@
     <DefineConstants>$(DefineConstants);CORE</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
+    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
+    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">10.0.10240.0</TargetPlatformVersion>
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">10.0.10240.0</TargetPlatformMinVersion> 
+    <DefineConstants>$(DefineConstants);CORE;UAP</DefineConstants>
+  </PropertyGroup>  
+
   <PropertyGroup Condition="'$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81'">
     <DefineConstants>$(DefineConstants);NETPRE45</DefineConstants>
     <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>
+    <LanguageTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</LanguageTargets>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
@@ -76,4 +70,17 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(SignAssembly)' == 'true' ">
+    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
+    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
+  </PropertyGroup>
+
+  <!-- Special packages and imports for UWP support -->
+  <ItemGroup>
+    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.9" PrivateAssets="all" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
+    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="5.2.2" />
+  </ItemGroup>
+  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
 </Project>
