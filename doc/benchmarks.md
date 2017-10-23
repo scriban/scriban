@@ -11,8 +11,8 @@ While Scriban is compared here to `liquid` and `mustache` like templating engine
 
 The benchmark was performed on two aspects of the libraries:
 
-- The **Parser Benchmark**: How long does it take to parse a template to a runtime representation? How much memory is used?
-- The **Rendering Benchmark**: How long does it take to render a template with some input datas? How much memory is used?
+- The [**Parser Benchmark**](#parser-benchmarks): How long does it take to parse a template to a runtime representation? How much memory is used?
+- The [**Rendering Benchmark**](#rendering-benchmarks): How long does it take to render a template with some input datas? How much memory is used?
 
 Libraries used in this comparison:
 
@@ -26,6 +26,7 @@ For benchmarking, we are using the fantastic [BenchmarkDotNet](https://github.co
 
 See the [Scriban.Benchmark/Program.cs](../src/Scriban.Benchmarks/Program.cs) for details of the benchmark implementation.
 
+[:top:](#benchmarks)
 ## Overall results
 
 - **Scriban is 1.5x to x10 times faster** than other templating engines
@@ -33,6 +34,7 @@ See the [Scriban.Benchmark/Program.cs](../src/Scriban.Benchmarks/Program.cs) for
 
 In the following sections, you will find benchmark details.
 
+[:top:](#benchmarks)
 ## Parser Benchmarks
 
 The methodology is to compile the following Scriban script:
@@ -110,7 +112,8 @@ About the results, we couldn't include Handlebars.NET in the following chart, as
 
 ![BenchMark Parser Time and Memory](../img/benchmark-parsing.png)
 
-## Runtime Benchmarks
+[:top:](#benchmarks)
+## Rendering Benchmarks
 
 The methodology is to use the previously compiled script and use it with a list of 500 Products to output a final string
 
