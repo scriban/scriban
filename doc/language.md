@@ -29,7 +29,7 @@ This document describes the syntax of the scriban templating language.
   - [8.5 Conditional expressions](#85-conditional-expressions)
   - [8.6 Unary expressions](#86-unary-expressions)
   - [8.7 Range expressions](#87-range-expressions)
-  - [8.8 The null-coalescing operator `??`](#88-the-null-coalescing-operator)
+  - [8.8 The null-coalescing operator `??`](#88-the-null-coalescing-operator-)
   - [8.9 Function call expression](#89-function-call-expression)
 - [9 Statements](#9-statements)
   - [9.1 Single expression](#91-single-expression)
