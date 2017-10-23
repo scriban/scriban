@@ -243,7 +243,7 @@ end
                 }
                 catch (ScriptRuntimeException exception)
                 {
-                    result = exception.ToString();
+                    result = GetReason(exception);
                 }
             }
             Console.WriteLine("Result");
@@ -254,6 +254,21 @@ end
             Console.WriteLine(expectedOutputText);
 
             TextAssert.AreEqual(expectedOutputText, result);
+        }
+
+        private static string GetReason(Exception ex)
+        {
+            var text = new StringBuilder();
+            while (ex != null)
+            {
+                text.Append(ex);
+                if (ex.InnerException != null)
+                {
+                    text.Append(". Reason: ");
+                }
+                ex = ex.InnerException;
+            }
+            return text.ToString();
         }
 
         public static IEnumerable<object[]> TestFiles
