@@ -74,12 +74,12 @@ This is a simple, non-exhaustive benchmark that should highlight how fast and li
 > NOTE: This is a micro benchmark, so results may vary vastly on use cases. The goal here is to demonstrate on a very simple example how the different engines behave
 > Also, Scriban has not been optimized for this particular scenario tested here and little has been done so far to optimize the runtime, so even if Scriban is already blazing fast, there is no doubt that it can still be improved!
 
-While Scriban is compared here to `liquid` and `mustache` like templating engines, you should also keep in mind that language-wise, Scriban is allowing more language constructions/expressions and thus more versatile.
+While Scriban is compared here to `liquid` and `mustache` like templating engines, you should also keep in mind that language-wise, Scriban is allowing more language constructions/expressions.
 
 The benchmark was performed on two aspects of the libraries:
 
 - The **Parser Benchmark**: How long does it take to parse a template to a runtime representation? How much memory is used?
-- The **Runtime Benchmark**: How long does it take to execute a template with some input datas? How much memory is used?
+- The **Rendering Benchmark**: How long does it take to render a template with some input datas? How much memory is used?
 
 Libraries used in this comparison:
 
@@ -90,6 +90,8 @@ Libraries used in this comparison:
 - [Handlebars.NET](https://github.com/rexm/Handlebars.Net) (1.9.0)
 
 For benchmarking, we are using the fantastic [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet)
+
+See the [Scriban.Benchmark/Program.cs](src/Scriban.Benchmarks/Program.cs) for details of the benchmark implementation.
 
 ### Overall results
 
@@ -141,7 +143,6 @@ Or the pseudo-equivalent Mustache script:
   {{/products}}
 </ul>
 ```
-See the [Scriban.Benchmark/Program.cs](src/Scriban.Benchmarks/Program.cs) for details.
 
 The raw results of the benchmarks are:
 
