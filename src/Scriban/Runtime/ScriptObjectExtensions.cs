@@ -353,7 +353,7 @@ namespace Scriban.Runtime
 
                 for (int i = 0; i < parameters.Count; i++, argIndex++)
                 {
-                    var destType = hasObjectParams && i >= lastParamsIndex ? typeof(object) : parametersInfo[i].ParameterType;
+                    var destType = hasObjectParams && i >= lastParamsIndex ? typeof(object) : parametersInfo[argIndex].ParameterType;
                     try
                     {
                         var argValue = context.ToObject(callerContext.Span, parameters[i], destType);
