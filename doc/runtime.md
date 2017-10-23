@@ -716,3 +716,5 @@ var result = Template.Evaluate("var1 * 5 + 2", context);
 Console.WriteLine(result);
 ```
 When using `Template.Evaluate`, the underlying code will use the `ScriptMode.ScriptOnly` when compiling the expression and will disable the output on the `TemplateContext`.
+
+[:top:](#runtime)
