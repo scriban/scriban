@@ -130,3 +130,5 @@ The methodology is to use the previously compiled script and use it with a list 
 Note that for Stubble, It was not possible to match the behavior of the other engines, so it is including the parsing time (which is anyway insignificant compare to the rendering time in this particular case)
 
 ![BenchMark Rendering Time and Memory](../img/benchmark-rendering.png)
+
+[:top:](#benchmarks)
