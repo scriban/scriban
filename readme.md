@@ -9,7 +9,7 @@ var template = Template.Parse("Hello {{name}}!")
 template.Render(new { name = "World" }); // => "Hello World!" 
 ```
 
-The language is very versatile and easy to read and use, similar to Liquid but more powerful:
+The language is very versatile, easy to read and use, similar to [liquid](http://liquidmarkup.org/) templates:
 
 ```C#
 var template = Template.Parse(@"
@@ -28,16 +28,15 @@ var result = template.Render(new { products = this.ProductList });
 
 ## Features
 
-Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://handlebarsjs.com/) but provides additional support for:
-
-- Very efficient and fast parser (no regexp) with lightweight runtime. CPU and Garbage Collector friendly. Check the benchmarks below.
-- Real Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than a regex based parser.
+- Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly. Check the benchmarks below.
+- Powered by a Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than regex based parsers.
+- **Extensible runtime** providing many extensibility points
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
-- Full featured language including `if`/`else`/`for`/`while`, [expressions](doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
-- [function call and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
+- [Full featured language](doc/language.md) including `if`/`else`/`for`/`while`, [expressions](doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
+- [Function calls and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
+  - [Custom functions](doc/language.md#7-functions) directly into the language via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
+  - Bind [.NET custom functions](doc/runtime.md#imports-functions-from-a-net-class) from the runtime API with [many options](doc/runtime.md#the-scriptobject) for interfacing with .NET objects.
 - [Complex objects](doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
-- [Custom functions](doc/language.md#7-functions) directly into the language via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
-  - But also easily bind [.NET custom functions](doc/runtime.md#imports-functions-from-a-net-class) from the runtime API with [many options](doc/runtime.md#the-scriptobject) for interfacing with .NET objects.
 - Allow to pass [a block of statements](doc/language.md#98-wrap-function-arg1argn--end) to a function, typically used by the `wrap` statement
 - Several builtins objects/functions:
   - [`arrays functions`](doc/language.md#101-array-functions)
@@ -50,16 +49,21 @@ Scriban is similar to [liquid](http://liquidmarkup.org/) or [handlebars](http://
 
 ## Documentation
 
-* See the [Language](doc/language.md) for a description of the language syntax and the built-in functions
-* See the [Runtime](doc/runtime.md) for the a description of the runtime API. 
+* The [Language](doc/language.md) for a description of the script language syntax and all the built-in functions.
+* The [Runtime](doc/runtime.md) for the a description of the runtime API and how to use it from a .NET application.
 
 ## Binaries
+
+Scriban is available as a NuGet package: [![NuGet](https://img.shields.io/nuget/v/Scriban.svg)](https://www.nuget.org/packages/Scriban/)
 
 Compatible with the following .NET framework profiles:
 
 - `.NET3.5`
 - `.NET4.0+` via the PCL profile `portable40-net40+sl5+win8+wp8+wpa81`
+- `UAP10.0+`
 - `NetStandard1.1` running on `CoreCLR`
+
+Also [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet package provides signed assemblies.
 
 ## License
 
@@ -68,6 +72,7 @@ This software is released under the [BSD-Clause 2 license](http://opensource.org
 ## Related projects
 
 * [dotliquid](https://github.com/dotliquid/dotliquid): .NET port of the liquid templating engine by @tgjones
+* [Nustache](https://github.com/jdiamond/Nustache): Logic-less templates for .NET
 * [Handlebars.Net](https://github.com/rexm/Handlebars.Net): .NET port of handlebars.js by @rexm
 
 ## Credits
