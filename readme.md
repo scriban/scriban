@@ -69,7 +69,7 @@ Also [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet pack
 
 Latest benchmark update: 23 October 2017
 
-This is a simple, non-exhaustive benchmark that should highlight how fast and lightweight Scriban parser and runtime his.
+This is a simple, non-exhaustive benchmark that should highlight how fast and lightweight Scriban parser and runtime is.
 
 > NOTE: This is a micro benchmark, so results may vary vastly on use cases. The goal here is to demonstrate on a very simple example how the different engines behave
 > Also, Scriban has not been optimized for this particular scenario tested here and little has been done so far to optimize the runtime, so even if Scriban is already blazing fast, there is no doubt that it can still be improved!
