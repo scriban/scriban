@@ -575,6 +575,8 @@ The pipe operator `|` can also be used to pipe the result of an expression to a 
 
 `{{ date.parse '2016/01/05' | date.to_string '%g' }}` will output `06 Jan 2016`
 
+> Notice that when a function receives the result of a pipe call (e.g `date.to_string` in the example above), it is passed as the last argument of the call. This is valid for both .NET custom functions as well as for Scriban integrated functions.
+
 [:top:](#language)
 ## 9 Statements
 
