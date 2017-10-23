@@ -28,7 +28,7 @@ var result = template.Render(new { products = this.ProductList });
 
 ## Features
 
-- Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly. Check our [benchmarks](doc/benchmarks.md) for more details.
+- Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly. Check the [benchmarks](doc/benchmarks.md) for more details.
 - Powered by a Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than regex based parsers.
 - **Extensible runtime** providing many extensibility points
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
@@ -67,7 +67,7 @@ Also [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet pack
 
 ## Benchmarks
 
-**Scriban is 1.5x to x10 times faster** than existing templating engines, you find more details in our [benchmarks document](doc/benchmarks.md).
+**Scriban is 1.5x to x10 times faster** than existing templating engines, you will find more details in our [benchmarks document](doc/benchmarks.md).
 
 ## License
 
