@@ -138,7 +138,19 @@ A scriban code block may contain:
     {{if !name; name = "default"; end; name }}
     ```
 
-Inside a code block, except for the EOL after each statement, white spaces characters are not affecting the parsing. There is only one case where whitespace is used to disambiguate between an array indexer and an array initializer.   
+Inside a code block, except for the EOL after each statement, white spaces characters are not affecting the parsing. There is only one case where whitespace is used to disambiguate between an array indexer and an array initializer. 
+
+Also, if a statement is an expression (but not an assignment expression), the result of the expression will be output to the rendering output of the template:
+
+```
+{{
+  x = "5"   # This assignment will not output anything
+  x         # This expression will print 5
+  x + 1     # This expression will print 6
+}}
+```
+
+The previous code should print the string `56`. There is no EOL between `5` and `6` because we are inside a code block. You can still use a plain string with an EOL inside a code block `"\n"`
 
 [:top:](#language)
 ### 1.2 Text block
