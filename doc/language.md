@@ -126,13 +126,18 @@ A scriban code block may contain:
    `{{ name }}`
 - or a **multiline statements**:
     ```
-     {{
-        if !name
-          name = "default"
-        end
-        name
-     }}
+    {{
+      if !name
+        name = "default"
+      end
+      name
+    }}
     ```
+- or **statements separated by a semi-colon `;`** to allow compact forms in some use cases:
+    ```
+    {{if !name; name = "default"; end; name }}
+    ```
+
 Inside a code block, except for the EOL after each statement, white spaces characters are not affecting the parsing. There is only one case where whitespace is used to disambiguate between an array indexer and an array initializer.   
 
 [:top:](#language)
