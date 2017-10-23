@@ -13,7 +13,7 @@
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
 &gt; 0.9.0
- - Improve API with some breaking changes, work towards 1.0
+ - Improves API with some breaking changes, work towards 1.0
 &gt; 0.7.0
  - Improve extensibility
  - Breaking change: Replace ScriptDate by DateTime to avoid conversions
@@ -24,7 +24,7 @@
  - Make ScriptArray methods mostly virtual
  - Make array functions modifying an IList to instead return a modified copy of it
     </PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/markdig/master/img/scriban.png</PackageIconUrl>
+    <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/img/scriban.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/lunet-io/scriban/blob/master/license.txt</PackageLicenseUrl>
     <NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.1' ">1.6.0</NetStandardImplicitPackageVersion>
