@@ -29,7 +29,8 @@ This document describes the syntax of the scriban templating language.
   - [8.5 Conditional expressions](#85-conditional-expressions)
   - [8.6 Unary expressions](#86-unary-expressions)
   - [8.7 Range expressions](#87-range-expressions)
-  - [8.8 Function call expression](#88-function-call-expression)
+  - [8.8 The null-coalescing operator `??`](#88-the-null-coalescing-operator)
+  - [8.9 Function call expression](#89-function-call-expression)
 - [9 Statements](#9-statements)
   - [9.1 Single expression](#91-single-expression)
   - [9.2 <code>if &lt;expression&gt;</code>, <code>else</code>, <code>else if &lt;expression&gt;</code>](#92-if-expression-else-else-if-expression)
@@ -558,8 +559,13 @@ The evaluated `left` and `right` expressions must resolve to an integer at runti
 | `left..right`   | Returns an iterator between `left` and `right` with a step of 1, including `right`. e.g: `1..5` iterates from 1 to 5
 | `left..<right`  | Returns an iterator between `left` and `right` with a step of 1, excluding `right`. e.g: `1..<5` iterates from 1 to 4
 
+
+### 8.8 The null-coalescing operator `??` 
+
+The operator `left ?? right` can be used to return the `right` value if `left` is null.
+
 [:top:](#language)
-### 8.8 Function call expression
+### 8.9 Function call expression
 
 A function can be called by passing parameters separated by a whitespace:
 
