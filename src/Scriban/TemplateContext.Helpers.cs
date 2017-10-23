@@ -51,7 +51,7 @@ namespace Scriban
                 var dateTimeFunctions = GetValueFromVariable(DateTimeFunctions.DateVariable) as DateTimeFunctions;
                 if (dateTimeFunctions != null)
                 {
-                    return dateTimeFunctions.ToString((DateTime) value, dateTimeFunctions.Format);
+                    return dateTimeFunctions.ToString((DateTime) value, dateTimeFunctions.Format, CurrentCulture);
                 }
             }
 
@@ -68,7 +68,7 @@ namespace Scriban
             {
                 try
                 {
-                    return Convert.ToString(value, CultureInfo.InvariantCulture);
+                    return Convert.ToString(value, CurrentCulture);
                 }
                 catch (FormatException ex)
                 {
@@ -133,7 +133,7 @@ namespace Scriban
                 // Try to use IConvertible only for primitives
                 if (value.GetType().GetTypeInfo().IsPrimitive)
                 {
-                    return Convert.ToBoolean(value, CultureInfo.InvariantCulture);
+                    return Convert.ToBoolean(value, CurrentCulture);
                 }
             }
             catch (FormatException)
@@ -154,7 +154,7 @@ namespace Scriban
         {
             try
             {
-                return Convert.ToInt32(value, CultureInfo.InvariantCulture);
+                return Convert.ToInt32(value, CurrentCulture);
             }
             catch (FormatException ex)
             {
@@ -172,7 +172,7 @@ namespace Scriban
         {
             try
             {
-                return Convert.ToDouble(value, CultureInfo.InvariantCulture);
+                return Convert.ToDouble(value, CurrentCulture);
             }
             catch (FormatException ex)
             {
@@ -229,7 +229,7 @@ namespace Scriban
             var typeInfo = type.GetTypeInfo();
             var destTypeInfo = destinationType.GetTypeInfo();
 
-            if (destTypeInfo.IsAssignableFrom(typeInfo))
+            if (destTypeInfo == typeInfo || destTypeInfo.IsAssignableFrom(typeInfo))
             {
                 return value;
             }
@@ -243,7 +243,7 @@ namespace Scriban
             {
                 try
                 {
-                    return Convert.ChangeType(value, destinationType, CultureInfo.InvariantCulture);
+                    return Convert.ChangeType(value, destinationType, CurrentCulture);
                 }
                 catch (FormatException ex)
                 {

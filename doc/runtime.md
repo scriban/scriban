@@ -39,6 +39,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
     - [Advanced custom functions](#advanced-custom-functions)
     - [Hyper custom functions<code>IScriptCustomFunction</code>](#hyper-custom-functionsiscriptcustomfunction)
   - [Evaluating an expression](#evaluating-an-expression)
+  - [Changing the Culture](#changing-the-culture)
       
 [:top:](#runtime)
 ## Parsing a template
@@ -716,5 +717,21 @@ var result = Template.Evaluate("var1 * 5 + 2", context);
 Console.WriteLine(result);
 ```
 When using `Template.Evaluate`, the underlying code will use the `ScriptMode.ScriptOnly` when compiling the expression and will disable the output on the `TemplateContext`.
+
+[:top:](#runtime)
+### Changing the Culture
+
+The default culture when running a template is `CultureInfo.InvariantCulture`
+
+You can change the culture used to when rendering numbers/date/time and parsing date/time by pushing a new Culture to a `TemplateContext`
+
+```C#
+var context = new TemplateContext();
+context.PushCulture(CultureInfo.CurrentCulture);
+// ...
+context.PopCulture();
+```
+
+> Notice that the parsing of numbers in the language is not culture dependent but is baked into the language specs instead.
 
 [:top:](#runtime)

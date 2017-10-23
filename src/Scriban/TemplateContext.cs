@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -25,6 +26,7 @@ namespace Scriban
         private readonly Stack<ScriptObject> _availableStores;
         internal readonly Stack<ScriptBlockStatement> BlockDelegates;
         private readonly Stack<IScriptObject> _globalStores;
+        private Stack<CultureInfo> _cultures;
         private readonly Dictionary<Type, IListAccessor> _listAccessors;
         private readonly Stack<ScriptObject> _localStores;
         private readonly Stack<ScriptLoopStatementBase> _loops;
@@ -93,6 +95,11 @@ namespace Scriban
             // Ensure that builtin is registered first
             PushGlobal(BuiltinObject);
         }
+
+        /// <summary>
+        /// Gets the current culture set. Default is <c>CultureInfo.InvariantCulture</c>. Can be modified via <see cref="PushCulture"/>, and <see cref="PopCulture"/>.
+        /// </summary>
+        public CultureInfo CurrentCulture => _cultures == null || _cultures.Count == 0 ? CultureInfo.InvariantCulture : _cultures.Peek();
 
         /// <summary>
         /// Gets or sets the <see cref="ITemplateLoader"/> used by the include directive. Must be set in order for the include directive to work.
@@ -186,6 +193,34 @@ namespace Scriban
         ///   <c>true</c> if [in loop]; otherwise, <c>false</c>.
         /// </value>
         internal bool IsInLoop => _loops.Count > 0;
+
+        /// <summary>
+        /// Push a new <see cref="CultureInfo"/> to be used when rendering/parsing numbers.
+        /// </summary>
+        /// <param name="culture">The new culture to use when rendering/parsing numbers</param>
+        public void PushCulture(CultureInfo culture)
+        {
+            if (culture == null) throw new ArgumentNullException(nameof(culture));
+            // Create a stack for cultures if they are actually used
+            if (_cultures == null)
+            {
+                _cultures = new Stack<CultureInfo>();
+            }
+            _cultures.Push(culture);
+        }
+
+        /// <summary>
+        /// Pops the current culture used on the stack.
+        /// </summary>
+        /// <returns></returns>
+        public CultureInfo PopCulture()
+        {
+            if (_cultures == null || _cultures.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot PopCulture more than PushCulture");
+            }
+            return _cultures.Pop();
+        }
 
         /// <summary>
         /// Pushes the source file path being executed. This should have enough information so that template loading/include can work correctly.

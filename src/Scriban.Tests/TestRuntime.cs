@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 
 using System;
+using System.Globalization;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Scriban.Parsing;
@@ -13,6 +14,33 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+        [Test]
+        public void TestCulture()
+        {
+            var number = 11232.123;
+            var customCulture = new CultureInfo(CultureInfo.CurrentCulture.Name)
+            {
+                NumberFormat =
+                {
+                    NumberDecimalSeparator = ",",
+                    NumberGroupSeparator = "."
+                }
+            };
+
+            var numberAsStr = number.ToString(customCulture);
+
+            var template = Template.Parse("{{ 11232.123 }}");
+            var context = new TemplateContext();
+            context.PushCulture(customCulture);
+            template.Render(context);
+            context.PopCulture();
+
+            var result = context.Output.ToString();
+
+            Assert.AreEqual(numberAsStr, result);
+        }
+
+
         [Test]
         public void TestEvaluateScriptOnly()
         {

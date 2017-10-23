@@ -62,7 +62,7 @@ namespace Scriban.Functions
 
             this.Import("now", new Func<DateTime>(() => DateTime.Now));
 
-            this.Import("to_string", new Func<string, DateTime, string>((pattern, date) => ToString(date, pattern)));
+            this.Import("to_string", new Func<TemplateContext, string, DateTime, string>((context, pattern, date) => ToString(date, pattern, context.CurrentCulture)));
 
             this.Import("parse", new Func<string, DateTime>(Parse));
         }
@@ -182,7 +182,8 @@ namespace Scriban.Functions
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public virtual string ToString(DateTime datetime, string pattern)
+        [ScriptMemberIgnore]
+        public virtual string ToString(DateTime datetime, string pattern, CultureInfo culture)
         {
             if (pattern == null) throw new ArgumentNullException(nameof(pattern));
 
@@ -193,8 +194,6 @@ namespace Scriban.Functions
             }
 
             var builder = new StringBuilder();
-
-            var defaultCulture = CultureInfo.CurrentCulture;
 
             for (int i = 0; i < pattern.Length; i++)
             {
@@ -208,13 +207,13 @@ namespace Scriban.Functions
                     // Switch to invariant culture
                     if (format == 'g')
                     {
-                        defaultCulture = CultureInfo.InvariantCulture;
+                        culture = CultureInfo.InvariantCulture;
                         continue;
                     }
 
                     if (Formats.TryGetValue(format, out formatter))
                     {
-                        builder.Append(formatter.Invoke(datetime, defaultCulture));
+                        builder.Append(formatter.Invoke(datetime, culture));
                     }
                     else
                     {
