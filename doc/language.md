@@ -141,9 +141,9 @@ Inside a code block, except for the EOL after each statement, white spaces chara
 Otherwise, any text is considered as a **text block** and simply output as is
 
 ```
-	Hello this is {{ name }}, welcome to scriban!
-    ______________          _____________________
-    ^ text block            ^ text block
+Hello this is {{ name }}, welcome to scriban!
+______________          _____________________
+^ text block            ^ text block
 
 ```
 
