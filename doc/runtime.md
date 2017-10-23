@@ -38,7 +38,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
   - [<code>ScriptObject</code> advanced usages](#scriptobject-advanced-usages)
     - [Advanced custom functions](#advanced-custom-functions)
     - [Hyper custom functions<code>IScriptCustomFunction</code>](#hyper-custom-functionsiscriptcustomfunction)
-
+  - [Evaluating an expression](#evaluating-an-expression)
       
 [:top:](#runtime)
 ## Parsing a template
@@ -694,4 +694,25 @@ As you can see, the `IScriptCustomFunction` gives you access to:
 The `include` expression is typically implemented via a `IScriptCustomFunction`. You can have a look at the details [here](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Functions/IncludeFunction.cs)
 
 [:top:](#runtime)
+### Evaluating an expression
 
+It is sometimes convenient to evaluate a script expression without rendering it to a string.
+
+First, there is an option in `TemplateContext.EnableOutput` that can be set to disable the output to the `TemplateContext.Output` StringBuilder.
+
+Also, as in the [Abstract Syntax Tree](#abstract-syntax-tree) section, all AST `ScriptNode` have an `Evaluate` method that returns the result of an evaluation.
+
+Lastly, you can use the convenient static method `Template.Evaluate` to quickly evaluate an expression relative to a `TemplateContext`:
+
+```C#
+var scriptObject1 = new ScriptObject();
+scriptObject1.Add("var1", 5);
+
+var context = new TemplateContext();
+context.PushGlobal(scriptObject1);
+
+var result = Template.Evaluate("var1 * 5 + 2", context);
+// Prints `27`
+Console.WriteLine(result);
+```
+When using `Template.Evaluate`, the underlying code will use the `ScriptMode.ScriptOnly` when compiling the expression and will disable the output on the `TemplateContext`.
