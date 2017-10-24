@@ -1,6 +1,6 @@
 # Benchmarks
 
-Latest benchmark update: 23 October 2017
+Latest benchmark update: 24 October 2017
 
 This is a simple, non-exhaustive benchmark that should highlight how fast and lightweight Scriban parser and runtime is.
 
@@ -16,11 +16,12 @@ The benchmark was performed on two aspects of the libraries:
 
 Libraries used in this comparison:
 
-- Scriban (0.9.0)
-- [DotLiquid](https://github.com/dotliquid/dotliquid) (2.0.200)
-- [Nustache](https://github.com/jdiamond/Nustache) (1.16.0.4) - Mustache based
-- [Stubble](https://github.com/StubbleOrg/Stubble) (1.0.42-alpha17) - Mustache+ based
-- [Handlebars.NET](https://github.com/rexm/Handlebars.Net) (1.9.0)
+- Scriban (0.9.0), Syntax: Scriban
+- [DotLiquid](https://github.com/dotliquid/dotliquid) (2.0.200), Syntax: Liquid based
+- [Nustache](https://github.com/jdiamond/Nustache) (1.16.0.4), Syntax: Mustache based
+- [Stubble](https://github.com/StubbleOrg/Stubble) (1.0.42-alpha17), Syntax: Mustache+ based
+- [Handlebars.NET](https://github.com/rexm/Handlebars.Net) (1.9.0), Syntax: Handlebars based
+- [Cottle](https://github.com/r3c/cottle) (1.4.0.4), Syntax: Cottle
 
 For benchmarking, we are using the fantastic [BenchmarkDotNet](https://github.com/dotnet/BenchmarkDotNet)
 
@@ -29,8 +30,8 @@ See the [Scriban.Benchmark/Program.cs](../src/Scriban.Benchmarks/Program.cs) for
 [:top:](#benchmarks)
 ## Overall results
 
-- **Scriban is 1.5x to x10 times faster** than other templating engines
-- **Scriban is 3x to 30x more memory efficient** both at parsing and runtime time, than other templating engines (except with Handlebars.NET at rendering time which is on par)
+- **Scriban is 1.2x to x10 times faster** than other templating engines
+- **Scriban is 1.5x to 30x more memory efficient** both at parsing and runtime time, than other templating engines (except with Handlebars.NET at rendering time which is on par)
 
 In the following sections, you will find benchmark details.
 
@@ -97,6 +98,7 @@ Processor=Intel Core i7-7700K CPU 4.20GHz (Kaby Lake), ProcessorCount=8
         'Stubble - Parser' |    12.29 us | 0.0982 us | 0.0918 us |  1.6327 |      - |   6.74 KB |
        'Nustache - Parser' |    53.98 us | 0.1557 us | 0.1300 us |  4.0894 |      - |  16.84 KB |
  'Handlebars.NET - Parser' | 1,005.38 us | 6.5709 us | 5.8250 us | 25.3906 | 1.9531 | 106.81 KB |
+         'Cottle - Parser' |    13.54 us | 0.0456 us | 0.0426 us |  1.7090 |      - |   7.02 KB |
 
 // * Legends *
   Mean      : Arithmetic mean of all measurements
@@ -125,6 +127,7 @@ The methodology is to use the previously compiled script and use it with a list 
     Stubble |  3.507 ms | 0.0274 ms | 0.0256 ms |  593.7500 | 39.0625 | 27.3438 |  2522.75 KB |
    Nustache | 21.598 ms | 0.2369 ms | 0.1978 ms | 3718.7500 |       - |       - | 15444.73 KB |
  Handlebars |  3.404 ms | 0.0236 ms | 0.0209 ms |  171.8750 | 31.2500 | 27.3438 |   766.34 KB |
+     Cottle |  2.267 ms | 0.0159 ms | 0.0149 ms |  175.7813 | 85.9375 | 27.3438 |   900.33 KB |
  ```
 
 Note that for Stubble, It was not possible to match the behavior of the other engines, so it is including the parsing time (which is anyway insignificant compare to the rendering time in this particular case)

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 
@@ -19,6 +21,7 @@ namespace Scriban.Benchmarks
             //var result3 = program.TestStubble();
             //var result4 = program.TestNustache();
             //var result5 = program.TestHandlebars();
+            //var result6 = program.TestCottle();
             BenchmarkRunner.Run<BenchParsers>();
             BenchmarkRunner.Run<BenchRenderers>();
         }
@@ -75,6 +78,18 @@ namespace Scriban.Benchmarks
 </ul>
 ";
 
+        public const string TextTemplateCottle = @"
+<ul id='products'>
+  { for product in products:
+    <li>
+      <h2>{ product.Name }</h2>
+           Only { product.Price }
+           { string.truncate(product.Description, 15) }
+    </li>
+  }
+</ul>
+";
+
         [Benchmark(Description = "Scriban - Parser")]
         public Scriban.Template TestScriban()
         {
@@ -106,6 +121,12 @@ namespace Scriban.Benchmarks
         {
             return HandlebarsDotNet.Handlebars.Compile(TextTemplateMustache);
         }
+
+        [Benchmark(Description = "Cottle - Parser")]
+        public Cottle.Documents.SimpleDocument TestCottle()
+        {
+            return new Cottle.Documents.SimpleDocument(TextTemplateCottle);
+        }
     }
 
     /// <summary>
@@ -120,11 +141,14 @@ namespace Scriban.Benchmarks
         private readonly Stubble.Core.Tokens.MustacheTemplate _stubbleTemplate;
         private readonly Nustache.Core.Template _nustacheTemplate;
         private readonly Func<object, string> _handlebarsTemplate;
+        private readonly Cottle.Documents.SimpleDocument _cottleTemplate;
 
         private const string Lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
 
         private readonly List<Product> _products;
         private readonly List<DotLiquid.Hash> _dotLiquidProducts;
+
+        private readonly Dictionary<Cottle.Value, Cottle.Value> _cottleStringStore;
 
         public BenchRenderers()
         {
@@ -135,16 +159,27 @@ namespace Scriban.Benchmarks
             _stubbleSettings = new Stubble.Core.Settings.RendererSettingsBuilder().BuildSettings();
             _nustacheTemplate = parsers.TestNustache();
             _handlebarsTemplate = parsers.TestHandlebars();
+            _cottleTemplate = parsers.TestCottle();
 
             const int ProductCount = 500;
             _products = new List<Product>(ProductCount);
             _dotLiquidProducts = new List<DotLiquid.Hash>(ProductCount);
+            
+            var cottleValues = new List<Cottle.Value>();
             for (int i = 0; i < ProductCount; i++)
             {
                 var product = new Product("Name" + i, i, Lorem);
                 _products.Add(product);
-                _dotLiquidProducts.Add(DotLiquid.Hash.FromAnonymousObject(product));
+                var hash = DotLiquid.Hash.FromAnonymousObject(product);
+                _dotLiquidProducts.Add(hash);
+                cottleValues.Add(new Cottle.Values.ReflectionValue(product)); 
             }
+
+            // For Cottle, we match the behavior of Scriban that is accessing the Truncate function via an reflection invoke
+            // In Scriban, we could also have a direct Truncate function, but it is much less practical in terms of declaration
+            var methodInfo = typeof(Scriban.Functions.StringFunctions).GetMethod("Truncate");
+            _cottleStringStore = new Dictionary<Cottle.Value, Cottle.Value>();
+            _cottleStringStore["truncate"] = new Cottle.Functions.NativeFunction((values, store, output) => methodInfo.Invoke(null, new object[2] { Convert.ToInt32(values[1].AsNumber), values[0].AsString }).ToString(), 2);
         }
 
         [Benchmark(Description = "Scriban")]
@@ -156,6 +191,7 @@ namespace Scriban.Benchmarks
         [Benchmark(Description = "DotLiquid")]
         public string TestDotLiquid()
         {
+            // DotLiquid forces to rework the original List<Product> into a custom object, which is not the same behavior as Scriban (easier somewhat because no late binding)
             return _dotLiquidTemplate.Render(DotLiquid.Hash.FromAnonymousObject(new { products = _dotLiquidProducts }));
         }
 
@@ -188,6 +224,16 @@ namespace Scriban.Benchmarks
             {
                 products = _dotLiquidProducts
             });
+        }
+
+        [Benchmark(Description = "Cottle")]
+        public string TestCottle()
+        {
+            // This is done to match the behavior of Scriban (no preparation of the datas)
+            var cottleStore = new Cottle.Stores.BuiltinStore();
+            cottleStore["string"] = _cottleStringStore;
+            cottleStore["products"] = new Cottle.Values.ReflectionValue(_products);
+            return _cottleTemplate.Render(cottleStore);
         }
 
         public class Product
