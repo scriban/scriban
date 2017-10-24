@@ -665,7 +665,10 @@ namespace Scriban
                 {
                     if (targetExpression is ScriptMemberExpression nextDot)
                     {
-                        var targetObject = GetOrSetValue(nextDot.Target, valueToSet, false, level + 1);
+                        var targetVariable = nextDot.Target as ScriptVariable;
+                        var targetObject = targetVariable != null 
+                            ? GetValueFromVariable(targetVariable) 
+                            : GetOrSetValue(nextDot.Target, valueToSet, false, level + 1);
 
                         if (targetObject == null)
                         {
