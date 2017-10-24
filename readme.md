@@ -47,6 +47,10 @@ var result = template.Render(new { products = this.ProductList });
 - [Multi-line statements](doc/language.md#11-code-block) without having to embrace each line by `{{...}}`
 - Safe language and runtime, allowing you to control what objects and functions are exposed
 
+## Syntax Coloring
+
+You can install the [Scriban Extension for Visual Studio Code](https://marketplace.visualstudio.com/items?itemName=xoofx.scriban) to get syntax coloring for scriban scripts (without HTML) and scriban html files.
+
 ## Documentation
 
 * The [Language](doc/language.md) for a description of the script language syntax and all the built-in functions.
