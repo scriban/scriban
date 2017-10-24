@@ -80,6 +80,20 @@ Or the pseudo-equivalent Mustache script:
 </ul>
 ```
 
+Or the pseudo-equivalent Cottle script:
+
+```html
+<ul id='products'>
+  { for product in products:
+    <li>
+      <h2>{ product.Name }</h2>
+           Only { product.Price }
+           { string.truncate(product.Description, 15) }
+    </li>
+  }
+</ul>
+```
+
 The raw results of the benchmarks are:
 
 ```
