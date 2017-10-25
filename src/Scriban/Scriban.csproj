@@ -10,6 +10,7 @@
     <TargetFrameworks>net35;net40;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1;uap10.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
+    <PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
 &gt; 0.9.0
