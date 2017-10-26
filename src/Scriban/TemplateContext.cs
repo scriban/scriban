@@ -136,12 +136,12 @@ namespace Scriban
         public MemberRenamerDelegate MemberRenamer { get; set; }
 
         /// <summary>
-        /// A loop limit that can be used at runtime to limit the number of loops.
+        /// A loop limit that can be used at runtime to limit the number of loops. Default is 1000.
         /// </summary>
         public int LoopLimit { get; set; }
 
         /// <summary>
-        /// A function recursive limit count used at runtime to limit the number of recursive calls.
+        /// A function recursive limit count used at runtime to limit the number of recursive calls. Default is 100
         /// </summary>
         public int RecursiveLimit { get; set; }
 

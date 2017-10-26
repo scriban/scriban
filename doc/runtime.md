@@ -40,6 +40,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
     - [Hyper custom functions<code>IScriptCustomFunction</code>](#hyper-custom-functionsiscriptcustomfunction)
   - [Evaluating an expression](#evaluating-an-expression)
   - [Changing the Culture](#changing-the-culture)
+  - [Safe runtime](#safe-runtime)
       
 [:top:](#runtime)
 ## Parsing a template
@@ -427,6 +428,8 @@ The `TemplateContext` stack is setup like this:  `scriptObject2` => `scriptObjec
 
 As you can see the variable `var1` will be resolved from `scriptObject1` but the variable `var2` will be resolved from `scriptObject2` as there is an override here.
 
+> **NOTE**: If a variable is not found, the runtime will not throw an error but will return `null` instead. It allows to check for a variable existence `if !page` for example. In case you want your script to throw an exception if a variable was not found, you can specify `TemplateContext.StrictVariables = true` to enforce checks. See the [safe runtime](#safe-runtime) section for more details.
+
 When writing to a variable, only the `ScriptObject` at the top of the `TemplateContext` will be used. This top object is accessible through `TemplateContext.CurrentGlobal` property. It the previous example, if we had something like this in a template:
 
 ```C#
@@ -733,5 +736,16 @@ context.PopCulture();
 ```
 
 > Notice that the parsing of numbers in the language is not culture dependent but is baked into the language specs instead.
+
+[:top:](#runtime)
+
+### Safe Runtime
+
+The `TemplateContext` provides a few properties to control the runtime and make it safer. You can tweak the following properties:
+
+- `LoopLimit` (default is `1000`): If a script performs a loop over 1000 iteration, the runtime will throw a `ScriptRuntimeException`
+- `RecursiveLimit` (default is `100`): If a script performs a recursive all over 100 depth, the runtime will throw a `ScriptRuntimeException`
+- `StrictVariables` (default is `false`): If set to `true`, any variables that were not found during variable resolution will throw a `ScriptRuntimeException`
+- `RegexTimeOut` (default is `10s`): If a builtin function is using a regular expression that is taking more than 10s to complete, the runtime will throw an exception
 
 [:top:](#runtime)
