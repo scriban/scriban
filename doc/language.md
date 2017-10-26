@@ -112,9 +112,9 @@ This document describes the syntax of the scriban templating language.
     - [<code>timespan.from_hours &lt;hours&gt;</code>](#timespanfrom_hours-hours)
     - [<code>timespan.parse</code>](#timespanparse)
   - [10.8 Html](#108-html)
-    - [<code>html.escape</code>](#hmtlescape)
-    - [<code>html.url_encode</code>](#htmlurlencode)
-    - [<code>html.url_escape</code>](#htmlurlescape)
+    - [<code>html.escape</code>](#htmlescape)
+    - [<code>html.url_encode</code>](#htmlurl_encode)
+    - [<code>html.url_escape</code>](#htmlurl_escape)
 
 [:top:](#language)
 ## 1. Blocks
