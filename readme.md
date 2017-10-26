@@ -46,7 +46,7 @@ var result = template.Render(new { products = this.ProductList });
   - [`regex functions`](doc/language.md#104-regex)
   - [`date`](doc/language.md#106-datetime)/[`time`](doc/language.md#107-timespan)
 - [Multi-line statements](doc/language.md#11-code-block) without having to embrace each line by `{{...}}`
-- Safe language and runtime, allowing you to control what objects and functions are exposed
+- [Safe parser](doc/runtime.md#the-lexer-and-parser) and [safe runtime](doc/runtime.md#safe-runtime), allowing you to control what objects and functions are exposed
 
 ## Syntax Coloring
 
