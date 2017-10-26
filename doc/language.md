@@ -68,14 +68,19 @@ This document describes the syntax of the scriban templating language.
     - [<code>math.format &lt;format&gt; &lt;value&gt;</code>](#mathformat-format-value)
     - [<code>math.is_number &lt;value&gt;</code>](#mathis_number-value)
   - [10.3 String functions](#103-string-functions)
+    - [<code>string.append</code>](#stringappend-text)
     - [<code>string.capitalize</code>](#stringcapitalize)
     - [<code>string.downcase</code> and <code>string.upcase</code>](#stringdowncase-and-stringupcase)
     - [<code>string.handleize</code>](#stringhandleize)
+    - [<code>string.md5</code>](#stringmd5)
     - [<code>string.pluralize &lt;single&gt; &lt;plural&gt;</code>](#stringpluralize-single-plural)
+    - [<code>string.prepend</code>](#stringprepend-text)
     - [<code>string.remove &lt;match&gt;</code>](#stringremove-match)
     - [<code>string.remove_first &lt;match&gt;</code>](#stringremove_first-match)
     - [<code>string.replace &lt;match&gt; &lt;replace&gt;</code>](#stringreplace-match-replace)
     - [<code>string.replace_first &lt;match&gt; &lt;replace&gt;</code>](#stringreplace_first-match-replace)
+    - [<code>string.sha1</code>](#stringsha1)
+    - [<code>string.sha256</code>](#stringsha256)
     - [<code>string.strip</code>, <code>string.rstrip</code>, <code>string,lstrip</code>](#stringstrip-stringrstrip-stringlstrip)
     - [<code>string.slice &lt;index&gt; &lt;length&gt;?</code>](#stringslice-index-length)
     - [<code>string.split &lt;delimiter&gt;</code>](#stringsplit-delimiter)
@@ -106,6 +111,10 @@ This document describes the syntax of the scriban templating language.
     - [<code>timespan.from_days &lt;days&gt;</code>](#timespanfrom_days-days)
     - [<code>timespan.from_hours &lt;hours&gt;</code>](#timespanfrom_hours-hours)
     - [<code>timespan.parse</code>](#timespanparse)
+  - [10.8 Html](#108-html)
+    - [<code>html.escape</code>](#hmtlescape)
+    - [<code>html.url_encode</code>](#htmlurlencode)
+    - [<code>html.url_escape</code>](#htmlurlescape)
 
 [:top:](#language)
 ## 1. Blocks
@@ -1148,6 +1157,21 @@ false
 [:top:](#language)
 ### 10.3 String functions
 
+#### `string.append <text>`
+
+Appends a text to the input text
+
+```
+{{ "test" | string.append " + toto" }}
+```
+
+Will output:
+
+```
+test + toto
+```
+
+[:top:](#language)
 #### `string.capitalize`
 
 Converts the first character of the passed string to a upper case character.
@@ -1191,6 +1215,23 @@ Will output:
 ```
 This-is-a-value
 ```
+
+
+[:top:](#language)
+#### `string.md5`
+
+Computes the MD5 hash of the input string
+
+```
+{{ "test" | string.md5 }}
+```
+
+Will output:
+
+```
+098f6bcd4621d373cade4e832627b4f6
+```
+
 [:top:](#language)
 #### `string.pluralize <single> <plural>`
 
@@ -1205,6 +1246,22 @@ Will output:
 ```
 items
 ```
+
+[:top:](#language)
+#### `string.prepend <text>`
+
+Prepends a text to an input text
+
+```
+{{ "test" | string.prepend "toto + " }}
+```
+
+Will output:
+
+```
+toto + test
+```
+
 [:top:](#language)
 #### `string.remove <match>`
 
@@ -1261,6 +1318,37 @@ Will output:
 ```
 This is a boom with a test 
 ```
+
+[:top:](#language)
+#### `string.sha1`
+
+Computes the SHA1 hash of the input string
+
+```
+{{ "test" | string.sha1 }}
+```
+
+Will output:
+
+```
+a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+```
+
+[:top:](#language)
+#### `string.sha256`
+
+Computes the SHA256 hash of the input string
+
+```
+{{ "test" | string.sha256 }}
+```
+
+Will output:
+
+```
+9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+```
+
 [:top:](#language)
 #### `string.strip`, `string.rstrip`, `string,lstrip`
 
@@ -1676,4 +1764,52 @@ The same functions exists for `timespan.from_minutes`, `timespan_from_seconds`, 
 
 Parses the specified input string into a timespan object. 
 
+[:top:](#language)
+
+### 10.8 Html
+
+[:top:](#language)
+#### `html.escape`
+
+Escape the HTML characters from the input string.
+
+```
+{{ "<p>test</p>" | html.escape }}
+```
+
+will output:
+   
+```
+&lt;p&gt;test&lt;/p&gt;
+```
+
+[:top:](#language)
+#### `html.url_encode`
+
+Converts the input URL-unsafe string into a percent-encoded string.
+
+```
+{{ "john@liquid.com" | html.url_encode }}
+```
+
+will output:
+   
+```
+john%40liquid.com
+```
+
+[:top:](#language)
+#### `html.url_escape`
+
+Converts the input URL string to an escaped string that can be passed as a parameter in an URL.
+
+```
+{{ "<hello> & <scriban>" | html.url_escape }}
+```
+
+will output:
+   
+```
+%3Chello%3E%20&%20%3Cscriban%3E
+```
 [:top:](#language)
