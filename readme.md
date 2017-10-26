@@ -30,6 +30,7 @@ var result = template.Render(new { products = this.ProductList });
 
 - Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly. Check the [benchmarks](doc/benchmarks.md) for more details.
 - Powered by a Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than regex based parsers.
+  - Precise source code location (path, column and line) for error reporting
 - **Extensible runtime** providing many extensibility points
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
 - [Full featured language](doc/language.md) including `if`/`else`/`for`/`while`, [expressions](doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
