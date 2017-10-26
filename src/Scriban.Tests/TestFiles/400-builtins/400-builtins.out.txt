@@ -84,5 +84,6 @@ List of all the builtin <regex> functions:
 
 List of all the builtin <html> functions:
  escape
+ strip
  url_encode
  url_escape

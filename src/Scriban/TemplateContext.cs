@@ -66,6 +66,8 @@ namespace Scriban
             RecursiveLimit = 100;
             MemberRenamer = StandardMemberRenamer.Default;
 
+            RegexTimeOut = TimeSpan.FromSeconds(10);
+
             TemplateLoaderParserOptions = new ParserOptions();
             TemplateLoaderLexerOptions = LexerOptions.Default;
 
@@ -185,6 +187,11 @@ namespace Scriban
         /// Gets or sets the internal state of control flow.
         /// </summary>
         internal ScriptFlowState FlowState { get; set; }
+
+        /// <summary>
+        /// Timeout used for any regexp that might be used by a builtin function. Default is 10s.
+        /// </summary>
+        public TimeSpan RegexTimeOut { get; set; }
 
         /// <summary>
         /// Indicates if we are in a looop

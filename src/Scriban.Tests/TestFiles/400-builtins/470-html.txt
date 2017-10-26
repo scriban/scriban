@@ -1,3 +1,14 @@
 {{ "<p>test</p>" | html.escape }}
 {{ "john@liquid.com" | html.url_encode }}
 {{ "<hello> & <scriban>" | html.url_escape }}
+{{ "<hello> and test" | html.strip }}
+{{ "<hello x='yoy>' y='yes'> and test" | html.strip }}
+{{ "</html> and test </body>" | html.strip }}
+{{ "<script type='text/javascript'>
+//<![CDATA[
+var i = 10;
+if (i < 5) {
+  // some code
+}
+//]]>
+</script> and noscript" | html.strip }}

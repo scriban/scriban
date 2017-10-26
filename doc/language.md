@@ -113,6 +113,7 @@ This document describes the syntax of the scriban templating language.
     - [<code>timespan.parse</code>](#timespanparse)
   - [10.8 Html](#108-html)
     - [<code>html.escape</code>](#htmlescape)
+    - [<code>html.strip</code>](#htmlstrip)    
     - [<code>html.url_encode</code>](#htmlurl_encode)
     - [<code>html.url_escape</code>](#htmlurl_escape)
 
@@ -1781,6 +1782,21 @@ will output:
    
 ```
 &lt;p&gt;test&lt;/p&gt;
+```
+
+[:top:](#language)
+#### `html.strip`
+
+Strips any HTML tags from the input string.
+
+```
+{{ "<p>test</p>" | html.strip }}
+```
+
+will output:
+   
+```
+test
 ```
 
 [:top:](#language)
