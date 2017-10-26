@@ -41,11 +41,23 @@ namespace Scriban
         /// <summary>
         /// A delegate used to late binding <see cref="TryGetMember"/>
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The current sourcespan</param>
         /// <param name="target">The target.</param>
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if the member on the target , <c>false</c> otherwise.</returns>
         public delegate bool TryGetMemberDelegate(TemplateContext context, SourceSpan span, object target, string member, out object value);
+
+        /// <summary>
+        /// A delegate used to late binding <see cref="TryGetVariable"/>
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The current sourcespan</param>
+        /// <param name="variable">The the variable to look for.</param>
+        /// <param name="value">The value if the result is true.</param>
+        /// <returns><c>true</c> if the variable was found, <c>false</c> otherwise.</returns>
+        public delegate bool TryGetVariableDelegate(TemplateContext context, SourceSpan span, ScriptVariable variable, out object value);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Scriban.TemplateContext" /> class.
@@ -166,7 +178,7 @@ namespace Scriban
         /// <summary>
         /// Gets or sets a callback function that is called when a variable is being resolved and was not found from any scopes.
         /// </summary>
-        public Func<ScriptVariable, object> TryGetVariable { get; set; }
+        public TryGetVariableDelegate TryGetVariable { get; set; }
 
         /// <summary>
         /// Gets or sets the fallback accessor when accessing a member of an object and the member was not found, this accessor will be called.
@@ -192,6 +204,11 @@ namespace Scriban
         /// Timeout used for any regexp that might be used by a builtin function. Default is 10s.
         /// </summary>
         public TimeSpan RegexTimeOut { get; set; }
+
+        /// <summary>
+        /// Gets or sets a boolean indicating if the template should throw an exception if it doesn't find a variable. Default is <c>false</c>
+        /// </summary>
+        public bool StrictVariables { get; set; }
 
         /// <summary>
         /// Indicates if we are in a looop
@@ -280,8 +297,7 @@ namespace Scriban
             // Try to set the variable
             if (!store.TrySetValue(variable.Name, value, asReadOnly))
             {
-                throw new ScriptRuntimeException(variable.Span,
-                    $"Cannot set value on the readonly variable [{variable}]"); // unit test: 105-assign-error2.txt
+                throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable [{variable}]"); // unit test: 105-assign-error2.txt
             }
         }
 
@@ -633,11 +649,19 @@ namespace Scriban
                 }
             }
 
+            bool found = false;
             if (TryGetVariable != null)
             {
-                value = TryGetVariable(variable);
+                if (TryGetVariable(this, variable.Span, variable, out value))
+                {
+                    found = true;
+                }
             }
 
+            if (StrictVariables && !found)
+            {
+                throw new ScriptRuntimeException(variable.Span, $"The variable `{variable}` was not found");
+            }
             return value;
         }
 
@@ -679,8 +703,7 @@ namespace Scriban
 
                         if (targetObject == null)
                         {
-                            throw new ScriptRuntimeException(nextDot.Span,
-                                $"Object [{nextDot.Target}] is null. Cannot access member: {nextDot}"); // unit test: 131-member-accessor-error1.txt
+                            throw new ScriptRuntimeException(nextDot.Span, $"Object [{nextDot.Target}] is null. Cannot access member: {nextDot}"); // unit test: 131-member-accessor-error1.txt
                         }
 
                         if (targetObject is string || targetObject.GetType().GetTypeInfo().IsPrimitive)

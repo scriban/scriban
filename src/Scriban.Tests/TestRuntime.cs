@@ -94,21 +94,37 @@ namespace Scriban.Tests
         [Test]
         public void TestDynamicVariable()
         {
-            var template = Template.Parse("Test with a dynamic {{ myvar }}");
-
             var context = new TemplateContext
             {
-                TryGetVariable = variable =>
+                TryGetVariable = (TemplateContext templateContext, SourceSpan span, ScriptVariable variable, out object value) =>
                 {
-                    Assert.AreEqual("myvar", variable.Name);
-                    return "yes";
+                    value = null;
+                    if (variable.Name == "myvar")
+                    {
+                        value = "yes";
+                        return true;
+                    }
+                    return false;
                 }
             };
 
-            context.Evaluate(template.Page);
-            var result = context.Output.ToString();
+            {
+                var template = Template.Parse("Test with a dynamic {{ myvar }}");
+                context.Evaluate(template.Page);
+                var result = context.Output.ToString();
 
-            TextAssert.AreEqual("Test with a dynamic yes", result);
+                TextAssert.AreEqual("Test with a dynamic yes", result);
+            }
+
+            {
+                // Test StrictVariables
+                var template = Template.Parse("Test with a dynamic {{ myvar2 }}");
+                context.StrictVariables = true;
+                var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
+                var result = exception.ToString();
+                var check = "The variable `myvar2` was not found";
+                Assert.True(result.Contains(check), $"The exception string `{result}` does not contain the expected value");
+            }
         }
 
         [Test]
