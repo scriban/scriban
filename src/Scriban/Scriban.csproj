@@ -7,7 +7,7 @@
     <NeutralLanguage>en-US</NeutralLanguage>
     <VersionPrefix>0.9.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
-    <TargetFrameworks>net35;net40;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1;uap10.0</TargetFrameworks>
+    <TargetFrameworks>net35;net40;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1;netstandard1.3;uap10.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
     <PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>
@@ -35,6 +35,7 @@
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Web" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81' ">
@@ -43,23 +44,35 @@
     <Reference Include="System.Core" />
   </ItemGroup>
 
+    <PropertyGroup Condition=" '$(TargetFramework)' == 'net35'">
+        <DefineConstants>$(DefineConstants);NET35</DefineConstants>
+    </PropertyGroup>    
+    
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
-    <DefineConstants>$(DefineConstants);NETPRE45</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET40</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
-    <DefineConstants>$(DefineConstants);CORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETSTD11</DefineConstants>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+    <DefineConstants>$(DefineConstants);NETSTD13</DefineConstants>
+  </PropertyGroup>
+    
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
+    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
+  </ItemGroup>
+    
   <PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">10.0.10240.0</TargetPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">10.0.10240.0</TargetPlatformMinVersion> 
-    <DefineConstants>$(DefineConstants);CORE;UAP</DefineConstants>
+    <DefineConstants>$(DefineConstants);UAP</DefineConstants>
   </PropertyGroup>  
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81'">
-    <DefineConstants>$(DefineConstants);NETPRE45</DefineConstants>
+    <DefineConstants>$(DefineConstants);PCL328</DefineConstants>
     <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>

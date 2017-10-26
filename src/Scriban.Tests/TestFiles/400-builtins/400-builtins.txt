@@ -18,3 +18,5 @@ List of all the builtin <object> functions:
 {{dump_members object}}
 List of all the builtin <regex> functions:
 {{dump_members regex}}
+List of all the builtin <html> functions:
+{{dump_members html}}

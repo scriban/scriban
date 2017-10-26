@@ -20,17 +20,24 @@ List of all the builtin <math> functions:
  round
 
 List of all the builtin <string> functions:
+ append
  capitalize
  capitalizewords
  downcase
  handleize
+ hmac_sha1
+ hmac_sha256
  lstrip
+ md5
  pluralize
+ prepend
  remove
  remove_first
  replace
  replace_first
  rstrip
+ sha1
+ sha256
  slice
  split
  starts_with
@@ -74,3 +81,8 @@ List of all the builtin <regex> functions:
  replace
  split
  unescape
+
+List of all the builtin <html> functions:
+ escape
+ url_encode
+ url_escape

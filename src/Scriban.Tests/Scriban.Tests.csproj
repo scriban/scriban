@@ -249,6 +249,8 @@
     <Content Include="TestFiles\300-functions\300-func-simple.txt" />
     <Content Include="TestFiles\400-builtins\400-builtins.out.txt" />
     <Content Include="TestFiles\400-builtins\400-builtins.txt" />
+    <Content Include="TestFiles\400-builtins\470-html.out.txt" />
+    <Content Include="TestFiles\400-builtins\470-html.txt" />
     <Content Include="TestFiles\400-builtins\460-regex.out.txt" />
     <Content Include="TestFiles\400-builtins\460-regex.txt" />
     <Content Include="TestFiles\400-builtins\450-object.out.txt" />

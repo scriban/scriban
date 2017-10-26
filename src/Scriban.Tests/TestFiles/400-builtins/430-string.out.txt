@@ -21,3 +21,11 @@ This is a lo...
 This is a test truncated...
 TEST
 This Will Capitalize Words
+This is a string + another string
+another string + This is a string
+null | string.append "+ another string": + another string
+null | string.append null: 
+"This is a string" | string.append null: This is a string
+md5: 098f6bcd4621d373cade4e832627b4f6
+sha1: a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+sha256: 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08

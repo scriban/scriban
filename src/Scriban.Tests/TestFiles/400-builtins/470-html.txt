@@ -1,0 +1,3 @@
+{{ "<p>test</p>" | html.escape }}
+{{ "john@liquid.com" | html.url_encode }}
+{{ "<hello> & <scriban>" | html.url_escape }}

@@ -22,6 +22,73 @@ namespace Scriban.Functions
             this.SetValue("slice", new DelegateCustomFunction(Slice), true);
         }
 
+        public static string Append(string toAppend, string text)
+        {
+            return (text ?? string.Empty) + (toAppend ?? string.Empty);
+        }
+
+        public static string Prepend(string toPrepend, string text)
+        {
+            return (toPrepend ?? string.Empty) + (text ?? string.Empty);
+        }
+
+#if !PCL328 && !NETSTD11
+        public static string Md5(string text)
+        {
+            text = text ?? string.Empty;
+            using (var md5 = System.Security.Cryptography.MD5.Create())
+            {
+                return Hash(md5, text);
+            }
+        }
+
+        public static string Sha1(string text)
+        {
+            using (var sha1 = System.Security.Cryptography.SHA1.Create())
+            {
+                return Hash(sha1, text);
+            }
+        }
+
+        public static string Sha256(string text)
+        {
+            using (var sha256 = System.Security.Cryptography.SHA256.Create())
+            {
+                return Hash(sha256, text);
+            }
+        }
+
+        public static string HmacSha1(string secretKey, string text)
+        {
+            using (var hsha1 = new System.Security.Cryptography.HMACSHA1(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
+            {
+                return Hash(hsha1, text);
+            }
+        }
+
+        public static string HmacSha256(string secretKey, string text)
+        {
+            using (var hsha256 = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
+            {
+                return Hash(hsha256, text);
+            }
+        }
+
+        private static string Hash(System.Security.Cryptography.HashAlgorithm algo, string text)
+        {
+            text = text ?? string.Empty;
+            var bytes = Encoding.UTF8.GetBytes(text);
+            var hash = algo.ComputeHash(bytes);
+            var sb = new StringBuilder(hash.Length * 2);
+            for (var i = 0; i < hash.Length; i++)
+            {
+                var b = hash[i];
+                sb.Append(b.ToString("x2"));
+            }
+            return sb.ToString();
+        }
+#endif
+
         public static string Upcase(string text)
         {
             return text?.ToUpperInvariant();

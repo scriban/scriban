@@ -21,3 +21,11 @@
 {{ "This is a test truncated at 5" | string.truncatewords 5 }}
 {{ "test" | string.upcase }}
 {{ "This will capitalize words" | string.capitalizewords }}
+{{ "This is a string" | string.append " + another string" }}
+{{ "This is a string" | string.prepend "another string + " }}
+null | string.append "+ another string": {{ null | string.append "+ another string" }}
+null | string.append null: {{ null | string.append null }}
+"This is a string" | string.append null: {{ "This is a string" | string.append null }}
+md5: {{ "test" | string.md5 }}
+sha1: {{ "test" | string.sha1 }}
+sha256: {{ "test" | string.sha256 }}

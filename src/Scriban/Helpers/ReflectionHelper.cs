@@ -9,7 +9,7 @@ namespace Scriban.Helpers
 {
     internal static class ReflectionHelper
     {
-#if NETPRE45
+#if NET35 || NET40 || PCL328
         public static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
         {
             if (type == null)

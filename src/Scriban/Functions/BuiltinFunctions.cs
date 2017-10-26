@@ -13,6 +13,7 @@ namespace Scriban.Functions
             SetValue("object", new ObjectFunctions(), true);
             SetValue(DateTimeFunctions.DateVariable.Name, new DateTimeFunctions(), true);
             SetValue("timespan", new TimeSpanFunctions(), true);
+            SetValue("html", new HtmlFunctions(), true);
             SetValue("array", new ArrayFunctions(), true);
             SetValue("string", new StringFunctions(), true);
             SetValue("math", new MathFunctions(), true);
