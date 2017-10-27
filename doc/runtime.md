@@ -692,8 +692,9 @@ namespace Scriban.Runtime
 As you can see, the `IScriptCustomFunction` gives you access to:
 
 - The current `TemplateContext` evaluating the current `Template`
-- The AST node context from the `Template` that is calling this custom functions
-- The parameters - not yet evaluated, so you can precisely get information about the location of the parameters in the original source code...etc.
+- The AST node context from the `Template` that is calling this custom functions, so you can precisely get information about the location of the parameters in the original source code...etc.
+- The parameters already evaluated
+- The block statement (not yet used for custom functions - but used by the `wrap` statement)
 
 The `include` expression is typically implemented via a `IScriptCustomFunction`. You can have a look at the details [here](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Functions/IncludeFunction.cs)
 
@@ -726,7 +727,7 @@ When using `Template.Evaluate`, the underlying code will use the `ScriptMode.Scr
 
 The default culture when running a template is `CultureInfo.InvariantCulture`
 
-You can change the culture used to when rendering numbers/date/time and parsing date/time by pushing a new Culture to a `TemplateContext`
+You can change the culture that is used when rendering numbers/date/time and parsing date/time by pushing a new Culture to a `TemplateContext`
 
 ```C#
 var context = new TemplateContext();
@@ -744,7 +745,7 @@ context.PopCulture();
 The `TemplateContext` provides a few properties to control the runtime and make it safer. You can tweak the following properties:
 
 - `LoopLimit` (default is `1000`): If a script performs a loop over 1000 iteration, the runtime will throw a `ScriptRuntimeException`
-- `RecursiveLimit` (default is `100`): If a script performs a recursive all over 100 depth, the runtime will throw a `ScriptRuntimeException`
+- `RecursiveLimit` (default is `100`): If a script performs a recursive call over 100 depth, the runtime will throw a `ScriptRuntimeException`
 - `StrictVariables` (default is `false`): If set to `true`, any variables that were not found during variable resolution will throw a `ScriptRuntimeException`
 - `RegexTimeOut` (default is `10s`): If a builtin function is using a regular expression that is taking more than 10s to complete, the runtime will throw an exception
 
