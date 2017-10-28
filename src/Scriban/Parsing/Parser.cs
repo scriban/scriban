@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -20,6 +20,7 @@ namespace Scriban.Parsing
         private Token _previousToken;
         private Token _token;
         private bool _inCodeSection;
+        private bool _isLiquidTagSection;
         private int _blockLevel;
         private bool _inFrontMatter;
         private bool _isStatementDepthLimitReached;
@@ -185,10 +186,12 @@ namespace Scriban.Parsing
                     break;
 
                 case TokenType.CodeEnter:
+                case TokenType.LiquidTagEnter:
                     if (_inCodeSection)
                     {
                         LogError("Unexpected token while already in a code block");
                     }
+                    _isLiquidTagSection = Current.Type == TokenType.LiquidTagEnter;
                     _inCodeSection = true;
                     NextToken();
                     goto continueParsing;
@@ -221,6 +224,7 @@ namespace Scriban.Parsing
                     break;
 
                 case TokenType.CodeExit:
+                case TokenType.LiquidTagExit:
                     if (!_inCodeSection)
                     {
                         LogError("Unexpected code block exit '}}' while no code block enter '{{' has been found");
@@ -230,6 +234,7 @@ namespace Scriban.Parsing
                         LogError("Unexpected code clock exit '}}' while parsing in script only mode. '}}' is not allowed.");
                     }
 
+                    _isLiquidTagSection = false;
                     _inCodeSection = false;
                     NextToken();
                     goto continueParsing;
@@ -246,102 +251,7 @@ namespace Scriban.Parsing
                             case TokenType.Identifier:
                             case TokenType.IdentifierSpecial:
                                 var identifier = GetAsText(Current);
-                                switch (identifier)
-                                {
-                                    case "end":
-                                        hasEnd = true;
-                                        nextStatement = false;
-                                        NextToken();
-                                        break;
-                                    case "wrap":
-                                        statement = ParseWrapStatement();
-                                        break;
-                                    case "if":
-                                        statement = ParseIfStatement();
-                                        break;
-                                    case "else":
-                                        var parentCondition = parent as ScriptConditionStatement;
-                                        if (parentCondition == null)
-                                        {
-                                            nextStatement = false;
-
-                                            // unit test: 201-if-else-error3.txt
-                                            LogError("A else condition must be preceded by another if/else condition");
-                                        }
-                                        else
-                                        {
-                                            var nextCondition = ParseElseStatement();
-                                            parentCondition.Else = nextCondition;
-                                            hasEnd = true;
-                                        }
-                                        break;
-                                    case "for":
-                                        if (PeekToken().Type == TokenType.Dot)
-                                        {
-                                            statement = ParseExpressionStatement();
-                                        }
-                                        else
-                                        {
-                                            statement = ParseForStatement();
-                                        }
-                                        break;
-                                    case "with":
-                                        statement = ParseWithStatement();
-                                        break;
-                                    case "import":
-                                        statement = ParseImportStatement();
-                                        break;
-                                    case "readonly":
-                                        statement = ParseReadOnlyStatement();
-                                        break;
-                                    case "while":
-                                        if (PeekToken().Type == TokenType.Dot)
-                                        {
-                                            statement = ParseExpressionStatement();
-                                        }
-                                        else
-                                        {
-                                            statement = ParseWhileStatement();
-                                        }
-                                        break;
-                                    case "break":
-                                        statement = Open<ScriptBreakStatement>();
-                                        NextToken();
-                                        Close(statement);
-
-                                        // This has to be done at execution time, because of the wrap statement
-                                        //if (!IsInLoop())
-                                        //{
-                                        //    LogError(statement, "Unexpected statement outside of a loop");
-                                        //}
-                                        ExpectEndOfStatement(statement);
-                                        break;
-                                    case "continue":
-                                        statement = Open<ScriptContinueStatement>();
-                                        NextToken();
-                                        Close(statement);
-
-                                        // This has to be done at execution time, because of the wrap statement
-                                        //if (!IsInLoop())
-                                        //{
-                                        //    LogError(statement, "Unexpected statement outside of a loop");
-                                        //}
-                                        ExpectEndOfStatement(statement);
-                                        break;
-                                    case "func":
-                                        statement = ParseFunctionStatement(false);
-                                        break;
-                                    case "ret":
-                                        statement = ParseReturnStatement();
-                                        break;
-                                    case "capture":
-                                        statement = ParseCaptureStatement();
-                                        break;
-                                    default:
-                                        // Otherwise it is an expression statement
-                                        statement = ParseExpressionStatement();
-                                        break;
-                                }
+                                ReadScribanStatement(identifier, parent, ref statement, ref hasEnd, ref nextStatement);
                                 break;
                             default:
                                 if (StartAsExpression())
@@ -366,6 +276,106 @@ namespace Scriban.Parsing
             }
 
             return nextStatement;
+        }
+
+        private void ReadScribanStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
+        {
+            switch (identifier)
+            {
+                case "end":
+                    hasEnd = true;
+                    nextStatement = false;
+                    NextToken();
+                    break;
+                case "wrap":
+                    statement = ParseWrapStatement();
+                    break;
+                case "if":
+                    statement = ParseIfStatement();
+                    break;
+                case "else":
+                    var parentCondition = parent as ScriptConditionStatement;
+                    if (parentCondition == null)
+                    {
+                        nextStatement = false;
+
+                        // unit test: 201-if-else-error3.txt
+                        LogError("A else condition must be preceded by another if/else condition");
+                    }
+                    else
+                    {
+                        var nextCondition = ParseElseStatement();
+                        parentCondition.Else = nextCondition;
+                        hasEnd = true;
+                    }
+                    break;
+                case "for":
+                    if (PeekToken().Type == TokenType.Dot)
+                    {
+                        statement = ParseExpressionStatement();
+                    }
+                    else
+                    {
+                        statement = ParseForStatement();
+                    }
+                    break;
+                case "with":
+                    statement = ParseWithStatement();
+                    break;
+                case "import":
+                    statement = ParseImportStatement();
+                    break;
+                case "readonly":
+                    statement = ParseReadOnlyStatement();
+                    break;
+                case "while":
+                    if (PeekToken().Type == TokenType.Dot)
+                    {
+                        statement = ParseExpressionStatement();
+                    }
+                    else
+                    {
+                        statement = ParseWhileStatement();
+                    }
+                    break;
+                case "break":
+                    statement = Open<ScriptBreakStatement>();
+                    NextToken();
+                    Close(statement);
+
+                    // This has to be done at execution time, because of the wrap statement
+                    //if (!IsInLoop())
+                    //{
+                    //    LogError(statement, "Unexpected statement outside of a loop");
+                    //}
+                    ExpectEndOfStatement(statement);
+                    break;
+                case "continue":
+                    statement = Open<ScriptContinueStatement>();
+                    NextToken();
+                    Close(statement);
+
+                    // This has to be done at execution time, because of the wrap statement
+                    //if (!IsInLoop())
+                    //{
+                    //    LogError(statement, "Unexpected statement outside of a loop");
+                    //}
+                    ExpectEndOfStatement(statement);
+                    break;
+                case "func":
+                    statement = ParseFunctionStatement(false);
+                    break;
+                case "ret":
+                    statement = ParseReturnStatement();
+                    break;
+                case "capture":
+                    statement = ParseCaptureStatement();
+                    break;
+                default:
+                    // Otherwise it is an expression statement
+                    statement = ParseExpressionStatement();
+                    break;
+            }
         }
 
         private ScriptReadOnlyStatement ParseReadOnlyStatement()
