@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
 using Scriban.Helpers;
+using Scriban.Parsing;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -89,7 +90,7 @@ namespace Scriban.Syntax
                         }
                         else
                         {
-                            return Calculate(context, leftValue, leftType, rightValue, rightType);
+                            return Calculate(context, Span, Operator, leftValue, leftType, rightValue, rightType);
                         }
                 }
             }
@@ -145,43 +146,6 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(Span, $"Operator [{Operator.ToText()}] is not supported on string objects"); // unit test: 112-binary-string-error2.txt
         }
 
-        private object Calculate(ScriptBinaryOperator op, int left, int right)
-        {
-            switch (op)
-            {
-                case ScriptBinaryOperator.Add:
-                    return left + right;
-                case ScriptBinaryOperator.Substract:
-                    return left - right;
-                case ScriptBinaryOperator.Multiply:
-                    return left*right;
-                case ScriptBinaryOperator.Divide:
-                    return (float)left/right;
-                case ScriptBinaryOperator.DivideRound:
-                    return left/right;
-                case ScriptBinaryOperator.Modulus:
-                    return left % right;
-                case ScriptBinaryOperator.CompareEqual:
-                    return left == right;
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return left != right;
-                case ScriptBinaryOperator.CompareGreater:
-                    return left > right;
-                case ScriptBinaryOperator.CompareLess:
-                    return left < right;
-                case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return left >= right;
-                case ScriptBinaryOperator.CompareLessOrEqual:
-                    return left <= right;
-                case ScriptBinaryOperator.RangeInclude:
-                    return RangeInclude(left, right);
-                case ScriptBinaryOperator.RangeExclude:
-                    return RangeExclude(left, right);
-            }
-            throw new ScriptRuntimeException(Span, $"The operator [{op.ToText()}] is not implemented for int<->int");
-        }
-
-
         private static IEnumerable<int> RangeInclude(int left, int right)
         {
             // unit test: 150-range-expression.txt
@@ -219,8 +183,120 @@ namespace Scriban.Syntax
                 }
             }
         }
+      
+        public static object Calculate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, Type leftType, object rightValue, Type rightType)
+        {
+            // The order matters: double, float, long, int
+            if (leftType == typeof(double))
+            {
+                var rightDouble = (double)context.ToObject(span, rightValue, typeof(double));
+                return CalculateDouble(op, span, (double)leftValue, rightDouble);
+            }
 
-        private object Calculate(ScriptBinaryOperator op, long left, long right)
+            if (rightType == typeof(double))
+            {
+                var leftDouble = (double)context.ToObject(span, leftValue, typeof(double));
+                return CalculateDouble(op, span, leftDouble, (double)rightValue);
+            }
+
+            if (leftType == typeof(float))
+            {
+                var rightFloat = (float)context.ToObject(span, rightValue, typeof(float));
+                return CalculateFloat(op, span, (float)leftValue, rightFloat);
+            }
+
+            if (rightType == typeof(float))
+            {
+                var leftFloat = (float)context.ToObject(span, leftValue, typeof(float));
+                return CalculateFloat(op, span, leftFloat, (float)rightValue);
+            }
+
+            if (leftType == typeof(long))
+            {
+                var rightLong = (long)context.ToObject(span, rightValue, typeof(long));
+                return CalculateLong(op, span, (long)leftValue, rightLong);
+            }
+
+            if (rightType == typeof(long))
+            {
+                var leftLong = (long)context.ToObject(span, leftValue, typeof(long));
+                return CalculateLong(op, span, leftLong, (long)rightValue);
+            }
+
+            if (leftType == typeof (int) || (leftType != null && leftType.GetTypeInfo().IsEnum))
+            {
+                var rightInt = (int) context.ToObject(span, rightValue, typeof (int));
+                return CalculateInt(op, span, (int) leftValue, rightInt);
+            }
+
+            if (rightType == typeof (int) || (rightType != null && rightType.GetTypeInfo().IsEnum))
+            {
+                var leftInt = (int) context.ToObject(span, leftValue, typeof (int));
+                return CalculateInt(op, span, leftInt, (int) rightValue);
+            }
+
+            if (leftType == typeof(bool))
+            {
+                var rightBool = (bool)context.ToObject(span, rightValue, typeof(bool));
+                return CalculateBool(op, span, (bool)leftValue, rightBool);
+            }
+
+            if (rightType == typeof(bool))
+            {
+                var leftBool = (bool)context.ToObject(span, leftValue, typeof(bool));
+                return CalculateBool(op, span, leftBool, (bool)rightValue);
+            }
+
+            if (leftType == typeof(DateTime) && rightType == typeof(DateTime))
+            {
+                return CalculateDateTime(op, span, (DateTime)leftValue, (DateTime)rightValue);
+            }
+
+            if (leftType == typeof(DateTime) && rightType == typeof(TimeSpan))
+            {
+                return CalculateDateTime(op, span, (DateTime)leftValue, (TimeSpan)rightValue);
+            }
+
+            throw new ScriptRuntimeException(span, $"Unsupported types [{leftValue ?? "null"}/{leftType?.ToString() ?? "null"}] {op.ToText()} [{rightValue ?? "null"}/{rightType?.ToString() ?? "null"}] for binary operation");
+        }
+
+        private static object CalculateInt(ScriptBinaryOperator op, SourceSpan span, int left, int right)
+        {
+            switch (op)
+            {
+                case ScriptBinaryOperator.Add:
+                    return left + right;
+                case ScriptBinaryOperator.Substract:
+                    return left - right;
+                case ScriptBinaryOperator.Multiply:
+                    return left * right;
+                case ScriptBinaryOperator.Divide:
+                    return (float)left / right;
+                case ScriptBinaryOperator.DivideRound:
+                    return left / right;
+                case ScriptBinaryOperator.Modulus:
+                    return left % right;
+                case ScriptBinaryOperator.CompareEqual:
+                    return left == right;
+                case ScriptBinaryOperator.CompareNotEqual:
+                    return left != right;
+                case ScriptBinaryOperator.CompareGreater:
+                    return left > right;
+                case ScriptBinaryOperator.CompareLess:
+                    return left < right;
+                case ScriptBinaryOperator.CompareGreaterOrEqual:
+                    return left >= right;
+                case ScriptBinaryOperator.CompareLessOrEqual:
+                    return left <= right;
+                case ScriptBinaryOperator.RangeInclude:
+                    return RangeInclude(left, right);
+                case ScriptBinaryOperator.RangeExclude:
+                    return RangeExclude(left, right);
+            }
+            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not implemented for int<->int");
+        }
+
+        private static object CalculateLong(ScriptBinaryOperator op, SourceSpan span, long left, long right)
         {
             switch (op)
             {
@@ -249,11 +325,11 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
             }
-            throw new ScriptRuntimeException(Span, $"The operator [{op.ToText()}] is not implemented for long<->long");
+            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not implemented for long<->long");
         }
 
 
-        private object Calculate(ScriptBinaryOperator op, double left, double right)
+        private static object CalculateDouble(ScriptBinaryOperator op, SourceSpan span, double left, double right)
         {
             switch (op)
             {
@@ -282,10 +358,10 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
             }
-            throw new ScriptRuntimeException(Span, $"The operator [{op.ToText()}] is not implemented for double<->double");
+            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not implemented for double<->double");
         }
 
-        private object Calculate(ScriptBinaryOperator op, float left, float right)
+        private static object CalculateFloat(ScriptBinaryOperator op, SourceSpan span, float left, float right)
         {
             switch (op)
             {
@@ -314,12 +390,12 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
             }
-            throw new ScriptRuntimeException(Span, $"The operator [{op.ToText()}] is not implemented for float<->float");
+            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not implemented for float<->float");
         }
 
-        private object EvaluateBinaryExpression(TemplateContext context, DateTime left, DateTime right)
+        private static object CalculateDateTime(ScriptBinaryOperator op, SourceSpan span, DateTime left, DateTime right)
         {
-            switch (Operator)
+            switch (op)
             {
                 case ScriptBinaryOperator.Substract:
                     return left - right;
@@ -337,21 +413,21 @@ namespace Scriban.Syntax
                     return left >= right;
             }
 
-            throw new ScriptRuntimeException(Span, $"The operator [{Operator}] is not supported for DateTime");
+            throw new ScriptRuntimeException(span, $"The operator [{op}] is not supported for DateTime");
         }
 
-        private object EvaluateBinaryExpression(TemplateContext context, DateTime left, TimeSpan right)
+        private static object CalculateDateTime(ScriptBinaryOperator op, SourceSpan span, DateTime left, TimeSpan right)
         {
-            switch (Operator)
+            switch (op)
             {
                 case ScriptBinaryOperator.Add:
                     return left + right;
             }
 
-            throw new ScriptRuntimeException(Span, $"The operator [{Operator}] is not supported for between <DateTime> and <TimeSpan>");
+            throw new ScriptRuntimeException(span, $"The operator [{op}] is not supported for between <DateTime> and <TimeSpan>");
         }
 
-        private object Calculate(ScriptBinaryOperator op, bool left, bool right)
+        private static object CalculateBool(ScriptBinaryOperator op, SourceSpan span, bool left, bool right)
         {
             switch (op)
             {
@@ -360,84 +436,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareNotEqual:
                     return left != right;
             }
-            throw new ScriptRuntimeException(Span, $"The operator [{op.ToText()}] is not valid for bool<->bool");
-        }
-
-        private object Calculate(TemplateContext context, object leftValue, Type leftType, object rightValue, Type rightType)
-        {
-            var op = Operator;
-            // The order matters: double, float, long, int
-            if (leftType == typeof(double))
-            {
-                var rightDouble = (double)context.ToObject(Span, rightValue, typeof(double));
-                return Calculate(op, (double)leftValue, rightDouble);
-            }
-
-            if (rightType == typeof(double))
-            {
-                var leftDouble = (double)context.ToObject(Span, leftValue, typeof(double));
-                return Calculate(op, leftDouble, (double)rightValue);
-            }
-
-            if (leftType == typeof(float))
-            {
-                var rightFloat = (float)context.ToObject(Span, rightValue, typeof(float));
-                return Calculate(op, (float)leftValue, rightFloat);
-            }
-
-            if (rightType == typeof(float))
-            {
-                var leftFloat = (float)context.ToObject(Span, leftValue, typeof(float));
-                return Calculate(op, leftFloat, (float)rightValue);
-            }
-
-            if (leftType == typeof(long))
-            {
-                var rightLong = (long)context.ToObject(Span, rightValue, typeof(long));
-                return Calculate(op, (long)leftValue, rightLong);
-            }
-
-            if (rightType == typeof(long))
-            {
-                var leftLong = (long)context.ToObject(Span, leftValue, typeof(long));
-                return Calculate(op, leftLong, (long)rightValue);
-            }
-
-            if (leftType == typeof (int) || (leftType != null && leftType.GetTypeInfo().IsEnum))
-            {
-                var rightInt = (int) context.ToObject(Span, rightValue, typeof (int));
-                return Calculate(op, (int) leftValue, rightInt);
-            }
-
-            if (rightType == typeof (int) || (rightType != null && rightType.GetTypeInfo().IsEnum))
-            {
-                var leftInt = (int) context.ToObject(Span, leftValue, typeof (int));
-                return Calculate(op, leftInt, (int) rightValue);
-            }
-
-            if (leftType == typeof(bool))
-            {
-                var rightBool = (bool)context.ToObject(Span, rightValue, typeof(bool));
-                return Calculate(op, (bool)leftValue, rightBool);
-            }
-
-            if (rightType == typeof(bool))
-            {
-                var leftBool = (bool)context.ToObject(Span, leftValue, typeof(bool));
-                return Calculate(op, leftBool, (bool)rightValue);
-            }
-
-            if (leftType == typeof(DateTime) && rightType == typeof(DateTime))
-            {
-                return EvaluateBinaryExpression(context, (DateTime)leftValue, (DateTime)rightValue);
-            }
-
-            if (leftType == typeof(DateTime) && rightType == typeof(TimeSpan))
-            {
-                return EvaluateBinaryExpression(context, (DateTime)leftValue, (TimeSpan)rightValue);
-            }
-
-            throw new ScriptRuntimeException(Span, $"Unsupported types [{leftValue ?? "null"}/{leftType?.ToString() ?? "null"}] {op.ToText()} [{rightValue ?? "null"}/{rightType?.ToString() ?? "null"}] for binary operation");
+            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not valid for bool<->bool");
         }
     }
 }
