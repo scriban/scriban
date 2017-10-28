@@ -181,7 +181,14 @@ namespace Scriban.Parsing
 
                 if (_blockType == BlockType.Code)
                 {
-                    if (ReadCode())
+                    if (_isLiquid)
+                    {
+                        if (ReadCodeLiquid())
+                        {
+                            break;
+                        }
+                    }
+                    else if (ReadCode())
                     {
                         break;
                     }
@@ -483,18 +490,10 @@ namespace Scriban.Parsing
                     ConsumeWhitespace(false);
                     break;
                 case ';':
-                    if (_isLiquid)
-                    {
-                        _token = new Token(TokenType.Invalid, _position, _position);
-                        NextChar();
-                    }
-                    else
-                    {
-                        _token = new Token(TokenType.SemiColon, start, _position);
-                        NextChar();
-                        // consume all remaining space including new lines
-                        ConsumeWhitespace(false);
-                    }
+                    _token = new Token(TokenType.SemiColon, start, _position);
+                    NextChar();
+                    // consume all remaining space including new lines
+                    ConsumeWhitespace(false);
                     break;
                 case '\r':
                     NextChar();
@@ -517,11 +516,11 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '@':
-                    _token = _isLiquid ? new Token(TokenType.Invalid, _position, _position) : new Token(TokenType.Arroba, start, start);
+                    _token = new Token(TokenType.Arroba, start, start);
                     NextChar();
                     break;
                 case '^':
-                    _token = _isLiquid ? new Token(TokenType.Invalid, _position, _position) : new Token(TokenType.Caret, start, start);
+                    _token = new Token(TokenType.Caret, start, start);
                     NextChar();
                     break;
                 case '*':
@@ -707,30 +706,14 @@ namespace Scriban.Parsing
                     }
                     break;
                 case '#':
-                    if (_isLiquid)
-                    {
-                        _token = new Token(TokenType.Invalid, _position, _position);
-                        NextChar();
-                    }
-                    else
-                    {
-                        ReadComment();
-                    }
+                    ReadComment();
                     break;
                 case '"':
                 case '\'':
                     ReadString();
                     break;
                 case '`':
-                    if (_isLiquid)
-                    {
-                        _token = new Token(TokenType.Invalid, _position, _position);
-                        NextChar();
-                    }
-                    else
-                    {
-                        ReadVerbatimString();
-                    }
+                    ReadVerbatimString();
                     break;
                 case '\0':
                     _token = Token.Eof;
@@ -744,10 +727,148 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    bool specialIdentifier = !_isLiquid && c == '$';
+                    bool specialIdentifier = c == '$';
                     if (IsFirstIdentifierLetter(c) || specialIdentifier)
                     {
                         ReadIdentifier(specialIdentifier);
+                        break;
+                    }
+
+                    if (char.IsDigit(c))
+                    {
+                        ReadNumber();
+                        break;
+                    }
+
+                    // invalid char
+                    _token = new Token(TokenType.Invalid, _position, _position);
+                    NextChar();
+                    break;
+            }
+
+            return hasTokens;
+        }
+
+
+        private bool ReadCodeLiquid()
+        {
+            bool hasTokens = true;
+            var start = _position;
+            switch (c)
+            {
+                case '\n':
+                    _token = new Token(TokenType.NewLine, start, _position);
+                    NextChar();
+                    // consume all remaining space including new lines
+                    ConsumeWhitespace(false);
+                    break;
+                case '\r':
+                    NextChar();
+                    // case of: \r\n
+                    if (c == '\n')
+                    {
+                        _token = new Token(TokenType.NewLine, start, _position);
+                        NextChar();
+                        // consume all remaining space including new lines
+                        ConsumeWhitespace(false);
+                        break;
+                    }
+                    // case of \r
+                    _token = new Token(TokenType.NewLine, start, start);
+                    // consume all remaining space including new lines
+                    ConsumeWhitespace(false);
+                    break;
+                case ':':
+                    _token = new Token(TokenType.Colon, start, start);
+                    NextChar();
+                    break;
+                case '.':
+                    NextChar();
+                    if (c == '.')
+                    {
+                        var index = _position;
+                        NextChar();
+                        if (c == '<')
+                        {
+                            _token = new Token(TokenType.DoubleDotLess, start, _position);
+                            NextChar();
+                            break;
+                        }
+
+                        _token = new Token(TokenType.DoubleDot, start, index);
+                        break;
+                    }
+                    _token = new Token(TokenType.Dot, start, start);
+                    break;
+
+                case '!':
+                    NextChar();
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.CompareNotEqual, start, _position);
+                        NextChar();
+                        break;
+                    }
+                    _token = new Token(TokenType.Not, start, start);
+                    break;
+
+                case '=':
+                    NextChar();
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.CompareEqual, start, _position);
+                        NextChar();
+                        break;
+                    }
+                    _token = new Token(TokenType.Equal, start, start);
+                    break;
+                case '<':
+                    NextChar();
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.CompareLessOrEqual, start, _position);
+                        NextChar();
+                        break;
+                    }
+                    _token = new Token(TokenType.CompareLess, start, start);
+                    break;
+                case '>':
+                    NextChar();
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.CompareGreaterOrEqual, start, _position);
+                        NextChar();
+                        break;
+                    }
+                    _token = new Token(TokenType.CompareGreater, start, start);
+                    break;
+                case '(':
+                    _token = new Token(TokenType.OpenParent, _position, _position);
+                    NextChar();
+                    break;
+                case ')':
+                    _token = new Token(TokenType.CloseParent, _position, _position);
+                    NextChar();
+                    break;
+                case '"':
+                case '\'':
+                    ReadString();
+                    break;
+                case '\0':
+                    _token = Token.Eof;
+                    break;
+                default:
+                    // Eat any whitespace
+                    if (ConsumeWhitespace(true))
+                    {
+                        // We have no tokens for this ReadCode
+                        hasTokens = false;
+                        break;
+                    }
+
+                    if (IsFirstIdentifierLetter(c))
+                    {
+                        ReadIdentifier(false);
                         break;
                     }
 
