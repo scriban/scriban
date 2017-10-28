@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -115,6 +115,12 @@ namespace Scriban.Parsing
                     case TokenType.Identifier:
                     case TokenType.IdentifierSpecial:
                         leftOperand = ParseVariableOrLiteral();
+
+                        // In case of liquid template, we accept the syntax colon after a tag
+                        if (_isLiquid && parentNode is ScriptPipeCall && Current.Type == TokenType.Colon)
+                        {
+                            NextToken();
+                        }
 
                         // Special handle of the $$ block delegate variable
                         if (ScriptVariable.BlockDelegate.Equals(leftOperand))
@@ -248,7 +254,7 @@ namespace Scriban.Parsing
 
                     // Handle binary operators here
                     ScriptBinaryOperator binaryOperatorType;
-                    if (BinaryOperators.TryGetValue(Current.Type, out binaryOperatorType))
+                    if (BinaryOperators.TryGetValue(Current.Type, out binaryOperatorType) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType)))
                     {
                         var newPrecedence = GetOperatorPrecedence(binaryOperatorType);
 
@@ -331,6 +337,43 @@ namespace Scriban.Parsing
             }
         }
 
+        private bool TryLiquidBinaryOperator(out ScriptBinaryOperator binOp)
+        {
+            binOp = 0;
+            if (Current.Type != TokenType.Identifier)
+            {
+                return false;
+            }
+
+            var text = GetAsText(Current);
+            switch (text)
+            {
+                case "or":
+                    binOp = ScriptBinaryOperator.Or;
+                    return true;
+                case "and":
+                    binOp = ScriptBinaryOperator.And;
+                    return true;
+                case "contains":
+                    binOp = ScriptBinaryOperator.LiquidContains;
+                    return true;
+                case "startsWith":
+                    binOp = ScriptBinaryOperator.LiquidStartsWith;
+                    return true;
+                case "endsWith":
+                    binOp = ScriptBinaryOperator.LiquidEndsWith;
+                    return true;
+                case "hasKey":
+                    binOp = ScriptBinaryOperator.LiquidHasKey;
+                    return true;
+                case "hasValue":
+                    binOp = ScriptBinaryOperator.LiquidHasValue;
+                    return true;
+            }
+
+            return false;
+        }
+      
         private ScriptExpression ParseArrayInitializer()
         {
             var scriptArray = Open<ScriptArrayInitializerExpression>();
@@ -532,6 +575,14 @@ namespace Scriban.Parsing
                 case ScriptBinaryOperator.CompareGreater:
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
                     return 60;
+
+                case ScriptBinaryOperator.LiquidContains:
+                case ScriptBinaryOperator.LiquidStartsWith:
+                case ScriptBinaryOperator.LiquidEndsWith:
+                case ScriptBinaryOperator.LiquidHasKey:
+                case ScriptBinaryOperator.LiquidHasValue:
+                    return 65;
+
                 case ScriptBinaryOperator.Add:
                 case ScriptBinaryOperator.Substract:
                     return 70;

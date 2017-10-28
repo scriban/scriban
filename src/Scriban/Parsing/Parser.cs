@@ -15,6 +15,7 @@ namespace Scriban.Parsing
     public partial class Parser
     {
         private readonly Lexer _lexer;
+        private readonly bool _isLiquid;
         private Lexer.Enumerator _tokenIt;
         private readonly LinkedList<Token> _tokensPreview;
         private Token _previousToken;
@@ -34,6 +35,7 @@ namespace Scriban.Parsing
         public Parser(Lexer lexer, ParserOptions? options = null)
         {
             _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
+            _isLiquid = _lexer.Options.Mode == ScriptMode.Liquid;
             _tokensPreview = new LinkedList<Token>();
             Messages = new List<LogMessage>();
 
@@ -251,7 +253,14 @@ namespace Scriban.Parsing
                             case TokenType.Identifier:
                             case TokenType.IdentifierSpecial:
                                 var identifier = GetAsText(Current);
-                                ReadScribanStatement(identifier, parent, ref statement, ref hasEnd, ref nextStatement);
+                                if (_isLiquid)
+                                {
+                                    ReadLiquidStatement(identifier, parent, ref statement, ref hasEnd, ref nextStatement);
+                                }
+                                else
+                                {
+                                    ReadScribanStatement(identifier, parent, ref statement, ref hasEnd, ref nextStatement);
+                                }
                                 break;
                             default:
                                 if (StartAsExpression())
@@ -291,7 +300,7 @@ namespace Scriban.Parsing
                     statement = ParseWrapStatement();
                     break;
                 case "if":
-                    statement = ParseIfStatement();
+                    statement = ParseIfStatement(false);
                     break;
                 case "else":
                     var parentCondition = parent as ScriptConditionStatement;
@@ -304,7 +313,7 @@ namespace Scriban.Parsing
                     }
                     else
                     {
-                        var nextCondition = ParseElseStatement();
+                        var nextCondition = ParseElseStatement(false);
                         parentCondition.Else = nextCondition;
                         hasEnd = true;
                     }
@@ -378,6 +387,176 @@ namespace Scriban.Parsing
             }
         }
 
+        private void ReadLiquidStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
+        {
+            var currentCondition = PeekCurrentBlock<ScriptConditionStatement>();
+            bool isExpectedInTagSection = true;
+            switch (identifier)
+            {
+                case "endif":
+                    hasEnd = true;
+                    nextStatement = false;
+                    if (currentCondition == null)
+                    {
+                        LogError($"The <endif> is expecting a if/else previous block statement");
+                    }
+                    NextToken();
+                    break;
+                case "endunless":
+                    hasEnd = true;
+                    nextStatement = false;
+                    // Expecting a unless opening
+                    if (!(currentCondition is ScriptIfStatement) || !((ScriptIfStatement)currentCondition).InvertCondition)
+                    {
+                        LogError($"The <endunless> is expecting a unless previous block statement");
+                    }
+                    NextToken();
+                    break;
+
+                case "endfor":
+                    hasEnd = true;
+                    nextStatement = false;
+                    var currentFor = PeekCurrentBlock<ScriptForStatement>();
+                    // Expecting a for opening
+                    if (currentFor == null)
+                    {
+                        LogError($"The <unless> is expecting a if/else previous block statement");
+                    }
+                    NextToken();
+                    break;
+
+                case "endcase":
+                    hasEnd = true;
+                    nextStatement = false;
+                    var currentCase = PeekCurrentBlock<ScriptConditionStatement>();
+                    // Expecting a for opening
+                    if (currentCase == null)
+                    {
+                        LogError($"The <endcase> is expecting a `case` previous block statement");
+                    }
+                    NextToken();
+                    break;
+
+                case "endcapture":
+                    hasEnd = true;
+                    nextStatement = false;
+                    var capture = PeekCurrentBlock<ScriptCaptureStatement>();
+                    // Expecting a for opening
+                    if (capture == null)
+                    {
+                        LogError($"The <endcapture> is expecting a `capture` previous block statement");
+                    }
+                    NextToken();
+                    break;
+
+                case "case":
+                    // TODO
+                    throw new NotImplementedException();
+
+                case "when":
+                    // TODO
+                    throw new NotImplementedException();
+
+                case "if":
+                    statement = ParseIfStatement(false);
+                    break;
+                case "unless":
+                    statement = ParseIfStatement(true);
+                    break;
+                case "else":
+                case "elsif":
+                    var parentCondition = parent as ScriptConditionStatement;
+                    if (parentCondition == null)
+                    {
+                        nextStatement = false;
+
+                        // unit test: 201-if-else-error3.txt
+                        LogError("A else condition must be preceded by another if/else condition");
+                    }
+                    else
+                    {
+                        var nextCondition = ParseElseStatement(identifier == "elsif");
+                        parentCondition.Else = nextCondition;
+                        hasEnd = true;
+                    }
+                    break;
+                case "for":
+                    statement = ParseForStatement();
+                    break;
+                case "break":
+                    statement = Open<ScriptBreakStatement>();
+                    NextToken();
+                    Close(statement);
+
+                    ExpectEndOfStatement(statement);
+                    break;
+                case "continue":
+                    statement = Open<ScriptContinueStatement>();
+                    NextToken();
+                    Close(statement);
+
+                    ExpectEndOfStatement(statement);
+                    break;
+                case "assign":
+                    NextToken(); // skip assign
+                    var token = _token;
+                    // Try to parse an expression
+                    var expressionStatement = ParseExpressionStatement();
+                    // If we don't have an assign expression, this is not a valid assign
+                    if (!(expressionStatement.Expression is ScriptAssignExpression))
+                    {
+                        LogError(token, "Expecting an assign expression: <variable> = <expression>");
+                    }
+                    statement = expressionStatement;
+                    break;
+
+                case "capture":
+                    statement = ParseCaptureStatement();
+                    break;
+
+                case "increment":
+                    statement = ParseIncDecStatement(false);
+                    break;
+
+                case "decrement":
+                    statement = ParseIncDecStatement(true);
+                    break;
+
+                default:
+                    isExpectedInTagSection = false;
+                    // Otherwise it is an expression statement
+                    statement = ParseExpressionStatement();
+                    break;
+            }
+
+            if (isExpectedInTagSection && !_isLiquidTagSection)
+            {
+                LogError(Current, "Expecting the following expression to be in a tag section `{% ... %}`");
+            }
+        }
+
+        private T PeekCurrentBlock<T>() where T : ScriptNode
+        {
+            return Blocks.Count == 0 ? null : Blocks.Peek() as T;
+        }
+
+        private ScriptStatement ParseIncDecStatement(bool isDec)
+        {
+            var incdecStatement = Open<ScriptExpressionStatement>();
+            NextToken(); // skip increment/decrement keyword
+
+            var binaryExpression = Open<ScriptBinaryExpression>();
+            binaryExpression.Left = ExpectAndParseVariable(incdecStatement);
+            binaryExpression.Right = new ScriptLiteral() {Span = binaryExpression.Span, Value = 1};
+            binaryExpression.Operator = isDec ? ScriptBinaryOperator.Substract : ScriptBinaryOperator.Add;
+            ExpectEndOfStatement(incdecStatement);
+
+            incdecStatement.Expression = binaryExpression;
+
+            Close(binaryExpression);
+            return Close(incdecStatement);
+        }
+
         private ScriptReadOnlyStatement ParseReadOnlyStatement()
         {
             var readOnlyStatement = Open<ScriptReadOnlyStatement>();
@@ -448,7 +627,14 @@ namespace Scriban.Parsing
 
         private bool ExpectEndOfStatement(ScriptNode statement)
         {
-            if (Current.Type == TokenType.NewLine || Current.Type == TokenType.CodeExit || Current.Type == TokenType.SemiColon || Current.Type == TokenType.Eof)
+            if (_isLiquid)
+            {
+                if (Current.Type == TokenType.CodeExit || (_isLiquidTagSection && Current.Type == TokenType.LiquidTagExit))
+                {
+                    return true;
+                }
+            }
+            else if (Current.Type == TokenType.NewLine || Current.Type == TokenType.CodeExit || Current.Type == TokenType.SemiColon || Current.Type == TokenType.Eof)
             {
                 return true;
             }
@@ -501,10 +687,11 @@ namespace Scriban.Parsing
             return Close(scriptStatement);
         }
 
-        private ScriptIfStatement ParseIfStatement()
+        private ScriptIfStatement ParseIfStatement(bool invert)
         {
             // unit test: 200-if-else-statement.txt
             var condition = Open<ScriptIfStatement>();
+            condition.InvertCondition = invert;
             NextToken(); // skip if
 
             condition.Condition = ExpectAndParseExpression(condition);
@@ -553,14 +740,20 @@ namespace Scriban.Parsing
         }
 
 
-        private ScriptConditionStatement ParseElseStatement()
+        private ScriptConditionStatement ParseElseStatement(bool isElseIf)
         {
+            // Case of elsif
+            if (_isLiquid && isElseIf)
+            {
+                return ParseIfStatement(false);
+            }
+
             // unit test: 200-if-else-statement.txt
             var nextToken = PeekToken();
-            if (nextToken.Type == TokenType.Identifier && GetAsText(nextToken) == "if")
+            if (!_isLiquid && nextToken.Type == TokenType.Identifier && GetAsText(nextToken) == "if")
             {
                 NextToken();
-                return ParseIfStatement();
+                return ParseIfStatement(false);
             }
 
             var elseStatement = Open<ScriptElseStatement>();
@@ -806,26 +999,54 @@ namespace Scriban.Parsing
             }
         }
 
-        private static bool IsKeyword(string text)
+        private bool IsKeyword(string text)
         {
-            switch (text)
+            if (_isLiquid)
             {
-                case "if":
-                case "else":
-                case "end":
-                case "for":
-                case "while":
-                case "break":
-                case "continue":
-                case "func":
-                case "import":
-                case "readonly":
-                case "with":
-                case "capture":
-                case "ret":
-                case "wrap":
-                case "do":
-                    return true;
+                switch (text)
+                {
+                    case "assign":
+                    case "if":
+                    case "else":
+                    case "elsif":
+                    case "endif":
+                    case "for":
+                    case "endfor":
+                    case "case":
+                    case "when":
+                    case "endcase":
+                    case "break":
+                    case "continue":
+                    case "unless":
+                    case "endunless":
+                    case "capture":
+                    case "endcapture":
+                    case "increment":
+                    case "decrement":
+                        return true;
+                }
+            }
+            else
+            {
+                switch (text)
+                {
+                    case "if":
+                    case "else":
+                    case "end":
+                    case "for":
+                    case "while":
+                    case "break":
+                    case "continue":
+                    case "func":
+                    case "import":
+                    case "readonly":
+                    case "with":
+                    case "capture":
+                    case "ret":
+                    case "wrap":
+                    case "do":
+                        return true;
+                }
             }
             return false;
         }
