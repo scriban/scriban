@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 namespace Scriban.Syntax
@@ -45,6 +45,12 @@ namespace Scriban.Syntax
         And,
 
         Or,
+
+        LiquidContains,
+        LiquidStartsWith,
+        LiquidEndsWith,
+        LiquidHasKey,
+        LiquidHasValue
     }
 
     public static class ScriptBinaryOperatorExtensions
@@ -85,6 +91,17 @@ namespace Scriban.Syntax
                     return "&&";
                 case ScriptBinaryOperator.Or:
                     return "||";
+
+                case ScriptBinaryOperator.LiquidContains:
+                    return "contains";
+                case ScriptBinaryOperator.LiquidStartsWith:
+                    return "startsWith";
+                case ScriptBinaryOperator.LiquidEndsWith:
+                    return "endsWith";
+                case ScriptBinaryOperator.LiquidHasKey:
+                    return "hasKey";
+                case ScriptBinaryOperator.LiquidHasValue:
+                    return "hasValue";
             }
             return op.ToString();
         }
