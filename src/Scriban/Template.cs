@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -58,6 +58,21 @@ namespace Scriban
             var template = new Template(parserOptions, lexerOptions, sourceFilePath);
             template.ParseInternal(text, sourceFilePath);
             return template;
+        }
+
+        /// <summary>
+        /// Parses the specified Liquid script text into a <see cref="Template"/> .
+        /// </summary>
+        /// <param name="text">The liquid scripting text.</param>
+        /// <param name="sourceFilePath">The source file path. Optional, used for better error reporting if the source file has a location on the disk</param>
+        /// <param name="parserOptions">The templating parsing parserOptions.</param>
+        /// <param name="lexerOptions">The options passed to the lexer</param>
+        /// <returns>A template</returns>
+        public static Template ParseLiquid(string text, string sourceFilePath = null, ParserOptions? parserOptions = null, LexerOptions? lexerOptions = null)
+        {
+            var localLexerOptions = lexerOptions ?? new LexerOptions();
+            localLexerOptions.Mode = ScriptMode.Liquid;
+            return Parse(text, sourceFilePath, parserOptions, localLexerOptions);
         }
 
         /// <summary>
@@ -157,7 +172,7 @@ namespace Scriban
                 scriptObject.Import(model);
             }
 
-            var context = new TemplateContext();
+            var context = _lexerOptions.HasValue && _lexerOptions.Value.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
             context.PushGlobal(scriptObject);
             Render(context);
             context.PopGlobal();

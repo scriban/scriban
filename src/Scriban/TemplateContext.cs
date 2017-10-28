@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -911,6 +911,16 @@ namespace Scriban
                 default:
                     throw new NotImplementedException($"Variable scope [{scope}] is not implemented");
             }
+        }
+    }
+
+    /// <summary>
+    /// A Liquid based <see cref="TemplateContext"/> providing the builtin functions usually available for a liquid template.
+    /// </summary>
+    public class LiquidTemplateContext : TemplateContext
+    {
+        public LiquidTemplateContext() : base(new LiquidBuiltinsFunctions())
+        {
         }
     }
 }
