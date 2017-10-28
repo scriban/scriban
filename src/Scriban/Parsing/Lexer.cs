@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -19,12 +19,14 @@ namespace Scriban.Parsing
         private Token _token;
         private char c;
         private BlockType _blockType;
+        private bool _isLiquidTagBlock;
         private List<LogMessage> _errors;
         private int _openBraceCount;
         private int _escapeRawCharCount;
         private bool _isExpectingFrontMatter;
+        private readonly bool _isLiquid;
 
-        private const char StripWhiteSpaceSpecialChar = '~';
+        private readonly char _stripWhiteSpaceSpecialChar;
         private const char RawEscapeSpecialChar = '%';
 
         /// <summary>
@@ -65,6 +67,8 @@ namespace Scriban.Parsing
 
             _isExpectingFrontMatter = Options.Mode == ScriptMode.FrontMatterOnly ||
                                      Options.Mode == ScriptMode.FrontMatterAndContent;
+            _isLiquid = Options.Mode == ScriptMode.Liquid;
+            _stripWhiteSpaceSpecialChar = _isLiquid ? '-' : '~';
         }
 
         /// <summary>
@@ -261,14 +265,17 @@ namespace Scriban.Parsing
             {
                 int i = 1;
                 var nc = PeekChar(i);
-                while (nc == RawEscapeSpecialChar)
+                if (!_isLiquid)
                 {
-                    i++;
-                    nc = PeekChar(i);
+                    while (nc == RawEscapeSpecialChar)
+                    {
+                        i++;
+                        nc = PeekChar(i);
+                    }
                 }
-                if (nc == '{')
+                if (nc == '{' || (_isLiquid && nc == '%'))
                 {
-                    if (PeekChar(i + 1) == StripWhiteSpaceSpecialChar)
+                    if (PeekChar(i + 1) == _stripWhiteSpaceSpecialChar)
                     {
                         removePreviousSpaces = true;
                     }
@@ -285,17 +292,24 @@ namespace Scriban.Parsing
 
             NextChar(); // Skip {
 
-            while (c == RawEscapeSpecialChar)
+            if (!_isLiquid)
             {
-                _escapeRawCharCount++;
-                end = end.NextColumn();
-                NextChar();
+                while (c == RawEscapeSpecialChar)
+                {
+                    _escapeRawCharCount++;
+                    end = end.NextColumn();
+                    NextChar();
+                }
             }
 
             end = end.NextColumn();
+            if (_isLiquid && c == '%')
+            {
+                _isLiquidTagBlock = true;
+            }
             NextChar(); // Skip {
 
-            if (c == StripWhiteSpaceSpecialChar)
+            if (c == _stripWhiteSpaceSpecialChar)
             {
                 end = end.NextColumn();
                 NextChar();
@@ -308,7 +322,7 @@ namespace Scriban.Parsing
             else
             {
                 _blockType = BlockType.Code;
-                _token = new Token(TokenType.CodeEnter, start, end);
+                _token = new Token(_isLiquidTagBlock ? TokenType.LiquidTagEnter : TokenType.CodeEnter, start, end);
             }
         }
 
@@ -322,26 +336,29 @@ namespace Scriban.Parsing
 
             // Do we have a ~}} or ~}%}
             int start = 0;
-            if (c == StripWhiteSpaceSpecialChar)
+            if (c == _stripWhiteSpaceSpecialChar)
             {
                 start = 1;
             }
 
-            // Do we have a regular 
-            if (PeekChar(start) != '}')
+            // Check for either }} or ( %} if liquid active)
+            if (PeekChar(start) != (_isLiquidTagBlock? '%' : '}'))
             {
                 return false;
             }
 
             start++;
-            for (int i = 0; i < _escapeRawCharCount; i++)
+            if (!_isLiquid)
             {
-                if (PeekChar(i + start) != RawEscapeSpecialChar)
+                for (int i = 0; i < _escapeRawCharCount; i++)
                 {
-                    return false;
+                    if (PeekChar(i + start) != RawEscapeSpecialChar)
+                    {
+                        return false;
+                    }
                 }
             }
-            
+
             return PeekChar(_escapeRawCharCount + start) == '}';
         }
 
@@ -350,16 +367,19 @@ namespace Scriban.Parsing
             var start = _position;
 
             var shouldSkipSpacesAfterExit = false;
-            if (c == StripWhiteSpaceSpecialChar)
+            if (c == _stripWhiteSpaceSpecialChar)
             {
                 shouldSkipSpacesAfterExit = true;
                 NextChar();
             }
 
-            NextChar();  // skip }
-            for (int i = 0; i < _escapeRawCharCount; i++)
+            NextChar();  // skip } or %
+            if (!_isLiquid)
             {
-                NextChar(); // skip !
+                for (int i = 0; i < _escapeRawCharCount; i++)
+                {
+                    NextChar(); // skip !
+                }
             }
             var end = _position;
             NextChar(); // skip }
@@ -370,7 +390,7 @@ namespace Scriban.Parsing
             }
             else
             {
-                _token = new Token(TokenType.CodeExit, start, end);
+                _token = new Token(_isLiquidTagBlock ? TokenType.LiquidTagExit : TokenType.CodeExit, start, end);
             }
 
             // Eat spaces after an exit
@@ -379,6 +399,7 @@ namespace Scriban.Parsing
                 ConsumeWhitespace(false);
             }
 
+            _isLiquidTagBlock = false;
             _blockType = BlockType.Raw;
         }
 
@@ -462,10 +483,18 @@ namespace Scriban.Parsing
                     ConsumeWhitespace(false);
                     break;
                 case ';':
-                    _token = new Token(TokenType.SemiColon, start, _position);
-                    NextChar();
-                    // consume all remaining space including new lines
-                    ConsumeWhitespace(false);
+                    if (_isLiquid)
+                    {
+                        _token = new Token(TokenType.Invalid, _position, _position);
+                        NextChar();
+                    }
+                    else
+                    {
+                        _token = new Token(TokenType.SemiColon, start, _position);
+                        NextChar();
+                        // consume all remaining space including new lines
+                        ConsumeWhitespace(false);
+                    }
                     break;
                 case '\r':
                     NextChar();
@@ -488,11 +517,11 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '@':
-                    _token = new Token(TokenType.Arroba, start, start);
+                    _token = _isLiquid ? new Token(TokenType.Invalid, _position, _position) : new Token(TokenType.Arroba, start, start);
                     NextChar();
                     break;
                 case '^':
-                    _token = new Token(TokenType.Caret, start, start);
+                    _token = _isLiquid ? new Token(TokenType.Invalid, _position, _position) : new Token(TokenType.Caret, start, start);
                     NextChar();
                     break;
                 case '*':
@@ -678,14 +707,30 @@ namespace Scriban.Parsing
                     }
                     break;
                 case '#':
-                    ReadComment();
+                    if (_isLiquid)
+                    {
+                        _token = new Token(TokenType.Invalid, _position, _position);
+                        NextChar();
+                    }
+                    else
+                    {
+                        ReadComment();
+                    }
                     break;
                 case '"':
                 case '\'':
                     ReadString();
                     break;
                 case '`':
-                    ReadVerbatimString();
+                    if (_isLiquid)
+                    {
+                        _token = new Token(TokenType.Invalid, _position, _position);
+                        NextChar();
+                    }
+                    else
+                    {
+                        ReadVerbatimString();
+                    }
                     break;
                 case '\0':
                     _token = Token.Eof;
@@ -699,7 +744,7 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    bool specialIdentifier = c == '$';
+                    bool specialIdentifier = !_isLiquid && c == '$';
                     if (IsFirstIdentifierLetter(c) || specialIdentifier)
                     {
                         ReadIdentifier(specialIdentifier);

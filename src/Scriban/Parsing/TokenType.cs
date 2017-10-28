@@ -15,8 +15,14 @@ namespace Scriban.Parsing
         [TokenText("{{")]
         CodeEnter,
 
+        [TokenText("{%")]
+        LiquidTagEnter,
+
         [TokenText("}}")]
         CodeExit,
+
+        [TokenText("%}")]
+        LiquidTagExit,
 
         Raw,
 

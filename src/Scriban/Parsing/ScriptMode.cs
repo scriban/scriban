@@ -9,9 +9,14 @@ namespace Scriban.Parsing
     public enum ScriptMode
     {
         /// <summary>
-        /// The template contains a regular content (text and script mixed).
+        /// The template contains a regular scriban content (text and script mixed).
         /// </summary>
         Default,
+
+        /// <summary>
+        /// The template contains a liquid content (text and script mixed).
+        /// </summary>
+        Liquid,
 
         /// <summary>
         /// The template contains a scriban frontmatter (script only) and the parser will parse only this part.
