@@ -263,6 +263,8 @@
     <Content Include="TestFiles\400-builtins\420-math.txt" />
     <Content Include="TestFiles\400-builtins\410-array.out.txt" />
     <Content Include="TestFiles\400-builtins\410-array.txt" />
+    <Content Include="TestFiles\500-liquid\500-liquid-variables.out.txt" />
+    <Content Include="TestFiles\500-liquid\500-liquid-variables.txt" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

@@ -1,0 +1,4 @@
+{% assign variable = 1 %}
+variable: {{ variable }}
+page.title: {{ page.title }}
+user.name: {{ user.name }}

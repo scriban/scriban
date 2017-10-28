@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -216,7 +216,15 @@ end
             Assert.True(File.Exists(expectedOutputFile), $"Expecting output result file [{expectedOutputFile}] for input file [{inputName}]");
             var expectedOutputText = File.ReadAllText(expectedOutputFile, Encoding.UTF8);
 
-            var template = Template.Parse(inputText, "text");
+
+            var isLiquid = inputName.Contains("liquid");
+
+            var lexerOptions = new LexerOptions()
+            {
+                Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default
+            };
+
+            var template = Template.Parse(inputText, "text", lexerOptions: lexerOptions);
 
             var result = string.Empty;
 
@@ -239,7 +247,21 @@ end
 
                 try
                 {
-                    result = template.Render();
+                    object model = null;
+
+                    // Setup a default liquid context for the tests, as we can't create object/array in liquid directly
+                    if (isLiquid)
+                    {
+                        var liquidContext = new ScriptObject
+                        {
+                            ["page"] = new ScriptObject {["title"] = "This is a title"},
+                            ["user"] = new ScriptObject {["name"] = "John"},
+                            ["product"] = new ScriptObject {["title"] = "Orange Hello World", ["type"] = "fruit"}
+                        };
+                        model = liquidContext;
+                    }
+
+                    result = template.Render(model);
                 }
                 catch (ScriptRuntimeException exception)
                 {

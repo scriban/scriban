@@ -1,0 +1,4 @@
+
+variable: 1
+page.title: This is a title
+user.name: John
