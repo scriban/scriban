@@ -23,11 +23,20 @@ namespace Scriban.Syntax
         /// </summary>
         public ScriptExpression Condition { get; set; }
 
+        /// <summary>
+        /// Gets or sets a boolean indicating that the result of the condition is inverted
+        /// </summary>
+        public bool InvertCondition { get; set; }
+
         public ScriptBlockStatement Then { get; set; }
 
         public override object Evaluate(TemplateContext context)
         {
             var conditionValue = context.ToBool(context.Evaluate(Condition));
+            if (InvertCondition)
+            {
+                conditionValue = !conditionValue;
+            }
             if (conditionValue)
             {
                 return context.Evaluate(Then);
