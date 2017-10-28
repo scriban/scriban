@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -20,6 +20,12 @@ namespace Scriban.Functions
         {
             // We need to handle "slice"/"truncate" differently as we have an optional parameters
             this.SetValue("slice", new DelegateCustomFunction(Slice), true);
+        }
+
+        public static int Size(string text)
+        {
+            if (text == null) return 0;
+            return text.Length;
         }
 
         public static string Append(string toAppend, string text)

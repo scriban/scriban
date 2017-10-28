@@ -1,6 +1,8 @@
 List of all the builtin <array> functions:
  add
  add_range
+ compact
+ concat
  first
  insert_at
  join
@@ -13,11 +15,16 @@ List of all the builtin <array> functions:
  uniq
 
 List of all the builtin <math> functions:
+ abs
  ceil
  floor
  format
  is_number
+ minus
+ modulo
+ plus
  round
+ times
 
 List of all the builtin <string> functions:
  append
@@ -38,6 +45,7 @@ List of all the builtin <string> functions:
  rstrip
  sha1
  sha256
+ size
  slice
  split
  starts_with

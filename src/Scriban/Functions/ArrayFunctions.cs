@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -42,6 +42,58 @@ namespace Scriban.Functions
         public static IEnumerable Uniq(IEnumerable iterator)
         {
             return iterator?.Cast<object>().Distinct();
+        }
+
+
+        /// <summary>
+        /// Removes any non-null values from the input list
+        /// </summary>
+        /// <param name="list">An input list</param>
+        /// <returns>Returns a list with null value removed</returns>
+        public static ScriptArray Compact(IEnumerable list)
+        {
+            if (list == null)
+            {
+                return null;
+            }
+
+            var result = new ScriptArray();
+            foreach (var item in list)
+            {
+                if (item != null)
+                {
+                    result.Add(item);
+                }
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Concats the two arrays into another array
+        /// </summary>
+        /// <param name="list1">An input list</param>
+        /// <param name="list2">An input list</param>
+        /// <returns>The concatenation of the </returns>
+        public static object Concat(IEnumerable list1, IEnumerable list2)
+        {
+            if (list1 == null && list2 == null)
+            {
+                return null;
+            }
+            if (list1 == null)
+            {
+                return list2;
+            }
+
+            if (list2 == null)
+            {
+                return list1;
+            }
+
+            var result = new ScriptArray();
+            foreach (var item in list2) result.Add(item);
+            foreach (var item in list1) result.Add(item);
+            return result;
         }
 
         public static int Size(IEnumerable list)
