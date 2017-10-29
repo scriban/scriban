@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -29,6 +29,42 @@ namespace Scriban.Tests
                 Token.Eof
             }, tokens);
             Assert.AreEqual(text, tokens[0].GetText(text));
+        }
+
+        [Test]
+        public void ParseLiquidComment()
+        {
+            var innerString = "This is a comment";
+            var text = "{% comment %}" + innerString + "{% endcomment %}";
+
+            var startInner = text.IndexOf(innerString, StringComparison.Ordinal);
+            var endInner = startInner + innerString.Length - 1;
+
+            var tokens = ParseTokens(text, true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.CommentMulti, new TextPosition(startInner,0, startInner), new TextPosition(endInner,0, endInner)),
+                Token.Eof
+            }, tokens);
+            Assert.AreEqual(innerString, tokens[0].GetText(text));
+        }
+
+        [Test]
+        public void ParseLiquidRaw()
+        {
+            var innerString = "This is a raw";
+            var text = "{% raw %}" + innerString + "{% endraw %}";
+
+            var startInner = text.IndexOf(innerString, StringComparison.Ordinal);
+            var endInner = startInner + innerString.Length - 1;
+
+            var tokens = ParseTokens(text, true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.Raw, new TextPosition(startInner,0, startInner), new TextPosition(endInner,0, endInner)),
+                Token.Eof
+            }, tokens);
+            Assert.AreEqual(innerString, tokens[0].GetText(text));
         }
 
         [Test]
@@ -383,9 +419,9 @@ end}}This is a test";
             }
         }
 
-        private List<Token> ParseTokens(string text)
+        private List<Token> ParseTokens(string text, bool isLiquid = false)
         {
-            var lexer = new Lexer(text);
+            var lexer = new Lexer(text, options: new LexerOptions() { Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default});
             foreach (var error in lexer.Errors)
             {
                 Console.WriteLine(error);

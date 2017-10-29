@@ -136,7 +136,7 @@ namespace Scriban.Parsing
                         if (IsCodeEnterOrEscape(out skipPreviousSpaces))
                         {
                             ReadCodeEnterOrEscape();
-                            if (_blockType == BlockType.Code)
+                            if (_blockType == BlockType.Code || _blockType == BlockType.Raw)
                             {
                                 return true;
                             }
@@ -328,9 +328,123 @@ namespace Scriban.Parsing
             }
             else
             {
+                if (_isLiquid && _isLiquidTagBlock)
+                {
+                    if (TryReadLiquidCommentOrRaw())
+                    {
+                        return;
+                    }
+                }
                 _blockType = BlockType.Code;
                 _token = new Token(_isLiquidTagBlock ? TokenType.LiquidTagEnter : TokenType.CodeEnter, start, end);
             }
+        }
+
+        private bool TryReadLiquidCommentOrRaw()
+        {
+            var start = _position;
+            int offset = 0;
+            PeekSkipSpaces(ref offset);
+            bool isComment;
+            if ((isComment = TryMatchPeek("comment", offset, out offset)) || TryMatchPeek("raw", offset, out offset))
+            {
+                PeekSkipSpaces(ref offset);
+                if (TryMatchPeek("%}", offset, out offset))
+                {
+                    start = new TextPosition(start.Offset + offset, start.Line, start.Column + offset);
+                    // Reinitialize the position to the prior character
+                    _position = new TextPosition(start.Offset - 1, start.Line, start.Column - 1);
+                    c = '}';
+                    while (true)
+                    {
+                        var end = _position;
+                        NextChar();
+                        if (c == '{')
+                        {
+                            NextChar();
+                            if (c == '%')
+                            {
+                                NextChar();
+                                SkipSpaces();
+
+                                if (TryMatch(isComment ? "endcomment" : "endraw"))
+                                {
+                                    SkipSpaces();
+                                    if (c == '%')
+                                    {
+                                        NextChar();
+                                        if (c == '}')
+                                        {
+                                            NextChar(); // Skip }
+                                            _blockType = BlockType.Raw;
+                                            _token = new Token(isComment ? TokenType.CommentMulti : TokenType.Raw, start, end);
+                                            return true;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (c == 0)
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+            return false;
+        }
+
+
+        private void SkipSpaces()
+        {
+            while (IsWhitespace(c))
+            {
+                NextChar();
+            }
+        }
+
+        private void PeekSkipSpaces(ref int i)
+        {
+            while (true)
+            {
+                var nc = PeekChar(i);
+                if (nc == ' ' || nc == '\t')
+                {
+                    i++;
+                }
+                else
+                {
+                    break;
+                }
+            }
+        }
+
+
+        private bool TryMatchPeek(string text, int offset, out int offsetOut)
+        {
+            offsetOut = offset;
+            for (int index = 0; index < text.Length; offset++, index++)
+            {
+                if (PeekChar(offset) != text[index])
+                {
+                    return false;
+                }
+            }
+            offsetOut = offset;
+            return true;
+        }
+
+        private bool TryMatch(string text)
+        {
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (c != text[i])
+                {
+                    return false;
+                }
+                NextChar();
+            }
+            return true;
         }
 
         private bool IsCodeExit()
@@ -1253,6 +1367,11 @@ namespace Scriban.Parsing
             c = Text.Length > 0 ? Text[Options.StartPosition.Offset] : '\0';
             _position = Options.StartPosition;
             _errors = null;
+        }
+
+        private static bool IsWhitespace(char c)
+        {
+            return c == ' ' || c == '\t';
         }
 
         /// <summary>
