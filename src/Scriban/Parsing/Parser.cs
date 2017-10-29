@@ -187,6 +187,7 @@ namespace Scriban.Parsing
                     break;
 
                 case TokenType.Raw:
+                case TokenType.RawEscape:
                     statement = ParseRawStatement();
                     break;
 
@@ -734,6 +735,7 @@ namespace Scriban.Parsing
         {
             var scriptStatement = Open<ScriptRawStatement>();
             scriptStatement.Text = _lexer.Text;
+            scriptStatement.IsEscape = Current.Type == TokenType.RawEscape;
             NextToken(); // Skip raw
             return Close(scriptStatement);
         }

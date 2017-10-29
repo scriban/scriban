@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Scriban.Helpers;
@@ -146,7 +147,7 @@ namespace Scriban.Parsing
                             _blockType = BlockType.Code;
                             return true;
                         }
-
+                        Debug.Assert(_blockType == BlockType.Raw || _blockType == BlockType.RawEscape);
                         // Else we have a BlockType.EscapeRaw, so we need to parse the raw block
                     }
 
@@ -377,7 +378,7 @@ namespace Scriban.Parsing
                                         {
                                             NextChar(); // Skip }
                                             _blockType = BlockType.Raw;
-                                            _token = new Token(isComment ? TokenType.CommentMulti : TokenType.Raw, start, end);
+                                            _token = new Token(isComment ? TokenType.CommentMulti : TokenType.RawEscape, start, end);
                                             return true;
                                         }
                                     }
@@ -580,7 +581,9 @@ namespace Scriban.Parsing
                 }
             }
 
-            _token = new Token(TokenType.Raw, start, nextCodeEnterOrEscapeExit ? end : _position);
+            Debug.Assert(_blockType == BlockType.Raw || _blockType == BlockType.RawEscape);
+
+            _token = new Token(_blockType == BlockType.RawEscape ? TokenType.RawEscape : TokenType.Raw, start, nextCodeEnterOrEscapeExit ? end : _position);
 
             // Go to eof
             if (!nextCodeEnterOrEscapeExit)

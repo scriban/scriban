@@ -26,6 +26,8 @@ namespace Scriban.Parsing
 
         Raw,
 
+        RawEscape,
+
         NewLine,
 
         Comment,

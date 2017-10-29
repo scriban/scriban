@@ -9,6 +9,8 @@ namespace Scriban.Syntax
     {
         public string Text { get; set; }
 
+        public bool IsEscape { get; set; }
+
         public override object Evaluate(TemplateContext context)
         {
             if (Text == null) return null;
