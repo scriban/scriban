@@ -7,6 +7,7 @@ using System.Collections;
 using System.Reflection;
 using System.Collections.Generic;
 using System.Text;
+using Scriban.Functions;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
@@ -67,6 +68,27 @@ namespace Scriban.Syntax
                             return newList;
                         }
                         break;
+
+                    case ScriptBinaryOperator.LiquidHasKey:
+                    {
+                        var leftDict = leftValue as IDictionary<string, object>;
+                        if (leftDict != null)
+                        {
+                            return ObjectFunctions.HasKey(context.ToString(Span, rightValue), leftDict);
+                        }
+                    }
+                        break;
+
+                    case ScriptBinaryOperator.LiquidHasValue:
+                    {
+                        var leftDict = leftValue as IDictionary<string, object>;
+                        if (leftDict != null)
+                        {
+                            return ObjectFunctions.HasValue(context.ToString(Span, rightValue), leftDict);
+                        }
+                    }
+                        break;
+
                     case ScriptBinaryOperator.CompareEqual:
                     case ScriptBinaryOperator.CompareNotEqual:
                     case ScriptBinaryOperator.CompareGreater:
@@ -81,12 +103,15 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.Modulus:
                     case ScriptBinaryOperator.RangeInclude:
                     case ScriptBinaryOperator.RangeExclude:
+                    case ScriptBinaryOperator.LiquidContains:
+                    case ScriptBinaryOperator.LiquidStartsWith:
+                    case ScriptBinaryOperator.LiquidEndsWith:
                         var leftType = leftValue?.GetType();
                         var rightType = rightValue?.GetType();
 
                         if (leftValue is string || rightValue is string)
                         {
-                            return CalculateToString(context, leftValue, rightValue);
+                            return CalculateToString(context, Span, Operator, leftValue, rightValue);
                         }
                         else
                         {
@@ -103,12 +128,12 @@ namespace Scriban.Syntax
             return $"{Left} {Operator.ToText()} {Right}";
         }
 
-        private object CalculateToString(TemplateContext context, object left, object right)
+        private static object CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object left, object right)
         {
-            switch (Operator)
+            switch (op)
             {
                 case ScriptBinaryOperator.Add:
-                    return context.ToString(Span, left) + context.ToString(Span, right);
+                    return context.ToString(span, left) + context.ToString(span, right);
                 case ScriptBinaryOperator.Multiply:
                     if (right is int)
                     {
@@ -119,7 +144,7 @@ namespace Scriban.Syntax
 
                     if (left is int)
                     {
-                        var rightText = context.ToString(Span, right);
+                        var rightText = context.ToString(span, right);
                         var builder = new StringBuilder();
                         for (int i = 0; i < (int) left; i++)
                         {
@@ -127,23 +152,30 @@ namespace Scriban.Syntax
                         }
                         return builder.ToString();
                     }
-                    throw new ScriptRuntimeException(Span, $"Operator [{Operator.ToText()}] is not supported for the expression [{this}]. Only working on string x int or int x string"); // unit test: 112-binary-string-error1.txt
+                    throw new ScriptRuntimeException(span, $"Operator [{op.ToText()}] is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1.txt
                 case ScriptBinaryOperator.CompareEqual:
-                    return context.ToString(Span, left) == context.ToString(Span, right);
+                    return context.ToString(span, left) == context.ToString(span, right);
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return context.ToString(Span, left) != context.ToString(Span, right);
+                    return context.ToString(span, left) != context.ToString(span, right);
                 case ScriptBinaryOperator.CompareGreater:
-                    return context.ToString(Span, left).CompareTo(context.ToString(Span, right)) > 0;
+                    return context.ToString(span, left).CompareTo(context.ToString(span, right)) > 0;
                 case ScriptBinaryOperator.CompareLess:
-                    return context.ToString(Span, left).CompareTo(context.ToString(Span, right)) < 0;
+                    return context.ToString(span, left).CompareTo(context.ToString(span, right)) < 0;
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return context.ToString(Span, left).CompareTo(context.ToString(Span, right)) >= 0;
+                    return context.ToString(span, left).CompareTo(context.ToString(span, right)) >= 0;
                 case ScriptBinaryOperator.CompareLessOrEqual:
-                    return context.ToString(Span, left).CompareTo(context.ToString(Span, right)) <= 0;
+                    return context.ToString(span, left).CompareTo(context.ToString(span, right)) <= 0;
+
+                case ScriptBinaryOperator.LiquidContains:
+                    return context.ToString(span, left).Contains(context.ToString(span, right));
+                case ScriptBinaryOperator.LiquidStartsWith:
+                    return context.ToString(span, left).StartsWith(context.ToString(span, right));
+                case ScriptBinaryOperator.LiquidEndsWith:
+                    return context.ToString(span, left).EndsWith(context.ToString(span, right));
             }
 
             // unit test: 150-range-expression-error1.out.txt
-            throw new ScriptRuntimeException(Span, $"Operator [{Operator.ToText()}] is not supported on string objects"); // unit test: 112-binary-string-error2.txt
+            throw new ScriptRuntimeException(span, $"Operator [{op.ToText()}] is not supported on string objects"); // unit test: 112-binary-string-error2.txt
         }
 
         private static IEnumerable<int> RangeInclude(int left, int right)

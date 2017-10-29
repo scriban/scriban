@@ -1,0 +1,27 @@
+
+
+  This is a variable with 1
+
+
+
+  This is a variable with 4
+
+
+  This is a variable with 2 or 4
+
+
+  This is true with a variable with 4
+
+
+  This page has a key "title"
+
+
+
+  This page title `This is a title` contains "This is"
+
+
+  This page title `This is a title` starts with "This is"
+
+
+  This page title `This is a title` ends with "a title"
+

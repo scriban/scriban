@@ -1,0 +1,12 @@
+{% assign variable = 1 %}
+{% unless variable == 1 %}
+  This is not a variable with 1
+{% endunless %}
+{% unless variable != 1 %}
+  This is a variable with 1
+{% endunless %}
+{% unless variable == 0 %}
+  This is not a variable with 0
+{% else %}
+  This is variable with 0
+{% endunless %}

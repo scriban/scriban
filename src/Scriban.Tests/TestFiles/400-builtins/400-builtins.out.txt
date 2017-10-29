@@ -79,6 +79,8 @@ List of all the builtin <timespan> functions:
  zero
 
 List of all the builtin <object> functions:
+ has_key
+ has_value
  keys
  typeof
  values

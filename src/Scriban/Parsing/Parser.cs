@@ -170,10 +170,6 @@ namespace Scriban.Parsing
             hasEnd = false;
             bool nextStatement = true;
             statement = null;
-            if (HasErrors)
-            {
-                return false;
-            }
 
             continueParsing:
             switch (Current.Type)
@@ -387,84 +383,116 @@ namespace Scriban.Parsing
             }
         }
 
+
+        private void CheckInTagSection()
+        {
+            if (!_isLiquidTagSection)
+            {
+                LogError(Current, "Expecting the expression to be in a tag section `{% ... %}`");
+            }
+        }
+
         private void ReadLiquidStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
             var currentCondition = PeekCurrentBlock<ScriptConditionStatement>();
-            bool isExpectedInTagSection = true;
+            bool isNotExpectedInTagSection = true;
+            var localToken = Current;
             switch (identifier)
             {
                 case "endif":
+                    CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
                     if (currentCondition == null)
                     {
-                        LogError($"The <endif> is expecting a if/else previous block statement");
+                        LogError($"Unable to find a pending `if`/`else` for this `endif`");
                     }
                     NextToken();
                     break;
                 case "endunless":
+                    CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
-                    // Expecting a unless opening
-                    if (!(currentCondition is ScriptIfStatement) || !((ScriptIfStatement)currentCondition).InvertCondition)
+
+                    bool foundUnless = false;
+                    foreach (var node in Blocks)
                     {
-                        LogError($"The <endunless> is expecting a unless previous block statement");
+                        // Expecting a unless opening
+                        if (node is ScriptIfStatement && ((ScriptIfStatement)node).InvertCondition)
+                        {
+                            foundUnless = true;
+                            break;
+                        }
+                    }
+
+                    // Expecting a unless opening
+                    if (!foundUnless)
+                    {
+                        LogError($"Unable to find a pending `unless` for this `endunless`");
                     }
                     NextToken();
                     break;
 
                 case "endfor":
+                    CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
                     var currentFor = PeekCurrentBlock<ScriptForStatement>();
                     // Expecting a for opening
                     if (currentFor == null)
                     {
-                        LogError($"The <unless> is expecting a if/else previous block statement");
+                        LogError($"Unable to find a pending `for` for this `endfor`");
                     }
                     NextToken();
                     break;
 
                 case "endcase":
+                    CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
                     var currentCase = PeekCurrentBlock<ScriptConditionStatement>();
                     // Expecting a for opening
                     if (currentCase == null)
                     {
-                        LogError($"The <endcase> is expecting a `case` previous block statement");
+                        LogError($"Unable to find a pending `case` for this `endcase`");
                     }
                     NextToken();
                     break;
 
                 case "endcapture":
+                    CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
                     var capture = PeekCurrentBlock<ScriptCaptureStatement>();
                     // Expecting a for opening
                     if (capture == null)
                     {
-                        LogError($"The <endcapture> is expecting a `capture` previous block statement");
+                        LogError($"Unable to find a pending `capture` for this `endcapture`");
                     }
                     NextToken();
                     break;
 
                 case "case":
+                    CheckInTagSection();
                     // TODO
                     throw new NotImplementedException();
 
                 case "when":
+                    CheckInTagSection();
                     // TODO
                     throw new NotImplementedException();
 
                 case "if":
+                    CheckInTagSection();
                     statement = ParseIfStatement(false);
                     break;
                 case "unless":
+                    CheckInTagSection();
                     statement = ParseIfStatement(true);
                     break;
                 case "else":
                 case "elsif":
+                    CheckInTagSection();
                     var parentCondition = parent as ScriptConditionStatement;
                     if (parentCondition == null)
                     {
@@ -481,9 +509,11 @@ namespace Scriban.Parsing
                     }
                     break;
                 case "for":
+                    CheckInTagSection();
                     statement = ParseForStatement();
                     break;
                 case "break":
+                    CheckInTagSection();
                     statement = Open<ScriptBreakStatement>();
                     NextToken();
                     Close(statement);
@@ -491,6 +521,7 @@ namespace Scriban.Parsing
                     ExpectEndOfStatement(statement);
                     break;
                 case "continue":
+                    CheckInTagSection();
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
                     Close(statement);
@@ -498,6 +529,8 @@ namespace Scriban.Parsing
                     ExpectEndOfStatement(statement);
                     break;
                 case "assign":
+                {
+                    CheckInTagSection();
                     NextToken(); // skip assign
                     var token = _token;
                     // Try to parse an expression
@@ -508,31 +541,41 @@ namespace Scriban.Parsing
                         LogError(token, "Expecting an assign expression: <variable> = <expression>");
                     }
                     statement = expressionStatement;
+                }
                     break;
 
                 case "capture":
+                    CheckInTagSection();
                     statement = ParseCaptureStatement();
                     break;
 
                 case "increment":
+                    CheckInTagSection();
                     statement = ParseIncDecStatement(false);
                     break;
 
                 case "decrement":
+                    CheckInTagSection();
                     statement = ParseIncDecStatement(true);
                     break;
 
                 default:
-                    isExpectedInTagSection = false;
+                {
                     // Otherwise it is an expression statement
-                    statement = ParseExpressionStatement();
+                    if (_isLiquidTagSection)
+                    {
+                        LogError(Current, $"Expecting the expression `{GetAsText(Current)}` to be in an object section `{{{{ ... }}}}`");
+                    }
+                    var expressionStatement = ParseExpressionStatement();
+                    statement = expressionStatement;
+                    if (!(expressionStatement.Expression is ScriptVariablePath))
+                    {
+                        LogError(statement, $"Only variable/member expressions are supported");
+                    }
+                }
                     break;
             }
 
-            if (isExpectedInTagSection && !_isLiquidTagSection)
-            {
-                LogError(Current, "Expecting the following expression to be in a tag section `{% ... %}`");
-            }
         }
 
         private T PeekCurrentBlock<T>() where T : ScriptNode
@@ -847,13 +890,21 @@ namespace Scriban.Parsing
                 }
             }
 
-            if (!HasErrors && !hasEnd)
+            if (!hasEnd)
             {
                 // If there are any end block not matching, we have an error
                 if (_blockLevel > 1)
                 {
-                    // unit test: 201-if-else-error2.txt
-                    LogError(parentStatement, GetSpanForToken(Previous), $"The <end> statement was not found");
+                    if (_isLiquid)
+                    {
+                        var syntax = ScriptSyntaxAttribute.Get(parentStatement);
+                        LogError(parentStatement, parentStatement.Span, $"The `end{syntax.Name}` was not found");
+                    }
+                    else
+                    {
+                        // unit test: 201-if-else-error2.txt
+                        LogError(parentStatement, GetSpanForToken(Previous), $"The <end> statement was not found");
+                    }
                 }
             }
 

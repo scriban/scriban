@@ -265,6 +265,12 @@
     <Content Include="TestFiles\400-builtins\410-array.txt" />
     <Content Include="TestFiles\500-liquid\500-liquid-variables.out.txt" />
     <Content Include="TestFiles\500-liquid\500-liquid-variables.txt" />
+    <Content Include="TestFiles\500-liquid\510-liquid-statement-if-error1.out.txt" />
+    <Content Include="TestFiles\500-liquid\510-liquid-statement-if-error1.txt" />
+    <Content Include="TestFiles\500-liquid\511-liquid-statement-unless.out.txt" />
+    <Content Include="TestFiles\500-liquid\511-liquid-statement-unless.txt" />
+    <Content Include="TestFiles\500-liquid\510-liquid-statement-if.out.txt" />
+    <Content Include="TestFiles\500-liquid\510-liquid-statement-if.txt" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{82A7F48D-3B50-4B1E-B82E-3ADA8210C358}" />

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System.Collections;
@@ -14,7 +14,26 @@ namespace Scriban.Functions
     /// </summary>
     public class ObjectFunctions : ScriptObject
     {
-        public new static IEnumerable<object> Keys(IDictionary<string, object> dictionary)
+        public static bool HasKey(string key, IDictionary<string, object> dictionary)
+        {
+            if (dictionary == null || key == null)
+            {
+                return false;
+            }
+
+            return dictionary.ContainsKey(key);
+        }
+
+        public static bool HasValue(string key, IDictionary<string, object> dictionary)
+        {
+            if (dictionary == null || key == null)
+            {
+                return false;
+            }
+            return dictionary.ContainsKey(key) && dictionary[key] != null;
+        }
+
+        public static IEnumerable<object> Keys(IDictionary<string, object> dictionary)
         {
             if (dictionary == null)
             {
