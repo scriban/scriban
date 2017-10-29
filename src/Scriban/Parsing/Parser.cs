@@ -25,6 +25,7 @@ namespace Scriban.Parsing
         private int _blockLevel;
         private bool _inFrontMatter;
         private bool _isStatementDepthLimitReached;
+        private bool _hasFatalError;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -172,6 +173,12 @@ namespace Scriban.Parsing
             statement = null;
 
             continueParsing:
+
+            if (_hasFatalError)
+            {
+                return false;
+            }
+
             switch (Current.Type)
             {
                 case TokenType.Eof:
@@ -568,9 +575,9 @@ namespace Scriban.Parsing
                     }
                     var expressionStatement = ParseExpressionStatement();
                     statement = expressionStatement;
-                    if (!(expressionStatement.Expression is ScriptVariablePath))
+                    if (expressionStatement.Expression is ScriptAssignExpression)
                     {
-                        LogError(statement, $"Only variable/member expressions are supported");
+                        LogError(statement, $"Assignment expression is not allowed");
                     }
                 }
                     break;
@@ -681,7 +688,8 @@ namespace Scriban.Parsing
             {
                 return true;
             }
-            LogError(statement, $"Expecting <EOL>/end of line after");
+            // If we are not finding an end of statement, log a fatal error
+            LogError(statement, $"Invalid token found `{GetAsText(Current)}`. Expecting <EOL>/end of line after", true);
             return false;
         }
 
@@ -1004,14 +1012,14 @@ namespace Scriban.Parsing
                    (tokenType == TokenType.NewLine && allowNewLineLevel > 0);
         }
 
-        private void LogError(string text)
+        private void LogError(string text, bool isFatal = false)
         {
-            LogError(Current, text);
+            LogError(Current, text, isFatal);
         }
 
-        private void LogError(Token tokenArg, string text)
+        private void LogError(Token tokenArg, string text, bool isFatal = false)
         {
-            LogError(GetSpanForToken(tokenArg), text);
+            LogError(GetSpanForToken(tokenArg), text, isFatal);
         }
 
         private SourceSpan GetSpanForToken(Token tokenArg)
@@ -1019,17 +1027,17 @@ namespace Scriban.Parsing
             return new SourceSpan(_lexer.SourcePath, tokenArg.Start, tokenArg.End);
         }
 
-        private void LogError(SourceSpan span, string text)
+        private void LogError(SourceSpan span, string text, bool isFatal = false)
         {
-            Log(new LogMessage(ParserMessageType.Error, span, text));
+            Log(new LogMessage(ParserMessageType.Error, span, text), isFatal);
         }
 
-        private void LogError(ScriptNode node, string message)
+        private void LogError(ScriptNode node, string message, bool isFatal = false)
         {
-            LogError(node, node.Span, message);
+            LogError(node, node.Span, message, isFatal);
         }
 
-        private void LogError(ScriptNode node, SourceSpan span, string message)
+        private void LogError(ScriptNode node, SourceSpan span, string message, bool isFatal = false)
         {
             var syntax = ScriptSyntaxAttribute.Get(node);
             string inMessage = " in";
@@ -1037,16 +1045,20 @@ namespace Scriban.Parsing
             {
                 inMessage = string.Empty;
             }
-            LogError(span, $"Error while parsing {syntax.Name}: {message}{inMessage}: {syntax.Example}");
+            LogError(span, $"Error while parsing {syntax.Name}: {message}{inMessage}: {syntax.Example}", isFatal);
         }
 
-        private void Log(LogMessage logMessage)
+        private void Log(LogMessage logMessage, bool isFatal = false)
         {
             if (logMessage == null) throw new ArgumentNullException(nameof(logMessage));
             Messages.Add(logMessage);
             if (logMessage.Type == ParserMessageType.Error)
             {
                 HasErrors = true;
+                if (isFatal)
+                {
+                    _hasFatalError = true;
+                }
             }
         }
 
