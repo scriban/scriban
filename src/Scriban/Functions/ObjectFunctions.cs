@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Scriban.Helpers;
+using Scriban.Parsing;
 using Scriban.Runtime;
 
 namespace Scriban.Functions
@@ -14,6 +15,27 @@ namespace Scriban.Functions
     /// </summary>
     public class ObjectFunctions : ScriptObject
     {
+        public static object Default(object defaultValue, object value)
+        {
+            return value ?? defaultValue;
+        }
+
+        public static int Size(TemplateContext context, SourceSpan span, object value)
+        {
+            if (value is string)
+            {
+                return StringFunctions.Size((string)value);
+            }
+
+            if (value is IEnumerable)
+            {
+                return ArrayFunctions.Size((IEnumerable)value);
+            }
+
+            // Should we throw an exception?
+            return 0;
+        }
+
         public static bool HasKey(string key, IDictionary<string, object> dictionary)
         {
             if (dictionary == null || key == null)

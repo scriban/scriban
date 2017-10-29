@@ -14,147 +14,125 @@ namespace Scriban.Functions
     /// </summary>
     public class LiquidBuiltinsFunctions : ScriptObject
     {
-        public LiquidBuiltinsFunctions()
+        /// <summary>
+        /// This object is readonly, should not be modified by any other objects internally.
+        /// </summary>
+        private static readonly DefaultBuiltins Default = new DefaultBuiltins();
+
+        public LiquidBuiltinsFunctions() : base(50, false)
         {
-            // ReSharper disable CollectionNeverUpdated.Local
-            var math = new MathFunctions();
-            var str = new StringFunctions();
-            var array = new ArrayFunctions();
-            var date = new DateTimeFunctions();
-            var html = new HtmlFunctions();
-            // ReSharper restore CollectionNeverUpdated.Local
-            SetValue("abs", math["abs"], true);
-            SetValue("append", str["append"], true);
-            SetValue("capitalize", str["capitalize"], true);
-            SetValue("ceil", math["ceil"], true);
-            SetValue("compact", array["compact"], true);
-            SetValue("concat", array["concat"], true);
-            SetValue("date", date["parse"], true);
-            SetValue("downcase", str["downcase"], true);
-            SetValue("escape", html["escape"], true);
-            //SetValue("escape_once", html["escape_once"], true);
-            SetValue("first", array["first"], true);
-            SetValue("floor", math["floor"], true);
-            SetValue("join", array["join"], true);
-            SetValue("last", array["last"], true);
-            SetValue("lstrip", str["lstrip"], true);
-            SetValue("map", array["map"], true);
-            SetValue("minus", math["minus"], true);
-            SetValue("modulo", math["modulo"], true);
-            //SetValue("newline_to_br", html["newline_to_br"], true);
-            SetValue("plus", math["plus"], true);
-            SetValue("prepend", str["prepend"], true);
-            SetValue("remove", str["remove"], true);
-            SetValue("remove_first", str["remove_first"], true);
-            SetValue("replace", str["replace"], true);
-            SetValue("replace_first", str["replace_first"], true);
-            SetValue("reverse", array["reverse"], true);
-            SetValue("round", math["round"], true);
-            SetValue("rstrip", str["rstrip"], true);
-            //size: provided by this function
-            SetValue("slice", new DelegateCustomFunction(Slice), true); // Special liquid compatible function
-            SetValue("sort", array["sort"], true);
-            // sort_natural: not supported
-            SetValue("split", str["split"], true);
-            SetValue("strip", str["strip"], true);
-            SetValue("strip_html", html["strip"], true);
-            SetValue("strip_newlines", str["strip_newlines"], true);
-            SetValue("times", math["times"], true);
-            SetValue("truncate", str["truncate"], true);
-            SetValue("truncatewords", str["truncatewords"], true);
-            SetValue("uniq", array["uniq"], true);
+            Default.Clone(false).CopyTo(this);
         }
 
-        public static object Default(object defaultValue, object value)
+        /// <summary>
+        /// Use an internal object to create all default builtins just once to avoid allocations of delegates/IScriptCustomFunction
+        /// </summary>
+        private class DefaultBuiltins : ScriptObject
         {
-            return value ?? defaultValue;
-        }
-
-        public static int Size(TemplateContext context, SourceSpan span, object value)
-        {
-            if (value is string)
+            public DefaultBuiltins() : base(50, false)
             {
-                return StringFunctions.Size((string) value);
+                // ReSharper disable CollectionNeverUpdated.Local
+                var math = (ScriptObject)BuiltinFunctions.Default["math"];
+                var str = (ScriptObject)BuiltinFunctions.Default["string"];
+                var array = (ScriptObject)BuiltinFunctions.Default["array"];
+                var date = (ScriptObject)BuiltinFunctions.Default[DateTimeFunctions.DateVariable.Name];
+                var html = (ScriptObject)BuiltinFunctions.Default["html"];
+                var objs = (ScriptObject)BuiltinFunctions.Default["object"];
+                // ReSharper restore CollectionNeverUpdated.Local
+                SetValue("abs", math["abs"], true);
+                SetValue("append", str["append"], true);
+                SetValue("capitalize", str["capitalize"], true);
+                SetValue("ceil", math["ceil"], true);
+                SetValue("compact", array["compact"], true);
+                SetValue("concat", array["concat"], true);
+                SetValue("date", date["parse"], true);
+                SetValue("default", objs["default"], true);
+                SetValue("divided_by", math["divided_by"], true);
+                SetValue("downcase", str["downcase"], true);
+                SetValue("escape", html["escape"], true);
+                //SetValue("escape_once", html["escape_once"], true);
+                SetValue("first", array["first"], true);
+                SetValue("floor", math["floor"], true);
+                SetValue("join", array["join"], true);
+                SetValue("last", array["last"], true);
+                SetValue("lstrip", str["lstrip"], true);
+                SetValue("map", array["map"], true);
+                SetValue("minus", math["minus"], true);
+                SetValue("modulo", math["modulo"], true);
+                //SetValue("newline_to_br", html["newline_to_br"], true);
+                SetValue("plus", math["plus"], true);
+                SetValue("prepend", str["prepend"], true);
+                SetValue("remove", str["remove"], true);
+                SetValue("remove_first", str["remove_first"], true);
+                SetValue("replace", str["replace"], true);
+                SetValue("replace_first", str["replace_first"], true);
+                SetValue("reverse", array["reverse"], true);
+                SetValue("round", math["round"], true);
+                SetValue("rstrip", str["rstrip"], true);
+                SetValue("size", objs["size"], true);
+                SetValue("slice", new DelegateCustomFunction(Slice), true); // Special liquid compatible function
+                SetValue("sort", array["sort"], true);
+                // sort_natural: not supported
+                SetValue("split", str["split"], true);
+                SetValue("strip", str["strip"], true);
+                SetValue("strip_html", html["strip"], true);
+                SetValue("strip_newlines", str["strip_newlines"], true);
+                SetValue("times", math["times"], true);
+                SetValue("truncate", str["truncate"], true);
+                SetValue("truncatewords", str["truncatewords"], true);
+                SetValue("uniq", array["uniq"], true);
+
+                this.Import(typeof(LiquidBuiltinsFunctions), ScriptMemberImportFlags.All);
             }
 
-            if (value is IEnumerable)
+            // On Liquid: Slice will return 1 character by default, unlike in scriban that returns the rest of the string
+            [ScriptMemberIgnore]
+            private static string Slice(string text, int start, int length = 1)
             {
-                return ArrayFunctions.Size((IEnumerable) value);
-            }
-
-            // Should we throw an exception?
-            return 0;
-        }
-
-        public static object DividedBy(TemplateContext context, SourceSpan span, object right, double left)
-        {
-            var leftType = typeof(double);
-            var rightType = right?.GetType();
-
-            var result = ScriptBinaryExpression.Calculate(context, span, ScriptBinaryOperator.Divide, left, leftType, right, rightType);
-
-            // If the divisor is an integer, return a an integer
-            if (right is int)
-            {
-                if (result is double)
+                if (text == null || start > text.Length)
                 {
-                    return (int)Math.Floor((double) result);
+                    return string.Empty;
                 }
-                if (result is float)
+
+                if (length < 0)
                 {
-                    return (int)Math.Floor((float) result);
+                    length = text.Length - start;
                 }
-            }
-            return result;
-        }
 
-        // On Liquid: Slice will return 1 character by default, unlike in scriban that returns the rest of the string
-        [ScriptMemberIgnore]
-        public static string Slice(string text, int start, int length = 1)
-        {
-            if (text == null || start > text.Length)
-            {
-                return string.Empty;
-            }
+                if (start < 0)
+                {
+                    start = Math.Max(start + text.Length, 0);
+                }
+                var end = start + length;
+                if (end <= start)
+                {
+                    return string.Empty;
+                }
+                if (end > text.Length)
+                {
+                    length = text.Length - start;
+                }
 
-            if (length < 0)
-            {
-                length = text.Length - start;
-            }
-
-            if (start < 0)
-            {
-                start = Math.Max(start + text.Length, 0);
-            }
-            var end = start + length;
-            if (end <= start)
-            {
-                return string.Empty;
-            }
-            if (end > text.Length)
-            {
-                length = text.Length - start;
+                return text.Substring(start, length);
             }
 
-            return text.Substring(start, length);
-        }
-
-        private static object Slice(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
-        {
-            if (parameters.Count < 2 || parameters.Count > 3)
+            private static object Slice(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for slice. Expecting at least 2 parameters <start> <length>? <text>");
-            }
+                if (parameters.Count < 2 || parameters.Count > 3)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for slice. Expecting at least 2 parameters <start> <length>? <text>");
+                }
 
-            var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
-            var start = context.ToInt(callerContext.Span, parameters[0]);
-            var length = 1;
-            if (parameters.Count == 3)
-            {
-                length = context.ToInt(callerContext.Span, parameters[1]);
-            }
+                var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
+                var start = context.ToInt(callerContext.Span, parameters[0]);
+                var length = 1;
+                if (parameters.Count == 3)
+                {
+                    length = context.ToInt(callerContext.Span, parameters[1]);
+                }
 
-            return Slice(text, start, length);
+                return Slice(text, start, length);
+            }
         }
     }
 }

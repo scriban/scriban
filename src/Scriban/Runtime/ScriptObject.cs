@@ -18,22 +18,30 @@ namespace Scriban.Runtime
     /// <seealso cref="System.Collections.IEnumerable" />
     public class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject
     {
-        internal readonly Dictionary<string, InternalValue> Store;
+        internal Dictionary<string, InternalValue> Store { get; private set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptObject"/> class.
         /// </summary>
-        public ScriptObject() : this(true)
+        public ScriptObject() : this(0)
         {
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptObject"/> class.
         /// </summary>
-        /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
-        public ScriptObject(bool autoImportStaticsFromThisType)
+        public ScriptObject(int capacity) : this(capacity, true)
         {
-            Store = new Dictionary<string, InternalValue>();
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptObject"/> class.
+        /// </summary>
+        /// <param name="capacity">Initial capacity of the dictionary</param>
+        /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
+        public ScriptObject(int capacity, bool autoImportStaticsFromThisType)
+        {
+            Store = new Dictionary<string, InternalValue>(capacity);
 
             // Only import if we are asked for and we have a derived type
             if (autoImportStaticsFromThisType || this.GetType() != typeof(ScriptObject))
@@ -235,6 +243,52 @@ namespace Scriban.Runtime
             }
             result.Append("}");
             return result.ToString();
+        }
+
+        public virtual void CopyTo(ScriptObject dest)
+        {
+            if (dest == null) throw new ArgumentNullException(nameof(dest));
+            foreach (var keyPair in Store)
+            {
+                dest.Store[keyPair.Key] = keyPair.Value;
+            }
+        }
+
+        /// <summary>
+        /// Clones the content of this object.
+        /// </summary>
+        /// <param name="deep">If set to <c>true</c> all <see cref="ScriptObject"/> and <see cref="ScriptArray"/> will be cloned and copied recursively</param>
+        public virtual ScriptObject Clone(bool deep)
+        {
+            var toObject = (ScriptObject)MemberwiseClone();
+            toObject.Store = new Dictionary<string, InternalValue>(Store.Count);
+            if (deep)
+            {
+                foreach (var keyPair in Store)
+                {
+                    var value = keyPair.Value.Value;
+                    if (value is ScriptObject)
+                    {
+                        var fromObject = (ScriptObject) value;
+                        value = fromObject.Clone(true);
+                    }
+                    else if (value is ScriptArray)
+                    {
+                        var fromArray = (ScriptArray)value;
+                        value = fromArray.Clone(true);
+                    }
+                    toObject.Store[keyPair.Key] = new InternalValue(value, keyPair.Value.IsReadOnly);
+                }
+
+            }
+            else
+            {
+                foreach (var keyPair in Store)
+                {
+                    toObject.Store[keyPair.Key] = keyPair.Value;
+                }
+            }
+            return toObject;
         }
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()

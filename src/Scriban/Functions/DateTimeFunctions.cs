@@ -175,6 +175,13 @@ namespace Scriban.Functions
             return new DateTime();
         }
 
+        public override ScriptObject Clone(bool deep)
+        {
+            var dateFunctions = (DateTimeFunctions)base.Clone(deep);
+            dateFunctions.Import("to_string", new Func<TemplateContext, string, DateTime, string>((context, pattern, date) => dateFunctions.ToString(date, pattern, context.CurrentCulture)));
+            return dateFunctions;
+        }
+
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>

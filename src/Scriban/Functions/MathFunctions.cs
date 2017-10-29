@@ -19,6 +19,28 @@ namespace Scriban.Functions
             SetValue("round", new DelegateCustomFunction(Round), true);
         }
 
+        public static object DividedBy(TemplateContext context, SourceSpan span, object right, double left)
+        {
+            var leftType = typeof(double);
+            var rightType = right?.GetType();
+
+            var result = ScriptBinaryExpression.Calculate(context, span, ScriptBinaryOperator.Divide, left, leftType, right, rightType);
+
+            // If the divisor is an integer, return a an integer
+            if (right is int)
+            {
+                if (result is double)
+                {
+                    return (int)Math.Floor((double)result);
+                }
+                if (result is float)
+                {
+                    return (int)Math.Floor((float)result);
+                }
+            }
+            return result;
+        }
+
         public static double Abs(double value)
         {
             return Math.Abs(value);

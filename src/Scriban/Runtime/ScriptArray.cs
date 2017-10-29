@@ -15,7 +15,7 @@ namespace Scriban.Runtime
     /// <seealso cref="System.Collections.IList" />
     public class ScriptArray<T> : IList<T>, IList, IScriptObject where T : class
     {
-        private readonly List<T> _values;
+        private List<T> _values;
         private bool _isReadOnly;
 
         // Attached ScriptObject is only created if needed
@@ -67,6 +67,50 @@ namespace Scriban.Runtime
                 }
                 _isReadOnly = value;
             }
+        }
+
+        public virtual ScriptArray Clone(bool deep)
+        {
+            var array = (ScriptArray) MemberwiseClone();
+            array._values = new List<object>(_values.Count);
+            array._script = null;
+            if (deep)
+            {
+                foreach (var value in array._values)
+                {
+                    var fromValue = value;
+                    if (value is ScriptObject)
+                    {
+                        var fromObject = (ScriptObject)value;
+                        fromValue = fromObject.Clone(true);
+                    }
+                    else if (value is ScriptArray)
+                    {
+                        var fromArray = (ScriptArray)value;
+                        var newValue = fromArray.Clone(true);
+                        fromValue = newValue;
+                    }
+                    array._values.Add(fromValue);
+                }
+
+                if (_script != null)
+                {
+                    array._script = _script.Clone(true);
+                }
+            }
+            else
+            {
+                foreach (var value in array._values)
+                {
+                    array._values.Add(value);
+                }
+
+                if (_script != null)
+                {
+                    array._script = _script.Clone(false);
+                }
+            }
+            return array;
         }
 
         public ScriptObject ScriptObject => _script ?? (_script = new ScriptObject() { IsReadOnly = IsReadOnly});

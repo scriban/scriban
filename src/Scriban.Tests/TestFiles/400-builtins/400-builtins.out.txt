@@ -17,6 +17,7 @@ List of all the builtin <array> functions:
 List of all the builtin <math> functions:
  abs
  ceil
+ divided_by
  floor
  format
  is_number
@@ -79,9 +80,11 @@ List of all the builtin <timespan> functions:
  zero
 
 List of all the builtin <object> functions:
+ default
  has_key
  has_value
  keys
+ size
  typeof
  values
 
