@@ -1,10 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Linq;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using Scriban.Functions;
+using Scriban.Runtime;
 
 namespace Scriban.Benchmarks
 {
@@ -16,12 +17,18 @@ namespace Scriban.Benchmarks
         static void Main(string[] args)
         {
             //var program = new BenchRenderers();
-            //var result1 = program.TestScriban();
+            //var clock = Stopwatch.StartNew();
+            //for (int i = 0; i < 1000; i++)
+            //{
+            //    var result1 = program.TestScriban();
+            //}
+            //Console.WriteLine(clock.ElapsedMilliseconds + "ms");
             //var result2 = program.TestDotLiquid();
             //var result3 = program.TestStubble();
             //var result4 = program.TestNustache();
             //var result5 = program.TestHandlebars();
             //var result6 = program.TestCottle();
+            //var result7 = program.TestFluid();
             BenchmarkRunner.Run<BenchParsers>();
             BenchmarkRunner.Run<BenchRenderers>();
         }
@@ -41,18 +48,6 @@ namespace Scriban.Benchmarks
                 output.Write(Scriban.Functions.StringFunctions.Truncate(15, context["description"]));
             });
         }
-
-        protected const string TextTemplateMarkdig = @"
-<ul id='products'>
-  {{ for product in products }}
-    <li>
-      <h2>{{ product.name }}</h2>
-           Only {{ product.price }}
-           {{ product.description | string.truncate 15 }}
-    </li>
-  {{ end }}
-</ul>
-";
 
         protected const string TextTemplateDotLiquid = @"
 <ul id='products'>
@@ -93,7 +88,7 @@ namespace Scriban.Benchmarks
         [Benchmark(Description = "Scriban - Parser")]
         public Scriban.Template TestScriban()
         {
-            return Template.Parse(TextTemplateMarkdig);
+            return Template.ParseLiquid(TextTemplateDotLiquid);
         }
 
         [Benchmark(Description = "DotLiquid - Parser")]
@@ -127,6 +122,17 @@ namespace Scriban.Benchmarks
         {
             return new Cottle.Documents.SimpleDocument(TextTemplateCottle);
         }
+
+        [Benchmark(Description = "Fluid - Parser")]
+        public Fluid.FluidTemplate TestFluid()
+        {
+            Fluid.FluidTemplate template;
+            if (!Fluid.FluidTemplate.TryParse(TextTemplateDotLiquid, out template))
+            {
+                throw new InvalidOperationException("Fluid template not parsed");
+            }
+            return template;
+        }
     }
 
     /// <summary>
@@ -142,6 +148,7 @@ namespace Scriban.Benchmarks
         private readonly Nustache.Core.Template _nustacheTemplate;
         private readonly Func<object, string> _handlebarsTemplate;
         private readonly Cottle.Documents.SimpleDocument _cottleTemplate;
+        private readonly Fluid.FluidTemplate _fluidTemplate;
 
         private const string Lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
 
@@ -149,6 +156,8 @@ namespace Scriban.Benchmarks
         private readonly List<DotLiquid.Hash> _dotLiquidProducts;
 
         private readonly Dictionary<Cottle.Value, Cottle.Value> _cottleStringStore;
+
+        private readonly LiquidTemplateContext _liquidTemplateContext;
 
         public BenchRenderers()
         {
@@ -160,6 +169,7 @@ namespace Scriban.Benchmarks
             _nustacheTemplate = parsers.TestNustache();
             _handlebarsTemplate = parsers.TestHandlebars();
             _cottleTemplate = parsers.TestCottle();
+            _fluidTemplate = parsers.TestFluid();
 
             const int ProductCount = 500;
             _products = new List<Product>(ProductCount);
@@ -175,27 +185,43 @@ namespace Scriban.Benchmarks
                 cottleValues.Add(new Cottle.Values.ReflectionValue(product)); 
             }
 
+            _liquidTemplateContext = new LiquidTemplateContext();
+
             // For Cottle, we match the behavior of Scriban that is accessing the Truncate function via an reflection invoke
             // In Scriban, we could also have a direct Truncate function, but it is much less practical in terms of declaration
-            var methodInfo = typeof(Scriban.Functions.StringFunctions).GetMethod("Truncate");
             _cottleStringStore = new Dictionary<Cottle.Value, Cottle.Value>();
-            _cottleStringStore["truncate"] = new Cottle.Functions.NativeFunction((values, store, output) => methodInfo.Invoke(null, new object[2] { Convert.ToInt32(values[1].AsNumber), values[0].AsString }).ToString(), 2);
+            _cottleStringStore["truncate"] = new Cottle.Functions.NativeFunction((values, store, output) =>
+            {
+                if (values.Count != 2)
+                {
+                    throw new InvalidOperationException("Unexpected number of arguments for truncate function");
+                }
+                return StringFunctions.Truncate(Convert.ToInt32(values[1].AsNumber), values[0].AsString);
+            }, 2);
         }
 
         [Benchmark(Description = "Scriban")]
         public string TestScriban()
         {
-            return _scribanTemplate.Render(new { products = _products });
+            // We could use the following simpler version, but we demonstrate the use of PushGlobal/PopGlobal object context
+            // for a slightly higher efficiency and the reuse of a TemplateContext on the same thread
+            //return _scribanTemplate.Render(new { products = _dotLiquidProducts });
+
+            var obj = new ScriptObject { { "products", _dotLiquidProducts } };
+            _liquidTemplateContext.PushGlobal(obj);
+            var result = _scribanTemplate.Render(_liquidTemplateContext);
+            _liquidTemplateContext.PopGlobal();
+            return result;
         }
 
-        [Benchmark(Description = "DotLiquid")]
+        //[Benchmark(Description = "DotLiquid")]
         public string TestDotLiquid()
         {
             // DotLiquid forces to rework the original List<Product> into a custom object, which is not the same behavior as Scriban (easier somewhat because no late binding)
             return _dotLiquidTemplate.Render(DotLiquid.Hash.FromAnonymousObject(new { products = _dotLiquidProducts }));
         }
 
-        [Benchmark(Description = "Stubble")]
+        //[Benchmark(Description = "Stubble")]
         public string TestStubble()
         {
             var renderer = new Stubble.Core.StubbleVisitorRenderer();
@@ -205,7 +231,7 @@ namespace Scriban.Benchmarks
             return renderer.Render(BenchParsers.TextTemplateMustache, props);
         }
 
-        [Benchmark(Description = "Nustache")]
+        //[Benchmark(Description = "Nustache")]
         public string TestNustache()
         {
             int i = 0;
@@ -216,7 +242,7 @@ namespace Scriban.Benchmarks
             });
         }
 
-        [Benchmark(Description = "Handlebars")]
+        //[Benchmark(Description = "Handlebars")]
         public string TestHandlebars()
         {
             int i = 0;
@@ -226,7 +252,7 @@ namespace Scriban.Benchmarks
             });
         }
 
-        [Benchmark(Description = "Cottle")]
+        //[Benchmark(Description = "Cottle")]
         public string TestCottle()
         {
             // This is done to match the behavior of Scriban (no preparation of the datas)
@@ -234,6 +260,15 @@ namespace Scriban.Benchmarks
             cottleStore["string"] = _cottleStringStore;
             cottleStore["products"] = new Cottle.Values.ReflectionValue(_products);
             return _cottleTemplate.Render(cottleStore);
+        }
+
+        [Benchmark(Description = "Fluid")]
+        public string TestFluid()
+        {
+            var templateContext = new Fluid.TemplateContext();
+            templateContext.SetValue("products", _dotLiquidProducts);
+            // DotLiquid forces to rework the original List<Product> into a custom object, which is not the same behavior as Scriban (easier somewhat because no late binding)
+            return Fluid.FluidTemplateExtensions.Render(_fluidTemplate, templateContext);
         }
 
         public class Product
