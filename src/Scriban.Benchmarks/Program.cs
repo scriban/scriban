@@ -214,14 +214,14 @@ namespace Scriban.Benchmarks
             return result;
         }
 
-        //[Benchmark(Description = "DotLiquid")]
+        [Benchmark(Description = "DotLiquid")]
         public string TestDotLiquid()
         {
             // DotLiquid forces to rework the original List<Product> into a custom object, which is not the same behavior as Scriban (easier somewhat because no late binding)
             return _dotLiquidTemplate.Render(DotLiquid.Hash.FromAnonymousObject(new { products = _dotLiquidProducts }));
         }
 
-        //[Benchmark(Description = "Stubble")]
+        [Benchmark(Description = "Stubble")]
         public string TestStubble()
         {
             var renderer = new Stubble.Core.StubbleVisitorRenderer();
@@ -231,7 +231,7 @@ namespace Scriban.Benchmarks
             return renderer.Render(BenchParsers.TextTemplateMustache, props);
         }
 
-        //[Benchmark(Description = "Nustache")]
+        [Benchmark(Description = "Nustache")]
         public string TestNustache()
         {
             int i = 0;
@@ -242,7 +242,7 @@ namespace Scriban.Benchmarks
             });
         }
 
-        //[Benchmark(Description = "Handlebars")]
+        [Benchmark(Description = "Handlebars")]
         public string TestHandlebars()
         {
             int i = 0;
@@ -252,7 +252,7 @@ namespace Scriban.Benchmarks
             });
         }
 
-        //[Benchmark(Description = "Cottle")]
+        [Benchmark(Description = "Cottle")]
         public string TestCottle()
         {
             // This is done to match the behavior of Scriban (no preparation of the datas)
