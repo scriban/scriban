@@ -11,31 +11,52 @@ namespace Scriban.Syntax
     /// </summary>
     /// <remarks>This class is immutable as all variable object are being shared across all templates</remarks>
     [ScriptSyntax("variable", "<variable_name>")]
-    public sealed class ScriptVariable : ScriptVariablePath, IEquatable<ScriptVariable>
+    public abstract class ScriptVariable : ScriptVariablePath, IEquatable<ScriptVariable>
     {
         private readonly int _hashCode;
 
-        public static readonly ScriptVariable Arguments = new ScriptVariable(string.Empty, ScriptVariableScope.Local);
+        public static readonly ScriptVariableLocal Arguments = new ScriptVariableLocal(string.Empty);
 
-        public static readonly ScriptVariable BlockDelegate = new ScriptVariable("$", ScriptVariableScope.Local);
+        public static readonly ScriptVariableLocal BlockDelegate = new ScriptVariableLocal("$");
 
-        public static readonly ScriptVariable LoopFirst = new ScriptVariable("for.first", ScriptVariableScope.Loop);
+        public static readonly ScriptVariableLoop LoopFirst = new ScriptVariableLoop("for.first");
 
-        public static readonly ScriptVariable LoopLast = new ScriptVariable("for.last", ScriptVariableScope.Loop);
+        public static readonly ScriptVariableLoop LoopLast = new ScriptVariableLoop("for.last");
 
-        public static readonly ScriptVariable LoopEven = new ScriptVariable("for.even", ScriptVariableScope.Loop);
+        public static readonly ScriptVariableLoop LoopEven = new ScriptVariableLoop("for.even");
 
-        public static readonly ScriptVariable LoopOdd = new ScriptVariable("for.odd", ScriptVariableScope.Loop);
+        public static readonly ScriptVariableLoop LoopOdd = new ScriptVariableLoop("for.odd");
 
-        public static readonly ScriptVariable LoopIndex = new ScriptVariable("for.index", ScriptVariableScope.Loop);
+        public static readonly ScriptVariableLoop LoopIndex = new ScriptVariableLoop("for.index");
 
-        public ScriptVariable(string name, ScriptVariableScope scope)
+        protected ScriptVariable(string name, ScriptVariableScope scope)
         {
             Name = name;
             Scope = scope;
             unchecked
             {
                 _hashCode = (Name.GetHashCode() * 397) ^ (int)Scope;
+            }
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ScriptVariable"/> according to the specified name and <see cref="ScriptVariableScope"/>
+        /// </summary>
+        /// <param name="name">Name of the variable</param>
+        /// <param name="scope">Scope of the variable</param>
+        /// <returns>The script variable</returns>
+        public static ScriptVariable Create(string name, ScriptVariableScope scope)
+        {
+            switch (scope)
+            {
+                case ScriptVariableScope.Global:
+                    return new ScriptVariableGlobal(name);
+                case ScriptVariableScope.Local:
+                    return new ScriptVariableLocal(name);
+                case ScriptVariableScope.Loop:
+                    return new ScriptVariableLoop(name);
+                default:
+                    throw new InvalidOperationException($"Scope `{scope}` is not supported");
             }
         }
 
@@ -99,4 +120,32 @@ namespace Scriban.Syntax
             context.SetValue(this, valueToSet);
         }
     }
+
+    public sealed class ScriptVariableGlobal : ScriptVariable
+    {
+        public ScriptVariableGlobal(string name) : base(name, ScriptVariableScope.Global)
+        {
+        }
+
+        public override object GetValue(TemplateContext context)
+        {
+            // Used a specialized overrides on contxet for ScriptVariableGlobal
+            return context.GetValue(this);
+        }
+    }
+
+    public sealed class ScriptVariableLocal : ScriptVariable
+    {
+        public ScriptVariableLocal(string name) : base(name, ScriptVariableScope.Local)
+        {
+        }
+    }
+
+    public sealed class ScriptVariableLoop : ScriptVariable
+    {
+        public ScriptVariableLoop(string name) : base(name, ScriptVariableScope.Loop)
+        {
+        }
+    }
+
 }

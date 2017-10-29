@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -57,7 +57,7 @@ namespace Scriban.Parsing
                     {
                         Span = currentSpan,
 
-                        Target = new ScriptVariable(ScriptVariable.Arguments.Name, ScriptVariableScope.Local)
+                        Target = new ScriptVariableLocal(ScriptVariable.Arguments.Name)
                         {
                             Span = currentSpan
                         },
@@ -131,9 +131,12 @@ namespace Scriban.Parsing
                 LogError(currentToken, $"The reserved keyword <{text}> cannot be used as a variable");
             }
 
-            var result = new ScriptVariable(text, scope)
+            var result = ScriptVariable.Create(text, scope);
+            result.Span = new SourceSpan
             {
-                Span = {FileName =currentSpan.FileName, Start = currentSpan.Start, End = endSpan.End}
+                FileName = currentSpan.FileName,
+                Start = currentSpan.Start,
+                End = endSpan.End
             };
             return result;
         }

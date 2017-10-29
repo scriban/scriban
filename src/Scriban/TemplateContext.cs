@@ -23,17 +23,17 @@ namespace Scriban
     /// </summary>
     public partial class TemplateContext
     {
-        private readonly Stack<ScriptObject> _availableStores;
-        internal readonly Stack<ScriptBlockStatement> BlockDelegates;
-        private readonly Stack<IScriptObject> _globalStores;
-        private Stack<CultureInfo> _cultures;
+        private FastStack<ScriptObject> _availableStores;
+        internal FastStack<ScriptBlockStatement> BlockDelegates;
+        private FastStack<IScriptObject> _globalStores;
+        private FastStack<CultureInfo> _cultures;
         private readonly Dictionary<Type, IListAccessor> _listAccessors;
-        private readonly Stack<ScriptObject> _localStores;
-        private readonly Stack<ScriptLoopStatementBase> _loops;
-        private readonly Stack<ScriptObject> _loopStores;
+        private FastStack<ScriptObject> _localStores;
+        private FastStack<ScriptLoopStatementBase> _loops;
+        private FastStack<ScriptObject> _loopStores;
         private readonly Dictionary<Type, IObjectAccessor> _memberAccessors;
-        private readonly Stack<StringBuilder> _outputs;
-        private readonly Stack<string> _sourceFiles;
+        private FastStack<StringBuilder> _outputs;
+        private FastStack<string> _sourceFiles;
         private int _functionDepth;
         private bool _isFunctionCallDisabled;
         private int _loopStep;
@@ -84,22 +84,23 @@ namespace Scriban
             TemplateLoaderParserOptions = new ParserOptions();
             TemplateLoaderLexerOptions = LexerOptions.Default;
 
-            _outputs = new Stack<StringBuilder>();
+            _outputs = new FastStack<StringBuilder>(4);
             _outputs.Push(new StringBuilder());
 
-            _globalStores = new Stack<IScriptObject>();
-            _localStores = new Stack<ScriptObject>();
-            _loopStores = new Stack<ScriptObject>();
-            _availableStores = new Stack<ScriptObject>();
+            _globalStores = new FastStack<IScriptObject>(4);
+            _localStores = new FastStack<ScriptObject>(4);
+            _loopStores = new FastStack<ScriptObject>(4);
+            _availableStores = new FastStack<ScriptObject>(4);
+            _cultures = new FastStack<CultureInfo>(4);
 
-            _sourceFiles = new Stack<string>();
+            _sourceFiles = new FastStack<string>(4);
 
             _memberAccessors = new Dictionary<Type, IObjectAccessor>();
             _listAccessors = new Dictionary<Type, IListAccessor>();
-            _loops = new Stack<ScriptLoopStatementBase>();
+            _loops = new FastStack<ScriptLoopStatementBase>(4);
             PipeArguments = new Stack<ScriptExpression>();
 
-            BlockDelegates = new Stack<ScriptBlockStatement>();
+            BlockDelegates = new FastStack<ScriptBlockStatement>(4);
 
             _isFunctionCallDisabled = false;
 
@@ -114,7 +115,7 @@ namespace Scriban
         /// <summary>
         /// Gets the current culture set. Default is <c>CultureInfo.InvariantCulture</c>. Can be modified via <see cref="PushCulture"/>, and <see cref="PopCulture"/>.
         /// </summary>
-        public CultureInfo CurrentCulture => _cultures == null || _cultures.Count == 0 ? CultureInfo.InvariantCulture : _cultures.Peek();
+        public CultureInfo CurrentCulture => _cultures.Count == 0 ? CultureInfo.InvariantCulture : _cultures.Peek();
 
         /// <summary>
         /// Gets or sets the <see cref="ITemplateLoader"/> used by the include directive. Must be set in order for the include directive to work.
@@ -227,10 +228,6 @@ namespace Scriban
         {
             if (culture == null) throw new ArgumentNullException(nameof(culture));
             // Create a stack for cultures if they are actually used
-            if (_cultures == null)
-            {
-                _cultures = new Stack<CultureInfo>();
-            }
             _cultures.Push(culture);
         }
 
@@ -240,7 +237,7 @@ namespace Scriban
         /// <returns></returns>
         public CultureInfo PopCulture()
         {
-            if (_cultures == null || _cultures.Count == 0)
+            if (_cultures.Count == 0)
             {
                 throw new InvalidOperationException("Cannot PopCulture more than PushCulture");
             }
@@ -566,7 +563,14 @@ namespace Scriban
         internal void PushVariableScope(ScriptVariableScope scope)
         {
             var store = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
-            (scope == ScriptVariableScope.Local ? _localStores : _loopStores).Push(store);
+            if (scope == ScriptVariableScope.Local)
+            {
+                _localStores.Push(store);
+            }
+            else
+            {
+                _loopStores.Push(store);
+            }
         }
 
         /// <summary>
@@ -575,7 +579,21 @@ namespace Scriban
         /// <param name="scope"></param>
         internal void PopVariableScope(ScriptVariableScope scope)
         {
-            var stores = (scope == ScriptVariableScope.Local ? _localStores : _loopStores);
+            if (scope == ScriptVariableScope.Local)
+            {
+                PopVariableScope(ref _localStores);
+            }
+            else
+            {
+                PopVariableScope(ref _loopStores);
+            }
+        }
+
+        /// <summary>
+        /// Pops a previous <see cref="ScriptVariableScope"/>.
+        /// </summary>
+        internal void PopVariableScope(ref FastStack<ScriptObject> stores)
+        {
             if (stores.Count == 0)
             {
                 // Should not happen at runtime
@@ -664,6 +682,41 @@ namespace Scriban
             foreach (var store in stores)
             {
                 if (store.TryGetValue(this, variable.Span, variable.Name, out value))
+                {
+                    return value;
+                }
+            }
+
+            bool found = false;
+            if (TryGetVariable != null)
+            {
+                if (TryGetVariable(this, variable.Span, variable, out value))
+                {
+                    found = true;
+                }
+            }
+
+            if (StrictVariables && !found)
+            {
+                throw new ScriptRuntimeException(variable.Span, $"The variable `{variable}` was not found");
+            }
+            return value;
+        }
+
+        /// <summary>
+        /// Gets the value for the specified global variable from the current object context/scope.
+        /// </summary>
+        /// <param name="variable">The variable to retrieve the value</param>
+        /// <returns>Value of the variable</returns>
+        public object GetValue(ScriptVariableGlobal variable)
+        {
+            if (variable == null) throw new ArgumentNullException(nameof(variable));
+            object value = null;
+            var count = _globalStores.Count;
+            var items = _globalStores.Items;
+            for (int i = count - 1; i >= 0; i--)
+            {
+                if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
                 {
                     return value;
                 }
@@ -781,9 +834,9 @@ namespace Scriban
             switch (scope)
             {
                 case ScriptVariableScope.Global:
-                    foreach (var store in _globalStores)
+                    for (int i = _globalStores.Count - 1; i >= 0; i--)
                     {
-                        yield return store;
+                            yield return _globalStores.Items[i];
                     }
                     break;
                 case ScriptVariableScope.Local:

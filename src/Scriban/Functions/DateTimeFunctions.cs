@@ -22,7 +22,7 @@ namespace Scriban.Functions
         public const string DefaultFormat = "%d %b %Y";
 
         [ScriptMemberIgnore]
-        public static readonly ScriptVariable DateVariable = new ScriptVariable("date", ScriptVariableScope.Global);
+        public static readonly ScriptVariable DateVariable = new ScriptVariableGlobal("date");
 
         // Code from DotLiquid https://github.com/dotliquid/dotliquid/blob/master/src/DotLiquid/Util/StrFTime.cs
         // Apache License, Version 2.0
