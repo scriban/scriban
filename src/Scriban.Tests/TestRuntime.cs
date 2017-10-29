@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 
 using System;
@@ -32,10 +32,8 @@ namespace Scriban.Tests
             var template = Template.Parse("{{ 11232.123 }}");
             var context = new TemplateContext();
             context.PushCulture(customCulture);
-            template.Render(context);
+            var result = template.Render(context);
             context.PopCulture();
-
-            var result = context.Output.ToString();
 
             Assert.AreEqual(numberAsStr, result);
         }
@@ -272,10 +270,9 @@ namespace Scriban.Tests
             var scriptObject = new ScriptObject();
             scriptObject.Import(new { tb = parsed });
             context.PushGlobal(scriptObject);
-            template.Render(context);
+            var result = template.Render(context);
             context.PopGlobal();
 
-            var result = context.Output.ToString();
             var expected =
                 @"
 [

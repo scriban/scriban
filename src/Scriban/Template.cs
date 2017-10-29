@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -154,9 +155,12 @@ namespace Scriban
         /// <remarks>
         /// When using this method, the result of rendering this page is output to <see cref="TemplateContext.Output"/>
         /// </remarks>
-        public void Render(TemplateContext context)
+        public string Render(TemplateContext context)
         {
             EvaluateAndRender(context, true);
+            var result = context.Output.ToString();
+            context.Output.Length = 0;
+            return result;
         }
 
         /// <summary>
@@ -174,10 +178,7 @@ namespace Scriban
 
             var context = _lexerOptions.HasValue && _lexerOptions.Value.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
             context.PushGlobal(scriptObject);
-            Render(context);
-            context.PopGlobal();
-
-            return context.Output.ToString();
+            return Render(context);
         }
 
         /// <summary>
@@ -189,7 +190,7 @@ namespace Scriban
         private object EvaluateAndRender(TemplateContext context, bool render)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Messages> property for more details");
+            if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Template.HasError> and <Template.Messages> before evaluating a template. Messages:\n" + StringHelper.Join("\n", Messages));
 
             // Make sure that we are using the same parserOptions
             if (SourceFilePath != null)

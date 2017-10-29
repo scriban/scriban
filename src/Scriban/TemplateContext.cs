@@ -382,14 +382,14 @@ namespace Scriban
         /// <summary>
         /// Pops a previous output.
         /// </summary>
-        public string PopOutput()
+        public StringBuilder PopOutput()
         {
             if (_outputs.Count == 1)
             {
                 throw new InvalidOperationException("Unexpected PopOutput for top level writer");
             }
 
-            return _outputs.Pop().ToString();
+            return _outputs.Pop();
         }
 
         /// <summary>
@@ -615,6 +615,7 @@ namespace Scriban
         {
             if (loop == null) throw new ArgumentNullException(nameof(loop));
             _loops.Push(loop);
+            _loopStep = 0;
             PushVariableScope(ScriptVariableScope.Loop);
             OnEnterLoop(loop);
         }
@@ -635,6 +636,7 @@ namespace Scriban
             OnExitLoop(loop);
             PopVariableScope(ScriptVariableScope.Loop);
             _loops.Pop();
+            _loopStep = 0;
         }
 
         /// <summary>
