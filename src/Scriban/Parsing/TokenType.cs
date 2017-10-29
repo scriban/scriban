@@ -30,6 +30,8 @@ namespace Scriban.Parsing
 
         NewLine,
 
+        Whitespace,
+
         Comment,
 
         CommentMulti,

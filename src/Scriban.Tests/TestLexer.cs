@@ -233,19 +233,22 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
+                    new Token(TokenType.Whitespace, new TextPosition(0, 0, 0), new TextPosition(0, 0, 0)),
                     new Token(TokenType.CodeEnter, new TextPosition(1, 0, 1), new TextPosition(3, 0, 3)),
                     new Token(TokenType.CodeExit, new TextPosition(5, 0, 5), new TextPosition(6, 0, 6)),
                     Token.Eof,
                 }, tokens);
             }
             {
-                //          012345
+                //          0          1          2
+                //          01234567 89012345 6789012
                 var text = "{{ ~}} \n       \n      \n";
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
                     new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
                     new Token(TokenType.CodeExit, new TextPosition(3, 0, 3), new TextPosition(5, 0, 5)),
+                    new Token(TokenType.Whitespace, new TextPosition(6, 0, 6), new TextPosition(22, 2, 6)),
                     Token.Eof,
                 }, tokens);
             }
@@ -255,17 +258,19 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
+                    new Token(TokenType.Whitespace, new TextPosition(0, 0, 0), new TextPosition(0, 0, 0)),
                     new Token(TokenType.RawEscape, new TextPosition(5, 0, 5), new TextPosition(5, 0, 5)),
                     Token.Eof,
                 }, tokens);
             }
             {
-                //          01234567
+                //          0123456789 01234567 8901234
                 var text = "{%{ ~}%} \n       \n      \n";
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
                     new Token(TokenType.RawEscape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                    new Token(TokenType.Whitespace, new TextPosition(8, 0, 8), new TextPosition(24, 2, 6)),
                     Token.Eof,
                 }, tokens);
             }

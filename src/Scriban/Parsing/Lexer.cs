@@ -29,6 +29,7 @@ namespace Scriban.Parsing
 
         private readonly char _stripWhiteSpaceSpecialChar;
         private const char RawEscapeSpecialChar = '%';
+        private Token? _spaceSpan;
 
         /// <summary>
         /// Lexer options.
@@ -108,6 +109,13 @@ namespace Scriban.Parsing
 
             while (true)
             {
+                if (_spaceSpan.HasValue)
+                {
+                    _token = _spaceSpan.Value;
+                    _spaceSpan = null;
+                    return true;
+                }
+
                 // If we have errors or we are already at the end of the file, we don't continue
                 if (HasErrors || _token.Type == TokenType.Eof)
                 {
@@ -518,7 +526,12 @@ namespace Scriban.Parsing
             // Eat spaces after an exit
             if (shouldSkipSpacesAfterExit)
             {
-                ConsumeWhitespace(false);
+                var startSpace = _position;
+                TextPosition endSpace;
+                if (ConsumeWhitespace(false, out endSpace))
+                {
+                    _spaceSpan = new Token(TokenType.Whitespace, startSpace, endSpace);
+                }
             }
 
             _isLiquidTagBlock = false;
@@ -555,11 +568,18 @@ namespace Scriban.Parsing
             if (removePreviousSpaces)
             {
                 int i = -1;
+                var endSpace = new TextPosition(-1, 0, 0);
+                TextPosition startSpace = end;
                 while (true)
                 {
                     var testc = PeekChar(i);
                     if (char.IsWhiteSpace(testc) || testc == '\r')
                     {
+                        if (endSpace.Offset < 0)
+                        {
+                            endSpace = end;
+                        }
+                        startSpace = end;
                         if (testc == '\r')
                         {
                             end.Offset--;
@@ -575,6 +595,12 @@ namespace Scriban.Parsing
                         break;
                     }
                 }
+
+                if (endSpace.Offset >= 0)
+                {
+                    _spaceSpan = new Token(TokenType.Whitespace, startSpace, endSpace);
+                }
+
                 if (end.Offset < start.Offset)
                 {
                     return false;
@@ -1007,6 +1033,20 @@ namespace Scriban.Parsing
 
             return hasTokens;
         }
+
+
+        private bool ConsumeWhitespace(bool stopAtNewLine, out TextPosition lastSpace)
+        {
+            var start = _position;
+            lastSpace = start;
+            while (char.IsWhiteSpace(c) && (!stopAtNewLine || !IsNewLine(c)))
+            {
+                lastSpace = _position;
+                NextChar();
+            }
+            return start != _position;
+        }
+
 
         private bool ConsumeWhitespace(bool stopAtNewLine)
         {

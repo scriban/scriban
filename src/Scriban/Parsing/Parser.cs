@@ -1010,7 +1010,7 @@ namespace Scriban.Parsing
 
         private bool IsHidden(TokenType tokenType)
         {
-            return tokenType == TokenType.Comment || tokenType == TokenType.CommentMulti ||
+            return tokenType == TokenType.Comment || tokenType == TokenType.CommentMulti || tokenType == TokenType.Whitespace ||
                    (tokenType == TokenType.NewLine && allowNewLineLevel > 0);
         }
 
