@@ -17,7 +17,8 @@ namespace Scriban.Parsing
         private readonly Lexer _lexer;
         private readonly bool _isLiquid;
         private Lexer.Enumerator _tokenIt;
-        private readonly LinkedList<Token> _tokensPreview;
+        private readonly List<Token> _tokensPreview;
+        private int _tokensPreviewStart;
         private Token _previousToken;
         private Token _token;
         private bool _inCodeSection;
@@ -37,7 +38,7 @@ namespace Scriban.Parsing
         {
             _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
             _isLiquid = _lexer.Options.Mode == ScriptMode.Liquid;
-            _tokensPreview = new LinkedList<Token>();
+            _tokensPreview = new List<Token>(4);
             Messages = new List<LogMessage>();
 
             Options = options ?? new ParserOptions();
@@ -957,11 +958,22 @@ namespace Scriban.Parsing
             _previousToken = _token;
             bool result;
 
-            if (_tokensPreview.Count > 0)
+            while (_tokensPreviewStart < _tokensPreview.Count)
             {
-                _token = _tokensPreview.First.Value;
-                _tokensPreview.RemoveFirst();
-                return;
+                _token = _tokensPreview[_tokensPreviewStart];
+               _tokensPreviewStart++;
+
+                // We can reset the tokens if we hit the upper limit of the preview
+                if (_tokensPreviewStart == _tokensPreview.Count)
+                {
+                    _tokensPreviewStart = 0;
+                    _tokensPreview.Clear();
+                }
+
+                if (!IsHidden(_token.Type))
+                {
+                    return;
+                }
             }
 
             // Skip Comments
@@ -972,40 +984,30 @@ namespace Scriban.Parsing
             _token = result ? _tokenIt.Current : Token.Eof;
         }
 
-        private Token PeekToken(int count = 1)
+        private Token PeekToken()
         {
-            if (count < 1) throw new ArgumentOutOfRangeException("count", "Must be > 0");
-
-            for (int i = _tokensPreview.Count; i < count; i++)
+            // Do we have preview token available?
+            for (int i = _tokensPreviewStart; i < _tokensPreview.Count; i++)
             {
-                if (_tokenIt.MoveNext())
+                var nextToken = _tokensPreview[i];
+                if (!IsHidden(nextToken.Type))
                 {
-                    var nextToken = _tokenIt.Current;
-                    if (!IsHidden(nextToken.Type))
-                    {
-                        _tokensPreview.AddLast(nextToken);
-                    }
+                    return nextToken;
                 }
             }
 
-            if (_tokensPreview.Count == 0)
+            // Else try to find the first token not hidden
+            while (_tokenIt.MoveNext())
             {
-                return Token.Eof;
+                var nextToken = _tokenIt.Current;
+                _tokensPreview.Add(nextToken);
+                if (!IsHidden(nextToken.Type))
+                {
+                    return nextToken;
+                }
             }
 
-            // optimized case for last element
-            if (count >= _tokensPreview.Count)
-            {
-                return _tokensPreview.Last.Value;
-            }
-
-            // TODO: depending on the count it may be faster to start from the end of the list
-            var node = _tokensPreview.First;
-            while (--count != 0)
-            {
-                node = node.Next;
-            }
-            return node.Value;
+            return Token.Eof;
         }
 
         private bool IsHidden(TokenType tokenType)
