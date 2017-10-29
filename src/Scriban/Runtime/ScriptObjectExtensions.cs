@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -250,7 +250,7 @@ namespace Scriban.Runtime
                             newMethodName = method.Name;
                         }
 
-                        script.SetValue(null, new SourceSpan(), newMethodName, new ObjectFunctionWrapper(obj, method), true);
+                        script.SetValue(null, new SourceSpan(), newMethodName, CustomFunctionHelper.GetCustomFunction(obj, method), true);
                     }
                 }
             }
@@ -267,122 +267,7 @@ namespace Scriban.Runtime
             if (member == null) throw new ArgumentNullException(nameof(member));
             if (function == null) throw new ArgumentNullException(nameof(function));
 
-            script.SetValue(null, new SourceSpan(), member, new ObjectFunctionWrapper(function.Target, function.GetMethodInfo()), true);
-        }
-
-        private class ObjectFunctionWrapper : IScriptCustomFunction
-        {
-            private readonly object target;
-            private readonly MethodInfo method;
-            private readonly ParameterInfo[] parametersInfo;
-            private readonly bool hasObjectParams;
-            private readonly int lastParamsIndex;
-            private readonly bool hasTemplateContext;
-            private readonly bool hasSpan;
-
-            public ObjectFunctionWrapper(object target, MethodInfo method)
-            {
-                this.target = target;
-                this.method = method;
-                parametersInfo = method.GetParameters();
-                lastParamsIndex = parametersInfo.Length - 1;
-                if (parametersInfo.Length > 0)
-                {
-                    // Check if we have TemplateContext+SourceSpan as first parameters
-                    if (typeof(TemplateContext).GetTypeInfo().IsAssignableFrom(parametersInfo[0].ParameterType.GetTypeInfo()))
-                    {
-                        hasTemplateContext = true;
-                        if (parametersInfo.Length > 1)
-                        {
-                            hasSpan = typeof(SourceSpan).GetTypeInfo().IsAssignableFrom(parametersInfo[1].ParameterType.GetTypeInfo());
-                        }
-                    }
-
-                    var lastParam = parametersInfo[lastParamsIndex];
-
-                    if (lastParam.ParameterType == typeof(object[]))
-                    {
-                        foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
-                        {
-                            hasObjectParams = true;
-                            break;
-                        }
-                    }
-                }
-            }
-
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
-            {
-                var expectedNumberOfParameters = parametersInfo.Length;
-                if (hasTemplateContext)
-                {
-                    expectedNumberOfParameters--;
-                    if (hasSpan)
-                    {
-                        expectedNumberOfParameters--;
-                    }
-                }
-
-                // Check parameters
-                if ((hasObjectParams && parameters.Count < expectedNumberOfParameters - 1) || (!hasObjectParams && parameters.Count != expectedNumberOfParameters))
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{expectedNumberOfParameters}] for [{callerContext}]");
-                }
-
-                // Convert arguments
-                var arguments = new object[parametersInfo.Length];
-                object[] paramArguments = null;
-                if (hasObjectParams)
-                {
-                    paramArguments = new object[parameters.Count - lastParamsIndex];
-                    arguments[lastParamsIndex] = paramArguments;
-                }
-
-                // Copy TemplateContext/SourceSpan parameters
-                int argIndex = 0;
-                if (hasTemplateContext)
-                {
-                    arguments[0] = context;
-                    argIndex++;
-                    if (hasSpan)
-                    {
-                        arguments[1] = callerContext.Span;
-                        argIndex++;
-                    }
-                }
-
-                for (int i = 0; i < parameters.Count; i++, argIndex++)
-                {
-                    var destType = hasObjectParams && i >= lastParamsIndex ? typeof(object) : parametersInfo[argIndex].ParameterType;
-                    try
-                    {
-                        var argValue = context.ToObject(callerContext.Span, parameters[i], destType);
-                        if (hasObjectParams && i >= lastParamsIndex)
-                        {
-                            paramArguments[argIndex - lastParamsIndex] = argValue;
-                        }
-                        else
-                        {
-                            arguments[argIndex] = argValue;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type [{parameters[i]?.GetType()}] to type [{destType}]", exception);
-                    }
-                }
-
-                // Call method
-                try
-                {
-                    var result = method.Invoke(target, arguments);
-                    return result;
-                }
-                catch (Exception exception)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception);
-                }
-            }
+            script.SetValue(null, new SourceSpan(), member, CustomFunctionHelper.GetCustomFunction(function.Target, function.GetMethodInfo()), true);
         }
     }
 }

@@ -48,7 +48,7 @@ namespace Scriban
             if (value is DateTime)
             {
                 // Output DateTime only if we have the date builtin object accessible (that provides the implementation of the ToString method)
-                var dateTimeFunctions = GetValueFromVariable(DateTimeFunctions.DateVariable) as DateTimeFunctions;
+                var dateTimeFunctions = GetValue(DateTimeFunctions.DateVariable) as DateTimeFunctions;
                 if (dateTimeFunctions != null)
                 {
                     return dateTimeFunctions.ToString((DateTime) value, dateTimeFunctions.Format, CurrentCulture);

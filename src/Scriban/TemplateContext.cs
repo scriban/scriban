@@ -37,6 +37,7 @@ namespace Scriban
         private int _functionDepth;
         private bool _isFunctionCallDisabled;
         private int _loopStep;
+        private int _getOrSetValueLevel;
 
         /// <summary>
         /// A delegate used to late binding <see cref="TryGetMember"/>
@@ -277,7 +278,15 @@ namespace Scriban
         /// <returns>The value of the expression</returns>
         public object GetValue(ScriptExpression target)
         {
-            return GetOrSetValue(target, null, false, 0);
+            _getOrSetValueLevel++;
+            try
+            {
+                return GetOrSetValue(target, null, false);
+            }
+            finally
+            {
+                _getOrSetValueLevel--;
+            }
         }
 
         /// <summary>
@@ -288,7 +297,7 @@ namespace Scriban
         /// <param name="asReadOnly">if set to <c>true</c> the variable set will be read-only.</param>
         /// <exception cref="System.ArgumentNullException">If variable is null</exception>
         /// <exception cref="ScriptRuntimeException">If an existing variable is already read-only</exception>
-        public void SetValue(ScriptVariable variable, object value, bool asReadOnly)
+        public void SetValue(ScriptVariable variable, object value, bool asReadOnly = false)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
 
@@ -326,7 +335,15 @@ namespace Scriban
         public void SetValue(ScriptExpression target, object value)
         {
             if (target == null) throw new ArgumentNullException(nameof(target));
-            GetOrSetValue(target, value, true, 0);
+            _getOrSetValueLevel++;
+            try
+            {
+                GetOrSetValue(target, value, true);
+            }
+            finally
+            {
+                _getOrSetValueLevel--;
+            }
         }
 
         /// <summary>
@@ -442,13 +459,16 @@ namespace Scriban
         public object Evaluate(ScriptNode scriptNode, bool aliasReturnedFunction)
         {
             var previousFunctionCallState = _isFunctionCallDisabled;
+            var previousLevel = _getOrSetValueLevel;
             try
-            { 
+            {
+                _getOrSetValueLevel = 0;
                 _isFunctionCallDisabled = aliasReturnedFunction;
                 return EvaluateImpl(scriptNode);
             }
             finally
             {
+                _getOrSetValueLevel = previousLevel;
                 _isFunctionCallDisabled = previousFunctionCallState;
             }
         }
@@ -636,7 +656,7 @@ namespace Scriban
         /// </summary>
         /// <param name="variable">The variable to retrieve the value</param>
         /// <returns>Value of the variable</returns>
-        private object GetValueFromVariable(ScriptVariable variable)
+        public object GetValue(ScriptVariable variable)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
             var stores = GetStoreForSet(variable);
@@ -671,162 +691,41 @@ namespace Scriban
         /// <param name="targetExpression">The expression to evaluate</param>
         /// <param name="valueToSet">A value to set in case of a setter</param>
         /// <param name="setter">true if this a setter</param>
-        /// <param name="level">The indirection level (0 before entering the expression)</param>
         /// <returns>The value of the targetExpression</returns>
-        private object GetOrSetValue(ScriptExpression targetExpression, object valueToSet, bool setter, int level)
+        private object GetOrSetValue(ScriptExpression targetExpression, object valueToSet, bool setter)
         {
             object value = null;
 
             try
             {
-
-                var nextVariable = targetExpression as ScriptVariable;
-                if (nextVariable != null)
+                if (targetExpression is ScriptVariablePath nextPath)
                 {
                     if (setter)
                     {
-                        SetValue(nextVariable, valueToSet, false);
+                        nextPath.SetValue(this, valueToSet);
                     }
                     else
                     {
-                        value = GetValueFromVariable(nextVariable);
+                        value = nextPath.GetValue(this);
                     }
+                }
+                else if (!setter)
+                {
+                    value = Evaluate(targetExpression);
                 }
                 else
                 {
-                    if (targetExpression is ScriptMemberExpression nextDot)
-                    {
-                        var targetVariable = nextDot.Target as ScriptVariable;
-                        var targetObject = targetVariable != null 
-                            ? GetValueFromVariable(targetVariable) 
-                            : GetOrSetValue(nextDot.Target, valueToSet, false, level + 1);
-
-                        if (targetObject == null)
-                        {
-                            throw new ScriptRuntimeException(nextDot.Span, $"Object [{nextDot.Target}] is null. Cannot access member: {nextDot}"); // unit test: 131-member-accessor-error1.txt
-                        }
-
-                        if (targetObject is string || targetObject.GetType().GetTypeInfo().IsPrimitive)
-                        {
-                            throw new ScriptRuntimeException(nextDot.Span,
-                                $"Cannot get or set a member on the primitive [{targetObject}/{targetObject.GetType()}] when accessing member: {nextDot}"); // unit test: 132-member-accessor-error2.txt
-                        }
-
-                        var accessor = GetMemberAccessor(targetObject);
-
-                        var memberName = nextDot.Member.Name;
-
-                        if (setter)
-                        {
-                            if (!accessor.TrySetValue(this, targetExpression.Span, targetObject, memberName, valueToSet))
-                            {
-                                throw new ScriptRuntimeException(nextDot.Member.Span,
-                                    $"Cannot set a value for the readonly member: {nextDot}"); // unit test: 132-member-accessor-error3.txt
-                            }
-                        }
-                        else
-                        {
-                            if (!accessor.TryGetValue(this, targetExpression.Span, targetObject, memberName, out value))
-                            {
-                                TryGetMember?.Invoke(this, targetExpression.Span, targetObject, memberName, out value);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        if (targetExpression is ScriptIndexerExpression nextIndexer)
-                        {
-                            var targetObject = GetOrSetValue(nextIndexer.Target, valueToSet, false, level + 1);
-                            if (targetObject == null)
-                            {
-                                throw new ScriptRuntimeException(nextIndexer.Target.Span,
-                                    $"Object [{nextIndexer.Target}] is null. Cannot access indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error1.txt
-                            }
-                            else
-                            {
-                                var index = Evaluate(nextIndexer.Index);
-                                if (index == null)
-                                {
-                                    throw new ScriptRuntimeException(nextIndexer.Index.Span,
-                                        $"Cannot access target [{nextIndexer.Target}] with a null indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error2.txt
-                                }
-                                else
-                                {
-                                    if (targetObject is IDictionary || targetObject is ScriptObject)
-                                    {
-                                        var accessor = GetMemberAccessor(targetObject);
-                                        var indexAsString =
-                                            ToString(nextIndexer.Index.Span, index);
-
-                                        if (setter)
-                                        {
-                                            if (!accessor.TrySetValue(this, targetExpression.Span, targetObject, indexAsString, valueToSet))
-                                            {
-                                                throw new ScriptRuntimeException(nextIndexer.Index.Span,
-                                                    $"Cannot set a value for the readonly member [{indexAsString}] in the indexer: {nextIndexer.Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (!accessor.TryGetValue(this, targetExpression.Span, targetObject, indexAsString, out value))
-                                            {
-                                                TryGetMember?.Invoke(this, targetExpression.Span, targetObject, indexAsString, out value);
-                                            }
-                                        }
-                                    }
-                                    else
-                                    {
-                                        var accessor = GetListAccessor(targetObject);
-                                        if (accessor == null)
-                                        {
-                                            throw new ScriptRuntimeException(nextIndexer.Target.Span, $"Expecting a list. Invalid value [{targetObject}/{targetObject.GetType().Name}] for the target [{nextIndexer.Target}] for the indexer: {nextIndexer}"); // unit test: 130-indexer-accessor-error4.txt
-                                        }
-                                        else
-                                        {
-                                            int i = ToInt(nextIndexer.Index.Span, index);
-
-                                            // Allow negative index from the end of the array
-                                            if (i < 0)
-                                            {
-                                                i = accessor.GetLength(this, targetExpression.Span, targetObject) + i;
-                                            }
-
-                                            if (i >= 0)
-                                            {
-                                                if (setter)
-                                                {
-                                                    accessor.SetValue(this, targetExpression.Span, targetObject, i, valueToSet);
-                                                }
-                                                else
-                                                {
-                                                    value = accessor.GetValue(this, targetExpression.Span, targetObject, i);
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (!setter)
-                        {
-                            value = Evaluate(targetExpression);
-                        }
-                        else
-                        {
-                            throw new ScriptRuntimeException(targetExpression.Span,
-                                $"Unsupported expression for target for assignment: {targetExpression} = ..."); // unit test: 105-assign-error1.txt
-                        }
-                    }
+                    throw new ScriptRuntimeException(targetExpression.Span, $"Unsupported expression for target for assignment: {targetExpression} = ..."); // unit test: 105-assign-error1.txt
                 }
             }
-            catch (Exception readonlyException) when(level == 0 && !(readonlyException is ScriptRuntimeException))
+            catch (Exception readonlyException) when(_getOrSetValueLevel == 1 && !(readonlyException is ScriptRuntimeException))
             {
                 throw new ScriptRuntimeException(targetExpression.Span, $"Unexpected exception while accessing `{targetExpression}`", readonlyException);
             }
 
             // If the variable being returned is a function, we need to evaluate it
             // If function call is disabled, it will be only when returning the final object (level 0 of recursion)
-            if ((!_isFunctionCallDisabled || level > 0) && ScriptFunctionCall.IsFunction(value))
+            if ((!_isFunctionCallDisabled || _getOrSetValueLevel > 1) && ScriptFunctionCall.IsFunction(value))
             {
                 value = ScriptFunctionCall.Call(this, targetExpression, value);
             }
@@ -839,7 +738,7 @@ namespace Scriban
         /// </summary>
         /// <param name="target">The expected object to be a list</param>
         /// <returns>A list accessor for the specified type of target</returns>
-        private IListAccessor GetListAccessor(object target)
+        public IListAccessor GetListAccessor(object target)
         {
             var type = target.GetType();
             if (!_listAccessors.TryGetValue(type, out var accessor))

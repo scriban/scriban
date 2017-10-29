@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -38,6 +38,10 @@ namespace Scriban.Helpers
             return null;
         }
 
+        public static Delegate CreateDelegate(this MethodInfo method, Type type)
+        {
+            return Delegate.CreateDelegate(type, method);
+        }
 
         public static Type GetTypeInfo(this Type type)
         {
