@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
@@ -120,25 +120,9 @@ namespace Scriban
                 return false;
             }
 
-            // Special case for strings
-            var valueStr = value as string;
-            if (valueStr != null)
+            if (value is bool)
             {
-                // If string is empty, we return false
-                return valueStr != string.Empty;
-            }
-
-            try
-            {
-                // Try to use IConvertible only for primitives
-                if (value.GetType().GetTypeInfo().IsPrimitive)
-                {
-                    return Convert.ToBoolean(value, CurrentCulture);
-                }
-            }
-            catch (FormatException)
-            {
-                // We don't throw an error and return true by default as the object is not null
+                return (bool) value;
             }
 
             return true;
