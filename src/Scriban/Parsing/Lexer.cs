@@ -782,6 +782,10 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.Colon, start, start);
                     NextChar();
                     break;
+                case '|':
+                    _token = new Token(TokenType.Pipe, start, start);
+                    NextChar();
+                    break;
                 case '.':
                     NextChar();
                     if (c == '.')
