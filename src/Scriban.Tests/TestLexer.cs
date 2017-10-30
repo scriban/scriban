@@ -75,11 +75,36 @@ namespace Scriban.Tests
             var endInner = startInner + inner.Length - 1;
 
             var tokens = ParseTokens(text, true);
-            Assert.AreEqual(new List<Token>
+
+            var expectedTokens = new List<Token>
             {
-                new Token(isComment ?  TokenType.CommentMulti : TokenType.RawEscape, new TextPosition(startInner,0, startInner), new TextPosition(endInner,0, endInner)),
-                Token.Eof
-            }, tokens);
+                new Token(isComment ? TokenType.CommentMulti : TokenType.Escape, new TextPosition(startInner, 0, startInner), new TextPosition(endInner, 0, endInner)),
+            };
+
+            if (!isComment)
+            {
+                expectedTokens.Add(new Token(TokenType.EscapeCount1, new TextPosition(startInner, 0, startInner), new TextPosition(endInner, 0, endInner)));
+            }
+            expectedTokens.Add(Token.Eof);
+
+            var tokensIt = tokens.GetEnumerator();
+            foreach (var expectedToken in expectedTokens)
+            {
+                if (tokensIt.MoveNext())
+                {
+                    var token = tokensIt.Current;
+                    if (expectedToken.Type == TokenType.EscapeCount1)
+                    {
+                        Assert.AreEqual(expectedToken.Type, token.Type);
+                    }
+                    else
+                    {
+                        Assert.AreEqual(expectedToken, token);
+                    }
+                }
+            }
+
+            Assert.AreEqual(expectedTokens.Count, tokens.Count);
             Assert.AreEqual(inner, tokens[0].GetText(text));
         }
 
@@ -191,7 +216,13 @@ namespace Scriban.Tests
             {
                 var text = "{%{}%}";
                 var tokens = ParseTokens(text);
-                Assert.AreEqual(new List<Token>() { Token.Eof, }, tokens);
+                Assert.AreEqual(new List<Token>()
+                {
+                    // Empty escape
+                    new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(2, 0, 2)),
+                    new Token(TokenType.EscapeCount1, new TextPosition(3, 0, 3), new TextPosition(5, 0, 5)),
+                    Token.Eof,
+                }, tokens);
             }
 
             {
@@ -199,7 +230,8 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
-                    new Token(TokenType.RawEscape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                    new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                    new Token(TokenType.EscapeCount1, new TextPosition(4, 0, 4), new TextPosition(6, 0, 6)),
                     Token.Eof,
                 }, tokens);
             }
@@ -209,7 +241,8 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
-                    new Token(TokenType.RawEscape, new TextPosition(3, 0, 3), new TextPosition(6, 0, 6)),
+                    new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(6, 0, 6)),
+                    new Token(TokenType.EscapeCount1, new TextPosition(7, 0, 7), new TextPosition(9, 0, 9)),
                     Token.Eof,
                 }, tokens);
             }
@@ -218,7 +251,8 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
-                    new Token(TokenType.RawEscape, new TextPosition(4, 0, 4), new TextPosition(6, 0, 6)),
+                    new Token(TokenType.Escape, new TextPosition(4, 0, 4), new TextPosition(6, 0, 6)),
+                    new Token(TokenType.EscapeCount2, new TextPosition(7, 0, 7), new TextPosition(10, 0, 10)),
                     Token.Eof,
                 }, tokens);
             }
@@ -259,7 +293,8 @@ namespace Scriban.Tests
                 Assert.AreEqual(new List<Token>()
                 {
                     new Token(TokenType.Whitespace, new TextPosition(0, 0, 0), new TextPosition(0, 0, 0)),
-                    new Token(TokenType.RawEscape, new TextPosition(5, 0, 5), new TextPosition(5, 0, 5)),
+                    new Token(TokenType.Escape, new TextPosition(5, 0, 5), new TextPosition(5, 0, 5)),
+                    new Token(TokenType.EscapeCount1, new TextPosition(6, 0, 6), new TextPosition(8, 0, 8)),
                     Token.Eof,
                 }, tokens);
             }
@@ -269,7 +304,8 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
-                    new Token(TokenType.RawEscape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                    new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                    new Token(TokenType.EscapeCount1, new TextPosition(4, 0, 4), new TextPosition(7, 0, 7)),
                     new Token(TokenType.Whitespace, new TextPosition(8, 0, 8), new TextPosition(24, 2, 6)),
                     Token.Eof,
                 }, tokens);

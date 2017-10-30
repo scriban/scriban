@@ -24,7 +24,6 @@ namespace Scriban.Parsing
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
         public Token(TokenType type, TextPosition start, TextPosition end)
         {
-            if (start.Offset > end.Offset) throw new ArgumentOutOfRangeException(nameof(start), $"[{nameof(start)}] index must be <= to [{nameof(end)}]");
             Type = type;
             Start = start;
             End = end;

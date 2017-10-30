@@ -26,7 +26,17 @@ namespace Scriban.Parsing
 
         Raw,
 
-        RawEscape,
+        Escape,
+
+        EscapeCount1,
+        EscapeCount2,
+        EscapeCount3,
+        EscapeCount4,
+        EscapeCount5,
+        EscapeCount6,
+        EscapeCount7,
+        EscapeCount8,
+        EscapeCount9,
 
         NewLine,
 

@@ -29,7 +29,7 @@ namespace Scriban.Parsing
 
         private readonly char _stripWhiteSpaceSpecialChar;
         private const char RawEscapeSpecialChar = '%';
-        private Token? _spaceSpan;
+        private readonly Queue<Token> _pendingTokens;
 
         /// <summary>
         /// Lexer options.
@@ -66,6 +66,7 @@ namespace Scriban.Parsing
 
             SourcePath = sourcePath ?? "<input>";
             _blockType = Options.Mode == ScriptMode.ScriptOnly ? BlockType.Code : BlockType.Raw;
+            _pendingTokens = new Queue<Token>();
 
             _isExpectingFrontMatter = Options.Mode == ScriptMode.FrontMatterOnly ||
                                      Options.Mode == ScriptMode.FrontMatterAndContent;
@@ -109,10 +110,9 @@ namespace Scriban.Parsing
 
             while (true)
             {
-                if (_spaceSpan.HasValue)
+                if (_pendingTokens.Count > 0)
                 {
-                    _token = _spaceSpan.Value;
-                    _spaceSpan = null;
+                    _token = _pendingTokens.Dequeue();
                     return true;
                 }
 
@@ -139,12 +139,14 @@ namespace Scriban.Parsing
 
                 if (Options.Mode != ScriptMode.ScriptOnly)
                 {
+                    bool hasEnter = false;
                     if (_blockType == BlockType.Raw)
                     {
                         bool skipPreviousSpaces;
                         if (IsCodeEnterOrEscape(out skipPreviousSpaces))
                         {
                             ReadCodeEnterOrEscape();
+                            hasEnter = true;
                             if (_blockType == BlockType.Code || _blockType == BlockType.Raw)
                             {
                                 return true;
@@ -155,11 +157,11 @@ namespace Scriban.Parsing
                             _blockType = BlockType.Code;
                             return true;
                         }
-                        Debug.Assert(_blockType == BlockType.Raw || _blockType == BlockType.RawEscape);
+                        Debug.Assert(_blockType == BlockType.Raw || _blockType == BlockType.Escape);
                         // Else we have a BlockType.EscapeRaw, so we need to parse the raw block
                     }
 
-                    if (_blockType != BlockType.Raw && IsCodeExit())
+                    if (!hasEnter && _blockType != BlockType.Raw && IsCodeExit())
                     {
                         var wasInBlock = _blockType == BlockType.Code;
                         ReadCodeExitOrEscape();
@@ -218,7 +220,7 @@ namespace Scriban.Parsing
         {
             Code,
 
-            RawEscape,
+            Escape,
 
             Raw,
         }
@@ -333,7 +335,7 @@ namespace Scriban.Parsing
 
             if (_escapeRawCharCount > 0)
             {
-                _blockType = BlockType.RawEscape;
+                _blockType = BlockType.Escape;
             }
             else
             {
@@ -386,7 +388,11 @@ namespace Scriban.Parsing
                                         {
                                             NextChar(); // Skip }
                                             _blockType = BlockType.Raw;
-                                            _token = new Token(isComment ? TokenType.CommentMulti : TokenType.RawEscape, start, end);
+                                            _token = new Token(isComment ? TokenType.CommentMulti : TokenType.Escape, start, end);
+                                            if (!isComment)
+                                            {
+                                                _pendingTokens.Enqueue(new Token(TokenType.EscapeCount1, end, end));
+                                            }
                                             return true;
                                         }
                                     }
@@ -402,7 +408,6 @@ namespace Scriban.Parsing
             }
             return false;
         }
-
 
         private void SkipSpaces()
         {
@@ -516,6 +521,8 @@ namespace Scriban.Parsing
 
             if (_escapeRawCharCount > 0)
             {
+                // We limit the escape count to 9 levels (only for roundtrip mode)
+                _pendingTokens.Enqueue(new Token((TokenType)(TokenType.EscapeCount1 + Math.Min(_escapeRawCharCount - 1, 8)), start, end));
                 _escapeRawCharCount = 0;
             }
             else
@@ -530,7 +537,7 @@ namespace Scriban.Parsing
                 TextPosition endSpace;
                 if (ConsumeWhitespace(false, out endSpace))
                 {
-                    _spaceSpan = new Token(TokenType.Whitespace, startSpace, endSpace);
+                    _pendingTokens.Enqueue(new Token(TokenType.Whitespace, startSpace, endSpace));
                 }
             }
 
@@ -541,16 +548,18 @@ namespace Scriban.Parsing
         private bool ReadRaw()
         {
             var start = _position;
-            var end = start;
+            var end = new TextPosition(-1, 0, 0);
             bool nextCodeEnterOrEscapeExit = false;
             bool removePreviousSpaces = false;
 
+            bool isEmptyRaw = false;
             while (true)
             {
                 if (PeekChar() != '\0')
                 {
-                    if (_blockType == BlockType.Raw && IsCodeEnterOrEscape(out removePreviousSpaces) || _blockType == BlockType.RawEscape && IsCodeExit())
+                    if (_blockType == BlockType.Raw && IsCodeEnterOrEscape(out removePreviousSpaces) || _blockType == BlockType.Escape && IsCodeExit())
                     {
+                        isEmptyRaw = end.Offset < 0;
                         nextCodeEnterOrEscapeExit = true;
                         break;
                     }
@@ -564,6 +573,10 @@ namespace Scriban.Parsing
                 }
             }
 
+            if (end.Offset < 0)
+            {
+                end = start;
+            }
 
             if (removePreviousSpaces)
             {
@@ -598,7 +611,7 @@ namespace Scriban.Parsing
 
                 if (endSpace.Offset >= 0)
                 {
-                    _spaceSpan = new Token(TokenType.Whitespace, startSpace, endSpace);
+                    _pendingTokens.Enqueue(new Token(TokenType.Whitespace, startSpace, endSpace));
                 }
 
                 if (end.Offset < start.Offset)
@@ -607,9 +620,22 @@ namespace Scriban.Parsing
                 }
             }
 
-            Debug.Assert(_blockType == BlockType.Raw || _blockType == BlockType.RawEscape);
+            Debug.Assert(_blockType == BlockType.Raw || _blockType == BlockType.Escape);
 
-            _token = new Token(_blockType == BlockType.RawEscape ? TokenType.RawEscape : TokenType.Raw, start, nextCodeEnterOrEscapeExit ? end : _position);
+            if (nextCodeEnterOrEscapeExit)
+            {
+                if (isEmptyRaw)
+                {
+                    end = new TextPosition(start.Offset - 1, start.Line, start.Column - 1);
+                }
+            }
+            else
+            {
+                end = _position;
+            }
+
+
+            _token = new Token(_blockType == BlockType.Escape ? TokenType.Escape : TokenType.Raw, start, end);
 
             // Go to eof
             if (!nextCodeEnterOrEscapeExit)

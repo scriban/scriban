@@ -9,19 +9,27 @@ namespace Scriban.Syntax
     {
         public string Text { get; set; }
 
-        public bool IsEscape { get; set; }
+        public int EscapeCount { get; set; }
 
         public override object Evaluate(TemplateContext context)
         {
             if (Text == null) return null;
 
             var length = Span.End.Offset - Span.Start.Offset + 1;
-            // If we are in the context of output, output directly to TemplateContext.Output
-            if (context.EnableOutput)
+            if (length > 0)
             {
-                context.Write(Text, Span.Start.Offset, length);
+                // If we are in the context of output, output directly to TemplateContext.Output
+                if (context.EnableOutput)
+                {
+                    context.Write(Text, Span.Start.Offset, length);
+                }
+                else
+                {
+                    return Text.Substring(Span.Start.Offset, length);
+                }
             }
-            else
+            return null;
+        }
             {
                 return Text.Substring(Span.Start.Offset, length);
             }
@@ -30,7 +38,8 @@ namespace Scriban.Syntax
 
         public override string ToString()
         {
-            return Text?.Substring(Span.Start.Offset, Span.End.Offset - Span.Start.Offset + 1) ?? string.Empty;
+            var length = Span.End.Offset - Span.Start.Offset + 1;
+            return Text?.Substring(Span.Start.Offset, length) ?? string.Empty;
         }
     }
 }

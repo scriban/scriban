@@ -188,7 +188,7 @@ namespace Scriban.Parsing
                     break;
 
                 case TokenType.Raw:
-                case TokenType.RawEscape:
+                case TokenType.Escape:
                     statement = ParseRawStatement();
                     break;
 
@@ -735,10 +735,31 @@ namespace Scriban.Parsing
         private ScriptRawStatement ParseRawStatement()
         {
             var scriptStatement = Open<ScriptRawStatement>();
+
+            // We keep span End here to update it with the raw span
+            var spanEnd = Current.End;
+
+            // If we have an escape, we can fetch the escape count
+            if (Current.Type == TokenType.Escape)
+            {
+                NextToken(); // Skip escape
+                if (Current.Type < TokenType.EscapeCount1 && Current.Type > TokenType.EscapeCount9)
+                {
+                    LogError(Current, $"Unexpected token `{GetAsText(Current)}` found. Expecting EscapeCount1-9.");
+                }
+                else
+                {
+                    scriptStatement.EscapeCount = (Current.Type - TokenType.EscapeCount1) + 1;
+                }
+            }
+
             scriptStatement.Text = _lexer.Text;
-            scriptStatement.IsEscape = Current.Type == TokenType.RawEscape;
-            NextToken(); // Skip raw
-            return Close(scriptStatement);
+            NextToken(); // Skip raw or escape count
+            Close(scriptStatement);
+            // Because the previous will update the ScriptStatement with the wrong Span End for escape (escapecount1+)
+            // We make sure that we use the span end of the Raw token
+            scriptStatement.Span.End = spanEnd;
+            return scriptStatement;
         }
 
         private ScriptIfStatement ParseIfStatement(bool invert)
