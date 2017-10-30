@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
@@ -32,6 +32,15 @@ namespace Scriban.Syntax
             {
                 context.PopGlobal();
             }
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            context.Write("with").WithSpace();
+            Name?.Write(context);
+            context.WithEos();
+            Body?.Write(context);
+            WriteEnd(context);
         }
 
         public override string ToString()

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
@@ -61,6 +61,21 @@ namespace Scriban.Syntax
             {
                 throw new ScriptRuntimeException(Iterator.Span, $"Unexpected type [{loopIterator.GetType()}] for iterator");
             }
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            context.Write("for").WithSpace();
+            Variable?.Write(context);
+            if (!context.PreviousHasSpace)
+            {
+                context.Write(" ");
+            }
+            context.Write("in").WithSpace();
+            Iterator?.Write(context);
+            context.WithEos();
+            Body?.Write(context);
+            WriteEnd(context);
         }
 
         public override string ToString()

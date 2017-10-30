@@ -534,8 +534,8 @@ namespace Scriban.Parsing
             if (shouldSkipSpacesAfterExit)
             {
                 var startSpace = _position;
-                TextPosition endSpace;
-                if (ConsumeWhitespace(false, out endSpace))
+                var endSpace = new TextPosition();
+                if (ConsumeWhitespace(false, ref endSpace))
                 {
                     _pendingTokens.Enqueue(new Token(TokenType.Whitespace, startSpace, endSpace));
                 }
@@ -656,13 +656,13 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.NewLine, start, _position);
                     NextChar();
                     // consume all remaining space including new lines
-                    ConsumeWhitespace(false);
+                    ConsumeWhitespace(false, ref _token.End);
                     break;
                 case ';':
                     _token = new Token(TokenType.SemiColon, start, _position);
                     NextChar();
                     // consume all remaining space including new lines
-                    ConsumeWhitespace(false);
+                    ConsumeWhitespace(false, ref _token.End);
                     break;
                 case '\r':
                     NextChar();
@@ -672,13 +672,13 @@ namespace Scriban.Parsing
                         _token = new Token(TokenType.NewLine, start, _position);
                         NextChar();
                         // consume all remaining space including new lines
-                        ConsumeWhitespace(false);
+                        ConsumeWhitespace(false, ref _token.End);
                         break;
                     }
                     // case of \r
                     _token = new Token(TokenType.NewLine, start, start);
                     // consume all remaining space including new lines
-                    ConsumeWhitespace(false);
+                    ConsumeWhitespace(false, ref _token.End);
                     break;
                 case ':':
                     _token = new Token(TokenType.Colon, start, start);
@@ -889,10 +889,18 @@ namespace Scriban.Parsing
                     break;
                 default:
                     // Eat any whitespace
-                    if (ConsumeWhitespace(true))
+                    var lastSpace = new TextPosition();
+                    if (ConsumeWhitespace(true, ref lastSpace))
                     {
-                        // We have no tokens for this ReadCode
-                        hasTokens = false;
+                        if (Options.KeepTrivia)
+                        {
+                            _token = new Token(TokenType.Whitespace, start, lastSpace);
+                        }
+                        else
+                        {
+                            // We have no tokens for this ReadCode
+                            hasTokens = false;
+                        }
                         break;
                     }
 
@@ -929,7 +937,7 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.NewLine, start, _position);
                     NextChar();
                     // consume all remaining space including new lines
-                    ConsumeWhitespace(false);
+                    ConsumeWhitespace(false, ref _token.End);
                     break;
                 case '\r':
                     NextChar();
@@ -939,13 +947,13 @@ namespace Scriban.Parsing
                         _token = new Token(TokenType.NewLine, start, _position);
                         NextChar();
                         // consume all remaining space including new lines
-                        ConsumeWhitespace(false);
+                        ConsumeWhitespace(false, ref _token.End);
                         break;
                     }
                     // case of \r
                     _token = new Token(TokenType.NewLine, start, start);
                     // consume all remaining space including new lines
-                    ConsumeWhitespace(false);
+                    ConsumeWhitespace(false, ref _token.End);
                     break;
                 case ':':
                     _token = new Token(TokenType.Colon, start, start);
@@ -1032,10 +1040,18 @@ namespace Scriban.Parsing
                     break;
                 default:
                     // Eat any whitespace
-                    if (ConsumeWhitespace(true))
+                    var lastSpace = new TextPosition();
+                    if (ConsumeWhitespace(true, ref lastSpace))
                     {
-                        // We have no tokens for this ReadCode
-                        hasTokens = false;
+                        if (Options.KeepTrivia)
+                        {
+                            _token = new Token(TokenType.Whitespace, start, lastSpace);
+                        }
+                        else
+                        {
+                            // We have no tokens for this ReadCode
+                            hasTokens = false;
+                        }
                         break;
                     }
 
@@ -1061,10 +1077,9 @@ namespace Scriban.Parsing
         }
 
 
-        private bool ConsumeWhitespace(bool stopAtNewLine, out TextPosition lastSpace)
+        private bool ConsumeWhitespace(bool stopAtNewLine, ref TextPosition lastSpace)
         {
             var start = _position;
-            lastSpace = start;
             while (char.IsWhiteSpace(c) && (!stopAtNewLine || !IsNewLine(c)))
             {
                 lastSpace = _position;

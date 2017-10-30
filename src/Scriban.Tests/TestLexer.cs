@@ -191,7 +191,7 @@ namespace Scriban.Tests
             Assert.AreEqual(new List<Token>
             {
                 new Token(TokenType.CodeEnter, new TextPosition(0,0, 0), new TextPosition(1,0, 1)),
-                new Token(TokenType.NewLine, new TextPosition(4,0, 4), new TextPosition(4,0, 4)), // Only first line is kept
+                new Token(TokenType.NewLine, new TextPosition(4,0, 4), new TextPosition(8,2, 1)), // Whe whole whitespaces with newlines
                 new Token(TokenType.CodeExit, new TextPosition(9,3, 0), new TextPosition(10,3, 1)),
                 Token.Eof
             }, tokens);

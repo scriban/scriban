@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System.IO;
+
 namespace Scriban.Syntax
 {
     [ScriptSyntax("nested expression", "(<expression>)")]
@@ -12,6 +14,13 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             return context.Evaluate(Expression);
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            context.Write("(");
+            Expression?.Write(context);
+            context.Write(")");
         }
 
         public override string ToString()

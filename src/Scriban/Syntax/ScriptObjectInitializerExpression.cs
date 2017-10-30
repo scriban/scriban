@@ -1,8 +1,9 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
 using System.Collections.Generic;
+using System.IO;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -31,6 +32,25 @@ namespace Scriban.Syntax
             return scriptObject;
         }
 
+        protected override void WriteImpl(RenderContext context)
+        {
+            context.Write("{");
+            bool isAfterFirst = false;
+            foreach(var member in Members)
+            {
+                if (isAfterFirst)
+                {
+                    context.Write(",");
+                }
+
+                member.Key?.Write(context);
+                context.Write(":");
+                member.Value?.Write(context);
+
+                isAfterFirst = true;
+            }
+            context.Write("}");
+        }
         public override string ToString()
         {
             return "{...}";

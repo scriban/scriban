@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System.Collections;
+using System.IO;
 using Scriban.Runtime;
 using Scriban.Helpers;
 
@@ -18,6 +19,27 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             return context.GetValue(this);
+        }
+
+        public override bool CanHaveLeadingTrivia()
+        {
+            return false;
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            Target?.Write(context);
+            var isSpecialArgumentsArray = Equals(Target, ScriptVariable.Arguments) && Index is ScriptLiteral &&
+                                          ((ScriptLiteral) Index).IsPositiveInteger();
+            if (!isSpecialArgumentsArray)
+            {
+                context.Write("[");
+            }
+            Index?.Write(context);
+            if (!isSpecialArgumentsArray)
+            {
+                context.Write("]");
+            }
         }
 
         public override string ToString()

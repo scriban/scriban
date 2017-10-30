@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.IO;
 
 namespace Scriban.Syntax
 {
@@ -119,6 +120,11 @@ namespace Scriban.Syntax
         {
             context.SetValue(this, valueToSet);
         }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            context.Write(ToString());
+        }
     }
 
     public sealed class ScriptVariableGlobal : ScriptVariable
@@ -133,6 +139,7 @@ namespace Scriban.Syntax
             return context.GetValue(this);
         }
     }
+
 
     public sealed class ScriptVariableLocal : ScriptVariable
     {

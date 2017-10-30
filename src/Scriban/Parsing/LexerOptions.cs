@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 namespace Scriban.Parsing
@@ -32,5 +32,10 @@ namespace Scriban.Parsing
         /// Defines the position to start the lexer parsing relative to the input text passed to <see cref="Lexer"/> constructor
         /// </summary>
         public TextPosition StartPosition { get; set; }
+
+        /// <summary>
+        /// The lexer will return whitespaces tokens
+        /// </summary>
+        public bool KeepTrivia { get; set; }
     }
 }

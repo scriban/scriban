@@ -4,6 +4,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using Scriban.Runtime;
 using Scriban.Syntax;
 
@@ -27,6 +28,9 @@ namespace Scriban.Parsing
         private bool _inFrontMatter;
         private bool _isStatementDepthLimitReached;
         private bool _hasFatalError;
+        private bool _isKeepTrivia;
+        private readonly List<ScriptTrivia> _trivias;
+        private bool _noEndProcess;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -40,9 +44,12 @@ namespace Scriban.Parsing
             _isLiquid = _lexer.Options.Mode == ScriptMode.Liquid;
             _tokensPreview = new List<Token>(4);
             Messages = new List<LogMessage>();
+            _trivias = new List<ScriptTrivia>();
 
             Options = options ?? new ParserOptions();
             CurrentParsingMode = lexer.Options.Mode;
+
+            _isKeepTrivia = Options.KeepTrivia;
 
             Blocks = new Stack<ScriptNode>();
 
@@ -201,6 +208,7 @@ namespace Scriban.Parsing
                     _isLiquidTagSection = Current.Type == TokenType.LiquidTagEnter;
                     _inCodeSection = true;
                     NextToken();
+
                     goto continueParsing;
 
                 case TokenType.FrontMatterMarker:
@@ -243,6 +251,7 @@ namespace Scriban.Parsing
 
                     _isLiquidTagSection = false;
                     _inCodeSection = false;
+
                     NextToken();
                     goto continueParsing;
 
@@ -253,6 +262,7 @@ namespace Scriban.Parsing
                         {
                             case TokenType.NewLine:
                             case TokenType.SemiColon:
+                                PushTokenToTrivia();
                                 NextToken();
                                 goto continueParsing;
                             case TokenType.Identifier:
@@ -300,12 +310,26 @@ namespace Scriban.Parsing
                     hasEnd = true;
                     nextStatement = false;
                     NextToken();
+
+                    if (!_noEndProcess)
+                    {
+                        ScriptStatement matchingStatement = null;
+                        if (_isKeepTrivia)
+                        {
+                            matchingStatement = FindMatchingStatementForEnd() ?? parent;
+                        }
+                        ExpectEndOfStatement(parent);
+                        if (_isKeepTrivia)
+                        {
+                            FlushTrivias(matchingStatement, false);
+                        }
+                    }
                     break;
                 case "wrap":
                     statement = ParseWrapStatement();
                     break;
                 case "if":
-                    statement = ParseIfStatement(false);
+                    statement = ParseIfStatement(false, false);
                     break;
                 case "else":
                     var parentCondition = parent as ScriptConditionStatement;
@@ -355,6 +379,7 @@ namespace Scriban.Parsing
                 case "break":
                     statement = Open<ScriptBreakStatement>();
                     NextToken();
+                    ExpectEndOfStatement(statement);
                     Close(statement);
 
                     // This has to be done at execution time, because of the wrap statement
@@ -362,11 +387,11 @@ namespace Scriban.Parsing
                     //{
                     //    LogError(statement, "Unexpected statement outside of a loop");
                     //}
-                    ExpectEndOfStatement(statement);
                     break;
                 case "continue":
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
+                    ExpectEndOfStatement(statement);
                     Close(statement);
 
                     // This has to be done at execution time, because of the wrap statement
@@ -374,7 +399,6 @@ namespace Scriban.Parsing
                     //{
                     //    LogError(statement, "Unexpected statement outside of a loop");
                     //}
-                    ExpectEndOfStatement(statement);
                     break;
                 case "func":
                     statement = ParseFunctionStatement(false);
@@ -392,6 +416,29 @@ namespace Scriban.Parsing
             }
         }
 
+        private ScriptStatement FindMatchingStatementForEnd()
+        {
+            foreach (var scriptNode in Blocks)
+            {
+                if (ExpectStatementEnd(scriptNode))
+                {
+                    return (ScriptStatement)scriptNode;
+                }
+            }
+            return null;
+        }
+
+        private static bool ExpectStatementEnd(ScriptNode scriptNode)
+        {
+            return (scriptNode is ScriptIfStatement && !((ScriptIfStatement) scriptNode).IsElseIf)
+                   || scriptNode is ScriptForStatement
+                   || scriptNode is ScriptCaptureStatement
+                   || scriptNode is ScriptWithStatement
+                   || scriptNode is ScriptWhileStatement
+                   || scriptNode is ScriptWrapStatement
+                   || scriptNode is ScriptFunction
+                   || scriptNode is ScriptAnonymousFunction;
+        }
 
         private void CheckInTagSection()
         {
@@ -403,7 +450,6 @@ namespace Scriban.Parsing
 
         private void ReadLiquidStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
-            var currentCondition = PeekCurrentBlock<ScriptConditionStatement>();
             bool isNotExpectedInTagSection = true;
             var localToken = Current;
             switch (identifier)
@@ -412,73 +458,93 @@ namespace Scriban.Parsing
                     CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
-                    if (currentCondition == null)
-                    {
-                        LogError($"Unable to find a pending `if`/`else` for this `endif`");
-                    }
+
                     NextToken();
+
+                    var matchingStatement = FindMatchingStatementForEnd() as ScriptIfStatement;
+                    if (matchingStatement == null)
+                    {
+                        LogError(localToken, $"Unable to find a pending `if`/`else` for this `endif`");
+                    }
+
+                    ExpectEndOfStatement(parent);
+                    if (_isKeepTrivia)
+                    {
+                        _trivias.Clear();
+                    }
                     break;
                 case "endunless":
                     CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
 
-                    bool foundUnless = false;
-                    foreach (var node in Blocks)
+                    NextToken();
+
+                    var unless = FindMatchingStatementForEnd() as ScriptIfStatement;
+                    if (unless == null || !unless.InvertCondition)
                     {
-                        // Expecting a unless opening
-                        if (node is ScriptIfStatement && ((ScriptIfStatement)node).InvertCondition)
-                        {
-                            foundUnless = true;
-                            break;
-                        }
+                        LogError(localToken, $"Unable to find a pending `unless` for this `endunless`");
                     }
 
-                    // Expecting a unless opening
-                    if (!foundUnless)
+                    ExpectEndOfStatement(parent);
+                    if (_isKeepTrivia)
                     {
-                        LogError($"Unable to find a pending `unless` for this `endunless`");
+                        _trivias.Clear();
                     }
-                    NextToken();
                     break;
 
                 case "endfor":
                     CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
-                    var currentFor = PeekCurrentBlock<ScriptForStatement>();
-                    // Expecting a for opening
-                    if (currentFor == null)
-                    {
-                        LogError($"Unable to find a pending `for` for this `endfor`");
-                    }
                     NextToken();
+
+                    var forStatement = FindMatchingStatementForEnd() as ScriptForStatement;
+                    if (forStatement == null)
+                    {
+                        LogError(localToken, $"Unable to find a pending `for` for this `endfor`");
+                    }
+
+                    ExpectEndOfStatement(parent);
+                    if (_isKeepTrivia)
+                    {
+                        _trivias.Clear();
+                    }
                     break;
 
                 case "endcase":
                     CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
-                    var currentCase = PeekCurrentBlock<ScriptConditionStatement>();
-                    // Expecting a for opening
-                    if (currentCase == null)
+
+                    var caseStatement = FindMatchingStatementForEnd() as ScriptIfStatement;
+                    if (caseStatement == null)
                     {
-                        LogError($"Unable to find a pending `case` for this `endcase`");
+                        LogError(localToken, $"Unable to find a pending `case` for this `endcase`");
                     }
-                    NextToken();
+
+                    ExpectEndOfStatement(parent);
+                    if (_isKeepTrivia)
+                    {
+                        _trivias.Clear();
+                    }
                     break;
 
                 case "endcapture":
                     CheckInTagSection();
                     hasEnd = true;
                     nextStatement = false;
-                    var capture = PeekCurrentBlock<ScriptCaptureStatement>();
-                    // Expecting a for opening
-                    if (capture == null)
+                    var captureStatement = FindMatchingStatementForEnd() as ScriptCaptureStatement;
+                    if (captureStatement == null)
                     {
-                        LogError($"Unable to find a pending `capture` for this `endcapture`");
+                        LogError(localToken, $"Unable to find a pending `capture` for this `endcapture`");
                     }
-                    NextToken();
+
+                    ExpectEndOfStatement(parent);
+                    if (_isKeepTrivia)
+                    {
+                        _trivias.Clear();
+                    }
                     break;
 
                 case "case":
@@ -493,11 +559,11 @@ namespace Scriban.Parsing
 
                 case "if":
                     CheckInTagSection();
-                    statement = ParseIfStatement(false);
+                    statement = ParseIfStatement(false, false);
                     break;
                 case "unless":
                     CheckInTagSection();
-                    statement = ParseIfStatement(true);
+                    statement = ParseIfStatement(true, false);
                     break;
                 case "else":
                 case "elsif":
@@ -534,13 +600,13 @@ namespace Scriban.Parsing
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
                     Close(statement);
-
                     ExpectEndOfStatement(statement);
                     break;
                 case "assign":
                 {
                     CheckInTagSection();
                     NextToken(); // skip assign
+                    
                     var token = _token;
                     // Try to parse an expression
                     var expressionStatement = ParseExpressionStatement();
@@ -677,7 +743,7 @@ namespace Scriban.Parsing
             return null;
         }
 
-        private bool ExpectEndOfStatement(ScriptNode statement)
+        private bool ExpectEndOfStatement(ScriptStatement statement)
         {
             if (_isLiquid)
             {
@@ -688,11 +754,31 @@ namespace Scriban.Parsing
             }
             else if (Current.Type == TokenType.NewLine || Current.Type == TokenType.CodeExit || Current.Type == TokenType.SemiColon || Current.Type == TokenType.Eof)
             {
+                if (Current.Type == TokenType.NewLine || Current.Type == TokenType.SemiColon)
+                {
+                    PushTokenToTrivia();
+                    NextToken();
+                }
                 return true;
             }
             // If we are not finding an end of statement, log a fatal error
             LogError(statement, $"Invalid token found `{GetAsText(Current)}`. Expecting <EOL>/end of line after", true);
             return false;
+        }
+
+        private void PushTokenToTrivia()
+        {
+            if (_isKeepTrivia)
+            {
+                if (Current.Type == TokenType.NewLine)
+                {
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.NewLine, _lexer.Text));
+                }
+                else if (Current.Type == TokenType.SemiColon)
+                {
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.SemiColon, _lexer.Text));
+                }
+            }
         }
 
         private ScriptFunction ParseFunctionStatement(bool isAnonymous)
@@ -762,10 +848,11 @@ namespace Scriban.Parsing
             return scriptStatement;
         }
 
-        private ScriptIfStatement ParseIfStatement(bool invert)
+        private ScriptIfStatement ParseIfStatement(bool invert, bool isElseIf)
         {
             // unit test: 200-if-else-statement.txt
             var condition = Open<ScriptIfStatement>();
+            condition.IsElseIf = isElseIf;
             condition.InvertCondition = invert;
             NextToken(); // skip if
 
@@ -773,6 +860,7 @@ namespace Scriban.Parsing
 
             if (ExpectEndOfStatement(condition))
             {
+                FlushTrivias(condition.Condition, false);
                 condition.Then = ParseBlockStatement(condition);
             }
 
@@ -787,6 +875,7 @@ namespace Scriban.Parsing
 
             if (ExpectEndOfStatement(wrapStatement))
             {
+                FlushTrivias(wrapStatement.Target, false);
                 wrapStatement.Body = ParseBlockStatement(wrapStatement);
             }
 
@@ -803,7 +892,6 @@ namespace Scriban.Parsing
             return null;
         }
 
-
         private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ref bool hasAnonymousExpression, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null)
         {
             if (StartAsExpression())
@@ -814,13 +902,12 @@ namespace Scriban.Parsing
             return null;
         }
 
-
         private ScriptConditionStatement ParseElseStatement(bool isElseIf)
         {
             // Case of elsif
             if (_isLiquid && isElseIf)
             {
-                return ParseIfStatement(false);
+                return ParseIfStatement(false, true);
             }
 
             // unit test: 200-if-else-statement.txt
@@ -828,7 +915,13 @@ namespace Scriban.Parsing
             if (!_isLiquid && nextToken.Type == TokenType.Identifier && GetAsText(nextToken) == "if")
             {
                 NextToken();
-                return ParseIfStatement(false);
+
+                if (_isKeepTrivia)
+                {
+                    // We don't store the trivias here
+                    _trivias.Clear();
+                }
+                return ParseIfStatement(false, true);
             }
 
             var elseStatement = Open<ScriptElseStatement>();
@@ -868,6 +961,7 @@ namespace Scriban.Parsing
 
                 if (ExpectEndOfStatement(forStatement))
                 {
+                    FlushTrivias(forStatement.Iterator, false);
                     forStatement.Body = ParseBlockStatement(forStatement);
                 }
             }
@@ -886,6 +980,7 @@ namespace Scriban.Parsing
 
             if (ExpectEndOfStatement(whileStatement))
             {
+                FlushTrivias(whileStatement.Condition, false);
                 whileStatement.Body = ParseBlockStatement(whileStatement);
             }
 
@@ -960,12 +1055,24 @@ namespace Scriban.Parsing
 
         private T Open<T>() where T : ScriptNode, new()
         {
-            return new T() { Span = {FileName = _lexer.SourcePath, Start = Current.Start}};
+            var element = new T() { Span = {FileName = _lexer.SourcePath, Start = Current.Start}};
+            FlushTrivias(element, true);
+            return element;
+        }
+
+        private void FlushTrivias(ScriptNode element, bool isBefore)
+        {
+            if (_isKeepTrivia && _trivias.Count > 0)
+            {
+                element.AddTrivias(_trivias, isBefore);
+                _trivias.Clear();
+            }
         }
 
         private T Close<T>(T statement) where T : ScriptNode
         {
             statement.Span.End = Previous.End;
+            FlushTrivias(statement, false);
             return statement;
         }
 
@@ -991,18 +1098,66 @@ namespace Scriban.Parsing
                     _tokensPreview.Clear();
                 }
 
-                if (!IsHidden(_token.Type))
+                if (IsHidden(_token.Type))
+                {
+                    if (_isKeepTrivia)
+                    {
+                        PushTrivia(_token);
+                    }
+                }
+                else
                 {
                     return;
                 }
+                
             }
 
             // Skip Comments
-            while ((result = _tokenIt.MoveNext()) && IsHidden(_tokenIt.Current.Type))
+            while ((result = _tokenIt.MoveNext()))
             {
+                if (IsHidden(_tokenIt.Current.Type))
+                {
+                    if (_isKeepTrivia)
+                    {
+                        PushTrivia(_tokenIt.Current);
+                    }
+                }
+                else
+                {
+                    break;
+                }
             }
 
             _token = result ? _tokenIt.Current : Token.Eof;
+        }
+
+
+        private void PushTrivia(Token token)
+        {
+            ScriptTriviaType type;
+            switch (token.Type)
+            {
+                case TokenType.Comment:
+                    type = ScriptTriviaType.Comment;
+                    break;
+
+                case TokenType.CommentMulti:
+                    type = ScriptTriviaType.CommentMulti;
+                    break;
+
+                case TokenType.Whitespace:
+                    type = ScriptTriviaType.Whitespace;
+                    break;
+
+                case TokenType.NewLine:
+                    type = ScriptTriviaType.Whitespace;
+                    break;
+                default:
+                    throw new InvalidOperationException($"Token type `{token.Type}` not supported by trivia");
+            }
+
+            var trivia = new ScriptTrivia(GetSpanForToken(token), type,  _lexer.Text);
+            _trivias.Add(trivia);
         }
 
         private Token PeekToken()
@@ -1033,8 +1188,7 @@ namespace Scriban.Parsing
 
         private bool IsHidden(TokenType tokenType)
         {
-            return tokenType == TokenType.Comment || tokenType == TokenType.CommentMulti || tokenType == TokenType.Whitespace ||
-                   (tokenType == TokenType.NewLine && allowNewLineLevel > 0);
+            return tokenType == TokenType.Comment || tokenType == TokenType.CommentMulti || tokenType == TokenType.Whitespace || (tokenType == TokenType.NewLine && allowNewLineLevel > 0);
         }
 
         private void LogError(string text, bool isFatal = false)

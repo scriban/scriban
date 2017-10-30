@@ -266,7 +266,7 @@ namespace Scriban.Functions
             }
             replace = replace ?? string.Empty;
 
-            var indexOfMatch = text.IndexOf(match);
+            var indexOfMatch = text.IndexOf(match, StringComparison.OrdinalIgnoreCase);
             if (indexOfMatch < 0)
             {
                 return text;
@@ -280,18 +280,34 @@ namespace Scriban.Functions
             return builder.ToString();
         }
 
+        public static bool Contains(string text, string input)
+        {
+            if (input == null || text == null)
+            {
+                return false;
+            }
+            return input.Contains(text);
+        }
+
         public static bool StartsWith(string start, string text)
         {
-            if (string.IsNullOrEmpty(start))
+            if (start == null || text == null)
             {
-                throw new ArgumentException("Invalid null start string to match against text", nameof(start));
-            }
-            if (string.IsNullOrEmpty(text))
-            {
-                throw new ArgumentException("Invalid null text", nameof(text));
+                return false;
             }
 
             return text.StartsWith(start);
+        }
+
+
+        public static bool EndsWith(string start, string text)
+        {
+            if (start == null || text == null)
+            {
+                return false;
+            }
+
+            return text.EndsWith(start);
         }
 
         [ScriptMemberIgnore]

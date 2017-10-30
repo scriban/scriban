@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System.IO;
+
 namespace Scriban.Syntax
 {
     [ScriptSyntax("expression statement", "<expression>")]
@@ -18,6 +20,12 @@ namespace Scriban.Syntax
                 return context.Evaluate(codeDelegate);
             }
             return result;
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            Expression?.Write(context);
+            context.WithEos();
         }
 
         public override string ToString()

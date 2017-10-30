@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
+using System.Collections.Generic;
 using System.Text;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -36,13 +37,27 @@ namespace Scriban.Parsing
                     NextToken();
                     return Close(falseValue);
                 case "do":
+                    var previousNoEndProcess = _noEndProcess;
+                    _noEndProcess = true;
                     var functionExp = Open<ScriptAnonymousFunction>();
                     functionExp.Function = ParseFunctionStatement(true);
-                    return Close(functionExp);
+                    var func = Close(functionExp);
+                    _noEndProcess = previousNoEndProcess;
+                    return func;
             }
 
-            NextToken();
+            // Keeps trivia before this token
+            List<ScriptTrivia> triviasBefore = null;
+            if (_isKeepTrivia && _trivias.Count > 0)
+            {
+                triviasBefore = new List<ScriptTrivia>();
+                triviasBefore.AddRange(_trivias);
+                _trivias.Clear();
+            }
 
+            ScriptExpression result = null;
+
+            NextToken();
             var scope = ScriptVariableScope.Global;
             if (text.StartsWith("$"))
             {
@@ -64,11 +79,10 @@ namespace Scriban.Parsing
 
                         Index = new ScriptLiteral() {Span = currentSpan, Value = index}
                     };
-                    return indexerExpression;
+                    result = indexerExpression;
                 }
             }
-
-            if (text == "for" || text == "while")
+            else if (text == "for" || text == "while")
             {
                 if (Current.Type == TokenType.Dot)
                 {
@@ -131,13 +145,27 @@ namespace Scriban.Parsing
                 LogError(currentToken, $"The reserved keyword <{text}> cannot be used as a variable");
             }
 
-            var result = ScriptVariable.Create(text, scope);
+            if (result == null)
+            {
+                result = ScriptVariable.Create(text, scope);
+            }            
             result.Span = new SourceSpan
             {
                 FileName = currentSpan.FileName,
                 Start = currentSpan.Start,
                 End = endSpan.End
             };
+
+            // Flush any trivias after
+            if (_isKeepTrivia)
+            {
+                if (triviasBefore != null)
+                {
+                    result.AddTrivias(triviasBefore, true);
+                }
+                FlushTrivias(result, false);
+            }
+
             return result;
         }
 

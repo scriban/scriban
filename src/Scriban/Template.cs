@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
@@ -182,6 +183,21 @@ namespace Scriban
         }
 
         /// <summary>
+        /// Converts back this template to a textual representation. This is the inverse of <see cref="Parse"/>.
+        /// </summary>
+        /// <param name="options">The rendering options</param>
+        /// <returns>The template converted back to a textual representation of the template</returns>
+        public string ToText(RenderOptions options = default(RenderOptions))
+        {
+            CheckErrors();
+            var writer = new StringWriter();
+            var renderContext = new RenderContext(writer, options);
+            Page.Write(renderContext);
+
+            return writer.ToString();
+        }
+
+        /// <summary>
         /// Evaluates the template using the specified context. See remarks.
         /// </summary>
         /// <param name="context">The template context.</param>
@@ -190,7 +206,7 @@ namespace Scriban
         private object EvaluateAndRender(TemplateContext context, bool render)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Template.HasError> and <Template.Messages> before evaluating a template. Messages:\n" + StringHelper.Join("\n", Messages));
+            CheckErrors();
 
             // Make sure that we are using the same parserOptions
             if (SourceFilePath != null)
@@ -219,6 +235,11 @@ namespace Scriban
             }
         }
 
+        private void CheckErrors()
+        {
+            if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Template.HasError> and <Template.Messages> before evaluating a template. Messages:\n" + StringHelper.Join("\n", Messages));
+        }
+
         private void ParseInternal(string text, string sourceFilePath)
         {
             // Early exit
@@ -226,6 +247,7 @@ namespace Scriban
             {
                 HasErrors = false;
                 Messages = new List<LogMessage>();
+                Page = new ScriptPage() {Span = new SourceSpan(sourceFilePath, new TextPosition(), TextPosition.Eof) };
                 return;
             }
 

@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System.IO;
+
 namespace Scriban.Syntax
 {
     [ScriptSyntax("raw statement", "<raw_text>")]
@@ -30,10 +32,25 @@ namespace Scriban.Syntax
             }
             return null;
         }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            if (EscapeCount > 0)
             {
-                return Text.Substring(Span.Start.Offset, length);
+                WriteEnterCode(context, EscapeCount);
             }
-            return null;
+
+            // TODO: handle escape
+            var length = Span.End.Offset - Span.Start.Offset + 1;
+            if (length > 0)
+            {
+                context.Write(Text.Substring(Span.Start.Offset, length));
+            }
+
+            if (EscapeCount > 0)
+            {
+                WriteExitCode(context, EscapeCount);
+            }
         }
 
         public override string ToString()

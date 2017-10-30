@@ -48,6 +48,24 @@ namespace Scriban.Syntax
             return result;
         }
 
+        protected override void WriteImpl(RenderContext context)
+        {
+            var isNextStatementRaw = context.IsNextStatementRaw;
+            for (var i = 0; i < Statements.Count; i++)
+            {
+                var scriptStatement = Statements[i];
+
+                var rawStatement = scriptStatement as ScriptRawStatement;
+
+                context.IsNextStatementRaw = i + 1 < Statements.Count ? Statements[i + 1] is ScriptRawStatement : isNextStatementRaw;
+
+                scriptStatement.Write(context);
+
+                context.PreviousRawStatement = rawStatement;
+            }
+            context.IsNextStatementRaw = isNextStatementRaw;
+        }
+
         public override string ToString()
         {
             return $"<statements[{Statements.Count}]>";

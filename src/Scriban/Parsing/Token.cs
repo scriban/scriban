@@ -42,7 +42,7 @@ namespace Scriban.Parsing
         /// <summary>
         /// The end position of this token.
         /// </summary>
-        public readonly TextPosition End;
+        public TextPosition End;
 
         public override string ToString()
         {

@@ -25,5 +25,11 @@ namespace Scriban.Syntax
             context.CurrentGlobal.Import(scriptObject);
             return null;
         }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            context.Write("import").WithSpace();
+            base.WriteImpl(context);
+        }
     }
 }

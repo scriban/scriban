@@ -1,9 +1,10 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using Scriban.Helpers;
 using Scriban.Runtime;
 
@@ -35,6 +36,17 @@ namespace Scriban.Syntax
             return Call(context, this, targetFunction, Arguments);
         }
 
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            Target?.Write(context);
+            foreach (var scriptExpression in Arguments)
+            {
+                context.WithSpace();
+                scriptExpression?.Write(context);
+            }
+        }
+
         public override string ToString()
         {
             var args = StringHelper.Join(" ", Arguments);
@@ -58,7 +70,7 @@ namespace Scriban.Syntax
 
             if (function == null && externFunction == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid object function [{functionObject?.GetType()}]");
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{callerContext}`( as `{functionObject?.GetType()}`)");
             }
 
             ScriptBlockStatement blockDelegate = null;

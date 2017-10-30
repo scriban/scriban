@@ -1,8 +1,10 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System;
 using System.Collections;
+using System.IO;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -13,11 +15,6 @@ namespace Scriban.Syntax
         public ScriptUnaryOperator Operator { get; set; }
 
         public ScriptExpression Right { get; set; }
-
-        public override string ToString()
-        {
-            return $"{Operator}{Right}";
-        }
 
         public bool ExpandParameters(object value, ScriptArray expandedParameters)
         {
@@ -88,6 +85,37 @@ namespace Scriban.Syntax
             }
 
             throw new ScriptRuntimeException(Span, $"Operator [{Operator}] is not supported");
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            switch (Operator)
+            {
+                case ScriptUnaryOperator.Not:
+                    context.Write("!");
+                    break;
+                case ScriptUnaryOperator.Negate:
+                    context.Write("-");
+                    break;
+                case ScriptUnaryOperator.Plus:
+                    context.Write("+");
+                    break;
+                case ScriptUnaryOperator.FunctionAlias:
+                    context.Write("@");
+                    break;
+                case ScriptUnaryOperator.FunctionParametersExpand:
+                    context.Write("^");
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+
+            Right?.Write(context);
+        }
+
+        public override string ToString()
+        {
+            return $"{Operator}{Right}";
         }
     }
 }

@@ -1,6 +1,8 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
+using System.IO;
 
 namespace Scriban.Syntax
 {
@@ -25,6 +27,13 @@ namespace Scriban.Syntax
                 throw new ScriptRuntimeException(To.Span, $"Pipe expression destination [{To}] is not a valid function ");
             }
             return result;
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            From?.Write(context);
+            context.Write("|");
+            To?.Write(context);
         }
 
         public override string ToString()

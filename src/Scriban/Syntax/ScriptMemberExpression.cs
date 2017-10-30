@@ -1,7 +1,8 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System.IO;
 using System.Reflection;
 using Scriban.Helpers;
 
@@ -17,6 +18,18 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             return context.GetValue(this);
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            Target?.Write(context);
+            context.Write(".");
+            Member?.Write(context);
+        }
+
+        public override bool CanHaveLeadingTrivia()
+        {
+            return false;
         }
 
         public override object GetValue(TemplateContext context)

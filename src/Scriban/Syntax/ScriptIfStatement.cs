@@ -30,6 +30,8 @@ namespace Scriban.Syntax
 
         public ScriptBlockStatement Then { get; set; }
 
+        public bool IsElseIf { get; set; }
+
         public override object Evaluate(TemplateContext context)
         {
             var conditionValue = context.ToBool(context.Evaluate(Condition));
@@ -44,6 +46,34 @@ namespace Scriban.Syntax
             else
             {
                 return base.Evaluate(context);
+            }
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            if (IsElseIf)
+            {
+                context.Write("else ");
+            }
+            context.Write("if").WithSpace();
+            if (InvertCondition)
+            {
+                context.Write("!(");
+            }
+            Condition?.Write(context);
+            if (InvertCondition)
+            {
+                context.Write(")");
+            }
+            context.WithEos();
+
+            Then?.Write(context);
+
+            Else?.Write(context);
+
+            if (!IsElseIf)
+            {
+                WriteEnd(context);
             }
         }
 
@@ -62,6 +92,13 @@ namespace Scriban.Syntax
         {
             context.Evaluate(Body);
             return base.Evaluate(context);
+        }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            context.Write("else").WithEos();
+            Body?.Write(context);
+            Else?.Write(context);
         }
     }
 }

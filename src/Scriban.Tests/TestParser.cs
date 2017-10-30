@@ -23,6 +23,94 @@ namespace Scriban.Tests
         private const string OutputEndFileExtension = ".out.txt";
 
         [Test]
+        public void TestRoundtrip()
+        {
+            var text = "This is a text {{ code # With some comment }} and a text";
+            AssertRoundtrip(text);
+        }
+
+        [Test]
+        public void TestRoundtrip1()
+        {
+            var text = "This is a text {{ code | pipe a b c | a + b }} and a text";
+            AssertRoundtrip(text);
+        }
+
+        [Test]
+        public void RoundtripFunction()
+        {
+            var text = @"{{ func inc
+    ret $0 + 1
+end }}";
+            AssertRoundtrip(text);
+        }
+
+        [Test]
+        public void RoundtripFunction2()
+        {
+            var text = @"{{
+func   inc
+    ret $0 + 1
+end
+xxx 1
+}}";
+            AssertRoundtrip(text);
+        }
+
+
+        [Test]
+        public void RoundtripIf()
+        {
+            var text = @"{{
+if true
+    ""yes""
+end
+}}
+raw
+";
+            AssertRoundtrip(text);
+        }
+
+        [Test]
+        public void RoundtripIfElse()
+        {
+            var text = @"{{
+if true
+    ""yes""
+else
+    ""no""
+end
+}}
+raw
+";
+            AssertRoundtrip(text);
+        }
+
+        [Test]
+        public void RoundtripIfElseIf()
+        {
+            var text = @"{{
+if true
+    ""yes""
+else if yo
+    ""no""
+end
+y
+}}
+raw
+";
+            AssertRoundtrip(text);
+        }
+
+
+        [Test]
+        public void RoundtripRaw()
+        {
+            var text = @"This is a raw     {{~ x ~}}     end";
+            AssertRoundtrip(text);
+        }
+
+        [Test]
         public void TestDateNow()
         {
             // default is dd MM yyyy
@@ -216,67 +304,138 @@ end
             Assert.True(File.Exists(expectedOutputFile), $"Expecting output result file [{expectedOutputFile}] for input file [{inputName}]");
             var expectedOutputText = File.ReadAllText(expectedOutputFile, Encoding.UTF8);
 
-
             var isLiquid = inputName.Contains("liquid");
 
+            AssertTemplate(inputText, isLiquid, expectedOutputText);
+        }
+
+        private void AssertRoundtrip(string inputText, bool isLiquid = false)
+        {
+            inputText = inputText.Replace("\r\n", "\n");
+            AssertTemplate(inputText, isLiquid, inputText, true);
+        }
+
+        private void AssertTemplate(string inputText, bool isLiquid, string expectedOutputText, bool isRoundTripTest = false)
+        {
+            var parserOptions = new ParserOptions();
             var lexerOptions = new LexerOptions()
             {
                 Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default
             };
 
-            var template = Template.Parse(inputText, "text", lexerOptions: lexerOptions);
 
-            var result = string.Empty;
-
-            if (template.HasErrors)
+            if (isRoundTripTest)
             {
-                for (int i = 0; i < template.Messages.Count; i++)
-                {
-                    var message = template.Messages[i];
-                    if (i > 0)
-                    {
-                        result += "\n";
-                    }
-                    result += message;
-                }
+                parserOptions.KeepTrivia = true;
+                lexerOptions.KeepTrivia = true;
             }
-            else
+
+            Console.WriteLine("Tokens");
+            Console.WriteLine("======================================");
+            var lexer = new Lexer(inputText, options: lexerOptions);
+            foreach (var token in lexer)
             {
+                Console.WriteLine($"{token.Type}: {token.GetText(inputText)}");
+            }
+            Console.WriteLine();
 
-                Assert.NotNull(template.Page);
+            string roundtripText = null;
 
-                try
+            // We loop first on input text, then on rountrip
+            while (true)
+            {
+                bool isRoundtrip = roundtripText != null;
+                bool hasErrors = false;
+                if (isRoundtrip)
                 {
-                    object model = null;
+                    inputText = roundtripText;
 
-                    // Setup a default liquid context for the tests, as we can't create object/array in liquid directly
-                    if (isLiquid)
+                    Console.WriteLine("Rountrip");
+                    Console.WriteLine("======================================");
+                    Console.WriteLine(roundtripText);
+                    lexerOptions.Mode = ScriptMode.Default;
+                }
+
+                var template = Template.Parse(inputText, "text", parserOptions, lexerOptions);
+
+                var result = string.Empty;
+                if (template.HasErrors)
+                {
+                    hasErrors = true;
+                    for (int i = 0; i < template.Messages.Count; i++)
                     {
-                        var liquidContext = new ScriptObject
+                        var message = template.Messages[i];
+                        if (i > 0)
                         {
-                            ["page"] = new ScriptObject {["title"] = "This is a title"},
-                            ["user"] = new ScriptObject {["name"] = "John"},
-                            ["product"] = new ScriptObject {["title"] = "Orange Hello World", ["type"] = "fruit"}
-                        };
-                        model = liquidContext;
+                            result += "\n";
+                        }
+                        result += message;
                     }
-
-                    result = template.Render(model);
                 }
-                catch (ScriptRuntimeException exception)
+                else
                 {
-                    result = GetReason(exception);
+                    if (isRoundTripTest)
+                    {
+                        result = template.ToText();
+                    }
+                    else
+                    {
+                        Assert.NotNull(template.Page);
+
+                        if (!isRoundtrip)
+                        {
+                            // Dumps the rountrip version
+                            var lexerOptionsForTrivia = lexerOptions;
+                            lexerOptionsForTrivia.KeepTrivia = true;
+                            var templateWithTrivia = Template.Parse(inputText, parserOptions: new ParserOptions() {KeepTrivia = true}, lexerOptions: lexerOptionsForTrivia);
+                            roundtripText = templateWithTrivia.ToText();
+                        }
+
+                        try
+                        {
+                            object model = null;
+
+                            // Setup a default liquid context for the tests, as we can't create object/array in liquid directly
+                            if (isLiquid)
+                            {
+                                var liquidContext = new ScriptObject
+                                {
+                                    ["page"] = new ScriptObject {["title"] = "This is a title"},
+                                    ["user"] = new ScriptObject {["name"] = "John"},
+                                    ["product"] =
+                                    new ScriptObject {["title"] = "Orange Hello World", ["type"] = "fruit"}
+                                };
+                                model = liquidContext;
+                            }
+
+                            result = template.Render(model);
+                        }
+                        catch (ScriptRuntimeException exception)
+                        {
+                            result = GetReason(exception);
+                        }
+                    }
+                }
+
+                var testContext = isRoundtrip ? "Roundtrip - " : String.Empty;
+                Console.WriteLine($"{testContext}Result");
+                Console.WriteLine("======================================");
+                Console.WriteLine(result);
+                Console.WriteLine($"{testContext}Expected");
+                Console.WriteLine("======================================");
+                Console.WriteLine(expectedOutputText);
+                Console.WriteLine();
+
+                TextAssert.AreEqual(expectedOutputText, result);
+
+                if (isRoundTripTest || isRoundtrip || hasErrors)
+                {
+                    break;
                 }
             }
-            Console.WriteLine("Result");
-            Console.WriteLine("======================================");
-            Console.WriteLine(result);
-            Console.WriteLine("Expected");
-            Console.WriteLine("======================================");
-            Console.WriteLine(expectedOutputText);
-
-            TextAssert.AreEqual(expectedOutputText, result);
         }
+
+
 
         private static string GetReason(Exception ex)
         {

@@ -12,5 +12,11 @@ namespace Scriban.Syntax
             context.FlowState = ScriptFlowState.Return;
             return base.Evaluate(context);
         }
+
+        protected override void WriteImpl(RenderContext context)
+        {
+            context.Write("ret").WithSpace();
+            base.WriteImpl(context);
+        }
     }
 }

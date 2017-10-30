@@ -31,7 +31,9 @@ List of all the builtin <string> functions:
  append
  capitalize
  capitalizewords
+ contains
  downcase
+ ends_with
  handleize
  hmac_sha1
  hmac_sha256

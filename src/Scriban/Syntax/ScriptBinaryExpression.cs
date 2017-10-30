@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using Scriban.Functions;
 using Scriban.Helpers;
@@ -123,9 +124,22 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(Span, $"Operator [{Operator.ToText()}] is not implemented for the left [{Left}] / right [{Right}]");
         }
 
+        protected override void WriteImpl(RenderContext context)
+        {
+            Left?.Write(context);
+            context.Write(Operator.ToText());
+            // No spaces for range
+            Right?.Write(context);
+        }
+
         public override string ToString()
         {
             return $"{Left} {Operator.ToText()} {Right}";
+        }
+
+        public override bool CanHaveLeadingTrivia()
+        {
+            return false;
         }
 
         private static object CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object left, object right)

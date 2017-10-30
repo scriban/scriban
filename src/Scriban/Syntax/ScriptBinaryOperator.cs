@@ -1,6 +1,9 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
+using System;
+
 namespace Scriban.Syntax
 {
     public enum ScriptBinaryOperator
@@ -74,7 +77,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.RangeInclude:
                     return "..";
                 case ScriptBinaryOperator.RangeExclude:
-                    return "...";
+                    return "..<";
                 case ScriptBinaryOperator.CompareEqual:
                     return "==";
                 case ScriptBinaryOperator.CompareNotEqual:
@@ -91,19 +94,26 @@ namespace Scriban.Syntax
                     return "&&";
                 case ScriptBinaryOperator.Or:
                     return "||";
+                case ScriptBinaryOperator.EmptyCoalescing:
+                    return "??";
+                case ScriptBinaryOperator.ShiftLeft:
+                    return "<<";
+                case ScriptBinaryOperator.ShiftRight:
+                    return ">>";
 
                 case ScriptBinaryOperator.LiquidContains:
-                    return "contains";
+                    return "| string.contains ";
                 case ScriptBinaryOperator.LiquidStartsWith:
-                    return "startsWith";
+                    return "| string.starts_with ";
                 case ScriptBinaryOperator.LiquidEndsWith:
-                    return "endsWith";
+                    return "| string.ends_with ";
                 case ScriptBinaryOperator.LiquidHasKey:
-                    return "hasKey";
+                    return "| object.has_key ";
                 case ScriptBinaryOperator.LiquidHasValue:
-                    return "hasValue";
+                    return "| object.has_value ";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(op));
             }
-            return op.ToString();
         }
     }
 }
