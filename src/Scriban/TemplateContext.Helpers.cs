@@ -235,7 +235,7 @@ namespace Scriban
                 }
             }
 
-            return value;
+            throw new ScriptRuntimeException(span, $"Unable to convert type [{value.GetType()}] to [{destinationType}]");
         }
     }
 }
