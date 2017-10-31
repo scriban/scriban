@@ -49,7 +49,7 @@ namespace Scriban.Parsing
             Options = options ?? new ParserOptions();
             CurrentParsingMode = lexer.Options.Mode;
 
-            _isKeepTrivia = Options.KeepTrivia;
+            _isKeepTrivia = lexer.Options.KeepTrivia;
 
             Blocks = new Stack<ScriptNode>();
 
