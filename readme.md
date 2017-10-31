@@ -77,9 +77,10 @@ Scriban is available as a NuGet package: [![NuGet](https://img.shields.io/nuget/
 Compatible with the following .NET framework profiles:
 
 - `.NET3.5`
-- `.NET4.0+` via the PCL profile `portable40-net40+sl5+win8+wp8+wpa81`
+- `.NET4.0+`
+-  .NET PCL profile `portable40-net40+sl5+win8+wp8+wpa81`
 - `UAP10.0+`
-- `NetStandard1.1` running on `CoreCLR`
+- `NetStandard1.1+` running on `CoreCLR`
 
 Also [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet package provides signed assemblies.
 
