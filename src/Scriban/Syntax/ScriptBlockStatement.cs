@@ -66,6 +66,11 @@ namespace Scriban.Syntax
             context.IsNextStatementRaw = isNextStatementRaw;
         }
 
+        public override bool CanHaveLeadingTrivia()
+        {
+            return false;
+        }
+
         public override string ToString()
         {
             return $"<statements[{Statements.Count}]>";

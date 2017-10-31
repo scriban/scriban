@@ -135,16 +135,24 @@ namespace Scriban.Syntax
 
         public override string ToString()
         {
+            if (Type == ScriptTriviaType.Empty)
+            {
+                return string.Empty;
+            }
             var length = Span.End.Offset - Span.Start.Offset + 1;
-            return Text.Substring(Span.Start.Offset, length);
+            return Text?.Substring(Span.Start.Offset, length);
         }
     }
 
     public enum ScriptTriviaType
     {
+        Empty,
+
         Whitespace,
 
         Comment,
+
+        Comma,
 
         CommentMulti,
 

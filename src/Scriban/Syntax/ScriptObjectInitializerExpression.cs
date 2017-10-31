@@ -47,7 +47,8 @@ namespace Scriban.Syntax
                 context.Write(":");
                 context.Write(member.Value);
 
-                isAfterFirst = true;
+                // If the value didn't have any Comma Trivia, we can emit it
+                isAfterFirst = !member.Value.HasTrivia(ScriptTriviaType.Comma, false);
             }
             context.Write("}");
         }

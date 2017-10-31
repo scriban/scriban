@@ -52,8 +52,6 @@ namespace Scriban.Parsing
                 _trivias.Clear();
             }
 
-            ScriptExpression result = null;
-
             NextToken();
             var scope = ScriptVariableScope.Global;
             if (text.StartsWith("$"))
@@ -76,7 +74,17 @@ namespace Scriban.Parsing
 
                         Index = new ScriptLiteral() {Span = currentSpan, Value = index}
                     };
-                    result = indexerExpression;
+
+                    if (_isKeepTrivia)
+                    {
+                        if (triviasBefore != null)
+                        {
+                            indexerExpression.Target.AddTrivias(triviasBefore, true);
+                        }
+                        FlushTrivias(indexerExpression.Index, false);
+                    }
+
+                    return indexerExpression;
                 }
             }
             else if (text == "for" || text == "while")
@@ -142,10 +150,7 @@ namespace Scriban.Parsing
                 LogError(currentToken, $"The reserved keyword <{text}> cannot be used as a variable");
             }
 
-            if (result == null)
-            {
-                result = ScriptVariable.Create(text, scope);
-            }            
+            var result = ScriptVariable.Create(text, scope);
             result.Span = new SourceSpan
             {
                 FileName = currentSpan.FileName,
@@ -214,6 +219,11 @@ namespace Scriban.Parsing
             var literal = Open<ScriptLiteral>();
             var text = _lexer.Text;
             var builder = new StringBuilder(Current.End.Offset - Current.Start.Offset - 1);
+
+            literal.StringQuoteType =
+                _lexer.Text[Current.Start.Offset] == '\''
+                    ? ScriptLiteralStringQuoteType.SimpleQuote
+                    : ScriptLiteralStringQuoteType.DoubleQuote;
 
             var end = Current.End.Offset;
             for (int i = Current.Start.Offset + 1; i < end; i++)
@@ -301,6 +311,8 @@ namespace Scriban.Parsing
         {
             var literal = Open<ScriptLiteral>();
             var text = _lexer.Text;
+
+            literal.StringQuoteType = ScriptLiteralStringQuoteType.Verbatim;
 
             StringBuilder builder = null;
 

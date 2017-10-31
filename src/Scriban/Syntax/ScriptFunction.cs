@@ -20,6 +20,11 @@ namespace Scriban.Syntax
             return null;
         }
 
+        public override bool CanHaveLeadingTrivia()
+        {
+            return Name != null;
+        }
+
         public override string ToString()
         {
             return $"func {Name} ... end";

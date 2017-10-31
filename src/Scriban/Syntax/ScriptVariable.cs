@@ -153,6 +153,19 @@ namespace Scriban.Syntax
         public ScriptVariableLoop(string name) : base(name, ScriptVariableScope.Loop)
         {
         }
+
+        public override void Write(RenderContext context)
+        {
+            if (context.IsInWhileLoop)
+            {
+                // TODO: Not efficient
+                context.Write(ToString().Replace("for", "while"));
+            }
+            else
+            {
+                base.Write(context);
+            }
+        }
     }
 
 }

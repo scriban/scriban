@@ -47,6 +47,11 @@ namespace Scriban.Syntax
             }
         }
 
+        public override bool CanHaveLeadingTrivia()
+        {
+            return false;
+        }
+
         public override string ToString()
         {
             var args = StringHelper.Join(" ", Arguments);

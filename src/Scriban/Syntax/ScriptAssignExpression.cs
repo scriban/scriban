@@ -20,10 +20,15 @@ namespace Scriban.Syntax
             return valueObject;
         }
 
+        public override bool CanHaveLeadingTrivia()
+        {
+            return false;
+        }
+
         public override void Write(RenderContext context)
         {
             context.Write(Target);
-            context.Write("=").WithSpace();
+            context.Write("=");
             context.Write(Value);
         }
 

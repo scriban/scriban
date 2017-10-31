@@ -36,11 +36,13 @@ namespace Scriban.Syntax
             for (var i = 0; i < Values.Count; i++)
             {
                 var value = Values[i];
-                if (i > 0)
+                context.Write(value);
+
+                // If the value didn't have any Comma Trivia, we can emit it
+                if (i + 1 < Values.Count && !value.HasTrivia(ScriptTriviaType.Comma, false))
                 {
                     context.Write(",");
                 }
-                context.Write(value);
             }
             context.Write("]");
         }

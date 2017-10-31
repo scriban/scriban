@@ -105,7 +105,7 @@ raw
         [Test]
         public void RoundtripCapture()
         {
-            var text = @" {{~ capture variable ~}}
+            var text = @" {{ capture variable ~}}
     This is a capture
 {{~ end ~}}
 {{ variable }}";
@@ -305,6 +305,9 @@ end
         public void Test(TestFilePath testFilePath)
         {
             var inputName = testFilePath.FilePath;
+
+            var isSupportingExactRoundTrip = !NotSupportingExactRoundtrip.Contains(Path.GetFileName(inputName));
+
             var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
 
             var inputFile = Path.Combine(baseDir, inputName);
@@ -316,7 +319,7 @@ end
 
             var isLiquid = inputName.Contains("liquid");
 
-            AssertTemplate(inputText, isLiquid, expectedOutputText);
+            AssertTemplate(inputText, isLiquid, expectedOutputText, false, isSupportingExactRoundTrip);
         }
 
         private void AssertRoundtrip(string inputText, bool isLiquid = false)
@@ -325,7 +328,20 @@ end
             AssertTemplate(inputText, isLiquid, inputText, true);
         }
 
-        private void AssertTemplate(string inputText, bool isLiquid, string expectedOutputText, bool isRoundTripTest = false)
+
+        /// <summary>
+        /// Lists of the tests that don't support exact byte-to-byte roundtrip (due to reformatting...etc.)
+        /// </summary>
+        private static readonly HashSet<string> NotSupportingExactRoundtrip = new HashSet<string>()
+        {
+            "003-whitespaces.txt",
+            "010-literals.txt",
+            "205-case-when-statement2.txt",
+            "230-capture-statement2.txt",
+            "470-html.txt"
+        };
+
+        private void AssertTemplate(string inputText, bool isLiquid, string expectedOutputText, bool isRoundTripTest = false, bool supportExactRoundtrip = true)
         {
             var parserOptions = new ParserOptions();
             var lexerOptions = new LexerOptions()
@@ -357,12 +373,24 @@ end
                 bool hasErrors = false;
                 if (isRoundtrip)
                 {
-                    inputText = roundtripText;
-
                     Console.WriteLine("Rountrip");
                     Console.WriteLine("======================================");
                     Console.WriteLine(roundtripText);
                     lexerOptions.Mode = ScriptMode.Default;
+
+                    if (lexerOptions.Mode == ScriptMode.Default && !isLiquid && supportExactRoundtrip)
+                    {
+                        Console.WriteLine("Checking Exact Roundtrip - Input");
+                        Console.WriteLine("======================================");
+                        TextAssert.AreEqual(inputText, roundtripText);
+                    }
+                    inputText = roundtripText;
+                }
+                else
+                {
+                    Console.WriteLine("Input");
+                    Console.WriteLine("======================================");
+                    Console.WriteLine(inputText);
                 }
 
                 var template = Template.Parse(inputText, "text", parserOptions, lexerOptions);

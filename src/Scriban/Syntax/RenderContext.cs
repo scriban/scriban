@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System.IO;
+using Scriban.Helpers;
 
 namespace Scriban.Syntax
 {
@@ -21,9 +22,11 @@ namespace Scriban.Syntax
         private bool _nextLStrip;
         private bool _nextRStrip;
         private bool _hasEndOfStatement;
+        private FastStack<bool> _isWhileLoop;
 
         public RenderContext(TextWriter writer, RenderOptions options = default(RenderOptions))
         {
+            _isWhileLoop = new FastStack<bool>(4);
             Options = options;
             _writer = writer;
         }
@@ -37,13 +40,31 @@ namespace Scriban.Syntax
 
         internal ScriptRawStatement PreviousRawStatement { get; set; }
 
+        public bool IsInWhileLoop => _isWhileLoop.Count > 0 && _isWhileLoop.Peek();
+
         public RenderContext Write(ScriptNode node)
         {
             if (node != null)
             {
-                WriteBegin(node);
-                node.Write(this);
-                WriteEnd(node);
+                bool pushedWhileLoop = false;
+                if (node is ScriptLoopStatementBase)
+                {
+                    _isWhileLoop.Push(node is ScriptWhileStatement);
+                    pushedWhileLoop = true;
+                }
+                try
+                {
+                    WriteBegin(node);
+                    node.Write(this);
+                    WriteEnd(node);
+                }
+                finally
+                {
+                    if (pushedWhileLoop)
+                    {
+                        _isWhileLoop.Pop();
+                    }
+                }
             }
             return this;
         }
@@ -57,7 +78,10 @@ namespace Scriban.Syntax
 
         public RenderContext WithEos()
         {
-            _expectEndOfStatement = true;
+            if (!_hasEndOfStatement)
+            {
+                _expectEndOfStatement = true;
+            }
             return this;
         }
 
@@ -134,11 +158,14 @@ namespace Scriban.Syntax
             WriteTrivias(node, true);
 
             // Add a space if this is required and no trivia are providing it
-            if (node.CanHaveLeadingTrivia() && _expectSpace && !_previousHasSpace)
+            if (node.CanHaveLeadingTrivia())
             {
-                Write(" ");
+                if (_expectSpace && !_previousHasSpace)
+                {
+                    Write(" ");
+                }
+                _expectSpace = false;
             }
-            _expectSpace = false;
 
             if (node is ScriptPage)
             {
@@ -206,15 +233,24 @@ namespace Scriban.Syntax
 
         private void WriteTrivias(ScriptNode node, bool before)
         {
-            _hasEndOfStatement = false;
             if (node.Trivias != null)
             {
                 foreach (var trivia in (before ? node.Trivias.Before : node.Trivias.After))
                 {
                     trivia.Write(this);
-                    if (trivia.Type == ScriptTriviaType.NewLine || trivia.Type == ScriptTriviaType.SemiColon)
+                    if (trivia.Type == ScriptTriviaType.End)
+                    {
+                        _hasEndOfStatement = false;
+                    }
+                    else if (trivia.Type == ScriptTriviaType.NewLine || trivia.Type == ScriptTriviaType.SemiColon)
                     {
                         _hasEndOfStatement = true;
+                        _expectEndOfStatement = false;
+                        // If expect a space and we have a NewLine or SemiColon, we can safely discard the required space
+                        if (_expectSpace)
+                        {
+                            _expectSpace = false;
+                        }
                     }
                 }
             }

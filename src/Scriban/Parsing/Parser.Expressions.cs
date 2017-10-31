@@ -404,7 +404,19 @@ namespace Scriban.Parsing
 
                     if (Current.Type == TokenType.Comma)
                     {
+                        // Record trailing Commas
+                        if (_isKeepTrivia)
+                        {
+                            expression.AddTrivia(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Comma, _lexer.Text), false);
+                        }
+
                         NextToken();
+
+                        if (_isKeepTrivia && _trivias.Count > 0)
+                        {
+                            expression.AddTrivias(_trivias, false);
+                            _trivias.Clear();
+                        }
                     }
                     else
                     {
@@ -487,6 +499,7 @@ namespace Scriban.Parsing
                         break;
                     }
 
+                    // TODO: record as trivia
                     NextToken(); // Skip :
 
                     if (!StartAsExpression())
@@ -503,7 +516,18 @@ namespace Scriban.Parsing
 
                     if (Current.Type == TokenType.Comma)
                     {
+                        // Record trailing Commas
+                        if (_isKeepTrivia)
+                        {
+                            expression.AddTrivia(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Comma, _lexer.Text), false);
+                        }
                         NextToken();
+
+                        if (_isKeepTrivia && _trivias.Count > 0)
+                        {
+                            expression.AddTrivias(_trivias, false);
+                            _trivias.Clear();
+                        }
                     }
                     else
                     {

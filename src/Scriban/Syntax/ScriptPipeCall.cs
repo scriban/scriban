@@ -29,6 +29,11 @@ namespace Scriban.Syntax
             return result;
         }
 
+        public override bool CanHaveLeadingTrivia()
+        {
+            return false;
+        }
+
         public override void Write(RenderContext context)
         {
             context.Write(From);

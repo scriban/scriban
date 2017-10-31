@@ -31,6 +31,7 @@ namespace Scriban.Parsing
         private bool _hasFatalError;
         private readonly bool _isKeepTrivia;
         private readonly List<ScriptTrivia> _trivias;
+        private readonly Queue<ScriptStatement> _pendingStatements;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -51,6 +52,7 @@ namespace Scriban.Parsing
 
             _isKeepTrivia = lexer.Options.KeepTrivia;
 
+            _pendingStatements = new Queue<ScriptStatement>(2);
             Blocks = new Stack<ScriptNode>();
 
             // Initialize the iterator
@@ -187,6 +189,12 @@ namespace Scriban.Parsing
                 return false;
             }
 
+            if (_pendingStatements.Count > 0)
+            {
+                statement = _pendingStatements.Dequeue();
+                return true;
+            }
+
             switch (Current.Type)
             {
                 case TokenType.Eof:
@@ -210,19 +218,41 @@ namespace Scriban.Parsing
 
                     // If we have any pending trivias before processing this code enter and we want to keep trivia
                     // we need to generate a RawStatement to store these trivias
-                    if (_isKeepTrivia && _trivias.Count > 0)
+                    if (_isKeepTrivia && (_trivias.Count > 0 || Previous.Type == TokenType.CodeEnter))
                     {
                         var rawStatement = Open<ScriptRawStatement>();
                         Close(rawStatement);
-                        rawStatement.Trivias.After.AddRange(rawStatement.Trivias.Before);
-                        rawStatement.Trivias.Before.Clear();
-                        var firstTriviaSpan = rawStatement.Trivias.After[0].Span;
-                        var lastTriviaSpan = rawStatement.Trivias.After[rawStatement.Trivias.After.Count - 1].Span;
-                        rawStatement.Span = new SourceSpan(firstTriviaSpan.FileName, firstTriviaSpan.Start, lastTriviaSpan.End);
+                        if (_trivias.Count > 0)
+                        {
+                            rawStatement.Trivias.After.AddRange(rawStatement.Trivias.Before);
+                            rawStatement.Trivias.Before.Clear();
+                            var firstTriviaSpan = rawStatement.Trivias.After[0].Span;
+                            var lastTriviaSpan = rawStatement.Trivias.After[rawStatement.Trivias.After.Count - 1].Span;
+                            rawStatement.Span = new SourceSpan(firstTriviaSpan.FileName, firstTriviaSpan.Start, lastTriviaSpan.End);
+                        }
+                        else
+                        {
+                            // Else Add an empty trivia
+                            rawStatement.AddTrivia(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Empty, null), false);
+                        }
                         statement = rawStatement;
                     }
 
                     NextToken();
+
+                    if (Current.Type == TokenType.CodeExit)
+                    {
+                        var nopStatement = Open<ScriptNopStatement>();
+                        Close(nopStatement);
+                        if (statement == null)
+                        {
+                            statement = nopStatement;
+                        }                        
+                        else
+                        {
+                            _pendingStatements.Enqueue(nopStatement);
+                        }
+                    }
 
                     // If we have a ScriptRawStatement previously defined, we need to break out of the loop to record it
                     if (statement == null)
@@ -283,13 +313,21 @@ namespace Scriban.Parsing
                     // If next token is directly a code enter or an eof but we want to keep trivia
                     // and with have trivias
                     // we need to generate a RawStatement to store these trivias
-                    if (_isKeepTrivia && _trivias.Count > 0 && (Current.Type == TokenType.CodeEnter || Current.Type == TokenType.Eof))
+                    if (_isKeepTrivia && (Current.Type == TokenType.CodeEnter || Current.Type == TokenType.Eof))
                     {
                         var rawStatement = Open<ScriptRawStatement>();
                         Close(rawStatement);
-                        var firstTriviaSpan = rawStatement.Trivias.Before[0].Span;
-                        var lastTriviaSpan = rawStatement.Trivias.Before[rawStatement.Trivias.Before.Count - 1].Span;
-                        rawStatement.Span = new SourceSpan(firstTriviaSpan.FileName, firstTriviaSpan.Start, lastTriviaSpan.End);
+                        if (_trivias.Count > 0)
+                        {
+                            var firstTriviaSpan = rawStatement.Trivias.Before[0].Span;
+                            var lastTriviaSpan = rawStatement.Trivias.Before[rawStatement.Trivias.Before.Count - 1].Span;
+                            rawStatement.Span = new SourceSpan(firstTriviaSpan.FileName, firstTriviaSpan.Start, lastTriviaSpan.End);
+                        }
+                        else
+                        {
+                            // Else Add an empty trivia
+                            rawStatement.AddTrivia(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Empty, null), false);
+                        }
                         statement = rawStatement;
                     }
                     else
