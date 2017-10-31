@@ -42,8 +42,8 @@ var result = template.Render(new { products = this.ProductList });
   - Precise source code location (path, column and line) for error reporting
   - **Write an AST to a script textual representation**, with [`Template.ToText`](doc/runtime.md#ast-to-text), allowing to manipulate scripts in memory and re-save them to the disk, useful for **roundtrip script update scenarios**
 - **Compatible with `liquid`** by using the `Template.ParseLiquid` method
-  - While you `liquid` language is less powerfull than scriban, this mode allows to migrate from `liquid` to `scriban` language easily
-  - You can convert a `liquid` script to a scriban script using `Template.ToText` on a template parsed with `Template.ParseLiquid`
+  - While the `liquid` language is less powerful than scriban, this mode allows to migrate from `liquid` to `scriban` language easily
+  - With the [AST to text](doc/runtime.md#ast-to-text) mode, you can convert a `liquid` script to a scriban script using `Template.ToText` on a template parsed with `Template.ParseLiquid`
 - **Extensible runtime** providing many extensibility points
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
 - [Full featured language](doc/language.md) including `if`/`else`/`for`/`while`, [expressions](doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
