@@ -7,7 +7,9 @@ List of all the builtin <array> functions:
  insert_at
  join
  last
+ limit
  map
+ offset
  remove_at
  reverse
  size
