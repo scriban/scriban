@@ -1,0 +1,11 @@
+variable = 5
+case variable
+    variable = 6
+end
+================
+{{
+variable = 5
+case variable
+    variable = 6
+end
+}}

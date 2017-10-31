@@ -1,0 +1,13 @@
+variable = 5
+case variable
+    else
+        "Yo"
+end
+================
+{{
+variable = 5
+case variable
+    else
+        "Yo"
+end
+}}

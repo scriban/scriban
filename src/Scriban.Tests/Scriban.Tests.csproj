@@ -163,6 +163,16 @@
     <Content Include="TestFiles\100-expressions\110-binary-simple.txt" />
     <Content Include="TestFiles\100-expressions\100-assign-string.out.txt" />
     <Content Include="TestFiles\100-expressions\100-assign-string.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-else-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-else-statement.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement2.out.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement2.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement-error2.out.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement-error2.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement-error1.out.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement-error1.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement.out.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement.txt" />
     <Content Include="TestFiles\200-statements\201-if-else-error4.out.txt" />
     <Content Include="TestFiles\200-statements\201-if-else-error4.txt" />
     <Content Include="TestFiles\200-statements\201-if-else-error3.out.txt" />
@@ -191,6 +201,8 @@
     <Content Include="TestFiles\200-statements\211-for-range-statement.txt" />
     <Content Include="TestFiles\200-statements\221-while-error1.out.txt" />
     <Content Include="TestFiles\200-statements\221-while-error1.txt" />
+    <Content Include="TestFiles\200-statements\230-capture-statement2.out.txt" />
+    <Content Include="TestFiles\200-statements\230-capture-statement2.txt" />
     <Content Include="TestFiles\200-statements\231-capture-error1.out.txt" />
     <Content Include="TestFiles\200-statements\231-capture-error1.txt" />
     <Content Include="TestFiles\200-statements\255-with-error1.out.txt" />
@@ -267,9 +279,17 @@
     <Content Include="TestFiles\500-liquid\500-liquid-variables.txt" />
     <Content Include="TestFiles\500-liquid\510-liquid-statement-if-error1.out.txt" />
     <Content Include="TestFiles\500-liquid\510-liquid-statement-if-error1.txt" />
+    <Content Include="TestFiles\500-liquid\510-liquid-statement-if.out.txt" />
+    <Content Include="TestFiles\500-liquid\511-liquid-statement-unless-error1.out.txt" />
+    <Content Include="TestFiles\500-liquid\511-liquid-statement-unless-error1.txt" />
     <Content Include="TestFiles\500-liquid\511-liquid-statement-unless.out.txt" />
     <Content Include="TestFiles\500-liquid\511-liquid-statement-unless.txt" />
-    <Content Include="TestFiles\500-liquid\510-liquid-statement-if.out.txt" />
+    <Content Include="TestFiles\500-liquid\520-liquid-statement-capture.out.txt" />
+    <Content Include="TestFiles\500-liquid\520-liquid-statement-capture.txt" />
+    <Content Include="TestFiles\500-liquid\513-liquid-statement-for.out.txt" />
+    <Content Include="TestFiles\500-liquid\513-liquid-statement-for.txt" />
+    <Content Include="TestFiles\500-liquid\512-liquid-statement-case-when.out.txt" />
+    <Content Include="TestFiles\500-liquid\512-liquid-statement-case-when.txt" />
     <Content Include="TestFiles\500-liquid\510-liquid-statement-if.txt" />
   </ItemGroup>
   <ItemGroup>

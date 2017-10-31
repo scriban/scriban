@@ -102,6 +102,16 @@ raw
             AssertRoundtrip(text);
         }
 
+        [Test]
+        public void RoundtripCapture()
+        {
+            var text = @" {{~ capture variable ~}}
+    This is a capture
+{{~ end ~}}
+{{ variable }}";
+            AssertRoundtrip(text);
+        }
+
 
         [Test]
         public void RoundtripRaw()
@@ -159,7 +169,7 @@ variable + 1
             // Evaluate front-matter
             var frontResult = context.Evaluate(template.Page.FrontMatter);
             Assert.Null(frontResult);
-            
+
             // Evaluate page-content
             context.Evaluate(template.Page);
             var pageResult = context.Output.ToString();
@@ -261,13 +271,13 @@ name = 'yes'
         [Test]
         public void TestFunctionCallInExpression()
         {
-            var lexer = new Lexer(@"{{ 
+            var lexer = new Lexer(@"{{
 with math
-    round pi 
+    round pi
 end
 }}");
             var parser = new Parser(lexer);
-            
+
             var scriptPage = parser.Run();
 
             foreach (var message in parser.Messages)
@@ -326,7 +336,6 @@ end
 
             if (isRoundTripTest)
             {
-                parserOptions.KeepTrivia = true;
                 lexerOptions.KeepTrivia = true;
             }
 
@@ -387,7 +396,7 @@ end
                             // Dumps the rountrip version
                             var lexerOptionsForTrivia = lexerOptions;
                             lexerOptionsForTrivia.KeepTrivia = true;
-                            var templateWithTrivia = Template.Parse(inputText, parserOptions: new ParserOptions() {KeepTrivia = true}, lexerOptions: lexerOptionsForTrivia);
+                            var templateWithTrivia = Template.Parse(inputText, lexerOptions: lexerOptionsForTrivia);
                             roundtripText = templateWithTrivia.ToText();
                         }
 

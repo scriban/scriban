@@ -1,0 +1,4 @@
+{% assign variable = 1 %}
+{% unless variable == 1 %}
+  This is not a variable with 1
+{% end %}

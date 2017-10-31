@@ -1,0 +1,25 @@
+variable = 4
+case variable
+    when 6
+        "Yo 6"
+    when 7
+        "Yo 6"
+    when 5
+        "Yo 5"
+    else
+        "Nope"
+end
+================
+{{
+variable = 4
+case variable
+    when 6
+        "Yo 6"
+    when 7
+        "Yo 6"
+    when 5
+        "Yo 5"
+    else
+        "Nope"
+end
+}}

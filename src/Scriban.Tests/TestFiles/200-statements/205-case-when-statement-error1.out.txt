@@ -1,0 +1,1 @@
+text(9,5) : error : Unexpected statement/expression `variable` in the body of a `case` statement. Only `when`/`else` are expected.

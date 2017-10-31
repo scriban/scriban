@@ -1,0 +1,1 @@
+text(10,5) : error : A else condition must be preceded by another if/else/when condition
