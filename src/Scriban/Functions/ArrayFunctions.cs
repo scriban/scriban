@@ -44,6 +44,58 @@ namespace Scriban.Functions
             return iterator?.Cast<object>().Distinct();
         }
 
+        /// <summary>
+        /// Returns only count elments from the input list
+        /// </summary>
+        /// <param name="count">The number of elements to return from the input list</param>
+        /// <param name="list">The input list</param>
+        public static ScriptArray Limit(int count, IEnumerable list)
+        {
+            if (list == null)
+            {
+                return null;
+            }
+
+            var result = new ScriptArray();
+            foreach (var item in list)
+            {
+                count--;
+                if (count < 0)
+                {
+                    break;
+                }
+                result.Add(item);
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Returns the remaining of the list after the specified offset
+        /// </summary>
+        /// <param name="index">The index of a list to return elements</param>
+        /// <param name="list">The input list</param>
+        public static ScriptArray Offset(int index, IEnumerable list)
+        {
+            if (list == null)
+            {
+                return null;
+            }
+
+            var result = new ScriptArray();
+            foreach (var item in list)
+            {
+                if (index <= 0)
+                {
+                    result.Add(item);
+                }
+                else
+                {
+                    index--;
+                }
+            }
+            return result;
+        }
+
 
         /// <summary>
         /// Removes any non-null values from the input list

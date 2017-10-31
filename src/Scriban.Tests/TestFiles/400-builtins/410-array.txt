@@ -1,3 +1,9 @@
+array.limit 2: {{[1,2,3,4] | array.limit 2}}
+array.limit 0: {{[1,2,3,4] | array.limit 0}}
+array.offset 2: {{[1,2,3,4] | array.offset 2}}
+array.offset 0: {{[1,2,3,4] | array.offset 0}}
+array.offset (-1): {{[1,2,3,4] | array.offset (-1)}}
+array.offset 10: {{[1,2,3,4] | array.offset 10}}
 {{[1,2,3,4] | array.first}}
 {{[1,2,3,4] | array.last}}
 {{[1,2,3,4] | array.join ' | '}}
