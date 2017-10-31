@@ -2,6 +2,8 @@
 
 This document describes the syntax of the scriban templating language.
 
+> NOTE: This document does not describe the `liquid` language. Check the [`liquid website`](https://shopify.github.io/liquid/) directly.
+
 ## Table of Contents
 
 - [1. Blocks](#1-blocks)

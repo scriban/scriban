@@ -2,10 +2,19 @@
 
 <img align="right" width="160px" height="160px" src="img/scriban.png">
 
-Scriban is a fast, powerful and lightweight text templating language and engine for .NET
+Scriban is a fast, powerful and lightweight text templating language and engine for .NET, with a compatibility mode for parsing `liquid` templates.
 
 ```C#
+// Parse a scriban template
 var template = Template.Parse("Hello {{name}}!")
+var result = template.Render(new { name = "World" }); // => "Hello World!" 
+```
+
+Parse a Liquid template using the Liquid language:
+
+```C#
+// Parse a liquid template
+var template = Template.LiquidParse("Hello {{name}}!")
 var result = template.Render(new { name = "World" }); // => "Hello World!" 
 ```
 
@@ -31,6 +40,10 @@ var result = template.Render(new { products = this.ProductList });
 - Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly. Check the [benchmarks](doc/benchmarks.md) for more details.
 - Powered by a Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than regex based parsers.
   - Precise source code location (path, column and line) for error reporting
+  - **Write an AST to a script textual representation**, with [`Template.ToText`](doc/runtime.md#ast-to-text), allowing to manipulate scripts in memory and re-save them to the disk, useful for **roundtrip script update scenarios**
+- **Compatible with `liquid`** by using the `Template.ParseLiquid` method
+  - While you `liquid` language is less powerfull than scriban, this mode allows to migrate from `liquid` to `scriban` language easily
+  - You can convert a `liquid` script to a scriban script using `Template.ToText` on a template parsed with `Template.ParseLiquid`
 - **Extensible runtime** providing many extensibility points
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
 - [Full featured language](doc/language.md) including `if`/`else`/`for`/`while`, [expressions](doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
@@ -72,7 +85,7 @@ Also [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet pack
 
 ## Benchmarks
 
-**Scriban is 1.5x to x10 times faster** than existing templating engines, you will find more details in our [benchmarks document](doc/benchmarks.md).
+**Scriban is blazing fast**! For more details, you can check the [benchmarks document](doc/benchmarks.md).
 
 ## License
 

@@ -13,6 +13,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
 
 - [Parsing a template](#parsing-a-template)
   - [Parsing modes](#parsing-modes)
+  - [Liquid support](#liquid-support)
 - [Rendering a template](#rendering-a-template)
   - [Overview](#overview)
   - [The <code>TemplateContext</code> execution model](#the-templatecontext-execution-model)
@@ -34,6 +35,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
   - [Include and <code>ITemplateLoader</code>](#include-and-itemplateloader)
   - [The Lexer and Parser](#the-lexer-and-parser)
   - [Abstract Syntax Tree](#abstract-syntax-tree)
+    - [AST to Text](#ast-to-text)
   - [Extending <code>TemplateContext</code>](#extending-templatecontext)
   - [<code>ScriptObject</code> advanced usages](#scriptobject-advanced-usages)
     - [Advanced custom functions](#advanced-custom-functions)
@@ -108,6 +110,29 @@ Console.WriteLine(result);
 ```
 
 > Note: As we will see in the following section about rendering, you can also avoid rendering a script only mode by evaluating the template instead of rendering. 
+
+[:top:](#runtime)
+### Liquid support
+
+Scriban supports a Lexer and Parser that can understand a Liquid template instead, while still translating it to a Scriban Runtime AST.
+
+You can easily parse an existing liquid template using the `Template.ParseLiquid` method:
+
+```c#
+// An Liquid 
+var inputTemplateAsText = "This is a {{ name }} template";
+
+// Parse the template
+var template = Template.ParseLiquid(inputTemplateAsText);
+
+// Renders the template with the variable `name` exposed to the template
+var result = template.Render(new { name = "Hello World"});
+
+// Prints the result: "This is a Hello World template"
+Console.WriteLine(result);
+```
+
+Also, in terms of runtime, Liquid builtin functions are supported. They are created with the `LiquidTemplateContext` which inherits from the `TemplateContext`.
 
 [:top:](#runtime)
 ## Rendering a template
@@ -633,6 +658,32 @@ public abstract class ScriptNode
 ```
 
 As you can see, each `ScriptNode` contains a method to evaluate it against a `TemplateContext`. You can go through the all the [Syntax classes](https://github.com/lunet-io/scriban/tree/master/src/Scriban/Syntax) in the codebase and you will see that it is very easy to create a new `SyntaxNode`
+
+[:top:](#runtime)
+#### AST to Text
+
+Scriban allows to write back an AST to a textual representation:
+
+```C#
+var template = Template.Parse("This is a {{ name }} template");
+
+// Prints "This is a {{name}} template"
+Console.WriteLine(template.ToText());
+```
+
+In the previous example, you can notice that whitespace were removed from the original template. The reason is by default, the parser doesn't keep all hidden symbols when parsing, to still allow fast parsing for the regular case.
+
+But you can specify the parser to keep all the hidden symbols from the original template, directly by activating the `IsKeepTrivia` on the `LexerOptions`
+
+In the following example, you can see that it keep all the whitespace and comment:
+
+```C#
+// Specifying the KeepTrivia allow to keep as much as hidden symbols from the original template (white spaces, newlines...etc.)
+var template = Template.Parse(@"This is a {{ name   +   ## With some comment ## '' }} template", lexerOptions: new LexerOptions() { KeepTrivia = true });
+
+// Prints "This is a {{ name   +   ## With some comment ## '' }} template"
+Console.WriteLine(template.ToText());
+```
 
 [:top:](#runtime)
 ### Extending `TemplateContext`
