@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Scriban.Helpers;
@@ -33,7 +34,7 @@ namespace Scriban.Syntax
                 throw new ScriptRuntimeException(Target.Span, $"The target function [{Target}] is null");
             }
 
-            return Call(context, this, targetFunction, Arguments);
+            return Call(context, this, targetFunction, context.AllowPipeArguments, Arguments);
         }
 
 
@@ -63,7 +64,7 @@ namespace Scriban.Syntax
             return target is ScriptFunction || target is IScriptCustomFunction;
         }
 
-        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, List<ScriptExpression> arguments = null)
+        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool pipeArguments, List < ScriptExpression> arguments = null)
         {
             if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (functionObject == null)
@@ -93,9 +94,17 @@ namespace Scriban.Syntax
 
                     // Handle parameters expansion for a function call when the operator ^ is used
                     var unaryExpression = argument as ScriptUnaryExpression;
-                    if (unaryExpression != null && unaryExpression.ExpandParameters(value, argumentValues))
+                    if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
                     {
-                        continue;
+                        var valueEnumerator = value as IEnumerable;
+                        if (valueEnumerator != null)
+                        {
+                            foreach (var subValue in valueEnumerator)
+                            {
+                                argumentValues.Add(subValue);
+                            }
+                            continue;
+                        }
                     }
 
                     argumentValues.Add(value);
@@ -103,17 +112,11 @@ namespace Scriban.Syntax
             }
 
             // Handle pipe arguments here
-            if (context.PipeArguments.Count > 0)
+            if (pipeArguments && context.PipeArguments.Count > 0)
             {
-                var additionalArgument = context.PipeArguments.Pop();
-
-                var value = context.Evaluate(additionalArgument);
-
-                // Handle parameters expansion for a function call when the operator ~ is used
-                var unaryExpression = additionalArgument as ScriptUnaryExpression;
-                if (unaryExpression == null || !unaryExpression.ExpandParameters(value, argumentValues))
+                while (context.PipeArguments.Count > 0)
                 {
-                    argumentValues.Add(value);
+                    argumentValues.Add(context.PipeArguments.Pop());
                 }
             }
 

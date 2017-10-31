@@ -16,24 +16,6 @@ namespace Scriban.Syntax
 
         public ScriptExpression Right { get; set; }
 
-        public bool ExpandParameters(object value, ScriptArray expandedParameters)
-        {
-            // Handle parameters expansion for a function call when the operator ~ is used
-            if (Operator == ScriptUnaryOperator.FunctionParametersExpand)
-            {
-                var valueEnumerator = value as IEnumerable;
-                if (valueEnumerator != null)
-                {
-                    foreach (var subValue in valueEnumerator)
-                    {
-                        expandedParameters.Add(subValue);
-                    }
-                    return true;
-                }
-            }
-            return false;
-        }
-
         public override object Evaluate(TemplateContext context)
         {
             switch (Operator)
@@ -89,27 +71,7 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            switch (Operator)
-            {
-                case ScriptUnaryOperator.Not:
-                    context.Write("!");
-                    break;
-                case ScriptUnaryOperator.Negate:
-                    context.Write("-");
-                    break;
-                case ScriptUnaryOperator.Plus:
-                    context.Write("+");
-                    break;
-                case ScriptUnaryOperator.FunctionAlias:
-                    context.Write("@");
-                    break;
-                case ScriptUnaryOperator.FunctionParametersExpand:
-                    context.Write("^");
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
+            context.Write(Operator.ToText());
             context.Write(Right);
         }
 

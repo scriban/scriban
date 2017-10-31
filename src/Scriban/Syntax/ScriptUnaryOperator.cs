@@ -1,6 +1,9 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
+using System;
+
 namespace Scriban.Syntax
 {
     public enum ScriptUnaryOperator
@@ -27,9 +30,10 @@ namespace Scriban.Syntax
                 case ScriptUnaryOperator.FunctionAlias:
                     return "@";
                 case ScriptUnaryOperator.FunctionParametersExpand:
-                    return "~";
+                    return "^";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(op));
             }
-            return op.ToString();
         }
     }
 }

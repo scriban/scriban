@@ -40,6 +40,8 @@ namespace Scriban
         private int _loopStep;
         private int _getOrSetValueLevel;
 
+        internal bool AllowPipeArguments => _getOrSetValueLevel <= 1;
+
         /// <summary>
         /// A delegate used to late binding <see cref="TryGetMember"/>
         /// </summary>
@@ -100,7 +102,7 @@ namespace Scriban
             _memberAccessors = new Dictionary<Type, IObjectAccessor>();
             _listAccessors = new Dictionary<Type, IListAccessor>();
             _loops = new FastStack<ScriptLoopStatementBase>(4);
-            PipeArguments = new Stack<ScriptExpression>();
+            PipeArguments = new Stack<object>();
 
             BlockDelegates = new FastStack<ScriptBlockStatement>(4);
 
@@ -197,7 +199,7 @@ namespace Scriban
         /// <summary>
         /// Store the current stack of pipe arguments used by <see cref="ScriptPipeCall"/> and <see cref="ScriptFunctionCall"/>
         /// </summary>
-        internal Stack<ScriptExpression> PipeArguments { get; }
+        internal Stack<object> PipeArguments { get; }
 
         /// <summary>
         /// Gets or sets the internal state of control flow.
@@ -801,9 +803,11 @@ namespace Scriban
 
             // If the variable being returned is a function, we need to evaluate it
             // If function call is disabled, it will be only when returning the final object (level 0 of recursion)
-            if ((!_isFunctionCallDisabled || _getOrSetValueLevel > 1) && ScriptFunctionCall.IsFunction(value))
+            var allowFunctionCall = (_isFunctionCallDisabled && _getOrSetValueLevel > 1) || !_isFunctionCallDisabled;
+            if (allowFunctionCall && ScriptFunctionCall.IsFunction(value))
             {
-                value = ScriptFunctionCall.Call(this, targetExpression, value);
+                // Allow to pipe arguments only for top level returned function
+                value = ScriptFunctionCall.Call(this, targetExpression, value, _getOrSetValueLevel == 1);
             }
 
             return value;
