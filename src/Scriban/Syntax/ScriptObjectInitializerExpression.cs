@@ -32,7 +32,7 @@ namespace Scriban.Syntax
             return scriptObject;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("{");
             bool isAfterFirst = false;
@@ -43,9 +43,9 @@ namespace Scriban.Syntax
                     context.Write(",");
                 }
 
-                member.Key?.Write(context);
+                context.Write(member.Key);
                 context.Write(":");
-                member.Value?.Write(context);
+                context.Write(member.Value);
 
                 isAfterFirst = true;
             }

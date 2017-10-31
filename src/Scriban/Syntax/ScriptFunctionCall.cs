@@ -37,13 +37,13 @@ namespace Scriban.Syntax
         }
 
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
-            Target?.Write(context);
+            context.Write(Target);
             foreach (var scriptExpression in Arguments)
             {
                 context.WithSpace();
-                scriptExpression?.Write(context);
+                context.Write(scriptExpression);
             }
         }
 

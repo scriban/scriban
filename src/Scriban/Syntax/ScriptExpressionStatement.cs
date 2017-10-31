@@ -22,9 +22,9 @@ namespace Scriban.Syntax
             return result;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
-            Expression?.Write(context);
+            context.Write(Expression);
             context.WithEos();
         }
 

@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using Scriban.Helpers;
 using Scriban.Runtime;
 using Scriban.Syntax;
 
@@ -28,9 +29,8 @@ namespace Scriban.Parsing
         private bool _inFrontMatter;
         private bool _isStatementDepthLimitReached;
         private bool _hasFatalError;
-        private bool _isKeepTrivia;
+        private readonly bool _isKeepTrivia;
         private readonly List<ScriptTrivia> _trivias;
-        private bool _noEndProcess;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -207,10 +207,29 @@ namespace Scriban.Parsing
                     }
                     _isLiquidTagSection = Current.Type == TokenType.LiquidTagEnter;
                     _inCodeSection = true;
+
+                    // If we have any pending trivias before processing this code enter and we want to keep trivia
+                    // we need to generate a RawStatement to store these trivias
+                    if (_isKeepTrivia && _trivias.Count > 0)
+                    {
+                        var rawStatement = Open<ScriptRawStatement>();
+                        Close(rawStatement);
+                        rawStatement.Trivias.After.AddRange(rawStatement.Trivias.Before);
+                        rawStatement.Trivias.Before.Clear();
+                        var firstTriviaSpan = rawStatement.Trivias.After[0].Span;
+                        var lastTriviaSpan = rawStatement.Trivias.After[rawStatement.Trivias.After.Count - 1].Span;
+                        rawStatement.Span = new SourceSpan(firstTriviaSpan.FileName, firstTriviaSpan.Start, lastTriviaSpan.End);
+                        statement = rawStatement;
+                    }
+
                     NextToken();
 
-                    goto continueParsing;
-
+                    // If we have a ScriptRawStatement previously defined, we need to break out of the loop to record it
+                    if (statement == null)
+                    {
+                        goto continueParsing;
+                    }
+                    break;
                 case TokenType.FrontMatterMarker:
                     if (_inFrontMatter)
                     {
@@ -252,8 +271,32 @@ namespace Scriban.Parsing
                     _isLiquidTagSection = false;
                     _inCodeSection = false;
 
+                    // We clear any trivia that might not have been takend by a node
+                    // so that they don't end up after this token
+                    if (_isKeepTrivia)
+                    {
+                        _trivias.Clear();
+                    }
+
                     NextToken();
-                    goto continueParsing;
+
+                    // If next token is directly a code enter or an eof but we want to keep trivia
+                    // and with have trivias
+                    // we need to generate a RawStatement to store these trivias
+                    if (_isKeepTrivia && _trivias.Count > 0 && (Current.Type == TokenType.CodeEnter || Current.Type == TokenType.Eof))
+                    {
+                        var rawStatement = Open<ScriptRawStatement>();
+                        Close(rawStatement);
+                        var firstTriviaSpan = rawStatement.Trivias.Before[0].Span;
+                        var lastTriviaSpan = rawStatement.Trivias.Before[rawStatement.Trivias.Before.Count - 1].Span;
+                        rawStatement.Span = new SourceSpan(firstTriviaSpan.FileName, firstTriviaSpan.Start, lastTriviaSpan.End);
+                        statement = rawStatement;
+                    }
+                    else
+                    {
+                        goto continueParsing;
+                    }
+                    break;
 
                 default:
                     if (_inCodeSection)
@@ -304,50 +347,83 @@ namespace Scriban.Parsing
 
         private void ReadScribanStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
+            var startToken = Current;
             switch (identifier)
             {
                 case "end":
                     hasEnd = true;
                     nextStatement = false;
+
+                    if (_isKeepTrivia)
+                    {
+                        _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.End, _lexer.Text));
+                    }
                     NextToken();
 
-                    if (!_noEndProcess)
+                    var matchingStatement = FindFirstStatementExpectingEnd();
+                    ExpectEndOfStatement(matchingStatement);
+                    if (_isKeepTrivia)
                     {
-                        ScriptStatement matchingStatement = null;
-                        if (_isKeepTrivia)
-                        {
-                            matchingStatement = FindMatchingStatementForEnd() ?? parent;
-                        }
-                        ExpectEndOfStatement(parent);
-                        if (_isKeepTrivia)
-                        {
-                            FlushTrivias(matchingStatement, false);
-                        }
+                        FlushTrivias(matchingStatement, false);
                     }
                     break;
                 case "wrap":
+                    CheckNotInCase(parent, startToken);
                     statement = ParseWrapStatement();
                     break;
                 case "if":
+                    CheckNotInCase(parent, startToken);
                     statement = ParseIfStatement(false, false);
                     break;
+                case "case":
+                    CheckNotInCase(parent, startToken);
+                    statement = ParseCaseStatement();
+                    break;
+                case "when":
+                    var whenStatement = ParseWhenStatement();
+                    var whenParent = parent as ScriptConditionStatement;
+                    if (parent is ScriptWhenStatement)
+                    {
+                        ((ScriptWhenStatement)whenParent).Next = whenStatement;
+                    }
+                    else if (parent is ScriptCaseStatement)
+                    {
+                        statement = whenStatement;
+                    }
+                    else
+                    {
+                        nextStatement = false;
+
+                        // unit test: TODO
+                        LogError(startToken, "A `when` condition must be preceded by another `when`/`else`/`case` condition");
+                    }
+                    hasEnd = true;
+                    break;
                 case "else":
+                    var nextCondition = ParseElseStatement(false);
                     var parentCondition = parent as ScriptConditionStatement;
-                    if (parentCondition == null)
+                    if (parent is ScriptIfStatement || parent is ScriptWhenStatement)
+                    {
+                        if (parent is ScriptIfStatement)
+                        {
+                            ((ScriptIfStatement)parentCondition).Else = nextCondition;
+                        }
+                        else
+                        {
+                            ((ScriptWhenStatement)parentCondition).Next = nextCondition;
+                        }
+                    }
+                    else
                     {
                         nextStatement = false;
 
                         // unit test: 201-if-else-error3.txt
-                        LogError("A else condition must be preceded by another if/else condition");
+                        LogError(startToken, "A else condition must be preceded by another if/else/when condition");
                     }
-                    else
-                    {
-                        var nextCondition = ParseElseStatement(false);
-                        parentCondition.Else = nextCondition;
-                        hasEnd = true;
-                    }
+                    hasEnd = true;
                     break;
                 case "for":
+                    CheckNotInCase(parent, startToken);
                     if (PeekToken().Type == TokenType.Dot)
                     {
                         statement = ParseExpressionStatement();
@@ -358,15 +434,19 @@ namespace Scriban.Parsing
                     }
                     break;
                 case "with":
+                    CheckNotInCase(parent, startToken);
                     statement = ParseWithStatement();
                     break;
                 case "import":
+                    CheckNotInCase(parent, startToken);
                     statement = ParseImportStatement();
                     break;
                 case "readonly":
+                    CheckNotInCase(parent, startToken);
                     statement = ParseReadOnlyStatement();
                     break;
                 case "while":
+                    CheckNotInCase(parent, startToken);
                     if (PeekToken().Type == TokenType.Dot)
                     {
                         statement = ParseExpressionStatement();
@@ -377,6 +457,7 @@ namespace Scriban.Parsing
                     }
                     break;
                 case "break":
+                    CheckNotInCase(parent, startToken);
                     statement = Open<ScriptBreakStatement>();
                     NextToken();
                     ExpectEndOfStatement(statement);
@@ -389,6 +470,7 @@ namespace Scriban.Parsing
                     //}
                     break;
                 case "continue":
+                    CheckNotInCase(parent, startToken);
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
                     ExpectEndOfStatement(statement);
@@ -401,22 +483,26 @@ namespace Scriban.Parsing
                     //}
                     break;
                 case "func":
+                    CheckNotInCase(parent, startToken);
                     statement = ParseFunctionStatement(false);
                     break;
                 case "ret":
+                    CheckNotInCase(parent, startToken);
                     statement = ParseReturnStatement();
                     break;
                 case "capture":
+                    CheckNotInCase(parent, startToken);
                     statement = ParseCaptureStatement();
                     break;
                 default:
+                    CheckNotInCase(parent, startToken);
                     // Otherwise it is an expression statement
                     statement = ParseExpressionStatement();
                     break;
             }
         }
 
-        private ScriptStatement FindMatchingStatementForEnd()
+        private ScriptStatement FindFirstStatementExpectingEnd()
         {
             foreach (var scriptNode in Blocks)
             {
@@ -436,6 +522,7 @@ namespace Scriban.Parsing
                    || scriptNode is ScriptWithStatement
                    || scriptNode is ScriptWhileStatement
                    || scriptNode is ScriptWrapStatement
+                   || scriptNode is ScriptCaseStatement
                    || scriptNode is ScriptFunction
                    || scriptNode is ScriptAnonymousFunction;
         }
@@ -451,23 +538,23 @@ namespace Scriban.Parsing
         private void ReadLiquidStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
             bool isNotExpectedInTagSection = true;
-            var localToken = Current;
+            var startToken = Current;
             switch (identifier)
             {
                 case "endif":
                     CheckInTagSection();
+                    NextToken();
+
                     hasEnd = true;
                     nextStatement = false;
 
-                    NextToken();
-
-                    var matchingStatement = FindMatchingStatementForEnd() as ScriptIfStatement;
+                    var matchingStatement = FindFirstStatementExpectingEnd() as ScriptIfStatement;
                     if (matchingStatement == null)
                     {
-                        LogError(localToken, $"Unable to find a pending `if`/`else` for this `endif`");
+                        LogError(startToken, $"Unable to find a pending `if`/`else` for this `endif`");
                     }
 
-                    ExpectEndOfStatement(parent);
+                    ExpectEndOfStatement(matchingStatement);
                     if (_isKeepTrivia)
                     {
                         _trivias.Clear();
@@ -475,18 +562,18 @@ namespace Scriban.Parsing
                     break;
                 case "endunless":
                     CheckInTagSection();
+                    NextToken();
+
                     hasEnd = true;
                     nextStatement = false;
 
-                    NextToken();
-
-                    var unless = FindMatchingStatementForEnd() as ScriptIfStatement;
+                    var unless = FindFirstStatementExpectingEnd() as ScriptIfStatement;
                     if (unless == null || !unless.InvertCondition)
                     {
-                        LogError(localToken, $"Unable to find a pending `unless` for this `endunless`");
+                        LogError(startToken, $"Unable to find a pending `unless` for this `endunless`");
                     }
 
-                    ExpectEndOfStatement(parent);
+                    ExpectEndOfStatement(unless);
                     if (_isKeepTrivia)
                     {
                         _trivias.Clear();
@@ -495,17 +582,18 @@ namespace Scriban.Parsing
 
                 case "endfor":
                     CheckInTagSection();
-                    hasEnd = true;
-                    nextStatement = false;
                     NextToken();
 
-                    var forStatement = FindMatchingStatementForEnd() as ScriptForStatement;
+                    hasEnd = true;
+                    nextStatement = false;
+
+                    var forStatement = FindFirstStatementExpectingEnd() as ScriptForStatement;
                     if (forStatement == null)
                     {
-                        LogError(localToken, $"Unable to find a pending `for` for this `endfor`");
+                        LogError(startToken, $"Unable to find a pending `for` for this `endfor`");
                     }
 
-                    ExpectEndOfStatement(parent);
+                    ExpectEndOfStatement(forStatement);
                     if (_isKeepTrivia)
                     {
                         _trivias.Clear();
@@ -514,16 +602,18 @@ namespace Scriban.Parsing
 
                 case "endcase":
                     CheckInTagSection();
+                    NextToken();
+
                     hasEnd = true;
                     nextStatement = false;
 
-                    var caseStatement = FindMatchingStatementForEnd() as ScriptIfStatement;
+                    var caseStatement = FindFirstStatementExpectingEnd() as ScriptCaseStatement;
                     if (caseStatement == null)
                     {
-                        LogError(localToken, $"Unable to find a pending `case` for this `endcase`");
+                        LogError(startToken, $"Unable to find a pending `case` for this `endcase`");
                     }
 
-                    ExpectEndOfStatement(parent);
+                    ExpectEndOfStatement(caseStatement);
                     if (_isKeepTrivia)
                     {
                         _trivias.Clear();
@@ -532,15 +622,18 @@ namespace Scriban.Parsing
 
                 case "endcapture":
                     CheckInTagSection();
+                    NextToken();
+
                     hasEnd = true;
                     nextStatement = false;
-                    var captureStatement = FindMatchingStatementForEnd() as ScriptCaptureStatement;
+
+                    var captureStatement = FindFirstStatementExpectingEnd() as ScriptCaptureStatement;
                     if (captureStatement == null)
                     {
-                        LogError(localToken, $"Unable to find a pending `capture` for this `endcapture`");
+                        LogError(startToken, $"Unable to find a pending `capture` for this `endcapture`");
                     }
 
-                    ExpectEndOfStatement(parent);
+                    ExpectEndOfStatement(captureStatement);
                     if (_isKeepTrivia)
                     {
                         _trivias.Clear();
@@ -549,45 +642,80 @@ namespace Scriban.Parsing
 
                 case "case":
                     CheckInTagSection();
-                    // TODO
-                    throw new NotImplementedException();
+                    statement = ParseCaseStatement();
+                    break;
 
                 case "when":
+                    var whenStatement = ParseWhenStatement();
                     CheckInTagSection();
-                    // TODO
-                    throw new NotImplementedException();
+                    var whenParent = parent as ScriptConditionStatement;
+                    if (parent is ScriptWhenStatement)
+                    {
+                        ((ScriptWhenStatement)whenParent).Next = whenStatement;
+                    }
+                    else if (parent is ScriptCaseStatement)
+                    {
+                        statement = whenStatement;
+                    }
+                    else
+                    {
+                        nextStatement = false;
+
+                        // unit test: TODO
+                        LogError(startToken, "A `when` condition must be preceded by another `when`/`else`/`case` condition");
+                    }
+                    hasEnd = true;
+                    break;
 
                 case "if":
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     statement = ParseIfStatement(false, false);
                     break;
+
                 case "unless":
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     statement = ParseIfStatement(true, false);
                     break;
+
                 case "else":
                 case "elsif":
                     CheckInTagSection();
+
+                    var nextCondition = ParseElseStatement(identifier == "elsif");
                     var parentCondition = parent as ScriptConditionStatement;
-                    if (parentCondition == null)
+                    if (parent is ScriptIfStatement || parent is ScriptWhenStatement)
+                    {
+                        if (parent is ScriptIfStatement)
+                        {
+                            ((ScriptIfStatement)parentCondition).Else = nextCondition;
+                        }
+                        else
+                        {
+                            if (identifier == "elseif")
+                            {
+                                LogError(startToken, "A elsif condition is not allowed within a when/case condition");
+                            }
+                            ((ScriptWhenStatement)parentCondition).Next = nextCondition;
+                        }
+                    }
+                    else
                     {
                         nextStatement = false;
 
                         // unit test: 201-if-else-error3.txt
-                        LogError("A else condition must be preceded by another if/else condition");
+                        LogError(startToken, "A else condition must be preceded by another if/else/when condition");
                     }
-                    else
-                    {
-                        var nextCondition = ParseElseStatement(identifier == "elsif");
-                        parentCondition.Else = nextCondition;
-                        hasEnd = true;
-                    }
+                    hasEnd = true;
                     break;
                 case "for":
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     statement = ParseForStatement();
                     break;
                 case "break":
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     statement = Open<ScriptBreakStatement>();
                     NextToken();
@@ -596,6 +724,7 @@ namespace Scriban.Parsing
                     ExpectEndOfStatement(statement);
                     break;
                 case "continue":
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
@@ -604,6 +733,7 @@ namespace Scriban.Parsing
                     break;
                 case "assign":
                 {
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     NextToken(); // skip assign
                     
@@ -620,26 +750,30 @@ namespace Scriban.Parsing
                     break;
 
                 case "capture":
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     statement = ParseCaptureStatement();
                     break;
 
                 case "increment":
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     statement = ParseIncDecStatement(false);
                     break;
 
                 case "decrement":
+                    CheckNotInCase(parent, startToken);
                     CheckInTagSection();
                     statement = ParseIncDecStatement(true);
                     break;
 
                 default:
                 {
+                    CheckNotInCase(parent, startToken);
                     // Otherwise it is an expression statement
                     if (_isLiquidTagSection)
                     {
-                        LogError(Current, $"Expecting the expression `{GetAsText(Current)}` to be in an object section `{{{{ ... }}}}`");
+                        LogError(startToken, $"Expecting the expression `{GetAsText(Current)}` to be in an object section `{{{{ ... }}}}`");
                     }
                     var expressionStatement = ParseExpressionStatement();
                     statement = expressionStatement;
@@ -656,6 +790,15 @@ namespace Scriban.Parsing
         private T PeekCurrentBlock<T>() where T : ScriptNode
         {
             return Blocks.Count == 0 ? null : Blocks.Peek() as T;
+        }
+
+        private void CheckNotInCase(ScriptStatement parent, Token token)
+        {
+            if (parent is ScriptCaseStatement)
+            {
+                // 205-case-when-statement-error1.txt
+                LogError(token, $"Unexpected statement/expression `{GetAsText(token)}` in the body of a `case` statement. Only `when`/`else` are expected.");
+            }
         }
 
         private ScriptStatement ParseIncDecStatement(bool isDec)
@@ -799,8 +942,15 @@ namespace Scriban.Parsing
         private ScriptExpressionStatement ParseExpressionStatement()
         {
             var expressionStatement = Open<ScriptExpressionStatement>();
-            expressionStatement.Expression = ExpectAndParseExpression(expressionStatement);
-            ExpectEndOfStatement(expressionStatement);
+            bool hasAnonymous;
+            expressionStatement.Expression = ExpectAndParseExpressionAndAnonymous(expressionStatement, out hasAnonymous);
+
+            // In case of an anonymous, there was already an ExpectEndOfStatement issued for the function
+            // so we don't have to verify this here again
+            if (!hasAnonymous)
+            {
+                ExpectEndOfStatement(expressionStatement);
+            }
             return Close(expressionStatement);
         }
 
@@ -848,6 +998,38 @@ namespace Scriban.Parsing
             return scriptStatement;
         }
 
+        private ScriptCaseStatement ParseCaseStatement()
+        {
+            var caseStatement = Open<ScriptCaseStatement>();
+            NextToken(); // skip case
+
+            caseStatement.Value = ExpectAndParseExpression(caseStatement);
+
+            if (ExpectEndOfStatement(caseStatement))
+            {
+                FlushTrivias(caseStatement.Value, false);
+                caseStatement.Body = ParseBlockStatement(caseStatement);
+            }
+
+            return Close(caseStatement);
+        }
+
+        private ScriptWhenStatement ParseWhenStatement()
+        {
+            var whenStatement = Open<ScriptWhenStatement>();
+            NextToken(); // skip when
+
+            whenStatement.Value = ExpectAndParseExpression(whenStatement);
+
+            if (ExpectEndOfStatement(whenStatement))
+            {
+                FlushTrivias(whenStatement.Value, false);
+                whenStatement.Body = ParseBlockStatement(whenStatement);
+            }
+
+            return Close(whenStatement);
+        }
+
         private ScriptIfStatement ParseIfStatement(bool invert, bool isElseIf)
         {
             // unit test: 200-if-else-statement.txt
@@ -889,6 +1071,17 @@ namespace Scriban.Parsing
                 return ParseExpression(parentNode, parentExpression, newPrecedence);
             }
             LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of [{Current.Type}]" );
+            return null;
+        }
+
+        private ScriptExpression ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, out bool hasAnonymousFunction)
+        {
+            hasAnonymousFunction = false;
+            if (StartAsExpression())
+            {
+                return ParseExpression(parentNode, ref hasAnonymousFunction);
+            }
+            LogError(parentNode, CurrentSpan, $"Expecting <expression> instead of [{Current.Type}]");
             return null;
         }
 
@@ -1062,7 +1255,7 @@ namespace Scriban.Parsing
 
         private void FlushTrivias(ScriptNode element, bool isBefore)
         {
-            if (_isKeepTrivia && _trivias.Count > 0)
+            if (_isKeepTrivia && _trivias.Count > 0 && !(element is ScriptBlockStatement))
             {
                 element.AddTrivias(_trivias, isBefore);
                 _trivias.Clear();

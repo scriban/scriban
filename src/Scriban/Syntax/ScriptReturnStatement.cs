@@ -13,10 +13,10 @@ namespace Scriban.Syntax
             return base.Evaluate(context);
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("ret").WithSpace();
-            base.WriteImpl(context);
+            base.Write(context);
         }
     }
 }

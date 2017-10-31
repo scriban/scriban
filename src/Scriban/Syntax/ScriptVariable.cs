@@ -121,7 +121,7 @@ namespace Scriban.Syntax
             context.SetValue(this, valueToSet);
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write(ToString());
         }

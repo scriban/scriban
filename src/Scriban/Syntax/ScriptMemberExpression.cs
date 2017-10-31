@@ -20,11 +20,11 @@ namespace Scriban.Syntax
             return context.GetValue(this);
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
-            Target?.Write(context);
+            context.Write(Target);
             context.Write(".");
-            Member?.Write(context);
+            context.Write(Member);
         }
 
         public override bool CanHaveLeadingTrivia()

@@ -34,13 +34,13 @@ namespace Scriban.Syntax
             }
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("with").WithSpace();
-            Name?.Write(context);
+            context.Write(Name);
             context.WithEos();
-            Body?.Write(context);
-            WriteEnd(context);
+            context.Write(Body);
+            context.WithEnd();
         }
 
         public override string ToString()

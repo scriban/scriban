@@ -63,19 +63,15 @@ namespace Scriban.Syntax
             }
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("for").WithSpace();
-            Variable?.Write(context);
-            if (!context.PreviousHasSpace)
-            {
-                context.Write(" ");
-            }
+            context.Write(Variable).WithSpace();
             context.Write("in").WithSpace();
-            Iterator?.Write(context);
+            context.Write(Iterator);
             context.WithEos();
-            Body?.Write(context);
-            WriteEnd(context);
+            context.Write(Body);
+            context.WithEnd();
         }
 
         public override string ToString()

@@ -37,12 +37,9 @@ namespace Scriban.Parsing
                     NextToken();
                     return Close(falseValue);
                 case "do":
-                    var previousNoEndProcess = _noEndProcess;
-                    _noEndProcess = true;
                     var functionExp = Open<ScriptAnonymousFunction>();
                     functionExp.Function = ParseFunctionStatement(true);
                     var func = Close(functionExp);
-                    _noEndProcess = previousNoEndProcess;
                     return func;
             }
 

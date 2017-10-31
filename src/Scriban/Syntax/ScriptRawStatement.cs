@@ -33,11 +33,16 @@ namespace Scriban.Syntax
             return null;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
+            if (Text == null)
+            {
+                return;
+            }
+
             if (EscapeCount > 0)
             {
-                WriteEnterCode(context, EscapeCount);
+                context.WriteEnterCode(EscapeCount);
             }
 
             // TODO: handle escape
@@ -49,7 +54,7 @@ namespace Scriban.Syntax
 
             if (EscapeCount > 0)
             {
-                WriteExitCode(context, EscapeCount);
+                context.WriteExitCode(EscapeCount);
             }
         }
 

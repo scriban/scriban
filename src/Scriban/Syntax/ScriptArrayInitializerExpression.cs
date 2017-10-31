@@ -30,7 +30,7 @@ namespace Scriban.Syntax
             return scriptArray;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("[");
             for (var i = 0; i < Values.Count; i++)
@@ -40,7 +40,7 @@ namespace Scriban.Syntax
                 {
                     context.Write(",");
                 }
-                value?.Write(context);
+                context.Write(value);
             }
             context.Write("]");
         }

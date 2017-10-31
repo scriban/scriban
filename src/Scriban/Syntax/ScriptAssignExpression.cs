@@ -20,11 +20,11 @@ namespace Scriban.Syntax
             return valueObject;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
-            Target?.Write(context);
+            context.Write(Target);
             context.Write("=").WithSpace();
-            Value?.Write(context);
+            context.Write(Value);
         }
 
         public override string ToString()

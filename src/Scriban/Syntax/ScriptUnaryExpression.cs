@@ -87,7 +87,7 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(Span, $"Operator [{Operator}] is not supported");
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             switch (Operator)
             {
@@ -110,7 +110,7 @@ namespace Scriban.Syntax
                     throw new ArgumentOutOfRangeException();
             }
 
-            Right?.Write(context);
+            context.Write(Right);
         }
 
         public override string ToString()

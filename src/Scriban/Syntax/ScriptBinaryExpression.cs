@@ -124,12 +124,11 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(Span, $"Operator [{Operator.ToText()}] is not implemented for the left [{Left}] / right [{Right}]");
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
-            Left?.Write(context);
+            context.Write(Left);
             context.Write(Operator.ToText());
-            // No spaces for range
-            Right?.Write(context);
+            context.Write(Right);
         }
 
         public override string ToString()

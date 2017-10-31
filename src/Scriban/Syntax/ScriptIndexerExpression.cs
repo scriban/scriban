@@ -26,16 +26,16 @@ namespace Scriban.Syntax
             return false;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
-            Target?.Write(context);
+            context.Write(Target);
             var isSpecialArgumentsArray = Equals(Target, ScriptVariable.Arguments) && Index is ScriptLiteral &&
                                           ((ScriptLiteral) Index).IsPositiveInteger();
             if (!isSpecialArgumentsArray)
             {
                 context.Write("[");
             }
-            Index?.Write(context);
+            context.Write(Index);
             if (!isSpecialArgumentsArray)
             {
                 context.Write("]");

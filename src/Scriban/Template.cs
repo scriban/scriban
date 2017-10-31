@@ -192,7 +192,7 @@ namespace Scriban
             CheckErrors();
             var writer = new StringWriter();
             var renderContext = new RenderContext(writer, options);
-            Page.Write(renderContext);
+            renderContext.Write(Page);
 
             return writer.ToString();
         }

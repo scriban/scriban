@@ -27,13 +27,13 @@ namespace Scriban.Syntax
             };
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("while").WithSpace();
-            Condition?.Write(context);
+            context.Write(Condition);
             context.WithEos();
-            Body?.Write(context);
-            WriteEnd(context);
+            context.Write(Body);
+            context.WithEnd();
         }
         
         public override string ToString()

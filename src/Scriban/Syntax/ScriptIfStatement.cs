@@ -4,17 +4,6 @@
 
 namespace Scriban.Syntax
 {
-
-    public abstract class ScriptConditionStatement : ScriptStatement
-    {
-        public ScriptConditionStatement Else { get; set; }
-
-        public override object Evaluate(TemplateContext context)
-        {
-            return context.Evaluate(Else);
-        }
-    }
-
     [ScriptSyntax("if statement", "if <expression> ... end|else|else if")]
     public class ScriptIfStatement : ScriptConditionStatement
     {
@@ -30,6 +19,9 @@ namespace Scriban.Syntax
 
         public ScriptBlockStatement Then { get; set; }
 
+        public ScriptConditionStatement Else { get; set; }
+
+
         public bool IsElseIf { get; set; }
 
         public override object Evaluate(TemplateContext context)
@@ -39,17 +31,10 @@ namespace Scriban.Syntax
             {
                 conditionValue = !conditionValue;
             }
-            if (conditionValue)
-            {
-                return context.Evaluate(Then);
-            }
-            else
-            {
-                return base.Evaluate(context);
-            }
+            return conditionValue ? context.Evaluate(Then) : context.Evaluate(Else);
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             if (IsElseIf)
             {
@@ -60,45 +45,26 @@ namespace Scriban.Syntax
             {
                 context.Write("!(");
             }
-            Condition?.Write(context);
+            context.Write(Condition);
             if (InvertCondition)
             {
                 context.Write(")");
             }
             context.WithEos();
 
-            Then?.Write(context);
+            context.Write(Then);
 
-            Else?.Write(context);
+            context.Write(Else);
 
             if (!IsElseIf)
             {
-                WriteEnd(context);
+                context.WithEnd();
             }
         }
 
         public override string ToString()
         {
             return $"if {Condition}";
-        }
-    }
-
-    [ScriptSyntax("else statement", "else | else if <expression> ... end|else|else if")]
-    public class ScriptElseStatement : ScriptConditionStatement
-    {
-        public ScriptBlockStatement Body { get; set; }
-
-        public override object Evaluate(TemplateContext context)
-        {
-            context.Evaluate(Body);
-            return base.Evaluate(context);
-        }
-
-        protected override void WriteImpl(RenderContext context)
-        {
-            context.Write("else").WithEos();
-            Body?.Write(context);
-            Else?.Write(context);
         }
     }
 }

@@ -34,6 +34,7 @@ namespace Scriban
         private readonly Dictionary<Type, IObjectAccessor> _memberAccessors;
         private FastStack<StringBuilder> _outputs;
         private FastStack<string> _sourceFiles;
+        private FastStack<object> _caseValues;
         private int _functionDepth;
         private bool _isFunctionCallDisabled;
         private int _loopStep;
@@ -92,6 +93,7 @@ namespace Scriban
             _loopStores = new FastStack<ScriptObject>(4);
             _availableStores = new FastStack<ScriptObject>(4);
             _cultures = new FastStack<CultureInfo>(4);
+            _caseValues = new FastStack<object>(4);
 
             _sourceFiles = new FastStack<string>(4);
 
@@ -669,6 +671,25 @@ namespace Scriban
         protected virtual bool OnStepLoop(ScriptLoopStatementBase loop)
         {
             return true;
+        }
+
+        internal void PushCase(object caseValue)
+        {
+            _caseValues.Push(caseValue);
+        }
+
+        internal object PeekCase()
+        {
+            return _caseValues.Peek();
+        }
+
+        internal object PopCase()
+        {
+            if (_caseValues.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot PopCase more than PushCase");
+            }
+            return _caseValues.Pop();
         }
 
         /// <summary>

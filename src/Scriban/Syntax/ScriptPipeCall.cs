@@ -29,11 +29,11 @@ namespace Scriban.Syntax
             return result;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
-            From?.Write(context);
+            context.Write(From);
             context.Write("|");
-            To?.Write(context);
+            context.Write(To);
         }
 
         public override string ToString()

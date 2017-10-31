@@ -25,16 +25,16 @@ namespace Scriban.Syntax
             return $"func {Name} ... end";
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             if (Name != null)
             {
                 context.Write("func").WithSpace();
-                Name.Write(context);
+                context.Write(Name);
             }
             context.WithEos();
-            Body?.Write(context);
-            WriteEnd(context);
+            context.Write(Body);
+            context.WithEnd();
         }
     }
 }

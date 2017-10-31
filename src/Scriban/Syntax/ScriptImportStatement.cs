@@ -26,10 +26,10 @@ namespace Scriban.Syntax
             return null;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("import").WithSpace();
-            base.WriteImpl(context);
+            base.Write(context);
         }
     }
 }

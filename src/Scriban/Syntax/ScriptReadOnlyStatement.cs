@@ -16,10 +16,10 @@ namespace Scriban.Syntax
             return null;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("readonly").WithSpace();
-            Variable?.Write(context);
+            context.Write(Variable);
             context.WithEos();
         }
     }

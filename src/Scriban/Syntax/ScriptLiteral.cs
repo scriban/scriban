@@ -59,7 +59,7 @@ namespace Scriban.Syntax
             return false;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             if (Value == null)
             {

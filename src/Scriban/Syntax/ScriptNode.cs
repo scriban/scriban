@@ -31,109 +31,12 @@ namespace Scriban.Syntax
         /// <param name="context">The template context.</param>
         public abstract object Evaluate(TemplateContext context);
 
-
-        public void Write(RenderContext context)
-        {
-            var rawStatement = this as ScriptRawStatement;
-            if (!(this is ScriptBlockStatement))
-            {
-                if (context.IsInCode)
-                {
-                    if (rawStatement != null)
-                    {
-                        context.NextRStrip = rawStatement.HasTrivia(ScriptTriviaType.Whitespace, true);
-                        WriteExitCode(context);
-                    }
-                }
-                else if (rawStatement == null)
-                {
-                    if (context.PreviousRawStatement != null)
-                    {
-                        context.NextLStrip = context.PreviousRawStatement.HasTrivia(ScriptTriviaType.Whitespace, false);
-                    }
-                    WriteEnterCode(context);
-                }
-            }
-
-            context.WriteTrivias(this, true);
-
-            // Add a space if this is required and no trivia are providing it
-            if (CanHaveLeadingTrivia() && context.ExpectSpace && !context.PreviousHasSpace)
-            {
-                context.Write(" ");
-            }
-            context.ExpectSpace = false;
-
-            WriteImpl(context);
-
-            context.WriteTrivias(this, false);
-
-            if (this is ScriptStatement && context.IsInCode && context.ExpectEndOfStatement)
-            {
-                if (!context.HasEndOfStatement)
-                {
-                    if (!context.IsNextStatementRaw)
-                    {
-                        context.Write("; ");
-                    }
-                }
-                context.ExpectEndOfStatement = false;
-                context.HasEndOfStatement = false;
-            }
-        }
-
         public virtual bool CanHaveLeadingTrivia()
         {
             return true;
         }
 
-        protected abstract void WriteImpl(RenderContext context);
-
-        protected void WriteEnd(RenderContext context)
-        {
-            if (context.IsInCode)
-            {
-                context.Write("end");
-            }
-            else
-            {
-                WriteEnterCode(context);
-                context.Write(" end ");
-                WriteExitCode(context);
-            }
-            context.WithEos();
-        }
-
-        protected void WriteEnterCode(RenderContext context, int escape = 0)
-        {
-            context.Write("{");
-            for (int i = 0; i < escape; i++)
-            {
-                context.Write("%");
-            }
-            context.Write("{");
-            if (context.NextLStrip)
-            {
-                context.Write("~");
-                context.NextLStrip = false;
-            }
-            context.IsInCode = true;
-        }
-        protected void WriteExitCode(RenderContext context, int escape = 0)
-        {
-            if (context.NextRStrip)
-            {
-                context.Write("~");
-                context.NextRStrip = false;
-            }
-            context.Write("}");
-            for (int i = 0; i < escape; i++)
-            {
-                context.Write("%");
-            }
-            context.Write("}");
-            context.IsInCode = false;
-        }
+        public abstract void Write(RenderContext context);
     }
 
     public static class ScriptNodeExtensions
@@ -248,5 +151,7 @@ namespace Scriban.Syntax
         NewLine,
 
         SemiColon,
+
+        End,
     }
 }

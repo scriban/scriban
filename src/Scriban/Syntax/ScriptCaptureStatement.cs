@@ -28,13 +28,13 @@ namespace Scriban.Syntax
             return null;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("capture").WithSpace();
-            Target?.Write(context);
+            context.Write(Target);
             context.WithEos();
-            Body?.Write(context);
-            WriteEnd(context);
+            context.Write(Body);
+            context.WithEnd();
         }
     }
 }

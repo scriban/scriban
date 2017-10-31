@@ -20,19 +20,5 @@ namespace Scriban.Syntax
         /// Note that this code block is not executed when evaluating this page. It has to be evaluated separately (usually before evaluating the page).
         /// </remarks>
         public ScriptBlockStatement FrontMatter { get; set; }
-
-
-        protected override void WriteImpl(RenderContext context)
-        {
-            // Make sure that we exit in a raw statement
-            context.IsNextStatementRaw = true;
-
-            base.WriteImpl(context);
-
-            if (context.IsInCode)
-            {
-                WriteExitCode(context);
-            }
-        }
     }
 }

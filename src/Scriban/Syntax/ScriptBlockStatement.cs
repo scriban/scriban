@@ -48,7 +48,7 @@ namespace Scriban.Syntax
             return result;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             var isNextStatementRaw = context.IsNextStatementRaw;
             for (var i = 0; i < Statements.Count; i++)
@@ -59,7 +59,7 @@ namespace Scriban.Syntax
 
                 context.IsNextStatementRaw = i + 1 < Statements.Count ? Statements[i + 1] is ScriptRawStatement : isNextStatementRaw;
 
-                scriptStatement.Write(context);
+                context.Write(scriptStatement);
 
                 context.PreviousRawStatement = rawStatement;
             }

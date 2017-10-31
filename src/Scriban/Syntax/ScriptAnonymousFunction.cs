@@ -12,10 +12,10 @@ namespace Scriban.Syntax
             return Function;
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("do").WithSpace();
-            Function?.Write(context);
+            context.Write(Function);
         }
     }
 }

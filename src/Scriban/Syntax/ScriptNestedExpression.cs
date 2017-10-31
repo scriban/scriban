@@ -16,10 +16,10 @@ namespace Scriban.Syntax
             return context.Evaluate(Expression);
         }
 
-        protected override void WriteImpl(RenderContext context)
+        public override void Write(RenderContext context)
         {
             context.Write("(");
-            Expression?.Write(context);
+            context.Write(Expression);
             context.Write(")");
         }
 
