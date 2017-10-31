@@ -21,6 +21,9 @@ namespace Scriban.Functions
 
         public LiquidBuiltinsFunctions() : base(50, false)
         {
+            // We copy the default scriban objects
+            BuiltinFunctions.Default.Clone(true).CopyTo(this);
+            // And we create the liquid alias
             Default.Clone(false).CopyTo(this);
         }
 
@@ -45,7 +48,7 @@ namespace Scriban.Functions
                 SetValue("ceil", math["ceil"], true);
                 SetValue("compact", array["compact"], true);
                 SetValue("concat", array["concat"], true);
-                SetValue("date", date["parse"], true);
+                SetValue("date", date, true);
                 SetValue("default", objs["default"], true);
                 SetValue("divided_by", math["divided_by"], true);
                 SetValue("downcase", str["downcase"], true);

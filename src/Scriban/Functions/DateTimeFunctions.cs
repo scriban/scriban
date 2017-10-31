@@ -14,7 +14,7 @@ namespace Scriban.Functions
     /// The object representing the global 'date'  object
     /// </summary>
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
-    public class DateTimeFunctions : ScriptObject
+    public class DateTimeFunctions : ScriptObject, IScriptCustomFunction
     {
         private const string FormatKey = "format";
 
@@ -236,6 +236,21 @@ namespace Scriban.Functions
 
             return builder.ToString();
 
+        }
+
+        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+        {
+            // If we access `date` without any parameter, it calls by default the "parse" function
+            // otherwise it is the 'date' object itself
+            switch (parameters.Count)
+            {
+                case 0:
+                    return this;
+                case 1:
+                    return Parse(context.ToString(callerContext.Span, parameters[0]));
+                default:
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{parameters.Count}` for `date` object/function.");
+            }
         }
     }
 }
