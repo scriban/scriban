@@ -64,6 +64,23 @@ namespace Scriban.Parsing
             return "<error>";
         }
 
+        public bool Match(string text, string lexerText)
+        {
+            var length = End.Offset - Start.Offset + 1;
+            if (text.Length != length)
+            {
+                return false;
+            }
+            for (int i = 0; i < text.Length; i++)
+            {
+                if (lexerText[Start.Offset + i] != text[i])
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
         public bool Equals(Token other)
         {
             return Type == other.Type && Start.Equals(other.Start) && End.Equals(other.End);

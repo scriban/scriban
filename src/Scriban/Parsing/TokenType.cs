@@ -72,6 +72,11 @@ namespace Scriban.Parsing
         String,
 
         /// <summary>
+        /// An implicit string with quotes
+        /// </summary>
+        ImplicitString,
+
+        /// <summary>
         /// A verbatim string
         /// </summary>
         VerbatimString,

@@ -214,6 +214,15 @@ namespace Scriban.Parsing
             return Close(literal);
         }
 
+        private ScriptLiteral ParseImplicitString()
+        {
+            var literal = Open<ScriptLiteral>();
+            literal.Value = GetAsText(Current);
+            Close(literal);
+            NextToken();
+            return literal;
+        }
+
         private ScriptLiteral ParseString()
         {
             var literal = Open<ScriptLiteral>();

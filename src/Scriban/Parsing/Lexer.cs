@@ -341,7 +341,7 @@ namespace Scriban.Parsing
             {
                 if (_isLiquid && _isLiquidTagBlock)
                 {
-                    if (TryReadLiquidCommentOrRaw())
+                    if (TryReadLiquidCommentOrRaw(start, end))
                     {
                         return;
                     }
@@ -351,7 +351,7 @@ namespace Scriban.Parsing
             }
         }
 
-        private bool TryReadLiquidCommentOrRaw()
+        private bool TryReadLiquidCommentOrRaw(TextPosition codeEnterStart, TextPosition codeEnterEnd)
         {
             var start = _position;
             int offset = 0;
@@ -376,21 +376,38 @@ namespace Scriban.Parsing
                             if (c == '%')
                             {
                                 NextChar();
+                                if (c == '-')
+                                {
+                                    NextChar();
+                                }
                                 SkipSpaces();
 
                                 if (TryMatch(isComment ? "endcomment" : "endraw"))
                                 {
                                     SkipSpaces();
+                                    var codeExitStart = _position;
+                                    if (c == '-')
+                                    {
+                                        NextChar();
+                                    }
                                     if (c == '%')
                                     {
                                         NextChar();
                                         if (c == '}')
                                         {
+                                            var codeExitEnd = _position;
                                             NextChar(); // Skip }
                                             _blockType = BlockType.Raw;
-                                            _token = new Token(isComment ? TokenType.CommentMulti : TokenType.Escape, start, end);
-                                            if (!isComment)
+                                            if (isComment)
                                             {
+                                                // Convert a liquit comment into a Scriban multi-line {{ ## comment ## }}
+                                                _token = new Token(TokenType.CodeEnter, codeEnterStart, codeEnterEnd);
+                                                _pendingTokens.Enqueue(new Token(TokenType.CommentMulti, start, end));
+                                                _pendingTokens.Enqueue(new Token(TokenType.CodeExit, codeExitStart, codeExitEnd));
+                                            }
+                                            else
+                                            {
+                                                _token = new Token(TokenType.Escape, start, end);
                                                 _pendingTokens.Enqueue(new Token(TokenType.EscapeCount1, end, end));
                                             }
                                             return true;
@@ -959,6 +976,10 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.Colon, start, start);
                     NextChar();
                     break;
+                case ',':
+                    _token = new Token(TokenType.Comma, start, start);
+                    NextChar();
+                    break;
                 case '|':
                     _token = new Token(TokenType.Pipe, start, start);
                     NextChar();
@@ -1029,6 +1050,14 @@ namespace Scriban.Parsing
                     break;
                 case ')':
                     _token = new Token(TokenType.CloseParent, _position, _position);
+                    NextChar();
+                    break;
+                case '[':
+                    _token = new Token(TokenType.OpenBracket, _position, _position);
+                    NextChar();
+                    break;
+                case ']':
+                    _token = new Token(TokenType.CloseBracket, _position, _position);
                     NextChar();
                     break;
                 case '"':
@@ -1127,6 +1156,25 @@ namespace Scriban.Parsing
             } while (IsIdentifierLetter(c));
 
             _token = new Token(special ? TokenType.IdentifierSpecial : TokenType.Identifier, start, beforePosition);
+
+            // If we have an include token, we are going to parse spaces and non_white_spaces
+            // in order to support the tag "include"
+            if (_isLiquid && _token.Match("include", Text) && char.IsWhiteSpace(c))
+            {
+                var startSpace = _position;
+                var endSpace = startSpace;
+                ConsumeWhitespace(false, ref startSpace);
+                _pendingTokens.Enqueue(new Token(TokenType.Whitespace, startSpace, endSpace));
+
+                var startPath = _position;
+                var endPath = startPath;
+                while (!char.IsWhiteSpace(c) && c != 0)
+                {
+                    endPath = _position;
+                    NextChar();
+                }
+                _pendingTokens.Enqueue(new Token(TokenType.ImplicitString, startPath, endPath));
+            }
         }
 
         [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]

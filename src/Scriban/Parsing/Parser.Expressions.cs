@@ -47,6 +47,7 @@ namespace Scriban.Parsing
                 case TokenType.Integer:
                 case TokenType.Float:
                 case TokenType.String:
+                case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
                 case TokenType.OpenParent:
                 case TokenType.OpenBrace:
@@ -147,6 +148,9 @@ namespace Scriban.Parsing
                     case TokenType.String:
                         leftOperand = ParseString();
                         break;
+                    case TokenType.ImplicitString:
+                        leftOperand = ParseImplicitString();
+                        break;
                     case TokenType.VerbatimString:
                         leftOperand = ParseVerbatimString();
                         break;
@@ -182,6 +186,11 @@ namespace Scriban.Parsing
 
                 while (!hasAnonymousFunction)
                 {
+                    if (_isLiquid && Current.Type == TokenType.Comma && functionCall != null)
+                    {
+                        NextToken(); // Skip the comma for arguments in a function call
+                    }
+                    
                     // Parse Member expression are expected to be followed only by an identifier
                     if (Current.Type == TokenType.Dot)
                     {
@@ -276,6 +285,8 @@ namespace Scriban.Parsing
 
                         continue;
                     }
+
+
 
                     if (precedence > 0)
                     {

@@ -808,21 +808,48 @@ namespace Scriban.Parsing
                 default:
                 {
                     CheckNotInCase(parent, startToken);
-                    // Otherwise it is an expression statement
-                    if (_isLiquidTagSection)
-                    {
-                        LogError(startToken, $"Expecting the expression `{GetAsText(Current)}` to be in an object section `{{{{ ... }}}}`");
-                    }
                     var expressionStatement = ParseExpressionStatement();
+
+                    var functionCall = expressionStatement.Expression as ScriptFunctionCall;
+                    bool isInclude = functionCall != null && functionCall.Target is ScriptVariable &&
+                                     ((ScriptVariable) functionCall.Target).Name == "include";
+
+                    // Otherwise it is an expression statement
+                    if (isInclude)
+                    {
+                        if (!_isLiquidTagSection)
+                        {
+                            LogError(startToken, $"The `include` statement must be in a tag section `{{% ... %}}`");
+                        }
+                    }
+                    else if (_isLiquidTagSection)
+                    {
+                        LogError(startToken, $"Expecting the expression `{GetAsText(startToken)}` to be in an object section `{{{{ ... }}}}`");
+                    }
                     statement = expressionStatement;
-                    if (expressionStatement.Expression is ScriptAssignExpression)
+                    if (!isInclude && expressionStatement.Expression is ScriptAssignExpression)
                     {
                         LogError(statement, $"Assignment expression is not allowed");
                     }
                 }
                     break;
             }
+        }
 
+        private void CheckIsAssignment(Token token, ScriptExpression expression)
+        {
+            while (expression != null)
+            {
+                if (expression is ScriptPipeCall)
+                {
+                    expression = ((ScriptPipeCall) expression).From;
+                }
+                else if (expression is ScriptAssignExpression)
+                {
+                    return;
+                }
+            }
+            LogError(token, "Expecting an assign expression: <variable> = <expression>");
         }
 
         private T PeekCurrentBlock<T>() where T : ScriptNode

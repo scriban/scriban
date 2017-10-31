@@ -126,11 +126,24 @@ namespace Scriban.Syntax
 
         public void Write(RenderContext context)
         {
-            //if (!context.PreviousHasSpace && (Type == ScriptTriviaType.Comment || Type == ScriptTriviaType.CommentMulti))
-            //{
-            //    context.Write(" ");
-            //}
-            context.Write(ToString());
+            var rawText = ToString();
+
+            bool isRawComment = Type == ScriptTriviaType.CommentMulti && !rawText.StartsWith("##");
+            if (isRawComment)
+            {
+                // Escape any # by \#
+                rawText = rawText.Replace("#", "\\#");
+                // Escape any }}
+                rawText = rawText.Replace("}", "\\}");
+                context.Write("## ");
+            }
+
+            context.Write(rawText);
+
+            if (isRawComment)
+            {
+                context.Write(" ##");
+            }
         }
 
         public override string ToString()

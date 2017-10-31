@@ -69,19 +69,30 @@ namespace Scriban.Tests
             }
             if (withRight)
             {
-                text = "abc " + text;
+                text = text + " abc";
             }
             var startInner = text.IndexOf(inner, StringComparison.Ordinal);
             var endInner = startInner + inner.Length - 1;
 
             var tokens = ParseTokens(text, true);
 
-            var expectedTokens = new List<Token>
+            var expectedTokens = new List<Token>();
+            int innerIndex = 0;
+            if (isComment)
             {
-                new Token(isComment ? TokenType.CommentMulti : TokenType.Escape, new TextPosition(startInner, 0, startInner), new TextPosition(endInner, 0, endInner)),
-            };
+                var startCodeEnter = text.IndexOf("{%");
+                expectedTokens.Add(new Token(TokenType.CodeEnter, new TextPosition(startCodeEnter, 0, startCodeEnter), new TextPosition(startCodeEnter+1, 0, startCodeEnter+1)));
+                innerIndex = 1;
+            }
 
-            if (!isComment)
+            expectedTokens.Add(new Token(isComment ? TokenType.CommentMulti : TokenType.Escape, new TextPosition(startInner, 0, startInner), new TextPosition(endInner, 0, endInner)));
+
+            if (isComment)
+            {
+                var startCodeExit = text.LastIndexOf("%}");
+                expectedTokens.Add(new Token(TokenType.CodeExit, new TextPosition(startCodeExit, 0, startCodeExit), new TextPosition(startCodeExit + 1, 0, startCodeExit + 1)));
+            }
+            else
             {
                 expectedTokens.Add(new Token(TokenType.EscapeCount1, new TextPosition(startInner, 0, startInner), new TextPosition(endInner, 0, endInner)));
             }
@@ -105,7 +116,27 @@ namespace Scriban.Tests
             }
 
             Assert.AreEqual(expectedTokens.Count, tokens.Count);
-            Assert.AreEqual(inner, tokens[0].GetText(text));
+            Assert.AreEqual(inner, tokens[innerIndex].GetText(text));
+        }
+
+        [Test]
+        public void ParseLiquidInclude()
+        {
+            //          0         1         2
+            //          012345678901234567890123456
+            var text = "{% include toto/tata.htm %}";
+            var tokens = ParseTokens(text, true, true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.LiquidTagEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
+                new Token(TokenType.Whitespace, new TextPosition(2, 0, 2), new TextPosition(2, 0, 2)),
+                new Token(TokenType.Identifier, new TextPosition(3, 0, 3), new TextPosition(9, 0, 9)),
+                new Token(TokenType.Whitespace, new TextPosition(10, 0, 10), new TextPosition(10, 0, 10)),
+                new Token(TokenType.ImplicitString, new TextPosition(11, 0, 11), new TextPosition(23, 0, 23)),
+                new Token(TokenType.Whitespace, new TextPosition(24, 0, 24), new TextPosition(24, 0, 24)),
+                new Token(TokenType.LiquidTagExit, new TextPosition(25, 0, 25), new TextPosition(26, 0, 26)),
+                Token.Eof
+            }, tokens);
         }
 
         [Test]
@@ -476,9 +507,9 @@ end}}This is a test";
             }
         }
 
-        private List<Token> ParseTokens(string text, bool isLiquid = false)
+        private List<Token> ParseTokens(string text, bool isLiquid = false, bool keepTrivia = false)
         {
-            var lexer = new Lexer(text, options: new LexerOptions() { Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default});
+            var lexer = new Lexer(text, options: new LexerOptions() { Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default, KeepTrivia = keepTrivia});
             foreach (var error in lexer.Errors)
             {
                 Console.WriteLine(error);
