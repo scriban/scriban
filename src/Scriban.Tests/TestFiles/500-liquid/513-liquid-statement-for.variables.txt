@@ -1,0 +1,9 @@
+{% for product in products -%}
+{% if forloop.first == true -%}
+First time through!
+{% elsif forloop.last == true -%}
+Last time through!
+{% else -%}
+Not the first time with index0 {{ forloop.index0 }} and index {{ forloop.index }}
+{% endif -%}
+{%- endfor %}

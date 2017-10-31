@@ -11,6 +11,15 @@ namespace Scriban.Syntax
     [ScriptSyntax("literal", "<value>")]
     public class ScriptLiteral : ScriptExpression
     {
+        public ScriptLiteral()
+        {
+        }
+
+        public ScriptLiteral(object value)
+        {
+            Value = value;
+        }
+
         public object Value { get; set; }
 
         public ScriptLiteralStringQuoteType StringQuoteType { get; set; }

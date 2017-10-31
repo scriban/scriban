@@ -275,6 +275,10 @@
     <Content Include="TestFiles\400-builtins\420-math.txt" />
     <Content Include="TestFiles\400-builtins\410-array.out.txt" />
     <Content Include="TestFiles\400-builtins\410-array.txt" />
+    <Content Include="TestFiles\500-liquid\502-liquid-comment.out.txt" />
+    <Content Include="TestFiles\500-liquid\502-liquid-comment.txt" />
+    <Content Include="TestFiles\500-liquid\501-liquid-raw.out.txt" />
+    <Content Include="TestFiles\500-liquid\501-liquid-raw.txt" />
     <Content Include="TestFiles\500-liquid\500-liquid-variables.out.txt" />
     <Content Include="TestFiles\500-liquid\500-liquid-variables.txt" />
     <Content Include="TestFiles\500-liquid\510-liquid-statement-if-error1.out.txt" />
@@ -284,6 +288,8 @@
     <Content Include="TestFiles\500-liquid\511-liquid-statement-unless-error1.txt" />
     <Content Include="TestFiles\500-liquid\511-liquid-statement-unless.out.txt" />
     <Content Include="TestFiles\500-liquid\511-liquid-statement-unless.txt" />
+    <Content Include="TestFiles\500-liquid\513-liquid-statement-for.variables.out.txt" />
+    <Content Include="TestFiles\500-liquid\513-liquid-statement-for.variables.txt" />
     <Content Include="TestFiles\500-liquid\520-liquid-statement-capture.out.txt" />
     <Content Include="TestFiles\500-liquid\520-liquid-statement-capture.txt" />
     <Content Include="TestFiles\500-liquid\513-liquid-statement-for.out.txt" />

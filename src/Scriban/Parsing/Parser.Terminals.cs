@@ -87,7 +87,7 @@ namespace Scriban.Parsing
                     return indexerExpression;
                 }
             }
-            else if (text == "for" || text == "while")
+            else if (text == "for" || text == "while" || (_isLiquid && text == "forloop"))
             {
                 if (Current.Type == TokenType.Dot)
                 {
@@ -96,34 +96,89 @@ namespace Scriban.Parsing
                     {
                         endSpan = CurrentSpan;
                         var loopVariableText = GetAsText(Current);
+                        NextToken();
+
                         scope = ScriptVariableScope.Loop;
-                        switch (loopVariableText)
+                        if (_isLiquid)
                         {
-                            case "first":
-                                text = "for.first";
-                                break;
-                            case "last":
-                                if (text == "while")
-                                {
-                                    // unit test: 108-variable-loop-error2.txt
-                                    LogError(currentToken, "The loop variable <while.last> is invalid");
-                                }
-                                text = "for.last";
-                                break;
-                            case "even":
-                                text = "for.even";
-                                break;
-                            case "odd":
-                                text = "for.odd";
-                                break;
-                            case "index":
-                                text = "for.index";
-                                break;
-                            default:
-                                text = text + "." + loopVariableText;
-                                // unit test: 108-variable-loop-error1.txt
-                                LogError(currentToken, $"The loop variable <{text}> is not supported");
-                                break;
+                            switch (loopVariableText)
+                            {
+                                case "first":
+                                    text = ScriptVariable.LoopFirst.Name;
+                                    break;
+                                case "last":
+                                    text = ScriptVariable.LoopLast.Name;
+                                    break;
+                                case "index0":
+                                    text = ScriptVariable.LoopIndex.Name;
+                                    break;
+                                case "index":
+                                    // Because forloop.index is 1 based index, we need to create a binary expression
+                                    // to support it here
+
+                                    var nested = new ScriptNestedExpression()
+                                    {
+                                        Expression = new ScriptBinaryExpression()
+                                        {
+                                            Operator = ScriptBinaryOperator.Add,
+                                            Left = new ScriptVariableLoop(ScriptVariable.LoopIndex.Name)
+                                            {
+                                                Span = currentSpan
+                                            },
+                                            Right = new ScriptLiteral(1)
+                                            {
+                                                Span = currentSpan
+                                            },
+                                            Span = currentSpan
+                                        },
+                                        Span = currentSpan
+                                    };
+
+                                    if (_isKeepTrivia)
+                                    {
+                                        if (triviasBefore != null)
+                                        {
+                                            nested.AddTrivias(triviasBefore, true);
+                                        }
+                                        FlushTrivias(nested, false);
+                                    }
+                                    return nested;
+                                default:
+                                    text = text + "." + loopVariableText;
+                                    LogError(currentToken, $"The liquid loop variable <{text}> is not supported");
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            switch (loopVariableText)
+                            {
+                                case "first":
+                                    text = ScriptVariable.LoopFirst.Name;
+                                    break;
+                                case "last":
+                                    if (text == "while")
+                                    {
+                                        // unit test: 108-variable-loop-error2.txt
+                                        LogError(currentToken, "The loop variable <while.last> is invalid");
+                                    }
+                                    text = ScriptVariable.LoopLast.Name;
+                                    break;
+                                case "even":
+                                    text = ScriptVariable.LoopEven.Name;
+                                    break;
+                                case "odd":
+                                    text = ScriptVariable.LoopOdd.Name;
+                                    break;
+                                case "index":
+                                    text = ScriptVariable.LoopIndex.Name;
+                                    break;
+                                default:
+                                    text = text + "." + loopVariableText;
+                                    // unit test: 108-variable-loop-error1.txt
+                                    LogError(currentToken, $"The loop variable <{text}> is not supported");
+                                    break;
+                            }
                         }
 
                         // We no longer checks at parse time usage of loop variables, as they can be used in a wrap context
@@ -132,7 +187,6 @@ namespace Scriban.Parsing
                         //    LogError(currentToken, $"Unexpected variable <{text}> outside of a loop");
                         //}
 
-                        NextToken();
                     }
                     else
                     {
