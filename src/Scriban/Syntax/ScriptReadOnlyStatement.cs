@@ -18,9 +18,9 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("readonly").WithSpace();
+            context.Write("readonly").ExpectSpace();
             context.Write(Variable);
-            context.WithEos();
+            context.ExpectEos();
         }
     }
 }

@@ -18,7 +18,7 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("else").WithEos();
+            context.Write("else").ExpectEos();
             context.Write(Body);
             context.Write(Else);
         }

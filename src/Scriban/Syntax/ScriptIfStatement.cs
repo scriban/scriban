@@ -40,7 +40,7 @@ namespace Scriban.Syntax
             {
                 context.Write("else ");
             }
-            context.Write("if").WithSpace();
+            context.Write("if").ExpectSpace();
             if (InvertCondition)
             {
                 context.Write("!(");
@@ -50,7 +50,7 @@ namespace Scriban.Syntax
             {
                 context.Write(")");
             }
-            context.WithEos();
+            context.ExpectEos();
 
             context.Write(Then);
 
@@ -58,7 +58,7 @@ namespace Scriban.Syntax
 
             if (!IsElseIf)
             {
-                context.WithEnd();
+                context.ExpectEnd();
             }
         }
 

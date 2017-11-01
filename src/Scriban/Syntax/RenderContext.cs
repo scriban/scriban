@@ -36,6 +36,8 @@ namespace Scriban.Syntax
         /// </summary>
         public readonly RenderOptions Options;
 
+        public bool PreviousHasSpace => _previousHasSpace;
+
         internal bool IsNextStatementRaw { get; set; }
 
         internal ScriptRawStatement PreviousRawStatement { get; set; }
@@ -76,7 +78,7 @@ namespace Scriban.Syntax
             return this;
         }
 
-        public RenderContext WithEos()
+        public RenderContext ExpectEos()
         {
             if (!_hasEndOfStatement)
             {
@@ -85,16 +87,16 @@ namespace Scriban.Syntax
             return this;
         }
 
-        public RenderContext WithSpace()
+        public RenderContext ExpectSpace()
         {
             _expectSpace = true;
             return this;
         }
 
-        public RenderContext WithEnd()
+        public RenderContext ExpectEnd()
         {
             _expectEnd = true;
-            WithEos();
+            ExpectEos();
             return this;
         }
 

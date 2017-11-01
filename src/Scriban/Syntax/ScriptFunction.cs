@@ -34,12 +34,12 @@ namespace Scriban.Syntax
         {
             if (Name != null)
             {
-                context.Write("func").WithSpace();
+                context.Write("func").ExpectSpace();
                 context.Write(Name);
             }
-            context.WithEos();
+            context.ExpectEos();
             context.Write(Body);
-            context.WithEnd();
+            context.ExpectEnd();
         }
     }
 }

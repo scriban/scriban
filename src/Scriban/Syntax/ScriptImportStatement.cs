@@ -30,9 +30,9 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("import").WithSpace();
+            context.Write("import").ExpectSpace();
             context.Write(Expression);
-            context.WithEos();
+            context.ExpectEos();
         }
     }
 }

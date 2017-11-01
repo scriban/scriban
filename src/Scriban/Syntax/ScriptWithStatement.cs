@@ -36,11 +36,11 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("with").WithSpace();
+            context.Write("with").ExpectSpace();
             context.Write(Name);
-            context.WithEos();
+            context.ExpectEos();
             context.Write(Body);
-            context.WithEnd();
+            context.ExpectEnd();
         }
 
         public override string ToString()

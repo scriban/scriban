@@ -30,11 +30,11 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("capture").WithSpace();
+            context.Write("capture").ExpectSpace();
             context.Write(Target);
-            context.WithEos();
+            context.ExpectEos();
             context.Write(Body);
-            context.WithEnd();
+            context.ExpectEnd();
         }
     }
 }

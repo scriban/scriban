@@ -43,7 +43,7 @@ namespace Scriban.Syntax
             context.Write(Target);
             foreach (var scriptExpression in Arguments)
             {
-                context.WithSpace();
+                context.ExpectSpace();
                 context.Write(scriptExpression);
             }
         }

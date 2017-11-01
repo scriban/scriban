@@ -65,6 +65,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Add:
                     return "+";
                 case ScriptBinaryOperator.Substract:
+                    // The substract operator requires to be separated by space
                     return "-";
                 case ScriptBinaryOperator.Divide:
                     return "/";

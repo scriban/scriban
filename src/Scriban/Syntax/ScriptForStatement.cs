@@ -65,13 +65,13 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("for").WithSpace();
-            context.Write(Variable).WithSpace();
-            context.Write("in").WithSpace();
+            context.Write("for").ExpectSpace();
+            context.Write(Variable).ExpectSpace();
+            context.Write("in").ExpectSpace();
             context.Write(Iterator);
-            context.WithEos();
+            context.ExpectEos();
             context.Write(Body);
-            context.WithEnd();
+            context.ExpectEnd();
         }
 
         public override string ToString()

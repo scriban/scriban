@@ -24,7 +24,7 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("break").WithEos();
+            context.Write("break").ExpectEos();
         }
     }
 }

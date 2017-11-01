@@ -127,7 +127,16 @@ namespace Scriban.Syntax
         public override void Write(RenderContext context)
         {
             context.Write(Left);
+            // Because a-b is a variable name, we need to transform binary op a-b to a - b
+            if (Operator == ScriptBinaryOperator.Substract && !context.PreviousHasSpace)
+            {
+                context.Write(" ");
+            }
             context.Write(Operator.ToText());
+            if (Operator == ScriptBinaryOperator.Substract)
+            {
+                context.ExpectSpace();
+            }
             context.Write(Right);
         }
 

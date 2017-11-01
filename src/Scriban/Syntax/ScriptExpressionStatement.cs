@@ -26,7 +26,7 @@ namespace Scriban.Syntax
         public override void Write(RenderContext context)
         {
             context.Write(Expression);
-            context.WithEos();
+            context.ExpectEos();
         }
 
         public override string ToString()

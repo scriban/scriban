@@ -29,10 +29,10 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("case").WithSpace();
-            context.Write(Value).WithEos();
+            context.Write("case").ExpectSpace();
+            context.Write(Value).ExpectEos();
             context.Write(Body);
-            context.WithEnd();
+            context.ExpectEnd();
         }
 
         public override string ToString()

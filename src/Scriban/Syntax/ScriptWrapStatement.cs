@@ -38,11 +38,11 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            context.Write("wrap").WithSpace();
+            context.Write("wrap").ExpectSpace();
             context.Write(Target);
-            context.WithEos();
+            context.ExpectEos();
             context.Write(Body);
-            context.WithEnd();
+            context.ExpectEnd();
         }
     }
 }
