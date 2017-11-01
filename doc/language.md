@@ -297,7 +297,16 @@ The null value `{{ null }}`
 
 Scriban supports the concept of **global** and **local** variables
 
-A **global/property variable** like `{{ name }}` is a javascript like identifier, starting by a letter and following by a letter `A-Z a-z`, a digit `0-9` or an underscore `_`
+A **global/property variable** like `{{ name }}` is a liquid like handle, starting by a letter or underscore `_` and following by a letter `A-Z a-z`, a digit `0-9`, an underscore `_` or the minus `-`
+
+The following text are valid variable names:
+
+- `var` 
+- `var9`
+- `_var`
+- `my-var`
+
+> NOTE: because the character `-` is allowed in a variable name and scriban supports also binary subtract with the `-` operator, if you want to perform the calculation `my` minus `var` you should add a space between `-`: `my - var`
 
 A **local variable** like `{{ $name }}` is an identifier starting with `$`. A local variable is only accessible within the same include page or function body.
 

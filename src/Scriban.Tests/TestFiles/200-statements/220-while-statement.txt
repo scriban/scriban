@@ -65,13 +65,13 @@ end
 x = 0
 while x < 4
 	x = x + 1
-	(x-1) + " => [" + while.index + "] " + while.first + "," + while.even + "," + while.odd + "\n"
+	(x - 1) + " => [" + while.index + "] " + while.first + "," + while.even + "," + while.odd + "\n"
 end
 ===
 {{
 x = 0
 while x < 4
 	x = x + 1
-	(x-1) + " => [" + while.index + "] " + while.first + "," + while.even + "," + while.odd + "\n"
+	(x - 1) + " => [" + while.index + "] " + while.first + "," + while.even + "," + while.odd + "\n"
 end
 }}

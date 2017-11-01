@@ -1186,7 +1186,7 @@ namespace Scriban.Parsing
         [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         private static bool IsIdentifierLetter(char c)
         {
-            return IsFirstIdentifierLetter(c) || char.IsDigit(c);
+            return IsFirstIdentifierLetter(c) || char.IsDigit(c) || c == '-';
         }
 
         private void ReadNumber()
