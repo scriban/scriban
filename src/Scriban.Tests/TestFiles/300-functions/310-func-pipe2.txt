@@ -1,0 +1,18 @@
+Complex example of function pipes and aliasing (to check nested expression + returned function from pipes)
+{{
+func add
+	ret $0 + $1
+end
+func sub 
+	ret $0 - $1
+end
+# Store an alias of sub
+myarray = [ @add, @sub ]
+
+func aliasFunc
+    # return an alias of the function
+	ret @myarray[$0]
+end
+
+(1 | sub 5) | ( sub 4 3 | aliasFunc) 6
+}}

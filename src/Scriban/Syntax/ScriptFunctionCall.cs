@@ -64,7 +64,7 @@ namespace Scriban.Syntax
             return target is ScriptFunction || target is IScriptCustomFunction;
         }
 
-        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool pipeArguments, List < ScriptExpression> arguments = null)
+        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, List < ScriptExpression> arguments = null)
         {
             if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (functionObject == null)
@@ -112,12 +112,10 @@ namespace Scriban.Syntax
             }
 
             // Handle pipe arguments here
-            if (pipeArguments && context.PipeArguments.Count > 0)
+            if (processPipeArguments && context.PipeArguments.Count > 0)
             {
-                while (context.PipeArguments.Count > 0)
-                {
-                    argumentValues.Add(context.PipeArguments.Pop());
-                }
+                argumentValues.AddRange(context.PipeArguments);
+                context.PipeArguments.Clear();
             }
 
             object result = null;

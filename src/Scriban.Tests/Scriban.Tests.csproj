@@ -215,6 +215,8 @@
     <Content Include="TestFiles\300-functions\305-func-error-invalid.txt" />
     <Content Include="TestFiles\300-functions\305-func-error-null.out.txt" />
     <Content Include="TestFiles\300-functions\305-func-error-null.txt" />
+    <Content Include="TestFiles\300-functions\310-func-pipe2.out.txt" />
+    <Content Include="TestFiles\300-functions\310-func-pipe2.txt" />
     <Content Include="TestFiles\300-functions\320-func-anonymous2.out.txt" />
     <Content Include="TestFiles\300-functions\320-func-anonymous2.txt" />
     <Content Include="TestFiles\300-functions\320-func-anonymous1.out.txt" />

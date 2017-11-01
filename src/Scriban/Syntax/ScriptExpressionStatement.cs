@@ -14,6 +14,7 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             var result = context.Evaluate(Expression);
+            // This code is necessary for wrap to work
             var codeDelegate = result as ScriptNode;
             if (codeDelegate != null)
             {

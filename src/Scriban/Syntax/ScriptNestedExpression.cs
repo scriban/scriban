@@ -13,7 +13,16 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            return context.Evaluate(Expression);
+            // A nested expression will reset the pipe arguments for the group
+            context.PushPipeArguments();
+            try
+            {
+                return context.Evaluate(Expression);
+            }
+            finally
+            {
+                context.PopPipeArguments();
+            }
         }
 
         public override void Write(RenderContext context)

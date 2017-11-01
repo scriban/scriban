@@ -30,26 +30,22 @@ namespace Scriban.Syntax
                 var valueEnumerator = leftResult as IEnumerable;
                 if (valueEnumerator != null)
                 {
-                    var localArray = new ScriptArray();
+                    var pipeArguments = context.PipeArguments;
                     foreach (var subValue in valueEnumerator)
                     {
-                        localArray.Add(subValue);
-                    }
-                    for (var i = localArray.Count - 1; i >= 0; i--)
-                    {
-                        var subValue = localArray[i];
-                        context.PipeArguments.Push(subValue);
+                        pipeArguments.Add(subValue);
                     }
                 }
                 else
                 {
-                    context.PipeArguments.Push(leftResult);
+                    context.PipeArguments.Add(leftResult);
                 }
             }
             else
             {
-                context.PipeArguments.Push(leftResult);
+                context.PipeArguments.Add(leftResult);
             }
+
             var result = context.Evaluate(To);
 
             int afterPipeArgumentCount = context.PipeArguments.Count;

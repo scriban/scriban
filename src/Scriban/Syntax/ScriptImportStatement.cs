@@ -7,11 +7,13 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("import statement", "import <expression>")]
-    public class ScriptImportStatement : ScriptExpressionStatement
+    public class ScriptImportStatement : ScriptStatement
     {
+        public ScriptExpression Expression { get; set; }
+
         public override object Evaluate(TemplateContext context)
         {
-            var value = base.Evaluate(context);
+            var value = context.Evaluate(Expression);
             if (value == null)
             {
                 return null;
@@ -29,7 +31,8 @@ namespace Scriban.Syntax
         public override void Write(RenderContext context)
         {
             context.Write("import").WithSpace();
-            base.Write(context);
+            context.Write(Expression);
+            context.WithEos();
         }
     }
 }

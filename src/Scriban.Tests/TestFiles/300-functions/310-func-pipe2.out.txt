@@ -1,0 +1,2 @@
+Complex example of function pipes and aliasing (to check nested expression + returned function from pipes)
+2

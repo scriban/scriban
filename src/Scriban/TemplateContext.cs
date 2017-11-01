@@ -39,6 +39,9 @@ namespace Scriban
         private bool _isFunctionCallDisabled;
         private int _loopStep;
         private int _getOrSetValueLevel;
+        private FastStack<ScriptPipeArguments> _availablePipeArguments;
+        private FastStack<ScriptPipeArguments> _pipeArguments;
+        private ScriptPipeArguments _currentPipeArguments;
 
         internal bool AllowPipeArguments => _getOrSetValueLevel <= 1;
 
@@ -102,15 +105,19 @@ namespace Scriban
             _memberAccessors = new Dictionary<Type, IObjectAccessor>();
             _listAccessors = new Dictionary<Type, IListAccessor>();
             _loops = new FastStack<ScriptLoopStatementBase>(4);
-            PipeArguments = new Stack<object>();
 
             BlockDelegates = new FastStack<ScriptBlockStatement>(4);
+
+            _availablePipeArguments = new FastStack<ScriptPipeArguments>(4);
+            _pipeArguments = new FastStack<ScriptPipeArguments>(4);
 
             _isFunctionCallDisabled = false;
 
             CachedTemplates = new Dictionary<string, Template>();
 
             Tags = new Dictionary<object, object>();
+
+            PushPipeArguments();
 
             // Ensure that builtin is registered first
             PushGlobal(BuiltinObject);
@@ -199,7 +206,7 @@ namespace Scriban
         /// <summary>
         /// Store the current stack of pipe arguments used by <see cref="ScriptPipeCall"/> and <see cref="ScriptFunctionCall"/>
         /// </summary>
-        internal Stack<object> PipeArguments { get; }
+        internal ScriptPipeArguments PipeArguments => _currentPipeArguments;
 
         /// <summary>
         /// Gets or sets the internal state of control flow.
@@ -246,6 +253,27 @@ namespace Scriban
                 throw new InvalidOperationException("Cannot PopCulture more than PushCulture");
             }
             return _cultures.Pop();
+        }
+
+        internal void PushPipeArguments()
+        {
+            var pipeArguments = _availablePipeArguments.Count > 0 ? _availablePipeArguments.Pop() : new ScriptPipeArguments(4);
+            _pipeArguments.Push(pipeArguments);
+            _currentPipeArguments = pipeArguments;
+        }
+
+        internal void PopPipeArguments()
+        {
+            if (_pipeArguments.Count == 1)
+            {
+                throw new InvalidOperationException("Cannot PopPipeArguments more than PushPipeArguments");
+            }
+
+            var pipeArguments = _pipeArguments.Pop();
+            // Might be not null in case of an exception
+            pipeArguments.Clear();
+            _availablePipeArguments.Push(pipeArguments);
+            _currentPipeArguments = _pipeArguments.Peek();
         }
 
         /// <summary>
