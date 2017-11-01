@@ -565,22 +565,16 @@ namespace Scriban.Parsing
                    || scriptNode is ScriptAnonymousFunction;
         }
 
-        private void CheckInTagSection()
-        {
-            if (!_isLiquidTagSection)
-            {
-                LogError(Current, "Expecting the expression to be in a tag section `{% ... %}`");
-            }
-        }
-
         private void ReadLiquidStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
-            bool isNotExpectedInTagSection = true;
             var startToken = Current;
             switch (identifier)
             {
                 case "endif":
-                    CheckInTagSection();
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     NextToken();
 
                     hasEnd = true;
@@ -599,7 +593,10 @@ namespace Scriban.Parsing
                     }
                     break;
                 case "endunless":
-                    CheckInTagSection();
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     NextToken();
 
                     hasEnd = true;
@@ -619,7 +616,10 @@ namespace Scriban.Parsing
                     break;
 
                 case "endfor":
-                    CheckInTagSection();
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     NextToken();
 
                     hasEnd = true;
@@ -639,7 +639,10 @@ namespace Scriban.Parsing
                     break;
 
                 case "endcase":
-                    CheckInTagSection();
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     NextToken();
 
                     hasEnd = true;
@@ -659,7 +662,10 @@ namespace Scriban.Parsing
                     break;
 
                 case "endcapture":
-                    CheckInTagSection();
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     NextToken();
 
                     hasEnd = true;
@@ -679,13 +685,19 @@ namespace Scriban.Parsing
                     break;
 
                 case "case":
-                    CheckInTagSection();
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     statement = ParseCaseStatement();
                     break;
 
                 case "when":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     var whenStatement = ParseWhenStatement();
-                    CheckInTagSection();
                     var whenParent = parent as ScriptConditionStatement;
                     if (parent is ScriptWhenStatement)
                     {
@@ -706,20 +718,29 @@ namespace Scriban.Parsing
                     break;
 
                 case "if":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     statement = ParseIfStatement(false, false);
                     break;
 
                 case "unless":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     statement = ParseIfStatement(true, false);
                     break;
 
                 case "else":
                 case "elsif":
-                    CheckInTagSection();
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
 
                     var nextCondition = ParseElseStatement(identifier == "elsif");
                     var parentCondition = parent as ScriptConditionStatement;
@@ -756,26 +777,34 @@ namespace Scriban.Parsing
                     statement = ParseForStatement();
                     break;
                 case "break":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     statement = Open<ScriptBreakStatement>();
                     NextToken();
-                    Close(statement);
-
                     ExpectEndOfStatement(statement);
+                    Close(statement);
                     break;
                 case "continue":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
-                    Close(statement);
                     ExpectEndOfStatement(statement);
+                    Close(statement);
                     break;
                 case "assign":
                 {
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     NextToken(); // skip assign
                     
                     var token = _token;
@@ -791,20 +820,29 @@ namespace Scriban.Parsing
                     break;
 
                 case "capture":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     statement = ParseCaptureStatement();
                     break;
 
                 case "increment":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     statement = ParseIncDecStatement(false);
                     break;
 
                 case "decrement":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     statement = ParseIncDecStatement(true);
                     break;
 
