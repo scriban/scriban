@@ -10,7 +10,7 @@ using Scriban.Helpers;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("indexer expression", "<expression>[<index_expression>]")]
-    public class ScriptIndexerExpression : ScriptVariablePath
+    public class ScriptIndexerExpression : ScriptExpression, IScriptVariablePath
     {
         public ScriptExpression Target { get; set; }
 
@@ -47,14 +47,19 @@ namespace Scriban.Syntax
             return $"{Target}[{Index}]";
         }
 
-        public override object GetValue(TemplateContext context)
+        public object GetValue(TemplateContext context)
         {
             return GetOrSetValue(context, null, false);
         }
 
-        public override void SetValue(TemplateContext context, object valueToSet)
+        public void SetValue(TemplateContext context, object valueToSet)
         {
             GetOrSetValue(context, valueToSet, true);
+        }
+
+        public string GetFirstPath()
+        {
+            return (Target as IScriptVariablePath)?.GetFirstPath();
         }
 
         private object GetOrSetValue(TemplateContext context, object valueToSet, bool setter)

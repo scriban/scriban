@@ -1,1 +1,7 @@
-text(4,5) : error : The reserved keyword <if> cannot be used as a variable
+(if) = 5  # assigning to a if variable is possible
+x = if    # using a variable if is possible
+x
+(if) = 6
+(if)
+===
+56

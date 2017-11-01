@@ -1,5 +1,13 @@
-x = if    # using a variable as a keyword is not allowed
+(if) = 5  # assigning to a if variable is possible
+x = if    # using a variable if is possible
+x
+(if) = 6
+(if)
 ===
 {{
-x = if
+(if) = 5  # assigning to a if variable is possible
+x = if    # using a variable if is possible
+x
+(if) = 6
+(if)
 }}

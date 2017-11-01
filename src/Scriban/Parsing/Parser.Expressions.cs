@@ -220,7 +220,7 @@ namespace Scriban.Parsing
 
                     // If we have a bracket but left operand is a (variable || member || indexer), then we consider next as an indexer
                     // unit test: 130-indexer-accessor-accept1.txt
-                    if (Current.Type == TokenType.OpenBracket && leftOperand is ScriptVariablePath && !IsPreviousCharWhitespace())
+                    if (Current.Type == TokenType.OpenBracket && leftOperand is IScriptVariablePath && !IsPreviousCharWhitespace())
                     {
                         NextToken();
                         var indexerExpression = Open<ScriptIndexerExpression>();
@@ -252,7 +252,8 @@ namespace Scriban.Parsing
                         }
 
                         NextToken();
-                        assignExpression.Target = leftOperand;
+
+                        assignExpression.Target = TransformKeyword(leftOperand);
 
                         // unit test: 105-assign-error3.txt
                         assignExpression.Value = ExpectAndParseExpression(assignExpression, ref hasAnonymousFunction, parentExpression);
@@ -346,6 +347,30 @@ namespace Scriban.Parsing
             {
                 expressionLevel--;
             }
+        }
+
+        private ScriptExpression TransformKeyword(ScriptExpression leftOperand)
+        {
+            // In case we are in liquid and we are assigning to a scriban keyword, we escape the variable with a nested expression
+            if (_isLiquid && leftOperand is IScriptVariablePath && IsScribanKeyword(((IScriptVariablePath)leftOperand).GetFirstPath()) && !(leftOperand is ScriptNestedExpression))
+            {
+                var nestedExpression = new ScriptNestedExpression
+                {
+                    Expression = leftOperand,
+                    Span = leftOperand.Span
+                };
+
+                // If the variable has any trivia, we copy them to the NestedExpression instead
+                if (_isKeepTrivia && leftOperand.Trivias != null)
+                {
+                    nestedExpression.Trivias = leftOperand.Trivias;
+                    leftOperand.Trivias = null;
+                }
+
+                return nestedExpression;
+            }
+
+            return leftOperand;
         }
 
         private bool TryLiquidBinaryOperator(out ScriptBinaryOperator binOp)
@@ -487,14 +512,6 @@ namespace Scriban.Parsing
 
                     if (variable != null)
                     {
-                        if (IsKeyword(variable.Name))
-                        {
-                            // unit test: 140-object-initializer-error2.txt
-                            LogError(positionBefore,
-                                $"Invalid Keyword [{variable}] found for object initializer member name");
-                            break;
-                        }
-
                         if (variable.Scope != ScriptVariableScope.Global)
                         {
                             // unit test: 140-object-initializer-error3.txt

@@ -1,4 +1,7 @@
-{for: 1} # Cannot use a keyword as a variable
+x = {for: 1} # Can use a keyword as a member
+x.for
+===
 {{
-{for: 1}
+x = {for: 1} # Can use a keyword as a member
+x.for
 }}

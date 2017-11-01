@@ -193,15 +193,6 @@ namespace Scriban.Parsing
                         LogError(currentToken, $"Invalid token [{Current.Type}]. The loop variable <{text}> dot must be followed by an identifier");
                     }
                 }
-                else
-                {
-                    LogError(currentToken, $"The reserved keyword <{text}> cannot be used as a variable");
-                }
-            }
-            else if (IsKeyword(text))
-            {
-                // unit test: 108-variable-error1.txt
-                LogError(currentToken, $"The reserved keyword <{text}> cannot be used as a variable");
             }
 
             var result = ScriptVariable.Create(text, scope);
@@ -221,7 +212,6 @@ namespace Scriban.Parsing
                 }
                 FlushTrivias(result, false);
             }
-
             return result;
         }
 

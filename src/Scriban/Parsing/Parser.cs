@@ -748,8 +748,11 @@ namespace Scriban.Parsing
                     hasEnd = true;
                     break;
                 case "for":
+                    if (!_isLiquidTagSection)
+                    {
+                        goto default;
+                    }
                     CheckNotInCase(parent, startToken);
-                    CheckInTagSection();
                     statement = ParseForStatement();
                     break;
                 case "break":
@@ -1008,7 +1011,7 @@ namespace Scriban.Parsing
         {
             var expressionStatement = Open<ScriptExpressionStatement>();
             bool hasAnonymous;
-            expressionStatement.Expression = ExpectAndParseExpressionAndAnonymous(expressionStatement, out hasAnonymous);
+            expressionStatement.Expression = TransformKeyword(ExpectAndParseExpressionAndAnonymous(expressionStatement, out hasAnonymous));
 
             // In case of an anonymous, there was already an ExpectEndOfStatement issued for the function
             // so we don't have to verify this here again
@@ -1499,54 +1502,28 @@ namespace Scriban.Parsing
             }
         }
 
-        private bool IsKeyword(string text)
+        private bool IsScribanKeyword(string text)
         {
-            if (_isLiquid)
+            switch (text)
             {
-                switch (text)
-                {
-                    case "assign":
-                    case "if":
-                    case "else":
-                    case "elsif":
-                    case "endif":
-                    case "for":
-                    case "endfor":
-                    case "case":
-                    case "when":
-                    case "endcase":
-                    case "break":
-                    case "continue":
-                    case "unless":
-                    case "endunless":
-                    case "capture":
-                    case "endcapture":
-                    case "increment":
-                    case "decrement":
-                        return true;
-                }
-            }
-            else
-            {
-                switch (text)
-                {
-                    case "if":
-                    case "else":
-                    case "end":
-                    case "for":
-                    case "while":
-                    case "break":
-                    case "continue":
-                    case "func":
-                    case "import":
-                    case "readonly":
-                    case "with":
-                    case "capture":
-                    case "ret":
-                    case "wrap":
-                    case "do":
-                        return true;
-                }
+                case "if":
+                case "else":
+                case "end":
+                case "for":
+                case "case":
+                case "when":
+                case "while":
+                case "break":
+                case "continue":
+                case "func":
+                case "import":
+                case "readonly":
+                case "with":
+                case "capture":
+                case "ret":
+                case "wrap":
+                case "do":
+                    return true;
             }
             return false;
         }

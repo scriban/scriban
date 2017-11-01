@@ -7,7 +7,7 @@ using System.IO;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("nested expression", "(<expression>)")]
-    public class ScriptNestedExpression : ScriptExpression
+    public class ScriptNestedExpression : ScriptExpression, IScriptVariablePath
     {
         public ScriptExpression Expression { get; set; }
 
@@ -17,7 +17,7 @@ namespace Scriban.Syntax
             context.PushPipeArguments();
             try
             {
-                return context.Evaluate(Expression);
+                return context.GetValue(this);
             }
             finally
             {
@@ -35,6 +35,21 @@ namespace Scriban.Syntax
         public override string ToString()
         {
             return $"({Expression})";
+        }
+
+        public object GetValue(TemplateContext context)
+        {
+            return context.Evaluate(Expression);
+        }
+
+        public void SetValue(TemplateContext context, object valueToSet)
+        {
+            context.SetValue(Expression, valueToSet);
+        }
+
+        public string GetFirstPath()
+        {
+            return (Expression as IScriptVariablePath)?.GetFirstPath();
         }
     }
 }

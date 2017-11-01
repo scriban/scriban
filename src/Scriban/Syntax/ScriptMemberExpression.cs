@@ -9,7 +9,7 @@ using Scriban.Helpers;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("member expression", "<expression>.<variable_name>")]
-    public class ScriptMemberExpression : ScriptVariablePath
+    public class ScriptMemberExpression : ScriptExpression, IScriptVariablePath
     {
         public ScriptExpression Target { get; set; }
 
@@ -32,7 +32,7 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override object GetValue(TemplateContext context)
+        public object GetValue(TemplateContext context)
         {
             var targetObject = GetTargetObject(context);
             var accessor = context.GetMemberAccessor(targetObject);
@@ -47,7 +47,7 @@ namespace Scriban.Syntax
             return value;
         }
 
-        public override void SetValue(TemplateContext context, object valueToSet)
+        public void SetValue(TemplateContext context, object valueToSet)
         {
             var targetObject = GetTargetObject(context);
             var accessor = context.GetMemberAccessor(targetObject);
@@ -59,6 +59,11 @@ namespace Scriban.Syntax
                 throw new ScriptRuntimeException(this.Member.Span,
                     $"Cannot set a value for the readonly member: {this}"); // unit test: 132-member-accessor-error3.txt
             }
+        }
+
+        public string GetFirstPath()
+        {
+            return (Target as IScriptVariablePath)?.GetFirstPath();
         }
 
         private object GetTargetObject(TemplateContext context)

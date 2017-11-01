@@ -2,3 +2,5 @@
 variable: {{ variable }}
 page.title: {{ page.title }}
 user.name: {{ user.name }}
+assign for = 5: {% assign for = 5 %}
+for: {{ for }}

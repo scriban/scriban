@@ -12,7 +12,7 @@ namespace Scriban.Syntax
     /// </summary>
     /// <remarks>This class is immutable as all variable object are being shared across all templates</remarks>
     [ScriptSyntax("variable", "<variable_name>")]
-    public abstract class ScriptVariable : ScriptVariablePath, IEquatable<ScriptVariable>
+    public abstract class ScriptVariable : ScriptExpression, IScriptVariablePath, IEquatable<ScriptVariable>
     {
         private readonly int _hashCode;
 
@@ -71,6 +71,10 @@ namespace Scriban.Syntax
         /// </summary>
         public ScriptVariableScope Scope { get; }
 
+        public string GetFirstPath()
+        {
+            return ToString();
+        }
 
         public bool Equals(ScriptVariable other)
         {
@@ -111,12 +115,12 @@ namespace Scriban.Syntax
             return context.GetValue((ScriptExpression)this);
         }
 
-        public override object GetValue(TemplateContext context)
+        public virtual object GetValue(TemplateContext context)
         {
             return context.GetValue(this);
         }
 
-        public override void SetValue(TemplateContext context, object valueToSet)
+        public void SetValue(TemplateContext context, object valueToSet)
         {
             context.SetValue(this, valueToSet);
         }

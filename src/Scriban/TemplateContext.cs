@@ -804,7 +804,7 @@ namespace Scriban
 
             try
             {
-                if (targetExpression is ScriptVariablePath nextPath)
+                if (targetExpression is IScriptVariablePath nextPath)
                 {
                     if (setter)
                     {
