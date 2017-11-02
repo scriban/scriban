@@ -1,0 +1,3 @@
+{%- for variable in (1..5) -%}
+    {% cycle 'one', 'two', 'three' %}
+{% endfor -%}

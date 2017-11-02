@@ -290,6 +290,8 @@
     <Content Include="TestFiles\500-liquid\511-liquid-statement-unless-error1.txt" />
     <Content Include="TestFiles\500-liquid\511-liquid-statement-unless.out.txt" />
     <Content Include="TestFiles\500-liquid\511-liquid-statement-unless.txt" />
+    <Content Include="TestFiles\500-liquid\513-liquid-statement-for-cycle.out.txt" />
+    <Content Include="TestFiles\500-liquid\513-liquid-statement-for-cycle.txt" />
     <Content Include="TestFiles\500-liquid\513-liquid-statement-for.variables.out.txt" />
     <Content Include="TestFiles\500-liquid\513-liquid-statement-for.variables.txt" />
     <Content Include="TestFiles\500-liquid\520-liquid-statement-capture.out.txt" />
