@@ -41,6 +41,9 @@ namespace Scriban
         private int _getOrSetValueLevel;
         private FastStack<ScriptPipeArguments> _availablePipeArguments;
         private FastStack<ScriptPipeArguments> _pipeArguments;
+        private FastStack<Dictionary<object, object>> _localTagsStack;
+        private FastStack<Dictionary<object, object>> _loopTagsStack;
+        private FastStack<Dictionary<object, object>> _availableTags;
         private ScriptPipeArguments _currentPipeArguments;
 
         internal bool AllowPipeArguments => _getOrSetValueLevel <= 1;
@@ -99,6 +102,10 @@ namespace Scriban
             _availableStores = new FastStack<ScriptObject>(4);
             _cultures = new FastStack<CultureInfo>(4);
             _caseValues = new FastStack<object>(4);
+
+            _localTagsStack = new FastStack<Dictionary<object, object>>(1);
+            _loopTagsStack = new FastStack<Dictionary<object, object>>(1);
+            _availableTags = new FastStack<Dictionary<object, object>>(4);
 
             _sourceFiles = new FastStack<string>(4);
 
@@ -202,6 +209,16 @@ namespace Scriban
         /// Allows to store data within this context.
         /// </summary>
         public Dictionary<object, object> Tags { get; }
+
+        /// <summary>
+        /// Gets the tags currently available only inside the current local scope
+        /// </summary>
+        public Dictionary<object, object> TagsCurrentLocal => _localTagsStack.Count == 0 ? null : _localTagsStack.Peek();
+
+        /// <summary>
+        /// Gets the tags currently available only inside the current loop
+        /// </summary>
+        public Dictionary<object, object> TagsCurrentLoop => _loopTagsStack.Count == 0 ? null : _loopTagsStack.Peek();
 
         /// <summary>
         /// Store the current stack of pipe arguments used by <see cref="ScriptPipeCall"/> and <see cref="ScriptFunctionCall"/>
@@ -595,13 +612,16 @@ namespace Scriban
         internal void PushVariableScope(ScriptVariableScope scope)
         {
             var store = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
+            var tags = _availableTags.Count > 0 ? _availableTags.Pop() : new Dictionary<object, object>();
             if (scope == ScriptVariableScope.Local)
             {
                 _localStores.Push(store);
+                _localTagsStack.Push(tags);
             }
             else
             {
                 _loopStores.Push(store);
+                _loopTagsStack.Push(tags);
             }
         }
 
@@ -611,14 +631,20 @@ namespace Scriban
         /// <param name="scope"></param>
         internal void PopVariableScope(ScriptVariableScope scope)
         {
+            Dictionary<object, object> tags;
             if (scope == ScriptVariableScope.Local)
             {
                 PopVariableScope(ref _localStores);
+                tags = _localTagsStack.Pop();
             }
             else
             {
                 PopVariableScope(ref _loopStores);
+                tags = _loopTagsStack.Pop();
             }
+            // Make sure that tags are clear
+            tags.Clear();
+            _availableTags.Push(tags);
         }
 
         /// <summary>
@@ -912,7 +938,7 @@ namespace Scriban
                     else
                     {
                         // unit test: 215-for-special-var-error1.txt
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable [{variable}] in the current context");
+                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable [{variable}] not inside a loop");
                     }
                     break;
                 default:
