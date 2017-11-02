@@ -568,135 +568,53 @@ namespace Scriban.Parsing
         private void ReadLiquidStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
             var startToken = Current;
+            if (!_isLiquidTagSection)
+            {
+                statement = ParseLiquidExpressionStatement(parent);
+                return;
+            }
+
+            if (identifier != "when" && identifier != "case" && !identifier.StartsWith("end") && parent is ScriptCaseStatement)
+            {
+                // 205-case-when-statement-error1.txt
+                LogError(startToken, $"Unexpected statement/expression `{GetAsText(startToken)}` in the body of a `case` statement. Only `when`/`else` are expected.");
+            }
+
+            ScriptStatement startStatement = null;
+            string pendingStart = null;
             switch (identifier)
             {
                 case "endif":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    NextToken();
+                    startStatement = FindFirstStatementExpectingEnd() as ScriptIfStatement;
+                    pendingStart = "`if`/`else`";
+                    // Handle after the switch
+                break;
 
-                    hasEnd = true;
-                    nextStatement = false;
-
-                    var matchingStatement = FindFirstStatementExpectingEnd() as ScriptIfStatement;
-                    if (matchingStatement == null)
-                    {
-                        LogError(startToken, $"Unable to find a pending `if`/`else` for this `endif`");
-                    }
-
-                    ExpectEndOfStatement(matchingStatement);
-                    if (_isKeepTrivia)
-                    {
-                        _trivias.Clear();
-                    }
-                    break;
                 case "endunless":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    NextToken();
-
-                    hasEnd = true;
-                    nextStatement = false;
-
-                    var unless = FindFirstStatementExpectingEnd() as ScriptIfStatement;
-                    if (unless == null || !unless.InvertCondition)
-                    {
-                        LogError(startToken, $"Unable to find a pending `unless` for this `endunless`");
-                    }
-
-                    ExpectEndOfStatement(unless);
-                    if (_isKeepTrivia)
-                    {
-                        _trivias.Clear();
-                    }
+                    startStatement = FindFirstStatementExpectingEnd() as ScriptIfStatement;
+                    pendingStart = "`unless`";
                     break;
 
                 case "endfor":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    NextToken();
-
-                    hasEnd = true;
-                    nextStatement = false;
-
-                    var forStatement = FindFirstStatementExpectingEnd() as ScriptForStatement;
-                    if (forStatement == null)
-                    {
-                        LogError(startToken, $"Unable to find a pending `for` for this `endfor`");
-                    }
-
-                    ExpectEndOfStatement(forStatement);
-                    if (_isKeepTrivia)
-                    {
-                        _trivias.Clear();
-                    }
+                    startStatement = FindFirstStatementExpectingEnd() as ScriptForStatement;
+                    pendingStart = "`unless`";
                     break;
 
                 case "endcase":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    NextToken();
-
-                    hasEnd = true;
-                    nextStatement = false;
-
-                    var caseStatement = FindFirstStatementExpectingEnd() as ScriptCaseStatement;
-                    if (caseStatement == null)
-                    {
-                        LogError(startToken, $"Unable to find a pending `case` for this `endcase`");
-                    }
-
-                    ExpectEndOfStatement(caseStatement);
-                    if (_isKeepTrivia)
-                    {
-                        _trivias.Clear();
-                    }
+                    startStatement = FindFirstStatementExpectingEnd() as ScriptCaseStatement;
+                    pendingStart = "`case`";
                     break;
 
                 case "endcapture":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    NextToken();
-
-                    hasEnd = true;
-                    nextStatement = false;
-
-                    var captureStatement = FindFirstStatementExpectingEnd() as ScriptCaptureStatement;
-                    if (captureStatement == null)
-                    {
-                        LogError(startToken, $"Unable to find a pending `capture` for this `endcapture`");
-                    }
-
-                    ExpectEndOfStatement(captureStatement);
-                    if (_isKeepTrivia)
-                    {
-                        _trivias.Clear();
-                    }
+                    startStatement = FindFirstStatementExpectingEnd() as ScriptCaptureStatement;
+                    pendingStart = "`capture`";
                     break;
 
                 case "case":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
                     statement = ParseCaseStatement();
                     break;
 
                 case "when":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
                     var whenStatement = ParseWhenStatement();
                     var whenParent = parent as ScriptConditionStatement;
                     if (parent is ScriptWhenStatement)
@@ -718,30 +636,16 @@ namespace Scriban.Parsing
                     break;
 
                 case "if":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    CheckNotInCase(parent, startToken);
                     statement = ParseIfStatement(false, false);
                     break;
 
                 case "unless":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
                     CheckNotInCase(parent, startToken);
                     statement = ParseIfStatement(true, false);
                     break;
 
                 case "else":
                 case "elsif":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-
                     var nextCondition = ParseElseStatement(identifier == "elsif");
                     var parentCondition = parent as ScriptConditionStatement;
                     if (parent is ScriptIfStatement || parent is ScriptWhenStatement)
@@ -769,30 +673,15 @@ namespace Scriban.Parsing
                     hasEnd = true;
                     break;
                 case "for":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    CheckNotInCase(parent, startToken);
                     statement = ParseForStatement();
                     break;
                 case "break":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    CheckNotInCase(parent, startToken);
                     statement = Open<ScriptBreakStatement>();
                     NextToken();
                     ExpectEndOfStatement(statement);
                     Close(statement);
                     break;
                 case "continue":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    CheckNotInCase(parent, startToken);
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
                     ExpectEndOfStatement(statement);
@@ -800,11 +689,10 @@ namespace Scriban.Parsing
                     break;
                 case "assign":
                 {
-                    if (!_isLiquidTagSection)
+                    if (_isKeepTrivia)
                     {
-                        goto default;
+                        _trivias.Clear();
                     }
-                    CheckNotInCase(parent, startToken);
                     NextToken(); // skip assign
                     
                     var token = _token;
@@ -820,61 +708,75 @@ namespace Scriban.Parsing
                     break;
 
                 case "capture":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    CheckNotInCase(parent, startToken);
                     statement = ParseCaptureStatement();
                     break;
 
                 case "increment":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    CheckNotInCase(parent, startToken);
                     statement = ParseIncDecStatement(false);
                     break;
 
                 case "decrement":
-                    if (!_isLiquidTagSection)
-                    {
-                        goto default;
-                    }
-                    CheckNotInCase(parent, startToken);
                     statement = ParseIncDecStatement(true);
                     break;
 
                 default:
-                {
-                    CheckNotInCase(parent, startToken);
-                    var expressionStatement = ParseExpressionStatement();
-
-                    var functionCall = expressionStatement.Expression as ScriptFunctionCall;
-                    bool isInclude = functionCall != null && functionCall.Target is ScriptVariable &&
-                                     ((ScriptVariable) functionCall.Target).Name == "include";
-
-                    // Otherwise it is an expression statement
-                    if (isInclude)
-                    {
-                        if (!_isLiquidTagSection)
-                        {
-                            LogError(startToken, $"The `include` statement must be in a tag section `{{% ... %}}`");
-                        }
-                    }
-                    else if (_isLiquidTagSection)
-                    {
-                        LogError(startToken, $"Expecting the expression `{GetAsText(startToken)}` to be in an object section `{{{{ ... }}}}`");
-                    }
-                    statement = expressionStatement;
-                    if (!isInclude && expressionStatement.Expression is ScriptAssignExpression)
-                    {
-                        LogError(statement, $"Assignment expression is not allowed");
-                    }
-                }
+                    statement = ParseLiquidExpressionStatement(parent);
                     break;
             }
+
+            if (pendingStart != null)
+            {
+                if (_isKeepTrivia)
+                {
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.End));
+                }
+
+                NextToken();
+
+                hasEnd = true;
+                nextStatement = false;
+
+                if (startStatement == null)
+                {
+                    LogError(startToken, $"Unable to find a pending {pendingStart} for this `{identifier}`");
+                }
+
+                ExpectEndOfStatement(startStatement);
+                if (_isKeepTrivia)
+                {
+                    FlushTrivias(startStatement, false);
+                }
+            }
+        }
+
+        private ScriptStatement ParseLiquidExpressionStatement(ScriptStatement parent)
+        {
+            var startToken = Current;
+            CheckNotInCase(parent, startToken);
+            var expressionStatement = ParseExpressionStatement();
+
+            var functionCall = expressionStatement.Expression as ScriptFunctionCall;
+            bool isInclude = functionCall != null && functionCall.Target is ScriptVariable &&
+                             ((ScriptVariable)functionCall.Target).Name == "include";
+
+            // Otherwise it is an expression statement
+            if (isInclude)
+            {
+                if (!_isLiquidTagSection)
+                {
+                    LogError(startToken, $"The `include` statement must be in a tag section `{{% ... %}}`");
+                }
+            }
+            else if (_isLiquidTagSection)
+            {
+                LogError(startToken, $"Expecting the expression `{GetAsText(startToken)}` to be in an object section `{{{{ ... }}}}`");
+            }
+            var statement = expressionStatement;
+            if (!isInclude && expressionStatement.Expression is ScriptAssignExpression)
+            {
+                LogError(statement, $"Assignment expression is not allowed");
+            }
+            return statement;
         }
 
         private void CheckIsAssignment(Token token, ScriptExpression expression)

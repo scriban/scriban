@@ -111,6 +111,13 @@ namespace Scriban.Syntax
 
     public struct ScriptTrivia
     {
+        public ScriptTrivia(SourceSpan span, ScriptTriviaType type)
+        {
+            Span = span;
+            Type = type;
+            Text = null;
+        }
+
         public ScriptTrivia(SourceSpan span, ScriptTriviaType type, string text)
         {
             Span = span;
@@ -148,9 +155,16 @@ namespace Scriban.Syntax
 
         public override string ToString()
         {
-            if (Type == ScriptTriviaType.Empty)
+            switch (Type)
             {
-                return string.Empty;
+                case ScriptTriviaType.Empty:
+                    return string.Empty;
+                case ScriptTriviaType.End:
+                    return "end";
+                case ScriptTriviaType.Comma:
+                    return ",";
+                case ScriptTriviaType.SemiColon:
+                    return ";";
             }
             var length = Span.End.Offset - Span.Start.Offset + 1;
             return Text?.Substring(Span.Start.Offset, length);

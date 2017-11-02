@@ -678,8 +678,6 @@ namespace Scriban.Parsing
                 case ';':
                     _token = new Token(TokenType.SemiColon, start, _position);
                     NextChar();
-                    // consume all remaining space including new lines
-                    ConsumeWhitespace(false, ref _token.End);
                     break;
                 case '\r':
                     NextChar();
