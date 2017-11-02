@@ -41,6 +41,9 @@ namespace Scriban.Functions
                 var date = (ScriptObject)BuiltinFunctions.Default[DateTimeFunctions.DateVariable.Name];
                 var html = (ScriptObject)BuiltinFunctions.Default["html"];
                 var objs = (ScriptObject)BuiltinFunctions.Default["object"];
+
+                // NOTE: must be in sync with TryLiquidToScriban
+
                 // ReSharper restore CollectionNeverUpdated.Local
                 SetValue("abs", math["abs"], true);
                 SetValue("append", str["append"], true);
@@ -48,6 +51,7 @@ namespace Scriban.Functions
                 SetValue("ceil", math["ceil"], true);
                 SetValue("compact", array["compact"], true);
                 SetValue("concat", array["concat"], true);
+                SetValue("cycle", array["cycle"], true);
                 SetValue("date", date, true);
                 SetValue("default", objs["default"], true);
                 SetValue("divided_by", math["divided_by"], true);
@@ -73,7 +77,7 @@ namespace Scriban.Functions
                 SetValue("round", math["round"], true);
                 SetValue("rstrip", str["rstrip"], true);
                 SetValue("size", objs["size"], true);
-                SetValue("slice", new DelegateCustomFunction(Slice), true); // Special liquid compatible function
+                SetValue("slice", str["slice_at"], true); // Special liquid compatible function
                 SetValue("sort", array["sort"], true);
                 // sort_natural: not supported
                 SetValue("split", str["split"], true);
@@ -86,55 +90,6 @@ namespace Scriban.Functions
                 SetValue("uniq", array["uniq"], true);
 
                 this.Import(typeof(LiquidBuiltinsFunctions), ScriptMemberImportFlags.All);
-            }
-
-            // On Liquid: Slice will return 1 character by default, unlike in scriban that returns the rest of the string
-            [ScriptMemberIgnore]
-            private static string Slice(string text, int start, int length = 1)
-            {
-                if (text == null || start > text.Length)
-                {
-                    return string.Empty;
-                }
-
-                if (length < 0)
-                {
-                    length = text.Length - start;
-                }
-
-                if (start < 0)
-                {
-                    start = Math.Max(start + text.Length, 0);
-                }
-                var end = start + length;
-                if (end <= start)
-                {
-                    return string.Empty;
-                }
-                if (end > text.Length)
-                {
-                    length = text.Length - start;
-                }
-
-                return text.Substring(start, length);
-            }
-
-            private static object Slice(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
-            {
-                if (parameters.Count < 2 || parameters.Count > 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for slice. Expecting at least 2 parameters <start> <length>? <text>");
-                }
-
-                var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
-                var start = context.ToInt(callerContext.Span, parameters[0]);
-                var length = 1;
-                if (parameters.Count == 3)
-                {
-                    length = context.ToInt(callerContext.Span, parameters[1]);
-                }
-
-                return Slice(text, start, length);
             }
         }
     }

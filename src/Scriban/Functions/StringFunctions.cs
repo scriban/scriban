@@ -20,6 +20,8 @@ namespace Scriban.Functions
         {
             // We need to handle "slice"/"truncate" differently as we have an optional parameters
             this.SetValue("slice", new DelegateCustomFunction(Slice), true);
+            // The liquid version of slice
+            this.SetValue("slice_at", new DelegateCustomFunction(SliceAt), true);
         }
 
         public static int Size(string text)
@@ -309,6 +311,31 @@ namespace Scriban.Functions
 
             return text.EndsWith(start);
         }
+        
+        public static string Handleize(string text)
+        {
+            var builder = new StringBuilder();
+            char lastChar = (char)0;
+            for (int i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (char.IsLetterOrDigit(c))
+                {
+                    lastChar = c;
+                    builder.Append(c);
+                }
+                else if (lastChar != '-')
+                {
+                    builder.Append('-');
+                    lastChar = '-';
+                }
+            }
+            if (builder.Length > 0 && builder[builder.Length - 1] == '-')
+            {
+                builder.Length--;
+            }
+            return builder.ToString();
+        }
 
         [ScriptMemberIgnore]
         public static string Slice(string text, int start, int length = -1)
@@ -340,31 +367,6 @@ namespace Scriban.Functions
             return text.Substring(start, length);
         }
 
-        public static string Handleize(string text)
-        {
-            var builder = new StringBuilder();
-            char lastChar = (char)0;
-            for (int i = 0; i < text.Length; i++)
-            {
-                var c = text[i];
-                if (char.IsLetterOrDigit(c))
-                {
-                    lastChar = c;
-                    builder.Append(c);
-                }
-                else if (lastChar != '-')
-                {
-                    builder.Append('-');
-                    lastChar = '-';
-                }
-            }
-            if (builder.Length > 0 && builder[builder.Length - 1] == '-')
-            {
-                builder.Length--;
-            }
-            return builder.ToString();
-        }
-
         private static object Slice(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
         {
             if (parameters.Count < 2 || parameters.Count > 3)
@@ -381,6 +383,55 @@ namespace Scriban.Functions
             }
 
             return Slice(text, start, length);
+        }
+
+        // On Liquid: Slice will return 1 character by default, unlike in scriban that returns the rest of the string
+        [ScriptMemberIgnore]
+        private static string SliceAt(string text, int start, int length = 1)
+        {
+            if (text == null || start > text.Length)
+            {
+                return string.Empty;
+            }
+
+            if (length < 0)
+            {
+                length = text.Length - start;
+            }
+
+            if (start < 0)
+            {
+                start = Math.Max(start + text.Length, 0);
+            }
+            var end = start + length;
+            if (end <= start)
+            {
+                return string.Empty;
+            }
+            if (end > text.Length)
+            {
+                length = text.Length - start;
+            }
+
+            return text.Substring(start, length);
+        }
+
+        private static object SliceAt(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
+        {
+            if (parameters.Count < 2 || parameters.Count > 3)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for slice. Expecting at least 2 parameters <start> <length>? <text>");
+            }
+
+            var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
+            var start = context.ToInt(callerContext.Span, parameters[0]);
+            var length = 1;
+            if (parameters.Count == 3)
+            {
+                length = context.ToInt(callerContext.Span, parameters[1]);
+            }
+
+            return SliceAt(text, start, length);
         }
     }
 }
