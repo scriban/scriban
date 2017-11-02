@@ -40,3 +40,8 @@ null | array.insert_at 1 5:[, 5]
 [] | array.insert_at 1 5:[, 5]
 [] | array.sort:[]
 [{id: 5}, {id: 1}, {id: 10}]| array.sort "id":[{id: 1}, {id: 5}, {id: 10}]
+Cycle:
+abcab
+defd
+Multiple cycle:
+adgbegcdgdeg

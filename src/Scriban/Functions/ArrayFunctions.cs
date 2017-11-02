@@ -20,6 +20,7 @@ namespace Scriban.Functions
         public ArrayFunctions()
         {
             SetValue("sort", new DelegateCustomFunction(Sort), true);
+            SetValue("cycle", new DelegateCustomFunction(Cycle), true);
         }
 
         public static string Join(TemplateContext context, SourceSpan span, string delimiter, IEnumerable enumerable)
@@ -382,6 +383,53 @@ namespace Scriban.Functions
             }
 
             return Sort(context, callerContext.Span, target, member);
+        }
+
+        private static object Cycle(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
+        {
+            if (parameters.Count == 0)
+            {
+                return null;
+            }
+
+            // We create a cycle variable that is dependent on the exact AST context.
+            // So we allow to have multiple cycle running in the same loop
+            var cycleVar = new CycleVariable(callerContext);
+
+            object cycleValue;
+            var tagsCurrentLoop = context.TagsCurrentLoop;
+            if (!tagsCurrentLoop.TryGetValue(cycleVar, out cycleValue) || !(cycleValue is int))
+            {
+                cycleValue = 0;
+            }
+
+            var cycleIndex = (int) cycleValue;
+            cycleIndex = cycleIndex % parameters.Count;
+            var result = parameters[cycleIndex];
+
+            cycleIndex++;
+            cycleIndex = cycleIndex % parameters.Count;
+
+            tagsCurrentLoop[cycleVar] = cycleIndex;
+
+            return result;
+        }
+
+        private class CycleVariable : ScriptVariableLoop
+        {
+            public CycleVariable(ScriptNode cycleContext) : base("cycle")
+            {
+                CycleContext = cycleContext;
+            }
+
+            private ScriptNode CycleContext { get; }
+
+            public override bool Equals(ScriptVariable other)
+            {
+                if (!base.Equals(other)) return false;
+                var cycleVar = other as CycleVariable;
+                return cycleVar != null && ReferenceEquals(CycleContext, cycleVar.CycleContext);
+            }
         }
     }
 }
