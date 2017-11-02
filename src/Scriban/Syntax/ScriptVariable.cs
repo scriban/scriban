@@ -76,7 +76,7 @@ namespace Scriban.Syntax
             return ToString();
         }
 
-        public bool Equals(ScriptVariable other)
+        public virtual bool Equals(ScriptVariable other)
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
@@ -131,7 +131,7 @@ namespace Scriban.Syntax
         }
     }
 
-    public sealed class ScriptVariableGlobal : ScriptVariable
+    public class ScriptVariableGlobal : ScriptVariable
     {
         public ScriptVariableGlobal(string name) : base(name, ScriptVariableScope.Global)
         {
@@ -145,14 +145,14 @@ namespace Scriban.Syntax
     }
 
 
-    public sealed class ScriptVariableLocal : ScriptVariable
+    public class ScriptVariableLocal : ScriptVariable
     {
         public ScriptVariableLocal(string name) : base(name, ScriptVariableScope.Local)
         {
         }
     }
 
-    public sealed class ScriptVariableLoop : ScriptVariable
+    public class ScriptVariableLoop : ScriptVariable
     {
         public ScriptVariableLoop(string name) : base(name, ScriptVariableScope.Loop)
         {
