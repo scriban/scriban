@@ -343,13 +343,15 @@ end
 
         private void AssertTemplate(string inputText, bool isLiquid, string expectedOutputText, bool isRoundTripTest = false, bool supportExactRoundtrip = true)
         {
-            var parserOptions = new ParserOptions();
+            var parserOptions = new ParserOptions()
+            {
+                LiquidFunctionsToScriban = isLiquid
+            };
             var lexerOptions = new LexerOptions()
             {
                 Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default
             };
-
-
+            
             if (isRoundTripTest)
             {
                 lexerOptions.KeepTrivia = true;
@@ -424,7 +426,7 @@ end
                             // Dumps the rountrip version
                             var lexerOptionsForTrivia = lexerOptions;
                             lexerOptionsForTrivia.KeepTrivia = true;
-                            var templateWithTrivia = Template.Parse(inputText, lexerOptions: lexerOptionsForTrivia);
+                            var templateWithTrivia = Template.Parse(inputText, "input",  parserOptions, lexerOptionsForTrivia);
                             roundtripText = templateWithTrivia.ToText();
                         }
 
@@ -470,7 +472,6 @@ end
                 Console.WriteLine($"{testContext}Expected");
                 Console.WriteLine("======================================");
                 Console.WriteLine(expectedOutputText);
-                Console.WriteLine();
 
                 TextAssert.AreEqual(expectedOutputText, result);
 

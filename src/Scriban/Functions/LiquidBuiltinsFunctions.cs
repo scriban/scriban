@@ -27,6 +27,62 @@ namespace Scriban.Functions
             Default.Clone(false).CopyTo(this);
         }
 
+        public static bool TryLiquidToScriban(string liquidBuiltin, out string target, out string member)
+        {
+            if (liquidBuiltin == null) throw new ArgumentNullException(nameof(liquidBuiltin));
+
+            target = null;
+            member = null;
+
+            switch (liquidBuiltin)
+            {
+                case "abs": target = "math"; member = "abs"; return true;
+                case "append": target = "string"; member = "append"; return true;
+                case "capitalize": target = "string"; member = "capitalize"; return true;
+                case "ceil": target = "math"; member = "ceil"; return true;
+                case "compact": target = "array"; member = "compact"; return true;
+                case "concat": target = "array"; member = "concat"; return true;
+                case "cycle": target = "array"; member = "cycle"; return true;
+                case "date": target = "date"; member = "parse"; return true;
+                case "default": target = "object"; member = "default"; return true;
+                case "divided_by": target = "math"; member = "divided_by"; return true;
+                case "downcase": target = "string"; member = "downcase"; return true;
+                case "escape": target = "html"; member = "escape"; return true;
+                case "escape_once": target = "html"; member = "escape_once"; return true;
+                case "first": target = "array"; member = "first"; return true;
+                case "floor": target = "math"; member = "floor"; return true;
+                case "join": target = "array"; member = "join"; return true;
+                case "last": target = "array"; member = "last"; return true;
+                case "lstrip": target = "string"; member = "lstrip"; return true;
+                case "map": target = "array"; member = "map"; return true;
+                case "minus": target = "math"; member = "minus"; return true;
+                case "modulo": target = "math"; member = "modulo"; return true;
+                case "newline_to_br": target = "html"; member = "newline_to_br"; return true;
+                case "plus": target = "math"; member = "plus"; return true;
+                case "prepend": target = "string"; member = "prepend"; return true;
+                case "remove": target = "string"; member = "remove"; return true;
+                case "remove_first": target = "string"; member = "remove_first"; return true;
+                case "replace": target = "string"; member = "replace"; return true;
+                case "replace_first": target = "string"; member = "replace_first"; return true;
+                case "reverse": target = "array"; member = "reverse"; return true;
+                case "round": target = "math"; member = "round"; return true;
+                case "rstrip": target = "string"; member = "rstrip"; return true;
+                case "size": target = "object"; member = "size"; return true;
+                case "slice": target = "string"; member = "slice_at"; return true;
+                case "sort": target = "array"; member = "sort"; return true;
+                case "split": target = "string"; member = "split"; return true;
+                case "strip": target = "string"; member = "strip"; return true;
+                case "strip_html": target = "html"; member = "strip"; return true;
+                case "strip_newlines": target = "string"; member = "strip_newlines"; return true;
+                case "times": target = "math"; member = "times"; return true;
+                case "truncate": target = "string"; member = "truncate"; return true;
+                case "truncatewords": target = "string"; member = "truncatewords"; return true;
+                case "uniq": target = "array"; member = "uniq"; return true;
+            }
+
+            return false;
+        }
+
         /// <summary>
         /// Use an internal object to create all default builtins just once to avoid allocations of delegates/IScriptCustomFunction
         /// </summary>

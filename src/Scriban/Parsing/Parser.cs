@@ -756,25 +756,23 @@ namespace Scriban.Parsing
             var expressionStatement = ParseExpressionStatement();
 
             var functionCall = expressionStatement.Expression as ScriptFunctionCall;
-            bool isInclude = functionCall != null && functionCall.Target is ScriptVariable &&
-                             ((ScriptVariable)functionCall.Target).Name == "include";
+            var statement = expressionStatement;
 
             // Otherwise it is an expression statement
-            if (isInclude)
+            if (functionCall != null)
             {
                 if (!_isLiquidTagSection)
                 {
-                    LogError(startToken, $"The `include` statement must be in a tag section `{{% ... %}}`");
+                    LogError(startToken, $"The `{functionCall}` statement must be in a tag section `{{% ... %}}`");
                 }
             }
             else if (_isLiquidTagSection)
             {
                 LogError(startToken, $"Expecting the expression `{GetAsText(startToken)}` to be in an object section `{{{{ ... }}}}`");
             }
-            var statement = expressionStatement;
-            if (!isInclude && expressionStatement.Expression is ScriptAssignExpression)
+            else if (!(expressionStatement.Expression is IScriptVariablePath || expressionStatement.Expression is ScriptPipeCall))
             {
-                LogError(statement, $"Assignment expression is not allowed");
+                LogError(statement, $"The <{expressionStatement.Expression}> is not allowed in this context");
             }
             return statement;
         }

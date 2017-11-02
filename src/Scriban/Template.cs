@@ -16,13 +16,13 @@ namespace Scriban
     /// </summary>
     public class Template
     {
-        private readonly ParserOptions? _parserOptions;
-        private readonly LexerOptions? _lexerOptions;
+        private readonly ParserOptions _parserOptions;
+        private readonly LexerOptions _lexerOptions;
 
         private Template(ParserOptions? parserOptions, LexerOptions? lexerOptions, string sourceFilePath)
         {
-            this._parserOptions = parserOptions;
-            this._lexerOptions = lexerOptions;
+            _parserOptions = parserOptions ?? new ParserOptions();
+            _lexerOptions = lexerOptions ?? new LexerOptions();
             Messages = new List<LogMessage>();
             this.SourceFilePath = sourceFilePath;
         }
@@ -177,7 +177,7 @@ namespace Scriban
                 scriptObject.Import(model);
             }
 
-            var context = _lexerOptions.HasValue && _lexerOptions.Value.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
+            var context = _lexerOptions.Mode == ScriptMode.Liquid && !_parserOptions.LiquidFunctionsToScriban ? new LiquidTemplateContext() : new TemplateContext();
             context.PushGlobal(scriptObject);
             return Render(context);
         }

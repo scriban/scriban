@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using Scriban.Functions;
 using Scriban.Runtime;
 using Scriban.Syntax;
 
@@ -306,6 +307,33 @@ namespace Scriban.Parsing
                         {
                             functionCall = Open<ScriptFunctionCall>();
                             functionCall.Target = leftOperand;
+
+                            // If we need to convert liquid to scriban functions:
+                            if (_isLiquid && Options.LiquidFunctionsToScriban)
+                            {
+                                var liquidTarget = functionCall.Target as ScriptVariable;
+                                string targetName;
+                                string memberName;
+                                // In case of cycle we transform it to array.cycle at runtime
+                                if (liquidTarget != null && LiquidBuiltinsFunctions.TryLiquidToScriban(liquidTarget.Name, out targetName, out memberName))
+                                {
+                                    var arrayCycle = new ScriptMemberExpression
+                                    {
+                                        Span = liquidTarget.Span,
+                                        Target = new ScriptVariableGlobal(targetName) { Span = liquidTarget.Span },
+                                        Member = new ScriptVariableGlobal(memberName) { Span = liquidTarget.Span },
+                                    };
+
+                                    // Transfer trivias accordingly to target (trivias before) and member (trivias after)
+                                    if (_isKeepTrivia && liquidTarget.Trivias != null)
+                                    {
+                                        arrayCycle.Target.AddTrivias(liquidTarget.Trivias.Before, true);
+                                        arrayCycle.Member.AddTrivias(liquidTarget.Trivias.After, false);
+                                    }
+                                    functionCall.Target = arrayCycle;
+                                }
+                            }
+
                             functionCall.Span.Start = leftOperand.Span.Start;
                         }
                         else
