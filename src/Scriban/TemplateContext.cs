@@ -84,6 +84,7 @@ namespace Scriban
         {
             BuiltinObject = builtin ?? GetDefaultBuiltinObject();
             EnableOutput = true;
+            EnableBreakAndContinueAsReturnOutsideLoop = false;
             LoopLimit = 1000;
             RecursiveLimit = 100;
             MemberRenamer = StandardMemberRenamer.Default;
@@ -241,6 +242,16 @@ namespace Scriban
         public bool StrictVariables { get; set; }
 
         /// <summary>
+        /// Enables break and continue to act as a return outside of a loop, used by liquid templates. Default is <c>false</c>.
+        /// </summary>
+        public bool EnableBreakAndContinueAsReturnOutsideLoop { get; set; }
+
+        /// <summary>
+        /// Enables a member access on a null by returning null instead of an exception. Default is <c>false</c>
+        /// </summary>
+        public bool EnableRelaxedMemberAccess { get; set; }
+
+        /// <summary>
         /// Indicates if we are in a looop
         /// </summary>
         /// <value>
@@ -348,6 +359,12 @@ namespace Scriban
             if (variable == null) throw new ArgumentNullException(nameof(variable));
 
             var store = GetStoreForSet(variable).First();
+
+            // We don't allow to overwrite a builtin function
+            if (!BuiltinObject.CanWrite(variable.Name))
+            {
+                throw new ScriptRuntimeException(variable.Span, $"Cannot override the value of a builtin function/variable [{variable}]");
+            }
 
             // Try to set the variable
             if (!store.TrySetValue(variable.Name, value, asReadOnly))
@@ -564,7 +581,18 @@ namespace Scriban
             {
                 accessor = ScriptObjectAccessor.Default;
             }
-            else if (!DictionaryAccessor.TryGet(type, out accessor))
+            else if (DictionaryAccessor.TryGet(type, out accessor))
+            {
+            }
+            else if (type.GetTypeInfo().IsArray)
+            {
+                accessor = ArrayAccessor.Default;
+            }
+            else if (target is IList)
+            {
+                accessor = ListAccessor.Default;
+            }
+            else
             {
                 accessor = new TypedObjectAccessor(type, MemberRenamer);
             }
@@ -954,6 +982,9 @@ namespace Scriban
     {
         public LiquidTemplateContext() : base(new LiquidBuiltinsFunctions())
         {
+            // In liquid, if we have a break/continue outside a loop, we return from the current script
+            EnableBreakAndContinueAsReturnOutsideLoop = true;
+            EnableRelaxedMemberAccess = true;
         }
     }
 }

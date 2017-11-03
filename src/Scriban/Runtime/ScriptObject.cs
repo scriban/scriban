@@ -69,6 +69,11 @@ namespace Scriban.Runtime
         /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
         public virtual bool IsReadOnly { get; set; }
 
+        public IEnumerable<string> GetMembers()
+        {
+            return Store.Keys;
+        }
+
         /// <summary>
         /// Determines whether this object contains the specified member.
         /// </summary>
@@ -258,7 +263,7 @@ namespace Scriban.Runtime
         /// Clones the content of this object.
         /// </summary>
         /// <param name="deep">If set to <c>true</c> all <see cref="ScriptObject"/> and <see cref="ScriptArray"/> will be cloned and copied recursively</param>
-        public virtual ScriptObject Clone(bool deep)
+        public virtual IScriptObject Clone(bool deep)
         {
             var toObject = (ScriptObject)MemberwiseClone();
             toObject.Store = new Dictionary<string, InternalValue>(Store.Count);

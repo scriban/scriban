@@ -11,7 +11,7 @@ namespace Scriban.Parsing
 {
     public partial class Parser
     {
-        private ScriptExpression ParseVariableOrLiteral()
+        private ScriptExpression ParseVariable()
         {
             var currentToken = Current;
             var currentSpan = CurrentSpan;
@@ -112,16 +112,21 @@ namespace Scriban.Parsing
                                 case "index0":
                                     text = ScriptVariable.LoopIndex.Name;
                                     break;
+                                case "rindex0":
+                                    text = ScriptVariable.LoopRIndex.Name;
+                                    break;
+                                case "rindex":
                                 case "index":
                                     // Because forloop.index is 1 based index, we need to create a binary expression
                                     // to support it here
+                                    bool isrindex = loopVariableText == "rindex";
 
                                     var nested = new ScriptNestedExpression()
                                     {
                                         Expression = new ScriptBinaryExpression()
                                         {
                                             Operator = ScriptBinaryOperator.Add,
-                                            Left = new ScriptVariableLoop(ScriptVariable.LoopIndex.Name)
+                                            Left = new ScriptVariableLoop(isrindex ? ScriptVariable.LoopRIndex.Name : ScriptVariable.LoopIndex.Name)
                                             {
                                                 Span = currentSpan
                                             },
@@ -143,6 +148,10 @@ namespace Scriban.Parsing
                                         FlushTrivias(nested, false);
                                     }
                                     return nested;
+                                case "length":
+                                    text = ScriptVariable.LoopLength.Name;
+                                    break;
+
                                 default:
                                     text = text + "." + loopVariableText;
                                     LogError(currentToken, $"The liquid loop variable <{text}> is not supported");
@@ -164,6 +173,22 @@ namespace Scriban.Parsing
                                     }
                                     text = ScriptVariable.LoopLast.Name;
                                     break;
+                                case "changed":
+                                    if (text == "while")
+                                    {
+                                        // unit test: 108-variable-loop-error2.txt
+                                        LogError(currentToken, "The loop variable <while.changed> is invalid");
+                                    }
+                                    text = ScriptVariable.LoopChanged.Name;
+                                    break;
+                                case "length":
+                                    if (text == "while")
+                                    {
+                                        // unit test: 108-variable-loop-error2.txt
+                                        LogError(currentToken, "The loop variable <while.length> is invalid");
+                                    }
+                                    text = ScriptVariable.LoopLength.Name;
+                                    break;
                                 case "even":
                                     text = ScriptVariable.LoopEven.Name;
                                     break;
@@ -172,6 +197,14 @@ namespace Scriban.Parsing
                                     break;
                                 case "index":
                                     text = ScriptVariable.LoopIndex.Name;
+                                    break;
+                                case "rindex":
+                                    if (text == "while")
+                                    {
+                                        // unit test: 108-variable-loop-error2.txt
+                                        LogError(currentToken, "The loop variable <while.rindex> is invalid");
+                                    }
+                                    text = ScriptVariable.LoopRIndex.Name;
                                     break;
                                 default:
                                     text = text + "." + loopVariableText;
@@ -193,6 +226,9 @@ namespace Scriban.Parsing
                         LogError(currentToken, $"Invalid token [{Current.Type}]. The loop variable <{text}> dot must be followed by an identifier");
                     }
                 }
+            } else if (_isLiquid && text == "continue")
+            {
+                scope = ScriptVariableScope.Local;
             }
 
             var result = ScriptVariable.Create(text, scope);

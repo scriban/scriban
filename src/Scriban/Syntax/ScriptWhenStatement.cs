@@ -1,15 +1,25 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
+using System.Collections.Generic;
+using System.Text;
+using Scriban.Functions;
+
 namespace Scriban.Syntax
 {
     [ScriptSyntax("when statement", "when <expression> ... end|when|else")]
     public class ScriptWhenStatement : ScriptConditionStatement
     {
+        public ScriptWhenStatement()
+        {
+            Values = new List<ScriptExpression>();
+        }
+
         /// <summary>
         /// Get or sets the value used to check against When clause.
         /// </summary>
-        public ScriptExpression Value { get; set; }
+        public List<ScriptExpression> Values { get; }
 
         public ScriptBlockStatement Body { get; set; }
 
@@ -17,23 +27,44 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            var whenValue = context.Evaluate(Value);
             var caseValue = context.PeekCase();
-            var result = (bool) ScriptBinaryExpression.Calculate(context, this.Span, ScriptBinaryOperator.CompareEqual, caseValue, caseValue?.GetType(), whenValue, whenValue?.GetType());
-            return result ? context.Evaluate(Body) : context.Evaluate(Next);
+            foreach (var value in Values)
+            {
+                var whenValue = context.Evaluate(value);
+                var result = ScriptBinaryExpression.Evaluate(context, Span, ScriptBinaryOperator.CompareEqual, caseValue, whenValue);
+                if (result is bool && (bool) result)
+                {
+                    return context.Evaluate(Body);
+                }
+
+            }
+            return context.Evaluate(Next);
         }
 
         public override void Write(RenderContext context)
         {
             context.Write("when").ExpectSpace();
-            context.Write(Value).ExpectEos();
+            context.WriteListWithCommas(Values);
+            context.ExpectEos();
             context.Write(Body);
             context.Write(Next);
         }
 
         public override string ToString()
         {
-            return $"when {Value}";
+            var builder = new StringBuilder();
+            builder.Append("when ");
+            for (var i = 0; i < Values.Count; i++)
+            {
+                var value = Values[i];
+                if (i > 0)
+                {
+                    builder.Append(", ");
+                }
+                builder.Append(value);
+            }
+
+            return builder.ToString();
         }
     }
 }

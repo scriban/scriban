@@ -31,97 +31,7 @@ namespace Scriban.Syntax
             var rightValueOriginal = context.Evaluate(Right);
             object rightValue = rightValueOriginal;
 
-            if (Operator == ScriptBinaryOperator.EmptyCoalescing)
-            {
-                return leftValue ?? rightValue;
-            }
-            else if (Operator == ScriptBinaryOperator.And || Operator == ScriptBinaryOperator.Or)
-            {
-                var leftBoolValue = context.ToBool(leftValue);
-                var rightBoolValue = context.ToBool(rightValue);
-                if (Operator == ScriptBinaryOperator.And)
-                {
-                    return leftBoolValue && rightBoolValue;
-                }
-                else
-                {
-                    return leftBoolValue || rightBoolValue;
-                }
-            }
-            else
-            {
-                switch (Operator)
-                {
-                    case ScriptBinaryOperator.ShiftLeft:
-                        var leftList = leftValue as IList;
-                        if (leftList != null)
-                        {
-                            var newList = new ScriptArray(leftList) { rightValue };
-                            return newList;
-                        }
-                        break;
-                    case ScriptBinaryOperator.ShiftRight:
-                        var rightList = rightValue as IList;
-                        if (rightList != null)
-                        {
-                            var newList = new ScriptArray(rightList);
-                            newList.Insert(0, leftValue);
-                            return newList;
-                        }
-                        break;
-
-                    case ScriptBinaryOperator.LiquidHasKey:
-                    {
-                        var leftDict = leftValue as IDictionary<string, object>;
-                        if (leftDict != null)
-                        {
-                            return ObjectFunctions.HasKey(context.ToString(Span, rightValue), leftDict);
-                        }
-                    }
-                        break;
-
-                    case ScriptBinaryOperator.LiquidHasValue:
-                    {
-                        var leftDict = leftValue as IDictionary<string, object>;
-                        if (leftDict != null)
-                        {
-                            return ObjectFunctions.HasValue(context.ToString(Span, rightValue), leftDict);
-                        }
-                    }
-                        break;
-
-                    case ScriptBinaryOperator.CompareEqual:
-                    case ScriptBinaryOperator.CompareNotEqual:
-                    case ScriptBinaryOperator.CompareGreater:
-                    case ScriptBinaryOperator.CompareLess:
-                    case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    case ScriptBinaryOperator.CompareLessOrEqual:
-                    case ScriptBinaryOperator.Add:
-                    case ScriptBinaryOperator.Substract:
-                    case ScriptBinaryOperator.Multiply:
-                    case ScriptBinaryOperator.Divide:
-                    case ScriptBinaryOperator.DivideRound:
-                    case ScriptBinaryOperator.Modulus:
-                    case ScriptBinaryOperator.RangeInclude:
-                    case ScriptBinaryOperator.RangeExclude:
-                    case ScriptBinaryOperator.LiquidContains:
-                    case ScriptBinaryOperator.LiquidStartsWith:
-                    case ScriptBinaryOperator.LiquidEndsWith:
-                        var leftType = leftValue?.GetType();
-                        var rightType = rightValue?.GetType();
-
-                        if (leftValue is string || rightValue is string)
-                        {
-                            return CalculateToString(context, Span, Operator, leftValue, rightValue);
-                        }
-                        else
-                        {
-                            return Calculate(context, Span, Operator, leftValue, leftType, rightValue, rightType);
-                        }
-                }
-            }
-
-            throw new ScriptRuntimeException(Span, $"Operator [{Operator.ToText()}] is not implemented for the left [{Left}] / right [{Right}]");
+            return Evaluate(context, Span, Operator, leftValue, rightValue);
         }
 
         public override void Write(RenderContext context)
@@ -148,6 +58,162 @@ namespace Scriban.Syntax
         public override bool CanHaveLeadingTrivia()
         {
             return false;
+        }
+
+        
+        public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
+        {
+            if (op == ScriptBinaryOperator.EmptyCoalescing)
+            {
+                return leftValue ?? rightValue;
+            }
+            else if (op == ScriptBinaryOperator.And || op == ScriptBinaryOperator.Or)
+            {
+                var leftBoolValue = context.ToBool(leftValue);
+                var rightBoolValue = context.ToBool(rightValue);
+                if (op == ScriptBinaryOperator.And)
+                {
+                    return leftBoolValue && rightBoolValue;
+                }
+                else
+                {
+                    return leftBoolValue || rightBoolValue;
+                }
+            }
+            else
+            {
+                switch (op)
+                {
+                    case ScriptBinaryOperator.ShiftLeft:
+                        var leftList = leftValue as IList;
+                        if (leftList != null)
+                        {
+                            var newList = new ScriptArray(leftList) { rightValue };
+                            return newList;
+                        }
+                        break;
+                    case ScriptBinaryOperator.ShiftRight:
+                        var rightList = rightValue as IList;
+                        if (rightList != null)
+                        {
+                            var newList = new ScriptArray(rightList);
+                            newList.Insert(0, leftValue);
+                            return newList;
+                        }
+                        break;
+
+                    case ScriptBinaryOperator.LiquidHasKey:
+                        {
+                            var leftDict = leftValue as IDictionary<string, object>;
+                            if (leftDict != null)
+                            {
+                                return ObjectFunctions.HasKey(context.ToString(span, rightValue), leftDict);
+                            }
+                        }
+                        break;
+
+                    case ScriptBinaryOperator.LiquidHasValue:
+                        {
+                            var leftDict = leftValue as IDictionary<string, object>;
+                            if (leftDict != null)
+                            {
+                                return ObjectFunctions.HasValue(context.ToString(span, rightValue), leftDict);
+                            }
+                        }
+                        break;
+
+                    case ScriptBinaryOperator.CompareEqual:
+                    case ScriptBinaryOperator.CompareNotEqual:
+                    case ScriptBinaryOperator.CompareGreater:
+                    case ScriptBinaryOperator.CompareLess:
+                    case ScriptBinaryOperator.CompareGreaterOrEqual:
+                    case ScriptBinaryOperator.CompareLessOrEqual:
+                    case ScriptBinaryOperator.Add:
+                    case ScriptBinaryOperator.Substract:
+                    case ScriptBinaryOperator.Multiply:
+                    case ScriptBinaryOperator.Divide:
+                    case ScriptBinaryOperator.DivideRound:
+                    case ScriptBinaryOperator.Modulus:
+                    case ScriptBinaryOperator.RangeInclude:
+                    case ScriptBinaryOperator.RangeExclude:
+                    case ScriptBinaryOperator.LiquidContains:
+                    case ScriptBinaryOperator.LiquidStartsWith:
+                    case ScriptBinaryOperator.LiquidEndsWith:
+                        if (leftValue is string || rightValue is string)
+                        {
+                            return CalculateToString(context, span, op, leftValue, rightValue);
+                        }
+                        else if (leftValue == EmptyScriptObject.Default || rightValue == EmptyScriptObject.Default)
+                        {
+                            return CalculateEmpty(context, span, op, leftValue, rightValue);
+                        }
+                        else
+                        {
+                            return CalculateOthers(context, span, op, leftValue, rightValue);
+                        }
+                }
+            }
+            throw new ScriptRuntimeException(span, $"Operator [{op.ToText()}] is not implemented for [{leftValue}] / [{rightValue}]");
+        }
+
+        private static object CalculateEmpty(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
+        {
+
+            var leftIsEmptyObject = leftValue == EmptyScriptObject.Default;
+            var rightIsEmptyObject = rightValue== EmptyScriptObject.Default;
+
+            // If both are empty, we return false or empty
+            if (leftIsEmptyObject && rightIsEmptyObject)
+            {
+                switch (op)
+                {
+                    case ScriptBinaryOperator.CompareEqual:
+                    case ScriptBinaryOperator.CompareGreaterOrEqual:
+                    case ScriptBinaryOperator.CompareLessOrEqual:
+                        return true;
+                    case ScriptBinaryOperator.CompareNotEqual:
+                    case ScriptBinaryOperator.CompareGreater:
+                    case ScriptBinaryOperator.CompareLess:
+                    case ScriptBinaryOperator.LiquidContains:
+                    case ScriptBinaryOperator.LiquidStartsWith:
+                    case ScriptBinaryOperator.LiquidEndsWith:
+                        return false;
+                }
+                return EmptyScriptObject.Default;
+            }
+
+            var against = leftIsEmptyObject ? rightValue : leftValue;
+            var againstEmpty = context.IsEmpty(span, against);
+
+            switch (op)
+            {
+                case ScriptBinaryOperator.CompareEqual:
+                    return againstEmpty;
+                case ScriptBinaryOperator.CompareNotEqual:
+                    return !againstEmpty;
+                case ScriptBinaryOperator.CompareGreater:
+                case ScriptBinaryOperator.CompareLess:
+                    return false;
+                case ScriptBinaryOperator.CompareGreaterOrEqual:
+                case ScriptBinaryOperator.CompareLessOrEqual:
+                    return againstEmpty;
+                case ScriptBinaryOperator.Add:
+                case ScriptBinaryOperator.Substract:
+                case ScriptBinaryOperator.Multiply:
+                case ScriptBinaryOperator.Divide:
+                case ScriptBinaryOperator.DivideRound:
+                case ScriptBinaryOperator.Modulus:
+                case ScriptBinaryOperator.RangeInclude:
+                case ScriptBinaryOperator.RangeExclude:
+                    return EmptyScriptObject.Default;
+
+                case ScriptBinaryOperator.LiquidContains:
+                case ScriptBinaryOperator.LiquidStartsWith:
+                case ScriptBinaryOperator.LiquidEndsWith:
+                    return false;
+            }
+
+            throw new ScriptRuntimeException(span, $"Operator [{op.ToText()}] is not implemented for [{(leftIsEmptyObject ? "empty" : leftValue)}] / [{(rightIsEmptyObject ? "empty" : rightValue)}]");
         }
 
         private static object CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object left, object right)
@@ -237,9 +303,71 @@ namespace Scriban.Syntax
                 }
             }
         }
-      
-        public static object Calculate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, Type leftType, object rightValue, Type rightType)
+        
+        private static object CalculateOthers(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {
+            // Both values are null, applies the relevant binary ops
+            if (leftValue == null && rightValue == null)
+            {
+                switch (op)
+                {
+                    case ScriptBinaryOperator.CompareEqual:
+                        return true;
+                    case ScriptBinaryOperator.CompareNotEqual:
+                        return false;
+                    case ScriptBinaryOperator.CompareGreater:
+                    case ScriptBinaryOperator.CompareLess:
+                    case ScriptBinaryOperator.CompareGreaterOrEqual:
+                    case ScriptBinaryOperator.CompareLessOrEqual:
+                        return false;
+                    case ScriptBinaryOperator.Add:
+                    case ScriptBinaryOperator.Substract:
+                    case ScriptBinaryOperator.Multiply:
+                    case ScriptBinaryOperator.Divide:
+                    case ScriptBinaryOperator.DivideRound:
+                    case ScriptBinaryOperator.Modulus:
+                    case ScriptBinaryOperator.RangeInclude:
+                    case ScriptBinaryOperator.RangeExclude:
+                        return null;
+                    case ScriptBinaryOperator.LiquidContains:
+                    case ScriptBinaryOperator.LiquidStartsWith:
+                    case ScriptBinaryOperator.LiquidEndsWith:
+                        return false;
+                }
+                return null;
+            }
+
+            // One value is null
+            if (leftValue == null || rightValue == null)
+            {
+                switch (op)
+                {
+                    case ScriptBinaryOperator.CompareEqual:
+                    case ScriptBinaryOperator.CompareNotEqual:
+                    case ScriptBinaryOperator.CompareGreater:
+                    case ScriptBinaryOperator.CompareLess:
+                    case ScriptBinaryOperator.CompareGreaterOrEqual:
+                    case ScriptBinaryOperator.CompareLessOrEqual:
+                    case ScriptBinaryOperator.LiquidContains:
+                    case ScriptBinaryOperator.LiquidStartsWith:
+                    case ScriptBinaryOperator.LiquidEndsWith:
+                        return false;
+                    case ScriptBinaryOperator.Add:
+                    case ScriptBinaryOperator.Substract:
+                    case ScriptBinaryOperator.Multiply:
+                    case ScriptBinaryOperator.Divide:
+                    case ScriptBinaryOperator.DivideRound:
+                    case ScriptBinaryOperator.Modulus:
+                    case ScriptBinaryOperator.RangeInclude:
+                    case ScriptBinaryOperator.RangeExclude:
+                        return null;
+                }
+                return null;
+            }
+
+            var leftType = leftValue?.GetType();
+            var rightType = rightValue?.GetType();
+
             // The order matters: double, float, long, int
             if (leftType == typeof(double))
             {
@@ -249,6 +377,7 @@ namespace Scriban.Syntax
 
             if (rightType == typeof(double))
             {
+                if (leftValue == null) return null;
                 var leftDouble = (double)context.ToObject(span, leftValue, typeof(double));
                 return CalculateDouble(op, span, leftDouble, (double)rightValue);
             }

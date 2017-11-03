@@ -59,7 +59,7 @@ namespace Scriban.Parsing
 
             _position = Options.StartPosition;
 
-            if (_position.Offset >= text.Length)
+            if (_position.Offset > text.Length)
             {
                 throw new ArgumentOutOfRangeException($"The starting position [{_position.Offset}] of range [0, {text.Length - 1}]");
             }
@@ -758,8 +758,7 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    // ? is an invalid char alone
-                    _token = new Token(TokenType.Invalid, start, start);
+                    _token = new Token(TokenType.Question, start, start);
                     break;
                 case '|':
                     NextChar();
@@ -982,6 +981,11 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.Pipe, start, start);
                     NextChar();
                     break;
+                case '?':
+                    NextChar();
+                    _token = new Token(TokenType.Question, start, start);
+                    break;
+
                 case '.':
                     NextChar();
                     if (c == '.')

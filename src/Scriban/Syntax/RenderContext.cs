@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using Scriban.Helpers;
 
@@ -23,6 +25,7 @@ namespace Scriban.Syntax
         private bool _nextRStrip;
         private bool _hasEndOfStatement;
         private FastStack<bool> _isWhileLoop;
+        private ScriptRawStatement _previousRawStatement;
 
         public RenderContext(TextWriter writer, RenderOptions options = default(RenderOptions))
         {
@@ -37,10 +40,6 @@ namespace Scriban.Syntax
         public readonly RenderOptions Options;
 
         public bool PreviousHasSpace => _previousHasSpace;
-
-        internal bool IsNextStatementRaw { get; set; }
-
-        internal ScriptRawStatement PreviousRawStatement { get; set; }
 
         public bool IsInWhileLoop => _isWhileLoop.Count > 0 && _isWhileLoop.Peek();
 
@@ -65,6 +64,11 @@ namespace Scriban.Syntax
                     if (pushedWhileLoop)
                     {
                         _isWhileLoop.Pop();
+                    }
+
+                    if (!IsBlockOrPage(node))
+                    {
+                        _previousRawStatement = node as ScriptRawStatement;
                     }
                 }
             }
@@ -100,6 +104,26 @@ namespace Scriban.Syntax
             return this;
         }
 
+        public RenderContext WriteListWithCommas<T>(IList<T> list) where T : ScriptNode
+        {
+            if (list == null)
+            {
+                return this;
+            }
+            for(int i = 0; i < list.Count; i++)
+            {
+                var value = list[i];
+                Write(value);
+
+                // If the value didn't have any Comma Trivia, we can emit it
+                if (i + 1 < list.Count && !value.HasTrivia(ScriptTriviaType.Comma, false))
+                {
+                    Write(",");
+                }
+            }
+            return this;
+        }
+
         public RenderContext WriteEnterCode(int escape = 0)
         {
             Write("{");
@@ -113,6 +137,10 @@ namespace Scriban.Syntax
                 Write("~");
                 _nextLStrip = false;
             }
+            _expectEndOfStatement = false;
+            _expectEnd = false;
+            _expectSpace = false;
+            _hasEndOfStatement = false;
             _isInCode = true;
             return this;
         }
@@ -130,6 +158,11 @@ namespace Scriban.Syntax
                 Write("%");
             }
             Write("}");
+
+            _expectEndOfStatement = false;
+            _expectEnd = false;
+            _expectSpace = false;
+            _hasEndOfStatement = false;
             _isInCode = false;
             return this;
         }
@@ -137,7 +170,7 @@ namespace Scriban.Syntax
         private void WriteBegin(ScriptNode node)
         {
             var rawStatement = node as ScriptRawStatement;
-            if (!(node is ScriptBlockStatement))
+            if (!IsBlockOrPage(node))
             {
                 if (_isInCode)
                 {
@@ -149,15 +182,17 @@ namespace Scriban.Syntax
                 }
                 else if (rawStatement == null)
                 {
-                    if (PreviousRawStatement != null)
+                    if (_previousRawStatement != null)
                     {
-                        _nextLStrip = PreviousRawStatement.HasTrivia(ScriptTriviaType.Whitespace, false);
+                        _nextLStrip = _previousRawStatement.HasTrivia(ScriptTriviaType.Whitespace, false);
                     }
                     WriteEnterCode();
                 }
             }
 
             WriteTrivias(node, true);
+
+            HandleEos(node);
 
             // Add a space if this is required and no trivia are providing it
             if (node.CanHaveLeadingTrivia())
@@ -168,22 +203,19 @@ namespace Scriban.Syntax
                 }
                 _expectSpace = false;
             }
-
-            if (node is ScriptPage)
-            {
-                IsNextStatementRaw = true;
-            }
         }
 
         private void WriteEnd(ScriptNode node)
         {
             if (_expectEnd)
             {
+                HandleEos(node);
+
                 var triviasHasEnd = node.HasTrivia(ScriptTriviaType.End, false);
 
-                if (PreviousRawStatement != null)
+                if (_previousRawStatement != null)
                 {
-                    _nextLStrip = PreviousRawStatement.HasTrivia(ScriptTriviaType.Whitespace, false);
+                    _nextLStrip = _previousRawStatement.HasTrivia(ScriptTriviaType.Whitespace, false);
                 }
 
                 if (!_isInCode)
@@ -204,24 +236,15 @@ namespace Scriban.Syntax
                 {
                     WriteExitCode();
                 }
+                else
+                {
+                    _expectEndOfStatement = true;
+                }
                 _expectEnd = false;
             }
             else
             {
                 WriteTrivias(node, false);
-            }
-
-            if (node is ScriptStatement && _isInCode && _expectEndOfStatement)
-            {
-                if (!_hasEndOfStatement)
-                {
-                    if (!IsNextStatementRaw)
-                    {
-                        Write("; ");
-                    }
-                }
-                _expectEndOfStatement = false;
-                _hasEndOfStatement = false;
             }
 
             if (node is ScriptPage)
@@ -231,6 +254,27 @@ namespace Scriban.Syntax
                     WriteExitCode();
                 }
             }
+        }
+
+        private void HandleEos(ScriptNode node)
+        {
+            if (node is ScriptStatement && !IsBlockOrPage(node) && _isInCode && _expectEndOfStatement)
+            {
+                if (!_hasEndOfStatement)
+                {
+                    if (!(node is ScriptRawStatement))
+                    {
+                        Write("; ");
+                    }
+                }
+                _expectEndOfStatement = false;
+                _hasEndOfStatement = false;
+            }
+        }
+
+        private static bool IsBlockOrPage(ScriptNode node)
+        {
+            return node is ScriptBlockStatement || node is ScriptPage;
         }
 
         private void WriteTrivias(ScriptNode node, bool before)
@@ -247,7 +291,6 @@ namespace Scriban.Syntax
                     else if (trivia.Type == ScriptTriviaType.NewLine || trivia.Type == ScriptTriviaType.SemiColon)
                     {
                         _hasEndOfStatement = true;
-                        _expectEndOfStatement = false;
                         // If expect a space and we have a NewLine or SemiColon, we can safely discard the required space
                         if (_expectSpace)
                         {

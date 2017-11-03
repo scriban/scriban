@@ -108,6 +108,9 @@ namespace Scriban.Parsing
         [TokenText("||")]
         Or,  // ||
 
+        [TokenText("?")]
+        Question,
+
         [TokenText("??")]
         EmptyCoalescing,
 

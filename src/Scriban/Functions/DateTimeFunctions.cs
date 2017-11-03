@@ -175,7 +175,7 @@ namespace Scriban.Functions
             return new DateTime();
         }
 
-        public override ScriptObject Clone(bool deep)
+        public override IScriptObject Clone(bool deep)
         {
             var dateFunctions = (DateTimeFunctions)base.Clone(deep);
             dateFunctions.Import("to_string", new Func<TemplateContext, string, DateTime, string>((context, pattern, date) => dateFunctions.ToString(date, pattern, context.CurrentCulture)));

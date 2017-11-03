@@ -211,7 +211,7 @@ variable + 1
 
             // Make sure that we have a front matter
             Assert.NotNull(page.FrontMatter);
-            Assert.AreEqual(0, page.Statements.Count);
+            Assert.Null(page.Body);
 
             var context = new TemplateContext();
 
@@ -341,7 +341,7 @@ end
             "470-html.txt"
         };
 
-        private void AssertTemplate(string inputText, bool isLiquid, string expectedOutputText, bool isRoundTripTest = false, bool supportExactRoundtrip = true)
+        public static void AssertTemplate(string inputText, bool isLiquid, string expectedOutputText, bool isRoundTripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false)
         {
             var parserOptions = new ParserOptions()
             {
@@ -355,6 +355,11 @@ end
             if (isRoundTripTest)
             {
                 lexerOptions.KeepTrivia = true;
+            }
+
+            if (specialLiquid)
+            {
+                parserOptions.ExpressionDepthLimit = 500;
             }
 
             Console.WriteLine("Tokens");
@@ -410,6 +415,10 @@ end
                         }
                         result += message;
                     }
+                    if (specialLiquid)
+                    {
+                        throw new InvalidOperationException("Parser errors: " + result);
+                    }
                 }
                 else
                 {
@@ -432,10 +441,8 @@ end
 
                         try
                         {
-                            object model = null;
-
                             // Setup a default liquid context for the tests, as we can't create object/array in liquid directly
-                            if (isLiquid)
+                            if (isLiquid && model == null)
                             {
                                 var liquidContext = new ScriptObject
                                 {
@@ -456,11 +463,25 @@ end
                                 model = liquidContext;
                             }
 
-                            result = template.Render(model);
+                            var context = isLiquid ? new LiquidTemplateContext() : new TemplateContext();
+                            var contextObj = new ScriptObject();
+                            if (model != null)
+                            {
+                                contextObj.Import(model);
+                            }
+                            context.PushGlobal(contextObj);
+                            result = template.Render(context);
                         }
-                        catch (ScriptRuntimeException exception)
+                        catch (Exception exception) 
                         {
-                            result = GetReason(exception);
+                            if (specialLiquid)
+                            {
+                                throw;
+                            }
+                            else
+                            {
+                                result = GetReason(exception);
+                            }
                         }
                     }
                 }

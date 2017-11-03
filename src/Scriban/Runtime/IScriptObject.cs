@@ -12,6 +12,13 @@ namespace Scriban.Runtime
     public interface IScriptObject
     {
         /// <summary>
+        /// Gets the number of members
+        /// </summary>
+        int Count { get; }
+
+        IEnumerable<string> GetMembers();
+
+        /// <summary>
         /// Determines whether this object contains the specified member.
         /// </summary>
         /// <param name="member">The member.</param>
@@ -65,5 +72,12 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
         void SetReadOnly(string member, bool readOnly);
+
+        /// <summary>
+        /// Clones this instance.
+        /// </summary>
+        /// <param name="deep">Clones this instance deeply</param>
+        /// <returns>A clone of this instance</returns>
+        IScriptObject Clone(bool deep);
     }
 }

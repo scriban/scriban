@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("block statement", "<statement>...end")]
-    public class ScriptBlockStatement : ScriptStatement
+    public sealed class ScriptBlockStatement : ScriptStatement
     {
         public ScriptBlockStatement()
         {
@@ -50,20 +50,10 @@ namespace Scriban.Syntax
 
         public override void Write(RenderContext context)
         {
-            var isNextStatementRaw = context.IsNextStatementRaw;
-            for (var i = 0; i < Statements.Count; i++)
+            foreach (var scriptStatement in Statements)
             {
-                var scriptStatement = Statements[i];
-
-                var rawStatement = scriptStatement as ScriptRawStatement;
-
-                context.IsNextStatementRaw = i + 1 < Statements.Count ? Statements[i + 1] is ScriptRawStatement : isNextStatementRaw;
-
                 context.Write(scriptStatement);
-
-                context.PreviousRawStatement = rawStatement;
             }
-            context.IsNextStatementRaw = isNextStatementRaw;
         }
 
         public override bool CanHaveLeadingTrivia()

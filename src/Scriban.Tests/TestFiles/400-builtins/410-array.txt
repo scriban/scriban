@@ -42,18 +42,24 @@ null | array.insert_at 1 5:{{null | array.insert_at 1 5}}
 [{id: 5}, {id: 1}, {id: 10}]| array.sort "id":{{[{id: 5}, {id: 1}, {id: 10}]| array.sort "id"}}
 Cycle:
 {{for x in 1..5
-    array.cycle "a" "b" "c"
+    array.cycle ["a", "b", "c"]
 end
 }}
 {{for x in 1..4
-    array.cycle "d" "e" "f"
+    array.cycle ["d", "e", "f"]
 end
 }}
 Multiple cycle:
 {{for x in 1..4
-    array.cycle ^["a", "b", "c", "d"]
-    array.cycle ^["d", "e"]
-    array.cycle ^["g"]
-    array.cycle ^[]
+    array.cycle ["a", "b", "c", "d"]
+    array.cycle ["d", "e"]
+    array.cycle ["g"]
+    array.cycle []
+end
+}}
+Multiple cycle group:
+{{for x in 1..4
+    array.cycle "group1" ["a", "b", "c", "d"]
+    array.cycle "group2" ["d", "e"]
 end
 }}

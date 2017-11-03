@@ -34,7 +34,13 @@ namespace Scriban.Syntax
 
         public object GetValue(TemplateContext context)
         {
-            var targetObject = GetTargetObject(context);
+            var targetObject = GetTargetObject(context, false);
+            // In case TemplateContext.EnableRelaxedMemberAccess
+            if (targetObject == null)
+            {
+                return null;
+            }
+
             var accessor = context.GetMemberAccessor(targetObject);
 
             var memberName = this.Member.Name;
@@ -49,15 +55,14 @@ namespace Scriban.Syntax
 
         public void SetValue(TemplateContext context, object valueToSet)
         {
-            var targetObject = GetTargetObject(context);
+            var targetObject = GetTargetObject(context, true);
             var accessor = context.GetMemberAccessor(targetObject);
 
             var memberName = this.Member.Name;
 
             if (!accessor.TrySetValue(context, this.Span, targetObject, memberName, valueToSet))
             {
-                throw new ScriptRuntimeException(this.Member.Span,
-                    $"Cannot set a value for the readonly member: {this}"); // unit test: 132-member-accessor-error3.txt
+                throw new ScriptRuntimeException(this.Member.Span, $"Cannot set a value for the readonly member: {this}"); // unit test: 132-member-accessor-error3.txt
             }
         }
 
@@ -66,18 +71,29 @@ namespace Scriban.Syntax
             return (Target as IScriptVariablePath)?.GetFirstPath();
         }
 
-        private object GetTargetObject(TemplateContext context)
+        private object GetTargetObject(TemplateContext context, bool isSet)
         {
             var targetObject = context.GetValue(Target);
 
             if (targetObject == null)
             {
-                throw new ScriptRuntimeException(this.Span, $"Object [{this.Target}] is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
+                if (isSet || !context.EnableRelaxedMemberAccess)
+                {
+                    throw new ScriptRuntimeException(this.Span, $"Object [{this.Target}] is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
+                }
             }
-
-            if (targetObject is string || targetObject.GetType().GetTypeInfo().IsPrimitive)
+            else if (targetObject is string || targetObject.GetType().GetTypeInfo().IsPrimitive)
             {
-                throw new ScriptRuntimeException(this.Span, $"Cannot get or set a member on the primitive [{targetObject}/{targetObject.GetType()}] when accessing member: {this}"); // unit test: 132-member-accessor-error2.txt
+                if (isSet || !context.EnableRelaxedMemberAccess)
+                {
+                    throw new ScriptRuntimeException(this.Span, $"Cannot get or set a member on the primitive [{targetObject}/{targetObject.GetType()}] when accessing member: {this}"); // unit test: 132-member-accessor-error2.txt
+                }
+
+                // If this is relaxed, set the target object to null
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    targetObject = null;
+                }
             }
 
             return targetObject;

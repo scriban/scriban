@@ -1,11 +1,13 @@
 Evaluate <while> statement
 
+x = 0
 while x < 9
 	x = x + 1
 	x
 end
 ===
 {{
+x = 0
 while x < 9
 	x = x + 1
 	x

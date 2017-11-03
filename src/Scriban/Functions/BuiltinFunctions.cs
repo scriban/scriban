@@ -14,7 +14,7 @@ namespace Scriban.Functions
 
         public BuiltinFunctions() : base(10)
         {
-            Default.Clone(true).CopyTo(this);
+            ((ScriptObject)Default.Clone(true)).CopyTo(this);
         }
 
         /// <summary>
@@ -25,6 +25,7 @@ namespace Scriban.Functions
             public DefaultBuiltins() : base(10, false)
             {
                 SetValue("include", new IncludeFunction(), true);
+                SetValue("empty", EmptyScriptObject.Default, true);
                 SetValue("object", new ObjectFunctions(), true);
                 SetValue(DateTimeFunctions.DateVariable.Name, new DateTimeFunctions(), true);
                 SetValue("timespan", new TimeSpanFunctions(), true);

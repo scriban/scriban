@@ -2,11 +2,12 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System.Collections;
+using System.Collections.Generic;
 using Scriban.Parsing;
 
 namespace Scriban.Runtime.Accessors
 {
-    public class ListAccessor : IListAccessor
+    public class ListAccessor : IListAccessor, IObjectAccessor
     {
         public static ListAccessor Default = new ListAccessor();
 
@@ -45,6 +46,51 @@ namespace Scriban.Runtime.Accessors
             }
 
             list[index] = value;
+        }
+
+        public int GetMemberCount(TemplateContext context, SourceSpan span, object target)
+        {
+            // size
+            return 1;
+        }
+
+        public IEnumerable<string> GetMembers(TemplateContext context, SourceSpan span, object target)
+        {
+            yield return "size";
+        }
+
+        public bool HasMember(TemplateContext context, SourceSpan span, object target, string member)
+        {
+            return member == "size";
+        }
+
+        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
+        {
+            if (member == "size")
+            {
+                value = GetLength(context, span, target);
+                return true;
+            }
+            if (target is IScriptObject)
+            {
+                return (((IScriptObject) target)).TryGetValue(context, span, member, out value);
+            }
+
+            value = null;
+            return false;
+        }
+
+        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
+        {
+            if (member == "size")
+            {
+                return false;
+            }
+            if (target is IScriptObject)
+            {
+                return (((IScriptObject)target)).TryGetValue(context, span, member, out value);
+            }
+            return false;
         }
     }
 }

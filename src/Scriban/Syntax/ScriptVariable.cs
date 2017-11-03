@@ -20,6 +20,8 @@ namespace Scriban.Syntax
 
         public static readonly ScriptVariableLocal BlockDelegate = new ScriptVariableLocal("$");
 
+        public static readonly ScriptVariableLocal Continue = new ScriptVariableLocal("continue");
+
         public static readonly ScriptVariableLoop LoopFirst = new ScriptVariableLoop("for.first");
 
         public static readonly ScriptVariableLoop LoopLast = new ScriptVariableLoop("for.last");
@@ -29,6 +31,15 @@ namespace Scriban.Syntax
         public static readonly ScriptVariableLoop LoopOdd = new ScriptVariableLoop("for.odd");
 
         public static readonly ScriptVariableLoop LoopIndex = new ScriptVariableLoop("for.index");
+
+        public static readonly ScriptVariableLoop LoopRIndex = new ScriptVariableLoop("for.rindex");
+
+        public static readonly ScriptVariableLoop LoopLength = new ScriptVariableLoop("for.length");
+
+        /// <summary>
+        /// A boolean variable indicating if the value changed from the previous value in a loop iteration
+        /// </summary>
+        public static readonly ScriptVariableLoop LoopChanged = new ScriptVariableLoop("for.changed");
 
         protected ScriptVariable(string name, ScriptVariableScope scope)
         {

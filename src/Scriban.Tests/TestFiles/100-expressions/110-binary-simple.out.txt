@@ -29,10 +29,10 @@ The result of 3 % 2 = 1
 1 + 10 / 2 -> 6
 10 / 2 + 1 -> 6
 
-null + 1 -> 1
-1 + null -> 1
-null + 1.5 -> 1.5
-1.5 + null -> 1.5
+null + 1 -> 
+1 + null -> 
+null + 1.5 -> 
+1.5 + null -> 
 
 null ?? 1 -> 1
 1 ?? null -> 1

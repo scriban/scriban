@@ -24,7 +24,7 @@ namespace Scriban.Functions
             var leftType = typeof(double);
             var rightType = right?.GetType();
 
-            var result = ScriptBinaryExpression.Calculate(context, span, ScriptBinaryOperator.Divide, left, leftType, right, rightType);
+            var result = ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Divide, left, right);
 
             // If the divisor is an integer, return a an integer
             if (right is int)
@@ -64,22 +64,22 @@ namespace Scriban.Functions
 
         public static object Minus(TemplateContext context, SourceSpan span, object subValue, object input)
         {
-            return ScriptBinaryExpression.Calculate(context, span, ScriptBinaryOperator.Substract, input, input?.GetType(), subValue, subValue?.GetType());
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Substract, input, subValue);
         }
 
         public static object Plus(TemplateContext context, SourceSpan span, object addValue, object input)
         {
-            return ScriptBinaryExpression.Calculate(context, span, ScriptBinaryOperator.Add, input, input?.GetType(), addValue, addValue?.GetType());
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Add, input, addValue);
         }
 
         public static object Modulo(TemplateContext context, SourceSpan span, object modValue, object input)
         {
-            return ScriptBinaryExpression.Calculate(context, span, ScriptBinaryOperator.Modulus, input, input?.GetType(), modValue, modValue?.GetType());
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Modulus, input, modValue);
         }
 
         public static object Times(TemplateContext context, SourceSpan span, object mulValue, object input)
         {
-            return ScriptBinaryExpression.Calculate(context, span, ScriptBinaryOperator.Multiply, input, input?.GetType(), mulValue, mulValue?.GetType());
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Multiply, input, mulValue);
         }
 
         public static string Format(TemplateContext context, SourceSpan span, string format, object value)

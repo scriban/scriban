@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Scriban.Helpers;
@@ -21,6 +22,16 @@ namespace Scriban.Runtime.Accessors
             _renamer = renamer ?? StandardMemberRenamer.Default;
             _members = new Dictionary<string, MemberInfo>();
             PrepareMembers();
+        }
+
+        public int GetMemberCount(TemplateContext context, SourceSpan span, object target)
+        {
+            return _members.Count;
+        }
+
+        public IEnumerable<string> GetMembers(TemplateContext context, SourceSpan span, object target)
+        {
+            return _members.Keys;
         }
 
         public bool HasMember(TemplateContext context, SourceSpan span, object target, string member)

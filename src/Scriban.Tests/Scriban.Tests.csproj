@@ -79,6 +79,8 @@
     <Content Include="TestFiles\100-expressions\100-assign-local-var.txt" />
     <Content Include="TestFiles\100-expressions\101-assign-complex-error1.out.txt" />
     <Content Include="TestFiles\100-expressions\101-assign-complex-error1.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-builtin-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-builtin-error1.txt" />
     <Content Include="TestFiles\100-expressions\108-variable-error1.out.txt" />
     <Content Include="TestFiles\100-expressions\108-variable-error1.txt" />
     <Content Include="TestFiles\100-expressions\108-variable-loop-error2.out.txt" />

@@ -4,7 +4,7 @@
 
 namespace Scriban.Syntax
 {
-    public class ScriptPage : ScriptBlockStatement
+    public class ScriptPage : ScriptNode
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptPage"/> class.
@@ -20,5 +20,17 @@ namespace Scriban.Syntax
         /// Note that this code block is not executed when evaluating this page. It has to be evaluated separately (usually before evaluating the page).
         /// </remarks>
         public ScriptBlockStatement FrontMatter { get; set; }
+
+        public ScriptBlockStatement Body { get; set; }
+
+        public override object Evaluate(TemplateContext context)
+        {
+            return context.Evaluate(Body);
+        }
+
+        public override void Write(RenderContext context)
+        {
+            context.Write(Body);
+        }
     }
 }

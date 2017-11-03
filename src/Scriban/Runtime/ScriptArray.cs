@@ -69,7 +69,7 @@ namespace Scriban.Runtime
             }
         }
 
-        public virtual ScriptArray Clone(bool deep)
+        public virtual IScriptObject Clone(bool deep)
         {
             var array = (ScriptArray) MemberwiseClone();
             array._values = new List<object>(_values.Count);
@@ -79,23 +79,17 @@ namespace Scriban.Runtime
                 foreach (var value in array._values)
                 {
                     var fromValue = value;
-                    if (value is ScriptObject)
+                    if (value is IScriptObject)
                     {
-                        var fromObject = (ScriptObject)value;
+                        var fromObject = (IScriptObject)value;
                         fromValue = fromObject.Clone(true);
-                    }
-                    else if (value is ScriptArray)
-                    {
-                        var fromArray = (ScriptArray)value;
-                        var newValue = fromArray.Clone(true);
-                        fromValue = newValue;
                     }
                     array._values.Add(fromValue);
                 }
 
                 if (_script != null)
                 {
-                    array._script = _script.Clone(true);
+                    array._script = (ScriptObject)_script.Clone(true);
                 }
             }
             else
@@ -107,7 +101,7 @@ namespace Scriban.Runtime
 
                 if (_script != null)
                 {
-                    array._script = _script.Clone(false);
+                    array._script = (ScriptObject)_script.Clone(false);
                 }
             }
             return array;
@@ -268,6 +262,18 @@ namespace Scriban.Runtime
             ((ICollection)_values).CopyTo(array, index);
         }
 
+        public IEnumerable<string> GetMembers()
+        {
+            yield return "size";
+            if (_script != null)
+            {
+                foreach (var member in _script.GetMembers())
+                {
+                    yield return member;
+                }
+            }
+        }
+
         public virtual bool Contains(string member)
         {
             return ScriptObject.Contains(member);
@@ -275,11 +281,22 @@ namespace Scriban.Runtime
 
         public virtual bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
         {
+            if (member == "size")
+            {
+                value = Count;
+                return true;
+            }
+
             return ScriptObject.TryGetValue(context, span, member, out value);
         }
 
         public virtual bool CanWrite(string member)
         {
+            if (member == "size")
+            {
+                return false;
+            }
+
             return ScriptObject.CanWrite(member);
         }
 

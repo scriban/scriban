@@ -39,6 +39,19 @@ namespace Scriban.Runtime.Accessors
             return true;
         }
 
+        public int GetMemberCount(TemplateContext context, SourceSpan span, object target)
+        {
+            return ((IDictionary) target).Count;
+        }
+
+        public IEnumerable<string> GetMembers(TemplateContext context, SourceSpan span, object target)
+        {
+            foreach (var key in ((IDictionary) target).Keys)
+            {
+                yield return context.ToString(span, key);
+            }
+        }
+
         public bool HasMember(TemplateContext context, SourceSpan span, object target, string member)
         {
             return ((IDictionary) target).Contains(member);
@@ -66,6 +79,19 @@ namespace Scriban.Runtime.Accessors
     {
         public GenericDictionaryAccessor()
         {
+        }
+
+        public int GetMemberCount(TemplateContext context, SourceSpan span, object target)
+        {
+            return ((IDictionary<TKey, TValue>)target).Count;
+        }
+
+        public IEnumerable<string> GetMembers(TemplateContext context, SourceSpan span, object target)
+        {
+            foreach (var key in ((IDictionary<TKey, TValue>)target).Keys)
+            {
+                yield return context.ToString(span, key);
+            }
         }
 
         public bool HasMember(TemplateContext context, SourceSpan span, object value, string member)

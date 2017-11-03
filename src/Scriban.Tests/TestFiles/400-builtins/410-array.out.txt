@@ -45,3 +45,5 @@ abcab
 defd
 Multiple cycle:
 adgbegcdgdeg
+Multiple cycle group:
+adbecdde

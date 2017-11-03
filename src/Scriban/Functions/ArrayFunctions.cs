@@ -387,48 +387,79 @@ namespace Scriban.Functions
 
         private static object Cycle(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
         {
-            if (parameters.Count == 0)
+            string group = null;
+            IList values = null;
+            if (parameters.Count == 1)
             {
-                return null;
+                values = context.ToList(callerContext.Span, parameters[0]);
+                group = Join(context, callerContext.Span, ",", values);
+            }
+            else if (parameters.Count == 2)
+            {
+                values = context.ToList(callerContext.Span, parameters[1]);
+                group = context.ToString(callerContext.Span, parameters[0]);
+            }
+            else
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for cycle. Expecting at least 1 parameter: cycle [val1, val2..] or cycle <group> [val1, val2...]");
             }
 
             // We create a cycle variable that is dependent on the exact AST context.
             // So we allow to have multiple cycle running in the same loop
-            var cycleVar = new CycleVariable(callerContext);
+            var cycleKey = new CycleKey(group);
 
             object cycleValue;
-            var tagsCurrentLoop = context.TagsCurrentLoop;
-            if (!tagsCurrentLoop.TryGetValue(cycleVar, out cycleValue) || !(cycleValue is int))
+            var currentTags = context.Tags;
+            if (!currentTags.TryGetValue(cycleKey, out cycleValue) || !(cycleValue is int))
             {
                 cycleValue = 0;
             }
 
             var cycleIndex = (int) cycleValue;
-            cycleIndex = cycleIndex % parameters.Count;
-            var result = parameters[cycleIndex];
-
-            cycleIndex++;
-            cycleIndex = cycleIndex % parameters.Count;
-
-            tagsCurrentLoop[cycleVar] = cycleIndex;
+            cycleIndex = values.Count == 0 ? 0 : cycleIndex % values.Count;
+            object result = null;
+            if (values.Count > 0)
+            {
+                result = values[cycleIndex];
+                cycleIndex++;
+            }
+            currentTags[cycleKey] = cycleIndex;
 
             return result;
         }
 
-        private class CycleVariable : ScriptVariableLoop
+        private class CycleKey : IEquatable<CycleKey>
         {
-            public CycleVariable(ScriptNode cycleContext) : base("cycle")
+            public CycleKey(string @group)
             {
-                CycleContext = cycleContext;
+                Group = @group;
             }
 
-            private ScriptNode CycleContext { get; }
+            public readonly string Group;
 
-            public override bool Equals(ScriptVariable other)
+            public bool Equals(CycleKey other)
             {
-                if (!base.Equals(other)) return false;
-                var cycleVar = other as CycleVariable;
-                return cycleVar != null && ReferenceEquals(CycleContext, cycleVar.CycleContext);
+                if (ReferenceEquals(null, other)) return false;
+                if (ReferenceEquals(this, other)) return true;
+                return string.Equals(Group, other.Group);
+            }
+
+            public override bool Equals(object obj)
+            {
+                if (ReferenceEquals(null, obj)) return false;
+                if (ReferenceEquals(this, obj)) return true;
+                if (obj.GetType() != this.GetType()) return false;
+                return Equals((CycleKey) obj);
+            }
+
+            public override int GetHashCode()
+            {
+                return (Group != null ? Group.GetHashCode() : 0);
+            }
+
+            public override string ToString()
+            {
+                return $"cycle {Group}";
             }
         }
     }

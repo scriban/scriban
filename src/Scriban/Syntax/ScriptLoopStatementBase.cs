@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 namespace Scriban.Syntax
@@ -8,7 +8,7 @@ namespace Scriban.Syntax
     /// </summary>
     public abstract class ScriptLoopStatementBase : ScriptStatement
     {
-        public ScriptStatement Body { get; set; }
+        public ScriptBlockStatement Body { get; set; }
 
         /// <summary>
         /// Base implementation for a loop single iteration

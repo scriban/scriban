@@ -2,9 +2,12 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
+using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
 
 namespace Scriban.Runtime
@@ -51,7 +54,15 @@ namespace Scriban.Runtime
         {
             if (obj is IScriptObject)
             {
+                // TODO: Add support for filter, member renamer
                 script.Import((IScriptObject)obj);
+                return;
+            }
+
+            if (obj is IDictionary)
+            {
+                // TODO: Add support for filter, member renamer
+                script.ImportDictionary((IDictionary)obj);
                 return;
             }
 
@@ -103,6 +114,26 @@ namespace Scriban.Runtime
                     continue;
                 }
                 thisScript.Store[keyValue.Key] = keyValue.Value;
+            }
+        }
+
+        private static void ImportDictionary(this IScriptObject @this, IDictionary dictionary)
+        {
+            if (dictionary == null)
+            {
+                return;
+            }
+
+            foreach (DictionaryEntry entry in dictionary)
+            {
+                var member = entry.Key?.ToString();
+                if (!@this.CanWrite(member))
+                {
+                    continue;
+                }
+                var thisScript = @this.GetScriptObject();
+                AssertNotReadOnly(thisScript);
+                thisScript[member] = entry.Value;
             }
         }
 

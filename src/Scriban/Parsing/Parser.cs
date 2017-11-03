@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Scriban.Helpers;
@@ -27,7 +28,8 @@ namespace Scriban.Parsing
         private bool _isLiquidTagSection;
         private int _blockLevel;
         private bool _inFrontMatter;
-        private bool _isStatementDepthLimitReached;
+        private bool _isExpressionDepthLimitReached;
+        private int _expressionDepth;
         private bool _hasFatalError;
         private readonly bool _isKeepTrivia;
         private readonly List<ScriptTrivia> _trivias;
@@ -81,7 +83,7 @@ namespace Scriban.Parsing
             Messages = new List<LogMessage>();
             HasErrors = false;
             _blockLevel = 0;
-            _isStatementDepthLimitReached = false;
+            _isExpressionDepthLimitReached = false;
             Blocks.Clear();
 
             var page = Open<ScriptPage>();
@@ -121,7 +123,7 @@ namespace Scriban.Parsing
                     break;
             }
 
-            ParseBlockStatement(page);
+            page.Body = ParseBlockStatement(null);
 
             if (page.FrontMatter != null)
             {
@@ -144,7 +146,7 @@ namespace Scriban.Parsing
             // In case of parsing a front matter, we don't want to include any \r\n after the end of the front-matter
             // So we manipulate back the syntax tree for the expected raw statement (if any), otherwise we can early 
             // exit.
-            var rawStatement = page.Statements.FirstOrDefault() as ScriptRawStatement;
+            var rawStatement = page.Body.Statements.FirstOrDefault() as ScriptRawStatement;
             if (rawStatement == null)
             {
                 return;
@@ -205,6 +207,13 @@ namespace Scriban.Parsing
                 case TokenType.Raw:
                 case TokenType.Escape:
                     statement = ParseRawStatement();
+                    if (parent is ScriptCaseStatement)
+                    {
+                        // In case we have a raw statement within directly a case
+                        // we don't keep it
+                        statement = null;
+                        goto continueParsing;
+                    }
                     break;
 
                 case TokenType.CodeEnter:
@@ -590,6 +599,12 @@ namespace Scriban.Parsing
                     // Handle after the switch
                 break;
 
+                case "endifchanged":
+                    startStatement = FindFirstStatementExpectingEnd() as ScriptIfStatement;
+                    pendingStart = "`ifchanged`";
+                    // Handle after the switch
+                    break;
+
                 case "endunless":
                     startStatement = FindFirstStatementExpectingEnd() as ScriptIfStatement;
                     pendingStart = "`unless`";
@@ -639,6 +654,10 @@ namespace Scriban.Parsing
                     statement = ParseIfStatement(false, false);
                     break;
 
+                case "ifchanged":
+                    statement = ParseLiquidIfChanged();
+                    break;
+
                 case "unless":
                     CheckNotInCase(parent, startToken);
                     statement = ParseIfStatement(true, false);
@@ -674,6 +693,9 @@ namespace Scriban.Parsing
                     break;
                 case "for":
                     statement = ParseForStatement();
+                    break;
+                case "cycle":
+                    statement = ParseLiquidCycleStatement();
                     break;
                 case "break":
                     statement = Open<ScriptBreakStatement>();
@@ -747,6 +769,78 @@ namespace Scriban.Parsing
                     FlushTrivias(startStatement, false);
                 }
             }
+        }
+
+        private ScriptStatement ParseLiquidIfChanged()
+        {
+            var statement = Open<ScriptIfStatement>();
+            NextToken(); // skip ifchanged token
+            statement.Condition = new ScriptVariableLoop(ScriptVariable.LoopChanged.Name);
+            statement.Then = ParseBlockStatement(statement);
+            Close(statement);
+            statement.Condition.Span = statement.Span;
+            return statement;
+        }
+
+        private ScriptExpressionStatement ParseLiquidCycleStatement()
+        {
+            var statement = Open<ScriptExpressionStatement>();
+            var functionCall = Open<ScriptFunctionCall>();
+            statement.Expression = functionCall;
+            functionCall.Target = ParseVariable();
+
+            if (Options.LiquidFunctionsToScriban)
+            {
+                TransformLiquidFunctionCallToScriban(functionCall);
+            }
+
+            ScriptArrayInitializerExpression arrayInit = null;
+
+            // Parse cycle without group: cycle "a", "b", "c" => transform to scriban: array.cycle ["a", "b", "c"] 
+            // Parse cycle with group: cycle "group1": "a", "b", "c" => transform to scriban: array.cycle "group1" ["a", "b", "c"]
+
+            bool isFirst = true;
+            while (IsVariableOrLiteral(Current))
+            {
+                var value = ParseVariableOrLiteral();
+
+                if (isFirst && Current.Type == TokenType.Colon)
+                {
+                    NextToken();
+                    isFirst = false;
+                    functionCall.Arguments.Add(value);
+                    continue;
+                }
+
+                if (arrayInit == null)
+                {
+                    arrayInit = Open<ScriptArrayInitializerExpression>();
+                    functionCall.Arguments.Add(arrayInit);
+                    arrayInit.Span.Start = value.Span.Start;
+                }
+
+                arrayInit.Values.Add(value);
+                arrayInit.Span.End = value.Span.End;
+
+                if (Current.Type == TokenType.Comma)
+                {
+                    NextToken();
+                }
+                else if (Current.Type == TokenType.LiquidTagExit)
+                {
+                    break;
+                }
+                else 
+                {
+                    LogError(Current, $"Unexpected token `{GetAsText(Current)}` after cycle value `{value}`. Expecting a `,`");
+                    break;
+                }
+            }
+
+            Close(functionCall);
+
+            ExpectEndOfStatement(statement);
+            return Close(statement);
         }
 
         private ScriptStatement ParseLiquidExpressionStatement(ScriptStatement parent)
@@ -877,7 +971,7 @@ namespace Scriban.Parsing
             if (parentNode == null) throw new ArgumentNullException(nameof(parentNode));
             if (Current.Type == TokenType.Identifier || Current.Type == TokenType.IdentifierSpecial)
             {
-                var variableOrLiteral = ParseVariableOrLiteral();
+                var variableOrLiteral = ParseVariable();
                 var variable = variableOrLiteral as ScriptVariable;
                 if (variable != null && variable.Scope != ScriptVariableScope.Loop)
                 {
@@ -1025,11 +1119,37 @@ namespace Scriban.Parsing
             var whenStatement = Open<ScriptWhenStatement>();
             NextToken(); // skip when
 
-            whenStatement.Value = ExpectAndParseExpression(whenStatement);
+            // Parse the when values
+            // - a, b, c
+            // - a || b || c (scriban)
+            // - a or b or c (liquid)
+            while (true)
+            {
+                if (!IsVariableOrLiteral(Current))
+                {
+                    break;
+                }
+
+                var variableOrLiteral = ParseVariableOrLiteral();
+                whenStatement.Values.Add(variableOrLiteral);
+
+                if (Current.Type == TokenType.Comma || (!_isLiquid && Current.Type == TokenType.Or) || (_isLiquid && GetAsText(Current) == "or"))
+                {
+                    NextToken();
+                }
+            }
+
+            if (whenStatement.Values.Count == 0)
+            {
+                LogError(Current, "When is expecting at least one value.");
+            }
 
             if (ExpectEndOfStatement(whenStatement))
             {
-                FlushTrivias(whenStatement.Value, false);
+                if (_isKeepTrivia && whenStatement.Values.Count > 0)
+                {
+                    FlushTrivias(whenStatement.Values[whenStatement.Values.Count - 1], false);
+                }
                 whenStatement.Body = ParseBlockStatement(whenStatement);
             }
 
@@ -1186,20 +1306,33 @@ namespace Scriban.Parsing
             return Close(whileStatement);
         }
 
+
+        private void EnterExpression()
+        {
+            _expressionDepth++;
+            if (Options.ExpressionDepthLimit.HasValue && !_isExpressionDepthLimitReached && _expressionDepth > Options.ExpressionDepthLimit.Value)
+            {
+                LogError(GetSpanForToken(Previous), $"The statement depth limit `{Options.ExpressionDepthLimit.Value}` was reached when parsing this statement");
+                _isExpressionDepthLimitReached = true;
+            }
+        }
+
+        private void LeaveExpression()
+        {
+            _expressionDepth--;
+        }
+
+
         private ScriptBlockStatement ParseBlockStatement(ScriptStatement parentStatement)
         {
+            Debug.Assert(!(parentStatement is ScriptBlockStatement));
+
             Blocks.Push(parentStatement);
 
             _blockLevel++;
-            if (Options.StatementDepthLimit.HasValue && !_isStatementDepthLimitReached && _blockLevel > Options.StatementDepthLimit.Value)
-            {
-                LogError(parentStatement, GetSpanForToken(Previous), $"The statement depth limit `{Options.StatementDepthLimit.Value}` was reached when parsing this statement");
-                _isStatementDepthLimitReached = true;
-            }
+            EnterExpression();
 
-            var blockStatement = parentStatement is ScriptBlockStatement
-                ? (ScriptBlockStatement) parentStatement
-                : Open<ScriptBlockStatement>();
+            var blockStatement = Open<ScriptBlockStatement>();
 
             ScriptStatement statement;
             bool hasEnd;
@@ -1224,7 +1357,7 @@ namespace Scriban.Parsing
                     if (_isLiquid)
                     {
                         var syntax = ScriptSyntaxAttribute.Get(parentStatement);
-                        LogError(parentStatement, parentStatement.Span, $"The `end{syntax.Name}` was not found");
+                        LogError(parentStatement, parentStatement?.Span ?? CurrentSpan, $"The `end{syntax.Name}` was not found");
                     }
                     else
                     {
@@ -1234,6 +1367,7 @@ namespace Scriban.Parsing
                 }
             }
 
+            LeaveExpression();
             _blockLevel--;
 
             Blocks.Pop();

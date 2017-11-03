@@ -22,9 +22,9 @@ namespace Scriban.Functions
         public LiquidBuiltinsFunctions() : base(50, false)
         {
             // We copy the default scriban objects
-            BuiltinFunctions.Default.Clone(true).CopyTo(this);
+            ((ScriptObject)BuiltinFunctions.Default.Clone(true)).CopyTo(this);
             // And we create the liquid alias
-            Default.Clone(false).CopyTo(this);
+            ((ScriptObject)Default.Clone(false)).CopyTo(this);
         }
 
         public static bool TryLiquidToScriban(string liquidBuiltin, out string target, out string member)

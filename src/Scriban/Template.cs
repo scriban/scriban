@@ -177,7 +177,7 @@ namespace Scriban
                 scriptObject.Import(model);
             }
 
-            var context = _lexerOptions.Mode == ScriptMode.Liquid && !_parserOptions.LiquidFunctionsToScriban ? new LiquidTemplateContext() : new TemplateContext();
+            var context = _lexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
             context.PushGlobal(scriptObject);
             return Render(context);
         }

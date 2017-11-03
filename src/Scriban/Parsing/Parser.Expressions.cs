@@ -102,10 +102,59 @@ namespace Scriban.Parsing
             return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence);
         }
 
+        private ScriptExpression ParseVariableOrLiteral()
+        {
+            ScriptExpression literal = null;
+            switch (Current.Type)
+            {
+                case TokenType.Identifier:
+                case TokenType.IdentifierSpecial:
+                    literal = ParseVariable();
+                    break;
+                case TokenType.Integer:
+                    literal = ParseInteger();
+                    break;
+                case TokenType.Float:
+                    literal = ParseFloat();
+                    break;
+                case TokenType.String:
+                    literal = ParseString();
+                    break;
+                case TokenType.ImplicitString:
+                    literal = ParseImplicitString();
+                    break;
+                case TokenType.VerbatimString:
+                    literal = ParseVerbatimString();
+                    break;
+                default:
+                    LogError(Current, "Unexpected token found `{GetAsText(Current)}` while parsing a literal");
+                    break;
+            }
+            return literal;
+        }
+
+        private static bool IsVariableOrLiteral(Token token)
+        {
+            switch (token.Type)
+            {
+                case TokenType.Identifier:
+                case TokenType.IdentifierSpecial:
+                case TokenType.Integer:
+                case TokenType.Float:
+                case TokenType.String:
+                case TokenType.ImplicitString:
+                case TokenType.VerbatimString:
+                    return true;
+            }
+            return false;
+        }
+
         private ScriptExpression ParseExpression(ScriptNode parentNode, ref bool hasAnonymousFunction, ScriptExpression parentExpression = null, int precedence = 0)
         {
             int expressionCount = 0;
             expressionLevel++;
+            var expressionDepthBeforeEntering = _expressionDepth;
+            EnterExpression();
             try
             {
                 ScriptFunctionCall functionCall = null;
@@ -116,7 +165,7 @@ namespace Scriban.Parsing
                 {
                     case TokenType.Identifier:
                     case TokenType.IdentifierSpecial:
-                        leftOperand = ParseVariableOrLiteral();
+                        leftOperand = ParseVariable();
 
                         // In case of liquid template, we accept the syntax colon after a tag
                         if (_isLiquid && parentNode is ScriptPipeCall && Current.Type == TokenType.Colon)
@@ -199,21 +248,32 @@ namespace Scriban.Parsing
                         if (nextToken.Type == TokenType.Identifier)
                         {
                             NextToken();
-                            var memberExpression = Open<ScriptMemberExpression>();
-                            memberExpression.Target = leftOperand;
-                            var member = ParseVariableOrLiteral();
-                            if (!(member is ScriptVariable))
+
+                            if (GetAsText(Current) == "empty" && PeekToken().Type == TokenType.Question)
                             {
-                                LogError("Unexpected literal member [{member}]");
-                                return null;
+                                var memberExpression = Open<ScriptIsEmptyExpression>();
+                                NextToken(); // skip empty
+                                NextToken(); // skip ?
+                                memberExpression.Target = leftOperand;
+                                leftOperand = Close(memberExpression);
                             }
-                            memberExpression.Member = (ScriptVariable) member;
-                            leftOperand = Close(memberExpression);
+                            else
+                            {
+                                var memberExpression = Open<ScriptMemberExpression>();
+                                memberExpression.Target = leftOperand;
+                                var member = ParseVariable();
+                                if (!(member is ScriptVariable))
+                                {
+                                    LogError("Unexpected literal member [{member}]");
+                                    return null;
+                                }
+                                memberExpression.Member = (ScriptVariable) member;
+                                leftOperand = Close(memberExpression);
+                            }
                         }
                         else
                         {
-                            LogError(nextToken,
-                                $"Invalid token [{nextToken.Type}]. The dot operator is expected to be followed by a plain identifier");
+                            LogError(nextToken, $"Invalid token [{nextToken.Type}]. The dot operator is expected to be followed by a plain identifier");
                             return null;
                         }
                         continue;
@@ -273,6 +333,8 @@ namespace Scriban.Parsing
                         if (newPrecedence < precedence)
                             break;
 
+                        // We fake entering an expression here to limit the number of expression
+                        EnterExpression();
                         var binaryExpression = Open<ScriptBinaryExpression>();
                         binaryExpression.Left = leftOperand;
                         binaryExpression.Operator = binaryOperatorType;
@@ -288,15 +350,59 @@ namespace Scriban.Parsing
                         continue;
                     }
 
-
-
                     if (precedence > 0)
                     {
                         break;
                     }
 
+                    // Parse special ForOptions for liquid
+                    if (parentNode is IScriptOptionsContainer)
+                    {
+                        var optionContainer = (IScriptOptionsContainer)parentNode;
+
+                        while (true)
+                        {
+                            if (_isLiquid)
+                            {
+                                if (expressionLevel > 1 || Current.Type != TokenType.Identifier)
+                                {
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if (Current.Type != TokenType.Comma)
+                                {
+                                    break;
+                                }
+
+                                NextToken();
+
+                                if (Current.Type != TokenType.Identifier)
+                                {
+                                    break;
+                                }
+                            }
+
+                            var option = Open<ScriptStatementOption>();
+                            var optionName = GetAsText(Current);
+                            option.Name = optionName;
+
+                            // Skip offset
+                            NextToken();
+
+                            optionContainer.AddOption(Close(option));
+
+                            if (Current.Type == TokenType.Colon)
+                            {
+                                NextToken();
+                                option.Value = ExpectAndParseExpression(parentNode);
+                            }
+                        }
+                    }
+
                     // If we can parse a statement, we have a method call
-                    if (StartAsExpression())
+                    if (!_isLiquid && StartAsExpression())
                     {
                         if (parentExpression != null)
                         {
@@ -311,27 +417,7 @@ namespace Scriban.Parsing
                             // If we need to convert liquid to scriban functions:
                             if (_isLiquid && Options.LiquidFunctionsToScriban)
                             {
-                                var liquidTarget = functionCall.Target as ScriptVariable;
-                                string targetName;
-                                string memberName;
-                                // In case of cycle we transform it to array.cycle at runtime
-                                if (liquidTarget != null && LiquidBuiltinsFunctions.TryLiquidToScriban(liquidTarget.Name, out targetName, out memberName))
-                                {
-                                    var arrayCycle = new ScriptMemberExpression
-                                    {
-                                        Span = liquidTarget.Span,
-                                        Target = new ScriptVariableGlobal(targetName) { Span = liquidTarget.Span },
-                                        Member = new ScriptVariableGlobal(memberName) { Span = liquidTarget.Span },
-                                    };
-
-                                    // Transfer trivias accordingly to target (trivias before) and member (trivias after)
-                                    if (_isKeepTrivia && liquidTarget.Trivias != null)
-                                    {
-                                        arrayCycle.Target.AddTrivias(liquidTarget.Trivias.Before, true);
-                                        arrayCycle.Member.AddTrivias(liquidTarget.Trivias.After, false);
-                                    }
-                                    functionCall.Target = arrayCycle;
-                                }
+                                TransformLiquidFunctionCallToScriban(functionCall);
                             }
 
                             functionCall.Span.Start = leftOperand.Span.Start;
@@ -373,7 +459,35 @@ namespace Scriban.Parsing
             }
             finally
             {
+                LeaveExpression();
+                // Force to restore back to a level
+                _expressionDepth = expressionDepthBeforeEntering;
                 expressionLevel--;
+            }
+        }
+
+        private void TransformLiquidFunctionCallToScriban(ScriptFunctionCall functionCall)
+        {
+            var liquidTarget = functionCall.Target as ScriptVariable;
+            string targetName;
+            string memberName;
+            // In case of cycle we transform it to array.cycle at runtime
+            if (liquidTarget != null && LiquidBuiltinsFunctions.TryLiquidToScriban(liquidTarget.Name, out targetName, out memberName))
+            {
+                var arrayCycle = new ScriptMemberExpression
+                {
+                    Span = liquidTarget.Span,
+                    Target = new ScriptVariableGlobal(targetName) { Span = liquidTarget.Span },
+                    Member = new ScriptVariableGlobal(memberName) { Span = liquidTarget.Span },
+                };
+
+                // Transfer trivias accordingly to target (trivias before) and member (trivias after)
+                if (_isKeepTrivia && liquidTarget.Trivias != null)
+                {
+                    arrayCycle.Target.AddTrivias(liquidTarget.Trivias.Before, true);
+                    arrayCycle.Member.AddTrivias(liquidTarget.Trivias.After, false);
+                }
+                functionCall.Target = arrayCycle;
             }
         }
 

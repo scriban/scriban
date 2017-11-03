@@ -16,8 +16,15 @@ namespace Scriban.Syntax
             }
             else
             {
-                // unit test: 216-break-continue-error2.txt
-                throw new ScriptRuntimeException(Span, $"The <continue> statement can only be used inside for/while loops");
+                if (context.EnableBreakAndContinueAsReturnOutsideLoop)
+                {
+                    context.FlowState = ScriptFlowState.Return;
+                }
+                else
+                {
+                    // unit test: 216-break-continue-error2.txt
+                    throw new ScriptRuntimeException(Span, $"The <continue> statement can only be used inside for/while loops");
+                }
             }
             return null;
         }

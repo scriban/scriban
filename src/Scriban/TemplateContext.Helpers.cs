@@ -18,6 +18,43 @@ namespace Scriban
     public partial class TemplateContext
     {
         /// <summary>
+        /// Returns a boolean indicating whether the against object is empty (array/list count = 0, null, or no members for a dictionary/script object)
+        /// </summary>
+        /// <param name="span"></param>
+        /// <param name="against"></param>
+        /// <returns></returns>
+        public virtual bool IsEmpty(SourceSpan span, object against)
+        {
+            if (against == null)
+            {
+                return true;
+            }
+            if (against is IList)
+            {
+                return ((IList)against).Count == 0;
+            }
+            if (against.GetType().GetTypeInfo().IsPrimitive)
+            {
+                return false;
+            }
+            return GetMemberAccessor(against).GetMemberCount(this, span, against) > 0;
+        }
+
+        public virtual IList ToList(SourceSpan span, object value)
+        {
+            if (value is IList)
+            {
+                return (IList) value;
+            }
+            var iterator = value as IEnumerable;
+            if (iterator == null)
+            {
+                throw new ScriptRuntimeException(span, $"Unexpected list value. Expecting an array, list or iterator. Unablet to convert to a list");
+            }
+            return new ScriptArray(iterator);
+        }
+
+        /// <summary>
         /// Called whenever an objects is converted to a string. This method can be overriden.
         /// </summary>
         /// <param name="span">The current span calling this ToString</param>
@@ -25,7 +62,7 @@ namespace Scriban
         /// <returns>A string representing the object value</returns>
         public virtual string ToString(SourceSpan span, object value)
         {
-            if (value == null)
+            if (value == null || value == EmptyScriptObject.Default)
             {
                 return string.Empty;
             }
@@ -115,7 +152,7 @@ namespace Scriban
         public virtual bool ToBool(object value)
         {
             // null -> false
-            if (value == null)
+            if (value == null || value == EmptyScriptObject.Default)
             {
                 return false;
             }
