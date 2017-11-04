@@ -985,6 +985,9 @@ namespace Scriban
             // In liquid, if we have a break/continue outside a loop, we return from the current script
             EnableBreakAndContinueAsReturnOutsideLoop = true;
             EnableRelaxedMemberAccess = true;
+
+            TemplateLoaderLexerOptions = new LexerOptions() {Mode = ScriptMode.Liquid};
+            TemplateLoaderParserOptions = new ParserOptions() {LiquidFunctionsToScriban = true};
         }
     }
 }
