@@ -1,6 +1,7 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -11,6 +12,182 @@ namespace Scriban.Parsing
 {
     public partial class Parser
     {
+        private ScriptExpression ParseVariableOrLiteral()
+        {
+            ScriptExpression literal = null;
+            switch (Current.Type)
+            {
+                case TokenType.Identifier:
+                case TokenType.IdentifierSpecial:
+                    literal = ParseVariable();
+                    break;
+                case TokenType.Integer:
+                    literal = ParseInteger();
+                    break;
+                case TokenType.Float:
+                    literal = ParseFloat();
+                    break;
+                case TokenType.String:
+                    literal = ParseString();
+                    break;
+                case TokenType.ImplicitString:
+                    literal = ParseImplicitString();
+                    break;
+                case TokenType.VerbatimString:
+                    literal = ParseVerbatimString();
+                    break;
+                default:
+                    LogError(Current, "Unexpected token found `{GetAsText(Current)}` while parsing a literal");
+                    break;
+            }
+            return literal;
+        }
+
+        private ScriptLiteral ParseFloat()
+        {
+            var literal = Open<ScriptLiteral>();
+
+            var text = GetAsText(Current);
+            double floatResult;
+            if (double.TryParse(text, out floatResult))
+            {
+                literal.Value = floatResult;
+            }
+            else
+            {
+                LogError($"Unable to parse double value `{text}`");
+            }
+
+            NextToken(); // Skip the float
+            return Close(literal);
+        }
+
+        private ScriptLiteral ParseImplicitString()
+        {
+            var literal = Open<ScriptLiteral>();
+            literal.Value = GetAsText(Current);
+            Close(literal);
+            NextToken();
+            return literal;
+        }
+
+        private ScriptLiteral ParseInteger()
+        {
+            var literal = Open<ScriptLiteral>();
+
+            var text = GetAsText(Current);
+            long result;
+            if (!long.TryParse(text, out result))
+            {
+                LogError($"Unable to parse the integer {text}");
+            }
+
+            if (result >= int.MinValue && result <= int.MaxValue)
+            {
+                literal.Value = (int) result;
+            }
+            else
+            {
+                literal.Value = result;
+            }
+
+            NextToken(); // Skip the literal
+            return Close(literal);
+        }
+
+        private ScriptLiteral ParseString()
+        {
+            var literal = Open<ScriptLiteral>();
+            var text = _lexer.Text;
+            var builder = new StringBuilder(Current.End.Offset - Current.Start.Offset - 1);
+
+            literal.StringQuoteType =
+                _lexer.Text[Current.Start.Offset] == '\''
+                    ? ScriptLiteralStringQuoteType.SimpleQuote
+                    : ScriptLiteralStringQuoteType.DoubleQuote;
+
+            var end = Current.End.Offset;
+            for (int i = Current.Start.Offset + 1; i < end; i++)
+            {
+                var c = text[i];
+                // Handle escape characters
+                if (text[i] == '\\')
+                {
+                    i++;
+                    switch (text[i])
+                    {
+                        case '0':
+                            builder.Append((char) 0);
+                            break;
+                        case '\n':
+                            break;
+                        case '\r':
+                            i++; // skip next \n that was validated by the lexer
+                            break;
+                        case '\'':
+                            builder.Append('\'');
+                            break;
+                        case '"':
+                            builder.Append('"');
+                            break;
+                        case '\\':
+                            builder.Append('\\');
+                            break;
+                        case 'b':
+                            builder.Append('\b');
+                            break;
+                        case 'f':
+                            builder.Append('\f');
+                            break;
+                        case 'n':
+                            builder.Append('\n');
+                            break;
+                        case 'r':
+                            builder.Append('\r');
+                            break;
+                        case 't':
+                            builder.Append('\t');
+                            break;
+                        case 'v':
+                            builder.Append('\v');
+                            break;
+                        case 'u':
+                        {
+                            i++;
+                            var value = (text[i++].HexToInt() << 12) +
+                                        (text[i++].HexToInt() << 8) +
+                                        (text[i++].HexToInt() << 4) +
+                                        text[i].HexToInt();
+                            // Is it correct?
+                            builder.Append(ConvertFromUtf32(value));
+                            break;
+                        }
+                        case 'x':
+                        {
+                            i++;
+                            var value = (text[i++].HexToInt() << 4) +
+                                        text[i++].HexToInt();
+                            builder.Append((char) value);
+                            break;
+                        }
+
+                        default:
+                            // This should not happen as the lexer is supposed to prevent this
+                            LogError($"Unexpected escape character `{text[i]}` in string");
+                            break;
+                    }
+                }
+                else
+                {
+                    builder.Append(c);
+                }
+            }
+            literal.Value = builder.ToString();
+
+            NextToken();
+            return Close(literal);
+        }
+
         private ScriptExpression ParseVariable()
         {
             var currentToken = Current;
@@ -243,14 +420,14 @@ namespace Scriban.Parsing
                         //{
                         //    LogError(currentToken, $"Unexpected variable <{text}> outside of a loop");
                         //}
-
                     }
                     else
                     {
                         LogError(currentToken, $"Invalid token `{Current.Type}`. The loop variable <{text}> dot must be followed by an identifier");
                     }
                 }
-            } else if (_isLiquid && text == "continue")
+            }
+            else if (_isLiquid && text == "continue")
             {
                 scope = ScriptVariableScope.Local;
             }
@@ -273,151 +450,6 @@ namespace Scriban.Parsing
                 FlushTrivias(result, false);
             }
             return result;
-        }
-
-        private ScriptLiteral ParseInteger()
-        {
-            var literal = Open<ScriptLiteral>();
-
-            var text = GetAsText(Current);
-            long result;
-            if (!long.TryParse(text, out result))
-            {
-                LogError($"Unable to parse the integer {text}");
-            }
-
-            if (result >= int.MinValue && result <= int.MaxValue)
-            {
-                literal.Value = (int)result;
-            }
-            else
-            {
-                literal.Value = result;
-            }
-
-            NextToken(); // Skip the literal
-            return Close(literal);
-        }
-
-        private ScriptLiteral ParseFloat()
-        {
-            var literal = Open<ScriptLiteral>();
-
-            var text = GetAsText(Current);
-            double floatResult;
-            if (double.TryParse(text, out floatResult))
-            {
-                literal.Value = floatResult;
-            }
-            else
-            {
-                LogError($"Unable to parse double value `{text}`");
-            }
-
-            NextToken(); // Skip the float
-            return Close(literal);
-        }
-
-        private ScriptLiteral ParseImplicitString()
-        {
-            var literal = Open<ScriptLiteral>();
-            literal.Value = GetAsText(Current);
-            Close(literal);
-            NextToken();
-            return literal;
-        }
-
-        private ScriptLiteral ParseString()
-        {
-            var literal = Open<ScriptLiteral>();
-            var text = _lexer.Text;
-            var builder = new StringBuilder(Current.End.Offset - Current.Start.Offset - 1);
-
-            literal.StringQuoteType =
-                _lexer.Text[Current.Start.Offset] == '\''
-                    ? ScriptLiteralStringQuoteType.SimpleQuote
-                    : ScriptLiteralStringQuoteType.DoubleQuote;
-
-            var end = Current.End.Offset;
-            for (int i = Current.Start.Offset + 1; i < end; i++)
-            {
-                var c = text[i];
-                // Handle escape characters
-                if (text[i] == '\\')
-                {
-                    i++;
-                    switch (text[i])
-                    {
-                        case '0':
-                            builder.Append((char)0);
-                            break;
-                        case '\n':
-                            break;
-                        case '\r':
-                            i++; // skip next \n that was validated by the lexer
-                            break;
-                        case '\'':
-                            builder.Append('\'');
-                            break;
-                        case '"':
-                            builder.Append('"');
-                            break;
-                        case '\\':
-                            builder.Append('\\');
-                            break;
-                        case 'b':
-                            builder.Append('\b');
-                            break;
-                        case 'f':
-                            builder.Append('\f');
-                            break;
-                        case 'n':
-                            builder.Append('\n');
-                            break;
-                        case 'r':
-                            builder.Append('\r');
-                            break;
-                        case 't':
-                            builder.Append('\t');
-                            break;
-                        case 'v':
-                            builder.Append('\v');
-                            break;
-                        case 'u':
-                        {
-                            i++;
-                                var value = (text[i++].HexToInt() << 12) +
-                                            (text[i++].HexToInt() << 8) +
-                                            (text[i++].HexToInt() << 4) +
-                                            text[i].HexToInt();
-                                // Is it correct?
-                                builder.Append(ConvertFromUtf32(value));
-                            break;
-                        }
-                        case 'x':
-                        {
-                            i++;
-                            var value = (text[i++].HexToInt() << 4) +
-                                        text[i++].HexToInt();
-                            builder.Append((char) value);
-                            break;
-                        }
-
-                        default:
-                            // This should not happen as the lexer is supposed to prevent this
-                            LogError($"Unexpected escape character `{text[i]}` in string");
-                            break;
-                    }
-                }
-                else
-                {
-                    builder.Append(c);
-                }
-            }
-            literal.Value = builder.ToString();
-
-            NextToken();
-            return Close(literal);
         }
 
         private ScriptLiteral ParseVerbatimString()
@@ -469,7 +501,6 @@ namespace Scriban.Parsing
             return Close(literal);
         }
 
-
         private static string ConvertFromUtf32(int utf32)
         {
             if (utf32 < 65536)
@@ -477,9 +508,25 @@ namespace Scriban.Parsing
             utf32 -= 65536;
             return new string(new char[2]
             {
-        (char) (utf32 / 1024 + 55296),
-        (char) (utf32 % 1024 + 56320)
+                (char) (utf32 / 1024 + 55296),
+                (char) (utf32 % 1024 + 56320)
             });
+        }
+
+        private static bool IsVariableOrLiteral(Token token)
+        {
+            switch (token.Type)
+            {
+                case TokenType.Identifier:
+                case TokenType.IdentifierSpecial:
+                case TokenType.Integer:
+                case TokenType.Float:
+                case TokenType.String:
+                case TokenType.ImplicitString:
+                case TokenType.VerbatimString:
+                    return true;
+            }
+            return false;
         }
     }
 }
