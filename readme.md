@@ -14,7 +14,7 @@ Parse a Liquid template using the Liquid language:
 
 ```C#
 // Parse a liquid template
-var template = Template.LiquidParse("Hello {{name}}!")
+var template = Template.ParseLiquid("Hello {{name}}!")
 var result = template.Render(new { name = "World" }); // => "Hello World!" 
 ```
 
