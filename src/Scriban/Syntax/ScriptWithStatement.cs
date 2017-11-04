@@ -19,7 +19,7 @@ namespace Scriban.Syntax
             if (!(target is IScriptObject))
             {
                 var targetName = target?.GetType().Name ?? "null";
-                throw new ScriptRuntimeException(Name.Span, $"Invalid target property [{Name}] used for [with] statement. Must be a ScriptObject instead of [{targetName}]");
+                throw new ScriptRuntimeException(Name.Span, $"Invalid target property `{Name}` used for [with] statement. Must be a ScriptObject instead of `{targetName}`");
             }
 
             context.PushGlobal((IScriptObject)target);

@@ -314,7 +314,7 @@ end
             var inputText = File.ReadAllText(inputFile);
 
             var expectedOutputFile = Path.ChangeExtension(inputFile, OutputEndFileExtension);
-            Assert.True(File.Exists(expectedOutputFile), $"Expecting output result file [{expectedOutputFile}] for input file [{inputName}]");
+            Assert.True(File.Exists(expectedOutputFile), $"Expecting output result file `{expectedOutputFile}` for input file `{inputName}`");
             var expectedOutputText = File.ReadAllText(expectedOutputFile, Encoding.UTF8);
 
             var isLiquid = inputName.Contains("liquid");

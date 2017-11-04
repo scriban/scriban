@@ -86,7 +86,7 @@ namespace Scriban.Parsing
                     unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
                     break;
                 default:
-                    LogError($"Unexpected token [{Current.Type}] for unary expression");
+                    LogError($"Unexpected token `{Current.Type}` for unary expression");
                     break;
             }
             var newPrecedence = GetOperatorPrecedence(unaryExpression.Operator);
@@ -225,7 +225,14 @@ namespace Scriban.Parsing
                 // Should not happen but in case
                 if (leftOperand == null)
                 {
-                    LogError($"Unexpected token [{Current.Type}] for expression");
+                    if (functionCall != null)
+                    {
+                        LogError($"Unexpected token `{GetAsText(Current)}` while parsing function call `{functionCall}`");
+                    }
+                    else
+                    {
+                        LogError($"Unexpected token `{GetAsText(Current)}` while parsing expression");
+                    }
                     return null;
                 }
 
@@ -264,7 +271,7 @@ namespace Scriban.Parsing
                                 var member = ParseVariable();
                                 if (!(member is ScriptVariable))
                                 {
-                                    LogError("Unexpected literal member [{member}]");
+                                    LogError("Unexpected literal member `{member}`");
                                     return null;
                                 }
                                 memberExpression.Member = (ScriptVariable) member;
@@ -273,7 +280,7 @@ namespace Scriban.Parsing
                         }
                         else
                         {
-                            LogError(nextToken, $"Invalid token [{nextToken.Type}]. The dot operator is expected to be followed by a plain identifier");
+                            LogError(nextToken, $"Invalid token `{nextToken.Type}`. The dot operator is expected to be followed by a plain identifier");
                             return null;
                         }
                         continue;
@@ -287,11 +294,11 @@ namespace Scriban.Parsing
                         var indexerExpression = Open<ScriptIndexerExpression>();
                         indexerExpression.Target = leftOperand;
                         // unit test: 130-indexer-accessor-error5.txt
-                        indexerExpression.Index = ExpectAndParseExpression(indexerExpression, ref hasAnonymousFunction, functionCall, 0, $"Expecting <index_expression> instead of [{Current.Type}]");
+                        indexerExpression.Index = ExpectAndParseExpression(indexerExpression, ref hasAnonymousFunction, functionCall, 0, $"Expecting <index_expression> instead of `{Current.Type}`");
 
                         if (Current.Type != TokenType.CloseBracket)
                         {
-                            LogError($"Unexpected [{Current.Type}]. Expecting ']'");
+                            LogError($"Unexpected `{Current.Type}`. Expecting ']'");
                         }
                         else
                         {
@@ -344,7 +351,7 @@ namespace Scriban.Parsing
                         // unit test: 110-binary-simple-error1.txt
                         binaryExpression.Right = ExpectAndParseExpression(binaryExpression, ref hasAnonymousFunction,
                             functionCall ?? parentExpression, newPrecedence,
-                            $"Expecting an <expression> to the right of the operator instead of [{Current.Type}]");
+                            $"Expecting an <expression> to the right of the operator instead of `{Current.Type}`");
                         leftOperand = Close(binaryExpression);
 
                         continue;
@@ -604,7 +611,7 @@ namespace Scriban.Parsing
                 else
                 {
                     // unit test: 120-array-initializer-error1.txt
-                    LogError($"Unexpected token [{Current.Type}]. Expecting a closing ] for the array initializer");
+                    LogError($"Unexpected token `{Current.Type}`. Expecting a closing ] for the array initializer");
                     break;
                 }
             }
@@ -642,13 +649,13 @@ namespace Scriban.Parsing
                     
                     if (variable == null && literal == null)
                     {
-                        LogError(positionBefore, $"Unexpected member type [{variableOrLiteral}/{ScriptSyntaxAttribute.Get(variableOrLiteral).Name}] found for object initializer member name");
+                        LogError(positionBefore, $"Unexpected member type `{variableOrLiteral}/{ScriptSyntaxAttribute.Get(variableOrLiteral).Name}` found for object initializer member name");
                         break;
                     }
 
                     if (literal != null && !(literal.Value is string))
                     {
-                        LogError(positionBefore, $"Invalid literal member [{literal.Value}/{literal.Value?.GetType()}] found for object initializer member name. Only literal string or identifier name are allowed");
+                        LogError(positionBefore, $"Invalid literal member `{literal.Value}/{literal.Value?.GetType()}` found for object initializer member name. Only literal string or identifier name are allowed");
                         break;
                     }
 
@@ -665,7 +672,7 @@ namespace Scriban.Parsing
                     if (Current.Type != TokenType.Colon)
                     {
                         // unit test: 140-object-initializer-error4.txt
-                        LogError($"Unexpected token [{Current.Type}] Expecting a colon : after identifier [{variable.Name}] for object initializer member name");
+                        LogError($"Unexpected token `{Current.Type}` Expecting a colon : after identifier `{variable.Name}` for object initializer member name");
                         break;
                     }
 
@@ -675,7 +682,7 @@ namespace Scriban.Parsing
                     if (!StartAsExpression())
                     {
                         // unit test: 140-object-initializer-error5.txt
-                        LogError($"Unexpected token [{Current.Type}]. Expecting an expression for the value of the member instead of [{GetAsText(Current)}]");
+                        LogError($"Unexpected token `{Current.Type}`. Expecting an expression for the value of the member instead of `{GetAsText(Current)}`");
                         break;
                     }
 
@@ -707,7 +714,7 @@ namespace Scriban.Parsing
                 else
                 {
                     // unit test: 140-object-initializer-error1.txt
-                    LogError($"Unexpected token [{Current.Type}] while parsing object initializer. Expecting a simple identifier for the member name instead of [{GetAsText(Current)}]");
+                    LogError($"Unexpected token `{Current.Type}` while parsing object initializer. Expecting a simple identifier for the member name instead of `{GetAsText(Current)}`");
                     break;
                 }
             }
@@ -733,7 +740,7 @@ namespace Scriban.Parsing
             else
             {
                 // unit test: 106-parenthesis-error1.txt
-                LogError(Current, $"Invalid token [{Current.Type}]. Expecting closing ) for opening [{expression.Span.Start}]");
+                LogError(Current, $"Invalid token `{Current.Type}`. Expecting closing ) for opening `{expression.Span.Start}`");
             }
             return Close(expression);
         }

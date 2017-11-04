@@ -1,1 +1,1 @@
-text(4,1) : error : Invalid usage of the loop variable [for.index] not inside a loop
+text(4,1) : error : Invalid usage of the loop variable `for.index` not inside a loop

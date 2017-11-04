@@ -51,7 +51,7 @@ namespace Scriban.Syntax
             int afterPipeArgumentCount = context.PipeArguments.Count;
             if (afterPipeArgumentCount >= beforePipeArgumentCount)
             {
-                throw new ScriptRuntimeException(To.Span, $"Pipe expression destination [{To}] is not a valid function ");
+                throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
             }
             return result;
         }

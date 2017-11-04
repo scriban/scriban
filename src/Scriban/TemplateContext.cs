@@ -363,13 +363,13 @@ namespace Scriban
             // We don't allow to overwrite a builtin function
             if (!BuiltinObject.CanWrite(variable.Name))
             {
-                throw new ScriptRuntimeException(variable.Span, $"Cannot override the value of a builtin function/variable [{variable}]");
+                throw new ScriptRuntimeException(variable.Span, $"Cannot override the value of a builtin function/variable `{variable}`");
             }
 
             // Try to set the variable
             if (!store.TrySetValue(variable.Name, value, asReadOnly))
             {
-                throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable [{variable}]"); // unit test: 105-assign-error2.txt
+                throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
             }
         }
 
@@ -618,7 +618,7 @@ namespace Scriban
             _functionDepth++;
             if (_functionDepth > RecursiveLimit)
             {
-                throw new ScriptRuntimeException(caller.Span, $"Exceeding number of recursive depth limit [{RecursiveLimit}] for function call: [{caller}]"); // unit test: 305-func-error2.txt
+                throw new ScriptRuntimeException(caller.Span, $"Exceeding number of recursive depth limit `{RecursiveLimit}` for function call: `{caller}`"); // unit test: 305-func-error2.txt
             }
 
             PushVariableScope(ScriptVariableScope.Local);
@@ -742,7 +742,7 @@ namespace Scriban
             {
                 var currentLoopStatement = _loops.Peek();
 
-                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit [{LoopLimit}] for statement: {currentLoopStatement}"); // unit test: 215-for-statement-error1.txt
+                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{LoopLimit}` for statement: {currentLoopStatement}"); // unit test: 215-for-statement-error1.txt
             }
             return OnStepLoop(loop);
         }
@@ -955,7 +955,7 @@ namespace Scriban
                     }
                     else
                     {
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable [{variable}] in the current context");
+                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable `{variable}` in the current context");
                     }
                     break;
                 case ScriptVariableScope.Loop:
@@ -966,11 +966,11 @@ namespace Scriban
                     else
                     {
                         // unit test: 215-for-special-var-error1.txt
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable [{variable}] not inside a loop");
+                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
                     }
                     break;
                 default:
-                    throw new NotImplementedException($"Variable scope [{scope}] is not implemented");
+                    throw new NotImplementedException($"Variable scope `{scope}` is not implemented");
             }
         }
     }

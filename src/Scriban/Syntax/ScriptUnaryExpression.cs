@@ -66,7 +66,7 @@ namespace Scriban.Syntax
                     return context.Evaluate(Right);
             }
 
-            throw new ScriptRuntimeException(Span, $"Operator [{Operator}] is not supported");
+            throw new ScriptRuntimeException(Span, $"Operator `{Operator}` is not supported");
         }
 
         public override void Write(RenderContext context)

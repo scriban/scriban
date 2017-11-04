@@ -1,1 +1,1 @@
-text(7,1) : error : Object [x] is null. Cannot access indexer: x[0]
+text(7,1) : error : Object `x` is null. Cannot access indexer: x[0]

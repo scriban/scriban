@@ -223,7 +223,7 @@ namespace Scriban.Parsing
                     }
                     else
                     {
-                        LogError(currentToken, $"Invalid token [{Current.Type}]. The loop variable <{text}> dot must be followed by an identifier");
+                        LogError(currentToken, $"Invalid token `{Current.Type}`. The loop variable <{text}> dot must be followed by an identifier");
                     }
                 }
             } else if (_isLiquid && text == "continue")
@@ -287,7 +287,7 @@ namespace Scriban.Parsing
             }
             else
             {
-                LogError($"Unable to parse double value [{text}]");
+                LogError($"Unable to parse double value `{text}`");
             }
 
             NextToken(); // Skip the float
@@ -381,7 +381,7 @@ namespace Scriban.Parsing
 
                         default:
                             // This should not happen as the lexer is supposed to prevent this
-                            LogError($"Unexpected escape character [{text[i]}] in string");
+                            LogError($"Unexpected escape character `{text[i]}` in string");
                             break;
                     }
                 }

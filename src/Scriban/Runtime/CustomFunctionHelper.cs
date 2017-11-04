@@ -87,7 +87,7 @@ namespace Scriban.Runtime
             {
                 if (parameters.Count != 2)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{2}] for [{callerContext}]");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{2}` for `{callerContext}`");
                 }
                 var arg0 = context.ToInt(callerContext.Span, parameters[0]);
                 var arg1 = context.ToString(callerContext.Span, parameters[1]);
@@ -114,7 +114,7 @@ namespace Scriban.Runtime
             {
                 if (parameters.Count != 2)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{2}] for [{callerContext}]");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{2}` for `{callerContext}`");
                 }
                 var arg0 = context.ToString(callerContext.Span, parameters[0]);
                 var arg1 = context.ToString(callerContext.Span, parameters[1]);
@@ -141,7 +141,7 @@ namespace Scriban.Runtime
             {
                 if (parameters.Count != 3)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{3}] for [{callerContext}]");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{3}` for `{callerContext}`");
                 }
                 var arg0 = context.ToString(callerContext.Span, parameters[0]);
                 var arg1 = context.ToString(callerContext.Span, parameters[1]);
@@ -169,7 +169,7 @@ namespace Scriban.Runtime
             {
                 if (parameters.Count != 1)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{1}] for [{callerContext}]");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{1}` for `{callerContext}`");
                 }
                 var arg0 = context.ToString(callerContext.Span, parameters[0]);
                 return _delegate(arg0);
@@ -237,7 +237,7 @@ namespace Scriban.Runtime
                 // Check parameters
                 if ((_hasObjectParams && parameters.Count < expectedNumberOfParameters - 1) || (!_hasObjectParams && parameters.Count != expectedNumberOfParameters))
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed [{parameters.Count}] while expecting [{expectedNumberOfParameters}] for [{callerContext}]");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{expectedNumberOfParameters}` for `{callerContext}`");
                 }
 
                 // Convert arguments
@@ -278,7 +278,7 @@ namespace Scriban.Runtime
                     }
                     catch (Exception exception)
                     {
-                        throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type [{parameters[i]?.GetType()}] to type [{destType}]", exception);
+                        throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{parameters[i]?.GetType()}` to type `{destType}`", exception);
                     }
                 }
 

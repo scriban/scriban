@@ -35,7 +35,7 @@ namespace Scriban.Parsing
                     builder.Append("warning");
                     break;
                 default:
-                    throw new InvalidOperationException($"Message type [{Type}] not supported");
+                    throw new InvalidOperationException($"Message type `{Type}` not supported");
             }
             builder.Append(" : ");
             if (Message != null)

@@ -21,7 +21,7 @@ namespace Scriban.Syntax
             var scriptObject = value as ScriptObject;
             if (scriptObject == null)
             {
-                throw new ScriptRuntimeException(Expression.Span, $"Unexpected value [{value.GetType()}] for import. Expecting an plain script object {{}}");
+                throw new ScriptRuntimeException(Expression.Span, $"Unexpected value `{value.GetType()}` for import. Expecting an plain script object {{}}");
             }
 
             context.CurrentGlobal.Import(scriptObject);

@@ -1,1 +1,1 @@
-text(6,1) : error : Expecting a list. Invalid value [5/Int32] for the target [x] for the indexer: x[0]
+text(6,1) : error : Expecting a list. Invalid value `5/Int32` for the target `x` for the indexer: x[0]

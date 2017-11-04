@@ -94,7 +94,7 @@ namespace Scriban.Parsing
                 case ScriptMode.FrontMatterOnly:
                     if (Current.Type != TokenType.FrontMatterMarker)
                     {
-                        LogError($"When [{CurrentParsingMode}] is enabled, expecting a `{_lexer.Options.FrontMatterMarker}` at the beginning of the text instead of `{Current.GetText(_lexer.Text)}`");
+                        LogError($"When `{CurrentParsingMode}` is enabled, expecting a `{_lexer.Options.FrontMatterMarker}` at the beginning of the text instead of `{Current.GetText(_lexer.Text)}`");
                         return null;
                     }
 
@@ -977,11 +977,11 @@ namespace Scriban.Parsing
                 {
                     return (ScriptVariable)variableOrLiteral;
                 }
-                LogError(parentNode, $"Unexpected variable [{variableOrLiteral}]");
+                LogError(parentNode, $"Unexpected variable `{variableOrLiteral}`");
             }
             else
             {
-                LogError(parentNode, $"Expecting a variable instead of [{Current.Type}]");
+                LogError(parentNode, $"Expecting a variable instead of `{Current.Type}`");
             }
             return null;
         }
@@ -1196,7 +1196,7 @@ namespace Scriban.Parsing
             {
                 return ParseExpression(parentNode, parentExpression, newPrecedence);
             }
-            LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of [{Current.Type}]" );
+            LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of `{Current.Type}`" );
             return null;
         }
 
@@ -1207,7 +1207,7 @@ namespace Scriban.Parsing
             {
                 return ParseExpression(parentNode, ref hasAnonymousFunction);
             }
-            LogError(parentNode, CurrentSpan, $"Expecting <expression> instead of [{Current.Type}]");
+            LogError(parentNode, CurrentSpan, $"Expecting <expression> instead of `{Current.Type}`");
             return null;
         }
 
@@ -1217,7 +1217,7 @@ namespace Scriban.Parsing
             {
                 return ParseExpression(parentNode, ref hasAnonymousExpression, parentExpression, newPrecedence);
             }
-            LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of [{Current.Type}]");
+            LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of `{Current.Type}`");
             return null;
         }
 
@@ -1268,7 +1268,7 @@ namespace Scriban.Parsing
                 if (Current.Type != TokenType.Identifier || GetAsText(Current) != "in")
                 {
                     // unit test: 211-for-error2.txt
-                    LogError(forStatement, $"Expecting 'in' word instead of [{Current.Type} {GetAsText(Current)}]");
+                    LogError(forStatement, $"Expecting 'in' word instead of `{Current.Type} {GetAsText(Current)}`");
                 }
                 else
                 {

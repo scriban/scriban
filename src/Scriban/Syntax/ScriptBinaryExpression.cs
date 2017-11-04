@@ -153,7 +153,7 @@ namespace Scriban.Syntax
                         }
                 }
             }
-            throw new ScriptRuntimeException(span, $"Operator [{op.ToText()}] is not implemented for [{leftValue}] / [{rightValue}]");
+            throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{leftValue}` / `{rightValue}`");
         }
 
         private static object CalculateEmpty(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
@@ -213,7 +213,7 @@ namespace Scriban.Syntax
                     return false;
             }
 
-            throw new ScriptRuntimeException(span, $"Operator [{op.ToText()}] is not implemented for [{(leftIsEmptyObject ? "empty" : leftValue)}] / [{(rightIsEmptyObject ? "empty" : rightValue)}]");
+            throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{(leftIsEmptyObject ? "empty" : leftValue)}` / `{(rightIsEmptyObject ? "empty" : rightValue)}`");
         }
 
         private static object CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object left, object right)
@@ -240,7 +240,7 @@ namespace Scriban.Syntax
                         }
                         return builder.ToString();
                     }
-                    throw new ScriptRuntimeException(span, $"Operator [{op.ToText()}] is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1.txt
+                    throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1.txt
                 case ScriptBinaryOperator.CompareEqual:
                     return context.ToString(span, left) == context.ToString(span, right);
                 case ScriptBinaryOperator.CompareNotEqual:
@@ -263,7 +263,7 @@ namespace Scriban.Syntax
             }
 
             // unit test: 150-range-expression-error1.out.txt
-            throw new ScriptRuntimeException(span, $"Operator [{op.ToText()}] is not supported on string objects"); // unit test: 112-binary-string-error2.txt
+            throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported on string objects"); // unit test: 112-binary-string-error2.txt
         }
 
         private static IEnumerable<int> RangeInclude(int left, int right)
@@ -476,7 +476,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.RangeExclude:
                     return RangeExclude(left, right);
             }
-            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not implemented for int<->int");
+            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for int<->int");
         }
 
         private static object CalculateLong(ScriptBinaryOperator op, SourceSpan span, long left, long right)
@@ -508,7 +508,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
             }
-            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not implemented for long<->long");
+            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for long<->long");
         }
 
 
@@ -541,7 +541,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
             }
-            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not implemented for double<->double");
+            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for double<->double");
         }
 
         private static object CalculateFloat(ScriptBinaryOperator op, SourceSpan span, float left, float right)
@@ -573,7 +573,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
             }
-            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not implemented for float<->float");
+            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for float<->float");
         }
 
         private static object CalculateDateTime(ScriptBinaryOperator op, SourceSpan span, DateTime left, DateTime right)
@@ -596,7 +596,7 @@ namespace Scriban.Syntax
                     return left >= right;
             }
 
-            throw new ScriptRuntimeException(span, $"The operator [{op}] is not supported for DateTime");
+            throw new ScriptRuntimeException(span, $"The operator `{op}` is not supported for DateTime");
         }
 
         private static object CalculateDateTime(ScriptBinaryOperator op, SourceSpan span, DateTime left, TimeSpan right)
@@ -607,7 +607,7 @@ namespace Scriban.Syntax
                     return left + right;
             }
 
-            throw new ScriptRuntimeException(span, $"The operator [{op}] is not supported for between <DateTime> and <TimeSpan>");
+            throw new ScriptRuntimeException(span, $"The operator `{op}` is not supported for between <DateTime> and <TimeSpan>");
         }
 
         private static object CalculateBool(ScriptBinaryOperator op, SourceSpan span, bool left, bool right)
@@ -619,7 +619,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareNotEqual:
                     return left != right;
             }
-            throw new ScriptRuntimeException(span, $"The operator [{op.ToText()}] is not valid for bool<->bool");
+            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not valid for bool<->bool");
         }
     }
 }

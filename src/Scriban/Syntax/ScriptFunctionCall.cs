@@ -31,7 +31,7 @@ namespace Scriban.Syntax
             // Throw an exception if the target function is null
             if (targetFunction == null)
             {
-                throw new ScriptRuntimeException(Target.Span, $"The target function [{Target}] is null");
+                throw new ScriptRuntimeException(Target.Span, $"The target function is null");
             }
 
             return Call(context, this, targetFunction, context.AllowPipeArguments, Arguments);
@@ -69,7 +69,7 @@ namespace Scriban.Syntax
             if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (functionObject == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"The target function [{callerContext}] is null");
+                throw new ScriptRuntimeException(callerContext.Span, $"The target function `{callerContext}` is null");
             }
             var function = functionObject as ScriptFunction;
             var externFunction = functionObject as IScriptCustomFunction;

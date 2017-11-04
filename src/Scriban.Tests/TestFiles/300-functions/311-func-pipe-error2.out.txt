@@ -1,1 +1,1 @@
-text(6,5) : error : Pipe expression destination [a] is not a valid function 
+text(6,5) : error : Pipe expression destination `a` is not a valid function 

@@ -1,1 +1,1 @@
-text(4,2) : error : Operator [..] is not supported on string objects
+text(4,2) : error : Operator `..` is not supported on string objects

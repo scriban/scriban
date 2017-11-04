@@ -61,7 +61,7 @@ namespace Scriban.Parsing
 
             if (_position.Offset > text.Length)
             {
-                throw new ArgumentOutOfRangeException($"The starting position [{_position.Offset}] of range [0, {text.Length - 1}]");
+                throw new ArgumentOutOfRangeException($"The starting position `{_position.Offset}` of range [0, {text.Length - 1}]");
             }
 
             SourcePath = sourcePath ?? "<input>";
@@ -1333,7 +1333,7 @@ namespace Scriban.Parsing
                             break;
 
                     }
-                    AddError($"Unexpected escape character [{c}] in string. Only 0 ' \\ \" b f n r t v u0000-uFFFF x00-xFF are allowed", _position, _position);
+                    AddError($"Unexpected escape character `{c}` in string. Only 0 ' \\ \" b f n r t v u0000-uFFFF x00-xFF are allowed", _position, _position);
                 }
                 else if (c == '\0')
                 {

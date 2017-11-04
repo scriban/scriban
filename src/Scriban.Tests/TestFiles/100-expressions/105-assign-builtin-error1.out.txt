@@ -1,1 +1,1 @@
-text(4,4) : error : Cannot override the value of a builtin function/variable [string]
+text(4,4) : error : Cannot override the value of a builtin function/variable `string`

@@ -372,7 +372,7 @@ namespace Scriban.Functions
         {
             if (parameters.Count < 1 || parameters.Count > 2)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for sort. Expecting at least 1 parameter <property>? <array>");
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for sort. Expecting at least 1 parameter <property>? <array>");
             }
 
             var target = parameters[parameters.Count - 1];
@@ -401,7 +401,7 @@ namespace Scriban.Functions
             }
             else
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for cycle. Expecting at least 1 parameter: cycle [val1, val2..] or cycle <group> [val1, val2...]");
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for cycle. Expecting at least 1 parameter: cycle [val1, val2..] or cycle <group> [val1, val2...]");
             }
 
             // We create a cycle variable that is dependent on the exact AST context.

@@ -55,7 +55,7 @@ namespace Scriban.Syntax
             {
                 if (isSet || !context.EnableRelaxedMemberAccess)
                 {
-                    throw new ScriptRuntimeException(this.Span, $"Object [{this.Target}] is null. Cannot access property `empty?`");
+                    throw new ScriptRuntimeException(this.Span, $"Object `{this.Target}` is null. Cannot access property `empty?`");
                 }
             }
             return targetObject;

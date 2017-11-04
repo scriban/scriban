@@ -187,7 +187,7 @@ namespace Scriban.Runtime
             }
             if (!ScriptObject.IsImportable(obj))
             {
-                throw new ArgumentOutOfRangeException(nameof(obj), $"Unsupported object type [{obj.GetType()}]. Expecting plain class or struct");
+                throw new ArgumentOutOfRangeException(nameof(obj), $"Unsupported object type `{obj.GetType()}`. Expecting plain class or struct");
             }
 
             var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();

@@ -1,1 +1,1 @@
-text(4,4) : error : Error while parsing pipe expression: Expecting <expression> instead of [NewLine] in: <expression> | <expression>
+text(4,4) : error : Error while parsing pipe expression: Expecting <expression> instead of `NewLine` in: <expression> | <expression>

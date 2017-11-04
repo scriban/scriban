@@ -109,7 +109,7 @@ namespace Scriban
                 }
                 catch (FormatException ex)
                 {
-                    throw new ScriptRuntimeException(span, $"Unable to convert value of type [{value.GetType()}] to string", ex);
+                    throw new ScriptRuntimeException(span, $"Unable to convert value of type `{value.GetType()}` to string", ex);
                 }
             }
 
@@ -179,7 +179,7 @@ namespace Scriban
             }
             catch (FormatException ex)
             {
-                throw new ScriptRuntimeException(span, $"Unable to convert type [{value.GetType()}] to int", ex);
+                throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to int", ex);
             }
         }
 
@@ -197,7 +197,7 @@ namespace Scriban
             }
             catch (FormatException ex)
             {
-                throw new ScriptRuntimeException(span, $"Unable to convert type [{value.GetType()}] to double", ex);
+                throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to double", ex);
             }
         }
 
@@ -268,11 +268,11 @@ namespace Scriban
                 }
                 catch (FormatException ex)
                 {
-                    throw new ScriptRuntimeException(span, $"Unable to convert type [{value.GetType()}] to [{destinationType}]", ex);
+                    throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`", ex);
                 }
             }
 
-            throw new ScriptRuntimeException(span, $"Unable to convert type [{value.GetType()}] to [{destinationType}]");
+            throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`");
         }
     }
 }

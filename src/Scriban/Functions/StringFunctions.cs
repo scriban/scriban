@@ -371,7 +371,7 @@ namespace Scriban.Functions
         {
             if (parameters.Count < 2 || parameters.Count > 3)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for slice. Expecting at least 2 parameters <start> <length>? <text>");
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for slice. Expecting at least 2 parameters <start> <length>? <text>");
             }
 
             var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
@@ -420,7 +420,7 @@ namespace Scriban.Functions
         {
             if (parameters.Count < 2 || parameters.Count > 3)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for slice. Expecting at least 2 parameters <start> <length>? <text>");
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for slice. Expecting at least 2 parameters <start> <length>? <text>");
             }
 
             var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);

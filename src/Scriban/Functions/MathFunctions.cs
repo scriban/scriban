@@ -116,7 +116,7 @@ namespace Scriban.Functions
         {
             if (parameters.Count < 1 || parameters.Count > 2)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments [{parameters.Count}] for math.round. Expecting at least 1 parameter <precision>? <value>");
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for math.round. Expecting at least 1 parameter <precision>? <value>");
             }
 
             var value = context.ToDouble(callerContext.Span, parameters[parameters.Count - 1]);
