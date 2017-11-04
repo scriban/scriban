@@ -10,13 +10,20 @@ namespace Scriban.Syntax
     {
         public ScriptBlockStatement Body { get; set; }
 
+
+        protected virtual void BeforeLoop(TemplateContext context)
+        {
+        }
+
         /// <summary>
         /// Base implementation for a loop single iteration
         /// </summary>
         /// <param name="context">The context</param>
         /// <param name="index">The index in the loop</param>
+        /// <param name="localIndex"></param>
+        /// <param name="isLast"></param>
         /// <returns></returns>
-        protected bool Loop(TemplateContext context, int index)
+        protected virtual bool Loop(TemplateContext context, int index, int localIndex, bool isLast)
         {
             // Setup variable
             context.SetValue(ScriptVariable.LoopFirst, index == 0);
@@ -39,10 +46,14 @@ namespace Scriban.Syntax
             return result;
         }
 
+        protected virtual void AfterLoop(TemplateContext context)
+        {
+        }
+
         public override object Evaluate(TemplateContext context)
         {
             // Notify the context that we enter a loop block (used for variable with scope Loop)
-            context.EnterLoop(this);
+            context.EnterLoop(this);            
             try
             {
                 EvaluateImpl(context);

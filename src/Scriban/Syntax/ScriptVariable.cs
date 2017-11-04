@@ -36,6 +36,8 @@ namespace Scriban.Syntax
 
         public static readonly ScriptVariableLoop LoopLength = new ScriptVariableLoop("for.length");
 
+        public static readonly ScriptVariableLoop TableRowCol = new ScriptVariableLoop("tablerow.col");
+
         /// <summary>
         /// A boolean variable indicating if the value changed from the previous value in a loop iteration
         /// </summary>

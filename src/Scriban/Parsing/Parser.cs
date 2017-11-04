@@ -477,7 +477,18 @@ namespace Scriban.Parsing
                     }
                     else
                     {
-                        statement = ParseForStatement();
+                        statement = ParseForStatement<ScriptForStatement>();
+                    }
+                    break;
+                case "tablerow":
+                    CheckNotInCase(parent, startToken);
+                    if (PeekToken().Type == TokenType.Dot)
+                    {
+                        statement = ParseExpressionStatement();
+                    }
+                    else
+                    {
+                        statement = ParseForStatement<ScriptTableRowStatement>();
                     }
                     break;
                 case "with":
@@ -625,6 +636,11 @@ namespace Scriban.Parsing
                     pendingStart = "`capture`";
                     break;
 
+                case "endtablerow":
+                    startStatement = FindFirstStatementExpectingEnd() as ScriptTableRowStatement;
+                    pendingStart = "`tablerow`";
+                    break;
+
                 case "case":
                     statement = ParseCaseStatement();
                     break;
@@ -692,7 +708,10 @@ namespace Scriban.Parsing
                     hasEnd = true;
                     break;
                 case "for":
-                    statement = ParseForStatement();
+                    statement = ParseForStatement<ScriptForStatement>();
+                    break;
+                case "tablerow":
+                    statement = ParseForStatement<ScriptTableRowStatement>();
                     break;
                 case "cycle":
                     statement = ParseLiquidCycleStatement();
@@ -1254,9 +1273,9 @@ namespace Scriban.Parsing
             return Close(elseStatement);
         }
 
-        private ScriptForStatement ParseForStatement()
+        private T ParseForStatement<T>() where T : ScriptForStatement, new()
         {
-            var forStatement = Open<ScriptForStatement>();
+            var forStatement = Open<T>();
             NextToken(); // skip for
 
             // unit test: 211-for-error1.txt

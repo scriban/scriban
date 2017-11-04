@@ -12,7 +12,8 @@ namespace Scriban.Syntax
         protected override void EvaluateImpl(TemplateContext context)
         {
             var index = 0;
-            while(context.StepLoop(this))
+            BeforeLoop(context);
+            while (context.StepLoop(this))
             {
                 var conditionResult = context.ToBool(context.Evaluate(Condition));
                 if (!conditionResult)
@@ -20,11 +21,12 @@ namespace Scriban.Syntax
                     break;
                 }
 
-                if (!Loop(context, index++))
+                if (!Loop(context, index++, index, false))
                 {
                     break;
                 }
             };
+            AfterLoop(context);
         }
 
         public override void Write(RenderContext context)

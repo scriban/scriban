@@ -362,10 +362,11 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    // Parse special ForOptions for liquid
-                    if (parentNode is IScriptOptionsContainer)
+                    // Parse special statement parameters (for, tablerow, include)
+                    if (parentNode is IScriptNamedParameterContainer)
                     {
-                        var optionContainer = (IScriptOptionsContainer)parentNode;
+                        // Only handle them at top level
+                        var paramContainer = (IScriptNamedParameterContainer)parentNode;
 
                         while (true)
                         {
@@ -391,26 +392,25 @@ namespace Scriban.Parsing
                                 }
                             }
 
-                            var option = Open<ScriptStatementOption>();
-                            var optionName = GetAsText(Current);
-                            option.Name = optionName;
+                            var parameter = Open<ScriptNamedParameter>();
+                            var parameterName = GetAsText(Current);
+                            parameter.Name = parameterName;
 
                             // Skip offset
                             NextToken();
 
-                            optionContainer.AddOption(Close(option));
+                            paramContainer.AddParameter(Close(parameter));
 
                             if (Current.Type == TokenType.Colon)
                             {
                                 NextToken();
-                                option.Value = ExpectAndParseExpression(parentNode);
+                                parameter.Value = ExpectAndParseExpression(parentNode);
                             }
                         }
-                    }
-
-                    // If we can parse a statement, we have a method call
-                    if (!_isLiquid && StartAsExpression())
+                    }                    
+                    else if (StartAsExpression())
                     {
+                        // If we can parse a statement, we have a method call
                         if (parentExpression != null)
                         {
                             break;

@@ -87,7 +87,7 @@ namespace Scriban.Parsing
                     return indexerExpression;
                 }
             }
-            else if (text == "for" || text == "while" || (_isLiquid && text == "forloop"))
+            else if (text == "for" || text == "while" || text == "tablerow" || (_isLiquid && (text == "forloop" || text == "tablerowloop")))
             {
                 if (Current.Type == TokenType.Dot)
                 {
@@ -151,6 +151,14 @@ namespace Scriban.Parsing
                                 case "length":
                                     text = ScriptVariable.LoopLength.Name;
                                     break;
+                                case "col":
+                                    if (text != "tablerowloop")
+                                    {
+                                        // unit test: 108-variable-loop-error2.txt
+                                        LogError(currentToken, $"The loop variable <{text}.col> is invalid");
+                                    }
+                                    text = ScriptVariable.TableRowCol.Name;
+                                    break;
 
                                 default:
                                     text = text + "." + loopVariableText;
@@ -205,6 +213,14 @@ namespace Scriban.Parsing
                                         LogError(currentToken, "The loop variable <while.rindex> is invalid");
                                     }
                                     text = ScriptVariable.LoopRIndex.Name;
+                                    break;
+                                case "col":
+                                    if (text != "tablerow")
+                                    {
+                                        // unit test: 108-variable-loop-error2.txt
+                                        LogError(currentToken, $"The loop variable <{text}.col> is invalid");
+                                    }
+                                    text = ScriptVariable.TableRowCol.Name;
                                     break;
                                 default:
                                     text = text + "." + loopVariableText;
