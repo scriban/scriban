@@ -258,7 +258,9 @@ namespace Scriban.Runtime
                             newPropertyName = property.Name;
                         }
 
-                        script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
+                        // Initially, we were setting readonly depending on the precense of a set method, but this is not compatible with liquid implems, so we remove readonly restriction
+                        //script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
+                        script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
                     }
                 }
             }
