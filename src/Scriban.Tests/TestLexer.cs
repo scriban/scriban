@@ -125,7 +125,7 @@ namespace Scriban.Tests
             //          0         1         2
             //          012345678901234567890123456
             var text = "{% include toto/tata.htm %}";
-            var tokens = ParseTokens(text, true, true, true);
+            var tokens = ParseTokens(text, true, true);
             Assert.AreEqual(new List<Token>
             {
                 new Token(TokenType.LiquidTagEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
@@ -507,9 +507,9 @@ end}}This is a test";
             }
         }
 
-        private List<Token> ParseTokens(string text, bool isLiquid = false, bool keepTrivia = false, bool isJekyll = false)
+        private List<Token> ParseTokens(string text, bool isLiquid = false, bool keepTrivia = false)
         {
-            var lexer = new Lexer(text, options: new LexerOptions() { Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default, KeepTrivia = keepTrivia, EnableIncludeImplicitString = isJekyll });
+            var lexer = new Lexer(text, options: new LexerOptions() { Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default, KeepTrivia = keepTrivia});
             foreach (var error in lexer.Errors)
             {
                 Console.WriteLine(error);
@@ -547,7 +547,7 @@ end}}This is a test";
                 var tokenText = token.GetText(text);
                 if (token.Type.HasText())
                 {
-                    Assert.AreEqual(token.Type.ToText(), tokenText, $"Invalid captured text found for standard token `{token.Type}` while parsing: {text}");
+                    Assert.AreEqual(token.Type.ToText(), tokenText, $"Invalid captured text found for standard token [{token.Type}] while parsing: {text}");
                 }
             }
         }
