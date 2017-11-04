@@ -135,6 +135,8 @@
     <Content Include="TestFiles\100-expressions\140-object-initializer-accessor2.txt" />
     <Content Include="TestFiles\100-expressions\140-object-initializer-error6.out.txt" />
     <Content Include="TestFiles\100-expressions\140-object-initializer-error6.txt" />
+    <Content Include="TestFiles\100-expressions\180-this-expression.out.txt" />
+    <Content Include="TestFiles\100-expressions\180-this-expression.txt" />
     <Content Include="TestFiles\100-expressions\170-array-members.out.txt" />
     <Content Include="TestFiles\100-expressions\170-array-members.txt" />
     <Content Include="TestFiles\100-expressions\160-array-expression.out.txt" />
