@@ -5,7 +5,7 @@
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.10.0</VersionPrefix>
+    <VersionPrefix>0.11.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
     <TargetFrameworks>net35;net40;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1;netstandard1.3;uap10.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
@@ -13,6 +13,11 @@
     <PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
+&gt; 0.11.0
+ - Add support for remaining liquid language constructions (fot with limits/offset, tablerow, cycle, include...etc.)        
+ - Improve AST to text
+ - Various improvement in the runtime
+ - Add `this` expression
 &gt; 0.10.0
  - Add support for liquid
  - Add support for AST to text
