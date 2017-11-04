@@ -217,9 +217,9 @@ namespace Scriban.Runtime
             InternalValue internalValue;
             if (Store.TryGetValue(member, out internalValue))
             {
+                internalValue.IsReadOnly = readOnly;
+                Store[member] = internalValue;
             }
-            internalValue.IsReadOnly = readOnly;
-            Store[member] = internalValue;
         }
 
         /// <summary>

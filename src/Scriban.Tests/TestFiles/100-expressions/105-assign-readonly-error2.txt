@@ -1,0 +1,8 @@
+{{
+x = 5
+readonly x
+y = {}
+with y
+    x = 6 # We should not be able to set a variable here that is declared readonly above
+end
+}}

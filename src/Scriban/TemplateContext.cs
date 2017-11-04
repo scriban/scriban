@@ -358,16 +358,57 @@ namespace Scriban
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
 
-            var store = GetStoreForSet(variable).First();
 
-            // We don't allow to overwrite a builtin function
-            if (!BuiltinObject.CanWrite(variable.Name))
+            var scope = variable.Scope;
+            IScriptObject firstStore = null;
+
+            switch (scope)
             {
-                throw new ScriptRuntimeException(variable.Span, $"Cannot override the value of a builtin function/variable `{variable}`");
+                case ScriptVariableScope.Global:
+                    for (int i = _globalStores.Count - 1; i >= 0; i--)
+                    {
+                        var store = _globalStores.Items[i];
+                        if (firstStore == null)
+                        {
+                            firstStore = store;
+                        }
+
+                        // We check that for upper store, we actually can write a variable with this name
+                        // otherwise we don't allow to create a variable with the same name as a readonly variable
+                        if (!store.CanWrite(variable.Name))
+                        {
+                            var variableType = store == BuiltinObject ? "builtin " : string.Empty;
+                            throw new ScriptRuntimeException(variable.Span, $"Cannot set the {variableType}readonly variable `{variable}`");
+                        }
+                    }
+                    break;
+                case ScriptVariableScope.Local:
+                    if (_localStores.Count > 0)
+                    {
+                        firstStore = _localStores.Peek();
+                    }
+                    else
+                    {
+                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable `{variable}` in the current context");
+                    }
+                    break;
+                case ScriptVariableScope.Loop:
+                    if (_loopStores.Count > 0)
+                    {
+                        firstStore = _loopStores.Peek();
+                    }
+                    else
+                    {
+                        // unit test: 215-for-special-var-error1.txt
+                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
+                    }
+                    break;
+                default:
+                    throw new NotImplementedException($"Variable scope `{scope}` is not implemented");
             }
 
             // Try to set the variable
-            if (!store.TrySetValue(variable.Name, value, asReadOnly))
+            if (!firstStore.TrySetValue(variable.Name, value, asReadOnly))
             {
                 throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
             }

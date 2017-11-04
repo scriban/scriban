@@ -1,0 +1,1 @@
+text(4,4) : error : Cannot set the builtin readonly variable `string`

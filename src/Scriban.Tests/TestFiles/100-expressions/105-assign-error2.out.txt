@@ -1,1 +1,0 @@
-text(8,1) : error : Cannot set value on the readonly variable `x`

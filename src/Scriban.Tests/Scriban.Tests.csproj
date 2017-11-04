@@ -79,8 +79,10 @@
     <Content Include="TestFiles\100-expressions\100-assign-local-var.txt" />
     <Content Include="TestFiles\100-expressions\101-assign-complex-error1.out.txt" />
     <Content Include="TestFiles\100-expressions\101-assign-complex-error1.txt" />
-    <Content Include="TestFiles\100-expressions\105-assign-builtin-error1.out.txt" />
-    <Content Include="TestFiles\100-expressions\105-assign-builtin-error1.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-readonly-builtin-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-readonly-builtin-error1.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-readonly-error2.out.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-readonly-error2.txt" />
     <Content Include="TestFiles\100-expressions\108-variable-error1.out.txt" />
     <Content Include="TestFiles\100-expressions\108-variable-error1.txt" />
     <Content Include="TestFiles\100-expressions\108-variable-loop-error2.out.txt" />
@@ -93,8 +95,8 @@
     <Content Include="TestFiles\100-expressions\106-parenthesis.txt" />
     <Content Include="TestFiles\100-expressions\105-assign-error3.out.txt" />
     <Content Include="TestFiles\100-expressions\105-assign-error3.txt" />
-    <Content Include="TestFiles\100-expressions\105-assign-error2.out.txt" />
-    <Content Include="TestFiles\100-expressions\105-assign-error2.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-readonly-error1.out.txt" />
+    <Content Include="TestFiles\100-expressions\105-assign-readonly-error1.txt" />
     <Content Include="TestFiles\100-expressions\105-assign-error1.out.txt" />
     <Content Include="TestFiles\100-expressions\105-assign-error1.txt" />
     <Content Include="TestFiles\100-expressions\110-binary-simple-error1.out.txt" />
