@@ -41,6 +41,14 @@ namespace Scriban.Parsing
                     functionExp.Function = ParseFunctionStatement(true);
                     var func = Close(functionExp);
                     return func;
+                case "this":
+                    if (!_isLiquid)
+                    {
+                        var thisExp = Open<ScriptThisExpression>();
+                        NextToken();
+                        return Close(thisExp);
+                    }
+                    break;
             }
 
             // Keeps trivia before this token
