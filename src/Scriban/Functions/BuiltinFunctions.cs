@@ -24,7 +24,6 @@ namespace Scriban.Functions
         {
             public DefaultBuiltins() : base(10, false)
             {
-                SetValue("include", new IncludeFunction(), true);
                 SetValue("empty", EmptyScriptObject.Default, true);
                 SetValue("object", new ObjectFunctions(), true);
                 SetValue(DateTimeFunctions.DateVariable.Name, new DateTimeFunctions(), true);

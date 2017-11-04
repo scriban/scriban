@@ -1161,7 +1161,7 @@ namespace Scriban.Parsing
 
             // If we have an include token, we are going to parse spaces and non_white_spaces
             // in order to support the tag "include"
-            if (_isLiquid && _token.Match("include", Text) && char.IsWhiteSpace(c))
+            if (Options.EnableIncludeImplicitString && _token.Match("include", Text) && char.IsWhiteSpace(c))
             {
                 var startSpace = _position;
                 var endSpace = startSpace;

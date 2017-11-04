@@ -29,6 +29,11 @@ namespace Scriban.Parsing
         public string FrontMatterMarker { get; set; }
 
         /// <summary>
+        /// This is a mode for supporting liquid Jekyll syntax include which allows to pass path directly `include /this/is/a/path.html`
+        /// </summary>
+        public bool EnableIncludeImplicitString { get; set; }
+
+        /// <summary>
         /// Defines the position to start the lexer parsing relative to the input text passed to <see cref="Lexer"/> constructor
         /// </summary>
         public TextPosition StartPosition { get; set; }

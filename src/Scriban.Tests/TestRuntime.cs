@@ -155,16 +155,6 @@ namespace Scriban.Tests
         }
 
         [Test]
-        public void TestTemplateLoaderNoArgs()
-        {
-            var template = Template.Parse("Test with a include {{ include }}");
-            var context = new TemplateContext();
-            var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
-            var expectedString = "Expecting at least the name of the template to include for the <include> function";
-            Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
-        }
-
-        [Test]
         public void TestTemplateLoaderNotSetup()
         {
             var template = Template.Parse("Test with a include {{ include 'yoyo' }}");

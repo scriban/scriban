@@ -241,6 +241,18 @@ namespace Scriban.Parsing
                     hasAnonymousFunction = true;
                 }
 
+                // Special case for include, if we detect it here, create an include expression directly
+                // and continue parsing the following. This is to make sure that if we use `include`
+                // alone, it will be a ScriptIncludeExpression and not a ScriptVariable
+                var targetVariable = leftOperand as ScriptVariable;
+                if (targetVariable != null && targetVariable.Name == "include" && targetVariable.Scope == ScriptVariableScope.Global)
+                {
+                    functionCall = Open<ScriptIncludeExpression>();
+                    functionCall.Target = leftOperand;
+                    functionCall.Span.Start = leftOperand.Span.Start;
+                    goto parseExpression;
+                }
+
                 while (!hasAnonymousFunction)
                 {
                     if (_isLiquid && Current.Type == TokenType.Comma && functionCall != null)
