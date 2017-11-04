@@ -94,9 +94,10 @@ This software is released under the [BSD-Clause 2 license](http://opensource.org
 
 ## Related projects
 
-* [dotliquid](https://github.com/dotliquid/dotliquid): .NET port of the liquid templating engine by @tgjones
+* [dotliquid](https://github.com/dotliquid/dotliquid): .NET port of the liquid templating engine
+- [Fluid](https://github.com/sebastienros/fluid/) .NET liquid templating engine
 * [Nustache](https://github.com/jdiamond/Nustache): Logic-less templates for .NET
-* [Handlebars.Net](https://github.com/rexm/Handlebars.Net): .NET port of handlebars.js by @rexm
+* [Handlebars.Net](https://github.com/rexm/Handlebars.Net): .NET port of handlebars.js
 
 ## Credits
 
