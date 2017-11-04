@@ -15,7 +15,7 @@ namespace Scriban.Syntax
     [ScriptSyntax("for statement", "for <variable> in <expression> ... end")]
     public class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedParameterContainer
     {
-        public ScriptVariable Variable { get; set; }
+        public ScriptExpression Variable { get; set; }
 
         public ScriptExpression Iterator { get; set; }
 

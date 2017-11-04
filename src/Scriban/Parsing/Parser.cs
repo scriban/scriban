@@ -1213,7 +1213,7 @@ namespace Scriban.Parsing
         {
             if (StartAsExpression())
             {
-                return ParseExpression(parentNode, parentExpression, newPrecedence);
+                return ParseExpression(parentNode, parentExpression, newPrecedence, mode);
             }
             LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of `{Current.Type}`" );
             return null;
@@ -1279,10 +1279,15 @@ namespace Scriban.Parsing
             NextToken(); // skip for
 
             // unit test: 211-for-error1.txt
-            forStatement.Variable = ExpectAndParseVariable(forStatement);
+            forStatement.Variable = ExpectAndParseExpression(forStatement, mode: ParseExpressionMode.BasicExpression);
 
             if (forStatement.Variable != null)
             {
+                if (!(forStatement.Variable is IScriptVariablePath))
+                {
+                    LogError(forStatement, $"Expecting a variable instead of `{forStatement.Variable}`");
+                }
+
                 // in 
                 if (Current.Type != TokenType.Identifier || GetAsText(Current) != "in")
                 {
