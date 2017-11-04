@@ -760,6 +760,10 @@ namespace Scriban.Parsing
                     statement = ParseIncDecStatement(true);
                     break;
 
+                case "include":
+                    statement = ParseLiquidIncludeStatement();
+                    break;
+
                 default:
                     statement = ParseLiquidExpressionStatement(parent);
                     break;
@@ -1207,6 +1211,141 @@ namespace Scriban.Parsing
             }
 
             return Close(wrapStatement);
+        }
+
+        private ScriptStatement ParseLiquidIncludeStatement()
+        {
+            var include = Open<ScriptFunctionCall>();
+            include.Target = ParseVariable();
+            var templateName = ExpectAndParseExpression(include, mode: ParseExpressionMode.BasicExpression);
+            if (templateName != null)
+            {
+                include.Arguments.Add(templateName);
+            }
+            Close(include);
+
+            var includeStatement = new ScriptExpressionStatement() {Span = include.Span, Expression = include};
+
+            ScriptForStatement forStatement = null;
+            ScriptBlockStatement block = null;
+
+            if (Current.Type == TokenType.Identifier)
+            {
+                var next = GetAsText(Current);
+                // Parse with <value>
+                // Create a block statement equivalent:
+                // this[target] = value;
+                // include target
+                if (next == "with")
+                {
+                    NextToken(); // skip with
+
+                    var assignExpression = Open<ScriptAssignExpression>();
+                    assignExpression.Target = new ScriptIndexerExpression()
+                    {
+                        Target = new ScriptThisExpression {Span = CurrentSpan},
+                        Index = templateName
+                    };
+
+                    assignExpression.Value = ExpectAndParseExpression(include, mode: ParseExpressionMode.BasicExpression);
+                    Close(assignExpression);
+
+                    block = new ScriptBlockStatement {Span = include.Span};
+                    block.Statements.Add(new ScriptExpressionStatement()
+                    {
+                        Span = assignExpression.Span,
+                        Expression = assignExpression
+                    });
+                    block.Statements.Add(includeStatement);
+                    Close(block);
+                }
+                else if (next == "for")
+                {
+                    // Create a block statement equivalent:
+                    // for this[target] in value
+                    //  include target
+                    // end
+
+                    NextToken(); // skip for
+
+                    forStatement = Open<ScriptForStatement>();
+                    forStatement.Variable = new ScriptIndexerExpression()
+                    {
+                        Target = new ScriptThisExpression { Span = CurrentSpan },
+                        Index = templateName
+                    };
+
+                    forStatement.Iterator = ExpectAndParseExpression(include, mode: ParseExpressionMode.BasicExpression);
+
+                    forStatement.Body = new ScriptBlockStatement() { Span = include.Span};
+                    forStatement.Body.Statements.Add(includeStatement);
+                    Close(forStatement);
+                }
+
+                // For following variable separated by colon, add them as assignment before the include
+                while (Current.Type == TokenType.Identifier)
+                {
+                    var variableToken = Current;
+                    var variableObject = ParseVariable();
+
+                    var variable = variableObject as ScriptVariable;
+                    if (variable == null)
+                    {
+                        LogError(variableToken, $"Unexpected variable name `{GetAsText(variableToken)}` found in include parameter");
+                        break;
+                    }
+                    
+                    if (Current.Type != TokenType.Colon)
+                    {
+                        LogError(Current, $"Unexpected token `{GetAsText(Current)}` after variable `{variable}`. Expecting a `:`");
+                        break;
+                    }
+                    NextToken(); // skip :
+
+                    if (block == null)
+                    {
+                        block = new ScriptBlockStatement { Span = include.Span };
+                        block.Statements.Add(includeStatement);
+                    }
+
+                    var assignExpression = Open<ScriptAssignExpression>();
+                    assignExpression.Target = variable;
+                    assignExpression.Value = ExpectAndParseExpression(include, mode: ParseExpressionMode.BasicExpression);
+
+                    block.Statements.Insert(0, new ScriptExpressionStatement()
+                    {
+                        Span = assignExpression.Span,
+                        Expression = assignExpression
+                    });
+
+                    if (Current.Type == TokenType.Comma)
+                    {
+                        NextToken();
+                    }
+                }
+
+                ExpectEndOfStatement(includeStatement);
+
+                // If we only have an include for, return it directly
+                if (forStatement != null)
+                {
+                    if (block == null)
+                    {
+                        return Close(forStatement);
+                    }
+                    block.Statements.Add(forStatement);
+                }
+
+                // Else we have a block
+                if (block != null)
+                {
+                    Close(block);
+                    return block;
+                }
+            }
+
+            ExpectEndOfStatement(includeStatement);
+            return Close(includeStatement);
         }
 
         private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null, ParseExpressionMode mode = ParseExpressionMode.Default)

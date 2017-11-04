@@ -38,6 +38,11 @@ namespace Scriban.Functions
             // If template name is empty, throw an exception
             if (templateName == null || string.IsNullOrEmpty(templateName = templateName.Trim()))
             {
+                // In a liquid template context, we let an include to continue without failing
+                if (context is LiquidTemplateContext)
+                {
+                    return null;
+                }
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template name cannot be null or empty");
             }
 
@@ -77,13 +82,7 @@ namespace Scriban.Functions
 
                 // Clone parser options
                 var parserOptions = context.TemplateLoaderParserOptions;
-
                 var lexerOptions = context.TemplateLoaderLexerOptions;
-                // Parse include in default modes (while top page can be using front matter)
-                lexerOptions.Mode = lexerOptions.Mode == ScriptMode.ScriptOnly
-                    ? ScriptMode.ScriptOnly
-                    : ScriptMode.Default;
-
                 template = Template.Parse(templateText, templatePath, parserOptions, lexerOptions);
 
                 // If the template has any errors, throw an exception
