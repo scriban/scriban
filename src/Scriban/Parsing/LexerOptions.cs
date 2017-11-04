@@ -29,6 +29,12 @@ namespace Scriban.Parsing
         public string FrontMatterMarker { get; set; }
 
         /// <summary>
+        /// <c>true</c> to parse the include target as an implicit string (to support Jekyll passing raw path /a/b/c.txt as an include target).
+        /// Only valid if Mode == <see cref="ScriptMode.Liquid"/> as well.
+        /// </summary>
+        public bool EnableIncludeImplicitString { get; set; }
+
+        /// <summary>
         /// Defines the position to start the lexer parsing relative to the input text passed to <see cref="Lexer"/> constructor
         /// </summary>
         public TextPosition StartPosition { get; set; }
