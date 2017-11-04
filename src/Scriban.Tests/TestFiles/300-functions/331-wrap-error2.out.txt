@@ -1,1 +1,1 @@
-text(9,6) : error : Expecting a direct function instead of the expression [(test)/nested expression]
+text(9,6) : error : Expecting a direct function instead of the expression `(test)/nested expression`

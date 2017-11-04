@@ -52,8 +52,7 @@ namespace Scriban.Syntax
                         }
                         else
                         {
-                            throw new ScriptRuntimeException(this.Span,
-                                $"Unexpected value [{value} / Type: {value?.GetType()}]. Cannot negate(-)/positive(+) a non-numeric value");
+                            throw new ScriptRuntimeException(this.Span, $"Unexpected value `{value} / Type: {value?.GetType()}`. Cannot negate(-)/positive(+) a non-numeric value");
                         }
                     }
                 }

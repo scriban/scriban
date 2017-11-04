@@ -111,7 +111,7 @@ namespace Scriban.Functions
             // Make sure that we cannot recursively include a template
             if (pendingIncludes.Contains(templateName))
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"The include [{templateName}] cannot be used recursively");
+                throw new ScriptRuntimeException(callerContext.Span, $"The include `{templateName}` cannot be used recursively");
             }
             pendingIncludes.Add(templateName);
 

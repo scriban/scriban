@@ -365,8 +365,8 @@ namespace Scriban.Syntax
                 return null;
             }
 
-            var leftType = leftValue?.GetType();
-            var rightType = rightValue?.GetType();
+            var leftType = leftValue.GetType();
+            var rightType = rightValue.GetType();
 
             // The order matters: double, float, long, int
             if (leftType == typeof(double))
@@ -440,7 +440,7 @@ namespace Scriban.Syntax
                 return CalculateDateTime(op, span, (DateTime)leftValue, (TimeSpan)rightValue);
             }
 
-            throw new ScriptRuntimeException(span, $"Unsupported types [{leftValue ?? "null"}/{leftType?.ToString() ?? "null"}] {op.ToText()} [{rightValue ?? "null"}/{rightType?.ToString() ?? "null"}] for binary operation");
+            throw new ScriptRuntimeException(span, $"Unsupported types `{leftValue}/{leftType}` {op.ToText()} `{rightValue}/{rightType}` for binary operation");
         }
 
         private static object CalculateInt(ScriptBinaryOperator op, SourceSpan span, int left, int right)

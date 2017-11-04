@@ -547,7 +547,7 @@ end}}This is a test";
                 var tokenText = token.GetText(text);
                 if (token.Type.HasText())
                 {
-                    Assert.AreEqual(token.Type.ToText(), tokenText, $"Invalid captured text found for standard token [{token.Type}] while parsing: {text}");
+                    Assert.AreEqual(token.Type.ToText(), tokenText, $"Invalid captured text found for standard token `{token.Type}` while parsing: {text}");
                 }
             }
         }
