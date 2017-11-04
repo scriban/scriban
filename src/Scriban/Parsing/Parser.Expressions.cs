@@ -96,10 +96,10 @@ namespace Scriban.Parsing
             return Close(unaryExpression);
         }
 
-        private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0)
+        private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
             bool hasAnonymousFunction = false;
-            return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence);
+            return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence, mode);
         }
 
         private ScriptExpression ParseVariableOrLiteral()
@@ -149,7 +149,20 @@ namespace Scriban.Parsing
             return false;
         }
 
-        private ScriptExpression ParseExpression(ScriptNode parentNode, ref bool hasAnonymousFunction, ScriptExpression parentExpression = null, int precedence = 0)
+        public enum ParseExpressionMode
+        {
+            /// <summary>
+            /// All expressions (e.g literals, function calls, function pipes...etc.)
+            /// </summary>
+            Default,
+
+            /// <summary>
+            /// Only literal, unary, nested, array/object initializer, dot access, array access
+            /// </summary>
+            BasicExpression,
+        }
+
+        private ScriptExpression ParseExpression(ScriptNode parentNode, ref bool hasAnonymousFunction, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
             int expressionCount = 0;
             expressionLevel++;
@@ -309,6 +322,11 @@ namespace Scriban.Parsing
                         continue;
                     }
 
+                    if (mode == ParseExpressionMode.BasicExpression)
+                    {
+                        break;
+                    }
+
                     if (Current.Type == TokenType.Equal)
                     {
                         var assignExpression = Open<ScriptAssignExpression>();
@@ -363,7 +381,7 @@ namespace Scriban.Parsing
                     }
 
                     // Parse special statement parameters (for, tablerow, include)
-                    if (parentNode is IScriptNamedParameterContainer)
+                    if (parentNode is IScriptNamedParameterContainer && ((!_isLiquid && Current.Type == TokenType.Comma) || (_isLiquid && Current.Type == TokenType.Identifier)))
                     {
                         // Only handle them at top level
                         var paramContainer = (IScriptNamedParameterContainer)parentNode;
@@ -372,7 +390,7 @@ namespace Scriban.Parsing
                         {
                             if (_isLiquid)
                             {
-                                if (expressionLevel > 1 || Current.Type != TokenType.Identifier)
+                                if (Current.Type != TokenType.Identifier)
                                 {
                                     break;
                                 }
@@ -404,11 +422,15 @@ namespace Scriban.Parsing
                             if (Current.Type == TokenType.Colon)
                             {
                                 NextToken();
-                                parameter.Value = ExpectAndParseExpression(parentNode);
+                                parameter.Value = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.BasicExpression);
                             }
                         }
-                    }                    
-                    else if (StartAsExpression())
+
+                        // We don't allow anything after named parameters
+                        break;
+                    }
+
+                    if (StartAsExpression())
                     {
                         // If we can parse a statement, we have a method call
                         if (parentExpression != null)

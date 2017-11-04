@@ -1209,7 +1209,7 @@ namespace Scriban.Parsing
             return Close(wrapStatement);
         }
 
-        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null)
+        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
             if (StartAsExpression())
             {
@@ -1219,22 +1219,22 @@ namespace Scriban.Parsing
             return null;
         }
 
-        private ScriptExpression ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, out bool hasAnonymousFunction)
+        private ScriptExpression ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, out bool hasAnonymousFunction, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
             hasAnonymousFunction = false;
             if (StartAsExpression())
             {
-                return ParseExpression(parentNode, ref hasAnonymousFunction);
+                return ParseExpression(parentNode, ref hasAnonymousFunction, null, 0, mode);
             }
             LogError(parentNode, CurrentSpan, $"Expecting <expression> instead of `{Current.Type}`");
             return null;
         }
 
-        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ref bool hasAnonymousExpression, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null)
+        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ref bool hasAnonymousExpression, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
             if (StartAsExpression())
             {
-                return ParseExpression(parentNode, ref hasAnonymousExpression, parentExpression, newPrecedence);
+                return ParseExpression(parentNode, ref hasAnonymousExpression, parentExpression, newPrecedence, mode);
             }
             LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of `{Current.Type}`");
             return null;
