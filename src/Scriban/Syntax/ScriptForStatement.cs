@@ -109,6 +109,10 @@ namespace Scriban.Syntax
         {
             context.Write("for").ExpectSpace();
             context.Write(Variable).ExpectSpace();
+            if (!context.PreviousHasSpace)
+            {
+                context.Write(" ");
+            }
             context.Write("in").ExpectSpace();
             context.Write(Iterator);
             NamedParameters?.Write(context);
