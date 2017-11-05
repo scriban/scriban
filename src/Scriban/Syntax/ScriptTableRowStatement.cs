@@ -29,12 +29,12 @@ namespace Scriban.Syntax
 
         protected override void BeforeLoop(TemplateContext context)
         {
-            context.Output.Append("<tr class=\"row1\">").Append(Environment.NewLine);
+            context.Write("<tr class=\"row1\">").WriteLine();
         }
 
         protected override void AfterLoop(TemplateContext context)
         {
-            context.Output.Append("</tr>").Append(Environment.NewLine);
+            context.Write("</tr>").WriteLine();
         }
 
         protected override bool Loop(TemplateContext context, int index, int localIndex, bool isLast)
@@ -47,14 +47,14 @@ namespace Scriban.Syntax
 
             if (columnIndex == 0 && localIndex > 0)
             {
-                output.Append("</tr>").Append(Environment.NewLine);
-                output.Append("<tr class=\"row").Append((localIndex / _columnsCount) + 1).Append("\">");
+                output.Write("</tr>").Write(Environment.NewLine);
+                output.Write("<tr class=\"row").Write((localIndex / _columnsCount) + 1).Write("\">");
             }
-            output.Append("<td class=\"col").Append(columnIndex + 1).Append("\">");
+            output.Write("<td class=\"col").Write(columnIndex + 1).Write("\">");
 
             var result = base.Loop(context, index, localIndex, isLast);
 
-            output.Append("</td>");
+            output.Write("</td>");
 
             return result;
         }

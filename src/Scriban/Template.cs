@@ -160,7 +160,11 @@ namespace Scriban
         {
             EvaluateAndRender(context, true);
             var result = context.Output.ToString();
-            context.Output.Length = 0;
+            var output = context.Output as StringBuilderOutput;
+            if (output != null)
+            {
+                output.Builder.Length = 0;
+            }
             return result;
         }
 
@@ -190,7 +194,7 @@ namespace Scriban
         public string ToText(RenderOptions options = default(RenderOptions))
         {
             CheckErrors();
-            var writer = new StringWriter();
+            var writer = new TextWriterOutput();
             var renderContext = new RenderContext(writer, options);
             renderContext.Write(Page);
 

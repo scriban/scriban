@@ -6,6 +6,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using Scriban.Helpers;
+using Scriban.Runtime;
 
 namespace Scriban.Syntax
 {
@@ -14,7 +15,7 @@ namespace Scriban.Syntax
     /// </summary>
     public class RenderContext
     {
-        private readonly TextWriter _writer;
+        private readonly IScriptOutput _output;
         private bool _isInCode;
         private bool _expectSpace;
         private bool _expectEnd;
@@ -27,11 +28,11 @@ namespace Scriban.Syntax
         private FastStack<bool> _isWhileLoop;
         private ScriptRawStatement _previousRawStatement;
 
-        public RenderContext(TextWriter writer, RenderOptions options = default(RenderOptions))
+        public RenderContext(IScriptOutput output, RenderOptions options = default(RenderOptions))
         {
             _isWhileLoop = new FastStack<bool>(4);
             Options = options;
-            _writer = writer;
+            _output = output;
         }
 
         /// <summary>
@@ -78,7 +79,7 @@ namespace Scriban.Syntax
         public RenderContext Write(string text)
         {
             _previousHasSpace = text.Length > 0 && char.IsWhiteSpace(text[text.Length - 1]);
-            _writer.Write(text);
+            _output.Write(text);
             return this;
         }
 

@@ -32,7 +32,8 @@ namespace Scriban
         private FastStack<ScriptLoopStatementBase> _loops;
         private FastStack<ScriptObject> _loopStores;
         private readonly Dictionary<Type, IObjectAccessor> _memberAccessors;
-        private FastStack<StringBuilder> _outputs;
+        private FastStack<IScriptOutput> _outputs;
+        private IScriptOutput _output;
         private FastStack<string> _sourceFiles;
         private FastStack<object> _caseValues;
         private int _callDepth;
@@ -94,8 +95,9 @@ namespace Scriban
             TemplateLoaderParserOptions = new ParserOptions();
             TemplateLoaderLexerOptions = LexerOptions.Default;
 
-            _outputs = new FastStack<StringBuilder>(4);
-            _outputs.Push(new StringBuilder());
+            _outputs = new FastStack<IScriptOutput>(4);
+            _output = new StringBuilderOutput();
+            _outputs.Push(_output);
 
             _globalStores = new FastStack<IScriptObject>(4);
             _localStores = new FastStack<ScriptObject>(4);
@@ -174,7 +176,7 @@ namespace Scriban
         /// <summary>
         /// Gets the current output of the template being rendered (via <see cref="Template.Render(Scriban.TemplateContext)"/>)/>.
         /// </summary>
-        public StringBuilder Output => _outputs.Peek();
+        public IScriptOutput Output => _output;
 
         /// <summary>
         /// Gets the builtin objects (that can be setup via the constructor). Default is retrieved via <see cref="GetDefaultBuiltinObject"/>.
@@ -483,20 +485,32 @@ namespace Scriban
         /// </summary>
         public void PushOutput()
         {
-            _outputs.Push(new StringBuilder());
+            PushOutput(new StringBuilderOutput());
+        }
+
+        /// <summary>
+        /// Pushes a new output used for rendering the current template while keeping the previous output.
+        /// </summary>
+        public void PushOutput(IScriptOutput output)
+        {
+            if (output == null) throw new ArgumentNullException(nameof(output));
+            _output = new StringBuilderOutput();
+            _outputs.Push(_output);
         }
 
         /// <summary>
         /// Pops a previous output.
         /// </summary>
-        public StringBuilder PopOutput()
+        public IScriptOutput PopOutput()
         {
             if (_outputs.Count == 1)
             {
                 throw new InvalidOperationException("Unexpected PopOutput for top level writer");
             }
 
-            return _outputs.Pop();
+            var previous = _outputs.Pop();
+            _output = _outputs.Peek();
+            return previous;
         }
 
         /// <summary>
@@ -504,28 +518,36 @@ namespace Scriban
         /// </summary>
         /// <param name="span">The span of the object to render.</param>
         /// <param name="textAsObject">The text as object.</param>
-        public void Write(SourceSpan span, object textAsObject)
+        public TemplateContext Write(SourceSpan span, object textAsObject)
         {
-            if (textAsObject == null)
+            if (textAsObject != null)
             {
-                return;
+                var text = ToString(span, textAsObject);
+                Write(text);
             }
-            var text = ToString(span, textAsObject);
-            Write(text);
+            return this;
         }
 
         /// <summary>
         /// Writes the text to the current <see cref="Output"/>
         /// </summary>
         /// <param name="text">The text.</param>
-        public virtual void Write(string text)
+        public TemplateContext Write(string text)
         {
-            if (text == null)
+            if (text != null)
             {
-                return;
+                Output.Write(text);
             }
+            return this;
+        }
 
-            Output.Append(text);
+        /// <summary>
+        /// Writes the a new line to the current <see cref="Output"/>
+        /// </summary>
+        public TemplateContext WriteLine()
+        {
+            Output.WriteLine();
+            return this;
         }
 
         /// <summary>
@@ -534,14 +556,14 @@ namespace Scriban
         /// <param name="text">The text.</param>
         /// <param name="startIndex">The zero-based position of the substring of text</param>
         /// <param name="count">The number of characters to output starting at <see cref="startIndex"/> position from the text</param>
-        public virtual void Write(string text, int startIndex, int count)
+        public TemplateContext Write(string text, int startIndex, int count)
         {
-            if (text == null)
+            if (text != null)
             {
-                return;
+                Output.Write(text, startIndex, count);
             }
 
-            Output.Append(text, startIndex, count);
+            return this;
         }
 
         /// <summary>
