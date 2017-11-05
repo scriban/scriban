@@ -183,6 +183,8 @@
     <Content Include="TestFiles\100-expressions\100-assign-string.txt" />
     <Content Include="TestFiles\200-statements\205-case-when-else-statement.out.txt" />
     <Content Include="TestFiles\200-statements\205-case-when-else-statement.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement-multiple.out.txt" />
+    <Content Include="TestFiles\200-statements\205-case-when-statement-multiple.txt" />
     <Content Include="TestFiles\200-statements\205-case-when-statement2.out.txt" />
     <Content Include="TestFiles\200-statements\205-case-when-statement2.txt" />
     <Content Include="TestFiles\200-statements\205-case-when-statement-error2.out.txt" />
@@ -201,6 +203,16 @@
     <Content Include="TestFiles\200-statements\201-if-else-error1.txt" />
     <Content Include="TestFiles\200-statements\210-for-and-ret.out.txt" />
     <Content Include="TestFiles\200-statements\210-for-and-ret.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement4-variables.out.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement4-variables.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement3-limit-offset-reversed.out.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement3-limit-offset-reversed.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement2-reversed.out.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement2-reversed.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement2-offset.out.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement2-offset.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement2-limit.out.txt" />
+    <Content Include="TestFiles\200-statements\210-for-statement2-limit.txt" />
     <Content Include="TestFiles\200-statements\211-for-error3.out.txt" />
     <Content Include="TestFiles\200-statements\211-for-error3.txt" />
     <Content Include="TestFiles\200-statements\211-for-error2.out.txt" />

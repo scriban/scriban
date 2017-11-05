@@ -1,0 +1,6 @@
+{{
+x = [1,2,3,4]
+for y in x, offset: 1,limit: 3, reversed
+	y
+end
+}}

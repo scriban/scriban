@@ -1,0 +1,22 @@
+{{
+variable = 5
+case variable
+    when 4, 5, 6
+        "Yo 4 or 5 or 6"
+    when 4
+        "Yo 4"
+    when 5
+        "Yo 5"
+end
+}}
+{{
+variable = 6
+case variable
+    when 4
+        "Yo 4"
+    when 5
+        "Yo 5"
+    when 6, 7
+        "Yo 6 or 7"
+end
+}}
