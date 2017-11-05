@@ -45,7 +45,7 @@ namespace Scriban.Benchmarks
             // Due to issue https://github.com/rexm/Handlebars.Net/issues/105 cannot do the same as others, so 
             // working around this here
             HandlebarsDotNet.Handlebars.RegisterHelper("truncate", (output, options, context, arguments) => {
-                output.Write(Scriban.Functions.StringFunctions.Truncate(15, context["description"]));
+                output.Write(Scriban.Functions.StringFunctions.Truncate(15, null, context["description"]));
             });
         }
 
@@ -196,7 +196,7 @@ namespace Scriban.Benchmarks
                 {
                     throw new InvalidOperationException("Unexpected number of arguments for truncate function");
                 }
-                return StringFunctions.Truncate(Convert.ToInt32(values[1].AsNumber), values[0].AsString);
+                return StringFunctions.Truncate(Convert.ToInt32(values[1].AsNumber), null, values[0].AsString);
             }, 2);
         }
 
@@ -227,7 +227,7 @@ namespace Scriban.Benchmarks
             var renderer = new Stubble.Core.StubbleVisitorRenderer();
             var props = new Dictionary<string, object> { ["products"] = _dotLiquidProducts };
             int i = 0;
-            props["truncate"] = new Func<string, object>((str) => Scriban.Functions.StringFunctions.Truncate(15, renderer.Render(str, _dotLiquidProducts[i++])));
+            props["truncate"] = new Func<string, object>((str) => Scriban.Functions.StringFunctions.Truncate(15, null, renderer.Render(str, _dotLiquidProducts[i++])));
             return renderer.Render(BenchParsers.TextTemplateMustache, props);
         }
 
@@ -238,7 +238,7 @@ namespace Scriban.Benchmarks
             return Nustache.Core.Render.StringToString(BenchParsers.TextTemplateMustache, new
             {
                 products = _dotLiquidProducts,
-                truncate = new Func<string, object>((str) => Scriban.Functions.StringFunctions.Truncate(15, Nustache.Core.Render.StringToString(str, _dotLiquidProducts[i++])))
+                truncate = new Func<string, object>((str) => Scriban.Functions.StringFunctions.Truncate(15, null, Nustache.Core.Render.StringToString(str, _dotLiquidProducts[i++])))
             });
         }
 
