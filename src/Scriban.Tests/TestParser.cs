@@ -1,6 +1,7 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -305,10 +306,8 @@ end
         }
 
         [TestCaseSource("TestFiles")]
-        public void Test(TestFilePath testFilePath)
+        public void Test(string inputName)
         {
-            var inputName = testFilePath.FilePath;
-
             var isSupportingExactRoundTrip = !NotSupportingExactRoundtrip.Contains(Path.GetFileName(inputName));
 
             var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
@@ -529,20 +528,22 @@ end
             return text.ToString();
         }
 
-        public static IEnumerable<object[]> TestFiles
+        public static IEnumerable TestFiles
         {
             get
             {
                 var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
-                return
+                foreach (var file in
                     Directory.EnumerateFiles(baseDir, InputFilePattern, SearchOption.AllDirectories)
                         .Where(f => !f.EndsWith(OutputEndFileExtension))
                         .Select(f => f.StartsWith(baseDir) ? f.Substring(baseDir.Length + 1) : f)
-                        .OrderBy(f => f)
-                        .Select(x => new object[]
-                        {
-                            new TestFilePath(x)
-                        });
+                        .OrderBy(f => f))
+                {
+                    var caseData = new TestCaseData(file);
+                    caseData.TestName = Path.GetFileNameWithoutExtension(file);
+                    caseData.SetCategory(Path.GetDirectoryName(file));
+                    yield return caseData;
+                }
             }
         }
 
@@ -554,9 +555,12 @@ end
             public TestFilePath(string filePath)
             {
                 FilePath = filePath;
+                Category = Path.GetDirectoryName(filePath);
             }
 
             public string FilePath { get; }
+
+            public string Category { get; }
 
             public override string ToString()
             {

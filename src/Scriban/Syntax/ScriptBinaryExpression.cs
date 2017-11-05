@@ -190,7 +190,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareEqual:
                     return againstEmpty;
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return !againstEmpty;
+                    return againstEmpty is bool ? !(bool)againstEmpty : againstEmpty; 
                 case ScriptBinaryOperator.CompareGreater:
                 case ScriptBinaryOperator.CompareLess:
                     return false;

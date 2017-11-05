@@ -51,6 +51,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="LiquidTests\Helper.cs" />
+    <Compile Include="LiquidTests\Html\TableRowTests.cs" />
+    <Compile Include="LiquidTests\IfElseTests.cs" />
+    <Compile Include="LiquidTests\IncludeTagTests.cs" />
+    <Compile Include="LiquidTests\RawTests.cs" />
+    <Compile Include="LiquidTests\StandardTagTests.cs" />
+    <Compile Include="LiquidTests\UnlessElseTests.cs" />
     <Compile Include="MathObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -63,9 +70,11 @@
     <Compile Include="TestParser.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="LiquidTests\readme.md" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="LiquidTests\dotliquid-license.txt" />
     <Content Include="TestFiles\000-basic\000-script-empty.out.txt" />
     <Content Include="TestFiles\000-basic\000-script-empty.txt" />
     <Content Include="TestFiles\000-basic\003-whitespaces.out.txt" />
@@ -288,6 +297,8 @@
     <Content Include="TestFiles\400-builtins\420-math.txt" />
     <Content Include="TestFiles\400-builtins\410-array.out.txt" />
     <Content Include="TestFiles\400-builtins\410-array.txt" />
+    <Content Include="TestFiles\500-liquid\530-liquid-pipes.out.txt" />
+    <Content Include="TestFiles\500-liquid\530-liquid-pipes.txt" />
     <Content Include="TestFiles\500-liquid\502-liquid-comment.out.txt" />
     <Content Include="TestFiles\500-liquid\502-liquid-comment.txt" />
     <Content Include="TestFiles\500-liquid\501-liquid-raw.out.txt" />

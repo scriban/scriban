@@ -17,6 +17,7 @@ namespace Scriban.Parsing
     public class Lexer : IEnumerable<Token>
     {
         private TextPosition _position;
+        private readonly int _textLength;
         private Token _token;
         private char c;
         private BlockType _blockType;
@@ -46,8 +47,7 @@ namespace Scriban.Parsing
         /// <exception cref="System.ArgumentNullException"></exception>
         public Lexer(string text, string sourcePath = null, LexerOptions? options = null)
         {
-            if (text == null) throw new ArgumentNullException(nameof(text));
-            Text = text;
+            Text = text ?? throw new ArgumentNullException(nameof(text));
 
             // Setup options
             var localOptions = options ?? LexerOptions.Default;
@@ -63,6 +63,8 @@ namespace Scriban.Parsing
             {
                 throw new ArgumentOutOfRangeException($"The starting position `{_position.Offset}` of range [0, {text.Length - 1}]");
             }
+
+            _textLength = text.Length;
 
             SourcePath = sourcePath ?? "<input>";
             _blockType = Options.Mode == ScriptMode.ScriptOnly ? BlockType.Code : BlockType.Raw;
@@ -122,7 +124,7 @@ namespace Scriban.Parsing
                     return false;
                 }
 
-                if (_position.Offset == Text.Length)
+                if (_position.Offset == _textLength)
                 {
                     _token = Token.Eof;
                     return true;
@@ -184,7 +186,7 @@ namespace Scriban.Parsing
 
                 // We may me directly at the end of the EOF without reading anykind of block
                 // So we need to exit here
-                if (_position.Offset == Text.Length)
+                if (_position.Offset == _textLength)
                 {
                     _token = Token.Eof;
                     return true;
@@ -570,24 +572,35 @@ namespace Scriban.Parsing
             bool removePreviousSpaces = false;
 
             bool isEmptyRaw = false;
-            while (true)
-            {
-                if (PeekChar() != '\0')
-                {
-                    if (_blockType == BlockType.Raw && IsCodeEnterOrEscape(out removePreviousSpaces) || _blockType == BlockType.Escape && IsCodeExit())
-                    {
-                        isEmptyRaw = end.Offset < 0;
-                        nextCodeEnterOrEscapeExit = true;
-                        break;
-                    }
 
-                    end = _position;
-                    NextChar();
+            var endBeforeSpace = TextPosition.Eof;
+            var lastWhiteSpace = TextPosition.Eof;
+            while (c != '\0')
+            {
+                if (_blockType == BlockType.Raw && IsCodeEnterOrEscape(out removePreviousSpaces) || _blockType == BlockType.Escape && IsCodeExit())
+                {
+                    isEmptyRaw = end.Offset < 0;
+                    nextCodeEnterOrEscapeExit = true;
+                    break;
+                }
+
+                if (char.IsWhiteSpace(c))
+                {
+                    if (lastWhiteSpace.Offset < 0)
+                    {
+                        lastWhiteSpace = _position;
+                        endBeforeSpace = end;
+                    }
                 }
                 else
                 {
-                    break;
+                    // Reset white space if any
+                    lastWhiteSpace.Offset = -1;
+                    endBeforeSpace.Offset = -1;
                 }
+
+                end = _position;
+                NextChar();
             }
 
             if (end.Offset < 0)
@@ -595,46 +608,15 @@ namespace Scriban.Parsing
                 end = start;
             }
 
-            if (removePreviousSpaces)
+            if (removePreviousSpaces && lastWhiteSpace.Offset >= 0)
             {
-                int i = -1;
-                var endSpace = new TextPosition(-1, 0, 0);
-                TextPosition startSpace = end;
-                while (true)
-                {
-                    var testc = PeekChar(i);
-                    if (char.IsWhiteSpace(testc) || testc == '\r')
-                    {
-                        if (endSpace.Offset < 0)
-                        {
-                            endSpace = end;
-                        }
-                        startSpace = end;
-                        if (testc == '\r')
-                        {
-                            end.Offset--;
-                        }
-                        else
-                        {
-                            end = testc == '\n' ? end.NextLine(-1) : end.NextColumn(-1);
-                        }
-                        i--;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
+                _pendingTokens.Enqueue(new Token(TokenType.Whitespace, lastWhiteSpace, end));
 
-                if (endSpace.Offset >= 0)
-                {
-                    _pendingTokens.Enqueue(new Token(TokenType.Whitespace, startSpace, endSpace));
-                }
-
-                if (end.Offset < start.Offset)
+                if (endBeforeSpace.Offset < 0)
                 {
                     return false;
                 }
+                end = endBeforeSpace;
             }
 
             Debug.Assert(_blockType == BlockType.Raw || _blockType == BlockType.Escape);
@@ -646,11 +628,6 @@ namespace Scriban.Parsing
                     end = new TextPosition(start.Offset - 1, start.Line, start.Column - 1);
                 }
             }
-            else
-            {
-                end = _position;
-            }
-
 
             _token = new Token(_blockType == BlockType.Escape ? TokenType.Escape : TokenType.Raw, start, end);
 
@@ -947,28 +924,6 @@ namespace Scriban.Parsing
             var start = _position;
             switch (c)
             {
-                case '\n':
-                    _token = new Token(TokenType.NewLine, start, _position);
-                    NextChar();
-                    // consume all remaining space including new lines
-                    ConsumeWhitespace(false, ref _token.End);
-                    break;
-                case '\r':
-                    NextChar();
-                    // case of: \r\n
-                    if (c == '\n')
-                    {
-                        _token = new Token(TokenType.NewLine, start, _position);
-                        NextChar();
-                        // consume all remaining space including new lines
-                        ConsumeWhitespace(false, ref _token.End);
-                        break;
-                    }
-                    // case of \r
-                    _token = new Token(TokenType.NewLine, start, start);
-                    // consume all remaining space including new lines
-                    ConsumeWhitespace(false, ref _token.End);
-                    break;
                 case ':':
                     _token = new Token(TokenType.Colon, start, start);
                     NextChar();
@@ -990,16 +945,8 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '.')
                     {
-                        var index = _position;
+                        _token = new Token(TokenType.DoubleDot, start, _position);
                         NextChar();
-                        if (c == '<')
-                        {
-                            _token = new Token(TokenType.DoubleDotLess, start, _position);
-                            NextChar();
-                            break;
-                        }
-
-                        _token = new Token(TokenType.DoubleDot, start, index);
                         break;
                     }
                     _token = new Token(TokenType.Dot, start, start);
@@ -1013,7 +960,7 @@ namespace Scriban.Parsing
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.Not, start, start);
+                    _token = new Token(TokenType.Invalid, start, start);
                     break;
 
                 case '=':
@@ -1114,17 +1061,6 @@ namespace Scriban.Parsing
             while (char.IsWhiteSpace(c) && (!stopAtNewLine || !IsNewLine(c)))
             {
                 lastSpace = _position;
-                NextChar();
-            }
-            return start != _position;
-        }
-
-
-        private bool ConsumeWhitespace(bool stopAtNewLine)
-        {
-            var start = _position;
-            while (char.IsWhiteSpace(c) && (!stopAtNewLine || !IsNewLine(c)))
-            {
                 NextChar();
             }
             return start != _position;
@@ -1366,7 +1302,7 @@ namespace Scriban.Parsing
             {
                 if (c == '\0')
                 {
-                    AddError($"Unexpected end of file while parsing a string not terminated by a {startChar}", end, end);
+                    AddError($"Unexpected end of file while parsing a verbatim string not terminated by a {startChar}", end, end);
                     return;
                 }
                 else if (c == startChar)
@@ -1448,16 +1384,17 @@ namespace Scriban.Parsing
         {
             var offset = _position.Offset + count;
 
-            return offset >= 0 && offset < Text.Length ? Text[offset] : '\0';
+            return offset >= 0 && offset < _textLength ? Text[offset] : '\0';
         }
 
         [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         private void NextChar()
         {
             _position.Offset++;
-            if (_position.Offset < Text.Length)
+            if (_position.Offset < _textLength)
             {
-                if (c == '\n')
+                var nc = Text[_position.Offset];
+                if (c == '\n' || (c == '\r' && nc != '\n'))
                 {
                     _position.Column = 0;
                     _position.Line += 1;
@@ -1466,11 +1403,11 @@ namespace Scriban.Parsing
                 {
                     _position.Column++;
                 }
-                c = Text[_position.Offset];
+                c = nc;
             }
             else
             {
-                _position.Offset = Text.Length;
+                _position.Offset = _textLength;
                 c = '\0';
             }
         }

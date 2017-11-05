@@ -18,6 +18,7 @@ namespace Scriban.Functions
     {
         public StringFunctions()
         {
+            this.SetValue("truncate", new DelegateCustomFunction(Truncate), true);
             // We need to handle "slice"/"truncate" differently as we have an optional parameters
             this.SetValue("slice", new DelegateCustomFunction(Slice), true);
             // The liquid version of slice
@@ -201,14 +202,41 @@ namespace Scriban.Functions
             return Regex.Replace(text, @"\r?\n", string.Empty);
         }
 
-        public static string Truncate(int length, string text)
+        [ScriptMemberIgnore]
+        public static string Truncate(int length, string ellipsis, string text)
         {
+            ellipsis = ellipsis ?? "...";
             if (string.IsNullOrEmpty(text))
             {
                 return string.Empty;
             }
-            int lMinusTruncate = length - "...".Length;
-            return text.Length > length ? text.Substring(0, lMinusTruncate < 0 ? 0 : lMinusTruncate) + "..." : text;
+            int lMinusTruncate = length - ellipsis.Length;
+            if (text.Length > length)
+            {
+                var builder = new StringBuilder(length);
+                builder.Append(text, 0, lMinusTruncate < 0 ? 0 : lMinusTruncate);
+                builder.Append(ellipsis);
+                return builder.ToString();
+            }
+            return text;
+        }
+
+        private static object Truncate(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
+        {
+            if (parameters.Count < 2 || parameters.Count > 3)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for truncate. Expecting at least 2 parameters <length> <ellipsis>? <text>");
+            }
+
+            var length = context.ToInt(callerContext.Span, parameters[0]);
+            var ellipsis = "...";
+            var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
+            if (parameters.Count == 3)
+            {
+                ellipsis = context.ToString(callerContext.Span, parameters[1]);
+            }
+
+            return Truncate(length, ellipsis, text);
         }
 
         public static string Truncatewords(int count, string text)

@@ -184,6 +184,7 @@ namespace Scriban.Tests
         public void ParseCodeEnterAndCodeExitWithNewLineAndTextInRaw()
         {
             // In this case a raw token is generated
+            //          01234 5 6
             var text = "{{}}\r\na";
             var tokens = ParseTokens(text);
             Assert.AreEqual(new List<Token>
@@ -293,21 +294,35 @@ namespace Scriban.Tests
         public void ParseWithoutSpaces()
         {
             {
-                //          0123456
-                var text = " {{~ }}";
+                //                       1
+                //          0 12 3 4567890
+                var text = "\n \r\n {{~ }}";
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
-                    new Token(TokenType.Whitespace, new TextPosition(0, 0, 0), new TextPosition(0, 0, 0)),
-                    new Token(TokenType.CodeEnter, new TextPosition(1, 0, 1), new TextPosition(3, 0, 3)),
-                    new Token(TokenType.CodeExit, new TextPosition(5, 0, 5), new TextPosition(6, 0, 6)),
+                    new Token(TokenType.Whitespace, new TextPosition(0, 0, 0), new TextPosition(4, 2, 0)),
+                    new Token(TokenType.CodeEnter, new TextPosition(5, 2, 1), new TextPosition(7, 2, 3)),
+                    new Token(TokenType.CodeExit, new TextPosition(9, 2, 5), new TextPosition(10, 2, 6)),
+                    Token.Eof,
+                }, tokens);
+            }
+            {
+                //          01234567
+                var text = "a {{~ }}";
+                var tokens = ParseTokens(text);
+                Assert.AreEqual(new List<Token>()
+                {
+                    new Token(TokenType.Raw, new TextPosition(0, 0, 0), new TextPosition(0, 0, 0)),
+                    new Token(TokenType.Whitespace, new TextPosition(1, 0, 1), new TextPosition(1, 0, 1)),
+                    new Token(TokenType.CodeEnter, new TextPosition(2, 0, 2), new TextPosition(4, 0, 4)),
+                    new Token(TokenType.CodeExit, new TextPosition(6, 0, 6), new TextPosition(7, 0, 7)),
                     Token.Eof,
                 }, tokens);
             }
             {
                 //          0          1          2
                 //          01234567 89012345 6789012
-                var text = "{{ ~}} \n       \n      \n";
+                var text = "{{ ~}} \n      \r\n      \n";
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
@@ -348,6 +363,7 @@ namespace Scriban.Tests
         {
             VerifySimpleTokens(new Dictionary<string, TokenType>()
             {
+                {"\x01", TokenType.Invalid},
                 {"@", TokenType.Arroba},
                 {"^", TokenType.Caret},
                 {"*", TokenType.Multiply},
@@ -370,12 +386,49 @@ namespace Scriban.Tests
                 {"==", TokenType.CompareEqual},
                 {">=", TokenType.CompareGreaterOrEqual},
                 {"<=", TokenType.CompareLessOrEqual},
+                {"&", TokenType.Invalid},
                 {"&&", TokenType.And},
                 {"??", TokenType.EmptyCoalescing},
                 {"||", TokenType.Or},
                 {"..", TokenType.DoubleDot},
                 {"..<", TokenType.DoubleDotLess},
             });
+            //{ "{", TokenType.OpenBrace}, // We cannot test them individualy here as they are used in the lexer to match braces and better handle closing code }}
+            //{ "}", TokenType.CloseBrace},
+        }
+
+        [Test]
+        public void ParseLiquidTokens()
+        {
+            VerifySimpleTokens(new Dictionary<string, TokenType>()
+            {
+                {"\x01", TokenType.Invalid},
+                {"@", TokenType.Invalid},
+                {"^", TokenType.Invalid},
+                {"*", TokenType.Invalid},
+                {"+", TokenType.Invalid},
+                {"-", TokenType.Invalid},
+                {"/", TokenType.Invalid},
+                {"%", TokenType.Invalid},
+                {"=", TokenType.Equal},
+                {"!", TokenType.Invalid},
+                {"|", TokenType.Pipe},
+                {",", TokenType.Comma},
+                {".", TokenType.Dot},
+                {"(", TokenType.OpenParent},
+                {")", TokenType.CloseParent},
+                {"[", TokenType.OpenBracket},
+                {"]", TokenType.CloseBracket},
+                {"<", TokenType.CompareLess},
+                {">", TokenType.CompareGreater},
+                {"==", TokenType.CompareEqual},
+                {"!=", TokenType.CompareNotEqual},
+                {">=", TokenType.CompareGreaterOrEqual},
+                {"<=", TokenType.CompareLessOrEqual},
+                {"?", TokenType.Question},
+                {"&", TokenType.Invalid},
+                {"..", TokenType.DoubleDot}
+            }, true);
             //{ "{", TokenType.OpenBrace}, // We cannot test them individualy here as they are used in the lexer to match braces and better handle closing code }}
             //{ "}", TokenType.CloseBrace},
         }
@@ -422,10 +475,45 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void ParseNumberInvalid()
+        {
+            var lexer = new Lexer("{{ 1e }}");
+            var tokens = lexer.ToList();
+            Assert.True(lexer.HasErrors);
+            StringAssert.Contains("Expecting at least one digit after the exponent", lexer.Errors.First().Message);
+        }
+
+        [Test]
         public void ParseCommentSingleLine()
         {
             var comment = "{{# This is a comment}}";
             VerifyCodeBlock(comment, new Token(TokenType.Comment, new TextPosition(2, 0, 2), new TextPosition(comment.Length-3, 0, comment.Length-3)) );
+        }
+
+        [Test]
+        public void ParseCommentSingleLineEof()
+        {
+            var text = "{{# This is a comment";
+            var tokens = ParseTokens(text);
+            Assert.AreEqual(new List<Token>()
+            {
+                new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
+                new Token(TokenType.Comment, new TextPosition(2, 0, 2), new TextPosition(20, 0, 20)),
+                Token.Eof,
+            }, tokens);
+        }
+
+        [Test]
+        public void ParseCommentMultiLineEof()
+        {
+            var text = "{{## This is a comment";
+            var tokens = ParseTokens(text);
+            Assert.AreEqual(new List<Token>()
+            {
+                new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
+                new Token(TokenType.CommentMulti, new TextPosition(2, 0, 2), new TextPosition(21, 0, 21)),
+                Token.Eof,
+            }, tokens);
         }
 
         [Test]
@@ -471,6 +559,149 @@ single line
         }
 
         [Test]
+        public void ParseUnbalancedCloseBrace()
+        {
+            {
+                var lexer = new Lexer("{{ } }}");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected } while no matching", lexer.Errors.First().Message);
+            }
+        }
+
+        [Test]
+        public void ParseStringInvalid()
+        {
+            {
+                var lexer = new Lexer("{{ '\\u' }}");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+            }
+            {
+                var lexer = new Lexer("{{ '\\u1' }}");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+            }
+            {
+                var lexer = new Lexer("{{ '\\u12' }}");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+            }
+            {
+                var lexer = new Lexer("{{ '\\u123' }}");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+            }
+            {
+                var lexer = new Lexer("{{ '\\x' }}");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+            }
+            {
+                var lexer = new Lexer("{{ '\\x1' }}");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+            }
+            {
+                var lexer = new Lexer("{{ '");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected end of file while parsing a string not terminated", lexer.Errors.First().Message);
+            }
+            {
+                var lexer = new Lexer("{{ `");
+                var tokens = lexer.ToList();
+                Assert.True(lexer.HasErrors);
+                StringAssert.Contains("Unexpected end of file while parsing a verbatim string not terminated by", lexer.Errors.First().Message);
+            }
+        }
+
+        [Test]
+        public void ParseTestNewLine()
+        {
+            {
+                //          0       
+                //          01234 567
+                var text = "{{ a\r }}";
+                var tokens = ParseTokens(text);
+                Assert.AreEqual(new List<Token>()
+                {
+                    new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
+                    new Token(TokenType.Identifier, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                    new Token(TokenType.NewLine, new TextPosition(4, 0, 4), new TextPosition(5, 1, 0)),
+                    new Token(TokenType.CodeExit, new TextPosition(6, 1, 1), new TextPosition(7, 1, 2)),
+                    Token.Eof,
+                }, tokens);
+            }
+            {
+                //          0       
+                //          01234 567
+                var text = "{{ a\n }}";
+                var tokens = ParseTokens(text);
+                Assert.AreEqual(new List<Token>()
+                {
+                    new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
+                    new Token(TokenType.Identifier, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                    new Token(TokenType.NewLine, new TextPosition(4, 0, 4), new TextPosition(5, 1, 0)),
+                    new Token(TokenType.CodeExit, new TextPosition(6, 1, 1), new TextPosition(7, 1, 2)),
+                    Token.Eof,
+                }, tokens);
+            }
+            {
+                //          0       
+                //          01234 5 678
+                var text = "{{ a\r\n }}";
+                var tokens = ParseTokens(text);
+                Assert.AreEqual(new List<Token>()
+                {
+                    new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
+                    new Token(TokenType.Identifier, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                    new Token(TokenType.NewLine, new TextPosition(4, 0, 4), new TextPosition(6, 1, 0)),
+                    new Token(TokenType.CodeExit, new TextPosition(7, 1, 1), new TextPosition(8, 1, 2)),
+                    Token.Eof,
+                }, tokens);
+            }
+        }
+
+        [Test]
+        public void ParseStringEscapeEol()
+        {
+            //          0           1
+            //          012345678 9 0123
+            var text = "{{ 'text\\\n' }}";
+            var tokens = ParseTokens(text);
+            Assert.AreEqual(new List<Token>()
+            {
+                new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
+                new Token(TokenType.String, new TextPosition(3, 0, 3), new TextPosition(10, 1, 0)),
+                new Token(TokenType.CodeExit, new TextPosition(12, 1, 2), new TextPosition(13, 1, 3)),
+                Token.Eof,
+            }, tokens);
+        }
+
+        [Test]
+        public void ParseStringEscapeEol2()
+        {
+            //          0           1
+            //          012345678 9 0 1234
+            var text = "{{ 'text\\\r\n' }}";
+            var tokens = ParseTokens(text);
+            Assert.AreEqual(new List<Token>()
+            {
+                new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
+                new Token(TokenType.String, new TextPosition(3, 0, 3), new TextPosition(11, 1, 0)),
+                new Token(TokenType.CodeExit, new TextPosition(13, 1, 2), new TextPosition(14, 1, 3)),
+                Token.Eof,
+            }, tokens);
+        }
+
+        [Test]
         public void ParseStringMultiLine()
         {
             var text = @"{{""This a string on 
@@ -498,12 +729,12 @@ end}}This is a test";
             // TODO Add testd
         }
 
-        private void VerifySimpleTokens(Dictionary<string, TokenType> simpleTokens)
+        private void VerifySimpleTokens(Dictionary<string, TokenType> simpleTokens, bool isLiquid = false)
         {
             foreach (var token in simpleTokens)
             {
                 var text = "{{ " + token.Key + " }}";
-                VerifyCodeBlock(text, new Token(token.Value, new TextPosition(3, 0, 3), new TextPosition(3 + token.Key.Length - 1, 0, 3 + token.Key.Length - 1)) );
+                VerifyCodeBlock(text, isLiquid, new Token(token.Value, new TextPosition(3, 0, 3), new TextPosition(3 + token.Key.Length - 1, 0, 3 + token.Key.Length - 1)) );
             }
         }
 
@@ -521,6 +752,11 @@ end}}This is a test";
 
         private void VerifyCodeBlock(string text, params Token[] expectedTokens)
         {
+            VerifyCodeBlock(text, false, expectedTokens);
+        }
+
+        private void VerifyCodeBlock(string text, bool isLiquid, params Token[] expectedTokens)
+        {
             var expectedTokenList = new List<Token>();
             expectedTokenList.Add(new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)));
             expectedTokenList.AddRange(expectedTokens);
@@ -534,7 +770,7 @@ end}}This is a test";
             }
             expectedTokenList.Add(Token.Eof);
 
-            var tokens = ParseTokens(text);
+            var tokens = ParseTokens(text, isLiquid);
             Assert.AreEqual(expectedTokenList, tokens, $"Unexpected error while parsing: {text}");
 
             VerifyTokenGetText(tokens, text);

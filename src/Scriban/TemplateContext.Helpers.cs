@@ -23,15 +23,19 @@ namespace Scriban
         /// <param name="span"></param>
         /// <param name="against"></param>
         /// <returns></returns>
-        public virtual bool IsEmpty(SourceSpan span, object against)
+        public virtual object IsEmpty(SourceSpan span, object against)
         {
             if (against == null)
             {
-                return true;
+                return null;
             }
             if (against is IList)
             {
                 return ((IList)against).Count == 0;
+            }
+            if (against is IEnumerable)
+            {
+                return !((IEnumerable)against).GetEnumerator().MoveNext();
             }
             if (against.GetType().GetTypeInfo().IsPrimitive)
             {

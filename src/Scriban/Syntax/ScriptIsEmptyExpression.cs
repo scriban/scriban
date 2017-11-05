@@ -30,10 +30,6 @@ namespace Scriban.Syntax
         public object GetValue(TemplateContext context)
         {
             var targetObject = GetTargetObject(context, false);
-            if (targetObject == null)
-            {
-                return null;
-            }
             return context.IsEmpty(Span, targetObject);
         }
 

@@ -4,3 +4,6 @@ page.title: {{ page.title }}
 user.name: {{ user.name }}
 assign for = 5: {% assign for = 5 %}
 for: {{ for }}
+products[0].title: {{ products[0].title }}
+product.empty?: {{ product.empty? }}
+null.empty?: {{ null.empty? }}

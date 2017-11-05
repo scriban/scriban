@@ -43,7 +43,8 @@ slice1:{{ "test" | string.slice1 1 }}
 {{ "   test   " | string.strip }}
 {{ "test\r\ntest\r\n" | string.strip_newlines }}
 {{ null | string.strip_newlines }}
-{{ "This is a long test with several chars in it but going to be truncated" | string.truncate 15 }}
+truncate: {{ "This is a long test with several chars in it but going to be truncated" | string.truncate 15 }}
+{{ "This is a long test with several chars in it but going to be truncated" | string.truncate 20 " and blabla..." }}
 {{ null | string.truncate 15 }}
 {{ "This is a test truncated at 5" | string.truncatewords 5 }}
 {{ "" | string.truncatewords 5 }}

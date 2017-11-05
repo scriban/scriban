@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -26,17 +26,7 @@ namespace Scriban.Parsing
             var builder = new StringBuilder();
             builder.Append(Span.ToStringSimple());
             builder.Append(" : ");
-            switch (Type)
-            {
-                case ParserMessageType.Error:
-                    builder.Append("error");
-                    break;
-                case ParserMessageType.Warning:
-                    builder.Append("warning");
-                    break;
-                default:
-                    throw new InvalidOperationException($"Message type `{Type}` not supported");
-            }
+            builder.Append(Type.ToString().ToLowerInvariant());
             builder.Append(" : ");
             if (Message != null)
             {
