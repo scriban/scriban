@@ -20,6 +20,8 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestParser
     {
+        const bool EnableTokensOutput = false;
+
         private const string RelativeBasePath = @"..\..\TestFiles";
         private const string InputFilePattern = "*.txt";
         private const string OutputEndFileExtension = ".out.txt";
@@ -305,8 +307,49 @@ end
             Console.WriteLine(result);
         }
 
-        [TestCaseSource("TestFiles")]
-        public void Test(string inputName)
+        [TestCaseSource("ListTestFiles", new object[] { "000-basic" }, Category= "Basic")]
+        public static void A000_basic(string inputName)
+        {
+            TestFile(inputName);
+        }
+
+        [TestCaseSource("ListTestFiles", new object[] { "010-literals" }, Category = "Basic")]
+        public static void A010_literals(string inputName)
+        {
+            TestFile(inputName);
+        }
+
+        [TestCaseSource("ListTestFiles", new object[] { "100-expressions" }, Category = "Basic")]
+        public static void A100_expressions(string inputName)
+        {
+            TestFile(inputName);
+        }
+
+        [TestCaseSource("ListTestFiles", new object[] { "200-statements" }, Category = "Basic")]
+        public static void A200_statements(string inputName)
+        {
+            TestFile(inputName);
+        }
+
+        [TestCaseSource("ListTestFiles", new object[] { "300-functions" }, Category = "Basic")]
+        public static void A300_functions(string inputName)
+        {
+            TestFile(inputName);
+        }
+
+        [TestCaseSource("ListTestFiles", new object[] { "400-builtins" }, Category = "Basic")]
+        public static void A400_builtins(string inputName)
+        {
+            TestFile(inputName);
+        }
+
+        [TestCaseSource("ListTestFiles", new object[] { "500-liquid" }, Category = "Basic")]
+        public static void A500_liquid(string inputName)
+        {
+            TestFile(inputName);
+        }
+
+        private static void TestFile(string inputName)
         {
             var isSupportingExactRoundTrip = !NotSupportingExactRoundtrip.Contains(Path.GetFileName(inputName));
 
@@ -364,14 +407,17 @@ end
                 parserOptions.ExpressionDepthLimit = 500;
             }
 
-            Console.WriteLine("Tokens");
-            Console.WriteLine("======================================");
-            var lexer = new Lexer(input, options: lexerOptions);
-            foreach (var token in lexer)
+            if (EnableTokensOutput)
             {
-                Console.WriteLine($"{token.Type}: {token.GetText(input)}");
+                Console.WriteLine("Tokens");
+                Console.WriteLine("======================================");
+                var lexer = new Lexer(input, options: lexerOptions);
+                foreach (var token in lexer)
+                {
+                    Console.WriteLine($"{token.Type}: {token.GetText(input)}");
+                }
+                Console.WriteLine();
             }
-            Console.WriteLine();
 
             string roundtripText = null;
 
@@ -528,22 +574,20 @@ end
             return text.ToString();
         }
 
-        public static IEnumerable TestFiles
+        public static IEnumerable ListTestFiles(string folder)
         {
-            get
+            var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
+            foreach (var file in
+                Directory.EnumerateFiles(Path.Combine(baseDir, folder), InputFilePattern, SearchOption.AllDirectories)
+                    .Where(f => !f.EndsWith(OutputEndFileExtension))
+                    .Select(f => f.StartsWith(baseDir) ? f.Substring(baseDir.Length + 1) : f)
+                    .OrderBy(f => f))
             {
-                var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
-                foreach (var file in
-                    Directory.EnumerateFiles(baseDir, InputFilePattern, SearchOption.AllDirectories)
-                        .Where(f => !f.EndsWith(OutputEndFileExtension))
-                        .Select(f => f.StartsWith(baseDir) ? f.Substring(baseDir.Length + 1) : f)
-                        .OrderBy(f => f))
-                {
-                    var caseData = new TestCaseData(file);
-                    caseData.TestName = Path.GetFileNameWithoutExtension(file);
-                    caseData.SetCategory(Path.GetDirectoryName(file));
-                    yield return caseData;
-                }
+                var caseData = new TestCaseData(file);
+                var category = Path.GetDirectoryName(file);
+                caseData.TestName = category + "/" + Path.GetFileNameWithoutExtension(file);
+                caseData.SetCategory(category);
+                yield return caseData;
             }
         }
 
