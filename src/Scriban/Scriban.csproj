@@ -5,7 +5,7 @@
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.11.0</VersionPrefix>
+    <VersionPrefix>0.12.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
     <TargetFrameworks>net35;net40;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1;netstandard1.3;uap10.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
@@ -13,6 +13,10 @@
     <PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
+&gt; 0.12.0
+ - More compatibility added for liquid
+ - Breaking change of function parameters order to allow default values
+ - Works on API towards 1.0.0       
 &gt; 0.11.0
  - Add support for remaining liquid language constructions (fot with limits/offset, tablerow, cycle, include...etc.)        
  - Improve AST to text
@@ -23,11 +27,6 @@
  - Add support for AST to text
  - Add support for caes/when
  - Improve performance
-&gt; 0.9.1
- - Add string.append, string.prepend, string.md5/sha1/sha256/hmac_sha1/hmac_sha256, html.escape, html.url_encode, html.url_escape, html.strip
- - Add support for `TemplateContext.StrictVariables`
-&gt; 0.9.0
- - Improves API with some breaking changes, work towards 1.0
     </PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/img/scriban.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
