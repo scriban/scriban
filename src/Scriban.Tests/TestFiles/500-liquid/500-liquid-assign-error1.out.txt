@@ -1,0 +1,1 @@
+text(1,11) : error : Expecting an assign expression: <variable> = <expression>

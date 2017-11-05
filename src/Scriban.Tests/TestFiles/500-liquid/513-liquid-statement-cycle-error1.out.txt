@@ -1,0 +1,1 @@
+text(1,23) : error : Unexpected token `|` after cycle value `two`. Expecting a `,`

@@ -37,7 +37,7 @@ namespace Scriban.Parsing
                     literal = ParseVerbatimString();
                     break;
                 default:
-                    LogError(Current, "Unexpected token found `{GetAsText(Current)}` while parsing a literal");
+                    LogError(Current, "Unexpected token found `{GetAsText(Current)}` while parsing a variable or literal");
                     break;
             }
             return literal;

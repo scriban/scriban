@@ -275,6 +275,7 @@ namespace Scriban.Parsing
                 else
                 {
                     LogError(Current, $"Unexpected token `{GetAsText(Current)}` after cycle value `{value}`. Expecting a `,`");
+                    NextToken();
                     break;
                 }
             }
@@ -345,9 +346,17 @@ namespace Scriban.Parsing
         {
             var include = Open<ScriptFunctionCall>();
             include.Target = ParseVariable();
+
+            var templateNameToken = Current;
             var templateName = ExpectAndParseExpression(include, mode: ParseExpressionMode.BasicExpression);
             if (templateName != null)
             {
+                var literal = templateName as ScriptLiteral;
+                if (!(literal?.Value is string || templateName is IScriptVariablePath))
+                {
+                    LogError(templateNameToken, $"Unexpected include template name `{templateName}` expecting a string or a variable path");
+                }
+
                 include.Arguments.Add(templateName);
             }
             Close(include);
@@ -420,15 +429,16 @@ namespace Scriban.Parsing
                     if (variable == null)
                     {
                         LogError(variableToken, $"Unexpected variable name `{GetAsText(variableToken)}` found in include parameter");
-                        break;
                     }
 
-                    if (Current.Type != TokenType.Colon)
+                    if (Current.Type == TokenType.Colon)
+                    {
+                        NextToken(); // skip :
+                    }
+                    else
                     {
                         LogError(Current, $"Unexpected token `{GetAsText(Current)}` after variable `{variable}`. Expecting a `:`");
-                        break;
                     }
-                    NextToken(); // skip :
 
                     if (block == null)
                     {

@@ -297,6 +297,14 @@
     <Content Include="TestFiles\400-builtins\420-math.txt" />
     <Content Include="TestFiles\400-builtins\410-array.out.txt" />
     <Content Include="TestFiles\400-builtins\410-array.txt" />
+    <Content Include="TestFiles\500-liquid\500-liquid-assign-error1.out.txt" />
+    <Content Include="TestFiles\500-liquid\500-liquid-assign-error1.txt" />
+    <Content Include="TestFiles\500-liquid\513-liquid-statement-cycle-error1.out.txt" />
+    <Content Include="TestFiles\500-liquid\513-liquid-statement-cycle-error1.txt" />
+    <Content Include="TestFiles\500-liquid\520-liquid-statement-include-error2.out.txt" />
+    <Content Include="TestFiles\500-liquid\520-liquid-statement-include-error2.txt" />
+    <Content Include="TestFiles\500-liquid\520-liquid-statement-include-error1.out.txt" />
+    <Content Include="TestFiles\500-liquid\520-liquid-statement-include-error1.txt" />
     <Content Include="TestFiles\500-liquid\530-liquid-pipes.out.txt" />
     <Content Include="TestFiles\500-liquid\530-liquid-pipes.txt" />
     <Content Include="TestFiles\500-liquid\502-liquid-comment.out.txt" />

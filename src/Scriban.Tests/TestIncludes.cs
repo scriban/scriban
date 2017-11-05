@@ -85,7 +85,7 @@ namespace Scriban.Tests
         [Test]
         public void TestLiquidNull()
         {
-            TestParser.AssertTemplate("", "{% include null %}", true);
+            TestParser.AssertTemplate("", "{% include a %}", true);
         }
 
         [Test]

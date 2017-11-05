@@ -1,0 +1,1 @@
+{% assign variable | 1 %}
