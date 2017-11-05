@@ -353,6 +353,33 @@ namespace Scriban
         /// </summary>
         /// <param name="variable">The variable.</param>
         /// <param name="value">The value.</param>
+        /// <exception cref="System.ArgumentNullException">If variable is null</exception>
+        /// <exception cref="ScriptRuntimeException">If an existing variable is already read-only</exception>
+        public void SetValue(ScriptVariableLoop variable, object value)
+        {
+            if (variable == null) throw new ArgumentNullException(nameof(variable));
+
+            if (_loopStores.Count > 0)
+            {
+                // Try to set the variable
+                var store = _loopStores.Peek();
+                if (!store.TrySetValue(variable.Name, value, false))
+                {
+                    throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
+                }
+            }
+            else
+            {
+                // unit test: 215-for-special-var-error1.txt
+                throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
+            }
+        }
+
+        /// <summary>
+        /// Sets the variable with the specified value.
+        /// </summary>
+        /// <param name="variable">The variable.</param>
+        /// <param name="value">The value.</param>
         /// <param name="asReadOnly">if set to <c>true</c> the variable set will be read-only.</param>
         /// <exception cref="System.ArgumentNullException">If variable is null</exception>
         /// <exception cref="ScriptRuntimeException">If an existing variable is already read-only</exception>
