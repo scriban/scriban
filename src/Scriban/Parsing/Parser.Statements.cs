@@ -388,7 +388,7 @@ namespace Scriban.Parsing
 
                 if (ExpectEndOfStatement(forStatement))
                 {
-                    FlushTrivias(forStatement.Iterator, false);
+                    FlushTrivias(forStatement.IteratorOrLastParameter, false);
                     forStatement.Body = ParseBlockStatement(forStatement);
                 }
             }

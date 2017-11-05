@@ -21,6 +21,10 @@ namespace Scriban.Syntax
 
         public List<ScriptNamedParameter> NamedParameters { get; set; }
 
+        internal ScriptNode IteratorOrLastParameter => NamedParameters != null && NamedParameters.Count > 0
+            ? NamedParameters[NamedParameters.Count - 1]
+            : Iterator;
+
         protected override void EvaluateImpl(TemplateContext context)
         {
             var loopIterator = context.Evaluate(Iterator);
