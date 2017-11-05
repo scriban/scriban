@@ -1,0 +1,1 @@
+text(1,10) : error : Unexpected number of arguments `0` for cycle. Expecting at least 1 parameter: cycle [val1, val2..] or cycle <group> [val1, val2...]

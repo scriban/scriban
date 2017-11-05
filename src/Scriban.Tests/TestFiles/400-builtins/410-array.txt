@@ -63,3 +63,17 @@ Multiple cycle group:
     array.cycle "group2" ["d", "e"]
 end
 }}
+[5,6,7,8] | array.limit 2: {{ [5,6,7,8] | array.limit 2 }}
+null | array.limit 2:
+[5,6,7,8] | array.offset 2: {{ [5,6,7,8] | array.offset 2 }}
+[5,6,7,8] | array.offset 5: {{ [5,6,7,8] | array.offset 5 }}
+[5,6,7,8] | array.offset (-10): {{ [5,6,7,8] | array.offset (-10) }}
+null | array.offset 2:
+[1,2,3] | array.concat [5,6]: {{ [1,2,3] | array.concat [5,6] }}
+null | array.concat [5,6]: {{ null | array.concat [5,6] }}
+[1,2,3] | array.concat null: {{ [1,2,3] | array.concat null }}
+null | array.concat null:{{ null | array.concat null }}
+[1, null, 3] | array.compact: {{ [1, null, 3] | array.compact }}
+null | array.compact:{{ null | array.compact }}
+products | array.sort "title" | array.map "title": {{ products | array.sort "title" | array.map "title" | array.uniq }}
+5 | array.sort: {{ 5 | array.sort }}

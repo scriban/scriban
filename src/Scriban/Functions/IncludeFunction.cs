@@ -25,18 +25,10 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the name of the template to include for the <include> function");
             }
 
-            string templateName = null;
-            try
-            {
-                templateName = context.ToString(callerContext.Span, parameters[0]);
-            }
-            catch (Exception ex)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while converting first parameter for <include> function. Expecting a string", ex);
-            }
+            var templateName = context.ToString(callerContext.Span, parameters[0]);
 
             // If template name is empty, throw an exception
-            if (templateName == null || string.IsNullOrEmpty(templateName = templateName.Trim()))
+            if (string.IsNullOrEmpty(templateName))
             {
                 // In a liquid template context, we let an include to continue without failing
                 if (context is LiquidTemplateContext)
@@ -54,9 +46,9 @@ namespace Scriban.Functions
 
             var templatePath = templateLoader.GetPath(context, callerContext.Span, templateName);
             // If template name is empty, throw an exception
-            if (templatePath == null || string.IsNullOrEmpty(templatePath = templatePath.Trim()))
+            if (templatePath == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Include template path cannot be null or empty");
+                throw new ScriptRuntimeException(callerContext.Span, $"Include template path cannot be null");
             }
 
             // Compute a new parameters for the include
@@ -94,36 +86,19 @@ namespace Scriban.Functions
                 context.CachedTemplates.Add(templatePath, template);
             }
 
-            // Query the pending includes stored in the context
-            HashSet<string> pendingIncludes;
-            object pendingIncludesObject;
-            if (!context.Tags.TryGetValue(typeof(IncludeFunction), out pendingIncludesObject))
-            {
-                pendingIncludesObject = pendingIncludes = new HashSet<string>();
-                context.Tags[typeof (IncludeFunction)] = pendingIncludesObject;
-            }
-            else
-            {
-                pendingIncludes = (HashSet<string>) pendingIncludesObject;
-            }
-
             // Make sure that we cannot recursively include a template
-            if (pendingIncludes.Contains(templateName))
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"The include `{templateName}` cannot be used recursively");
-            }
-            pendingIncludes.Add(templateName);
 
             context.PushOutput();
             object result = null;
             try
             {
+                context.EnterRecursive(callerContext);
                 result = template.Render(context);
+                context.ExitRecursive(callerContext);
             }
             finally
             {
                 context.PopOutput();
-                pendingIncludes.Remove(templateName);
             }
 
             return result;

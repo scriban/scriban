@@ -1,26 +1,55 @@
+{{ "test" | string.size }}
+{{ null | string.size }}
 {{ "test" | string.capitalize }}
 {{ "Test" | string.capitalize }}
 {{ "TeSt" | string.downcase }}
 {{ "teSt" | string.downcase }}
-{{ "This & is a @@^^&%%%%% value" | string.handleize }}
+{{ "This & is a @@^^&%%%%% value@@" | string.handleize }}
 {{ "    test" | string.lstrip }}
 {{ 5 | string.pluralize 'item' 'items' }}
-{{ "This is a test with a test" | string.remove 'test' }}
-{{ "This is a test with a test" | string.remove_first 'test' }}
-{{ "This is a test with a test" | string.replace 'test' 'boom'}}
-{{ "This is a test with a test" | string.replace_first 'test' 'boom'}}
+remove:{{ "This is a test with a test" | string.remove 'test' }}
+{{ "This is a test with a test" | string.remove null }}
+{{ null | string.remove "test" }}
+remove_first:{{ "This is a test with a test" | string.remove_first 'test' }}
+{{ "This is a test with a test" | string.remove_first null }}
+{{ null | string.remove_first "test" }}
+replace:{{ "This is a test with a test" | string.replace 'test' 'boom'}}
+{{ null | string.replace 'test' 'boom'}}
+replace_first:{{ "This is a test with a test" | string.replace_first 'test' 'boom'}}
+{{ "This is a test with a test" | string.replace_first 'nothing' 'boom'}}
+{{ null | string.replace_first 'test' 'boom'}}
+{{ "yoyo" | string.replace_first null 'boom'}}
 {{ "test     " | string.rstrip }}
-{{ "test" | string.slice 1 }}
+slice:{{ "test" | string.slice 1 }}
+{{ "test" | string.slice 1 2 }}
+{{ "test" | string.slice (-5) 3 }}
+{{ "test" | string.slice 3 5 }}
+{{ null | string.slice 1 }}
+{{ "test" | string.slice 10 }}
 {{ "test" | string.slice (-2) }}
+{{ "test" | string.slice (-10) }}
+slice1:{{ "test" | string.slice1 1 }}
+{{ "test" | string.slice1 1 2 }}
+{{ "test" | string.slice1 (-5) 3 }}
+{{ "test" | string.slice1 3 5 }}
+{{ null | string.slice1 1 }}
+{{ "test" | string.slice1 10 }}
+{{ "test" | string.slice1 (-2) }}
+{{ "test" | string.slice1 10 }}
 {{ "a/b/c/d/e//f" | string.split '/' | array.join ' | ' }}
+{{ null | string.split '/' }}
 {{ "test" | string.starts_with 'test'}}
 {{ "test" | string.starts_with 'toto'}}
 {{ "   test   " | string.strip }}
 {{ "test\r\ntest\r\n" | string.strip_newlines }}
+{{ null | string.strip_newlines }}
 {{ "This is a long test with several chars in it but going to be truncated" | string.truncate 15 }}
+{{ null | string.truncate 15 }}
 {{ "This is a test truncated at 5" | string.truncatewords 5 }}
+{{ "" | string.truncatewords 5 }}
 {{ "test" | string.upcase }}
 {{ "This will capitalize words" | string.capitalizewords }}
+{{ null | string.capitalizewords }}
 {{ "This is a string" | string.append " + another string" }}
 {{ "This is a string" | string.prepend "another string + " }}
 null | string.append "+ another string": {{ null | string.append "+ another string" }}
@@ -29,3 +58,16 @@ null | string.append null: {{ null | string.append null }}
 md5: {{ "test" | string.md5 }}
 sha1: {{ "test" | string.sha1 }}
 sha256: {{ "test" | string.sha256 }}
+hmac_sha1: {{ "test" | string.hmac_sha1 "secret" }}
+hmac_sha256: {{ "test" | string.hmac_sha256 "secret" }}
+"tota" | string.contains "ta": {{ "tota" | string.contains "ta" }}
+null | string.contains "ta": {{ null | string.contains "ta" }}
+"tota" | string.contains null: {{ "tota" | string.contains null }}
+"tota" | string.starts_with "ta": {{ "tota" | string.starts_with "ta" }}
+"tota" | string.starts_with "to": {{ "tota" | string.starts_with "to" }}
+null | string.starts_with "ta": {{ null | string.starts_with "ta" }}
+"tota" | string.starts_with null: {{ "tota" | string.starts_with null }}
+"tota" | string.ends_with "ta": {{ "tota" | string.ends_with "ta" }}
+"tota" | string.ends_with "to": {{ "tota" | string.ends_with "to" }}
+null | string.ends_with "ta": {{ null | string.ends_with "ta" }}
+"tota" | string.ends_with null: {{ "tota" | string.ends_with null }}

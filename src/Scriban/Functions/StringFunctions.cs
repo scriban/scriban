@@ -21,13 +21,12 @@ namespace Scriban.Functions
             // We need to handle "slice"/"truncate" differently as we have an optional parameters
             this.SetValue("slice", new DelegateCustomFunction(Slice), true);
             // The liquid version of slice
-            this.SetValue("slice_at", new DelegateCustomFunction(SliceAt), true);
+            this.SetValue("slice1", new DelegateCustomFunction(Slice1), true);
         }
 
         public static int Size(string text)
         {
-            if (text == null) return 0;
-            return text.Length;
+            return string.IsNullOrEmpty(text) ? 0 : text.Length;
         }
 
         public static string Append(string toAppend, string text)
@@ -284,7 +283,7 @@ namespace Scriban.Functions
 
         public static bool Contains(string text, string input)
         {
-            if (input == null || text == null)
+            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(text))
             {
                 return false;
             }
@@ -293,7 +292,7 @@ namespace Scriban.Functions
 
         public static bool StartsWith(string start, string text)
         {
-            if (start == null || text == null)
+            if (string.IsNullOrEmpty(start) || string.IsNullOrEmpty(text))
             {
                 return false;
             }
@@ -304,7 +303,7 @@ namespace Scriban.Functions
 
         public static bool EndsWith(string start, string text)
         {
-            if (start == null || text == null)
+            if (string.IsNullOrEmpty(start) || string.IsNullOrEmpty(text))
             {
                 return false;
             }
@@ -340,26 +339,32 @@ namespace Scriban.Functions
         [ScriptMemberIgnore]
         public static string Slice(string text, int start, int length = -1)
         {
-            if (text == null || start > text.Length)
+            if (string.IsNullOrEmpty(text) || start >= text.Length)
             {
                 return string.Empty;
-            }
-
-            if (length < 0)
-            {
-                length = text.Length - start;
             }
 
             if (start < 0)
             {
-                start = Math.Max(start + text.Length, 0);
+                start = start + text.Length;
             }
-            var end = start + length;
-            if (end <= start)
+
+            if (length < 0)
             {
-                return string.Empty;
+                length = text.Length;
             }
-            if (end > text.Length)
+
+            if (start < 0)
+            {
+                if (start + length <= 0)
+                {
+                    return string.Empty;
+                }
+                length = length + start;
+                start = 0;
+            }
+
+            if (start + length > text.Length)
             {
                 length = text.Length - start;
             }
@@ -387,28 +392,25 @@ namespace Scriban.Functions
 
         // On Liquid: Slice will return 1 character by default, unlike in scriban that returns the rest of the string
         [ScriptMemberIgnore]
-        private static string SliceAt(string text, int start, int length = 1)
+        private static string Slice1(string text, int start, int length = 1)
         {
-            if (text == null || start > text.Length)
+            if (string.IsNullOrEmpty(text) || start > text.Length || length <= 0)
             {
                 return string.Empty;
-            }
-
-            if (length < 0)
-            {
-                length = text.Length - start;
             }
 
             if (start < 0)
             {
-                start = Math.Max(start + text.Length, 0);
+                start = start + text.Length;
             }
-            var end = start + length;
-            if (end <= start)
+
+            if (start < 0)
             {
-                return string.Empty;
+                length = length + start;
+                start = 0;
             }
-            if (end > text.Length)
+
+            if (start + length > text.Length)
             {
                 length = text.Length - start;
             }
@@ -416,11 +418,11 @@ namespace Scriban.Functions
             return text.Substring(start, length);
         }
 
-        private static object SliceAt(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
+        private static object Slice1(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
         {
             if (parameters.Count < 2 || parameters.Count > 3)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for slice. Expecting at least 2 parameters <start> <length>? <text>");
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for slice1. Expecting at least 2 parameters <start> <length>? <text>");
             }
 
             var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
@@ -431,7 +433,7 @@ namespace Scriban.Functions
                 length = context.ToInt(callerContext.Span, parameters[1]);
             }
 
-            return SliceAt(text, start, length);
+            return Slice1(text, start, length);
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Scriban
         private FastStack<StringBuilder> _outputs;
         private FastStack<string> _sourceFiles;
         private FastStack<object> _caseValues;
-        private int _functionDepth;
+        private int _callDepth;
         private bool _isFunctionCallDisabled;
         private int _loopStep;
         private int _getOrSetValueLevel;
@@ -650,18 +650,31 @@ namespace Scriban
             return builtinObject;
         }
 
+        public void EnterRecursive(ScriptNode node)
+        {
+            _callDepth++;
+            if (_callDepth > RecursiveLimit)
+            {
+                throw new ScriptRuntimeException(node.Span, $"Exceeding number of recursive depth limit `{RecursiveLimit}` for node: `{node}`"); // unit test: 305-func-error2.txt
+            }
+        }
+
+        public void ExitRecursive(ScriptNode node)
+        {
+            _callDepth--;
+            if (_callDepth < 0)
+            {
+                throw new InvalidOperationException($"unexpected ExitRecursive not matching EnterRecursive for `{node}`");
+            }
+        }
+
         /// <summary>
         /// Called when entering a function.
         /// </summary>
         /// <param name="caller"></param>
         internal void EnterFunction(ScriptNode caller)
         {
-            _functionDepth++;
-            if (_functionDepth > RecursiveLimit)
-            {
-                throw new ScriptRuntimeException(caller.Span, $"Exceeding number of recursive depth limit `{RecursiveLimit}` for function call: `{caller}`"); // unit test: 305-func-error2.txt
-            }
-
+            EnterRecursive(caller);
             PushVariableScope(ScriptVariableScope.Local);
         }
 
@@ -671,7 +684,7 @@ namespace Scriban
         internal void ExitFunction()
         {
             PopVariableScope(ScriptVariableScope.Local);
-            _functionDepth--;
+            _callDepth--;
         }
 
         /// <summary>

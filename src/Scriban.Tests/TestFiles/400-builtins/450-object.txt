@@ -12,3 +12,16 @@
 {{ { a: 1, b: 2} | object.keys }}
 null | object.keys:{{ null | object.keys }}
 null | object.values:{{ null | object.values }}
+product | object.has_key "title":{{ product | object.has_key "title"}}
+product | object.has_key "yoyo":{{ product | object.has_key "yoyo"}}
+null | object.has_key "member":{{ null | object.has_key "member"}}
+null | object.has_key null:{{null | object.has_key null}}
+product | object.has_value "title":{{ product | object.has_value "title"}}
+product | object.has_value "yoyo":{{ product | object.has_value "yoyo"}}
+null | object.has_value "member":{{ null | object.has_value "member"}}
+null | object.has_value null:{{null | object.has_value null}}
+"obj" | object.size: {{"obj" | object.size}}
+[1,2] | object.size: {{[1,2] | object.size}}
+5 | object.size: {{5 | object.size}}
+"tada" | object.default "yoyo": {{"tada" | object.default "yoyo"}}
+null | object.default "yoyo": {{null | object.default "yoyo"}}

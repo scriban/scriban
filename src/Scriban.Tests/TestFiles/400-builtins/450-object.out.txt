@@ -12,3 +12,16 @@ object
 [a, b]
 null | object.keys:[]
 null | object.values:[]
+product | object.has_key "title":true
+product | object.has_key "yoyo":false
+null | object.has_key "member":false
+null | object.has_key null:false
+product | object.has_value "title":true
+product | object.has_value "yoyo":false
+null | object.has_value "member":false
+null | object.has_value null:false
+"obj" | object.size: 3
+[1,2] | object.size: 2
+5 | object.size: 0
+"tada" | object.default "yoyo": tada
+null | object.default "yoyo": yoyo

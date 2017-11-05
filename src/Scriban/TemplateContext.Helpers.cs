@@ -42,6 +42,11 @@ namespace Scriban
 
         public virtual IList ToList(SourceSpan span, object value)
         {
+            if (value == null)
+            {
+                return null;
+            }
+
             if (value is IList)
             {
                 return (IList) value;
@@ -270,6 +275,11 @@ namespace Scriban
                 {
                     throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`", ex);
                 }
+            }
+
+            if (destinationType == typeof(IList))
+            {
+                return ToList(span, value);
             }
 
             throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`");

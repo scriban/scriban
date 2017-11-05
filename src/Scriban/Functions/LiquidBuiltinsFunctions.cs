@@ -68,7 +68,7 @@ namespace Scriban.Functions
                 case "round": target = "math"; member = "round"; return true;
                 case "rstrip": target = "string"; member = "rstrip"; return true;
                 case "size": target = "object"; member = "size"; return true;
-                case "slice": target = "string"; member = "slice_at"; return true;
+                case "slice": target = "string"; member = "slice1"; return true;
                 case "sort": target = "array"; member = "sort"; return true;
                 case "split": target = "string"; member = "split"; return true;
                 case "strip": target = "string"; member = "strip"; return true;
@@ -133,7 +133,7 @@ namespace Scriban.Functions
                 SetValue("round", math["round"], true);
                 SetValue("rstrip", str["rstrip"], true);
                 SetValue("size", objs["size"], true);
-                SetValue("slice", str["slice_at"], true); // Special liquid compatible function
+                SetValue("slice", str["slice1"], true); // Special liquid compatible function
                 SetValue("sort", array["sort"], true);
                 // sort_natural: not supported
                 SetValue("split", str["split"], true);

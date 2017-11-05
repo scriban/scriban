@@ -289,7 +289,6 @@ namespace Scriban.Functions
         [ScriptMemberIgnore]
         public static IEnumerable Sort(TemplateContext context, SourceSpan span, object input, string member = null)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
             if (input == null)
             {
                 return Enumerable.Empty<object>();

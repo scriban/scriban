@@ -53,7 +53,7 @@ List of all the builtin <string> functions:
  sha256
  size
  slice
- slice_at
+ slice1
  split
  starts_with
  strip
