@@ -14,6 +14,11 @@ namespace Scriban.Functions
     {
         public static string Strip(TemplateContext context, string text)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
+
             // From https://stackoverflow.com/a/17668453/1356325
             const string RegexMatchHtml = @"<script.*?</script>|<!--.*?-->|<style.*?</style>|<(?:[^>=]|='[^']*'|=""[^""]*""|=[^'""][^\s>]*)*>";
 #if NET35 || NET40 || PCL328
@@ -27,6 +32,10 @@ namespace Scriban.Functions
 #if !PCL328
         public static string Escape(string text)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
 #if NET35
             return System.Web.HttpUtility.HtmlEncode(text);
 #else
@@ -36,12 +45,36 @@ namespace Scriban.Functions
         
         public static string UrlEncode(string text)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
             return Uri.EscapeDataString(text);
         }
 
         public static string UrlEscape(string text)
         {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
             return Uri.EscapeUriString(text);
+        }
+#else
+
+        public static string Escape(string text)
+        {
+            throw new NotSupportedException("This method is not supported by this .NET profile");
+        }
+        
+        public static string UrlEncode(string text)
+        {
+            throw new NotSupportedException("This method is not supported by this .NET profile");
+        }
+
+        public static string UrlEscape(string text)
+        {
+            throw new NotSupportedException("This method is not supported by this .NET profile");
         }
 #endif
     }

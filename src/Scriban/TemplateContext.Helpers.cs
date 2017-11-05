@@ -73,7 +73,7 @@ namespace Scriban
         {
             if (value == null || value == EmptyScriptObject.Default)
             {
-                return string.Empty;
+                return null;
             }
 
             if (value is bool)
