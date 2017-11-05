@@ -19,11 +19,10 @@ namespace Scriban.Functions
     {
         public ArrayFunctions()
         {
-            SetValue("sort", new DelegateCustomFunction(Sort), true);
             SetValue("cycle", new DelegateCustomFunction(Cycle), true);
         }
 
-        public static string Join(TemplateContext context, SourceSpan span, string delimiter, IEnumerable enumerable)
+        public static string Join(TemplateContext context, SourceSpan span, IEnumerable enumerable, string delimiter)
         {
             var text = new StringBuilder();
             bool afterFirst = false;
@@ -48,9 +47,9 @@ namespace Scriban.Functions
         /// <summary>
         /// Returns only count elments from the input list
         /// </summary>
-        /// <param name="count">The number of elements to return from the input list</param>
         /// <param name="list">The input list</param>
-        public static ScriptArray Limit(int count, IEnumerable list)
+        /// <param name="count">The number of elements to return from the input list</param>
+        public static ScriptArray Limit(IEnumerable list, int count)
         {
             if (list == null)
             {
@@ -73,9 +72,9 @@ namespace Scriban.Functions
         /// <summary>
         /// Returns the remaining of the list after the specified offset
         /// </summary>
-        /// <param name="index">The index of a list to return elements</param>
         /// <param name="list">The input list</param>
-        public static ScriptArray Offset(int index, IEnumerable list)
+        /// <param name="index">The index of a list to return elements</param>
+        public static ScriptArray Offset(IEnumerable list, int index)
         {
             if (list == null)
             {
@@ -124,28 +123,28 @@ namespace Scriban.Functions
         /// <summary>
         /// Concats the two arrays into another array
         /// </summary>
-        /// <param name="list1">An input list</param>
-        /// <param name="list2">An input list</param>
+        /// <param name="left">An input list</param>
+        /// <param name="right">An input list</param>
         /// <returns>The concatenation of the </returns>
-        public static object Concat(IEnumerable list1, IEnumerable list2)
+        public static object Concat(IEnumerable left, IEnumerable right)
         {
-            if (list1 == null && list2 == null)
+            if (right == null && left == null)
             {
                 return null;
             }
-            if (list1 == null)
+            if (right == null)
             {
-                return list2;
+                return left;
             }
 
-            if (list2 == null)
+            if (left == null)
             {
-                return list1;
+                return right;
             }
 
             var result = new ScriptArray();
-            foreach (var item in list2) result.Add(item);
-            foreach (var item in list1) result.Add(item);
+            foreach (var item in left) result.Add(item);
+            foreach (var item in right) result.Add(item);
             return result;
         }
 
@@ -218,7 +217,7 @@ namespace Scriban.Functions
             return iterator.Cast<object>().Reverse();
         }
 
-        public static IList RemoveAt(int index, IList list)
+        public static IList RemoveAt(IList list, int index)
         {
             if (list == null)
             {
@@ -240,7 +239,7 @@ namespace Scriban.Functions
             return list;
         }
 
-        public static IList Add(object value, IList list)
+        public static IList Add(IList list, object value)
         {
             if (list == null)
             {
@@ -251,7 +250,7 @@ namespace Scriban.Functions
             return list;
         }
 
-        public static IList AddRange(IEnumerable iterator, IList list)
+        public static IList AddRange(IList list, IEnumerable iterator)
         {
             if (iterator == null)
             {
@@ -267,7 +266,7 @@ namespace Scriban.Functions
         }
 
 
-        public static IList InsertAt(int index, object value, IList list)
+        public static IList InsertAt(IList list, int index, object value)
         {
             if (index < 0)
             {
@@ -286,7 +285,6 @@ namespace Scriban.Functions
             return list;
         }
 
-        [ScriptMemberIgnore]
         public static IEnumerable Sort(TemplateContext context, SourceSpan span, object input, string member = null)
         {
             if (input == null)
@@ -334,13 +332,7 @@ namespace Scriban.Functions
             return list;
         }
 
-        public static object Map(TemplateContext context, SourceSpan span, string member, object input)
-        {
-            return MapInternal(context, span, member, input);
-        }
-
-        [ScriptMemberIgnore]
-        private static IEnumerable MapInternal(TemplateContext context, SourceSpan span, string member, object input)
+        public static IEnumerable Map(TemplateContext context, SourceSpan span, object input, string member = null)
         {
             if (input == null)
             {
@@ -367,23 +359,6 @@ namespace Scriban.Functions
             }
         }
 
-        private static object Sort(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
-        {
-            if (parameters.Count < 1 || parameters.Count > 2)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for sort. Expecting at least 1 parameter <property>? <array>");
-            }
-
-            var target = parameters[parameters.Count - 1];
-            string member = null;
-            if (parameters.Count == 2)
-            {
-               member = context.ToString(callerContext.Span, parameters[0]);
-            }
-
-            return Sort(context, callerContext.Span, target, member);
-        }
-
         private static object Cycle(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
         {
             string group = null;
@@ -391,12 +366,12 @@ namespace Scriban.Functions
             if (parameters.Count == 1)
             {
                 values = context.ToList(callerContext.Span, parameters[0]);
-                group = Join(context, callerContext.Span, ",", values);
+                group = Join(context, callerContext.Span, values, ",");
             }
             else if (parameters.Count == 2)
             {
-                values = context.ToList(callerContext.Span, parameters[1]);
                 group = context.ToString(callerContext.Span, parameters[0]);
+                values = context.ToList(callerContext.Span, parameters[1]);
             }
             else
             {

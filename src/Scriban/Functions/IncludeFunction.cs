@@ -18,14 +18,14 @@ namespace Scriban.Functions
         {
         }
 
-        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            if (parameters.Count == 0)
+            if (arguments.Count == 0)
             {
                 throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the name of the template to include for the <include> function");
             }
 
-            var templateName = context.ToString(callerContext.Span, parameters[0]);
+            var templateName = context.ToString(callerContext.Span, arguments[0]);
 
             // If template name is empty, throw an exception
             if (string.IsNullOrEmpty(templateName))
@@ -52,10 +52,10 @@ namespace Scriban.Functions
             }
 
             // Compute a new parameters for the include
-            var newParameters = new ScriptArray(parameters.Count - 1);
-            for (int i = 1; i < parameters.Count; i++)
+            var newParameters = new ScriptArray(arguments.Count - 1);
+            for (int i = 1; i < arguments.Count; i++)
             {
-                newParameters[i] = parameters[i];
+                newParameters[i] = arguments[i];
             }
 
             context.SetValue(ScriptVariable.Arguments, newParameters, true);

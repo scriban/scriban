@@ -14,5 +14,5 @@ func aliasFunc
 	ret @myarray[$0]
 end
 
-(1 | sub 5) | ( sub 4 3 | aliasFunc) 6
+(5 | sub 1) | ( sub 4 3 | aliasFunc) 6
 }}

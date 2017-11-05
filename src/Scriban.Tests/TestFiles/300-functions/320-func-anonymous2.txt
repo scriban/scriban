@@ -10,10 +10,10 @@ end
 ===
 {{
 func eval_test
-	$[-1] ^($ | array.remove_at (-1))
+    $[-1] ^($ | array.remove_at (-1))
 end
 
 x = eval_test "1" "2" "3" "4" do
-  ret $0 + $1 + $2 + $3
+    ret $0 + $1 + $2 + $3
 end
 }}

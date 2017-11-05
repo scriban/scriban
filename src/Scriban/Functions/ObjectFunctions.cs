@@ -15,7 +15,7 @@ namespace Scriban.Functions
     /// </summary>
     public class ObjectFunctions : ScriptObject
     {
-        public static object Default(object defaultValue, object value)
+        public static object Default(object value, object defaultValue)
         {
             return value ?? defaultValue;
         }
@@ -36,7 +36,7 @@ namespace Scriban.Functions
             return 0;
         }
 
-        public static bool HasKey(string key, IDictionary<string, object> dictionary)
+        public static bool HasKey(IDictionary<string, object> dictionary, string key)
         {
             if (dictionary == null || key == null)
             {
@@ -46,7 +46,7 @@ namespace Scriban.Functions
             return dictionary.ContainsKey(key);
         }
 
-        public static bool HasValue(string key, IDictionary<string, object> dictionary)
+        public static bool HasValue(IDictionary<string, object> dictionary, string key)
         {
             if (dictionary == null || key == null)
             {

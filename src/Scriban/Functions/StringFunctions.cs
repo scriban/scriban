@@ -16,26 +16,17 @@ namespace Scriban.Functions
     /// </summary>
     public class StringFunctions : ScriptObject
     {
-        public StringFunctions()
-        {
-            this.SetValue("truncate", new DelegateCustomFunction(Truncate), true);
-            // We need to handle "slice"/"truncate" differently as we have an optional parameters
-            this.SetValue("slice", new DelegateCustomFunction(Slice), true);
-            // The liquid version of slice
-            this.SetValue("slice1", new DelegateCustomFunction(Slice1), true);
-        }
-
         public static int Size(string text)
         {
             return string.IsNullOrEmpty(text) ? 0 : text.Length;
         }
 
-        public static string Append(string toAppend, string text)
+        public static string Append(string text, string toAppend)
         {
             return (text ?? string.Empty) + (toAppend ?? string.Empty);
         }
 
-        public static string Prepend(string toPrepend, string text)
+        public static string Prepend(string text, string toPrepend)
         {
             return (toPrepend ?? string.Empty) + (text ?? string.Empty);
         }
@@ -66,7 +57,7 @@ namespace Scriban.Functions
             }
         }
 
-        public static string HmacSha1(string secretKey, string text)
+        public static string HmacSha1(string text, string secretKey)
         {
             using (var hsha1 = new System.Security.Cryptography.HMACSHA1(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
             {
@@ -74,7 +65,7 @@ namespace Scriban.Functions
             }
         }
 
-        public static string HmacSha256(string secretKey, string text)
+        public static string HmacSha256(string text, string secretKey)
         {
             using (var hsha256 = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
             {
@@ -146,12 +137,12 @@ namespace Scriban.Functions
             return builder.ToString();
         }
 
-        public static string Pluralize(string single, string multiple, int number)
+        public static string Pluralize(int number, string single, string multiple)
         {
             return number == 1 ? single : multiple;
         }
 
-        public static string Remove(string remove, string text)
+        public static string Remove(string text, string remove)
         {
             if (string.IsNullOrEmpty(remove) || string.IsNullOrEmpty(text))
             {
@@ -160,9 +151,9 @@ namespace Scriban.Functions
             return text.Replace(remove, string.Empty);
         }
 
-        public static string RemoveFirst(string remove, string text)
+        public static string RemoveFirst(string text, string remove)
         {
-            return ReplaceFirst(remove, string.Empty, text);
+            return ReplaceFirst(text, remove, string.Empty);
         }
 
         public static string Strip(string text)
@@ -180,7 +171,7 @@ namespace Scriban.Functions
             return text?.TrimEnd();
         }
 
-        public static IEnumerable Split(string pattern, string text)
+        public static IEnumerable Split(string text, string pattern)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -202,8 +193,7 @@ namespace Scriban.Functions
             return Regex.Replace(text, @"\r?\n", string.Empty);
         }
 
-        [ScriptMemberIgnore]
-        public static string Truncate(int length, string ellipsis, string text)
+        public static string Truncate(string text, int length, string ellipsis = null)
         {
             ellipsis = ellipsis ?? "...";
             if (string.IsNullOrEmpty(text))
@@ -221,25 +211,7 @@ namespace Scriban.Functions
             return text;
         }
 
-        private static object Truncate(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
-        {
-            if (parameters.Count < 2 || parameters.Count > 3)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for truncate. Expecting at least 2 parameters <length> <ellipsis>? <text>");
-            }
-
-            var length = context.ToInt(callerContext.Span, parameters[0]);
-            var ellipsis = "...";
-            var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
-            if (parameters.Count == 3)
-            {
-                ellipsis = context.ToString(callerContext.Span, parameters[1]);
-            }
-
-            return Truncate(length, ellipsis, text);
-        }
-
-        public static string Truncatewords(int count, string text)
+        public static string Truncatewords(string text, int count)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -269,7 +241,7 @@ namespace Scriban.Functions
             return builder.ToString();
         }
 
-        public static string Replace(string match, string replace, string text)
+        public static string Replace(string text, string match, string replace)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -282,7 +254,7 @@ namespace Scriban.Functions
             return text.Replace(match, replace);
         }
 
-        public static string ReplaceFirst(string match, string replace, string text)
+        public static string ReplaceFirst(string text, string match, string replace)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -309,16 +281,16 @@ namespace Scriban.Functions
             return builder.ToString();
         }
 
-        public static bool Contains(string text, string input)
+        public static bool Contains(string text, string str)
         {
-            if (string.IsNullOrEmpty(input) || string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(str))
             {
                 return false;
             }
-            return input.Contains(text);
+            return text.Contains(str);
         }
 
-        public static bool StartsWith(string start, string text)
+        public static bool StartsWith(string text, string start)
         {
             if (string.IsNullOrEmpty(start) || string.IsNullOrEmpty(text))
             {
@@ -329,7 +301,7 @@ namespace Scriban.Functions
         }
 
 
-        public static bool EndsWith(string start, string text)
+        public static bool EndsWith(string text, string start)
         {
             if (string.IsNullOrEmpty(start) || string.IsNullOrEmpty(text))
             {
@@ -364,7 +336,6 @@ namespace Scriban.Functions
             return builder.ToString();
         }
 
-        [ScriptMemberIgnore]
         public static string Slice(string text, int start, int length = -1)
         {
             if (string.IsNullOrEmpty(text) || start >= text.Length)
@@ -400,27 +371,8 @@ namespace Scriban.Functions
             return text.Substring(start, length);
         }
 
-        private static object Slice(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
-        {
-            if (parameters.Count < 2 || parameters.Count > 3)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for slice. Expecting at least 2 parameters <start> <length>? <text>");
-            }
-
-            var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
-            var start = context.ToInt(callerContext.Span, parameters[0]);
-            var length = -1;
-            if (parameters.Count == 3)
-            {
-                length = context.ToInt(callerContext.Span, parameters[1]);
-            }
-
-            return Slice(text, start, length);
-        }
-
         // On Liquid: Slice will return 1 character by default, unlike in scriban that returns the rest of the string
-        [ScriptMemberIgnore]
-        private static string Slice1(string text, int start, int length = 1)
+        public static string Slice1(string text, int start, int length = 1)
         {
             if (string.IsNullOrEmpty(text) || start > text.Length || length <= 0)
             {
@@ -444,24 +396,6 @@ namespace Scriban.Functions
             }
 
             return text.Substring(start, length);
-        }
-
-        private static object Slice1(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
-        {
-            if (parameters.Count < 2 || parameters.Count > 3)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for slice1. Expecting at least 2 parameters <start> <length>? <text>");
-            }
-
-            var text = context.ToString(callerContext.Span, parameters[parameters.Count - 1]);
-            var start = context.ToInt(callerContext.Span, parameters[0]);
-            var length = 1;
-            if (parameters.Count == 3)
-            {
-                length = context.ToInt(callerContext.Span, parameters[1]);
-            }
-
-            return Slice1(text, start, length);
         }
     }
 }

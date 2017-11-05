@@ -14,13 +14,13 @@ namespace Scriban.Tests
             [Test]
             public void TestOffset()
             {
-                Assert.Null(ArrayFunctions.Offset(0, null));
+                Assert.Null(ArrayFunctions.Offset(null, 0));
             }
 
             [Test]
             public void TestLimit()
             {
-                Assert.Null(ArrayFunctions.Limit(0, null));
+                Assert.Null(ArrayFunctions.Limit(null, 0));
             }
 
             [Test]

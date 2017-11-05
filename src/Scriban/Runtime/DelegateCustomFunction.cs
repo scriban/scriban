@@ -18,9 +18,9 @@ namespace Scriban.Runtime
             _customFunction = customFunction ?? throw new ArgumentNullException(nameof(customFunction));
         }
 
-        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            return _customFunction(context, callerContext, parameters);
+            return _customFunction(context, callerContext, arguments);
         }
     }
 }

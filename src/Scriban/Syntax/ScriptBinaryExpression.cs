@@ -107,7 +107,7 @@ namespace Scriban.Syntax
                             var leftDict = leftValue as IDictionary<string, object>;
                             if (leftDict != null)
                             {
-                                return ObjectFunctions.HasKey(context.ToString(span, rightValue), leftDict);
+                                return ObjectFunctions.HasKey(leftDict, context.ToString(span, rightValue));
                             }
                         }
                         break;
@@ -117,7 +117,7 @@ namespace Scriban.Syntax
                             var leftDict = leftValue as IDictionary<string, object>;
                             if (leftDict != null)
                             {
-                                return ObjectFunctions.HasValue(context.ToString(span, rightValue), leftDict);
+                                return ObjectFunctions.HasValue(leftDict, context.ToString(span, rightValue));
                             }
                         }
                         break;

@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System.Text.RegularExpressions;
@@ -12,12 +12,12 @@ namespace Scriban.Functions
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
     public class RegexFunctions : ScriptObject
     {
-        public static string Replace(string pattern, string replace, string input)
+        public static string Replace(string input, string pattern, string replace)
         {
             return Regex.Replace(input, pattern, replace);
         }
 
-        public static ScriptArray Split(string pattern, string input)
+        public static ScriptArray Split(string input, string pattern)
         {
             return new ScriptArray(Regex.Split(input, pattern));
         }
@@ -32,7 +32,7 @@ namespace Scriban.Functions
             return Regex.Unescape(pattern);
         }
 
-        public static ScriptArray Match(string pattern, string input)
+        public static ScriptArray Match(string input, string pattern)
         {
             var match = Regex.Match(input, pattern);
             var matchObject = new ScriptArray();

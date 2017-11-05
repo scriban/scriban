@@ -62,7 +62,7 @@ namespace Scriban.Functions
 
             this.Import("now", new Func<DateTime>(() => DateTime.Now));
 
-            this.Import("to_string", new Func<TemplateContext, string, DateTime, string>((context, pattern, date) => ToString(date, pattern, context.CurrentCulture)));
+            this.Import("to_string", new Func<TemplateContext, DateTime, string, string>((context, date, pattern) => ToString(date, pattern, context.CurrentCulture)));
 
             this.Import("parse", new Func<string, DateTime>(Parse));
         }
@@ -82,10 +82,10 @@ namespace Scriban.Functions
         /// <summary>
         /// Adds days to date.
         /// </summary>
-        /// <param name="days">The days.</param>
         /// <param name="date">The date.</param>
+        /// <param name="days">The days.</param>
         /// <returns>A new date</returns>
-        public static DateTime AddDays(double days, DateTime date)
+        public static DateTime AddDays(DateTime date, double days)
         {
             return date.AddDays(days);
         }
@@ -93,10 +93,10 @@ namespace Scriban.Functions
         /// <summary>
         /// Adds years to date.
         /// </summary>
-        /// <param name="years">The years.</param>
         /// <param name="date">The date.</param>
+        /// <param name="years">The years.</param>
         /// <returns>A new date</returns>
-        public static DateTime AddYears(int years, DateTime date)
+        public static DateTime AddYears(DateTime date, int years)
         {
             return date.AddYears(years);
         }
@@ -104,10 +104,10 @@ namespace Scriban.Functions
         /// <summary>
         /// Adds months to date.
         /// </summary>
-        /// <param name="months">The months.</param>
         /// <param name="date">The date.</param>
+        /// <param name="months">The months.</param>
         /// <returns>A new date</returns>
-        public static DateTime AddMonths(int months, DateTime date)
+        public static DateTime AddMonths(DateTime date, int months)
         {
             return date.AddMonths(months);
         }
@@ -115,10 +115,10 @@ namespace Scriban.Functions
         /// <summary>
         /// Adds hours to date.
         /// </summary>
-        /// <param name="hours">The hours.</param>
         /// <param name="date">The date.</param>
+        /// <param name="hours">The hours.</param>
         /// <returns>A new date</returns>
-        public static DateTime AddHours(double hours, DateTime date)
+        public static DateTime AddHours(DateTime date, double hours)
         {
             return date.AddHours(hours);
         }
@@ -126,10 +126,10 @@ namespace Scriban.Functions
         /// <summary>
         /// Adds minutes to date.
         /// </summary>
-        /// <param name="minutes">The minutes.</param>
         /// <param name="date">The date.</param>
+        /// <param name="minutes">The minutes.</param>
         /// <returns>A new date</returns>
-        public static DateTime AddMinutes(double minutes, DateTime date)
+        public static DateTime AddMinutes(DateTime date, double minutes)
         {
             return date.AddMinutes(minutes);
         }
@@ -137,10 +137,10 @@ namespace Scriban.Functions
         /// <summary>
         /// Adds seconds to date.
         /// </summary>
-        /// <param name="seconds">The seconds.</param>
         /// <param name="date">The date.</param>
+        /// <param name="seconds">The seconds.</param>
         /// <returns>A new date</returns>
-        public static DateTime AddSeconds(double seconds, DateTime date)
+        public static DateTime AddSeconds(DateTime date, double seconds)
         {
             return date.AddSeconds(seconds);
         }
@@ -148,10 +148,10 @@ namespace Scriban.Functions
         /// <summary>
         /// Adds millis to date.
         /// </summary>
-        /// <param name="millis">The millis.</param>
         /// <param name="date">The date.</param>
+        /// <param name="millis">The millis.</param>
         /// <returns>A new date</returns>
-        public static DateTime AddMilliseconds(double millis, DateTime date)
+        public static DateTime AddMilliseconds(DateTime date, double millis)
         {
             return date.AddMilliseconds(millis);
         }
@@ -178,7 +178,7 @@ namespace Scriban.Functions
         public override IScriptObject Clone(bool deep)
         {
             var dateFunctions = (DateTimeFunctions)base.Clone(deep);
-            dateFunctions.Import("to_string", new Func<TemplateContext, string, DateTime, string>((context, pattern, date) => dateFunctions.ToString(date, pattern, context.CurrentCulture)));
+            dateFunctions.Import("to_string", new Func<TemplateContext, DateTime, string, string>((context, date, pattern) => dateFunctions.ToString(date, pattern, context.CurrentCulture)));
             return dateFunctions;
         }
 
@@ -238,18 +238,18 @@ namespace Scriban.Functions
 
         }
 
-        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             // If we access `date` without any parameter, it calls by default the "parse" function
             // otherwise it is the 'date' object itself
-            switch (parameters.Count)
+            switch (arguments.Count)
             {
                 case 0:
                     return this;
                 case 1:
-                    return Parse(context.ToString(callerContext.Span, parameters[0]));
+                    return Parse(context.ToString(callerContext.Span, arguments[0]));
                 default:
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{parameters.Count}` for `date` object/function.");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{arguments.Count}` for `date` object/function.");
             }
         }
     }

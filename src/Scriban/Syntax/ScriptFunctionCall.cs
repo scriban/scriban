@@ -86,6 +86,14 @@ namespace Scriban.Syntax
             }
 
             var argumentValues = new ScriptArray();
+
+            // Handle pipe arguments here
+            if (processPipeArguments && context.PipeArguments.Count > 0)
+            {
+                argumentValues.AddRange(context.PipeArguments);
+                context.PipeArguments.Clear();
+            }
+
             if (arguments != null)
             {
                 foreach (var argument in arguments)
@@ -109,13 +117,6 @@ namespace Scriban.Syntax
 
                     argumentValues.Add(value);
                 }
-            }
-
-            // Handle pipe arguments here
-            if (processPipeArguments && context.PipeArguments.Count > 0)
-            {
-                argumentValues.AddRange(context.PipeArguments);
-                context.PipeArguments.Clear();
             }
 
             object result = null;

@@ -82,15 +82,15 @@ namespace Scriban.Runtime
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
             }
 
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters,
+            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments,
                 ScriptBlockStatement blockStatement)
             {
-                if (parameters.Count != 2)
+                if (arguments.Count != 2)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{2}` for `{callerContext}`");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting `{2}` for `{callerContext}`");
                 }
-                var arg0 = context.ToInt(callerContext.Span, parameters[0]);
-                var arg1 = context.ToString(callerContext.Span, parameters[1]);
+                var arg0 = context.ToInt(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -110,14 +110,14 @@ namespace Scriban.Runtime
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
             }
 
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (parameters.Count != 2)
+                if (arguments.Count != 2)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{2}` for `{callerContext}`");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting `{2}` for `{callerContext}`");
                 }
-                var arg0 = context.ToString(callerContext.Span, parameters[0]);
-                var arg1 = context.ToString(callerContext.Span, parameters[1]);
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -137,15 +137,15 @@ namespace Scriban.Runtime
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
             }
 
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (parameters.Count != 3)
+                if (arguments.Count != 3)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{3}` for `{callerContext}`");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting `{3}` for `{callerContext}`");
                 }
-                var arg0 = context.ToString(callerContext.Span, parameters[0]);
-                var arg1 = context.ToString(callerContext.Span, parameters[1]);
-                var arg2 = context.ToString(callerContext.Span, parameters[2]);
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg2 = context.ToString(callerContext.Span, arguments[2]);
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -165,13 +165,13 @@ namespace Scriban.Runtime
                 _delegate = (StringToStringDelegate)method.CreateDelegate(typeof(StringToStringDelegate));
             }
 
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (parameters.Count != 1)
+                if (arguments.Count != 1)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{1}` for `{callerContext}`");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting `{1}` for `{callerContext}`");
                 }
-                var arg0 = context.ToString(callerContext.Span, parameters[0]);
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
                 return _delegate(arg0);
             }
         }
@@ -189,6 +189,7 @@ namespace Scriban.Runtime
             private readonly bool _hasTemplateContext;
             private readonly bool _hasSpan;
             private readonly object[] _arguments;
+            private readonly int _defaultParameterCount;
 
             public GenericFunctionWrapper(object target, MethodInfo method)
             {
@@ -210,6 +211,11 @@ namespace Scriban.Runtime
 
                     var lastParam = _parametersInfo[_lastParamsIndex];
 
+                    if ((lastParam.Attributes & ParameterAttributes.HasDefault) == ParameterAttributes.HasDefault)
+                    {
+                        _defaultParameterCount++;
+                    }
+
                     if (lastParam.ParameterType == typeof(object[]))
                     {
                         foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
@@ -222,7 +228,7 @@ namespace Scriban.Runtime
                 _arguments = new object[_parametersInfo.Length];
             }
 
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray parameters, ScriptBlockStatement blockStatement)
+            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
                 var expectedNumberOfParameters = _parametersInfo.Length;
                 if (_hasTemplateContext)
@@ -234,17 +240,19 @@ namespace Scriban.Runtime
                     }
                 }
 
+                var minimumRequiredParameters = expectedNumberOfParameters - _defaultParameterCount;
+
                 // Check parameters
-                if ((_hasObjectParams && parameters.Count < expectedNumberOfParameters - 1) || (!_hasObjectParams && parameters.Count != expectedNumberOfParameters))
+                if ((_hasObjectParams && arguments.Count < minimumRequiredParameters - 1) || (!_hasObjectParams && arguments.Count < minimumRequiredParameters))
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{parameters.Count}` while expecting `{expectedNumberOfParameters}` for `{callerContext}`");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting at least `{minimumRequiredParameters}` to `{expectedNumberOfParameters}` arguments for `{callerContext}`");
                 }
 
                 // Convert arguments
                 object[] paramArguments = null;
                 if (_hasObjectParams)
                 {
-                    paramArguments = new object[parameters.Count - _lastParamsIndex];
+                    paramArguments = new object[arguments.Count - _lastParamsIndex];
                     _arguments[_lastParamsIndex] = paramArguments;
                 }
 
@@ -261,12 +269,12 @@ namespace Scriban.Runtime
                     }
                 }
 
-                for (int i = 0; i < parameters.Count; i++, argIndex++)
+                for (int i = 0; i < arguments.Count; i++, argIndex++)
                 {
                     var destType = _hasObjectParams && i >= _lastParamsIndex ? typeof(object) : _parametersInfo[argIndex].ParameterType;
                     try
                     {
-                        var argValue = context.ToObject(callerContext.Span, parameters[i], destType);
+                        var argValue = context.ToObject(callerContext.Span, arguments[i], destType);
                         if (paramArguments != null && i >= _lastParamsIndex)
                         {
                             paramArguments[argIndex - _lastParamsIndex] = argValue;
@@ -278,7 +286,16 @@ namespace Scriban.Runtime
                     }
                     catch (Exception exception)
                     {
-                        throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{parameters[i]?.GetType()}` to type `{destType}`", exception);
+                        throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{arguments[i]?.GetType()}` to type `{destType}`", exception);
+                    }
+                }
+
+                // Setup any default parameters
+                if (_defaultParameterCount > 0)
+                {
+                    for (int i = arguments.Count; i < expectedNumberOfParameters; i++ , argIndex++)
+                    {
+                        _arguments[argIndex] = _parametersInfo[argIndex].DefaultValue;
                     }
                 }
 
@@ -288,9 +305,9 @@ namespace Scriban.Runtime
                     var result = _method.Invoke(_target, _arguments);
                     return result;
                 }
-                catch (Exception exception)
+                catch (TargetInvocationException exception)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception);
+                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception.InnerException);
                 }
             }
         }

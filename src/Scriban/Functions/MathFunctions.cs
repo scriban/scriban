@@ -19,7 +19,7 @@ namespace Scriban.Functions
             SetValue("round", new DelegateCustomFunction(Round), true);
         }
 
-        public static object DividedBy(TemplateContext context, SourceSpan span, object right, double left)
+        public static object DividedBy(TemplateContext context, SourceSpan span, double left, object right)
         {
             var leftType = typeof(double);
             var rightType = right?.GetType();
@@ -57,32 +57,32 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static object Round(int precision, double value)
+        public static object Round(double value, int precision)
         {
             return Math.Round(value, precision);
         }
 
-        public static object Minus(TemplateContext context, SourceSpan span, object subValue, object input)
+        public static object Minus(TemplateContext context, SourceSpan span, object input, object subValue)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Substract, input, subValue);
         }
 
-        public static object Plus(TemplateContext context, SourceSpan span, object addValue, object input)
+        public static object Plus(TemplateContext context, SourceSpan span, object input, object addValue)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Add, input, addValue);
         }
 
-        public static object Modulo(TemplateContext context, SourceSpan span, object modValue, object input)
+        public static object Modulo(TemplateContext context, SourceSpan span, object input, object modValue)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Modulus, input, modValue);
         }
 
-        public static object Times(TemplateContext context, SourceSpan span, object mulValue, object input)
+        public static object Times(TemplateContext context, SourceSpan span, object input, object mulValue)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Multiply, input, mulValue);
         }
 
-        public static string Format(TemplateContext context, SourceSpan span, string format, object value)
+        public static string Format(TemplateContext context, SourceSpan span, object value, string format)
         {
             if (value == null)
             {
@@ -119,14 +119,14 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for math.round. Expecting at least 1 parameter <precision>? <value>");
             }
 
-            var value = context.ToDouble(callerContext.Span, parameters[parameters.Count - 1]);
+            var value = context.ToDouble(callerContext.Span, parameters[0]);
             int precision = 0;
             if (parameters.Count == 2)
             {
-                precision = context.ToInt(callerContext.Span, parameters[0]);
+                precision = context.ToInt(callerContext.Span, parameters[1]);
             }
 
-            return Round(precision, value);
+            return Round(value, precision);
         }
     }
 }
