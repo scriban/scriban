@@ -23,7 +23,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.Benchmarks", "Scrib
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "liquid2scriban", "liquid2scriban\liquid2scriban.csproj", "{4AE5CDC4-4D74-4FDC-988B-4B783F61C56F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.CodeGen", "Scriban.CodeGen\Scriban.CodeGen.csproj", "{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}"
+EndProject
 Global
+	GlobalSection(Performance) = preSolution
+		HasPerformanceSessions = true
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
@@ -45,6 +50,10 @@ Global
 		{4AE5CDC4-4D74-4FDC-988B-4B783F61C56F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4AE5CDC4-4D74-4FDC-988B-4B783F61C56F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4AE5CDC4-4D74-4FDC-988B-4B783F61C56F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

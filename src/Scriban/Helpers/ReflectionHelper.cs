@@ -67,6 +67,10 @@ namespace Scriban.Helpers
         {
             propInfo.SetValue(obj, value, null);
         }
+        public static MethodInfo GetDeclaredMethod(this Type type, string name)
+        {
+            return type.GetMethod(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
+        }
         public static IEnumerable<MethodInfo> GetDeclaredMethods(this Type type)
         {
             return type.GetMethods(BindingFlags.Public| BindingFlags.Instance|BindingFlags.Static|BindingFlags.DeclaredOnly);

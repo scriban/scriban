@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -10,170 +11,26 @@ using Scriban.Syntax;
 
 namespace Scriban.Runtime
 {
-    public static class CustomFunctionHelper
+    public static partial class CustomFunction
     {
+        private static readonly Dictionary<MethodInfo, Func<MethodInfo, IScriptCustomFunction>> BuiltinFunctions = new Dictionary<MethodInfo, Func<MethodInfo, IScriptCustomFunction>>(MethodComparer.Default);
+
         /// <summary>
         /// Returns a <see cref="IScriptCustomFunction"/> from the specified object target and <see cref="MethodInfo"/>.
         /// </summary>
         /// <param name="target">A target object - might be null</param>
         /// <param name="method">A MethodInfo</param>
         /// <returns>A custom <see cref="IScriptCustomFunction"/></returns>
-        public static IScriptCustomFunction GetCustomFunction(object target, MethodInfo method)
+        public static IScriptCustomFunction Create(object target, MethodInfo method)
         {
             if (method == null) throw new ArgumentNullException(nameof(method));
-            var parameters = method.GetParameters();
-            if (target == null)
+
+            Func<MethodInfo, IScriptCustomFunction> newFunction;
+            if (target == null && method.IsStatic && BuiltinFunctions.TryGetValue(method, out newFunction))
             {
-                if (method.ReturnType == typeof(string))
-                {
-                    if (parameters.Length == 1)
-                    {
-                        var arg0 = parameters[0].ParameterType;
-
-                        if (arg0 == typeof(string))
-                        {
-                            return new StringToStringFunction(method);
-                        }
-                    }
-                    else if (parameters.Length == 2)
-                    {
-                        var arg0 = parameters[0].ParameterType;
-                        var arg1 = parameters[1].ParameterType;
-
-                        if (arg1 == typeof(string))
-                        {
-                            if (arg0 == typeof(int))
-                            {
-                                return new IntStringToStringFunction(method);
-                            }
-                            if (arg0 == typeof(string))
-                            {
-                                return new StringStringToStringFunction(method);
-                            }
-                        }
-                    }
-                    else if (parameters.Length == 3)
-                    {
-                        var arg0 = parameters[0].ParameterType;
-                        var arg1 = parameters[1].ParameterType;
-                        var arg2 = parameters[2].ParameterType;
-                        if (arg0 == typeof(string) && arg1 == typeof(string) && arg2 == typeof(string))
-                        {
-                            return new StringStringStringToStringFunction(method);
-                        }
-                    }
-                }
+                return newFunction(method);
             }
-
             return new GenericFunctionWrapper(target, method);
-        }
-
-        /// <summary>
-        /// Optimized custom function for: string XXX(int, string)
-        /// </summary>
-        private class IntStringToStringFunction : IScriptCustomFunction
-        {
-            private delegate string InternalDelegate(int value, string text);
-
-            private readonly InternalDelegate _delegate;
-
-            public IntStringToStringFunction(MethodInfo method)
-            {
-                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-            }
-
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments,
-                ScriptBlockStatement blockStatement)
-            {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting `{2}` for `{callerContext}`");
-                }
-                var arg0 = context.ToInt(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
-
-                return _delegate(arg0, arg1);
-            }
-        }
-
-        /// <summary>
-        /// Optimized custom function for: string XXX(string, string)
-        /// </summary>
-        private class StringStringToStringFunction : IScriptCustomFunction
-        {
-            private delegate string InternalDelegate(string value, string text);
-
-            private readonly InternalDelegate _delegate;
-
-            public StringStringToStringFunction(MethodInfo method)
-            {
-                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-            }
-
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-            {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting `{2}` for `{callerContext}`");
-                }
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
-
-                return _delegate(arg0, arg1);
-            }
-        }
-
-        /// <summary>
-        /// Optimized custom function for: string XXX(string, string, string)
-        /// </summary>
-        private class StringStringStringToStringFunction : IScriptCustomFunction
-        {
-            private delegate string InternalDelegate(string a, string b, string c);
-
-            private readonly InternalDelegate _delegate;
-
-            public StringStringStringToStringFunction(MethodInfo method)
-            {
-                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-            }
-
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-            {
-                if (arguments.Count != 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting `{3}` for `{callerContext}`");
-                }
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
-                var arg2 = context.ToString(callerContext.Span, arguments[2]);
-
-                return _delegate(arg0, arg1, arg2);
-            }
-        }
-
-        /// <summary>
-        /// Optimized custom function for: string XXX(string)
-        /// </summary>
-        private class StringToStringFunction : IScriptCustomFunction
-        {
-            private delegate string StringToStringDelegate(string value);
-
-            private readonly StringToStringDelegate _delegate;
-
-            public StringToStringFunction(MethodInfo method)
-            {
-                _delegate = (StringToStringDelegate)method.CreateDelegate(typeof(StringToStringDelegate));
-            }
-
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-            {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments passed `{arguments.Count}` while expecting `{1}` for `{callerContext}`");
-                }
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                return _delegate(arg0);
-            }
         }
 
         /// <summary>
@@ -309,6 +166,50 @@ namespace Scriban.Runtime
                 {
                     throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception.InnerException);
                 }
+            }
+        }
+
+        private class MethodComparer : IEqualityComparer<MethodInfo>
+        {
+            public static readonly MethodComparer Default = new MethodComparer();
+
+            public bool Equals(MethodInfo method, MethodInfo otherMethod)
+            {
+                if (method != null && otherMethod != null && method.ReturnType == otherMethod.ReturnType && method.IsStatic == otherMethod.IsStatic)
+                {
+                    var parameters = method.GetParameters();
+                    var otherParameters = otherMethod.GetParameters();
+                    var length = parameters.Length;
+                    if (length == otherParameters.Length)
+                    {
+                        for (int i = 0; i < length; i++)
+                        {
+                            var param = parameters[i];
+                            var otherParam = otherParameters[i];
+                            if (param.ParameterType != otherParam.ParameterType || param.IsOptional != otherParam.IsOptional)
+                            {
+                                return false;
+                            }
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            public int GetHashCode(MethodInfo method)
+            {
+                var hash = method.ReturnType.GetHashCode();
+                if (!method.IsStatic)
+                {
+                    hash = (hash * 397) ^ 1;
+                }
+                var parameters = method.GetParameters();
+                for (int i = 0; i < parameters.Length; i++)
+                {
+                    hash = (hash * 397) ^ parameters[i].ParameterType.GetHashCode();
+                }
+                return hash;
             }
         }
     }
