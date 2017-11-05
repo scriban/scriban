@@ -17,7 +17,7 @@ namespace Scriban.Syntax
         }
 
 
-        public static void Write(this List<ScriptNamedParameter> parameters, RenderContext context)
+        public static void Write(this RenderContext context, List<ScriptNamedParameter> parameters)
         {
             if (parameters == null)
             {

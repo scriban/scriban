@@ -65,7 +65,7 @@ namespace Scriban.Syntax
             context.Write(Variable).ExpectSpace();
             context.Write("in").ExpectSpace();
             context.Write(Iterator);
-            NamedParameters?.Write(context);
+            context.Write(NamedParameters);
             context.ExpectEos();
             context.Write(Body);
             context.ExpectEnd();
