@@ -26,7 +26,7 @@ namespace Scriban.Tests
             [Test]
             public void TestSortError()
             {
-                TestParser.AssertTemplate("text(1,19) : error : Unexpected number of arguments `0` for sort. Expecting at least 1 parameter <property>? <array>", "{{ [1,2] || array.sort }}");
+                TestParser.AssertTemplate("text(1,19) : error : Invalid number of arguments `0` passed to `array.sort` while expecting at least `1` arguments", "{{ [1,2] || array.sort }}");
             }
         }
 
@@ -35,12 +35,12 @@ namespace Scriban.Tests
             [Test]
             public void TestSliceError()
             {
-                TestParser.AssertTemplate("text(1,11) : error : Unexpected number of arguments `0` for slice. Expecting at least 2 parameters <start> <length>? <text>", "{{ string.slice }}");
+                TestParser.AssertTemplate("text(1,11) : error : Invalid number of arguments `0` passed to `string.slice` while expecting at least `2` arguments", "{{ string.slice }}");
             }
             [Test]
             public void TestSliceAtError()
             {
-                TestParser.AssertTemplate("text(1,11) : error : Unexpected number of arguments `0` for slice1. Expecting at least 2 parameters <start> <length>? <text>", "{{ string.slice1 }}");
+                TestParser.AssertTemplate("text(1,11) : error : Invalid number of arguments `0` passed to `string.slice1` while expecting at least `2` arguments", "{{ string.slice1 }}");
             }
         }
     }
