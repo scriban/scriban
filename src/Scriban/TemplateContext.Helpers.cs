@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection; // Leave this as it is required by some .NET targets
 using System.Text;
@@ -147,6 +148,15 @@ namespace Scriban
                 }
                 result.Append("]");
                 return result.ToString();
+            }
+
+            // Special case to display KeyValuePair as key, value
+            var typeName = type.FullName;
+            if (typeName != null && typeName.StartsWith("System.Collections.Generic.KeyValuePair"))
+            {
+                var keyValuePair = new ScriptObject(2);
+                keyValuePair.Import(value, renamer: this.MemberRenamer);
+                return ToString(span, keyValuePair);
             }
 
             // Else just end-up trying to emit the ToString
