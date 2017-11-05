@@ -493,8 +493,7 @@ namespace Scriban
         /// </summary>
         public void PushOutput(IScriptOutput output)
         {
-            if (output == null) throw new ArgumentNullException(nameof(output));
-            _output = new StringBuilderOutput();
+            _output = output ?? throw new ArgumentNullException(nameof(output));
             _outputs.Push(_output);
         }
 
