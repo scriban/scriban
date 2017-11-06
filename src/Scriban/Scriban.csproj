@@ -5,7 +5,7 @@
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.12.0</VersionPrefix>
+    <VersionPrefix>0.12.1</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
     <TargetFrameworks>net35;net40;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1;netstandard1.3;uap10.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
@@ -13,6 +13,8 @@
     <PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>
+&gt; 0.12.1
+ - Enable hyphenated variables (my-variable) only for liquid and convert it to scriban with the this indexer (`this["my-variable"]`)
 &gt; 0.12.0
  - More compatibility added for liquid
  - Breaking change of function parameters order to allow default values
