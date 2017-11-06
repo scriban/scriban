@@ -440,9 +440,39 @@ namespace Scriban.Parsing
                 End = endSpan.End
             };
 
-            // Flush any trivias after
+            // A liquid variable can have `-` in its identifier
+            // If this is the case, we need to translate it to `this["this"]` instead
+            if (_isLiquid && text.IndexOf('-') >= 0)
+            {
+                var newExp = new ScriptIndexerExpression
+                {
+                    Target = new ScriptThisExpression()
+                    {
+                        Span = result.Span
+                    },
+                    Index = new ScriptLiteral(text)
+                    {
+                        Span = result.Span
+                    },
+                    Span = result.Span
+                };
+
+                // Flush any trivias after
+                if (_isKeepTrivia)
+                {
+                    if (triviasBefore != null)
+                    {
+                        newExp.Target.AddTrivias(triviasBefore, true);
+                    }
+                    FlushTrivias(newExp, false);
+                }
+                // Return the expression
+                return newExp;
+            }
+
             if (_isKeepTrivia)
             {
+                // Flush any trivias after
                 if (triviasBefore != null)
                 {
                     result.AddTrivias(triviasBefore, true);
