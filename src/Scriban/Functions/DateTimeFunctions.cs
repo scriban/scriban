@@ -60,11 +60,9 @@ namespace Scriban.Functions
         {
             Format = DefaultFormat;
 
-            this.Import("now", new Func<DateTime>(() => DateTime.Now));
-
+            // This function is very specific, as it is calling a member function of this instance
+            // in order to retrieve the `date.format`
             this.Import("to_string", new Func<TemplateContext, DateTime, string, string>((context, date, pattern) => ToString(date, pattern, context.CurrentCulture)));
-
-            this.Import("parse", new Func<string, DateTime>(Parse));
         }
 
         /// <summary>
@@ -72,12 +70,14 @@ namespace Scriban.Functions
         /// </summary>
         public string Format
         {
-            get { return this.GetSafeValue<string>(FormatKey) ?? DefaultFormat; }
-            set
-            {
-                this.SetValue(FormatKey, value, false);
-            }
+            get => GetSafeValue<string>(FormatKey) ?? DefaultFormat;
+            set => SetValue(FormatKey, value, false);
         }
+
+        /// <summary>
+        /// Gets gets the current date time
+        /// </summary>
+        public static DateTime Now => DateTime.Now;
 
         /// <summary>
         /// Adds days to date.
@@ -157,11 +157,11 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Parses the specified text as a <see cref="ScriptDate"/> using the current culture.
+        /// Parses the specified text as a <see cref="DateTime"/> using the current culture.
         /// </summary>
         /// <param name="text">A text representing a date.</param>
         /// <returns>A date object</returns>
-        internal static DateTime Parse(string text)
+        public static DateTime Parse(string text)
         {
             if (String.IsNullOrEmpty(text))
             {
@@ -185,11 +185,12 @@ namespace Scriban.Functions
         /// <summary>
         /// Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
+        /// <param name="datetime">The input datetime to format</param>
         /// <param name="pattern">The date format pattern.</param>
+        /// <param name="culture">The culture used to format the datetime</param>
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        [ScriptMemberIgnore]
         public virtual string ToString(DateTime datetime, string pattern, CultureInfo culture)
         {
             if (pattern == null) throw new ArgumentNullException(nameof(pattern));
