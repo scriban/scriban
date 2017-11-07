@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 07-Nov-17 12:24:44 by Scriban.CodeGen
+// This file was automatically generated - 07-Nov-17 22:40:06 by Scriban.CodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -46,7 +46,6 @@ namespace Scriban.Runtime
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Pluralize)), method => new Functionstring_int_string_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Typeof)), method => new Functionstring_object(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.HtmlFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.HtmlFunctions.Escape)), method => new Functionstring_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Truncatewords)), method => new Functionstring_string_int(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Slice)), method => new Functionstring_string_int_int___Opt(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Truncate)), method => new Functionstring_string_int_string___Opt(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Append)), method => new Functionstring_string_string(method));
@@ -1811,70 +1810,6 @@ namespace Scriban.Runtime
                 }
 
                 return _delegate(arg0);
-            }
-        }
-
-        /// <summary>
-        /// Optimized custom function for: string (string, int)
-        /// </summary>
-        private class Functionstring_string_int : DynamicCustomFunction
-        {
-            private delegate string InternalDelegate(string arg0, int arg1);
-
-            private readonly InternalDelegate _delegate;
-
-            public Functionstring_string_int(MethodInfo method) : base(method)
-            {
-                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-            }
-
-            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-            {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(int);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-
-                return _delegate(arg0, arg1);
             }
         }
 
