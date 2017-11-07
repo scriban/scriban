@@ -1,6 +1,7 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -17,82 +18,30 @@ namespace Scriban.Functions
     /// </summary>
     public class ArrayFunctions : ScriptObject
     {
-        public static string Join(TemplateContext context, SourceSpan span, IEnumerable list, string delimiter)
+        public static IList Add(IList list, object value)
         {
             if (list == null)
             {
-                return string.Empty;
+                return new ScriptArray {value};
             }
 
-            var text = new StringBuilder();
-            bool afterFirst = false;
-            foreach (var obj in list)
-            {
-                if (afterFirst)
-                {
-                    text.Append(delimiter);
-                }
-                text.Append(context.ToString(span, obj));
-                afterFirst = true;
-            }
-            return text.ToString();
+            list = new ScriptArray(list) {value};
+            return list;
         }
 
-        public static IEnumerable Uniq(IEnumerable list)
+        public static IList AddRange(IList list1, IEnumerable list2)
         {
-            return list?.Cast<object>().Distinct();
-        }
-
-        /// <summary>
-        /// Returns only count elments from the input list
-        /// </summary>
-        /// <param name="list">The input list</param>
-        /// <param name="count">The number of elements to return from the input list</param>
-        public static ScriptArray Limit(IEnumerable list, int count)
-        {
-            if (list == null)
+            if (list2 == null)
             {
-                return null;
+                return list1;
             }
 
-            var result = new ScriptArray();
-            foreach (var item in list)
+            list1 = list1 == null ? new ScriptArray() : new ScriptArray(list1);
+            foreach (var value in list2)
             {
-                count--;
-                if (count < 0)
-                {
-                    break;
-                }
-                result.Add(item);
+                list1.Add(value);
             }
-            return result;
-        }
-
-        /// <summary>
-        /// Returns the remaining of the list after the specified offset
-        /// </summary>
-        /// <param name="list">The input list</param>
-        /// <param name="index">The index of a list to return elements</param>
-        public static ScriptArray Offset(IEnumerable list, int index)
-        {
-            if (list == null)
-            {
-                return null;
-            }
-
-            var result = new ScriptArray();
-            foreach (var item in list)
-            {
-                if (index <= 0)
-                {
-                    result.Add(item);
-                }
-                else
-                {
-                    index--;
-                }
-            }
-            return result;
+            return list1;
         }
 
 
@@ -147,20 +96,48 @@ namespace Scriban.Functions
             return result;
         }
 
-        public static int Size(IEnumerable list)
+        public static object Cycle(TemplateContext context, SourceSpan span, object listOrGroup, object list = null)
         {
+            string group = null;
+            IList valueList = null;
             if (list == null)
             {
-                return 0;
+                valueList = context.ToList(span, listOrGroup);
+                group = Join(context, span, valueList, ",");
             }
-            var collection = list as ICollection;
-            if (collection != null)
+            else
             {
-                return collection.Count;
+                group = context.ToString(span, listOrGroup);
+                valueList = context.ToList(span, list);
             }
 
-            // Slow path, go through the whole list
-            return list.Cast<object>().Count();
+            if (!(valueList is IList))
+            {
+                return null;
+            }
+
+            // We create a cycle variable that is dependent on the exact AST context.
+            // So we allow to have multiple cycle running in the same loop
+            var cycleKey = new CycleKey(group);
+
+            object cycleValue;
+            var currentTags = context.Tags;
+            if (!currentTags.TryGetValue(cycleKey, out cycleValue) || !(cycleValue is int))
+            {
+                cycleValue = 0;
+            }
+
+            var cycleIndex = (int) cycleValue;
+            cycleIndex = valueList.Count == 0 ? 0 : cycleIndex % valueList.Count;
+            object result = null;
+            if (valueList.Count > 0)
+            {
+                result = valueList[cycleIndex];
+                cycleIndex++;
+            }
+            currentTags[cycleKey] = cycleIndex;
+
+            return result;
         }
 
         public static object First(IEnumerable list)
@@ -184,6 +161,47 @@ namespace Scriban.Functions
             return null;
         }
 
+
+        public static IList InsertAt(IList list, int index, object value)
+        {
+            if (index < 0)
+            {
+                index = 0;
+            }
+
+            list = list == null ? new ScriptArray() : new ScriptArray(list);
+            // Make sure that the list has already inserted elements before the index
+            for (int i = list.Count; i < index; i++)
+            {
+                list.Add(null);
+            }
+
+            list.Insert(index, value);
+
+            return list;
+        }
+
+        public static string Join(TemplateContext context, SourceSpan span, IEnumerable list, string delimiter)
+        {
+            if (list == null)
+            {
+                return string.Empty;
+            }
+
+            var text = new StringBuilder();
+            bool afterFirst = false;
+            foreach (var obj in list)
+            {
+                if (afterFirst)
+                {
+                    text.Append(delimiter);
+                }
+                text.Append(context.ToString(span, obj));
+                afterFirst = true;
+            }
+            return text.ToString();
+        }
+
         public static object Last(IEnumerable list)
         {
             if (list == null)
@@ -201,19 +219,83 @@ namespace Scriban.Functions
             return list.Cast<object>().LastOrDefault();
         }
 
-        public static IEnumerable Reverse(IEnumerable list)
+        /// <summary>
+        /// Returns only count elments from the input list
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <param name="count">The number of elements to return from the input list</param>
+        public static ScriptArray Limit(IEnumerable list, int count)
         {
             if (list == null)
             {
-                return Enumerable.Empty<object>();
+                return null;
             }
 
-            // TODO: provide a special path for IList
-            //var list = list as IList;
-            //if (list != null)
-            //{
-            //}
-            return list.Cast<object>().Reverse();
+            var result = new ScriptArray();
+            foreach (var item in list)
+            {
+                count--;
+                if (count < 0)
+                {
+                    break;
+                }
+                result.Add(item);
+            }
+            return result;
+        }
+
+        public static IEnumerable Map(TemplateContext context, SourceSpan span, object list, string member = null)
+        {
+            if (list == null)
+            {
+                yield break;
+            }
+
+            var enumerable = list as IEnumerable;
+            var realList = enumerable?.Cast<object>().ToList() ?? new List<object>(1) {list};
+            if (realList.Count == 0)
+            {
+                yield break;
+            }
+
+            foreach (var item in realList)
+            {
+                var itemAccessor = context.GetMemberAccessor(item);
+                if (itemAccessor.HasMember(context, span, item, member))
+                {
+                    object value = null;
+                    itemAccessor.TryGetValue(context, span, item, member, out value);
+
+                    yield return value;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Returns the remaining of the list after the specified offset
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <param name="index">The index of a list to return elements</param>
+        public static ScriptArray Offset(IEnumerable list, int index)
+        {
+            if (list == null)
+            {
+                return null;
+            }
+
+            var result = new ScriptArray();
+            foreach (var item in list)
+            {
+                if (index <= 0)
+                {
+                    result.Add(item);
+                }
+                else
+                {
+                    index--;
+                }
+            }
+            return result;
         }
 
         public static IList RemoveAt(IList list, int index)
@@ -238,50 +320,35 @@ namespace Scriban.Functions
             return list;
         }
 
-        public static IList Add(IList list, object value)
+        public static IEnumerable Reverse(IEnumerable list)
         {
             if (list == null)
             {
-                return new ScriptArray { value };
+                return Enumerable.Empty<object>();
             }
 
-            list = new ScriptArray(list) {value};
-            return list;
+            // TODO: provide a special path for IList
+            //var list = list as IList;
+            //if (list != null)
+            //{
+            //}
+            return list.Cast<object>().Reverse();
         }
 
-        public static IList AddRange(IList list1, IEnumerable list2)
+        public static int Size(IEnumerable list)
         {
-            if (list2 == null)
+            if (list == null)
             {
-                return list1;
+                return 0;
+            }
+            var collection = list as ICollection;
+            if (collection != null)
+            {
+                return collection.Count;
             }
 
-            list1 = list1 == null ? new ScriptArray() : new ScriptArray(list1);
-            foreach (var value in list2)
-            {
-                list1.Add(value);
-            }
-            return list1;
-        }
-
-
-        public static IList InsertAt(IList list, int index, object value)
-        {
-            if (index < 0)
-            {
-                index = 0;
-            }
-
-            list = list == null ? new ScriptArray() : new ScriptArray(list);
-            // Make sure that the list has already inserted elements before the index
-            for (int i = list.Count; i < index; i++)
-            {
-                list.Add(null);
-            }
-
-            list.Insert(index, value);
-
-            return list;
+            // Slow path, go through the whole list
+            return list.Cast<object>().Count();
         }
 
         public static IEnumerable Sort(TemplateContext context, SourceSpan span, object list, string member = null)
@@ -331,85 +398,19 @@ namespace Scriban.Functions
             return realList;
         }
 
-        public static IEnumerable Map(TemplateContext context, SourceSpan span, object list, string member = null)
+        public static IEnumerable Uniq(IEnumerable list)
         {
-            if (list == null)
-            {
-                yield break;
-            }
-
-            var enumerable = list as IEnumerable;
-            var realList = enumerable?.Cast<object>().ToList() ?? new List<object>(1) {list};
-            if (realList.Count == 0)
-            {
-                yield break;
-            }
-
-            foreach (var item in realList)
-            {
-                var itemAccessor = context.GetMemberAccessor(item);
-                if (itemAccessor.HasMember(context, span, item, member))
-                {
-                    object value = null;
-                    itemAccessor.TryGetValue(context, span, item, member, out value);
-
-                    yield return value;
-                }
-            }
-        }
-
-        public static object Cycle(TemplateContext context, SourceSpan span, object listOrGroup, object list = null)
-        {
-            string group = null;
-            IList valueList = null;
-            if (list == null)
-            {
-                valueList = context.ToList(span, listOrGroup);
-                group = Join(context, span, valueList, ",");
-            }
-            else 
-            {
-                group = context.ToString(span, listOrGroup);
-                valueList = context.ToList(span, list);
-            }
-
-            if (!(valueList is IList))
-            {
-                return null;
-            }
-
-            // We create a cycle variable that is dependent on the exact AST context.
-            // So we allow to have multiple cycle running in the same loop
-            var cycleKey = new CycleKey(group);
-
-            object cycleValue;
-            var currentTags = context.Tags;
-            if (!currentTags.TryGetValue(cycleKey, out cycleValue) || !(cycleValue is int))
-            {
-                cycleValue = 0;
-            }
-
-            var cycleIndex = (int)cycleValue;
-            cycleIndex = valueList.Count == 0 ? 0 : cycleIndex % valueList.Count;
-            object result = null;
-            if (valueList.Count > 0)
-            {
-                result = valueList[cycleIndex];
-                cycleIndex++;
-            }
-            currentTags[cycleKey] = cycleIndex;
-
-            return result;
+            return list?.Cast<object>().Distinct();
         }
 
         private class CycleKey : IEquatable<CycleKey>
         {
+            public readonly string Group;
+
             public CycleKey(string @group)
             {
                 Group = @group;
             }
-
-            public readonly string Group;
 
             public bool Equals(CycleKey other)
             {
