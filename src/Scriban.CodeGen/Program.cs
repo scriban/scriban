@@ -50,11 +50,11 @@ using Scriban.Syntax;
 
 namespace Scriban.Runtime
 {
-    public static partial class CustomFunction
+    public abstract partial class DynamicCustomFunction
     {
 ");
             _writer.Write(@"
-        static CustomFunction()
+        static DynamicCustomFunction()
         {
 ");
             foreach (var keyPair in _methods.OrderBy(s => s.Key))
@@ -88,10 +88,11 @@ namespace Scriban.Runtime
             var delegateSignature = GetSignature(method, SignatureMode.Delegate);
 
             var arguments = new StringBuilder();
+            var caseArguments = new StringBuilder();
             var delegateCallArgs = new StringBuilder();
             var defaultParamDeclaration = new StringBuilder();
             var defaultParamConstructors = new StringBuilder();
-
+            
             int argumentCount = 0;
             int argOffset = 0;
             for (var i = 0; i < method.Parameters.Count; i++)
@@ -106,6 +107,8 @@ namespace Scriban.Runtime
                 argumentCount++;
             }
             int minimunArg = argumentCount;
+
+            string argCheckMask = $"argMask != (1 << {argumentCount}) - 1";
 
             int argIndex = 0;
             for (var paramIndex = 0; paramIndex < method.Parameters.Count; paramIndex++)
@@ -128,7 +131,10 @@ namespace Scriban.Runtime
                     delegateCallArgs.Append("callerContext.Span");
                     continue;
                 }
+
                 arguments.Append($"                var arg{argIndex} = ");
+                caseArguments.AppendLine($"                        case {argIndex}:");
+                caseArguments.Append($"                            arg{argIndex} = ");
 
                 if (arg.IsOptional)
                 {
@@ -136,16 +142,21 @@ namespace Scriban.Runtime
                     {
                         minimunArg = argIndex;
                     }
-                    arguments.Append($" arguments.Count >= {argIndex + 1} ? ");
+                    arguments.Append($"defaultArg{argIndex}");
                 }
+                else
+                {
+                    arguments.Append($"default({PrettyType(type)})");
+                }
+                arguments.AppendLine(";");
 
                 if (type.MetadataType == MetadataType.String)
                 {
-                    arguments.Append($"context.ToString(callerContext.Span, arguments[{argIndex}])");
+                    caseArguments.Append($"context.ToString(callerContext.Span, arg)");
                 }
                 else if (type.MetadataType == MetadataType.Int32)
                 {
-                    arguments.Append($"context.ToInt(callerContext.Span, arguments[{argIndex}])");
+                    caseArguments.Append($"context.ToInt(callerContext.Span, arg)");
                 }
                 else 
                 {
@@ -153,27 +164,38 @@ namespace Scriban.Runtime
                     {
                         if (type.Name == "IList")
                         {
-                            arguments.Append($"context.ToList(callerContext.Span, arguments[{argIndex}])");
+                            caseArguments.Append($"context.ToList(callerContext.Span, arg)");
                         }
                         else
                         {
-                            arguments.Append($"({PrettyType(type)})context.ToObject(callerContext.Span, arguments[{argIndex}], typeof({PrettyType(type)}))");
+                            caseArguments.Append($"({PrettyType(type)})context.ToObject(callerContext.Span, arg, typeof({PrettyType(type)}))");
                         }
                     }
                     else
                     {
-                        arguments.Append($"arguments[{argIndex}]");
+                        caseArguments.Append($"arg");
                     }
                 }
-                if (arg.IsOptional)
+                caseArguments.AppendLine(";");
+
+                // If argument is optional, we don't need to update the mask as it is aslready taken into account into the mask init
+                if (!arg.IsOptional)
                 {
-                    arguments.Append($" : defaultArg{argIndex}");
+                    caseArguments.AppendLine($"                            argMask |= (1 << {argIndex});");
                 }
-                arguments.AppendLine(";");
+                caseArguments.AppendLine($"                            break;");
 
                 delegateCallArgs.Append($"arg{argIndex}");
                 argIndex++;
             }
+
+            // Outptu default argument masking
+            var defaultArgMask = 0;
+            for (int i = minimunArg; i < argumentCount; i++)
+            {
+                defaultArgMask |= (1 << i);
+            }
+            arguments.AppendLine($"                int argMask = {defaultArgMask};");
 
             var argCheck = $"arguments.Count";
             string atLeast = "";
@@ -193,7 +215,7 @@ namespace Scriban.Runtime
                         defaultParamDeclaration.AppendLine();
                         defaultParamDeclaration.Append($"            private readonly {PrettyType(arg.ParameterType)} defaultArg{argIndex};");
                         defaultParamConstructors.AppendLine();
-                        defaultParamConstructors.Append($"                defaultArg{argIndex} = ({PrettyType(arg.ParameterType)})method.GetParameters()[{i}].DefaultValue;");
+                        defaultParamConstructors.Append($"                defaultArg{argIndex} = ({PrettyType(arg.ParameterType)})Parameters[{i}].DefaultValue;");
                     }
                 }
             }
@@ -207,24 +229,52 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: {signature}
         /// </summary>
-        private class {name} : IScriptCustomFunction
+        private class {name} : DynamicCustomFunction
         {{
             private delegate {delegateSignature};
 
             private readonly InternalDelegate _delegate;{defaultParamDeclaration}
 
-            public {name}(MethodInfo method)
+            public {name}(MethodInfo method) : base(method)
             {{
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));{defaultParamConstructors}
             }}
 
-            public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {{
                 if ({argCheck})
                 {{
                     throw new ScriptRuntimeException(callerContext.Span, $""Invalid number of arguments `{{arguments.Count}}` passed to `{{callerContext}}` while expecting {atLeast}`{minimunArg}` arguments"");
                 }}
 {arguments}
+                int argOrderedIndex = 0;
+                for (int i = 0; i < arguments.Count; i++)
+                {{
+                    int argIndex = 0;
+                    var arg = arguments[i];
+                    var namedArg = arg as ScriptNamedArgument;
+                    if (namedArg != null)
+                    {{
+                        Type argType;
+                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                    }}
+                    else
+                    {{
+                        argIndex = argOrderedIndex;
+                        argOrderedIndex++;
+                    }}
+
+                    switch (argIndex)
+                    {{
+{caseArguments}
+                    }}
+                }}
+
+                if ({argCheckMask})
+                {{
+                    throw new ScriptRuntimeException(callerContext.Span, $""Invalid number of arguments `{{arguments.Count}}` passed to `{{callerContext}}` while expecting {atLeast}`{minimunArg}` arguments"");
+                }}
+
                 return _delegate({delegateCallArgs});
             }}
         }}
@@ -290,15 +340,28 @@ namespace Scriban.Runtime
                         text.Append(", ");
                     }
                 }
+
+                if (mode == SignatureMode.Name)
+                {
+                    text.Append("_");
+                }
+
                 text.Append(PrettyType(parameter.ParameterType));
 
                 if (mode == SignatureMode.Delegate)
                 {
                     text.Append($" arg{i}");
                 }
-                if (mode == SignatureMode.Verbose && parameter.IsOptional)
+                if (parameter.IsOptional)
                 {
-                    text.Append(" = ...");
+                    if (mode == SignatureMode.Verbose)
+                    {
+                        text.Append(" = ...");
+                    }
+                    else if (mode == SignatureMode.Name)
+                    {
+                        text.Append("___Opt");
+                    }
                 }
                 // TODO: Handle params
             }

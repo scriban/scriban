@@ -283,7 +283,7 @@ namespace Scriban.Runtime
                             newMethodName = method.Name;
                         }
 
-                        script.SetValue(null, new SourceSpan(), newMethodName, CustomFunction.Create(obj, method), true);
+                        script.SetValue(null, new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
                     }
                 }
             }
@@ -300,7 +300,7 @@ namespace Scriban.Runtime
             if (member == null) throw new ArgumentNullException(nameof(member));
             if (function == null) throw new ArgumentNullException(nameof(function));
 
-            script.SetValue(null, new SourceSpan(), member, CustomFunction.Create(function.Target, function.GetMethodInfo()), true);
+            script.SetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function.Target, function.GetMethodInfo()), true);
         }
     }
 }

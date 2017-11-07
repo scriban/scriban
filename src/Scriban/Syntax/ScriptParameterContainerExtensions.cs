@@ -7,16 +7,16 @@ namespace Scriban.Syntax
 {
     public static class ScriptParameterContainerExtensions
     {
-        public static void AddParameter(this IScriptNamedParameterContainer container, ScriptNamedParameter parameter)
+        public static void AddParameter(this IScriptNamedArgumentContainer container, ScriptNamedArgument argument)
         {
-            if (container.NamedParameters == null)
+            if (container.NamedArguments == null)
             {
-                container.NamedParameters = new List<ScriptNamedParameter>();
+                container.NamedArguments = new List<ScriptNamedArgument>();
             }
-            container.NamedParameters.Add(parameter);
+            container.NamedArguments.Add(argument);
         }
 
-        public static void Write(this RenderContext context, List<ScriptNamedParameter> parameters)
+        public static void Write(this RenderContext context, List<ScriptNamedArgument> parameters)
         {
             if (parameters == null)
             {

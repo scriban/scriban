@@ -1,0 +1,9 @@
+special_concat_strings => a: default_a, b: default_b, c: default_c
+special_concat_strings "direct a" => a: direct a, b: default_b, c: default_c
+special_concat_strings "direct a" "direct b" => a: direct a, b: direct b, c: default_c
+special_concat_strings "direct a" "direct b" "direct c"=> a: direct a, b: direct b, c: direct c
+special_concat_strings "direct a" a: "override a" => a: override a, b: default_b, c: default_c
+special_concat_strings "direct a" b: "override b" => a: direct a, b: override b, c: default_c
+special_concat_strings "direct a" c: "override c" => a: direct a, b: default_b, c: override c
+special_concat_strings b: "override b" c: "override c" => a: default_a, b: override b, c: override c
+special_concat_strings a: "override a"  b: "override b" c: "override c" => a: override a, b: override b, c: override c

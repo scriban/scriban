@@ -1,0 +1,3 @@
+special_concat_params "a" "b" "c" => v0: a, v1: b, v2: c
+special_concat_params "a" args: "b" args: "c" => v0: a, v1: b, v2: c
+special_concat_string_and_params "default a" "b" "c" => a: default a, v0: b, v1: c

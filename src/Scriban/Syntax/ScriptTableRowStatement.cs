@@ -12,19 +12,19 @@ namespace Scriban.Syntax
     {
         private int _columnsCount;
 
-        protected override void ProcessParameter(TemplateContext context, ScriptNamedParameter parameter)
+        protected override void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)
         {
             _columnsCount = 1;
-            if (parameter.Name == "cols")
+            if (argument.Name == "cols")
             {
-                _columnsCount = context.ToInt(parameter.Value.Span, context.Evaluate(parameter.Value));
+                _columnsCount = context.ToInt(argument.Value.Span, context.Evaluate(argument.Value));
                 if (_columnsCount <= 0)
                 {
                     _columnsCount = 1;
                 }
                 return;
             }
-            base.ProcessParameter(context, parameter);
+            base.ProcessArgument(context, argument);
         }
 
         protected override void BeforeLoop(TemplateContext context)
@@ -65,7 +65,7 @@ namespace Scriban.Syntax
             context.Write(Variable).ExpectSpace();
             context.Write("in").ExpectSpace();
             context.Write(Iterator);
-            context.Write(NamedParameters);
+            context.Write(NamedArguments);
             context.ExpectEos();
             context.Write(Body);
             context.ExpectEnd();

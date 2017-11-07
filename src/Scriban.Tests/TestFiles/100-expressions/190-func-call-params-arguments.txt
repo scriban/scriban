@@ -1,0 +1,3 @@
+special_concat_params "a" "b" "c" => {{ special_concat_params "a" "b" "c" }}
+special_concat_params "a" args: "b" args: "c" => {{ special_concat_params "a" args: "b" args: "c" }}
+special_concat_string_and_params "default a" "b" "c" => {{ special_concat_string_and_params "default a" "b" "c" }}

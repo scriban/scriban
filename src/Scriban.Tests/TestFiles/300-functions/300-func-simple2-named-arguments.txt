@@ -1,0 +1,6 @@
+{{
+func nv
+	ret "name: " + $.name + " value: " + $.value
+end
+nv name: "Yes" value: "No"
+}}

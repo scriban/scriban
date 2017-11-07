@@ -64,7 +64,7 @@ namespace Scriban.Syntax
             return target is ScriptFunction || target is IScriptCustomFunction;
         }
 
-        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, List < ScriptExpression> arguments = null)
+        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, List<ScriptExpression> arguments = null)
         {
             if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (functionObject == null)
@@ -85,6 +85,8 @@ namespace Scriban.Syntax
                 blockDelegate = context.BlockDelegates.Pop();
             }
 
+            // We can't cache this array because it might be collect by the function
+            // So we absolutely need to generate a new array everytime we call a function
             var argumentValues = new ScriptArray();
 
             // Handle pipe arguments here
@@ -94,11 +96,40 @@ namespace Scriban.Syntax
                 context.PipeArguments.Clear();
             }
 
+            // Process direct arguments
             if (arguments != null)
             {
                 foreach (var argument in arguments)
                 {
-                    var value = context.Evaluate(argument);
+                    object value;
+
+                    // Handle named arguments
+                    var namedArg = argument as ScriptNamedArgument;
+                    if (namedArg != null)
+                    {
+                        // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
+                        if (externFunction == null)
+                        {
+                            // We can't add an argument that is "size" for array
+                            if (argumentValues.CanWrite(namedArg.Name))
+                            {
+                                argumentValues.SetValue(context, callerContext.Span, namedArg.Name, context.Evaluate(namedArg), false);
+                                continue;
+                            }
+
+                            // Otherwise pass as a regular argument
+                            value = context.Evaluate(namedArg);
+                        }
+                        else
+                        {
+                            // Named argument are passed as is to the IScriptCustomFunction
+                            value = argument;
+                        }
+                    }
+                    else
+                    {
+                        value = context.Evaluate(argument);
+                    }
 
                     // Handle parameters expansion for a function call when the operator ^ is used
                     var unaryExpression = argument as ScriptUnaryExpression;

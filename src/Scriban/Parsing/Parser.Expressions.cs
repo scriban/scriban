@@ -265,44 +265,79 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    // Parse special statement parameters (for, tablerow, include)
-                    if (parentNode is IScriptNamedParameterContainer && Current.Type == TokenType.Identifier)
-                    {
-                        // Only handle them at top level
-                        var paramContainer = (IScriptNamedParameterContainer)parentNode;
-
-                        while (true)
-                        {
-                            if (Current.Type != TokenType.Identifier)
-                            {
-                                break;
-                            }
-
-                            var parameter = Open<ScriptNamedParameter>();
-                            var parameterName = GetAsText(Current);
-                            parameter.Name = parameterName;
-
-                            // Skip offset
-                            NextToken();
-
-                            paramContainer.AddParameter(Close(parameter));
-
-                            if (Current.Type == TokenType.Colon)
-                            {
-                                NextToken();
-                                parameter.Value = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.BasicExpression);
-                            }
-                        }
-
-                        // We don't allow anything after named parameters
-                        break;
-                    }
-
                     if (StartAsExpression())
                     {
                         // If we can parse a statement, we have a method call
                         if (parentExpression != null)
                         {
+                            break;
+                        }
+
+                        // Parse named parameters
+                        var paramContainer = parentNode as IScriptNamedArgumentContainer;
+                        if (Current.Type == TokenType.Identifier && (parentNode is IScriptNamedArgumentContainer || !_isLiquid && PeekToken().Type == TokenType.Colon))
+                        {
+                            if (paramContainer == null)
+                            {
+                                if (functionCall == null)
+                                {
+                                    functionCall = Open<ScriptFunctionCall>();
+                                    functionCall.Target = leftOperand;
+                                    functionCall.Span.Start = leftOperand.Span.Start;
+                                }
+                                else
+                                {
+                                    functionCall.Arguments.Add(leftOperand);
+                                }
+                                Close(leftOperand);
+                            }
+
+                            while (true)
+                            {
+                                if (Current.Type != TokenType.Identifier)
+                                {
+                                    break;
+                                }
+
+                                var parameter = Open<ScriptNamedArgument>();
+                                var parameterName = GetAsText(Current);
+                                parameter.Name = parameterName;
+
+                                // Skip argument name
+                                NextToken();
+
+                                if (paramContainer != null)
+                                {
+                                    paramContainer.AddParameter(Close(parameter));
+                                }
+                                else
+                                {
+                                    functionCall.Arguments.Add(parameter);
+                                }
+
+                                // If we have a colon, we have a value
+                                // otherwise it is a boolean argument name
+                                if (Current.Type == TokenType.Colon)
+                                {
+                                    NextToken();
+                                    parameter.Value = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.BasicExpression);
+                                    parameter.Span.End = parameter.Value.Span.End;
+                                }
+
+                                if (functionCall != null)
+                                {
+                                    functionCall.Span.End = parameter.Span.End;
+                                }
+                            }
+
+                            // As we have handled leftOperand here, we don't let the function out of this while to pick up the leftOperand
+                            if (functionCall != null)
+                            {
+                                leftOperand = functionCall;
+                                functionCall = null;
+                            }
+
+                            // We don't allow anything after named parameters
                             break;
                         }
 

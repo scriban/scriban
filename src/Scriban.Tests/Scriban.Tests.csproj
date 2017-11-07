@@ -61,6 +61,7 @@
     <Compile Include="MathObject.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpecialFunctionProvider.cs" />
     <Compile Include="TestFunctions.cs" />
     <Compile Include="TestRuntime.cs" />
     <Compile Include="TestIncludes.cs" />
@@ -150,6 +151,10 @@
     <Content Include="TestFiles\100-expressions\140-object-initializer-error6.out.txt" />
     <Content Include="TestFiles\100-expressions\140-object-initializer-error6.txt" />
     <Content Include="TestFiles\100-expressions\180-this-expression.out.txt" />
+    <Content Include="TestFiles\100-expressions\190-func-call-named-arguments.out.txt" />
+    <Content Include="TestFiles\100-expressions\190-func-call-params-arguments.out.txt" />
+    <Content Include="TestFiles\100-expressions\190-func-call-params-arguments.txt" />
+    <Content Include="TestFiles\100-expressions\190-func-call-named-arguments.txt" />
     <Content Include="TestFiles\100-expressions\180-this-expression.txt" />
     <Content Include="TestFiles\100-expressions\170-array-members.out.txt" />
     <Content Include="TestFiles\100-expressions\170-array-members.txt" />
@@ -241,6 +246,8 @@
     <Content Include="TestFiles\200-statements\280-ret-statement2.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.out.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.txt" />
+    <Content Include="TestFiles\300-functions\300-func-simple2-named-arguments.out.txt" />
+    <Content Include="TestFiles\300-functions\300-func-simple2-named-arguments.txt" />
     <Content Include="TestFiles\300-functions\305-func-error-invalid.out.txt" />
     <Content Include="TestFiles\300-functions\305-func-error-invalid.txt" />
     <Content Include="TestFiles\300-functions\305-func-error-null.out.txt" />

@@ -3,18 +3,18 @@
 // See license.txt file in the project root for full license information.
 namespace Scriban.Syntax
 {
-    public class ScriptNamedParameter : ScriptExpression
+    public class ScriptNamedArgument : ScriptExpression
     {
-        public ScriptNamedParameter()
+        public ScriptNamedArgument()
         {
         }
 
-        public ScriptNamedParameter(string name)
+        public ScriptNamedArgument(string name)
         {
             Name = name;
         }
 
-        public ScriptNamedParameter(string name, ScriptExpression value)
+        public ScriptNamedArgument(string name, ScriptExpression value)
         {
             Name = name;
             Value = value;

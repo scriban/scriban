@@ -13,16 +13,16 @@ namespace Scriban.Syntax
     /// A for in loop statement.
     /// </summary>
     [ScriptSyntax("for statement", "for <variable> in <expression> ... end")]
-    public class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedParameterContainer
+    public class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
     {
         public ScriptExpression Variable { get; set; }
 
         public ScriptExpression Iterator { get; set; }
 
-        public List<ScriptNamedParameter> NamedParameters { get; set; }
+        public List<ScriptNamedArgument> NamedArguments { get; set; }
 
-        internal ScriptNode IteratorOrLastParameter => NamedParameters != null && NamedParameters.Count > 0
-            ? NamedParameters[NamedParameters.Count - 1]
+        internal ScriptNode IteratorOrLastParameter => NamedArguments != null && NamedArguments.Count > 0
+            ? NamedArguments[NamedArguments.Count - 1]
             : Iterator;
 
         protected override void EvaluateImpl(TemplateContext context)
@@ -46,9 +46,9 @@ namespace Scriban.Syntax
                 bool reversed = false;
                 int startIndex = 0;
                 int limit = list.Count;
-                if (NamedParameters != null)
+                if (NamedArguments != null)
                 {
-                    foreach (var option in NamedParameters)
+                    foreach (var option in NamedArguments)
                     {
                         switch (option.Name)
                         {
@@ -62,7 +62,7 @@ namespace Scriban.Syntax
                                 limit = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
                                 break;
                             default:
-                                ProcessParameter(context, option);
+                                ProcessArgument(context, option);
                                 break;
                         }
                     }
@@ -119,15 +119,15 @@ namespace Scriban.Syntax
             }
             context.Write("in").ExpectSpace();
             context.Write(Iterator);
-            context.Write(NamedParameters);
+            context.Write(NamedArguments);
             context.ExpectEos();
             context.Write(Body);
             context.ExpectEnd();
         }
 
-        protected virtual void ProcessParameter(TemplateContext context, ScriptNamedParameter parameter)
+        protected virtual void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)
         {
-            throw new ScriptRuntimeException(parameter.Span, $"Unsupported parameter `{parameter.Name}` for statement: `{this}`");
+            throw new ScriptRuntimeException(argument.Span, $"Unsupported argument `{argument.Name}` for statement: `{this}`");
         }
 
         public override string ToString()

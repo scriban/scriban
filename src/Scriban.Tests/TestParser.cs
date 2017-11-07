@@ -492,7 +492,7 @@ end
                             // Setup a default model context for the tests
                             if (model == null)
                             {
-                                model = new ScriptObject
+                                var scriptObj = new ScriptObject
                                 {
                                     ["page"] = new ScriptObject {["title"] = "This is a title"},
                                     ["user"] = new ScriptObject {["name"] = "John"},
@@ -508,6 +508,8 @@ end
                                         new ScriptObject {["title"] = "Item4 Hello World", ["type"] = "item"},
                                     }
                                 };
+                                scriptObj.Import(typeof(SpecialFunctionProvider));
+                                model = scriptObj;
                             }
 
                             var context = isLiquid

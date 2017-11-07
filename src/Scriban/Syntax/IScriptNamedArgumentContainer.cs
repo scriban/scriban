@@ -8,8 +8,8 @@ namespace Scriban.Syntax
     /// <summary>
     /// Interfaces used by statements/expressions that have special trailing parameters (for, tablerow, include...)
     /// </summary>
-    public interface IScriptNamedParameterContainer
+    public interface IScriptNamedArgumentContainer
     {
-        List<ScriptNamedParameter> NamedParameters { get; set; }
+        List<ScriptNamedArgument> NamedArguments { get; set; }
     }
 }
