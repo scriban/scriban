@@ -1,9 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Dynamic;
 using System.IO;
+using System.Reflection;
+using System.Text;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
+using Microsoft.AspNetCore.Razor.Language;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.Text;
 using Scriban.Functions;
 using Scriban.Runtime;
 
@@ -16,7 +23,23 @@ namespace Scriban.Benchmarks
     {
         static void Main(string[] args)
         {
+            //var parser = new BenchRenderers();
+
+            //var result1 = parser.TestScriban();
+            //var result2 = parser.TestRazor();
+
             //var program = new BenchRenderers();
+            ////var resultliquid = program.TestDotLiquid();
+
+            //Console.WriteLine("Press enter for profiling scriban");
+            //Console.ReadLine();
+
+            //var result = program.TestScriban();
+
+            //Console.WriteLine("Press enter for end scriban");
+            //Console.ReadLine();
+            ////program.TestScriban();
+
             //var clock = Stopwatch.StartNew();
             //for (int i = 0; i < 1000; i++)
             //{
@@ -30,7 +53,7 @@ namespace Scriban.Benchmarks
             //var result6 = program.TestCottle();
             //var result7 = program.TestFluid();
             BenchmarkRunner.Run<BenchParsers>();
-            //BenchmarkRunner.Run<BenchRenderers>();
+            BenchmarkRunner.Run<BenchRenderers>();
         }
     }
 
@@ -85,6 +108,20 @@ namespace Scriban.Benchmarks
 </ul>
 ";
 
+        public const string TestTemplateRazor = @"
+<ul id='products'>
+   @foreach(dynamic product in Model.products)
+    {
+    
+    <li>
+      <h2>@product.Name</h2>
+           Only @product.Price
+           @Model.truncate(product.Description, 15)
+    </li>
+   }
+</ul>
+";
+
         [Benchmark(Description = "Scriban - Parser")]
         public Scriban.Template TestScriban()
         {
@@ -133,6 +170,12 @@ namespace Scriban.Benchmarks
             }
             return template;
         }
+
+        [Benchmark(Description = "Razor - Parser")]
+        public RazorTemplatePage TestRazor()
+        {
+            return RazorBuilder.Compile(TestTemplateRazor);
+        }
     }
 
     /// <summary>
@@ -149,6 +192,7 @@ namespace Scriban.Benchmarks
         private readonly Func<object, string> _handlebarsTemplate;
         private readonly Cottle.Documents.SimpleDocument _cottleTemplate;
         private readonly Fluid.FluidTemplate _fluidTemplate;
+        private readonly RazorTemplatePage _razorTemplate;
 
         private const string Lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
 
@@ -170,6 +214,7 @@ namespace Scriban.Benchmarks
             _handlebarsTemplate = parsers.TestHandlebars();
             _cottleTemplate = parsers.TestCottle();
             _fluidTemplate = parsers.TestFluid();
+            _razorTemplate = parsers.TestRazor();
 
             const int ProductCount = 500;
             _products = new List<Product>(ProductCount);
@@ -190,7 +235,7 @@ namespace Scriban.Benchmarks
             // For Cottle, we match the behavior of Scriban that is accessing the Truncate function via an reflection invoke
             // In Scriban, we could also have a direct Truncate function, but it is much less practical in terms of declaration
             _cottleStringStore = new Dictionary<Cottle.Value, Cottle.Value>();
-            _cottleStringStore["truncate"] = new Cottle.Functions.NativeFunction((values, store, output) =>
+            _cottleStringStore["truncate"] = new Cottle.Functions.NativeFunction((values, store, Output) =>
             {
                 if (values.Count != 2)
                 {
@@ -269,6 +314,19 @@ namespace Scriban.Benchmarks
             templateContext.SetValue("products", _dotLiquidProducts);
             // DotLiquid forces to rework the original List<Product> into a custom object, which is not the same behavior as Scriban (easier somewhat because no late binding)
             return Fluid.FluidTemplateExtensions.Render(_fluidTemplate, templateContext);
+        }
+
+        [Benchmark(Description = "Razor")]
+        public string TestRazor()
+        {
+            dynamic expando = new ExpandoObject();
+            expando.products = _products;
+            expando.truncate = new Func<string, int, string>((text, length) => Scriban.Functions.StringFunctions.Truncate(text, length));
+            _razorTemplate.Output = new StringWriter();
+            _razorTemplate.Model = expando;
+            _razorTemplate.Execute();
+            var result = _razorTemplate.Output.ToString();
+            return result;
         }
 
         public class Product
