@@ -13,7 +13,7 @@ using Scriban.Syntax;
 namespace Scriban.Functions
 {
     /// <summary>
-    /// String functions available through the object 'string' in scriban.
+    /// String functions available through the builtin object 'string`.
     /// </summary>
     public class StringFunctions : ScriptObject
     {
@@ -27,9 +27,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "Hello" | string.append " World" }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// Hello World
         /// ```
@@ -48,9 +45,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.capitalize }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// Test
         /// ```
@@ -76,9 +70,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "This is easy" | string.capitalizewords }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// This Is Easy
         /// ```
@@ -120,9 +111,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "This is easy" | string.contains "easy" }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// true
         /// ```
@@ -145,9 +133,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "TeSt" | string.downcase }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// test
         /// ```
@@ -167,9 +152,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "This is easy" | string.ends_with "easy" }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// true
         /// ```
@@ -191,11 +173,8 @@ namespace Scriban.Functions
         /// <returns>A url handle</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ '100% M & Ms!!!' | string.handleize  }}
+        /// {{ '100% M &amp; Ms!!!' | string.handleize  }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// 100-m-ms
         /// ```
@@ -234,9 +213,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ '   too many spaces           ' | string.lstrip  }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// &lt;!-- Highlight to see the empty spaces to the right of the string --&gt;
         /// too many spaces           
@@ -258,9 +234,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ cart.item_count }} {{cart.item_count | string.pluralize 'item' 'items' }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// 4 items
         /// ```
@@ -280,9 +253,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "World" | string.prepend "Hello " }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// Hello World
         /// ```
@@ -292,6 +262,19 @@ namespace Scriban.Functions
             return (by ?? string.Empty) + (text ?? string.Empty);
         }
 
+        /// <summary>
+        /// Removes all occurrences of a substring from a string.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="remove">The substring to remove from the `text` string</param>
+        /// <returns>The input string with the all occurence of a substring removed</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Hello, world. Goodbye, world." | string.remove "world" }}
+        /// ```html
+        /// Hello, . Goodbye, .
+        /// ```
+        /// </remarks>
         public static string Remove(string text, string remove)
         {
             if (string.IsNullOrEmpty(remove) || string.IsNullOrEmpty(text))
@@ -301,11 +284,38 @@ namespace Scriban.Functions
             return text.Replace(remove, string.Empty);
         }
 
+        /// <summary>
+        /// Removes the first occurrence of a substring from a string.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="remove">The first occurence of substring to remove from the `text` string</param>
+        /// <returns>The input string with the first occurence of a substring removed</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Hello, world. Goodbye, world." | string.remove_first "world" }}
+        /// ```html
+        /// Hello, . Goodbye, world.
+        /// ```
+        /// </remarks>
         public static string RemoveFirst(string text, string remove)
         {
             return ReplaceFirst(text, remove, string.Empty);
         }
 
+        /// <summary>
+        /// Replaces all occurrences of a string with a substring.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="match">The substring to find in the `text` string</param>
+        /// <param name="replace">The substring used to replace the string matched by `match` in the input `text`</param>
+        /// <returns>The input string replaced</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Hello, world. Goodbye, world." | string.replace "world" "buddy" }}
+        /// ```html
+        /// Hello, buddy. Goodbye, buddy.
+        /// ```
+        /// </remarks>
         public static string Replace(string text, string match, string replace)
         {
             if (string.IsNullOrEmpty(text))
@@ -319,6 +329,20 @@ namespace Scriban.Functions
             return text.Replace(match, replace);
         }
 
+        /// <summary>
+        /// Replaces the first occurrence of a string with a substring.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="match">The substring to find in the `text` string</param>
+        /// <param name="replace">The substring used to replace the string matched by `match` in the input `text`</param>
+        /// <returns>The input string replaced</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Hello, world. Goodbye, world." | string.replace_first "world" "buddy" }}
+        /// ```html
+        /// Hello, buddy. Goodbye, world.
+        /// ```
+        /// </remarks>
         public static string ReplaceFirst(string text, string match, string replace)
         {
             if (string.IsNullOrEmpty(text))
@@ -353,14 +377,11 @@ namespace Scriban.Functions
         /// <returns>The input string without any left whitespace characters</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ '   too many spaces           ' | string.lstrip  }}
+        /// {{ '   too many spaces           ' | string.rstrip  }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```html
         /// &lt;!-- Highlight to see the empty spaces to the right of the string --&gt;
-        /// too many spaces           
+        ///    too many spaces
         /// ```
         /// </remarks>
         public static string RStrip(string text)
@@ -377,10 +398,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.size }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
-        /// ```
+        /// ```html
         /// 4
         /// ```
         /// </remarks>
@@ -389,7 +407,27 @@ namespace Scriban.Functions
             return string.IsNullOrEmpty(text) ? 0 : text.Length;
         }
 
-        public static string Slice(string text, int start, int length = -1)
+        /// <summary>
+        /// The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring. 
+        /// If no second parameter is given, a substring with the remaining characters will be returned.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="start">The starting index character where the slice should start from the input `text` string</param>
+        /// <param name="length">The number of character. Default is 0, meaning that the remaining of the string will be returned.</param>
+        /// <returns>The input string sliced</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "hello" | slice: 0 }}
+        /// {{ "hello" | slice: 1 }}
+        /// {{ "hello" | slice: 1, 3 }}
+        /// ```
+        /// ```html
+        /// hello
+        /// ello
+        /// ell
+        /// ```
+        /// </remarks>
+        public static string Slice(string text, int start, int length = 0)
         {
             if (string.IsNullOrEmpty(text) || start >= text.Length)
             {
@@ -401,7 +439,7 @@ namespace Scriban.Functions
                 start = start + text.Length;
             }
 
-            if (length < 0)
+            if (length <= 0)
             {
                 length = text.Length;
             }
@@ -424,7 +462,26 @@ namespace Scriban.Functions
             return text.Substring(start, length);
         }
 
-        // On Liquid: Slice will return 1 character by default, unlike in scriban that returns the rest of the string
+        /// <summary>
+        /// The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring. 
+        /// If no second parameter is given, a substring with the first character will be returned.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="start">The starting index character where the slice should start from the input `text` string</param>
+        /// <param name="length">The number of character. Default is 1, meaning that only the first character at `start` position will be returned.</param>
+        /// <returns>The input string sliced</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "hello" | slice: 0 }}
+        /// {{ "hello" | slice: 1 }}
+        /// {{ "hello" | slice: 1, 3 }}
+        /// ```
+        /// ```html
+        /// h
+        /// e
+        /// ell
+        /// ```
+        /// </remarks>
         public static string Slice1(string text, int start, int length = 1)
         {
             if (string.IsNullOrEmpty(text) || start > text.Length || length <= 0)
@@ -451,6 +508,27 @@ namespace Scriban.Functions
             return text.Substring(start, length);
         }
 
+        /// <summary>
+        /// The `split` function takes on a substring as a parameter. 
+        /// The substring is used as a delimiter to divide a string into an array. You can output different parts of an array using `array` functions.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="match">The string used to split the input `text` string</param>
+        /// <returns>An enumeration of the substrings</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ for word in "Hi, how are you today?" | string.split ' ' 
+        ///   word }}
+        /// {{ endfor }}
+        /// ```
+        /// ```html
+        /// Hi,
+        /// how
+        /// are
+        /// you
+        /// today?
+        /// ```
+        /// </remarks>
         public static IEnumerable Split(string text, string match)
         {
             if (string.IsNullOrEmpty(text))
@@ -473,9 +551,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "This is easy" | string.starts_with "This" }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```
         /// true
         /// ```
@@ -490,11 +565,39 @@ namespace Scriban.Functions
             return text.StartsWith(value);
         }
 
+        /// <summary>
+        /// Removes any whitespace characters on the **left** and **right** side of the input string.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The input string without any left and right whitespace characters</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ '   too many spaces           ' | string.strip  }}
+        /// ```
+        /// ```html
+        /// &lt;!-- Highlight to see the empty spaces to the right of the string --&gt;
+        /// too many spaces
+        /// ```
+        /// </remarks>
         public static string Strip(string text)
         {
             return text?.Trim();
         }
 
+        /// <summary>
+        /// Removes any line breaks/newlines from a string.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The input string without any breaks/newlines characters</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "This is a string.
+        /// With another string" | string.strip_newlines  }}
+        /// ```
+        /// ```html
+        /// This is a string.With another string
+        /// ```
+        /// </remarks>
         public static string StripNewlines(string text)
         {
             if (string.IsNullOrEmpty(text))
@@ -505,6 +608,22 @@ namespace Scriban.Functions
             return Regex.Replace(text, @"\r?\n", string.Empty);
         }
 
+        /// <summary>
+        /// Truncates a string down to the number of characters passed as the first parameter. 
+        /// An ellipsis (...) is appended to the truncated string and is included in the character count
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="length">The maximum length of the output string, including the length of the `ellipsis`</param>
+        /// <param name="ellipsis">The ellipsis to append to the end of the truncated string</param>
+        /// <returns>The truncated input string</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "The cat came back the very next day" | string.truncate 13 }}
+        /// ```
+        /// ```html
+        /// The cat ca...
+        /// ```
+        /// </remarks>
         public static string Truncate(string text, int length, string ellipsis = null)
         {
             ellipsis = ellipsis ?? "...";
@@ -523,7 +642,23 @@ namespace Scriban.Functions
             return text;
         }
 
-        public static string Truncatewords(string text, int count)
+        /// <summary>
+        /// Truncates a string down to the number of words passed as the first parameter. 
+        /// An ellipsis (...) is appended to the truncated string.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="count">The number of words to keep from the input `text` string before appending the `ellipsis`</param>
+        /// <param name="ellipsis">The ellipsis to append to the end of the truncated string</param>
+        /// <returns>The truncated input string</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "The cat came back the very next day" | string.truncatewords 4 }}
+        /// ```
+        /// ```html
+        /// The cat came back...
+        /// ```
+        /// </remarks>
+        public static string Truncatewords(string text, int count, string ellipsis = null)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -562,9 +697,6 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.upcase }}
         /// ```
-        /// 
-        /// Will output:
-        /// 
         /// ```
         /// TEST
         /// ```
@@ -575,6 +707,19 @@ namespace Scriban.Functions
         }
 
 #if !PCL328 && !NETSTD11
+        /// <summary>
+        /// Computes the `md5` hash of the input string
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The `md5` hash of the input string</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "test" | string.md5 }}
+        /// ```
+        /// ```
+        /// 098f6bcd4621d373cade4e832627b4f6
+        /// ```
+        /// </remarks>
         public static string Md5(string text)
         {
             text = text ?? string.Empty;
@@ -584,6 +729,19 @@ namespace Scriban.Functions
             }
         }
 
+        /// <summary>
+        /// Computes the `sha1` hash of the input string
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The `sha1` hash of the input string</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "test" | string.sha1 }}
+        /// ```
+        /// ```
+        /// a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
+        /// ```
+        /// </remarks>
         public static string Sha1(string text)
         {
             using (var sha1 = System.Security.Cryptography.SHA1.Create())
@@ -592,6 +750,19 @@ namespace Scriban.Functions
             }
         }
 
+        /// <summary>
+        /// Computes the `sha256` hash of the input string
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The `sha256` hash of the input string</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "test" | string.sha256 }}
+        /// ```
+        /// ```
+        /// 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
+        /// ```
+        /// </remarks>
         public static string Sha256(string text)
         {
             using (var sha256 = System.Security.Cryptography.SHA256.Create())
@@ -600,6 +771,20 @@ namespace Scriban.Functions
             }
         }
 
+        /// <summary>
+        /// Converts a string into a SHA-1 hash using a hash message authentication code (HMAC). Pass the secret key for the message as a parameter to the function.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="secretKey">The secret key</param>
+        /// <returns>The `SHA-1` hash of the input string using a hash message authentication code (HMAC)</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "test" | string.hmac_sha1 }}
+        /// ```
+        /// ```
+        /// 1aa349585ed7ecbd3b9c486a30067e395ca4b356
+        /// ```
+        /// </remarks>
         public static string HmacSha1(string text, string secretKey)
         {
             using (var hsha1 = new System.Security.Cryptography.HMACSHA1(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
@@ -608,6 +793,20 @@ namespace Scriban.Functions
             }
         }
 
+        /// <summary>
+        /// Converts a string into a SHA-256 hash using a hash message authentication code (HMAC). Pass the secret key for the message as a parameter to the function.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="secretKey">The secret key</param>
+        /// <returns>The `SHA-256` hash of the input string using a hash message authentication code (HMAC)</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "test" | string.hmac_sha256 }}
+        /// ```
+        /// ```
+        /// 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
+        /// ```
+        /// </remarks>
         public static string HmacSha256(string text, string secretKey)
         {
             using (var hsha256 = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
@@ -628,6 +827,31 @@ namespace Scriban.Functions
                 sb.Append(b.ToString("x2"));
             }
             return sb.ToString();
+        }
+#else
+        public static string Md5(string text)
+        {
+            throw new NotSupportedException("`string.md5` is not supported on this .NET platform");
+        }
+
+        public static string Sha1(string text)
+        {
+            throw new NotSupportedException("`string.sha1` is not supported on this .NET platform");
+        }
+
+        public static string Sha256(string text)
+        {
+            throw new NotSupportedException("`string.sha256` is not supported on this .NET platform");
+        }
+
+        public static string HmacSha1(string text, string secretKey)
+        {
+            throw new NotSupportedException("`string.hmac_sha1` is not supported on this .NET platform");
+        }
+
+        public static string HmacSha256(string text, string secretKey)
+        {
+            throw new NotSupportedException("`string.hmac_sha256` is not supported on this .NET platform");
         }
 #endif
     }
