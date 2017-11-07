@@ -59,8 +59,8 @@ end
 }}
 Multiple cycle group:
 {{for x in 1..4
-    array.cycle "group1" ["a", "b", "c", "d"]
-    array.cycle "group2" ["d", "e"]
+    array.cycle ["a", "b", "c", "d"] "group1" 
+    array.cycle ["d", "e"] "group2" 
 end
 }}
 [5,6,7,8] | array.limit 2: {{ [5,6,7,8] | array.limit 2 }}

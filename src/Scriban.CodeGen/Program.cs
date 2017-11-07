@@ -257,6 +257,7 @@ namespace Scriban.Runtime
                     {{
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= {argOffset};
                     }}
                     else
                     {{

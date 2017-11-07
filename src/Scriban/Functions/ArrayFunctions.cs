@@ -18,6 +18,20 @@ namespace Scriban.Functions
     /// </summary>
     public class ArrayFunctions : ScriptObject
     {
+        /// <summary>
+        /// Adds a value to the input list
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <param name="value">The value to add at the end of the list</param>
+        /// <returns>A new list with the value added</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [1, 2, 3] | array.add 4 }}
+        /// ```
+        /// ```html
+        /// [1, 2, 3, 4]
+        /// ```
+        /// </remarks>
         public static IList Add(IList list, object value)
         {
             if (list == null)
@@ -29,19 +43,24 @@ namespace Scriban.Functions
             return list;
         }
 
-        public static IList AddRange(IList list1, IEnumerable list2)
-        {
-            if (list2 == null)
-            {
-                return list1;
-            }
 
-            list1 = list1 == null ? new ScriptArray() : new ScriptArray(list1);
-            foreach (var value in list2)
-            {
-                list1.Add(value);
-            }
-            return list1;
+        /// <summary>
+        /// Concatenates two lists
+        /// </summary>
+        /// <param name="list1">The 1st input list</param>
+        /// <param name="list2">The 2nd input list</param>
+        /// <returns>The concatenation of the two input lists</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [1, 2, 3] | array.concat [4, 5] }}
+        /// ```
+        /// ```html
+        /// [1, 2, 3, 4, 5]
+        /// ```
+        /// </remarks>
+        public static IEnumerable AddRange(IEnumerable list1, IEnumerable list2)
+        {
+            return Concat(list1, list2);
         }
 
 
@@ -50,6 +69,14 @@ namespace Scriban.Functions
         /// </summary>
         /// <param name="list">An input list</param>
         /// <returns>Returns a list with null value removed</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [1, null, 3] | array.compact }}
+        /// ```
+        /// ```html
+        /// [1, 3]
+        /// ```
+        /// </remarks>
         public static ScriptArray Compact(IEnumerable list)
         {
             if (list == null)
@@ -69,12 +96,20 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Concats the two arrays into another array
+        /// Concatenates two lists
         /// </summary>
-        /// <param name="list1">An input list</param>
-        /// <param name="list2">An input list</param>
-        /// <returns>The concatenation of the </returns>
-        public static object Concat(IEnumerable list1, IEnumerable list2)
+        /// <param name="list1">The 1st input list</param>
+        /// <param name="list2">The 2nd input list</param>
+        /// <returns>The concatenation of the two input lists</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [1, 2, 3] | array.concat [4, 5] }}
+        /// ```
+        /// ```html
+        /// [1, 2, 3, 4, 5]
+        /// ```
+        /// </remarks>
+        public static IEnumerable Concat(IEnumerable list1, IEnumerable list2)
         {
             if (list2 == null && list1 == null)
             {
@@ -90,35 +125,46 @@ namespace Scriban.Functions
                 return list2;
             }
 
-            var result = new ScriptArray();
-            foreach (var item in list1) result.Add(item);
+            var result = new ScriptArray(list1);
             foreach (var item in list2) result.Add(item);
             return result;
         }
 
-        public static object Cycle(TemplateContext context, SourceSpan span, object listOrGroup, object list = null)
+        /// <summary>
+        /// Loops through a group of strings and outputs them in the order that they were passed as parameters. Each time cycle is called, the next string that was passed as a parameter is output.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">An input list</param>
+        /// <param name="group">The group used. Default is `null`</param>
+        /// <returns>Returns a list with null value removed</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ cycle ['one', 'two', 'three'] }}
+        /// {{ cycle ['one', 'two', 'three'] }}
+        /// {{ cycle ['one', 'two', 'three'] }}
+        /// {{ cycle ['one', 'two', 'three'] }}
+        /// ```
+        /// ```html
+        /// one
+        /// two
+        /// three
+        /// one
+        /// ```
+        /// `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template. 
+        /// If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
+        /// </remarks>
+        public static object Cycle(TemplateContext context, SourceSpan span, IList list, object group = null)
         {
-            string group = null;
-            IList valueList = null;
             if (list == null)
-            {
-                valueList = context.ToList(span, listOrGroup);
-                group = Join(context, span, valueList, ",");
-            }
-            else
-            {
-                group = context.ToString(span, listOrGroup);
-                valueList = context.ToList(span, list);
-            }
-
-            if (!(valueList is IList))
             {
                 return null;
             }
+            var strGroup = group == null ? Join(context, span, list, ",") : context.ToString(span, group);
 
             // We create a cycle variable that is dependent on the exact AST context.
             // So we allow to have multiple cycle running in the same loop
-            var cycleKey = new CycleKey(group);
+            var cycleKey = new CycleKey(strGroup);
 
             object cycleValue;
             var currentTags = context.Tags;
@@ -128,11 +174,11 @@ namespace Scriban.Functions
             }
 
             var cycleIndex = (int) cycleValue;
-            cycleIndex = valueList.Count == 0 ? 0 : cycleIndex % valueList.Count;
+            cycleIndex = list.Count == 0 ? 0 : cycleIndex % list.Count;
             object result = null;
-            if (valueList.Count > 0)
+            if (list.Count > 0)
             {
-                result = valueList[cycleIndex];
+                result = list[cycleIndex];
                 cycleIndex++;
             }
             currentTags[cycleKey] = cycleIndex;

@@ -239,7 +239,7 @@ namespace Scriban.Parsing
             ScriptArrayInitializerExpression arrayInit = null;
 
             // Parse cycle without group: cycle "a", "b", "c" => transform to scriban: array.cycle ["a", "b", "c"] 
-            // Parse cycle with group: cycle "group1": "a", "b", "c" => transform to scriban: array.cycle "group1" ["a", "b", "c"]
+            // Parse cycle with group: cycle "group1": "a", "b", "c" => transform to scriban: array.cycle ["a", "b", "c"] "group1"
 
             bool isFirst = true;
             while (IsVariableOrLiteral(Current))
@@ -248,16 +248,22 @@ namespace Scriban.Parsing
 
                 if (isFirst && Current.Type == TokenType.Colon)
                 {
-                    NextToken();
+                    NextToken(); // Skip :
+                    var namedArg = Open<ScriptNamedArgument>();
+                    namedArg.Name = "group";
+                    namedArg.Value = value;
+                    Close(namedArg);
+                    namedArg.Span = value.Span;
+
                     isFirst = false;
-                    functionCall.Arguments.Add(value);
+                    functionCall.Arguments.Add(namedArg);
                     continue;
                 }
 
                 if (arrayInit == null)
                 {
                     arrayInit = Open<ScriptArrayInitializerExpression>();
-                    functionCall.Arguments.Add(arrayInit);
+                    functionCall.Arguments.Insert(0, arrayInit);
                     arrayInit.Span.Start = value.Span.Start;
                 }
 

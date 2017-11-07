@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 07-Nov-17 22:40:06 by Scriban.CodeGen
+// This file was automatically generated - 07-Nov-17 23:58:18 by Scriban.CodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -22,12 +22,13 @@ namespace Scriban.Runtime
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Contains)), method => new Functionbool_string_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.AddDays)), method => new FunctionDateTime_DateTime_double(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.AddYears)), method => new FunctionDateTime_DateTime_int(method));
+            BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.Parse)), method => new FunctionDateTime_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Abs)), method => new Functiondouble_double(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Round)), method => new Functiondouble_double_int___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Uniq)), method => new FunctionIEnumerable_IEnumerable(method));
+            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Reverse)), method => new FunctionIEnumerable_IEnumerable(method));
+            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.AddRange)), method => new FunctionIEnumerable_IEnumerable_IEnumerable(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Split)), method => new FunctionIEnumerable_string_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Sort)), method => new FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.AddRange)), method => new FunctionIList_IList_IEnumerable(method));
+            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Map)), method => new FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.RemoveAt)), method => new FunctionIList_IList_int(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.InsertAt)), method => new FunctionIList_IList_int_object(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Add)), method => new FunctionIList_IList_object(method));
@@ -35,10 +36,9 @@ namespace Scriban.Runtime
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Size)), method => new Functionint_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Size)), method => new Functionint_TemplateContext_SourceSpan_object(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.First)), method => new Functionobject_IEnumerable(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Concat)), method => new Functionobject_IEnumerable_IEnumerable(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Default)), method => new Functionobject_object_object(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.DividedBy)), method => new Functionobject_TemplateContext_SourceSpan_double_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Cycle)), method => new Functionobject_TemplateContext_SourceSpan_object_object___Opt(method));
+            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Cycle)), method => new Functionobject_TemplateContext_SourceSpan_IList_object___Opt(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Minus)), method => new Functionobject_TemplateContext_SourceSpan_object_object(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Compact)), method => new FunctionScriptArray_IEnumerable(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Limit)), method => new FunctionScriptArray_IEnumerable_int(method));
@@ -91,6 +91,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -151,6 +152,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -215,6 +217,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -279,6 +282,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -306,6 +310,66 @@ namespace Scriban.Runtime
                 }
 
                 return _delegate(arg0, arg1);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: DateTime (string)
+        /// </summary>
+        private class FunctionDateTime_string : DynamicCustomFunction
+        {
+            private delegate DateTime InternalDelegate(string arg0);
+
+            private readonly InternalDelegate _delegate;
+
+            public FunctionDateTime_string(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                if (arguments.Count != 1)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
+                }
+                var arg0 = default(string);
+                int argMask = 0;
+
+                int argOrderedIndex = 0;
+                for (int i = 0; i < arguments.Count; i++)
+                {
+                    int argIndex = 0;
+                    var arg = arguments[i];
+                    var namedArg = arg as ScriptNamedArgument;
+                    if (namedArg != null)
+                    {
+                        Type argType;
+                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
+                    }
+                    else
+                    {
+                        argIndex = argOrderedIndex;
+                        argOrderedIndex++;
+                    }
+
+                    switch (argIndex)
+                    {
+                        case 0:
+                            arg0 = context.ToString(callerContext.Span, arg);
+                            argMask |= (1 << 0);
+                            break;
+
+                    }
+                }
+
+                if (argMask != (1 << 1) - 1)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
+                }
+
+                return _delegate(arg0);
             }
         }
 
@@ -342,6 +406,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -404,6 +469,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -466,6 +532,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -489,6 +556,71 @@ namespace Scriban.Runtime
                 }
 
                 return _delegate(arg0);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: IEnumerable (IEnumerable, IEnumerable)
+        /// </summary>
+        private class FunctionIEnumerable_IEnumerable_IEnumerable : DynamicCustomFunction
+        {
+            private delegate IEnumerable InternalDelegate(IEnumerable arg0, IEnumerable arg1);
+
+            private readonly InternalDelegate _delegate;
+
+            public FunctionIEnumerable_IEnumerable_IEnumerable(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                if (arguments.Count != 2)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
+                }
+                var arg0 = default(IEnumerable);
+                var arg1 = default(IEnumerable);
+                int argMask = 0;
+
+                int argOrderedIndex = 0;
+                for (int i = 0; i < arguments.Count; i++)
+                {
+                    int argIndex = 0;
+                    var arg = arguments[i];
+                    var namedArg = arg as ScriptNamedArgument;
+                    if (namedArg != null)
+                    {
+                        Type argType;
+                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
+                    }
+                    else
+                    {
+                        argIndex = argOrderedIndex;
+                        argOrderedIndex++;
+                    }
+
+                    switch (argIndex)
+                    {
+                        case 0:
+                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
+                            argMask |= (1 << 0);
+                            break;
+                        case 1:
+                            arg1 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
+                            argMask |= (1 << 1);
+                            break;
+
+                    }
+                }
+
+                if (argMask != (1 << 2) - 1)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
+                }
+
+                return _delegate(arg0, arg1);
             }
         }
 
@@ -526,6 +658,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -592,6 +725,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 2;
                     }
                     else
                     {
@@ -618,70 +752,6 @@ namespace Scriban.Runtime
                 }
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
-            }
-        }
-
-        /// <summary>
-        /// Optimized custom function for: IList (IList, IEnumerable)
-        /// </summary>
-        private class FunctionIList_IList_IEnumerable : DynamicCustomFunction
-        {
-            private delegate IList InternalDelegate(IList arg0, IEnumerable arg1);
-
-            private readonly InternalDelegate _delegate;
-
-            public FunctionIList_IList_IEnumerable(MethodInfo method) : base(method)
-            {
-                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-            }
-
-            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-            {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(IList);
-                var arg1 = default(IEnumerable);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToList(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-
-                return _delegate(arg0, arg1);
             }
         }
 
@@ -719,6 +789,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -784,6 +855,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -852,6 +924,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -915,6 +988,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -974,6 +1048,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1033,6 +1108,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 2;
                     }
                     else
                     {
@@ -1092,6 +1168,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1115,70 +1192,6 @@ namespace Scriban.Runtime
                 }
 
                 return _delegate(arg0);
-            }
-        }
-
-        /// <summary>
-        /// Optimized custom function for: object (IEnumerable, IEnumerable)
-        /// </summary>
-        private class Functionobject_IEnumerable_IEnumerable : DynamicCustomFunction
-        {
-            private delegate object InternalDelegate(IEnumerable arg0, IEnumerable arg1);
-
-            private readonly InternalDelegate _delegate;
-
-            public Functionobject_IEnumerable_IEnumerable(MethodInfo method) : base(method)
-            {
-                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-            }
-
-            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-            {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                var arg1 = default(IEnumerable);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-
-                return _delegate(arg0, arg1);
             }
         }
 
@@ -1216,6 +1229,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1280,6 +1294,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 2;
                     }
                     else
                     {
@@ -1311,16 +1326,16 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
-        /// Optimized custom function for: object (TemplateContext, SourceSpan, object, object = ...)
+        /// Optimized custom function for: object (TemplateContext, SourceSpan, IList, object = ...)
         /// </summary>
-        private class Functionobject_TemplateContext_SourceSpan_object_object___Opt : DynamicCustomFunction
+        private class Functionobject_TemplateContext_SourceSpan_IList_object___Opt : DynamicCustomFunction
         {
-            private delegate object InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, object arg3);
+            private delegate object InternalDelegate(TemplateContext arg0, SourceSpan arg1, IList arg2, object arg3);
 
             private readonly InternalDelegate _delegate;
             private readonly object defaultArg1;
 
-            public Functionobject_TemplateContext_SourceSpan_object_object___Opt(MethodInfo method) : base(method)
+            public Functionobject_TemplateContext_SourceSpan_IList_object___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
                 defaultArg1 = (object)Parameters[3].DefaultValue;
@@ -1332,7 +1347,7 @@ namespace Scriban.Runtime
                 {
                     throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `1` arguments");
                 }
-                var arg0 = default(object);
+                var arg0 = default(IList);
                 var arg1 = defaultArg1;
                 int argMask = 2;
 
@@ -1346,6 +1361,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 2;
                     }
                     else
                     {
@@ -1356,7 +1372,7 @@ namespace Scriban.Runtime
                     switch (argIndex)
                     {
                         case 0:
-                            arg0 = arg;
+                            arg0 = context.ToList(callerContext.Span, arg);
                             argMask |= (1 << 0);
                             break;
                         case 1:
@@ -1409,6 +1425,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 2;
                     }
                     else
                     {
@@ -1472,6 +1489,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1532,6 +1550,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1596,6 +1615,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1661,6 +1681,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1728,6 +1749,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1787,6 +1809,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1850,6 +1873,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1920,6 +1944,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -1987,6 +2012,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -2052,6 +2078,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -2120,6 +2147,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 2;
                     }
                     else
                     {
@@ -2184,6 +2212,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 2;
                     }
                     else
                     {
@@ -2247,6 +2276,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 1;
                     }
                     else
                     {
@@ -2306,6 +2336,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
@@ -2365,6 +2396,7 @@ namespace Scriban.Runtime
                     {
                         Type argType;
                         arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
+                        argIndex -= 0;
                     }
                     else
                     {
