@@ -12,14 +12,14 @@ namespace Scriban.Functions
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
     public class RegexFunctions : ScriptObject
     {
-        public static string Replace(string input, string pattern, string replace)
+        public static string Replace(string text, string pattern, string replace)
         {
-            return Regex.Replace(input, pattern, replace);
+            return Regex.Replace(text, pattern, replace);
         }
 
-        public static ScriptArray Split(string input, string pattern)
+        public static ScriptArray Split(string text, string pattern)
         {
-            return new ScriptArray(Regex.Split(input, pattern));
+            return new ScriptArray(Regex.Split(text, pattern));
         }
 
         public static string Escape(string pattern)
@@ -32,9 +32,9 @@ namespace Scriban.Functions
             return Regex.Unescape(pattern);
         }
 
-        public static ScriptArray Match(string input, string pattern)
+        public static ScriptArray Match(string text, string pattern)
         {
-            var match = Regex.Match(input, pattern);
+            var match = Regex.Match(text, pattern);
             var matchObject = new ScriptArray();
 
             if (match.Success)

@@ -17,31 +17,30 @@ namespace Scriban.Functions
     /// </summary>
     public class ArrayFunctions : ScriptObject
     {
-        public ArrayFunctions()
+        public static string Join(TemplateContext context, SourceSpan span, IEnumerable list, string delimiter)
         {
-            SetValue("cycle", new DelegateCustomFunction(Cycle), true);
-        }
+            if (list == null)
+            {
+                return string.Empty;
+            }
 
-        public static string Join(TemplateContext context, SourceSpan span, IEnumerable enumerable, string delimiter)
-        {
             var text = new StringBuilder();
             bool afterFirst = false;
-            foreach (var obj in enumerable)
+            foreach (var obj in list)
             {
                 if (afterFirst)
                 {
                     text.Append(delimiter);
                 }
-                // TODO: We need to convert to a string but we don't have a span!
-                text.Append(context.ToString(new SourceSpan("unknown", new TextPosition(), new TextPosition()), obj));
+                text.Append(context.ToString(span, obj));
                 afterFirst = true;
             }
             return text.ToString();
         }
 
-        public static IEnumerable Uniq(IEnumerable iterator)
+        public static IEnumerable Uniq(IEnumerable list)
         {
-            return iterator?.Cast<object>().Distinct();
+            return list?.Cast<object>().Distinct();
         }
 
         /// <summary>
@@ -123,28 +122,28 @@ namespace Scriban.Functions
         /// <summary>
         /// Concats the two arrays into another array
         /// </summary>
-        /// <param name="left">An input list</param>
-        /// <param name="right">An input list</param>
+        /// <param name="list1">An input list</param>
+        /// <param name="list2">An input list</param>
         /// <returns>The concatenation of the </returns>
-        public static object Concat(IEnumerable left, IEnumerable right)
+        public static object Concat(IEnumerable list1, IEnumerable list2)
         {
-            if (right == null && left == null)
+            if (list2 == null && list1 == null)
             {
                 return null;
             }
-            if (right == null)
+            if (list2 == null)
             {
-                return left;
+                return list1;
             }
 
-            if (left == null)
+            if (list1 == null)
             {
-                return right;
+                return list2;
             }
 
             var result = new ScriptArray();
-            foreach (var item in left) result.Add(item);
-            foreach (var item in right) result.Add(item);
+            foreach (var item in list1) result.Add(item);
+            foreach (var item in list2) result.Add(item);
             return result;
         }
 
@@ -164,20 +163,20 @@ namespace Scriban.Functions
             return list.Cast<object>().Count();
         }
 
-        public static object First(IEnumerable iterator)
+        public static object First(IEnumerable list)
         {
-            if (iterator == null)
+            if (list == null)
             {
                 return null;
             }
 
-            var list = iterator as IList;
-            if (list != null)
+            var realList = list as IList;
+            if (realList != null)
             {
-                return list.Count > 0 ? list[0] : null;
+                return realList.Count > 0 ? realList[0] : null;
             }
 
-            foreach (var item in iterator)
+            foreach (var item in list)
             {
                 return item;
             }
@@ -185,36 +184,36 @@ namespace Scriban.Functions
             return null;
         }
 
-        public static object Last(IEnumerable iterator)
+        public static object Last(IEnumerable list)
         {
-            if (iterator == null)
+            if (list == null)
             {
                 return null;
             }
 
-            var list = iterator as IList;
-            if (list != null)
+            var readList = list as IList;
+            if (readList != null)
             {
-                return list.Count > 0 ? list[list.Count - 1] : null;
+                return readList.Count > 0 ? readList[readList.Count - 1] : null;
             }
 
             // Slow path, go through the whole list
-            return iterator.Cast<object>().LastOrDefault();
+            return list.Cast<object>().LastOrDefault();
         }
 
-        public static IEnumerable Reverse(IEnumerable iterator)
+        public static IEnumerable Reverse(IEnumerable list)
         {
-            if (iterator == null)
+            if (list == null)
             {
                 return Enumerable.Empty<object>();
             }
 
             // TODO: provide a special path for IList
-            //var list = iterator as IList;
+            //var list = list as IList;
             //if (list != null)
             //{
             //}
-            return iterator.Cast<object>().Reverse();
+            return list.Cast<object>().Reverse();
         }
 
         public static IList RemoveAt(IList list, int index)
@@ -250,19 +249,19 @@ namespace Scriban.Functions
             return list;
         }
 
-        public static IList AddRange(IList list, IEnumerable iterator)
+        public static IList AddRange(IList list1, IEnumerable list2)
         {
-            if (iterator == null)
+            if (list2 == null)
             {
-                return list;
+                return list1;
             }
 
-            list = list == null ? new ScriptArray() : new ScriptArray(list);
-            foreach (var value in iterator)
+            list1 = list1 == null ? new ScriptArray() : new ScriptArray(list1);
+            foreach (var value in list2)
             {
-                list.Add(value);
+                list1.Add(value);
             }
-            return list;
+            return list1;
         }
 
 
@@ -285,30 +284,30 @@ namespace Scriban.Functions
             return list;
         }
 
-        public static IEnumerable Sort(TemplateContext context, SourceSpan span, object input, string member = null)
+        public static IEnumerable Sort(TemplateContext context, SourceSpan span, object list, string member = null)
         {
-            if (input == null)
+            if (list == null)
             {
                 return Enumerable.Empty<object>();
             }
 
-            var enumerable = input as IEnumerable;
+            var enumerable = list as IEnumerable;
             if (enumerable == null)
             {
-                return new ScriptArray(1) {input};
+                return new ScriptArray(1) {list};
             }
 
-            var list = enumerable.Cast<object>().ToList();
-            if (list.Count == 0)
-                return list;
+            var realList = enumerable.Cast<object>().ToList();
+            if (realList.Count == 0)
+                return realList;
 
             if (string.IsNullOrEmpty(member))
             {
-                list.Sort();
+                realList.Sort();
             }
             else
             {
-                list.Sort((a, b) =>
+                realList.Sort((a, b) =>
                 {
                     var leftAccessor = context.GetMemberAccessor(a);
                     var rightAccessor = context.GetMemberAccessor(b);
@@ -329,24 +328,24 @@ namespace Scriban.Functions
                 });
             }
 
-            return list;
+            return realList;
         }
 
-        public static IEnumerable Map(TemplateContext context, SourceSpan span, object input, string member = null)
+        public static IEnumerable Map(TemplateContext context, SourceSpan span, object list, string member = null)
         {
-            if (input == null)
+            if (list == null)
             {
                 yield break;
             }
 
-            var enumerable = input as IEnumerable;
-            var list = enumerable?.Cast<object>().ToList() ?? new List<object>(1) {input};
-            if (list.Count == 0)
+            var enumerable = list as IEnumerable;
+            var realList = enumerable?.Cast<object>().ToList() ?? new List<object>(1) {list};
+            if (realList.Count == 0)
             {
                 yield break;
             }
 
-            foreach (var item in list)
+            foreach (var item in realList)
             {
                 var itemAccessor = context.GetMemberAccessor(item);
                 if (itemAccessor.HasMember(context, span, item, member))
@@ -359,23 +358,24 @@ namespace Scriban.Functions
             }
         }
 
-        private static object Cycle(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
+        public static object Cycle(TemplateContext context, SourceSpan span, object listOrGroup, object list = null)
         {
             string group = null;
-            IList values = null;
-            if (parameters.Count == 1)
+            IList valueList = null;
+            if (list == null)
             {
-                values = context.ToList(callerContext.Span, parameters[0]);
-                group = Join(context, callerContext.Span, values, ",");
+                valueList = context.ToList(span, listOrGroup);
+                group = Join(context, span, valueList, ",");
             }
-            else if (parameters.Count == 2)
+            else 
             {
-                group = context.ToString(callerContext.Span, parameters[0]);
-                values = context.ToList(callerContext.Span, parameters[1]);
+                group = context.ToString(span, listOrGroup);
+                valueList = context.ToList(span, list);
             }
-            else
+
+            if (!(valueList is IList))
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for cycle. Expecting at least 1 parameter: cycle [val1, val2..] or cycle <group> [val1, val2...]");
+                return null;
             }
 
             // We create a cycle variable that is dependent on the exact AST context.
@@ -389,12 +389,12 @@ namespace Scriban.Functions
                 cycleValue = 0;
             }
 
-            var cycleIndex = (int) cycleValue;
-            cycleIndex = values.Count == 0 ? 0 : cycleIndex % values.Count;
+            var cycleIndex = (int)cycleValue;
+            cycleIndex = valueList.Count == 0 ? 0 : cycleIndex % valueList.Count;
             object result = null;
-            if (values.Count > 0)
+            if (valueList.Count > 0)
             {
-                result = values[cycleIndex];
+                result = valueList[cycleIndex];
                 cycleIndex++;
             }
             currentTags[cycleKey] = cycleIndex;

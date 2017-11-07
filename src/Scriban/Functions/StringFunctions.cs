@@ -21,14 +21,14 @@ namespace Scriban.Functions
             return string.IsNullOrEmpty(text) ? 0 : text.Length;
         }
 
-        public static string Append(string text, string toAppend)
+        public static string Append(string text, string with)
         {
-            return (text ?? string.Empty) + (toAppend ?? string.Empty);
+            return (text ?? string.Empty) + (with ?? string.Empty);
         }
 
-        public static string Prepend(string text, string toPrepend)
+        public static string Prepend(string text, string by)
         {
-            return (toPrepend ?? string.Empty) + (text ?? string.Empty);
+            return (by ?? string.Empty) + (text ?? string.Empty);
         }
 
 #if !PCL328 && !NETSTD11
@@ -171,16 +171,16 @@ namespace Scriban.Functions
             return text?.TrimEnd();
         }
 
-        public static IEnumerable Split(string text, string pattern)
+        public static IEnumerable Split(string text, string match)
         {
             if (string.IsNullOrEmpty(text))
             {
                 return Enumerable.Empty<string>();
             }
 
-            pattern = pattern ?? string.Empty;
+            match = match ?? string.Empty;
 
-            return text.Split(new[] {pattern}, StringSplitOptions.RemoveEmptyEntries);
+            return text.Split(new[] {match}, StringSplitOptions.RemoveEmptyEntries);
         }
 
         public static string StripNewlines(string text)
@@ -281,34 +281,34 @@ namespace Scriban.Functions
             return builder.ToString();
         }
 
-        public static bool Contains(string text, string str)
+        public static bool Contains(string text, string value)
         {
-            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(str))
+            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(value))
             {
                 return false;
             }
-            return text.Contains(str);
+            return text.Contains(value);
         }
 
-        public static bool StartsWith(string text, string start)
+        public static bool StartsWith(string text, string value)
         {
-            if (string.IsNullOrEmpty(start) || string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(text))
             {
                 return false;
             }
 
-            return text.StartsWith(start);
+            return text.StartsWith(value);
         }
 
 
-        public static bool EndsWith(string text, string start)
+        public static bool EndsWith(string text, string value)
         {
-            if (string.IsNullOrEmpty(start) || string.IsNullOrEmpty(text))
+            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(text))
             {
                 return false;
             }
 
-            return text.EndsWith(start);
+            return text.EndsWith(value);
         }
         
         public static string Handleize(string text)

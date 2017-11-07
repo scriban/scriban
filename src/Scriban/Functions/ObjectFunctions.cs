@@ -36,46 +36,46 @@ namespace Scriban.Functions
             return 0;
         }
 
-        public static bool HasKey(IDictionary<string, object> dictionary, string key)
+        public static bool HasKey(IDictionary<string, object> value, string key)
         {
-            if (dictionary == null || key == null)
+            if (value == null || key == null)
             {
                 return false;
             }
 
-            return dictionary.ContainsKey(key);
+            return value.ContainsKey(key);
         }
 
-        public static bool HasValue(IDictionary<string, object> dictionary, string key)
+        public static bool HasValue(IDictionary<string, object> value, string key)
         {
-            if (dictionary == null || key == null)
+            if (value == null || key == null)
             {
                 return false;
             }
-            return dictionary.ContainsKey(key) && dictionary[key] != null;
+            return value.ContainsKey(key) && value[key] != null;
         }
 
-        public static IEnumerable<object> Keys(IDictionary<string, object> dictionary)
+        public static IEnumerable<object> Keys(IDictionary<string, object> value)
         {
-            if (dictionary == null)
+            if (value == null)
             {
                 yield break;
             }
 
-            foreach (var entry in dictionary)
+            foreach (var entry in value)
             {
                 yield return entry.Key;
             }
         }
 
-        public new static IEnumerable<object> Values(IDictionary<string, object> dictionary)
+        public static IEnumerable<object> Values(IDictionary<string, object> value)
         {
-            if (dictionary == null)
+            if (value == null)
             {
                 yield break;
             }
 
-            foreach (var entry in dictionary)
+            foreach (var entry in value)
             {
                 yield return entry.Value;
             }

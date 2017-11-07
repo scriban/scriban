@@ -14,20 +14,12 @@ namespace Scriban.Functions
     /// </summary>
     public class MathFunctions : ScriptObject
     {
-        public MathFunctions()
+        public static object DividedBy(TemplateContext context, SourceSpan span, double value, object by)
         {
-            SetValue("round", new DelegateCustomFunction(Round), true);
-        }
-
-        public static object DividedBy(TemplateContext context, SourceSpan span, double left, object right)
-        {
-            var leftType = typeof(double);
-            var rightType = right?.GetType();
-
-            var result = ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Divide, left, right);
+            var result = ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Divide, value, by);
 
             // If the divisor is an integer, return a an integer
-            if (right is int)
+            if (by is int)
             {
                 if (result is double)
                 {
@@ -56,30 +48,29 @@ namespace Scriban.Functions
             return Math.Floor(value);
         }
 
-        [ScriptMemberIgnore]
-        public static object Round(double value, int precision)
+        public static double Round(double value, int precision = 0)
         {
             return Math.Round(value, precision);
         }
 
-        public static object Minus(TemplateContext context, SourceSpan span, object input, object subValue)
+        public static object Minus(TemplateContext context, SourceSpan span, object value, object with)
         {
-            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Substract, input, subValue);
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Substract, value, with);
         }
 
-        public static object Plus(TemplateContext context, SourceSpan span, object input, object addValue)
+        public static object Plus(TemplateContext context, SourceSpan span, object value, object with)
         {
-            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Add, input, addValue);
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Add, value, with);
         }
 
-        public static object Modulo(TemplateContext context, SourceSpan span, object input, object modValue)
+        public static object Modulo(TemplateContext context, SourceSpan span, object value, object with)
         {
-            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Modulus, input, modValue);
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Modulus, value, with);
         }
 
-        public static object Times(TemplateContext context, SourceSpan span, object input, object mulValue)
+        public static object Times(TemplateContext context, SourceSpan span, object value, object with)
         {
-            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Multiply, input, mulValue);
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Multiply, value, with);
         }
 
         public static string Format(TemplateContext context, SourceSpan span, object value, string format)
@@ -111,22 +102,5 @@ namespace Scriban.Functions
                    || value is double
                    || value is decimal;
         }
-
-        private static object Round(TemplateContext context, ScriptNode callerContext, ScriptArray parameters)
-        {
-            if (parameters.Count < 1 || parameters.Count > 2)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected number of arguments `{parameters.Count}` for math.round. Expecting at least 1 parameter <precision>? <value>");
-            }
-
-            var value = context.ToDouble(callerContext.Span, parameters[0]);
-            int precision = 0;
-            if (parameters.Count == 2)
-            {
-                precision = context.ToInt(callerContext.Span, parameters[1]);
-            }
-
-            return Round(value, precision);
-        }
-    }
+   }
 }
