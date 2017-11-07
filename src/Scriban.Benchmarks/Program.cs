@@ -290,7 +290,6 @@ namespace Scriban.Benchmarks
         [Benchmark(Description = "Handlebars")]
         public string TestHandlebars()
         {
-            int i = 0;
             return _handlebarsTemplate(new
             {
                 products = _dotLiquidProducts

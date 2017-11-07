@@ -1,3 +1,4 @@
+// #define EnableTokensOutput
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
@@ -20,8 +21,6 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestParser
     {
-        const bool EnableTokensOutput = false;
-
         private const string RelativeBasePath = @"..\..\TestFiles";
         private const string InputFilePattern = "*.txt";
         private const string OutputEndFileExtension = ".out.txt";
@@ -407,7 +406,7 @@ end
                 parserOptions.ExpressionDepthLimit = 500;
             }
 
-            if (EnableTokensOutput)
+#if EnableTokensOutput
             {
                 Console.WriteLine("Tokens");
                 Console.WriteLine("======================================");
@@ -418,7 +417,7 @@ end
                 }
                 Console.WriteLine();
             }
-
+#endif
             string roundtripText = null;
 
             // We loop first on input text, then on rountrip

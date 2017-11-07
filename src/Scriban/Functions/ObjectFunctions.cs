@@ -55,7 +55,7 @@ namespace Scriban.Functions
             return value.ContainsKey(key) && value[key] != null;
         }
 
-        public static IEnumerable<object> Keys(IDictionary<string, object> value)
+        public new static IEnumerable<object> Keys(IDictionary<string, object> value)
         {
             if (value == null)
             {
@@ -68,7 +68,7 @@ namespace Scriban.Functions
             }
         }
 
-        public static IEnumerable<object> Values(IDictionary<string, object> value)
+        public new static IEnumerable<object> Values(IDictionary<string, object> value)
         {
             if (value == null)
             {

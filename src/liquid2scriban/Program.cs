@@ -21,8 +21,6 @@ namespace Scriban.Liquid2Scriban
                 return;
             }
 
-            var outputExtension = "scriban";
-
             var files = new List<string>();
             for (var i = 0; i < args.Length; i++)
             {
