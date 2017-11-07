@@ -12,19 +12,19 @@ namespace Scriban.Syntax
     {
         private int _columnsCount;
 
-        protected override void ProcessOption(TemplateContext context, ScriptNamedParameter option)
+        protected override void ProcessParameter(TemplateContext context, ScriptNamedParameter parameter)
         {
             _columnsCount = 1;
-            if (option.Name == "cols")
+            if (parameter.Name == "cols")
             {
-                _columnsCount = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
+                _columnsCount = context.ToInt(parameter.Value.Span, context.Evaluate(parameter.Value));
                 if (_columnsCount <= 0)
                 {
                     _columnsCount = 1;
                 }
                 return;
             }
-            base.ProcessOption(context, option);
+            base.ProcessParameter(context, parameter);
         }
 
         protected override void BeforeLoop(TemplateContext context)

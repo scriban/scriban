@@ -16,7 +16,6 @@ namespace Scriban.Syntax
             container.NamedParameters.Add(parameter);
         }
 
-
         public static void Write(this RenderContext context, List<ScriptNamedParameter> parameters)
         {
             if (parameters == null)
@@ -26,7 +25,7 @@ namespace Scriban.Syntax
             for (var i = 0; i < parameters.Count; i++)
             {
                 var option = parameters[i];
-                context.Write(",");
+                context.ExpectSpace();
                 context.Write(option);
             }
         }

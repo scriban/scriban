@@ -62,7 +62,7 @@ namespace Scriban.Syntax
                                 limit = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
                                 break;
                             default:
-                                ProcessOption(context, option);
+                                ProcessParameter(context, option);
                                 break;
                         }
                     }
@@ -125,9 +125,9 @@ namespace Scriban.Syntax
             context.ExpectEnd();
         }
 
-        protected virtual void ProcessOption(TemplateContext context, ScriptNamedParameter option)
+        protected virtual void ProcessParameter(TemplateContext context, ScriptNamedParameter parameter)
         {
-            throw new ScriptRuntimeException(option.Span, $"Unsupported option `{option.Name}` for statement: `{this}`");
+            throw new ScriptRuntimeException(parameter.Span, $"Unsupported parameter `{parameter.Name}` for statement: `{this}`");
         }
 
         public override string ToString()

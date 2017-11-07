@@ -1,6 +1,6 @@
 {{
 x = [1,2,3,4]
-for y in x, offset: 2
+for y in x offset: 2
 	y
 end
 }}

@@ -266,33 +266,16 @@ namespace Scriban.Parsing
                     }
 
                     // Parse special statement parameters (for, tablerow, include)
-                    if (parentNode is IScriptNamedParameterContainer && ((!_isLiquid && Current.Type == TokenType.Comma) || (_isLiquid && Current.Type == TokenType.Identifier)))
+                    if (parentNode is IScriptNamedParameterContainer && Current.Type == TokenType.Identifier)
                     {
                         // Only handle them at top level
                         var paramContainer = (IScriptNamedParameterContainer)parentNode;
 
                         while (true)
                         {
-                            if (_isLiquid)
+                            if (Current.Type != TokenType.Identifier)
                             {
-                                if (Current.Type != TokenType.Identifier)
-                                {
-                                    break;
-                                }
-                            }
-                            else
-                            {
-                                if (Current.Type != TokenType.Comma)
-                                {
-                                    break;
-                                }
-
-                                NextToken();
-
-                                if (Current.Type != TokenType.Identifier)
-                                {
-                                    break;
-                                }
+                                break;
                             }
 
                             var parameter = Open<ScriptNamedParameter>();

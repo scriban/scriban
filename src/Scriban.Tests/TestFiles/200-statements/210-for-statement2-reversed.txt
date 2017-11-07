@@ -1,6 +1,6 @@
 {{
 x = [1,2,3,4]
-for y in x, reversed
+for y in x reversed
 	y
 end
 }}
