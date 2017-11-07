@@ -72,6 +72,11 @@ namespace Scriban
         /// <returns>A string representing the object value</returns>
         public virtual string ToString(SourceSpan span, object value)
         {
+            if (value is string)
+            {
+                return (string)value;
+            }
+
             if (value == null || value == EmptyScriptObject.Default)
             {
                 return null;
@@ -80,33 +85,6 @@ namespace Scriban
             if (value is bool)
             {
                 return ((bool)value) ? "true" : "false";
-            }
-
-            if (value is string)
-            {
-                return (string)value;
-            }
-
-            if (value is IScriptCustomFunction)
-            {
-                return "<function>";
-            }
-
-            if (value is DateTime)
-            {
-                // Output DateTime only if we have the date builtin object accessible (that provides the implementation of the ToString method)
-                var dateTimeFunctions = GetValue(DateTimeFunctions.DateVariable) as DateTimeFunctions;
-                if (dateTimeFunctions != null)
-                {
-                    return dateTimeFunctions.ToString((DateTime) value, dateTimeFunctions.Format, CurrentCulture);
-                }
-            }
-
-            // Dump a script object
-            var scriptObject = value as ScriptObject;
-            if (scriptObject != null)
-            {
-                return scriptObject.ToString(this, span);
             }
 
             // If we have a primitive, we can try to convert it
@@ -121,6 +99,23 @@ namespace Scriban
                 {
                     throw new ScriptRuntimeException(span, $"Unable to convert value of type `{value.GetType()}` to string", ex);
                 }
+            }
+
+            if (value is DateTime)
+            {
+                // Output DateTime only if we have the date builtin object accessible (that provides the implementation of the ToString method)
+                var dateTimeFunctions = GetValue(DateTimeFunctions.DateVariable) as DateTimeFunctions;
+                if (dateTimeFunctions != null)
+                {
+                    return dateTimeFunctions.ToString((DateTime)value, dateTimeFunctions.Format, CurrentCulture);
+                }
+            }
+
+            // Dump a script object
+            var scriptObject = value as ScriptObject;
+            if (scriptObject != null)
+            {
+                return scriptObject.ToString(this, span);
             }
 
             // If the value is formattable, use the formatter directly
@@ -157,6 +152,11 @@ namespace Scriban
                 var keyValuePair = new ScriptObject(2);
                 keyValuePair.Import(value, renamer: this.MemberRenamer);
                 return ToString(span, keyValuePair);
+            }
+
+            if (value is IScriptCustomFunction)
+            {
+                return "<function>";
             }
 
             // Else just end-up trying to emit the ToString
