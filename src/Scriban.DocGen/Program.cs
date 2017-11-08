@@ -52,6 +52,9 @@ This document describes the various built-in functions available in scriban.
             writer.WriteLine(visitor.Toc);
 
             writer.Write(visitor.Body);
+
+            writer.WriteLine();
+            writer.WriteLine("> Note: This document was automatically generated from the sourcecode using `Scriban.DocGen` program");
             writer.Flush();
             writer.Close();
         }
@@ -218,7 +221,12 @@ This document describes the various built-in functions available in scriban.
 
             public override void VisitText(Text text)
             {
-                _writer.Write(text.Content);
+                var content = text.Content;
+
+                content = content.Replace("```scriban-html", "> **input**\r\n```scriban-html");
+                content = content.Replace("```html", "> **output**\r\n```html");
+
+                _writer.Write(content);
                 //base.VisitText(text);
             }
 

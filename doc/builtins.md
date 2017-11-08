@@ -1,6 +1,6 @@
 # Builtins
 
-This document describes the various built-in functions available in from standard scriban template.
+This document describes the various built-in functions available in scriban.
 
 
 - [`array` functions](#array-functions)
@@ -128,9 +128,11 @@ A new list with the value added
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [1, 2, 3] | array.add 4 }}
 ```
+> **output**
 ```html
 [1, 2, 3, 4]
 ```
@@ -157,9 +159,11 @@ The concatenation of the two input lists
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [1, 2, 3] | array.concat [4, 5] }}
 ```
+> **output**
 ```html
 [1, 2, 3, 4, 5]
 ```
@@ -185,9 +189,11 @@ Returns a list with null value removed
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [1, null, 3] | array.compact }}
 ```
+> **output**
 ```html
 [1, 3]
 ```
@@ -214,9 +220,11 @@ The concatenation of the two input lists
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [1, 2, 3] | array.concat [4, 5] }}
 ```
+> **output**
 ```html
 [1, 2, 3, 4, 5]
 ```
@@ -243,12 +251,14 @@ Returns a list with null value removed
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ cycle ['one', 'two', 'three'] }}
 {{ cycle ['one', 'two', 'three'] }}
 {{ cycle ['one', 'two', 'three'] }}
 {{ cycle ['one', 'two', 'three'] }}
 ```
+> **output**
 ```html
 one
 two
@@ -279,9 +289,11 @@ The first element of the input `list`.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [4, 5, 6] | array.first }}
 ```
+> **output**
 ```html
 4
 ```
@@ -309,9 +321,11 @@ A new list with the element inserted.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ ["a", "b", "c"] | array.insert_at 2 "Yo" }}
 ```
+> **output**
 ```html
 [a, b, Yo, c]
 ```
@@ -338,9 +352,11 @@ A new list with the element inserted.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [1, 2, 3] | array.join "|" }}
 ```
+> **output**
 ```html
 1|2|3
 ```
@@ -366,9 +382,11 @@ The last element of the input `list`.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [4, 5, 6] | array.last }}
 ```
+> **output**
 ```html
 6
 ```
@@ -395,9 +413,11 @@ Returns a limited number of elments from the input list
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [4, 5, 6] | array.limit 2 }}
 ```
+> **output**
 ```html
 [4, 5]
 ```
@@ -424,11 +444,13 @@ Accepts an array element's attribute as a parameter and creates an array out of 
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 
 products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
 products | array.map "type" | array.uniq | array.sort }}
 ```
+> **output**
 ```html
 [electronics, fruit, furniture]
 ```
@@ -455,9 +477,11 @@ Returns the remaining of the list after the specified offset
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [4, 5, 6, 7, 8] | array.limit 2 }}
 ```
+> **output**
 ```html
 [6, 7, 8]
 ```
@@ -484,16 +508,20 @@ A new list with the element removed. If index is negative, remove at the end of 
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [4, 5, 6, 7, 8] | array.remove_at 2 }}
 ```
+> **output**
 ```html
 [4, 5, 7, 8]
 ```
 If the `index` is negative, removes at the end of the list:
+> **input**
 ```scriban-html
 {{ [4, 5, 6, 7, 8] | array.remove_at -1 }}
 ```
+> **output**
 ```html
 [4, 5, 6, 7]
 ```
@@ -519,9 +547,11 @@ A new list in reversed order.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [4, 5, 6, 7] | array.reverse }}
 ```
+> **output**
 ```html
 [7, 6, 5, 4]
 ```
@@ -547,9 +577,11 @@ A number of elements in the input `list`.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [4, 5, 6] | array.size }}
 ```
+> **output**
 ```html
 3
 ```
@@ -577,19 +609,23 @@ A list sorted according to the value of each element or the value of the specifi
 #### Examples
 
 Sorts by element's value: 
+> **input**
 ```scriban-html
 {{ [10, 2, 6] | array.sort }}
 ```
+> **output**
 ```html
 [2, 6, 10]
 ```
 Sorts by elements member's value: 
+> **input**
 ```scriban-html
 {{
 products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
 products | array.sort "title" | array.map "title"
 }}
 ```
+> **output**
 ```html
 [computer, orange, sofa]
 ```
@@ -615,9 +651,11 @@ A list of unique elements of the input `list`.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [1, 1, 4, 5, 8, 8] | array.uniq }}
 ```
+> **output**
 ```html
 [1, 4, 5, 8]
 ```
@@ -651,6 +689,7 @@ A new date
 ```
 {{ date.parse '2016/01/05' | date.add_days 1 }}
 ```
+> **output**
 ```html
 2017
 ```
@@ -680,6 +719,7 @@ A new date
 ```
 {{ date.parse '2016/01/05' | date.add_months 1 }}
 ```
+> **output**
 ```html
 5 Feb 2016
 ```
@@ -709,6 +749,7 @@ A new date
 ```
 {{ date.parse '2016/01/05' | date.add_years 1 }}
 ```
+> **output**
 ```html
 5 Jan 2017
 ```
@@ -833,6 +874,7 @@ A date object
 ```
 {{ date.parse '2016/01/05' }}
 ```
+> **output**
 ```html
 5 Jan 2016
 ```
@@ -889,9 +931,11 @@ Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the f
 | `"%%"` |  `"%"`        | Output the character `%`
 
 Note that the format is using a good part of the ruby format ([source]/// (http://apidock.com/ruby/DateTime/strftime))
+> **input**
 ```scriban-html
 {{ date.parse '2016/01/05' | date.to_string `%d %b %Y` }}
 ```
+> **output**
 ```html
 5 Jan 2016
 ```
@@ -935,9 +979,11 @@ The input string removed with any HTML tags
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "<p>This is a paragraph</p>" | html.strip }}
 ```
+> **output**
 ```html
 This is a paragraph
 ```
@@ -963,9 +1009,11 @@ The input string removed with any HTML tags
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "<p>This is a paragraph</p>" | html.escape }}
 ```
+> **output**
 ```html
 &lt;p&gt;This is a paragraph&lt;/p&gt;
 ```
@@ -991,9 +1039,11 @@ The input string url encoded
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "john@liquid.com" | html.url_encode }}
 ```
+> **output**
 ```html
 john%40liquid.com
 ```
@@ -1019,9 +1069,11 @@ The input string url escaped
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "<hello> & <scriban>" | html.url_escape }}
 ```
+> **output**
 ```html
 %3Chello%3E%20&%20%3Cscriban%3E
 ```
@@ -1051,10 +1103,12 @@ The absolute value of the input value
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ -15.5| math.abs }}
 {{ -5| math.abs }}
 ```
+> **output**
 ```html
 -15.5
 -5
@@ -1081,10 +1135,12 @@ The smallest integer greater than or equal to the specified number.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 4.6 | math.ceil }} 
 {{ 4.3 | math.ceil }} 
 ```
+> **output**
 ```html
 5
 5
@@ -1113,10 +1169,12 @@ The division of `value` by `divisor`.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 4.6 | math.divided_by 2.0 }} 
 {{ 4.6 | math.divided_by 2 }} 
 ```
+> **output**
 ```html
 2.3
 2
@@ -1143,10 +1201,12 @@ The largest integer less than or equal to the specified number.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 4.6 | math.ceil }} 
 {{ 4.3 | math.ceil }} 
 ```
+> **output**
 ```html
 4
 4
@@ -1174,9 +1234,11 @@ The largest integer less than or equal to the specified number.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 255 | math.format "X4" }} 
 ```
+> **output**
 ```html
 00FF
 ```
@@ -1202,10 +1264,12 @@ Returns a boolean indicating if the input value is a number
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 255 | math.is_number }} 
 {{ "yo" | math.is_number }} 
 ```
+> **output**
 ```html
 true
 false
@@ -1233,9 +1297,11 @@ The results of the substraction: `value` - `with`
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 255 | math.minus 5}} 
 ```
+> **output**
 ```html
 250
 ```
@@ -1262,9 +1328,11 @@ The results of the modulo: `value` % `with`
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 11 | math.modulo 10}} 
 ```
+> **output**
 ```html
 1
 ```
@@ -1291,9 +1359,11 @@ The results of the addition: `value` + `with`
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 1 | math.plus 2}} 
 ```
+> **output**
 ```html
 3
 ```
@@ -1320,11 +1390,13 @@ A value rounded to the nearest integer or to the specified number of fractional 
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 4.6 | math.round }} 
 {{ 4.3 | math.round }}
 {{ 4.5612 | math.round 2 }}
 ```
+> **output**
 ```html
 5
 4
@@ -1353,9 +1425,11 @@ The results of the multiplication: `value` * `with`
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ 2 | math.times 3}} 
 ```
+> **output**
 ```html
 6
 ```
@@ -1386,9 +1460,11 @@ The `default` value is returned if the input `value` is null or an empty string 
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ undefined_var | object.default "Yo" }}
 ```
+> **output**
 ```html
 Yo
 ```
@@ -1415,9 +1491,11 @@ Checks if the specified object as the member `key`
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ product | object.has_key "title" }}
 ```
+> **output**
 ```html
 true
 ```
@@ -1444,9 +1522,11 @@ Checks if the specified object as a value for the member `key`
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ product | object.has_value "title" }}
 ```
+> **output**
 ```html
 true
 ```
@@ -1472,9 +1552,11 @@ A list with the member names/key of the input object
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ product | object.keys | array.sort }}
 ```
+> **output**
 ```html
 [title, type]
 ```
@@ -1503,9 +1585,11 @@ The size of the input object.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ [1, 2, 3] | object.size }}
 ```
+> **output**
 ```html
 [title, type]
 ```
@@ -1531,6 +1615,7 @@ Returns string representing the type of the input object. The type can be `strin
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ null | object.typeof }}
 {{ true | object.typeof }}
@@ -1542,6 +1627,7 @@ Returns string representing the type of the input object. The type can be `strin
 {{ {} | object.typeof }}
 {{ object | object.typeof }}
 ```
+> **output**
 ```html
 
 boolean
@@ -1575,9 +1661,11 @@ A list with the member values of the input object
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ product | object.values | array.sort }}
 ```
+> **output**
 ```html
 [fruit, Orange]
 ```
@@ -1609,9 +1697,11 @@ A string of characters with metacharacters converted to their escaped form.
 
 #### Examples
 
+> **input**
 ```scriban-html
 "(abc.*)" | regex.escape }}
 ```
+> **output**
 ```html
 \\(abc\\.\\*\\)
 ```
@@ -1643,9 +1733,11 @@ An array that contains all the match groups. The first group contains the entire
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "this is a text123" | regex.match `(\w+) a ([a-z]+\d+)` }}
 ```
+> **output**
 ```html
 [is a text123, is, text123]
 ```
@@ -1679,9 +1771,11 @@ A new string that is identical to the input string, except that the replacement 
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "abbbbcccd | regex.replace "b+c+" "-Yo-" }}
 ```
+> **output**
 ```html
 a-Yo-d
 ```
@@ -1713,9 +1807,11 @@ A string array.
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "a, b   , c,    d" | regex.split `\s*,\s*" }}
 ```
+> **output**
 ```html
 [a, b, c, d]
 ```
@@ -1741,9 +1837,11 @@ A string of characters with any escaped characters converted to their unescaped 
 
 #### Examples
 
+> **input**
 ```scriban-html
 "\\(abc\\.\\*\\)" | regex.unescape }}
 ```
+> **output**
 ```html
 (abc.*)
 ```
@@ -1774,9 +1872,11 @@ The two strings concatenated
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "Hello" | string.append " World" }}
 ```
+> **output**
 ```html
 Hello World
 ```
@@ -1802,9 +1902,11 @@ The capitalized input string
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "test" | string.capitalize }}
 ```
+> **output**
 ```html
 Test
 ```
@@ -1830,9 +1932,11 @@ The capitalized input string
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "This is easy" | string.capitalizewords }}
 ```
+> **output**
 ```html
 This Is Easy
 ```
@@ -1859,9 +1963,11 @@ Returns a boolean indicating whether the input string contains the specified str
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "This is easy" | string.contains "easy" }}
 ```
+> **output**
 ```html
 true
 ```
@@ -1887,9 +1993,11 @@ The input string lower case
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "TeSt" | string.downcase }}
 ```
+> **output**
 ```html
 test
 ```
@@ -1916,9 +2024,11 @@ Returns a boolean indicating whether the input string ends with the specified st
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "This is easy" | string.ends_with "easy" }}
 ```
+> **output**
 ```html
 true
 ```
@@ -1944,9 +2054,11 @@ A url handle
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ '100% M & Ms!!!' | string.handleize  }}
 ```
+> **output**
 ```html
 100-m-ms
 ```
@@ -1972,9 +2084,11 @@ The input string without any left whitespace characters
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ '   too many spaces           ' | string.lstrip  }}
 ```
+> **output**
 ```html
 <!-- Highlight to see the empty spaces to the right of the string -->
 too many spaces           
@@ -2003,9 +2117,11 @@ The singular or plural string based on number
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ cart.item_count }} {{cart.item_count | string.pluralize 'item' 'items' }}
 ```
+> **output**
 ```html
 4 items
 ```
@@ -2032,9 +2148,11 @@ The two strings concatenated
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "World" | string.prepend "Hello " }}
 ```
+> **output**
 ```html
 Hello World
 ```
@@ -2061,8 +2179,10 @@ The input string with the all occurence of a substring removed
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "Hello, world. Goodbye, world." | string.remove "world" }}
+> **output**
 ```html
 Hello, . Goodbye, .
 ```
@@ -2089,8 +2209,10 @@ The input string with the first occurence of a substring removed
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "Hello, world. Goodbye, world." | string.remove_first "world" }}
+> **output**
 ```html
 Hello, . Goodbye, world.
 ```
@@ -2118,8 +2240,10 @@ The input string replaced
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "Hello, world. Goodbye, world." | string.replace "world" "buddy" }}
+> **output**
 ```html
 Hello, buddy. Goodbye, buddy.
 ```
@@ -2147,8 +2271,10 @@ The input string replaced
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "Hello, world. Goodbye, world." | string.replace_first "world" "buddy" }}
+> **output**
 ```html
 Hello, buddy. Goodbye, world.
 ```
@@ -2174,9 +2300,11 @@ The input string without any left whitespace characters
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ '   too many spaces           ' | string.rstrip  }}
 ```
+> **output**
 ```html
 <!-- Highlight to see the empty spaces to the right of the string -->
    too many spaces
@@ -2203,9 +2331,11 @@ The length of the input string
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "test" | string.size }}
 ```
+> **output**
 ```html
 4
 ```
@@ -2234,11 +2364,13 @@ The input string sliced
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "hello" | slice: 0 }}
 {{ "hello" | slice: 1 }}
 {{ "hello" | slice: 1, 3 }}
 ```
+> **output**
 ```html
 hello
 ello
@@ -2269,11 +2401,13 @@ The input string sliced
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "hello" | slice: 0 }}
 {{ "hello" | slice: 1 }}
 {{ "hello" | slice: 1, 3 }}
 ```
+> **output**
 ```html
 h
 e
@@ -2303,11 +2437,13 @@ An enumeration of the substrings
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ for word in "Hi, how are you today?" | string.split ' ' 
   word }}
 {{ endfor }}
 ```
+> **output**
 ```html
 Hi,
 how
@@ -2338,6 +2474,7 @@ Returns a boolean indicating whether the input string starts with the specified 
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "This is easy" | string.starts_with "This" }}
 ```
@@ -2366,9 +2503,11 @@ The input string without any left and right whitespace characters
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ '   too many spaces           ' | string.strip  }}
 ```
+> **output**
 ```html
 <!-- Highlight to see the empty spaces to the right of the string -->
 too many spaces
@@ -2395,10 +2534,12 @@ The input string without any breaks/newlines characters
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "This is a string.
 With another string" | string.strip_newlines  }}
 ```
+> **output**
 ```html
 This is a string.With another string
 ```
@@ -2427,9 +2568,11 @@ The truncated input string
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "The cat came back the very next day" | string.truncate 13 }}
 ```
+> **output**
 ```html
 The cat ca...
 ```
@@ -2458,9 +2601,11 @@ The truncated input string
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "The cat came back the very next day" | string.truncatewords 4 }}
 ```
+> **output**
 ```html
 The cat came back...
 ```
@@ -2486,6 +2631,7 @@ The input string upper case
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "test" | string.upcase }}
 ```
@@ -2514,6 +2660,7 @@ The `md5` hash of the input string
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "test" | string.md5 }}
 ```
@@ -2542,6 +2689,7 @@ The `sha1` hash of the input string
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "test" | string.sha1 }}
 ```
@@ -2570,6 +2718,7 @@ The `sha256` hash of the input string
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "test" | string.sha256 }}
 ```
@@ -2599,6 +2748,7 @@ The `SHA-1` hash of the input string using a hash message authentication code (H
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "test" | string.hmac_sha1 }}
 ```
@@ -2628,6 +2778,7 @@ The `SHA-256` hash of the input string using a hash message authentication code 
 
 #### Examples
 
+> **input**
 ```scriban-html
 {{ "test" | string.hmac_sha256 }}
 ```
@@ -2663,6 +2814,7 @@ A timespan object
 ```
 {{ (timespan.from_days 5).days }}
 ```
+> **output**
 ```html
 5
 ```
@@ -2691,6 +2843,7 @@ A timespan object
 ```
 {{ (timespan.from_hours 5).hours }}
 ```
+> **output**
 ```html
 5
 ```
@@ -2719,6 +2872,7 @@ A timespan object
 ```
 {{ (timespan.from_minutes 5).minutes }}
 ```
+> **output**
 ```html
 5
 ```
@@ -2747,6 +2901,7 @@ A timespan object
 ```
 {{ (timespan.from_seconds 5).seconds }}
 ```
+> **output**
 ```html
 5
 ```
@@ -2775,6 +2930,7 @@ A timespan object
 ```
 {{ (timespan.from_milliseconds 5).milliseconds }}
 ```
+> **output**
 ```html
 5
 ```
@@ -2801,3 +2957,5 @@ A timespan object parsed from timespan
 #### Examples
 
 
+
+> Note: This document was automatically generated from the sourcecode using `Scriban.DocGen` program
