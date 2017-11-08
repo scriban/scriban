@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "liquid2scriban", "liquid2sc
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.CodeGen", "Scriban.CodeGen\Scriban.CodeGen.csproj", "{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.DocGen", "Scriban.DocGen\Scriban.DocGen.csproj", "{D3478C01-63D6-4BAB-8A9E-3A9D5A98C80C}"
+EndProject
 Global
 	GlobalSection(Performance) = preSolution
 		HasPerformanceSessions = true
@@ -54,6 +56,10 @@ Global
 		{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D3478C01-63D6-4BAB-8A9E-3A9D5A98C80C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D3478C01-63D6-4BAB-8A9E-3A9D5A98C80C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D3478C01-63D6-4BAB-8A9E-3A9D5A98C80C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D3478C01-63D6-4BAB-8A9E-3A9D5A98C80C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
