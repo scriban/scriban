@@ -251,8 +251,12 @@ namespace Scriban.Parsing
                     type = ScriptTriviaType.Whitespace;
                     break;
 
+                case TokenType.WhitespaceFull:
+                    type = ScriptTriviaType.WhitespaceFull;
+                    break;
+
                 case TokenType.NewLine:
-                    type = ScriptTriviaType.Whitespace;
+                    type = ScriptTriviaType.NewLine;
                     break;
                 default:
                     throw new InvalidOperationException($"Token type `{token.Type}` not supported by trivia");
@@ -290,7 +294,7 @@ namespace Scriban.Parsing
 
         private bool IsHidden(TokenType tokenType)
         {
-            return tokenType == TokenType.Comment || tokenType == TokenType.CommentMulti || tokenType == TokenType.Whitespace || (tokenType == TokenType.NewLine && _allowNewLineLevel > 0);
+            return tokenType == TokenType.Comment || tokenType == TokenType.CommentMulti || tokenType == TokenType.Whitespace || tokenType == TokenType.WhitespaceFull || (tokenType == TokenType.NewLine && _allowNewLineLevel > 0);
         }
 
         private void LogError(string text, bool isFatal = false)

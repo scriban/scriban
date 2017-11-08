@@ -28,7 +28,8 @@ namespace Scriban.Parsing
         private bool _isExpectingFrontMatter;
         private readonly bool _isLiquid;
 
-        private readonly char _stripWhiteSpaceSpecialChar;
+        private readonly char _stripWhiteSpaceFullSpecialChar;
+        private readonly char _stripWhiteSpaceRestrictedSpecialChar;
         private const char RawEscapeSpecialChar = '%';
         private readonly Queue<Token> _pendingTokens;
 
@@ -73,7 +74,8 @@ namespace Scriban.Parsing
             _isExpectingFrontMatter = Options.Mode == ScriptMode.FrontMatterOnly ||
                                      Options.Mode == ScriptMode.FrontMatterAndContent;
             _isLiquid = Options.Mode == ScriptMode.Liquid;
-            _stripWhiteSpaceSpecialChar = _isLiquid ? '-' : '~';
+            _stripWhiteSpaceFullSpecialChar = '-';
+            _stripWhiteSpaceRestrictedSpecialChar = '~';
         }
 
         /// <summary>
@@ -144,8 +146,8 @@ namespace Scriban.Parsing
                     bool hasEnter = false;
                     if (_blockType == BlockType.Raw)
                     {
-                        bool skipPreviousSpaces;
-                        if (IsCodeEnterOrEscape(out skipPreviousSpaces))
+                        TokenType whiteSpaceMode;
+                        if (IsCodeEnterOrEscape(out whiteSpaceMode))
                         {
                             ReadCodeEnterOrEscape();
                             hasEnter = true;
@@ -278,9 +280,9 @@ namespace Scriban.Parsing
             return false;
         }
 
-        private bool IsCodeEnterOrEscape(out bool removePreviousSpaces)
+        private bool IsCodeEnterOrEscape(out TokenType whitespaceMode)
         {
-            removePreviousSpaces = false;
+            whitespaceMode = TokenType.Invalid;
             if (c == '{')
             {
                 int i = 1;
@@ -295,9 +297,14 @@ namespace Scriban.Parsing
                 }
                 if (nc == '{' || (_isLiquid && nc == '%'))
                 {
-                    if (PeekChar(i + 1) == _stripWhiteSpaceSpecialChar)
+                    var charSpace = PeekChar(i + 1);
+                    if (charSpace == _stripWhiteSpaceFullSpecialChar)
                     {
-                        removePreviousSpaces = true;
+                        whitespaceMode = TokenType.WhitespaceFull;
+                    }
+                    else if (!_isLiquid && charSpace == _stripWhiteSpaceRestrictedSpecialChar)
+                    {
+                        whitespaceMode = TokenType.Whitespace;
                     }
                     return true;
                 }
@@ -329,7 +336,7 @@ namespace Scriban.Parsing
             }
             NextChar(); // Skip {
 
-            if (c == _stripWhiteSpaceSpecialChar)
+            if (c == _stripWhiteSpaceFullSpecialChar || (!_isLiquid && c == _stripWhiteSpaceRestrictedSpecialChar))
             {
                 end = end.NextColumn();
                 NextChar();
@@ -490,7 +497,7 @@ namespace Scriban.Parsing
 
             // Do we have a ~}} or ~}%}
             int start = 0;
-            if (c == _stripWhiteSpaceSpecialChar)
+            if (c == _stripWhiteSpaceFullSpecialChar || (!_isLiquid && c == _stripWhiteSpaceRestrictedSpecialChar))
             {
                 start = 1;
             }
@@ -520,10 +527,15 @@ namespace Scriban.Parsing
         {
             var start = _position;
 
-            var shouldSkipSpacesAfterExit = false;
-            if (c == _stripWhiteSpaceSpecialChar)
+            var whitespaceMode = TokenType.Invalid;
+            if (c == _stripWhiteSpaceFullSpecialChar)
             {
-                shouldSkipSpacesAfterExit = true;
+                whitespaceMode = TokenType.WhitespaceFull;
+                NextChar();
+            }
+            else if (!_isLiquid && c == _stripWhiteSpaceRestrictedSpecialChar)
+            {
+                whitespaceMode = TokenType.Whitespace;
                 NextChar();
             }
 
@@ -550,13 +562,13 @@ namespace Scriban.Parsing
             }
 
             // Eat spaces after an exit
-            if (shouldSkipSpacesAfterExit)
+            if (whitespaceMode != TokenType.Invalid)
             {
                 var startSpace = _position;
                 var endSpace = new TextPosition();
-                if (ConsumeWhitespace(false, ref endSpace))
+                if (ConsumeWhitespace(whitespaceMode == TokenType.Whitespace, ref endSpace, whitespaceMode == TokenType.Whitespace))
                 {
-                    _pendingTokens.Enqueue(new Token(TokenType.Whitespace, startSpace, endSpace));
+                    _pendingTokens.Enqueue(new Token(whitespaceMode, startSpace, endSpace));
                 }
             }
 
@@ -569,15 +581,17 @@ namespace Scriban.Parsing
             var start = _position;
             var end = new TextPosition(-1, 0, 0);
             bool nextCodeEnterOrEscapeExit = false;
-            bool removePreviousSpaces = false;
+            var whitespaceMode = TokenType.Invalid;
 
             bool isEmptyRaw = false;
 
-            var endBeforeSpace = TextPosition.Eof;
-            var lastWhiteSpace = TextPosition.Eof;
+            var beforeSpaceFull = TextPosition.Eof;
+            var beforeSpaceRestricted = TextPosition.Eof;
+            var lastSpaceFull = TextPosition.Eof;
+            var lastSpaceRestricted = TextPosition.Eof;
             while (c != '\0')
             {
-                if (_blockType == BlockType.Raw && IsCodeEnterOrEscape(out removePreviousSpaces) || _blockType == BlockType.Escape && IsCodeExit())
+                if (_blockType == BlockType.Raw && IsCodeEnterOrEscape(out whitespaceMode) || _blockType == BlockType.Escape && IsCodeExit())
                 {
                     isEmptyRaw = end.Offset < 0;
                     nextCodeEnterOrEscapeExit = true;
@@ -586,17 +600,33 @@ namespace Scriban.Parsing
 
                 if (char.IsWhiteSpace(c))
                 {
-                    if (lastWhiteSpace.Offset < 0)
+                    if (lastSpaceFull.Offset < 0)
                     {
-                        lastWhiteSpace = _position;
-                        endBeforeSpace = end;
+                        lastSpaceFull = _position;
+                        beforeSpaceFull = end;
+                    }
+
+                    if (!(c == '\n' || (c == '\r' && PeekChar() != '\n')))
+                    {
+                        if (lastSpaceRestricted.Offset < 0)
+                        {
+                            lastSpaceRestricted = _position;
+                            beforeSpaceRestricted = end;
+                        }
+                    }
+                    else
+                    {
+                        lastSpaceRestricted.Offset = -1;
+                        beforeSpaceRestricted.Offset = -1;
                     }
                 }
                 else
                 {
                     // Reset white space if any
-                    lastWhiteSpace.Offset = -1;
-                    endBeforeSpace.Offset = -1;
+                    lastSpaceFull.Offset = -1;
+                    beforeSpaceFull.Offset = -1;
+                    lastSpaceRestricted.Offset = -1;
+                    beforeSpaceRestricted.Offset = -1;
                 }
 
                 end = _position;
@@ -608,15 +638,23 @@ namespace Scriban.Parsing
                 end = start;
             }
 
-            if (removePreviousSpaces && lastWhiteSpace.Offset >= 0)
+            var lastSpace = lastSpaceFull;
+            var beforeSpace = beforeSpaceFull;
+            if (whitespaceMode == TokenType.Whitespace)
             {
-                _pendingTokens.Enqueue(new Token(TokenType.Whitespace, lastWhiteSpace, end));
+                lastSpace = lastSpaceRestricted;
+                beforeSpace = beforeSpaceRestricted;
+            }
 
-                if (endBeforeSpace.Offset < 0)
+            if (whitespaceMode != TokenType.Invalid && lastSpace.Offset >= 0)
+            {
+                _pendingTokens.Enqueue(new Token(whitespaceMode, lastSpace, end));
+
+                if (beforeSpace.Offset < 0)
                 {
                     return false;
                 }
-                end = endBeforeSpace;
+                end = beforeSpace;
             }
 
             Debug.Assert(_blockType == BlockType.Raw || _blockType == BlockType.Escape);
@@ -1055,11 +1093,20 @@ namespace Scriban.Parsing
         }
 
 
-        private bool ConsumeWhitespace(bool stopAtNewLine, ref TextPosition lastSpace)
+        private bool ConsumeWhitespace(bool stopAtNewLine, ref TextPosition lastSpace, bool keepNewLine = false)
         {
             var start = _position;
-            while (char.IsWhiteSpace(c) && (!stopAtNewLine || !IsNewLine(c)))
+            while (char.IsWhiteSpace(c))
             {
+                if (stopAtNewLine && IsNewLine(c))
+                {
+                    if (keepNewLine)
+                    {
+                        lastSpace = _position;
+                        NextChar();
+                    }
+                    break;
+                }
                 lastSpace = _position;
                 NextChar();
             }

@@ -2,7 +2,7 @@
 {{ date.parse '2016/01/05' | date.add_days 1 | date.to_string '%g' }}
 {{ date.parse '2016/01/05' | date.add_months 1 | date.to_string '%g' }}
 {{ date.parse '2016/01/05' | date.add_years 1 | date.to_string '%g' }}
-{{ x = date.parse '2016/01/05' ~}}
+{{ x = date.parse '2016/01/05' -}}
 {{ x.year }}
 {{ x.month }}
 {{ x.day }}

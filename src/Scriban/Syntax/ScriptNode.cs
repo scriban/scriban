@@ -173,9 +173,11 @@ namespace Scriban.Syntax
 
     public enum ScriptTriviaType
     {
-        Empty,
+        Empty = 0,
 
         Whitespace,
+
+        WhitespaceFull,
 
         Comment,
 

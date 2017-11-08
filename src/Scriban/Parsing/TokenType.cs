@@ -42,6 +42,8 @@ namespace Scriban.Parsing
 
         Whitespace,
 
+        WhitespaceFull,
+
         Comment,
 
         CommentMulti,

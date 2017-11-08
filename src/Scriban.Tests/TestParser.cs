@@ -108,9 +108,9 @@ raw
         [Test]
         public void RoundtripCapture()
         {
-            var text = @" {{ capture variable ~}}
+            var text = @" {{ capture variable -}}
     This is a capture
-{{~ end ~}}
+{{- end -}}
 {{ variable }}";
             AssertRoundtrip(text);
         }

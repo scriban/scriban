@@ -198,39 +198,78 @@ Hence a starting escape block `{%%%%{` will required an ending `}%%%%}`
 [:top:](#language)
 ### 1.4 Whitespace control
 
-By default, any whitespace (including new lines) before or after a code/escape block are copied to the output. You can omit whitespace just before or after a code/escape block by using the character `~`:
+By default, any whitespace (including new lines) before or after a code/escape block are copied as-is to the output. 
 
-Examples with the variable `name = "foo"`:
+Scriban provides **two modes** for controlling whitespace:
 
-* Strip whitespaces on the left:
+- The **greedy mode** using the character `-` (e.g `{{-` or `-}}`), **removes any whitespace, including newlines** 
+  Examples with the variable `name = "foo"`:
+  
+  * Strip whitespace on the left:  
+    > **input**
+    ``` 
+    This is a <       
+    {{- name}}> text
+    ``` 
+    > **output**
+    ```
+    This is a <foo> a text
+    ```
+    
+  * Strip on the right:  
+    > **input**
+    ``` 
+    This is <{{ name -}} 
+    > a text:       
+    ``` 
+    > **output**
+    ```
+    This is a <foo> a text
+    ```
+  
+  * Strip on both left and right:  
+    > **input**
+    ``` 
+    This is <
+    {{~ name ~}} 
+    > a text:       
+    ``` 
+    > **output**
+    ```
+    This is a <foo> a text
+    ```
 
-``` 
-This is a <       
-{{~ name}}> text
-``` 
+- The **non greedy mode** using the character `~`
+  - Using a `{{~` will remove any **whitespace before** but will **stop on the first newline without including it**
+  - Using a `~}}` will remove any **whitespace after including the first newline** but will stop after
 
-> **output**: `This is a <foo> a text` 
+  This mode is very convenient when you want to use only a scriban statement on a line, but want that line to be completely 
+  removed from the output, but to keep spaces before and after this line intact.
 
-* Strip on the right:
+  In the following example, we want to remove entirely the lines `{{~ for product in products ~}}` and `{{~ end ~}}`, but we want
+  for example to keep the indentation of the opening `<li>`.
 
-``` 
-This is <{{ name ~}} 
-> a text:       
-``` 
+  Using the greedy mode `{{-` or `-}}` would have removed all whitespace and lines and would have put the results on a single line.
 
-> **output**: `This is a <foo> a text` 
+  > **input**
+  ```
+  <ul>
+      {{~ for product in products ~}}
+      <li>{{ product.name }}</li>
+      {{~ end ~}}
+  </ul>
+  ```
 
-* Strip on both left and right:
+  > **output**
+  ```
+  <ul>
+      <li>Orange</li>
+      <li>Banana</li>
+      <li>Apple</li>
+  </ul>
+  ```
 
-``` 
-This is <
-{{~ name ~}} 
-> a text:       
-``` 
-
-> **output**: `This is a <foo> a text` 
-
-The `~` character can also be used with **escape blocks** `{%%{~` or `~}%%}`
+Both mode `~` and '-' can also be used with **escape blocks** `{%%{~` or `~}%%}` or `{%%{-` or `-}%%}`
 
 [:top:](#language)
 ## 2 Comments
@@ -264,12 +303,12 @@ Scriban supports two types of strings:
   - `\f` form feed
   - `\uxxxx` where xxxx is a unicode hexa code number `0000` to `ffff` 
 - **verbatim strings** enclosed by backstick quotes `` `...` ``. They are, for example, useful to use with for regex patterns :
+  > **input**
   ``` 
   {{ "this is a text" | regex.split `\s+` }}
   ``` 
   
-  will output:
-  
+  > **output**
   ``` 
   [this, is, a, test]
   ``` 

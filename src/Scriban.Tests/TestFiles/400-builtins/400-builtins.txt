@@ -4,7 +4,7 @@ func dump_members
 	for member in $0 | array.map 'key' | array.sort
 		" " + member + "\n"
 	end
-end~}}
+end-}}
 {{dump_members array}}
 List of all the builtin <math> functions:
 {{dump_members math}}

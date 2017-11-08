@@ -22,8 +22,8 @@ namespace Scriban.Syntax
         private bool _expectEndOfStatement;
         // Gets a boolean indicating whether the last character written has a whitespace.
         private bool _previousHasSpace;
-        private bool _nextLStrip;
-        private bool _nextRStrip;
+        private ScriptTriviaType _nextLStrip;
+        private ScriptTriviaType _nextRStrip;
         private bool _hasEndOfStatement;
         private FastStack<bool> _isWhileLoop;
         private ScriptRawStatement _previousRawStatement;
@@ -32,7 +32,7 @@ namespace Scriban.Syntax
         {
             _isWhileLoop = new FastStack<bool>(4);
             Options = options;
-            _output = output;
+            _output = output;          
         }
 
         /// <summary>
@@ -133,10 +133,10 @@ namespace Scriban.Syntax
                 Write("%");
             }
             Write("{");
-            if (_nextLStrip)
+            if (_nextLStrip != ScriptTriviaType.Empty)
             {
-                Write("~");
-                _nextLStrip = false;
+                Write(_nextLStrip == ScriptTriviaType.Whitespace ? "~" : "-");
+                _nextLStrip = ScriptTriviaType.Empty;
             }
             _expectEndOfStatement = false;
             _expectEnd = false;
@@ -148,10 +148,10 @@ namespace Scriban.Syntax
 
         public RenderContext WriteExitCode(int escape = 0)
         {
-            if (_nextRStrip)
+            if (_nextRStrip != ScriptTriviaType.Empty)
             {
-                Write("~");
-                _nextRStrip = false;
+                Write(_nextRStrip == ScriptTriviaType.Whitespace ? "~" : "-");
+                _nextRStrip = ScriptTriviaType.Empty;
             }
             Write("}");
             for (int i = 0; i < escape; i++)
@@ -177,7 +177,7 @@ namespace Scriban.Syntax
                 {
                     if (rawStatement != null)
                     {
-                        _nextRStrip = rawStatement.HasTrivia(ScriptTriviaType.Whitespace, true);
+                        _nextRStrip = GetWhitespaceModeFromTrivia(rawStatement, true);
                         WriteExitCode();
                     }
                 }
@@ -185,7 +185,7 @@ namespace Scriban.Syntax
                 {
                     if (_previousRawStatement != null)
                     {
-                        _nextLStrip = _previousRawStatement.HasTrivia(ScriptTriviaType.Whitespace, false);
+                        _nextLStrip = GetWhitespaceModeFromTrivia(_previousRawStatement, false);
                     }
                     WriteEnterCode();
                 }
@@ -216,7 +216,7 @@ namespace Scriban.Syntax
 
                 if (_previousRawStatement != null)
                 {
-                    _nextLStrip = _previousRawStatement.HasTrivia(ScriptTriviaType.Whitespace, false);
+                    _nextLStrip = GetWhitespaceModeFromTrivia(_previousRawStatement, false);
                 }
 
                 if (!_isInCode)
@@ -300,6 +300,41 @@ namespace Scriban.Syntax
                     }
                 }
             }
+        }
+
+        private ScriptTriviaType GetWhitespaceModeFromTrivia(ScriptNode node, bool before)
+        {
+            if (node.Trivias == null)
+            {
+                return ScriptTriviaType.Empty;
+            }
+
+            if (before)
+            {
+                var trivias = node.Trivias.Before;
+                for (int i = trivias.Count - 1; i >= 0; i--)
+                {
+                    var type = trivias[i].Type;
+                    if (type == ScriptTriviaType.WhitespaceFull || type == ScriptTriviaType.Whitespace)
+                    {
+                        return type;
+                    }
+                }
+            }
+            else
+            {
+                var trivias = node.Trivias.After;
+                for (int i = 0; i < trivias.Count; i++)
+                {
+                    var type = trivias[i].Type;
+                    if (type == ScriptTriviaType.WhitespaceFull || type == ScriptTriviaType.Whitespace)
+                    {
+                        return type;
+                    }
+                }
+            }
+
+            return ScriptTriviaType.Empty;
         }
     }
 }

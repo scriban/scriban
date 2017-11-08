@@ -1,4 +1,4 @@
-{{~ capture variable ~}}
+{{- capture variable -}}
     This is a capture
-{{~ end ~}}
-{{~ variable }}
+{{- end -}}
+{{- variable }}

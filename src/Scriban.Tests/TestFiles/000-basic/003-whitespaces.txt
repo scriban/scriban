@@ -1,7 +1,9 @@
 This is a text
 
 
-{{~ "This is an expression" ~}}        123456789  
-{{~ 10 }}
+{{- "This is an expression" -}}        123456789  
+{{- 10 }}
 
-{%{~ a b c d ~}%}{%%{ }%} }%%}
+{%{- a b c d -}%}{%%{ }%} }%%}
+         {{~         ~}}
+This is another test

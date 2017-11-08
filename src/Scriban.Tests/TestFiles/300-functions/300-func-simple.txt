@@ -18,7 +18,7 @@ end
 func $dec
 	ret $0 - 1
 end
-~}}
+-}}
 {{inc 1}}
 {{$dec 3}}
 {{2 | inc}}
@@ -31,13 +31,13 @@ end
 x = with_output_and_return
 x
 ===
-{{func with_output_and_return ~}}
+{{func with_output_and_return -}}
 	do some output here
 {{
 	ret 256
 end
-~}}
-{{x = with_output_and_return ~}}
+-}}
+{{x = with_output_and_return -}}
 {{x}}
 
 func inc3
