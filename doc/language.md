@@ -599,7 +599,7 @@ A conditional expression produces a boolean by comparing a left and right value.
 | `<left> < <right>`  | Is left less than right?
 | `<left> <= <right>` | Is left less or equal to right?
 
-They work with both `numbers` and `strings`.
+They work with both `numbers`, `strings` and datetimes.
 
 You can combine conditionnal expressions with `&&` (and operator) and `||` (or operator)
 
@@ -631,7 +631,6 @@ The evaluated `left` and `right` expressions must resolve to an integer at runti
 | `left..right`   | Returns an iterator between `left` and `right` with a step of 1, including `right`. e.g: `1..5` iterates from 1 to 5
 | `left..<right`  | Returns an iterator between `left` and `right` with a step of 1, excluding `right`. e.g: `1..<5` iterates from 1 to 4
 
-
 ### 8.8 The null-coalescing operator `??` 
 
 The operator `left ?? right` can be used to return the `right` value if `left` is null.
@@ -647,7 +646,58 @@ The pipe operator `|` can also be used to pipe the result of an expression to a 
 
 `{{ date.parse '2016/01/05' | date.to_string '%g' }}` will output `06 Jan 2016`
 
-> Notice that when a function receives the result of a pipe call (e.g `date.to_string` in the example above), it is passed as the last argument of the call. This is valid for both .NET custom functions as well as for Scriban integrated functions.
+> Notice that when a function receives the result of a pipe call (e.g `date.to_string` in the example above), it is passed as the **first argument of the call**. This is valid for both .NET custom functions as well as for Scriban integrated functions.
+
+#### Named arguments
+
+When passing multiple arguments to an existing .NET function, you may want to use named arguments.
+
+Suppose you have declared a .NET function like this:
+
+```c#
+public static string MyProcessor(string left, string right, int count, string options = null)
+{
+    // ...
+}
+```
+
+You can call this function from scriban with the following syntax:
+
+```scriban-html
+{{ my_processor "Hello" "World" count: 15 options: "optimized" }}
+```
+
+with a pipe we could rewrite this to:
+
+```scriban-html
+{{ "Hello" | my_processor "World" count: 15 options: "optimized" }}
+```
+> Note that once arguments are named, the following arguments must be all named.
+
+In a custom function with declared with `func` named arguments are accessible through the variable arguments variable `$`, but as properties (and not as part of the default array arguments):
+
+> **input**
+```scriban-html
+{{
+    func my_processor
+        "Argument count:" + $.count
+        "Argument options:" + $["options"]
+        for $x in $
+            "arg[" + $x + "]: " + $x
+        end
+    end
+
+    my_processor "Hello" "World" count: 15 options: "optimized"
+}}
+```
+
+> **output**
+```html
+Argument count: 15
+Argument options: optimized
+arg[0]: Hello
+arg[1]: World
+```
 
 [:top:](#language)
 ## 9 Statements
