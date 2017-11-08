@@ -358,29 +358,36 @@ The `this` variable gives you access to the current object bound where you have 
 
 Thus the following variable access are equivalent:
 
+> **input**
 ```scriban-html
+{{
 a = 5
-this.a = 5
-this["a"] = 5
+a
+this.a = 6
+a
+this["a"] = 7
+a
+}}
 ```
-
+> **output**
+```html
+567
+```
 In the case of the `with` statement, the this operator refers to the object passed to `with`:
 
 > **input**
 ```scriban-html
+{{
 a = {x: 1, y: 2}
 with a
     b = this
 end
 b.x
+}}
 ```
 > **output**
-```scriban-html
-a = {x: 1, y: 2}
-with a
-    b = this
-end
-b.x
+```html
+1
 ```
 
 
