@@ -804,6 +804,59 @@ The expression can be an array or a range iterator:
 
 * Loop on a range: `{{ for x in 1..n }}This is the loop step [{{x}}]{{ end }}`  
 
+The for loop (along the `tablerow` statement) suports additional parameters, `offset`, `limit` and `reversed` that can also be used togethers:
+
+##### The `offset` parameter
+
+Allows to start the iteration of the loop at the specified zero-based index:
+
+> **input**
+```scriban-html
+{{~ for $i in 4..9 offset:2 ~}}
+ {{ $i }}
+{{~ endfor ~}}
+```
+> **output**
+```html
+6
+7
+8
+9
+```
+
+##### The `limit` parameter
+
+Allows to limit the iteration of the loop for the specified count
+
+> **input**
+```scriban-html
+{{~ for $i in 4..9 limit:2 ~}}
+ {{ $i }}
+{{~ endfor ~}}
+```
+> **output**
+```html
+4
+5
+```
+
+##### The `reversed` parameter
+
+Allows to reverse the iteration on the elements
+
+> **input**
+```scriban-html
+{{~ for $i in 1..3 reversed ~}}
+ {{ $i }}
+{{~ endfor ~}}
+```
+> **output**
+```html
+3
+2
+1
+```
+
 [:top:](#language)
 #### `while <expression> ... end`
 
