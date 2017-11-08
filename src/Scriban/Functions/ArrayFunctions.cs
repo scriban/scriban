@@ -19,7 +19,7 @@ namespace Scriban.Functions
     public class ArrayFunctions : ScriptObject
     {
         /// <summary>
-        /// Adds a value to the input list
+        /// Adds a value to the input list.
         /// </summary>
         /// <param name="list">The input list</param>
         /// <param name="value">The value to add at the end of the list</param>
@@ -45,7 +45,7 @@ namespace Scriban.Functions
 
 
         /// <summary>
-        /// Concatenates two lists
+        /// Concatenates two lists.
         /// </summary>
         /// <param name="list1">The 1st input list</param>
         /// <param name="list2">The 2nd input list</param>
@@ -65,7 +65,7 @@ namespace Scriban.Functions
 
 
         /// <summary>
-        /// Removes any non-null values from the input list
+        /// Removes any non-null values from the input list.
         /// </summary>
         /// <param name="list">An input list</param>
         /// <returns>Returns a list with null value removed</returns>
@@ -96,7 +96,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Concatenates two lists
+        /// Concatenates two lists.
         /// </summary>
         /// <param name="list1">The 1st input list</param>
         /// <param name="list2">The 2nd input list</param>
@@ -186,6 +186,19 @@ namespace Scriban.Functions
             return result;
         }
 
+        /// <summary>
+        /// Returns the first element of the input `list`.
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <returns>The first element of the input `list`.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6] | array.first }}
+        /// ```
+        /// ```html
+        /// 4
+        /// ```
+        /// </remarks>
         public static object First(IEnumerable list)
         {
             if (list == null)
@@ -207,7 +220,21 @@ namespace Scriban.Functions
             return null;
         }
 
-
+        /// <summary>
+        /// Inserts a `value` at the specified index in the input `list`.
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <param name="index">The index in the list where to insert the element</param>
+        /// <param name="value">The value to insert</param>
+        /// <returns>A new list with the element inserted.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ ["a", "b", "c"] | array.insert_at 2 "Yo" }}
+        /// ```
+        /// ```html
+        /// [a, b, Yo, c]
+        /// ```
+        /// </remarks>
         public static IList InsertAt(IList list, int index, object value)
         {
             if (index < 0)
@@ -227,6 +254,23 @@ namespace Scriban.Functions
             return list;
         }
 
+
+        /// <summary>
+        /// Joins the element of a list separated by a delimiter string and return the concatenated string.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">The input list</param>
+        /// <param name="delimiter">The delimiter string to use to separate elements in the output string</param>
+        /// <returns>A new list with the element inserted.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [1, 2, 3] | array.join "|" }}
+        /// ```
+        /// ```html
+        /// 1|2|3
+        /// ```
+        /// </remarks>
         public static string Join(TemplateContext context, SourceSpan span, IEnumerable list, string delimiter)
         {
             if (list == null)
@@ -248,6 +292,19 @@ namespace Scriban.Functions
             return text.ToString();
         }
 
+        /// <summary>
+        /// Returns the last element of the input `list`.
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <returns>The last element of the input `list`.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6] | array.last }}
+        /// ```
+        /// ```html
+        /// 6
+        /// ```
+        /// </remarks>
         public static object Last(IEnumerable list)
         {
             if (list == null)
@@ -266,10 +323,18 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Returns only count elments from the input list
+        /// Returns a limited number of elments from the input list
         /// </summary>
         /// <param name="list">The input list</param>
         /// <param name="count">The number of elements to return from the input list</param>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6] | array.limit 2 }}
+        /// ```
+        /// ```html
+        /// [4, 5]
+        /// ```
+        /// </remarks>
         public static ScriptArray Limit(IEnumerable list, int count)
         {
             if (list == null)
@@ -290,9 +355,26 @@ namespace Scriban.Functions
             return result;
         }
 
-        public static IEnumerable Map(TemplateContext context, SourceSpan span, object list, string member = null)
+        /// <summary>
+        /// Accepts an array element's attribute as a parameter and creates an array out of each array element's value.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">The input list</param>
+        /// <param name="member">The member to extract the value from</param>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 
+        /// products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
+        /// products | array.map "type" | array.uniq | array.sort }}
+        /// ```
+        /// ```html
+        /// [electronics, fruit, furniture]
+        /// ```
+        /// </remarks>
+        public static IEnumerable Map(TemplateContext context, SourceSpan span, object list, string member)
         {
-            if (list == null)
+            if (list == null || member == null)
             {
                 yield break;
             }
@@ -309,9 +391,7 @@ namespace Scriban.Functions
                 var itemAccessor = context.GetMemberAccessor(item);
                 if (itemAccessor.HasMember(context, span, item, member))
                 {
-                    object value = null;
-                    itemAccessor.TryGetValue(context, span, item, member, out value);
-
+                    itemAccessor.TryGetValue(context, span, item, member, out object value);
                     yield return value;
                 }
             }
@@ -322,6 +402,14 @@ namespace Scriban.Functions
         /// </summary>
         /// <param name="list">The input list</param>
         /// <param name="index">The index of a list to return elements</param>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6, 7, 8] | array.limit 2 }}
+        /// ```
+        /// ```html
+        /// [6, 7, 8]
+        /// ```
+        /// </remarks>
         public static ScriptArray Offset(IEnumerable list, int index)
         {
             if (list == null)
@@ -344,6 +432,27 @@ namespace Scriban.Functions
             return result;
         }
 
+        /// <summary>
+        /// Removes an element at the specified `index` from the input `list`
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <param name="index">The index of a list to return elements</param>
+        /// <returns>A new list with the element removed. If index is negative, remove at the end of the list.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6, 7, 8] | array.remove_at 2 }}
+        /// ```
+        /// ```html
+        /// [4, 5, 7, 8]
+        /// ```
+        /// If the `index` is negative, removes at the end of the list:
+        /// ```scriban-html
+        /// {{ [4, 5, 6, 7, 8] | array.remove_at -1 }}
+        /// ```
+        /// ```html
+        /// [4, 5, 6, 7]
+        /// ```
+        /// </remarks>
         public static IList RemoveAt(IList list, int index)
         {
             if (list == null)
@@ -366,6 +475,19 @@ namespace Scriban.Functions
             return list;
         }
 
+        /// <summary>
+        /// Reverses the input `list`
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <returns>A new list in reversed order.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6, 7] | array.reverse }}
+        /// ```
+        /// ```html
+        /// [7, 6, 5, 4]
+        /// ```
+        /// </remarks>
         public static IEnumerable Reverse(IEnumerable list)
         {
             if (list == null)
@@ -381,6 +503,19 @@ namespace Scriban.Functions
             return list.Cast<object>().Reverse();
         }
 
+        /// <summary>
+        /// Returns the number of elements in the input `list`
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <returns>A number of elements in the input `list`.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6] | array.size }}
+        /// ```
+        /// ```html
+        /// 3
+        /// ```
+        /// </remarks>
         public static int Size(IEnumerable list)
         {
             if (list == null)
@@ -397,6 +532,33 @@ namespace Scriban.Functions
             return list.Cast<object>().Count();
         }
 
+        /// <summary>
+        /// Sorts the elements of the input `list` according to the value of each element or the value of the specified `member` of each element
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">The input list</param>
+        /// <param name="member">The member name to sort according to its value. Null by default, meaning that the element's value are used instead.</param>
+        /// <returns>A list sorted according to the value of each element or the value of the specified `member` of each element.</returns>
+        /// <remarks>
+        /// Sorts by element's value: 
+        /// ```scriban-html
+        /// {{ [10, 2, 6] | array.sort }}
+        /// ```
+        /// ```html
+        /// [2, 6, 10]
+        /// ```
+        /// Sorts by elements member's value: 
+        /// ```scriban-html
+        /// {{
+        /// products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
+        /// products | array.sort "title" | array.map "title"
+        /// }}
+        /// ```
+        /// ```html
+        /// [computer, orange, sofa]
+        /// ```
+        /// </remarks>
         public static IEnumerable Sort(TemplateContext context, SourceSpan span, object list, string member = null)
         {
             if (list == null)
@@ -444,6 +606,19 @@ namespace Scriban.Functions
             return realList;
         }
 
+        /// <summary>
+        /// Returns the unique elements of the input `list`.
+        /// </summary>
+        /// <param name="list">The input list</param>
+        /// <returns>A list of unique elements of the input `list`.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [1, 1, 4, 5, 8, 8] | array.uniq }}
+        /// ```
+        /// ```html
+        /// [1, 4, 5, 8]
+        /// ```
+        /// </remarks>
         public static IEnumerable Uniq(IEnumerable list)
         {
             return list?.Cast<object>().Distinct();
