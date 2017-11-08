@@ -96,12 +96,31 @@ namespace Scriban.Functions
             return Math.Ceiling(value);
         }
 
-        public static object DividedBy(TemplateContext context, SourceSpan span, double value, object by)
+        /// <summary>
+        /// Divides the specified value by another value. If the divisor is an integer, the result will
+        /// be floor to and converted back to an integer.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value</param>
+        /// <param name="divisor">The divisor value</param>
+        /// <returns>The division of `value` by `divisor`.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 4.6 | math.divided_by 2.0 }} 
+        /// {{ 4.6 | math.divided_by 2 }} 
+        /// ```
+        /// ```html
+        /// 2.3
+        /// 2
+        /// ```
+        /// </remarks>
+        public static object DividedBy(TemplateContext context, SourceSpan span, double value, object divisor)
         {
-            var result = ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Divide, value, by);
+            var result = ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Divide, value, divisor);
 
             // If the divisor is an integer, return a an integer
-            if (by is int)
+            if (divisor is int)
             {
                 if (result is double)
                 {
@@ -135,6 +154,22 @@ namespace Scriban.Functions
             return Math.Floor(value);
         }
 
+        /// <summary>
+        /// Formats a number value with specified [.NET standard numeric format strings](https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings)
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value</param>
+        /// <param name="format">The format string.</param>
+        /// <returns>The largest integer less than or equal to the specified number.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 255 | math.format "X4" }} 
+        /// ```
+        /// ```html
+        /// 00FF
+        /// ```
+        /// </remarks>
         public static string Format(TemplateContext context, SourceSpan span, object value, string format)
         {
             if (value == null)
@@ -150,6 +185,21 @@ namespace Scriban.Functions
             return formattable.ToString(format, context.CurrentCulture);
         }
 
+        /// <summary>
+        /// Returns a boolean indicating if the input value is a number
+        /// </summary>
+        /// <param name="value">The input value</param>
+        /// <returns>**true** if the input value is a number; otherwise false.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 255 | math.is_number }} 
+        /// {{ "yo" | math.is_number }} 
+        /// ```
+        /// ```html
+        /// true
+        /// false
+        /// ```
+        /// </remarks>
         public static bool IsNumber(object value)
         {
             return value is sbyte
@@ -165,16 +215,64 @@ namespace Scriban.Functions
                    || value is decimal;
         }
 
+        /// <summary>
+        /// Substracts from the input value the `with` value
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value</param>
+        /// <param name="with">The with value to substract from `value`</param>
+        /// <returns>The results of the substraction: `value` - `with`</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 255 | math.minus 5}} 
+        /// ```
+        /// ```html
+        /// 250
+        /// ```
+        /// </remarks>
         public static object Minus(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Substract, value, with);
         }
 
+        /// <summary>
+        /// Performs the modulo of the input value with the `with` value
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value</param>
+        /// <param name="with">The with value to module `value`</param>
+        /// <returns>The results of the modulo: `value` % `with`</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 11 | math.modulo 10}} 
+        /// ```
+        /// ```html
+        /// 1
+        /// ```
+        /// </remarks>
         public static object Modulo(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Modulus, value, with);
         }
 
+        /// <summary>
+        /// Performs the addition of the input value with the `with` value
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value</param>
+        /// <param name="with">The with value to add to`value`</param>
+        /// <returns>The results of the addition: `value` + `with`</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 1 | math.plus 2}} 
+        /// ```
+        /// ```html
+        /// 3
+        /// ```
+        /// </remarks>
         public static object Plus(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Add, value, with);
@@ -203,6 +301,22 @@ namespace Scriban.Functions
             return Math.Round(value, precision);
         }
 
+        /// <summary>
+        /// Performs the multiplication of the input value with the `with` value
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value</param>
+        /// <param name="with">The with value to multiply to`value`</param>
+        /// <returns>The results of the multiplication: `value` * `with`</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 2 | math.times 3}} 
+        /// ```
+        /// ```html
+        /// 6
+        /// ```
+        /// </remarks>
         public static object Times(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Multiply, value, with);
