@@ -231,7 +231,7 @@ Scriban provides **two modes** for controlling whitespace:
     > **input**
     ``` 
     This is <
-    {{~ name ~}} 
+    {{- name -}} 
     > a text:       
     ``` 
     > **output**
