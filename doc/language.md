@@ -358,11 +358,32 @@ The `this` variable gives you access to the current object bound where you have 
 
 Thus the following variable access are equivalent:
 
-```
+```scriban-html
 a = 5
 this.a = 5
 this["a"] = 5
 ```
+
+In the case of the `with` statement, the this operator refers to the object passed to `with`:
+
+> **input**
+```scriban-html
+a = {x: 1, y: 2}
+with a
+    b = this
+end
+b.x
+```
+> **output**
+```scriban-html
+a = {x: 1, y: 2}
+with a
+    b = this
+end
+b.x
+```
+
+
 
 [:top:](#language)
 ## 5 Objects
