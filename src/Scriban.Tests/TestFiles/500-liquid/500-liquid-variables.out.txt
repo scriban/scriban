@@ -4,6 +4,6 @@ page.title: This is a title
 user.name: John
 assign for = 5: 
 for: 5
-products[0].title: Orange Hello World
+products[0].title: Orange
 product.empty?: false
 null.empty?: 

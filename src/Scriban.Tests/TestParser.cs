@@ -1,4 +1,4 @@
-// #define EnableTokensOutput
+#define EnableTokensOutput
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
@@ -495,16 +495,16 @@ end
                                 {
                                     ["page"] = new ScriptObject {["title"] = "This is a title"},
                                     ["user"] = new ScriptObject {["name"] = "John"},
-                                    ["product"] = new ScriptObject {["title"] = "Orange Hello World", ["type"] = "fruit"},
+                                    ["product"] = new ScriptObject {["title"] = "Orange", ["type"] = "fruit"},
                                     ["products"] = new ScriptArray()
                                     {
-                                        new ScriptObject {["title"] = "Orange Hello World", ["type"] = "fruit"},
-                                        new ScriptObject {["title"] = "Banana Hello World", ["type"] = "fruit"},
-                                        new ScriptObject {["title"] = "Apple Hello World", ["type"] = "fruit"},
-                                        new ScriptObject {["title"] = "Item1 Hello World", ["type"] = "item"},
-                                        new ScriptObject {["title"] = "Item2 Hello World", ["type"] = "item"},
-                                        new ScriptObject {["title"] = "Item3 Hello World", ["type"] = "item"},
-                                        new ScriptObject {["title"] = "Item4 Hello World", ["type"] = "item"},
+                                        new ScriptObject {["title"] = "Orange", ["type"] = "fruit"},
+                                        new ScriptObject {["title"] = "Banana", ["type"] = "fruit"},
+                                        new ScriptObject {["title"] = "Apple", ["type"] = "fruit"},
+                                        new ScriptObject {["title"] = "Computer", ["type"] = "electronics"},
+                                        new ScriptObject {["title"] = "Mobile Phone", ["type"] = "electronics"},
+                                        new ScriptObject {["title"] = "Table", ["type"] = "furniture"},
+                                        new ScriptObject {["title"] = "Sofa", ["type"] = "furniture"},
                                     }
                                 };
                                 scriptObj.Import(typeof(SpecialFunctionProvider));

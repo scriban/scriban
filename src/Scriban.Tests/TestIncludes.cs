@@ -67,7 +67,7 @@ namespace Scriban.Tests
         [Test]
         public void TestProduct()
         {
-            TestParser.AssertTemplate("product: Orange Hello World", "{{ include 'product' }}");
+            TestParser.AssertTemplate("product: Orange", "{{ include 'product' }}");
         }
         
         [Test]
@@ -91,13 +91,13 @@ namespace Scriban.Tests
         [Test]
         public void TestLiquidWith()
         {
-            TestParser.AssertTemplate("with_product: Orange Hello World", "{% include 'with_product' with product %}", true);
+            TestParser.AssertTemplate("with_product: Orange", "{% include 'with_product' with product %}", true);
         }
 
         [Test]
         public void TestLiquidFor()
         {
-            TestParser.AssertTemplate("for_product: Orange Hello World for_product: Banana Hello World for_product: Apple Hello World for_product: Item1 Hello World for_product: Item2 Hello World for_product: Item3 Hello World for_product: Item4 Hello World ", "{% include 'for_product' for products %}", true);
+            TestParser.AssertTemplate("for_product: Orange for_product: Banana for_product: Apple for_product: Computer for_product: Mobile Phone for_product: Table for_product: Sofa ", "{% include 'for_product' for products %}", true);
         }
         
         [Test]
