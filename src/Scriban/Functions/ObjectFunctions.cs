@@ -138,10 +138,26 @@ namespace Scriban.Functions
         /// <param name="value">The input object.</param>
         /// <remarks>
         /// ```scriban-html
-        /// {{ [1, 2, 3] | object.typeof }}
+        /// {{ null | object.typeof }}
+        /// {{ true | object.typeof }}
+        /// {{ 1 | object.typeof }}
+        /// {{ 1.0 | object.typeof }}
+        /// {{ "text" | object.typeof }}
+        /// {{ 1..5 | object.typeof }}
+        /// {{ [1,2,3,4,5] | object.typeof }}
+        /// {{ {} | object.typeof }}
+        /// {{ object | object.typeof }}
         /// ```
         /// ```html
+        /// 
+        /// boolean
+        /// number
+        /// number
+        /// string
+        /// iterator
         /// array
+        /// object
+        /// object
         /// ```
         /// </remarks>
         public static string Typeof(object value)
