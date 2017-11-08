@@ -52,12 +52,15 @@ var result = template.Render(new { products = this.ProductList });
   - Bind [.NET custom functions](doc/runtime.md#imports-functions-from-a-net-class) from the runtime API with [many options](doc/runtime.md#the-scriptobject) for interfacing with .NET objects.
 - [Complex objects](doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
 - Allow to pass [a block of statements](doc/language.md#98-wrap-function-arg1argn--end) to a function, typically used by the `wrap` statement
-- Several builtins objects/functions:
-  - [`arrays functions`](doc/language.md#101-array-functions)
-  - [`maths functions`](doc/language.md#102-math-functions)
-  - [`string functions`](doc/language.md#103-string-functions)
-  - [`regex functions`](doc/language.md#104-regex)
-  - [`date`](doc/language.md#106-datetime)/[`time`](doc/language.md#107-timespan)
+- Several [built-in functions](doc/builtins.md):
+  - [`arrays functions`](doc/builtins.md#array-functions)
+  - [`date`](doc/builtins.md#date-functions)
+  - [`html`](doc/builtins.md#html-functions)
+  - [`maths functions`](doc/builtins.md#math-functions)
+  - [`object`](doc/builtins.md#object-functions)
+  - [`regex functions`](doc/builtins.md#regex-functions)
+  - [`string functions`](doc/builtins.md#string-functions)
+  - [`timespan`](doc/builtins.md#timespan-functions)
 - [Multi-line statements](doc/language.md#11-code-block) without having to embrace each line by `{{...}}`
 - [Safe parser](doc/runtime.md#the-lexer-and-parser) and [safe runtime](doc/runtime.md#safe-runtime), allowing you to control what objects and functions are exposed
 
@@ -68,6 +71,7 @@ You can install the [Scriban Extension for Visual Studio Code](https://marketpla
 ## Documentation
 
 * The [Language](doc/language.md) for a description of the script language syntax and all the built-in functions.
+* The [Built-in functions](builtins.md) for the list of supported built-in functions.
 * The [Runtime](doc/runtime.md) for the a description of the runtime API and how to use it from a .NET application.
 
 ## Binaries
