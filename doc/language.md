@@ -352,6 +352,18 @@ The **special local variable** `$` alone is an array containing the arguments pa
 
 The special local variables `$0` `$1` ... `$n` is a shorthand of `$[0]`, `$[1]` ... `$[n]`. e.g Using `$0` returns the first argument of the current function or including page.
 
+### 4.1 The special variable `this`
+
+The `this` variable gives you access to the current object bound where you have access to all local variables for the current scope.
+
+Thus the following variable access are equivalent:
+
+```
+a = 5
+this.a = 5
+this["a"] = 5
+```
+
 [:top:](#language)
 ## 5 Objects
 
