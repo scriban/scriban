@@ -756,6 +756,37 @@ Example testing a page object:
  
 `{{ if !page }}Page is not null{{ else }}Page is null!{{ end }}` 
 
+
+[:top:](#language)
+### 9.3 `case` and `when`
+
+This is the equivalent of `switch` statement in C#, a selection statement that chooses a single switch section to execute from a list of candidates based on a value matching. 
+
+- `case <expression>` opens a switch with an expression
+- `when <match>` allows to match with the specified expression and the case expression
+  - `when` can also be used with multiple values separated by `,` or `||`
+- A final `else` can be used to as a default handler in case nothing matched.
+
+> **input**
+```scriban-html
+{{
+    x = 5
+    case x
+      when 1, 2, 3
+          "Value is 1 or 2 or 3
+      when 5
+          "Value is 5"
+      else
+          "Value is " + x
+    end
+}}
+```
+
+> **output**
+```html
+Value is 5
+```
+
 [:top:](#language)
 ### 9.3 Loops
 
