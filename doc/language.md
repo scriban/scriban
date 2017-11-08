@@ -823,10 +823,12 @@ The following variables are accessible within a `for` block:
 | Name                | Description
 | ------------------- | -----------
 | `{{for.index}}`     | The current `index` of the for loop
+| `{{for.rindex}}`    | The current `index` of the for loop starting from the end of the list
 | `{{for.first}}`     | A boolean indicating whether this is the first step in the loop
 | `{{for.last}}`      | A boolean indicating whether this is the last step in the loop
 | `{{for.even}}`      | A boolean indicating whether this is an even row in the loop
 | `{{for.odd}}`       | A boolean indicating whether this is an odd row in the loop
+| `{{for.changed}}`   | A boolean indicating whether a current value of this iteration changed from previous step
 
 Within a `while` statement, the following variables can be used:
 
