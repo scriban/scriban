@@ -8,6 +8,10 @@ using Mono.Cecil;
 
 namespace Scriban.CodeGen
 {
+    /// <summary>
+    /// Program generating pre-compiled custom delegates for all builtin functions
+    /// Output result is in: `src/Scriban/CustomFunction.Generated.cs`
+    /// </summary>
     class Program
     {
         private readonly AssemblyDefinition _assemblyDefinition;
