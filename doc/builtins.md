@@ -2396,12 +2396,14 @@ The input string sliced
 ```scriban-html
 {{ "hello" | string.slice 0 }}
 {{ "hello" | string.slice 1 }}
-{{ "hello" | string.slice 1, 3 }}
+{{ "hello" | string.slice 1 3 }}
+{{ "hello" | string.slice 1 length:3 }}
 ```
 > **output**
 ```html
 hello
 ello
+ell
 ell
 ```
 
@@ -2433,12 +2435,14 @@ The input string sliced
 ```scriban-html
 {{ "hello" | string.slice1 0 }}
 {{ "hello" | string.slice1 1 }}
-{{ "hello" | string.slice1 1, 3 }}
+{{ "hello" | string.slice1 1 3 }}
+{{ "hello" | string.slice1 1 length: 3 }}
 ```
 > **output**
 ```html
 h
 e
+ell
 ell
 ```
 
