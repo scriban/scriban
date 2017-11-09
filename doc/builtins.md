@@ -2782,7 +2782,7 @@ The `SHA-1` hash of the input string using a hash message authentication code (H
 
 > **input**
 ```scriban-html
-{{ "test" | string.hmac_sha1 }}
+{{ "test" | string.hmac_sha1 "secret" }}
 ```
 ```
 1aa349585ed7ecbd3b9c486a30067e395ca4b356
@@ -2812,7 +2812,7 @@ The `SHA-256` hash of the input string using a hash message authentication code 
 
 > **input**
 ```scriban-html
-{{ "test" | string.hmac_sha256 }}
+{{ "test" | string.hmac_sha256 "secret" }}
 ```
 ```
 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914

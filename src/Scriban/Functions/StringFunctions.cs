@@ -419,11 +419,13 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "hello" | string.slice 0 }}
         /// {{ "hello" | string.slice 1 }}
-        /// {{ "hello" | string.slice 1, 3 }}
+        /// {{ "hello" | string.slice 1 3 }}
+        /// {{ "hello" | string.slice 1 length:3 }}
         /// ```
         /// ```html
         /// hello
         /// ello
+        /// ell
         /// ell
         /// ```
         /// </remarks>
@@ -474,11 +476,13 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "hello" | string.slice1 0 }}
         /// {{ "hello" | string.slice1 1 }}
-        /// {{ "hello" | string.slice1 1, 3 }}
+        /// {{ "hello" | string.slice1 1 3 }}
+        /// {{ "hello" | string.slice1 1 length: 3 }}
         /// ```
         /// ```html
         /// h
         /// e
+        /// ell
         /// ell
         /// ```
         /// </remarks>
@@ -779,7 +783,7 @@ namespace Scriban.Functions
         /// <returns>The `SHA-1` hash of the input string using a hash message authentication code (HMAC)</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "test" | string.hmac_sha1 }}
+        /// {{ "test" | string.hmac_sha1 "secret" }}
         /// ```
         /// ```
         /// 1aa349585ed7ecbd3b9c486a30067e395ca4b356
@@ -801,7 +805,7 @@ namespace Scriban.Functions
         /// <returns>The `SHA-256` hash of the input string using a hash message authentication code (HMAC)</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "test" | string.hmac_sha256 }}
+        /// {{ "test" | string.hmac_sha256 "secret" }}
         /// ```
         /// ```
         /// 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
