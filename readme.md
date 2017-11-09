@@ -73,6 +73,7 @@ You can install the [Scriban Extension for Visual Studio Code](https://marketpla
 * See the [Language](doc/language.md) document for a description of the language syntax.
 * See the [Built-in functions](doc/builtins.md) document for the list of the built-in functions.
 * See the [Runtime](doc/runtime.md) document for a description of the .NET runtime API to compile and run templates.
+* See the [Liquid support](doc/liquid-support.md) document for more details about the support of liquid templates.
 
 ## Binaries
 
