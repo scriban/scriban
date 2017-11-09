@@ -329,7 +329,7 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
-        /// Determines whether the specified object is importable by the method <see cref="ScriptObjectExtensions.Import(Scriban.Runtime.IScriptObject,object)"/>
+        /// Determines whether the specified object is importable by the method the various Import methods.
         /// </summary>
         /// <param name="obj">The object.</param>
         /// <returns><c>true</c> if the object is importable; <c>false</c> otherwise</returns>

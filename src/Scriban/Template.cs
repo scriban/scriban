@@ -205,6 +205,7 @@ namespace Scriban
         /// Evaluates the template using the specified context. See remarks.
         /// </summary>
         /// <param name="context">The template context.</param>
+        /// <param name="render"><c>true</c> to render the output to the <see cref="TemplateContext.Output"/></param>
         /// <exception cref="System.ArgumentNullException">If context is null</exception>
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
         private object EvaluateAndRender(TemplateContext context, bool render)

@@ -581,7 +581,7 @@ namespace Scriban
         /// </summary>
         /// <param name="text">The text.</param>
         /// <param name="startIndex">The zero-based position of the substring of text</param>
-        /// <param name="count">The number of characters to output starting at <see cref="startIndex"/> position from the text</param>
+        /// <param name="count">The number of characters to output starting at <paramref name="startIndex"/> position from the text</param>
         public TemplateContext Write(string text, int startIndex, int count)
         {
             if (text != null)

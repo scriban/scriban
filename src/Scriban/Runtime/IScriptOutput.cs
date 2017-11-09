@@ -5,7 +5,7 @@
 namespace Scriban.Runtime
 {
     /// <summary>
-    /// Interface used to text output when evaluating a template used by <see cref="TemplateContext.Output"/> and <see cref="TemplateContext.PushOutput"/>
+    /// Interface used to text output when evaluating a template used by <see cref="TemplateContext.Output"/> and <see cref="TemplateContext.PushOutput()"/>
     /// </summary>
     public interface IScriptOutput
     {

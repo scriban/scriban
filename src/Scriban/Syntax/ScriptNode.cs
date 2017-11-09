@@ -21,7 +21,7 @@ namespace Scriban.Syntax
         public SourceSpan Span;
 
         /// <summary>
-        /// Trivias, null if <see cref="ParserOptions.KeepTrivia"/> was false.
+        /// Trivias, null if <see cref="LexerOptions.KeepTrivia"/> was false.
         /// </summary>
         public ScriptTrivias Trivias { get; set; }
 

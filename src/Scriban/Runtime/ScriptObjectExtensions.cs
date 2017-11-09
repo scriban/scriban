@@ -40,6 +40,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Imports the specified object intto this <see cref="ScriptObject"/> context. See remarks.
         /// </summary>
+        /// <param name="script">The script object to import into</param>
         /// <param name="obj">The object.</param>
         /// <param name="filter">Optional member filterer</param>
         /// <param name="renamer">Optional renamer</param>
@@ -77,6 +78,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Tries to set the value and readonly state of the specified member.
         /// </summary>
+        /// <param name="this">The script object</param>
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
@@ -94,6 +96,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Imports the specified <see cref="ScriptObject"/> into this instance by copying the member values into this object.
         /// </summary>
+        /// <param name="this">The script object to import into</param>
         /// <param name="other">The other <see cref="ScriptObject"/>.</param>
         public static void Import(this IScriptObject @this, IScriptObject other)
         {
@@ -162,6 +165,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Imports a specific member from the specified object.
         /// </summary>
+        /// <param name="script">The script object to import into</param>
         /// <param name="obj">The object.</param>
         /// <param name="memberName">Name of the member.</param>
         /// <param name="exportName">Name of the member name replacement. If null, use the default renamer will be used.</param>
@@ -174,6 +178,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Imports the specified object.
         /// </summary>
+        /// <param name="script">The script object to import into</param>
         /// <param name="obj">The object.</param>
         /// <param name="flags">The import flags.</param>
         /// <param name="filter">A filter applied on each member</param>
@@ -292,6 +297,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Imports the delegate to the specified member.
         /// </summary>
+        /// <param name="script">The script object to import into</param>
         /// <param name="member">The member.</param>
         /// <param name="function">The function delegate.</param>
         /// <exception cref="System.ArgumentNullException">if member or function are null</exception>
