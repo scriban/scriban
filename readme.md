@@ -70,9 +70,9 @@ You can install the [Scriban Extension for Visual Studio Code](https://marketpla
 
 ## Documentation
 
-* The [Language](doc/language.md) for a description of the script language syntax and all the built-in functions.
-* The [Built-in functions](builtins.md) for the list of supported built-in functions.
-* The [Runtime](doc/runtime.md) for the a description of the runtime API and how to use it from a .NET application.
+* See the [Language](doc/language.md) document for a description of the language syntax.
+* See the [Built-in functions](doc/builtins.md) document for the list of the built-in functions.
+* See the [Runtime](doc/runtime.md) document for a description of the .NET runtime API to compile and run templates.
 
 ## Binaries
 
