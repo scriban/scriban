@@ -51,7 +51,11 @@ This document describes the various built-in functions available in scriban.
 
             writer.WriteLine(visitor.Toc);
 
-            writer.Write(visitor.Body);
+            foreach (var classWriter in visitor.ClassWriters.OrderBy(c => c.Key).Select(c => c.Value))
+            {
+                writer.Write(classWriter.Head);
+                writer.Write(classWriter.Body);
+            }
 
             writer.WriteLine();
             writer.WriteLine("> Note: This document was automatically generated from the sourcecode using `Scriban.DocGen` program");
@@ -63,21 +67,34 @@ This document describes the various built-in functions available in scriban.
         public class MarkdownVisitor : Visitor
         {
             private readonly Dictionary<string, string> _builtinClassNames;
-            private readonly HashSet<string> _classVisited;
-            private readonly StringWriter _writerBody;
+            private readonly Dictionary<string, ClassWriter> _classWriters;
             private readonly StringWriter _writerToc;
 
-            private TextWriter _writer;
+            private StringWriter _writer;
             private StringWriter _writerParameters;
             private StringWriter _writerReturns;
             private StringWriter _writerSummary;
             private StringWriter _writerRemarks;
 
+
+            public class ClassWriter
+            {
+                public ClassWriter()
+                {
+                    Head = new StringWriter();
+                    Body = new StringWriter();
+                }
+
+                public readonly StringWriter Head;
+
+                public readonly StringWriter Body;
+            }
+
+
             public MarkdownVisitor(Dictionary<string, string> builtinClassNames)
             {
-                _classVisited = new HashSet<string>();
+                _classWriters = new Dictionary<string, ClassWriter>();
                 _writerToc = new StringWriter();
-                _writerBody = new StringWriter();
                 _writerParameters = new StringWriter();
                 _writerReturns = new StringWriter();
                 _writerSummary = new StringWriter();
@@ -87,8 +104,7 @@ This document describes the various built-in functions available in scriban.
 
             public StringWriter Toc => _writerToc;
 
-            public StringWriter Body => _writerBody;
-
+            public Dictionary<string, ClassWriter> ClassWriters => _classWriters;
 
             private bool IsBuiltinType(Type type, out string shortName)
             {
@@ -102,11 +118,14 @@ This document describes the various built-in functions available in scriban.
                 var methodInfo = member.Info as MethodInfo;
                 string shortName;
 
-                _writer = _writerBody;
-
                 //                if (type != null && )
                 if (type != null && IsBuiltinType(type, out shortName))
                 {
+                    var classWriter = new ClassWriter();
+                    _classWriters[shortName] = classWriter;
+
+                    _writer = classWriter.Head;
+
                     _writer.WriteLine("[:top:](#builtins)");
                     _writer.WriteLine();
                     _writer.WriteLine($"## `{shortName}` functions");
@@ -114,8 +133,9 @@ This document describes the various built-in functions available in scriban.
 
                     base.VisitMember(member);
 
-                    _writer.WriteLine(_writerSummary);
+                    _writer = classWriter.Head;
 
+                    _writer.WriteLine(_writerSummary);
                     _writer.WriteLine();
 
                     // Write the toc
@@ -125,12 +145,15 @@ This document describes the various built-in functions available in scriban.
                 {
                     var methodShortName = StandardMemberRenamer.Default(methodInfo.Name);
 
+                    var classWriter = _classWriters[shortName];
+
+                    // Write the toc
+                    classWriter.Head.WriteLine($"- [`{shortName}.{methodShortName}`](#{shortName}{methodShortName})");
+                    
+                    _writer = classWriter.Body;
                     _writer.WriteLine();
                     _writer.WriteLine("[:top:](#builtins)");
                     _writer.WriteLine($"### `{shortName}.{methodShortName}`");
-                    // Write the toc
-                    _writerToc.WriteLine($"  - [`{shortName}.{methodShortName}`](#{shortName}{methodShortName})");
-
                     _writer.WriteLine();
                     _writer.WriteLine("```");
                     _writer.Write($"{shortName}.{methodShortName}");
@@ -153,6 +176,8 @@ This document describes the various built-in functions available in scriban.
                     _writer.WriteLine();
 
                     base.VisitMember(member);
+
+                    _writer = classWriter.Body;
 
                     // Write parameters after the signature
                     _writer.WriteLine("#### Description");
@@ -181,14 +206,12 @@ This document describes the various built-in functions available in scriban.
             {
                 _writer = _writerSummary;
                 base.VisitSummary(summary);
-                _writer = _writerBody;
             }
 
             public override void VisitRemarks(Remarks remarks)
             {
                 _writer = _writerRemarks;
                 base.VisitRemarks(remarks);
-                _writer = _writerBody;
             }
 
             public override void VisitExample(Example example)
@@ -217,14 +240,12 @@ This document describes the various built-in functions available in scriban.
                 _writer.Write($"- `{param.Name}`: ");
                 base.VisitParam(param);
                 _writer.WriteLine();
-                _writer = _writerBody;
             }
 
             public override void VisitReturns(Returns returns)
             {
                 _writer = _writerReturns;
                 base.VisitReturns(returns);
-                _writer = _writerBody;
             }
 
             public override void VisitCode(Code code)
@@ -240,7 +261,6 @@ This document describes the various built-in functions available in scriban.
                 content = content.Replace("```html", "> **output**\r\n```html");
 
                 _writer.Write(content);
-                //base.VisitText(text);
             }
 
             public override void VisitPara(Para para)
@@ -261,15 +281,6 @@ This document describes the various built-in functions available in scriban.
                 //    var cref = NormalizeLink(seeAlso.Cref);
                 //    Console.WriteLine("[{0}]({1})", cref.Substring(2), cref);
                 //}
-            }
-
-            private string NormalizeLink(string cref)
-            {
-                if (cref == null)
-                {
-                    return string.Empty;
-                }
-                return cref.Replace(":", "-").Replace("(", "-").Replace(")", "");
             }
         }
     }

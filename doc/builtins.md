@@ -4,102 +4,13 @@ This document describes the various built-in functions available in scriban.
 
 
 - [`array` functions](#array-functions)
-  - [`array.add`](#arrayadd)
-  - [`array.add_range`](#arrayadd_range)
-  - [`array.compact`](#arraycompact)
-  - [`array.concat`](#arrayconcat)
-  - [`array.cycle`](#arraycycle)
-  - [`array.first`](#arrayfirst)
-  - [`array.insert_at`](#arrayinsert_at)
-  - [`array.join`](#arrayjoin)
-  - [`array.last`](#arraylast)
-  - [`array.limit`](#arraylimit)
-  - [`array.map`](#arraymap)
-  - [`array.offset`](#arrayoffset)
-  - [`array.remove_at`](#arrayremove_at)
-  - [`array.reverse`](#arrayreverse)
-  - [`array.size`](#arraysize)
-  - [`array.sort`](#arraysort)
-  - [`array.uniq`](#arrayuniq)
 - [`date` functions](#date-functions)
-  - [`date.add_days`](#dateadd_days)
-  - [`date.add_months`](#dateadd_months)
-  - [`date.add_years`](#dateadd_years)
-  - [`date.add_hours`](#dateadd_hours)
-  - [`date.add_minutes`](#dateadd_minutes)
-  - [`date.add_seconds`](#dateadd_seconds)
-  - [`date.add_milliseconds`](#dateadd_milliseconds)
-  - [`date.parse`](#dateparse)
-  - [`date.to_string`](#dateto_string)
 - [`html` functions](#html-functions)
-  - [`html.strip`](#htmlstrip)
-  - [`html.escape`](#htmlescape)
-  - [`html.url_encode`](#htmlurl_encode)
-  - [`html.url_escape`](#htmlurl_escape)
 - [`math` functions](#math-functions)
-  - [`math.abs`](#mathabs)
-  - [`math.ceil`](#mathceil)
-  - [`math.divided_by`](#mathdivided_by)
-  - [`math.floor`](#mathfloor)
-  - [`math.format`](#mathformat)
-  - [`math.is_number`](#mathis_number)
-  - [`math.minus`](#mathminus)
-  - [`math.modulo`](#mathmodulo)
-  - [`math.plus`](#mathplus)
-  - [`math.round`](#mathround)
-  - [`math.times`](#mathtimes)
 - [`object` functions](#object-functions)
-  - [`object.default`](#objectdefault)
-  - [`object.has_key`](#objecthas_key)
-  - [`object.has_value`](#objecthas_value)
-  - [`object.keys`](#objectkeys)
-  - [`object.size`](#objectsize)
-  - [`object.typeof`](#objecttypeof)
-  - [`object.values`](#objectvalues)
 - [`regex` functions](#regex-functions)
-  - [`regex.escape`](#regexescape)
-  - [`regex.match`](#regexmatch)
-  - [`regex.replace`](#regexreplace)
-  - [`regex.split`](#regexsplit)
-  - [`regex.unescape`](#regexunescape)
 - [`string` functions](#string-functions)
-  - [`string.append`](#stringappend)
-  - [`string.capitalize`](#stringcapitalize)
-  - [`string.capitalizewords`](#stringcapitalizewords)
-  - [`string.contains`](#stringcontains)
-  - [`string.downcase`](#stringdowncase)
-  - [`string.ends_with`](#stringends_with)
-  - [`string.handleize`](#stringhandleize)
-  - [`string.lstrip`](#stringlstrip)
-  - [`string.pluralize`](#stringpluralize)
-  - [`string.prepend`](#stringprepend)
-  - [`string.remove`](#stringremove)
-  - [`string.remove_first`](#stringremove_first)
-  - [`string.replace`](#stringreplace)
-  - [`string.replace_first`](#stringreplace_first)
-  - [`string.rstrip`](#stringrstrip)
-  - [`string.size`](#stringsize)
-  - [`string.slice`](#stringslice)
-  - [`string.slice1`](#stringslice1)
-  - [`string.split`](#stringsplit)
-  - [`string.starts_with`](#stringstarts_with)
-  - [`string.strip`](#stringstrip)
-  - [`string.strip_newlines`](#stringstrip_newlines)
-  - [`string.truncate`](#stringtruncate)
-  - [`string.truncatewords`](#stringtruncatewords)
-  - [`string.upcase`](#stringupcase)
-  - [`string.md5`](#stringmd5)
-  - [`string.sha1`](#stringsha1)
-  - [`string.sha256`](#stringsha256)
-  - [`string.hmac_sha1`](#stringhmac_sha1)
-  - [`string.hmac_sha256`](#stringhmac_sha256)
 - [`timespan` functions](#timespan-functions)
-  - [`timespan.from_days`](#timespanfrom_days)
-  - [`timespan.from_hours`](#timespanfrom_hours)
-  - [`timespan.from_minutes`](#timespanfrom_minutes)
-  - [`timespan.from_seconds`](#timespanfrom_seconds)
-  - [`timespan.from_milliseconds`](#timespanfrom_milliseconds)
-  - [`timespan.parse`](#timespanparse)
 
 [:top:](#builtins)
 
@@ -107,6 +18,23 @@ This document describes the various built-in functions available in scriban.
 
 Array functions available through the object 'array' in scriban.
 
+- [`array.add`](#arrayadd)
+- [`array.add_range`](#arrayadd_range)
+- [`array.compact`](#arraycompact)
+- [`array.concat`](#arrayconcat)
+- [`array.cycle`](#arraycycle)
+- [`array.first`](#arrayfirst)
+- [`array.insert_at`](#arrayinsert_at)
+- [`array.join`](#arrayjoin)
+- [`array.last`](#arraylast)
+- [`array.limit`](#arraylimit)
+- [`array.map`](#arraymap)
+- [`array.offset`](#arrayoffset)
+- [`array.remove_at`](#arrayremove_at)
+- [`array.reverse`](#arrayreverse)
+- [`array.size`](#arraysize)
+- [`array.sort`](#arraysort)
+- [`array.uniq`](#arrayuniq)
 
 [:top:](#builtins)
 ### `array.add`
@@ -687,6 +615,15 @@ Other comparison operators(`==`, `!=`, `<=`, `>=`, `<`, `>`) are also working wi
 
 A `timespan` and also the added to a `datetime` object.
 
+- [`date.add_days`](#dateadd_days)
+- [`date.add_months`](#dateadd_months)
+- [`date.add_years`](#dateadd_years)
+- [`date.add_hours`](#dateadd_hours)
+- [`date.add_minutes`](#dateadd_minutes)
+- [`date.add_seconds`](#dateadd_seconds)
+- [`date.add_milliseconds`](#dateadd_milliseconds)
+- [`date.parse`](#dateparse)
+- [`date.to_string`](#dateto_string)
 
 [:top:](#builtins)
 ### `date.add_days`
@@ -983,6 +920,10 @@ A  that represents this instance.
 
 Html functions available through the builtin object 'html'.
 
+- [`html.strip`](#htmlstrip)
+- [`html.escape`](#htmlescape)
+- [`html.url_encode`](#htmlurl_encode)
+- [`html.url_escape`](#htmlurl_escape)
 
 [:top:](#builtins)
 ### `html.strip`
@@ -1109,6 +1050,17 @@ The input string url escaped
 
 Math functions available through the object 'math' in scriban.
 
+- [`math.abs`](#mathabs)
+- [`math.ceil`](#mathceil)
+- [`math.divided_by`](#mathdivided_by)
+- [`math.floor`](#mathfloor)
+- [`math.format`](#mathformat)
+- [`math.is_number`](#mathis_number)
+- [`math.minus`](#mathminus)
+- [`math.modulo`](#mathmodulo)
+- [`math.plus`](#mathplus)
+- [`math.round`](#mathround)
+- [`math.times`](#mathtimes)
 
 [:top:](#builtins)
 ### `math.abs`
@@ -1467,6 +1419,13 @@ The results of the multiplication: `value` * `with`
 
 Object functions available through the builtin object 'object'.
 
+- [`object.default`](#objectdefault)
+- [`object.has_key`](#objecthas_key)
+- [`object.has_value`](#objecthas_value)
+- [`object.keys`](#objectkeys)
+- [`object.size`](#objectsize)
+- [`object.typeof`](#objecttypeof)
+- [`object.values`](#objectvalues)
 
 [:top:](#builtins)
 ### `object.default`
@@ -1705,6 +1664,11 @@ A list with the member values of the input object
 
 Functions exposed through `regex` builtin object.
 
+- [`regex.escape`](#regexescape)
+- [`regex.match`](#regexmatch)
+- [`regex.replace`](#regexreplace)
+- [`regex.split`](#regexsplit)
+- [`regex.unescape`](#regexunescape)
 
 [:top:](#builtins)
 ### `regex.escape`
@@ -1883,6 +1847,36 @@ A string of characters with any escaped characters converted to their unescaped 
 
 String functions available through the builtin object 'string`.
 
+- [`string.append`](#stringappend)
+- [`string.capitalize`](#stringcapitalize)
+- [`string.capitalizewords`](#stringcapitalizewords)
+- [`string.contains`](#stringcontains)
+- [`string.downcase`](#stringdowncase)
+- [`string.ends_with`](#stringends_with)
+- [`string.handleize`](#stringhandleize)
+- [`string.lstrip`](#stringlstrip)
+- [`string.pluralize`](#stringpluralize)
+- [`string.prepend`](#stringprepend)
+- [`string.remove`](#stringremove)
+- [`string.remove_first`](#stringremove_first)
+- [`string.replace`](#stringreplace)
+- [`string.replace_first`](#stringreplace_first)
+- [`string.rstrip`](#stringrstrip)
+- [`string.size`](#stringsize)
+- [`string.slice`](#stringslice)
+- [`string.slice1`](#stringslice1)
+- [`string.split`](#stringsplit)
+- [`string.starts_with`](#stringstarts_with)
+- [`string.strip`](#stringstrip)
+- [`string.strip_newlines`](#stringstrip_newlines)
+- [`string.truncate`](#stringtruncate)
+- [`string.truncatewords`](#stringtruncatewords)
+- [`string.upcase`](#stringupcase)
+- [`string.md5`](#stringmd5)
+- [`string.sha1`](#stringsha1)
+- [`string.sha256`](#stringsha256)
+- [`string.hmac_sha1`](#stringhmac_sha1)
+- [`string.hmac_sha256`](#stringhmac_sha256)
 
 [:top:](#builtins)
 ### `string.append`
@@ -2838,6 +2832,12 @@ A timespan object represents a time interval.
 | `.total_seconds` | Gets the total number of seconds  in fractional part
 | `.total_milliseconds` | Gets the total number of milliseconds  in fractional part
 
+- [`timespan.from_days`](#timespanfrom_days)
+- [`timespan.from_hours`](#timespanfrom_hours)
+- [`timespan.from_minutes`](#timespanfrom_minutes)
+- [`timespan.from_seconds`](#timespanfrom_seconds)
+- [`timespan.from_milliseconds`](#timespanfrom_milliseconds)
+- [`timespan.parse`](#timespanparse)
 
 [:top:](#builtins)
 ### `timespan.from_days`
