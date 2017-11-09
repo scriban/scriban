@@ -3,3 +3,8 @@ x.y              # x.y will work
 x.z              # x.z should print 10
 ===
 10
+
+a = {}
+b = [1, 2]
+a.empty?: true
+b.empty?: false

@@ -7,3 +7,12 @@ x = { z: 10 }    # x is initialized
 x.y              # x.y will work
 x.z              # x.z should print 10
 }}
+
+a = {}
+b = [1, 2]
+a.empty?: {{
+    a = {}
+    b = [1, 2]
+    a.empty?
+}}
+b.empty?: {{b.empty?}}

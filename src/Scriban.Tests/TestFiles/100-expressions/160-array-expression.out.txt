@@ -25,3 +25,16 @@ x5 = []
 x5 << 1 + 2
 ===
 [3]
+
+Check Array Size
+x6 = [1, 2, 3]
+x6.size
+===
+3
+
+Array Properties
+x7 = [1, 2, 3]
+x7.a = "yes"
+x7.a + x7[0]
+===
+yes1

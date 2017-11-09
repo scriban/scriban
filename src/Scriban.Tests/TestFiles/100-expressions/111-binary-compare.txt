@@ -38,3 +38,12 @@ true && true && false = {{true && true && false}}
 true && true && false || true = {{true && true && false || true}}
 true && true && false || true && true = {{true && true && false || true && true}}
 true && true && false || true && true && false = {{true && true && false || true && true && false}}
+
+a = {}
+b = [1, 2]
+a == empty: {{
+    a = {}
+    b = [1, 2]
+    a == empty
+}}
+b == empty: {{b == empty}}

@@ -38,3 +38,8 @@ true && true && false = false
 true && true && false || true = true
 true && true && false || true && true = true
 true && true && false || true && true && false = false
+
+a = {}
+b = [1, 2]
+a == empty: true
+b == empty: false
