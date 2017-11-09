@@ -2,7 +2,7 @@
 
 <img align="right" width="160px" height="160px" src="img/scriban.png">
 
-Scriban is a fast, powerful and lightweight text templating language and engine for .NET, with a compatibility mode for parsing `liquid` templates.
+Scriban is a fast, powerful, safe and lightweight text templating language and engine for .NET, with a compatibility mode for parsing `liquid` templates.
 
 ```C#
 // Parse a scriban template
