@@ -140,7 +140,7 @@ namespace Scriban.Syntax
 
         public override string ToString()
         {
-            return Value?.ToString() ?? string.Empty;
+            return Value?.ToString() ?? "null";
         }
 
         private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, string input)
