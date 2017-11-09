@@ -504,6 +504,38 @@ You can also manipulate arrays with the [`array` builtin object](#array-builtin)
 > }}    
 > ```
 
+### 6.1 Array with properties
+
+An array can also contains attached properties:
+
+> **input**
+```scriban-html
+{{
+a = [5, 6, 7]
+a.x = "yes"
+a.x + a[0]
+}}
+```
+> **output**
+```html
+yes5
+```
+
+### 6.2 The special `size` property
+
+Arrays have a `size` property that can be used to query the number of elements in the array:
+
+> **input**
+```scriban-html
+{{
+a = [1, 2, 3]
+a.size
+}}
+```
+> **output**
+```html
+3
+```
 
 [:top:](#language)
 ## 7 Functions
