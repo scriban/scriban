@@ -12,6 +12,11 @@ namespace Scriban.Syntax
     {
         private int _columnsCount;
 
+        public ScriptTableRowStatement()
+        {
+            _columnsCount = 1;
+        }
+
         protected override void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)
         {
             _columnsCount = 1;
@@ -29,7 +34,7 @@ namespace Scriban.Syntax
 
         protected override void BeforeLoop(TemplateContext context)
         {
-            context.Write("<tr class=\"row1\">").WriteLine();
+            context.Write("<tr class=\"row1\">");
         }
 
         protected override void AfterLoop(TemplateContext context)
@@ -47,7 +52,7 @@ namespace Scriban.Syntax
 
             if (columnIndex == 0 && localIndex > 0)
             {
-                output.Write("</tr>").Write(Environment.NewLine);
+                output.Write("</tr>").WriteLine();
                 output.Write("<tr class=\"row").Write((localIndex / _columnsCount) + 1).Write("\">");
             }
             output.Write("<td class=\"col").Write(columnIndex + 1).Write("\">");

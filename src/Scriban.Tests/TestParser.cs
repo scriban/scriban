@@ -1,4 +1,4 @@
-#define EnableTokensOutput
+// #define EnableTokensOutput
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
@@ -520,6 +520,9 @@ end
                                 {
                                     TemplateLoader = new CustomTemplateLoader()
                                 };
+
+                            // We use a custom output to make sure that all output is using the "\n"
+                            context.PushOutput(new TextWriterOutput(new StringWriter() { NewLine = "\n" })); 
 
                             var contextObj = new ScriptObject();
                             contextObj.Import(model);
