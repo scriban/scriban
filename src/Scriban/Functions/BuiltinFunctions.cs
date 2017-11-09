@@ -24,16 +24,16 @@ namespace Scriban.Functions
         {
             public DefaultBuiltins() : base(10, false)
             {
-                SetValue("include", new IncludeFunction(), true);
-                SetValue("empty", EmptyScriptObject.Default, true);
-                SetValue("object", new ObjectFunctions(), true);
-                SetValue(DateTimeFunctions.DateVariable.Name, new DateTimeFunctions(), true);
-                SetValue("timespan", new TimeSpanFunctions(), true);
-                SetValue("html", new HtmlFunctions(), true);
                 SetValue("array", new ArrayFunctions(), true);
-                SetValue("string", new StringFunctions(), true);
+                SetValue("empty", EmptyScriptObject.Default, true);
+                SetValue("include", new IncludeFunction(), true);
+                SetValue(DateTimeFunctions.DateVariable.Name, new DateTimeFunctions(), true);
+                SetValue("html", new HtmlFunctions(), true);
                 SetValue("math", new MathFunctions(), true);
+                SetValue("object", new ObjectFunctions(), true);
                 SetValue("regex", new RegexFunctions(), true);
+                SetValue("string", new StringFunctions(), true);
+                SetValue("timespan", new TimeSpanFunctions(), true);
             }
         }
     }
