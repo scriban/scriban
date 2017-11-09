@@ -189,7 +189,7 @@ namespace Scriban.Functions
                 if (char.IsLetterOrDigit(c))
                 {
                     lastChar = c;
-                    builder.Append(c);
+                    builder.Append(char.ToLowerInvariant(c));
                 }
                 else if (lastChar != '-')
                 {
@@ -213,8 +213,8 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ '   too many spaces           ' | string.lstrip  }}
         /// ```
+        /// > Highlight to see the empty spaces to the right of the string
         /// ```html
-        /// &lt;!-- Highlight to see the empty spaces to the right of the string --&gt;
         /// too many spaces           
         /// ```
         /// </remarks>
@@ -232,10 +232,10 @@ namespace Scriban.Functions
         /// <returns>The singular or plural string based on number</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ cart.item_count }} {{cart.item_count | string.pluralize 'item' 'items' }}
+        /// {{ products.size }} {{products.size | string.pluralize 'product' 'products' }}
         /// ```
         /// ```html
-        /// 4 items
+        /// 7 products
         /// ```
         /// </remarks>
         public static string Pluralize(int number, string singular, string plural)
@@ -271,6 +271,7 @@ namespace Scriban.Functions
         /// <remarks>
         /// ```scriban-html
         /// {{ "Hello, world. Goodbye, world." | string.remove "world" }}
+        /// ```
         /// ```html
         /// Hello, . Goodbye, .
         /// ```
@@ -293,6 +294,7 @@ namespace Scriban.Functions
         /// <remarks>
         /// ```scriban-html
         /// {{ "Hello, world. Goodbye, world." | string.remove_first "world" }}
+        /// ```
         /// ```html
         /// Hello, . Goodbye, world.
         /// ```
@@ -312,6 +314,7 @@ namespace Scriban.Functions
         /// <remarks>
         /// ```scriban-html
         /// {{ "Hello, world. Goodbye, world." | string.replace "world" "buddy" }}
+        /// ```
         /// ```html
         /// Hello, buddy. Goodbye, buddy.
         /// ```
@@ -339,6 +342,7 @@ namespace Scriban.Functions
         /// <remarks>
         /// ```scriban-html
         /// {{ "Hello, world. Goodbye, world." | string.replace_first "world" "buddy" }}
+        /// ```
         /// ```html
         /// Hello, buddy. Goodbye, world.
         /// ```
@@ -379,8 +383,8 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ '   too many spaces           ' | string.rstrip  }}
         /// ```
+        /// > Highlight to see the empty spaces to the right of the string
         /// ```html
-        /// &lt;!-- Highlight to see the empty spaces to the right of the string --&gt;
         ///    too many spaces
         /// ```
         /// </remarks>
@@ -521,9 +525,9 @@ namespace Scriban.Functions
         /// <returns>An enumeration of the substrings</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ for word in "Hi, how are you today?" | string.split ' ' 
-        ///   word }}
-        /// {{ endfor }}
+        /// {{ for word in "Hi, how are you today?" | string.split ' ' ~}}
+        /// {{ word }}
+        /// {{ end ~}}
         /// ```
         /// ```html
         /// Hi,
@@ -555,7 +559,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "This is easy" | string.starts_with "This" }}
         /// ```
-        /// ```
+        /// ```html
         /// true
         /// ```
         /// </remarks>
@@ -578,8 +582,8 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ '   too many spaces           ' | string.strip  }}
         /// ```
+        /// > Highlight to see the empty spaces to the right of the string
         /// ```html
-        /// &lt;!-- Highlight to see the empty spaces to the right of the string --&gt;
         /// too many spaces
         /// ```
         /// </remarks>
@@ -595,11 +599,10 @@ namespace Scriban.Functions
         /// <returns>The input string without any breaks/newlines characters</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "This is a string.
-        /// With another string" | string.strip_newlines  }}
+        /// {{ "This is a string.\r\n With \nanother \rstring" | string.strip_newlines  }}
         /// ```
         /// ```html
-        /// This is a string.With another string
+        /// This is a string. With another string
         /// ```
         /// </remarks>
         public static string StripNewlines(string text)
@@ -609,7 +612,7 @@ namespace Scriban.Functions
                 return string.Empty;
             }
 
-            return Regex.Replace(text, @"\r?\n", string.Empty);
+            return Regex.Replace(text, @"\r\n|\r|\n", string.Empty);
         }
 
         /// <summary>
@@ -701,7 +704,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.upcase }}
         /// ```
-        /// ```
+        /// ```html
         /// TEST
         /// ```
         /// </remarks>
@@ -720,7 +723,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.md5 }}
         /// ```
-        /// ```
+        /// ```html
         /// 098f6bcd4621d373cade4e832627b4f6
         /// ```
         /// </remarks>
@@ -742,7 +745,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.sha1 }}
         /// ```
-        /// ```
+        /// ```html
         /// a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
         /// ```
         /// </remarks>
@@ -763,7 +766,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.sha256 }}
         /// ```
-        /// ```
+        /// ```html
         /// 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
         /// ```
         /// </remarks>
@@ -785,7 +788,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.hmac_sha1 "secret" }}
         /// ```
-        /// ```
+        /// ```html
         /// 1aa349585ed7ecbd3b9c486a30067e395ca4b356
         /// ```
         /// </remarks>
@@ -807,7 +810,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ "test" | string.hmac_sha256 "secret" }}
         /// ```
-        /// ```
+        /// ```html
         /// 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
         /// ```
         /// </remarks>

@@ -30,8 +30,8 @@ namespace Scriban.Functions
         /// {{ -5| math.abs }}
         /// ```
         /// ```html
-        /// -15.5
-        /// -5
+        /// 15.5
+        /// 5
         /// ```
         /// </remarks>
         public static object Abs(TemplateContext context, SourceSpan span, object value)
@@ -83,8 +83,8 @@ namespace Scriban.Functions
         /// <returns>The smallest integer greater than or equal to the specified number.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 4.6 | math.ceil }} 
-        /// {{ 4.3 | math.ceil }} 
+        /// {{ 4.6 | math.ceil }}
+        /// {{ 4.3 | math.ceil }}
         /// ```
         /// ```html
         /// 5
@@ -107,12 +107,12 @@ namespace Scriban.Functions
         /// <returns>The division of `value` by `divisor`.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 4.6 | math.divided_by 2.0 }} 
-        /// {{ 4.6 | math.divided_by 2 }} 
+        /// {{ 8.4 | math.divided_by 2.0 | math.round 1 }}
+        /// {{ 8.4 | math.divided_by 2 }}
         /// ```
         /// ```html
-        /// 2.3
-        /// 2
+        /// 4.2
+        /// 4
         /// ```
         /// </remarks>
         public static object DividedBy(TemplateContext context, SourceSpan span, double value, object divisor)
@@ -141,8 +141,8 @@ namespace Scriban.Functions
         /// <returns>The largest integer less than or equal to the specified number.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 4.6 | math.ceil }} 
-        /// {{ 4.3 | math.ceil }} 
+        /// {{ 4.6 | math.floor }}
+        /// {{ 4.3 | math.floor }}
         /// ```
         /// ```html
         /// 4
@@ -164,7 +164,7 @@ namespace Scriban.Functions
         /// <returns>The largest integer less than or equal to the specified number.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 255 | math.format "X4" }} 
+        /// {{ 255 | math.format "X4" }}
         /// ```
         /// ```html
         /// 00FF
@@ -192,8 +192,8 @@ namespace Scriban.Functions
         /// <returns>**true** if the input value is a number; otherwise false.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 255 | math.is_number }} 
-        /// {{ "yo" | math.is_number }} 
+        /// {{ 255 | math.is_number }}
+        /// {{ "yo" | math.is_number }}
         /// ```
         /// ```html
         /// true
@@ -225,7 +225,7 @@ namespace Scriban.Functions
         /// <returns>The results of the substraction: `value` - `with`</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 255 | math.minus 5}} 
+        /// {{ 255 | math.minus 5}}
         /// ```
         /// ```html
         /// 250
@@ -246,7 +246,7 @@ namespace Scriban.Functions
         /// <returns>The results of the modulo: `value` % `with`</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 11 | math.modulo 10}} 
+        /// {{ 11 | math.modulo 10}}
         /// ```
         /// ```html
         /// 1
@@ -267,7 +267,7 @@ namespace Scriban.Functions
         /// <returns>The results of the addition: `value` + `with`</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 1 | math.plus 2}} 
+        /// {{ 1 | math.plus 2}}
         /// ```
         /// ```html
         /// 3
@@ -286,7 +286,7 @@ namespace Scriban.Functions
         /// <returns>A value rounded to the nearest integer or to the specified number of fractional digits.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 4.6 | math.round }} 
+        /// {{ 4.6 | math.round }}
         /// {{ 4.3 | math.round }}
         /// {{ 4.5612 | math.round 2 }}
         /// ```
@@ -311,7 +311,7 @@ namespace Scriban.Functions
         /// <returns>The results of the multiplication: `value` * `with`</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 2 | math.times 3}} 
+        /// {{ 2 | math.times 3}}
         /// ```
         /// ```html
         /// 6

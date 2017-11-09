@@ -22,10 +22,10 @@ namespace Scriban.Functions
         /// <returns>A string of characters with metacharacters converted to their escaped form.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// "(abc.*)" | regex.escape }}
+        /// {{ "(abc.*)" | regex.escape }}
         /// ```
         /// ```html
-        /// \\(abc\\.\\*\\)
+        /// \(abc\.\*\)
         /// ```
         /// </remarks>
         public static string Escape(string pattern)
@@ -92,7 +92,7 @@ namespace Scriban.Functions
         /// <returns>A new string that is identical to the input string, except that the replacement string takes the place of each matched string. If pattern is not matched in the current instance, the method returns the current instance unchanged.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "abbbbcccd | regex.replace "b+c+" "-Yo-" }}
+        /// {{ "abbbbcccd" | regex.replace "b+c+" "-Yo-" }}
         /// ```
         /// ```html
         /// a-Yo-d
@@ -122,7 +122,7 @@ namespace Scriban.Functions
         /// <returns>A string array.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "a, b   , c,    d" | regex.split `\s*,\s*" }}
+        /// {{ "a, b   , c,    d" | regex.split `\s*,\s*` }}
         /// ```
         /// ```html
         /// [a, b, c, d]
@@ -144,7 +144,7 @@ namespace Scriban.Functions
         /// <returns>A string of characters with any escaped characters converted to their unescaped form.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// "\\(abc\\.\\*\\)" | regex.unescape }}
+        /// {{ "\\(abc\\.\\*\\)" | regex.unescape }}
         /// ```
         /// ```html
         /// (abc.*)

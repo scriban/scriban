@@ -9,6 +9,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Text.RegularExpressions;
 using DotLiquid.Tests.Tags;
 using NUnit.Framework;
 using Scriban.Helpers;
@@ -22,6 +23,7 @@ namespace Scriban.Tests
     public class TestParser
     {
         private const string RelativeBasePath = @"..\..\TestFiles";
+        private const string BuiltinMarkdownDocFile = @"..\..\..\..\doc\builtins.md";
         private const string InputFilePattern = "*.txt";
         private const string OutputEndFileExtension = ".out.txt";
 
@@ -348,6 +350,54 @@ end
             TestFile(inputName);
         }
 
+        [TestCaseSource("ListBuiltinFunctionTests", new object[] { "array" })]
+        public static void Doc_array(string inputName, string input, string output)
+        {
+            AssertTemplate(output, input);
+        }
+
+        [TestCaseSource("ListBuiltinFunctionTests", new object[] { "date" })]
+        public static void Doc_date(string inputName, string input, string output)
+        {
+            AssertTemplate(output, input);
+        }
+
+        [TestCaseSource("ListBuiltinFunctionTests", new object[] { "html" })]
+        public static void Doc_html(string inputName, string input, string output)
+        {
+            AssertTemplate(output, input);
+        }
+
+        [TestCaseSource("ListBuiltinFunctionTests", new object[] { "math" })]
+        public static void Doc_math(string inputName, string input, string output)
+        {
+            AssertTemplate(output, input);
+        }
+
+        [TestCaseSource("ListBuiltinFunctionTests", new object[] { "object" })]
+        public static void Doc_object(string inputName, string input, string output)
+        {
+            AssertTemplate(output, input);
+        }
+
+        [TestCaseSource("ListBuiltinFunctionTests", new object[] { "regex" })]
+        public static void Doc_regex(string inputName, string input, string output)
+        {
+            AssertTemplate(output, input);
+        }
+
+        [TestCaseSource("ListBuiltinFunctionTests", new object[] { "string" })]
+        public static void Doc_string(string inputName, string input, string output)
+        {
+            AssertTemplate(output, input);
+        }
+
+        [TestCaseSource("ListBuiltinFunctionTests", new object[] { "timespan" })]
+        public static void Doc_timespan(string inputName, string input, string output)
+        {
+            AssertTemplate(output, input);
+        }
+
         private static void TestFile(string inputName)
         {
             var isSupportingExactRoundTrip = !NotSupportingExactRoundtrip.Contains(Path.GetFileName(inputName));
@@ -576,6 +626,83 @@ end
                 ex = ex.InnerException;
             }
             return text.ToString();
+        }
+
+        public static IEnumerable ListBuiltinFunctionTests(string functionObject)
+        {
+            var builtinDocFile = Path.GetFullPath(Path.Combine(BaseDirectory, BuiltinMarkdownDocFile));
+            var lines = File.ReadAllLines(builtinDocFile);
+
+            var matchFunctionSection = new Regex($@"^###\s+`({functionObject}\.\w+)`");
+
+            var tests = new List<TestCaseData>();
+
+            string nextFunctionName = null;
+            int processState = 0;
+            // states:
+            // - 0 function section or wait for ```scriban-html (input)
+            // - 2 parse input (wait for ```)
+            // - 3 wait for ```html (output)
+            // - 4 parse input (wait for ```)
+            var input = new StringBuilder();
+            var output = new StringBuilder();
+            foreach (var line in lines)
+            {
+                // Match first:
+                //### `array.add_range`
+                switch (processState)
+                {
+                    case 0:
+                        var match = matchFunctionSection.Match(line);
+                        if (match.Success)
+                        {
+                            nextFunctionName = match.Groups[1].Value;
+                        }
+
+                        // We have reached another object section, we can exit
+                        if (line.StartsWith("## ") && nextFunctionName != null)
+                        {
+                            return tests;
+                        }
+
+                        if (nextFunctionName != null && line.StartsWith("```scriban-html"))
+                        {
+                            processState = 1;
+                            input = new StringBuilder();
+                            output = new StringBuilder();
+                        }
+                        break;
+                    case 1:
+                        if (line.Equals("```"))
+                        {
+                            processState = 2;
+                        }
+                        else
+                        {
+                            input.AppendLine(line);
+                        }
+                        break;
+                    case 2:
+                        if (line.StartsWith("```html"))
+                        {
+                            processState = 3;
+                        }
+                        break;
+                    case 3:
+                        if (line.Equals("```"))
+                        {
+                            tests.Add(new TestCaseData(nextFunctionName, input.ToString(), output.ToString()));
+                            processState = 0;
+                        }
+                        else
+                        {
+                            output.AppendLine(line);
+                        }
+                        break;
+                }
+            }
+
+            return tests;
         }
 
         public static IEnumerable ListTestFiles(string folder)

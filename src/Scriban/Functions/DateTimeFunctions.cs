@@ -114,11 +114,11 @@ namespace Scriban.Functions
         /// <param name="days">The days.</param>
         /// <returns>A new date</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ date.parse '2016/01/05' | date.add_days 1 }}
         /// ```
         /// ```html
-        /// 2017
+        /// 06 Jan 2016
         /// ```
         /// </remarks>
         public static DateTime AddDays(DateTime date, double days)
@@ -133,11 +133,11 @@ namespace Scriban.Functions
         /// <param name="months">The months.</param>
         /// <returns>A new date</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ date.parse '2016/01/05' | date.add_months 1 }}
         /// ```
         /// ```html
-        /// 5 Feb 2016
+        /// 05 Feb 2016
         /// ```
         /// </remarks>
         public static DateTime AddMonths(DateTime date, int months)
@@ -152,11 +152,11 @@ namespace Scriban.Functions
         /// <param name="years">The years.</param>
         /// <returns>A new date</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ date.parse '2016/01/05' | date.add_years 1 }}
         /// ```
         /// ```html
-        /// 5 Jan 2017
+        /// 05 Jan 2017
         /// ```
         /// </remarks>
         public static DateTime AddYears(DateTime date, int years)
@@ -215,11 +215,11 @@ namespace Scriban.Functions
         /// <param name="text">A text representing a date.</param>
         /// <returns>A date object</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ date.parse '2016/01/05' }}
         /// ```
         /// ```html
-        /// 5 Jan 2016
+        /// 05 Jan 2016
         /// ```
         /// </remarks>
         public static DateTime Parse(TemplateContext context, string text)
@@ -291,7 +291,7 @@ namespace Scriban.Functions
         /// {{ date.parse '2016/01/05' | date.to_string `%d %b %Y` }}
         /// ```
         /// ```html
-        /// 5 Jan 2016
+        /// 05 Jan 2016
         /// ```
         /// </summary>
         /// <param name="datetime">The input datetime to format</param>

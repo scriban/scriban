@@ -30,7 +30,7 @@ namespace Scriban.Functions
         /// </summary>
         /// <returns>A zero timespan object</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ (timespan.zero + timespan.from_days 5).days }}
         /// ```
         /// ```html
@@ -45,7 +45,7 @@ namespace Scriban.Functions
         /// <param name="days">The days.</param>
         /// <returns>A timespan object</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ (timespan.from_days 5).days }}
         /// ```
         /// ```html
@@ -63,7 +63,7 @@ namespace Scriban.Functions
         /// <param name="hours">The hours.</param>
         /// <returns>A timespan object</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ (timespan.from_hours 5).hours }}
         /// ```
         /// ```html
@@ -81,7 +81,7 @@ namespace Scriban.Functions
         /// <param name="minutes">The minutes.</param>
         /// <returns>A timespan object</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ (timespan.from_minutes 5).minutes }}
         /// ```
         /// ```html
@@ -99,7 +99,7 @@ namespace Scriban.Functions
         /// <param name="seconds">The seconds.</param>
         /// <returns>A timespan object</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ (timespan.from_seconds 5).seconds }}
         /// ```
         /// ```html
@@ -117,7 +117,7 @@ namespace Scriban.Functions
         /// <param name="millis">The milliseconds.</param>
         /// <returns>A timespan object</returns>
         /// <remarks>
-        /// ```
+        /// ```scriban-html
         /// {{ (timespan.from_milliseconds 5).milliseconds }}
         /// ```
         /// ```html

@@ -106,6 +106,8 @@ namespace Scriban.Functions
         /// - If the input is a list, it will return the number of elements
         /// - If the input is an object, it will return the number of members
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
         /// <param name="value">The input object.</param>
         /// <returns>The size of the input object.</returns>
         /// <remarks>
@@ -113,7 +115,7 @@ namespace Scriban.Functions
         /// {{ [1, 2, 3] | object.size }}
         /// ```
         /// ```html
-        /// [title, type]
+        /// 3
         /// ```
         /// </remarks>
         public static int Size(TemplateContext context, SourceSpan span, object value)

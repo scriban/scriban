@@ -140,10 +140,10 @@ namespace Scriban.Functions
         /// <returns>Returns a list with null value removed</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ cycle ['one', 'two', 'three'] }}
-        /// {{ cycle ['one', 'two', 'three'] }}
-        /// {{ cycle ['one', 'two', 'three'] }}
-        /// {{ cycle ['one', 'two', 'three'] }}
+        /// {{ array.cycle ['one', 'two', 'three'] }}
+        /// {{ array.cycle ['one', 'two', 'three'] }}
+        /// {{ array.cycle ['one', 'two', 'three'] }}
+        /// {{ array.cycle ['one', 'two', 'three'] }}
         /// ```
         /// ```html
         /// one
@@ -404,7 +404,7 @@ namespace Scriban.Functions
         /// <param name="index">The index of a list to return elements</param>
         /// <remarks>
         /// ```scriban-html
-        /// {{ [4, 5, 6, 7, 8] | array.limit 2 }}
+        /// {{ [4, 5, 6, 7, 8] | array.offset 2 }}
         /// ```
         /// ```html
         /// [6, 7, 8]
@@ -445,9 +445,9 @@ namespace Scriban.Functions
         /// ```html
         /// [4, 5, 7, 8]
         /// ```
-        /// If the `index` is negative, removes at the end of the list:
+        /// If the `index` is negative, removes at the end of the list (notice that we need to put -1 in parenthesis to avoid confusing the parser with a binary `-` operation):
         /// ```scriban-html
-        /// {{ [4, 5, 6, 7, 8] | array.remove_at -1 }}
+        /// {{ [4, 5, 6, 7, 8] | array.remove_at (-1) }}
         /// ```
         /// ```html
         /// [4, 5, 6, 7]
