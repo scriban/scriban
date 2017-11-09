@@ -105,6 +105,8 @@ This document describes the various built-in functions available in scriban.
 
 ## `array` functions
 
+Array functions available through the object 'array' in scriban.
+
 
 [:top:](#builtins)
 ### `array.add`
@@ -663,6 +665,28 @@ A list of unique elements of the input `list`.
 
 ## `date` functions
 
+A datetime object represents an instant in time, expressed as a date and time of day. 
+
+| Name             | Description
+|--------------    |-----------------
+| `.year`          | Gets the year of a date object 
+| `.month`         | Gets the month of a date object
+| `.day`           | Gets the day in the month of a date object
+| `.day_of_year`   | Gets the day within the year
+| `.hour`          | Gets the hour of the date object
+| `.minute`        | Gets the minute of the date object
+| `.second`        | Gets the second of the date object
+| `.millisecond`   | Gets the millisecond of the date object
+
+[:top:](#builtins)
+#### Binary operations
+
+The substract operation `date1 - date2`: Substract `date2` from `date1` and return a timespan internal object (see timespan object below).
+
+Other comparison operators(`==`, `!=`, `<=`, `>=`, `<`, `>`) are also working with date objects.
+
+A `timespan` and also the added to a `datetime` object.
+
 
 [:top:](#builtins)
 ### `date.add_days`
@@ -957,6 +981,8 @@ A  that represents this instance.
 
 ## `html` functions
 
+Html functions available through the builtin object 'html'.
+
 
 [:top:](#builtins)
 ### `html.strip`
@@ -1080,6 +1106,8 @@ The input string url escaped
 [:top:](#builtins)
 
 ## `math` functions
+
+Math functions available through the object 'math' in scriban.
 
 
 [:top:](#builtins)
@@ -1437,6 +1465,8 @@ The results of the multiplication: `value` * `with`
 
 ## `object` functions
 
+Object functions available through the builtin object 'object'.
+
 
 [:top:](#builtins)
 ### `object.default`
@@ -1673,6 +1703,8 @@ A list with the member values of the input object
 
 ## `regex` functions
 
+Functions exposed through `regex` builtin object.
+
 
 [:top:](#builtins)
 ### `regex.escape`
@@ -1848,6 +1880,8 @@ A string of characters with any escaped characters converted to their unescaped 
 [:top:](#builtins)
 
 ## `string` functions
+
+String functions available through the builtin object 'string`.
 
 
 [:top:](#builtins)
@@ -2788,6 +2822,21 @@ The `SHA-256` hash of the input string using a hash message authentication code 
 [:top:](#builtins)
 
 ## `timespan` functions
+
+A timespan object represents a time interval.
+
+| Name             | Description
+|--------------    |-----------------
+| `.days`          | Gets the number of days of this interval 
+| `.hours`         | Gets the number of hours of this interval
+| `.minutes`       | Gets the number of minutes of this interval
+| `.seconds`       | Gets the number of seconds of this interval
+| `.milliseconds`  | Gets the number of milliseconds of this interval 
+| `.total_days`    | Gets the total number of days in fractional part
+| `.total_hours`   | Gets the total number of hours in fractional part
+| `.total_minutes` | Gets the total number of minutes in fractional part
+| `.total_seconds` | Gets the total number of seconds  in fractional part
+| `.total_milliseconds` | Gets the total number of milliseconds  in fractional part
 
 
 [:top:](#builtins)
