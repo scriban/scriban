@@ -87,15 +87,32 @@ Inside a code block, except for the EOL after each statement, white spaces chara
 
 Also, if a statement is an expression (but not an assignment expression), the result of the expression will be output to the rendering output of the template:
 
-```
+> **input**
+```scriban-html
 {{
   x = "5"   # This assignment will not output anything
   x         # This expression will print 5
   x + 1     # This expression will print 6
 }}
 ```
+> **output**
+```html
+56
+```
+Note that in the previous example, there is no EOL between `5` and `6` because we are inside a code block. 
+You can still use a plain string with an EOL inside a code block `"\n"` or you could use mixed code and text blocks:
 
-The previous code should print the string `56`. There is no EOL between `5` and `6` because we are inside a code block. You can still use a plain string with an EOL inside a code block `"\n"`
+> **input**
+```scriban-html
+{{ x = "5" }}
+{{ x }}
+{{ x + 1 }}
+```
+> **output**
+```html
+5
+6
+```
 
 [:top:](#language)
 ### 1.2 Text block
@@ -115,14 +132,14 @@ ______________          _____________________
 Any code and text block can be escaped to produce a text block by enclosing it with `{%{` and `}%}` 
 
 For example the following escape:
--  `{%{Hello this is {{ name }}}%}`
-   
+> **input**: `{%{Hello this is {{ name }}}%}`   
 > **output**: `Hello this is {{ name }}` 
 
 Any escape block can be also escaped by increasing the number of `%` in the starting and ending block:
-- `{%%{This is an escaped block: }%} here}%%}`
-   
+> **input**: `{%%{This is an escaped block: }%} here}%%}`
 > **output**: `This is an escaped block: }%} here`
+
+This allow effectively to nest escape blocks and still be able to escape them.
 
 Hence a starting escape block `{%%%%{` will required an ending `}%%%%}`
 
@@ -138,33 +155,33 @@ Scriban provides **two modes** for controlling whitespace:
   
   * Strip whitespace on the left:  
     > **input**
-    ``` 
+    ```scriban-html
     This is a <       
     {{- name}}> text
     ``` 
     > **output**
-    ```
+    ```html
     This is a <foo> a text
     ```
     
   * Strip on the right:  
     > **input**
-    ``` 
+    ```scriban-html
     This is <{{ name -}} 
     > a text:       
     ``` 
     > **output**
-    ```
+    ```html
     This is a <foo> a text
     ```
   
   * Strip on both left and right:  
     > **input**
-    ``` 
+    ```scriban-html
     This is <
     {{- name -}} 
     > a text:       
-    ``` 
+    ```html
     > **output**
     ```
     This is a <foo> a text
@@ -209,12 +226,16 @@ Within a code block, scriban supports single line comments `#` and multi-line co
 
 `{{ name   # this is a single line comment }}`
 
+> **input**
 ```
 {{ ## This 
 is a multi
 line
 comment ## }}
 ```
+> **output**: `` (empty)
+
+As you can notice, both single line and multi-line comments can be closed by the presence of a code block exit tag `}}`
 
 [:top:](#language)
 ## 3 Literals
@@ -233,14 +254,16 @@ Scriban supports two types of strings:
   - `\b` backspace
   - `\f` form feed
   - `\uxxxx` where xxxx is a unicode hexa code number `0000` to `ffff` 
+  - `\x00-\xFF` a hexadecimal ranging from `0x00` to `0xFF`
+
 - **verbatim strings** enclosed by backstick quotes `` `...` ``. They are, for example, useful to use with for regex patterns :
   > **input**
-  ``` 
+  ```scriban-html
   {{ "this is a text" | regex.split `\s+` }}
   ``` 
   
   > **output**
-  ``` 
+  ```html 
   [this, is, a, test]
   ``` 
 
@@ -257,10 +280,29 @@ A number in scriban `{{ 100 }}` is similar to a javascript number:
 
 The boolean value `{{ true }}` or `{{ false }}`
 
+> **input**
+```scriban-html
+{{ true }}
+{{ false }}
+```
+> **output**
+```scriban-html
+true
+false
+```
+
 [:top:](#language)
 ### 3.4 null
 
 The null value `{{ null }}` 
+
+When resolving to a string output, the null value will output an empty string:
+
+> **input**
+```scriban-html
+{{ null }}
+```
+> **output**: `` (empty)
 
 [:top:](#language)
 ## 4 Variables
@@ -293,11 +335,11 @@ Thus the following variable access are equivalent:
 ```scriban-html
 {{
 a = 5
-a
+a    # output 5
 this.a = 6
-a
+a    # output 6
 this["a"] = 7
-a
+a    # output 7
 }}
 ```
 > **output**
@@ -320,8 +362,6 @@ b.x
 ```html
 1
 ```
-
-
 
 [:top:](#language)
 ## 5 Objects
@@ -357,11 +397,17 @@ Members of an object can be accessed:
 
 If the object is a "pure" scriban objects (created with a `{...}` or  instantiated by the runtime as a `ScriptObject`), you can also add members to it with a simple assignment:
 
-```
+> **input**
+```scriban-html
 {{
   myobject = {} 
   myobject.member3 = "may be" 
+  myobject.member3
 }}
+``` 
+> **output**
+```html
+may be
 ``` 
 
 [:top:](#language)
@@ -436,15 +482,19 @@ The following declares a function `inc` that uses its first argument to return a
 end}}
 ``` 
 
+All argument are passed to the special variable `$` that will contain the list of direct arguments
+and named arguments.
+
+
+
 This function can then be used:
 
+> **input**
 ```
 {{inc 1}}
 {{5 | inc}}
 ```
-
-will output:
-
+> **output**
 ```
 2
 6
