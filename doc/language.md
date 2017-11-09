@@ -950,6 +950,59 @@ Allows to reverse the iteration on the elements
 
 Like the `if` statement, the `expression` is evaluated to a boolean.
 
+#### `tablerow <variable> in <expression> ... end`
+
+This function generates HTML rows compatible with an HTML table. Must be wrapped in an opening <table> and closing </table> HTML tags.
+
+This statement is mainly for compatibility reason with the liquid `tablerow` tag.
+It has overall the same syntax as a `for` statement (supporting the same parameters).
+
+```
+{{tablerow <variable> in <expression>}} 
+  ... 
+{{end}}
+```
+> **input**
+```scriban-html
+<table>
+  {{~ tablerow $p in products | array.sort "title" -}}
+    {{ $p.title -}}
+  {{ end ~}}
+</table>
+```
+> **output**
+```html
+<table>
+<tr class="row1"><td class="col1">Apple</td></tr>
+<tr class="row2"><td class="col1">Banana</td></tr>
+<tr class="row3"><td class="col1">Computer</td></tr>
+<tr class="row4"><td class="col1">Mobile Phone</td></tr>
+<tr class="row5"><td class="col1">Orange</td></tr>
+<tr class="row6"><td class="col1">Sofa</td></tr>
+<tr class="row7"><td class="col1">Table</td></tr>
+</table>
+```
+
+##### The `cols` parameter
+
+Defines the number of columns to output:
+
+> **input**
+```scriban-html
+<table>
+  {{~ tablerow $p in (products | array.sort "title") limit: 4 cols: 2 -}}
+    {{ $p.title -}}
+  {{ end ~}}
+</table>
+```
+> **output**
+```html
+<table>
+<tr class="row1"><td class="col1">Apple</td><td class="col2">Banana</td></tr>
+<tr class="row2"><td class="col1">Computer</td><td class="col2">Mobile Phone</td></tr>
+</table>
+```
+
 [:top:](#language)
 #### Special loop variables
 
