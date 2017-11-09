@@ -1,0 +1,17 @@
+<table>
+  {{~ tablerow $p in products | array.sort "title" -}}
+    {{ $p.title -}}
+  {{ end ~}}
+</table>
+
+<table>
+  {{~ tablerow $p in (products | array.sort "title") cols: 2 -}}
+    {{ $p.title -}}
+  {{ end ~}}
+</table>
+
+<table>
+  {{~ tablerow $p in (products | array.sort "title") limit: 4 cols: 2 -}}
+    {{ $p.title -}}
+  {{ end ~}}
+</table>

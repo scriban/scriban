@@ -1,0 +1,21 @@
+<table>
+<tr class="row1"><td class="col1">Apple</td></tr>
+<tr class="row2"><td class="col1">Banana</td></tr>
+<tr class="row3"><td class="col1">Computer</td></tr>
+<tr class="row4"><td class="col1">Mobile Phone</td></tr>
+<tr class="row5"><td class="col1">Orange</td></tr>
+<tr class="row6"><td class="col1">Sofa</td></tr>
+<tr class="row7"><td class="col1">Table</td></tr>
+</table>
+
+<table>
+<tr class="row1"><td class="col1">Apple</td><td class="col2">Banana</td></tr>
+<tr class="row2"><td class="col1">Computer</td><td class="col2">Mobile Phone</td></tr>
+<tr class="row3"><td class="col1">Orange</td><td class="col2">Sofa</td></tr>
+<tr class="row4"><td class="col1">Table</td></tr>
+</table>
+
+<table>
+<tr class="row1"><td class="col1">Apple</td><td class="col2">Banana</td></tr>
+<tr class="row2"><td class="col1">Computer</td><td class="col2">Mobile Phone</td></tr>
+</table>

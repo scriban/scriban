@@ -242,6 +242,8 @@
     <Content Include="TestFiles\200-statements\231-capture-error1.txt" />
     <Content Include="TestFiles\200-statements\255-with-error1.out.txt" />
     <Content Include="TestFiles\200-statements\255-with-error1.txt" />
+    <Content Include="TestFiles\200-statements\290-tablerow.out.txt" />
+    <Content Include="TestFiles\200-statements\290-tablerow.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement2.out.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement2.txt" />
     <Content Include="TestFiles\200-statements\280-ret-statement.out.txt" />
@@ -320,6 +322,8 @@
     <Content Include="TestFiles\500-liquid\500-liquid-assign-error1.txt" />
     <Content Include="TestFiles\500-liquid\513-liquid-statement-cycle-error1.out.txt" />
     <Content Include="TestFiles\500-liquid\513-liquid-statement-cycle-error1.txt" />
+    <Content Include="TestFiles\500-liquid\520-liquid-statement-capture2.out.txt" />
+    <Content Include="TestFiles\500-liquid\520-liquid-statement-capture2.txt" />
     <Content Include="TestFiles\500-liquid\520-liquid-statement-include-error2.out.txt" />
     <Content Include="TestFiles\500-liquid\520-liquid-statement-include-error2.txt" />
     <Content Include="TestFiles\500-liquid\520-liquid-statement-include-error1.out.txt" />
