@@ -542,31 +542,36 @@ a.size
 
 Scriban allows to define functions:
 
-The following declares a function `inc` that uses its first argument to return an increment of the value.
+The following declares a function `sub` that uses its first argument and subtract from it the second argument:
 
 ``` 
-{{func inc
-   ret $0 + 1
+{{func sub
+   ret $0 - $1
 end}}
 ``` 
 
 All argument are passed to the special variable `$` that will contain the list of direct arguments
-and named arguments.
+and named arguments:
 
-
+- `$0` or `$[0]` will access the first argument
+- `$1` or `$[1]` will access the second argument
+- `$[-1]` will access the last argument
+- `$.named` will access the named argument `named` 
 
 This function can then be used:
 
 > **input**
 ```
-{{inc 1}}
-{{5 | inc}}
+{{sub 5 1}}
+{{5 | sub 1}}
 ```
 > **output**
 ```
-2
-6
+4
+4
 ```
+
+As you can notice from the example above, when using the pipe, the result of the pipe is pushed as the **first argument** of the pipe receiver.
 
 Note that a function can have mixed text statements as well:
 
