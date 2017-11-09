@@ -18,8 +18,13 @@ This document describes the syntax of the scriban templating language.
   - [3.3 Boolean](#33-boolean)
   - [3.4 null](#34-null)
 - [4 Variables](#4-variables)
+  - [4.1 The special variable <code>this</code>](#41-the-special-variable-this)
+  - [4.2 The special variable <code>empty</code>](#42-the-special-variable-empty)
 - [5 Objects](#5-objects)
+  - [5.1 The special property <code>empty?</code>](#51-the-special-property-empty)
 - [6 Arrays](#6-arrays)
+  - [6.1 Array with properties](#61-array-with-properties)
+  - [6.2 The special <code>size</code> property](#62-the-special-size-property)
 - [7 Functions](#7-functions)
 - [8 Expressions](#8-expressions)
   - [8.1 Variable path expressions](#81-variable-path-expressions)
@@ -31,15 +36,22 @@ This document describes the syntax of the scriban templating language.
   - [8.5 Conditional expressions](#85-conditional-expressions)
   - [8.6 Unary expressions](#86-unary-expressions)
   - [8.7 Range expressions](#87-range-expressions)
-  - [8.8 The null-coalescing operator `??`](#88-the-null-coalescing-operator-)
+  - [8.8 The null-coalescing operator <code>??</code>](#88-the-null-coalescing-operator)
   - [8.9 Function call expression](#89-function-call-expression)
+    - [Named arguments](#named-arguments)
 - [9 Statements](#9-statements)
   - [9.1 Single expression](#91-single-expression)
   - [9.2 <code>if &lt;expression&gt;</code>, <code>else</code>, <code>else if &lt;expression&gt;</code>](#92-if-expression-else-else-if-expression)
     - [Trusty and Falsy](#trusty-and-falsy)
+  - [9.3 <code>case</code> and <code>when</code>](#93-case-and-when)
   - [9.3 Loops](#93-loops)
     - [<code>for &lt;variable&gt; in &lt;expression&gt; ... end</code>](#for-variable-in-expression-end)
+      - [The <code>offset</code> parameter](#the-offset-parameter)
+      - [The <code>limit</code> parameter](#the-limit-parameter)
+      - [The <code>reversed</code> parameter](#the-reversed-parameter)
     - [<code>while &lt;expression&gt; ... end</code>](#while-expression-end)
+    - [<code>tablerow &lt;variable&gt; in &lt;expression&gt; ... end</code>](#tablerow-variable-in-expression-end)
+      - [The <code>cols</code> parameter](#the-cols-parameter)
     - [Special loop variables](#special-loop-variables)
     - [<code>break</code> and <code>continue</code>](#break-and-continue)
   - [9.4 <code>capture &lt;variable&gt; ... end</code>](#94-capture-variable-end)
@@ -181,9 +193,9 @@ Scriban provides **two modes** for controlling whitespace:
     This is <
     {{- name -}} 
     > a text:       
-    ```html
-    > **output**
     ```
+    > **output**
+    ```html
     This is a <foo> a text
     ```
 
@@ -227,13 +239,16 @@ Within a code block, scriban supports single line comments `#` and multi-line co
 `{{ name   # this is a single line comment }}`
 
 > **input**
-```
+```scriban-html
 {{ ## This 
 is a multi
 line
 comment ## }}
 ```
-> **output**: `` (empty)
+> **output**
+```html
+
+```
 
 As you can notice, both single line and multi-line comments can be closed by the presence of a code block exit tag `}}`
 
@@ -302,7 +317,10 @@ When resolving to a string output, the null value will output an empty string:
 ```scriban-html
 {{ null }}
 ```
-> **output**: `` (empty)
+> **output**
+```html
+
+```
 
 [:top:](#language)
 ## 4 Variables
