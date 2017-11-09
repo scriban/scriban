@@ -363,6 +363,24 @@ b.x
 1
 ```
 
+### 4.2 The special variable `empty`
+
+The `empty` variable represents simply an empty object. It is mainly relevant to be compatible with liquid, by providing a way to compare an object with the `empty` object to check if it is empty or not:
+
+> **input**
+```scriban-html
+{{
+a = {}
+b = [1, 2]~}}
+{{a == empty}}
+{{b == empty}}
+```
+> **output**
+```html
+true
+false
+```
+
 [:top:](#language)
 ## 5 Objects
 
@@ -409,6 +427,24 @@ If the object is a "pure" scriban objects (created with a `{...}` or  instantiat
 ```html
 may be
 ``` 
+
+### 5.1 The special property `empty?`
+
+Any object can respond the the property `.empty?` to check if it is empty or not:
+
+> **input**
+```scriban-html
+{{
+a = {}
+b = [1, 2]~}}
+{{a.empty?}}
+{{b.empty?}}
+```
+> **output**
+```html
+true
+false
+```
 
 [:top:](#language)
 ## 6 Arrays
