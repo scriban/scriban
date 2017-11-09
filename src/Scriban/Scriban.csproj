@@ -1,39 +1,18 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Description>A fast and powerful text templating language and engine for .NET</Description>
+    <Description>Scriban is a fast, powerful, safe and lightweight text templating language and engine for .NET, with a compatibility mode for parsing liquid templates.</Description>
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>0.14.0</VersionPrefix>
+    <VersionPrefix>0.15.0</VersionPrefix>
     <Authors>Alexandre Mutel</Authors>
     <TargetFrameworks>net35;net40;portable40-net40+sl5+win8+wp8+wpa81;netstandard1.1;netstandard1.3;uap10.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
     <PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>
     <PackageTags>templating;handlebars;liquid</PackageTags>
-    <PackageReleaseNotes>
-&gt; 0.14.0
- - Add support for named parameters for function calls (#28)
-&gt; 0.13.0
- - Change named parameters in scriban for `for`/`tablerow` statement to match liquid's behavior (no comma but separated by space)
-&gt; 0.12.1
- - Enable hyphenated variables (my-variable) only for liquid and convert it to scriban with the this indexer (`this["my-variable"]`)
-&gt; 0.12.0
- - More compatibility added for liquid
- - Breaking change of function parameters order to allow default values
- - Works on API towards 1.0.0       
-&gt; 0.11.0
- - Add support for remaining liquid language constructions (fot with limits/offset, tablerow, cycle, include...etc.)        
- - Improve AST to text
- - Various improvement in the runtime
- - Add `this` expression
-&gt; 0.10.0
- - Add support for liquid
- - Add support for AST to text
- - Add support for caes/when
- - Improve performance
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>https://github.com/lunet-io/scriban/blob/master/changelog.md</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/img/scriban.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
     <PackageLicenseUrl>https://github.com/lunet-io/scriban/blob/master/license.txt</PackageLicenseUrl>

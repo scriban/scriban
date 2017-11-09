@@ -1,0 +1,119 @@
+# Changelog
+
+## 0.15.0 (09 Nov 2017)
+
+- Add changelog.md
+- Work towards 1.0.0-beta (#29)
+- Named arguments (#28)
+- Add documentation to all .NET builtin functions (59fa7c5, ece713d)
+- Generate markdown docs from .NET code for all builtin functions (c8350bb9181c8728ca6223a0e2e8e5de4aa712d4)
+- Add documentation for named arguments (da32cee)
+- Add documentation for `this` variable (96b31ff, fcd60ce)
+- Generate tests from builtin functions documentation directly (to verify that examples are actually compiling and correct) (1db628e)
+- Add documentation for `empty` variable (9884067)
+- Add documentation for `obj.empty?` (9884067)
+- Add documentation for .NET functions with object `params` (4755e5b)
+- Add documentation for `for` statements with limit, offset, reversed. (a433209)
+- Add documentation for `tablerow` statements with limit, offset, reversed. (5f7274e)
+- Add documentation about `for.changed` and `for.rindex` variables (ea3c5d9)
+- Add documentation for `when`/`case` (b150a5d)
+- Add documentation for liquid support (d88a931)
+
+## 0.14.0 (07 Nov 2017)
+
+- Add support for named arguments to function calls (#28)
+- Update all builtin functions to use proper argument names (for named arguments)
+- Start to add markdown documentation to functions directly into .NET code (to extract them later)
+
+## 0.13.0 (07 Nov 2017)
+
+- Change named parameters in scriban for `for`/`tablerow` statement to match liquid's behavior (no comma but separated by space)
+
+## 0.12.1 (06 Nov 2017)
+
+- Enable hyphenated variables (my-variable) only for liquid and convert it to scriban with the this indexer (`this["my-variable"]`)
+
+## 0.12.0 (05 Nov 2017)
+
+- Improve API towards 1.0.0-beta (#29)
+- Improve tests coverage
+
+## 0.11.0 (04 Nov 2017)
+
+- Improve support for liquid
+- Add more tests and coverage
+
+## 0.10.0 (01 Nov 2017)
+
+- Add support for liquid compatible parser
+- Add support for Ast-to-text mode
+- Fix various parsing to improve compatibility with liquid templates
+- Update benchmarks
+- Add documentation
+
+## 0.9.1 (27 Oct 2017)
+
+- Add string.append, string.prepend, string.md5/sha1/sha256/hmac_sha1/hmac_sha256, html.escape, html.url_encode, html.url_escape, html.strip
+- Add documentation
+
+## 0.9.0 (25 Oct 2017)
+
+- Refactoring breaking changes. Change namespace Scriban.Model to Scriban.Syntax. Remove usage of interfaces for renamer and template loader and use delegates instead.
+- Fix a few internals in TemplateContext
+- Makes the IListAccessor behaves like IObjectAccessor with TemplateContext/SourceSpan
+- Change IScriptCustomFunction.Evaluate to IScriptCustomFunction.Invoke
+- Add static `Template.Evaluate ` method to evalaute an expression directly (#20)
+- Update documentation (runtime.md, language.md)
+- Add benchmark project
+
+## 0.7.0 (12 Oct 2017)
+
+- Add math.is_number and math.format (#6)
+- Propagate TemplateContext and Span to IScriptObject (#22)
+- Major refactoring of internals of TemplateContext and ScriptNode.  Replace ScriptDate by DateTime instead (fix for #23)
+- Allow bool comparison (#24)
+
+## 0.6.0 (16 May 2017)
+
+- Make array functions modifying an IList to instead return a modified copy of it
+- Add virtual to most ScriptArray methods
+- Make ScriptObject.IsReadOnly virtual
+
+## 0.5.0 (16 May 2017)
+
+- Breaking changes. Rename IScriptObject.IsReadOnly to CanWrite. Add IScriptObject.IsReadOnly for global object locking
+- Catch exceptions while evaluating an expression and rethrow them wrapped into a ScriptRuntimeExecption if it is not already the case.
+
+## 0.4.0 (08 May 2017)
+
+- Make ScriptObject methods virtual
+- Split namespace for Runtime to Model and Functions
+
+## 0.3.1 (04 Apr 2017)
+
+- Add support for binding variable/member access (#19)
+- Migrate to new csproj
+- Improve performance of raw statements
+- Add support for front matter
+
+## 0.3.0 (09 Mar 2017)
+
+- Add support for regex functions
+- Add support for verbatim strings using backsticks
+- Add support for default format date
+
+## 0.2.2 (02 Feb 2017)
+
+- Add support for accessing generic dictionary (#11, #15)
+
+## 0.2.1 (01 Feb 2017)
+
+- Fix string.capitalize bug returning an empty string when the input was already capitalized (#13)
+
+## 0.2.0 (27 Jun 2016)
+
+- Switch to .NETCore RTM
+
+## 0.1.0 (31 May 2016)
+
+- Initial version
