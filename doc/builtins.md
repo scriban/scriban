@@ -163,7 +163,7 @@ The concatenation of the two input lists
 ### `array.cycle`
 
 ```
-array.cycle <list> <group>?=
+array.cycle <list> <group>?
 ```
 
 #### Description
@@ -183,10 +183,10 @@ Returns a list with null value removed
 
 > **input**
 ```scriban-html
-{{ cycle ['one', 'two', 'three'] }}
-{{ cycle ['one', 'two', 'three'] }}
-{{ cycle ['one', 'two', 'three'] }}
-{{ cycle ['one', 'two', 'three'] }}
+{{ array.cycle ['one', 'two', 'three'] }}
+{{ array.cycle ['one', 'two', 'three'] }}
+{{ array.cycle ['one', 'two', 'three'] }}
+{{ array.cycle ['one', 'two', 'three'] }}
 ```
 > **output**
 ```html
@@ -409,7 +409,7 @@ Returns the remaining of the list after the specified offset
 
 > **input**
 ```scriban-html
-{{ [4, 5, 6, 7, 8] | array.limit 2 }}
+{{ [4, 5, 6, 7, 8] | array.offset 2 }}
 ```
 > **output**
 ```html
@@ -446,10 +446,10 @@ A new list with the element removed. If index is negative, remove at the end of 
 ```html
 [4, 5, 7, 8]
 ```
-If the `index` is negative, removes at the end of the list:
+If the `index` is negative, removes at the end of the list (notice that we need to put -1 in parenthesis to avoid confusing the parser with a binary `-` operation):
 > **input**
 ```scriban-html
-{{ [4, 5, 6, 7, 8] | array.remove_at -1 }}
+{{ [4, 5, 6, 7, 8] | array.remove_at (-1) }}
 ```
 > **output**
 ```html
@@ -520,7 +520,7 @@ A number of elements in the input `list`.
 ### `array.sort`
 
 ```
-array.sort <list> <member>?=
+array.sort <list> <member>?
 ```
 
 #### Description
@@ -647,12 +647,13 @@ A new date
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ date.parse '2016/01/05' | date.add_days 1 }}
 ```
 > **output**
 ```html
-2017
+06 Jan 2016
 ```
 
 [:top:](#builtins)
@@ -677,12 +678,13 @@ A new date
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ date.parse '2016/01/05' | date.add_months 1 }}
 ```
 > **output**
 ```html
-5 Feb 2016
+05 Feb 2016
 ```
 
 [:top:](#builtins)
@@ -707,12 +709,13 @@ A new date
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ date.parse '2016/01/05' | date.add_years 1 }}
 ```
 > **output**
 ```html
-5 Jan 2017
+05 Jan 2017
 ```
 
 [:top:](#builtins)
@@ -832,12 +835,13 @@ A date object
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ date.parse '2016/01/05' }}
 ```
 > **output**
 ```html
-5 Jan 2016
+05 Jan 2016
 ```
 
 [:top:](#builtins)
@@ -898,7 +902,7 @@ Note that the format is using a good part of the ruby format ([source]/// (http:
 ```
 > **output**
 ```html
-5 Jan 2016
+05 Jan 2016
 ```
 
 #### Arguments
@@ -1090,8 +1094,8 @@ The absolute value of the input value
 ```
 > **output**
 ```html
--15.5
--5
+15.5
+5
 ```
 
 [:top:](#builtins)
@@ -1117,8 +1121,8 @@ The smallest integer greater than or equal to the specified number.
 
 > **input**
 ```scriban-html
-{{ 4.6 | math.ceil }} 
-{{ 4.3 | math.ceil }} 
+{{ 4.6 | math.ceil }}
+{{ 4.3 | math.ceil }}
 ```
 > **output**
 ```html
@@ -1151,13 +1155,13 @@ The division of `value` by `divisor`.
 
 > **input**
 ```scriban-html
-{{ 4.6 | math.divided_by 2.0 }} 
-{{ 4.6 | math.divided_by 2 }} 
+{{ 8.4 | math.divided_by 2.0 | math.round 1 }}
+{{ 8.4 | math.divided_by 2 }}
 ```
 > **output**
 ```html
-2.3
-2
+4.2
+4
 ```
 
 [:top:](#builtins)
@@ -1183,8 +1187,8 @@ The largest integer less than or equal to the specified number.
 
 > **input**
 ```scriban-html
-{{ 4.6 | math.ceil }} 
-{{ 4.3 | math.ceil }} 
+{{ 4.6 | math.floor }}
+{{ 4.3 | math.floor }}
 ```
 > **output**
 ```html
@@ -1216,7 +1220,7 @@ The largest integer less than or equal to the specified number.
 
 > **input**
 ```scriban-html
-{{ 255 | math.format "X4" }} 
+{{ 255 | math.format "X4" }}
 ```
 > **output**
 ```html
@@ -1246,8 +1250,8 @@ Returns a boolean indicating if the input value is a number
 
 > **input**
 ```scriban-html
-{{ 255 | math.is_number }} 
-{{ "yo" | math.is_number }} 
+{{ 255 | math.is_number }}
+{{ "yo" | math.is_number }}
 ```
 > **output**
 ```html
@@ -1279,7 +1283,7 @@ The results of the substraction: `value` - `with`
 
 > **input**
 ```scriban-html
-{{ 255 | math.minus 5}} 
+{{ 255 | math.minus 5}}
 ```
 > **output**
 ```html
@@ -1310,7 +1314,7 @@ The results of the modulo: `value` % `with`
 
 > **input**
 ```scriban-html
-{{ 11 | math.modulo 10}} 
+{{ 11 | math.modulo 10}}
 ```
 > **output**
 ```html
@@ -1341,7 +1345,7 @@ The results of the addition: `value` + `with`
 
 > **input**
 ```scriban-html
-{{ 1 | math.plus 2}} 
+{{ 1 | math.plus 2}}
 ```
 > **output**
 ```html
@@ -1352,7 +1356,7 @@ The results of the addition: `value` + `with`
 ### `math.round`
 
 ```
-math.round <value> <precision>?=0
+math.round <value> <precision: 0>?
 ```
 
 #### Description
@@ -1372,7 +1376,7 @@ A value rounded to the nearest integer or to the specified number of fractional 
 
 > **input**
 ```scriban-html
-{{ 4.6 | math.round }} 
+{{ 4.6 | math.round }}
 {{ 4.3 | math.round }}
 {{ 4.5612 | math.round 2 }}
 ```
@@ -1407,7 +1411,7 @@ The results of the multiplication: `value` * `with`
 
 > **input**
 ```scriban-html
-{{ 2 | math.times 3}} 
+{{ 2 | math.times 3}}
 ```
 > **output**
 ```html
@@ -1580,7 +1584,7 @@ The size of the input object.
 ```
 > **output**
 ```html
-[title, type]
+3
 ```
 
 [:top:](#builtins)
@@ -1695,18 +1699,18 @@ A string of characters with metacharacters converted to their escaped form.
 
 > **input**
 ```scriban-html
-"(abc.*)" | regex.escape }}
+{{ "(abc.*)" | regex.escape }}
 ```
 > **output**
 ```html
-\\(abc\\.\\*\\)
+\(abc\.\*\)
 ```
 
 [:top:](#builtins)
 ### `regex.match`
 
 ```
-regex.match <text> <pattern> <options>?=
+regex.match <text> <pattern> <options>?
 ```
 
 #### Description
@@ -1743,7 +1747,7 @@ Notice that the first element returned in the array is the entire regex match, f
 ### `regex.replace`
 
 ```
-regex.replace <text> <pattern> <replace> <options>?=
+regex.replace <text> <pattern> <replace> <options>?
 ```
 
 #### Description
@@ -1769,7 +1773,7 @@ A new string that is identical to the input string, except that the replacement 
 
 > **input**
 ```scriban-html
-{{ "abbbbcccd | regex.replace "b+c+" "-Yo-" }}
+{{ "abbbbcccd" | regex.replace "b+c+" "-Yo-" }}
 ```
 > **output**
 ```html
@@ -1780,7 +1784,7 @@ a-Yo-d
 ### `regex.split`
 
 ```
-regex.split <text> <pattern> <options>?=
+regex.split <text> <pattern> <options>?
 ```
 
 #### Description
@@ -1805,7 +1809,7 @@ A string array.
 
 > **input**
 ```scriban-html
-{{ "a, b   , c,    d" | regex.split `\s*,\s*" }}
+{{ "a, b   , c,    d" | regex.split `\s*,\s*` }}
 ```
 > **output**
 ```html
@@ -1835,7 +1839,7 @@ A string of characters with any escaped characters converted to their unescaped 
 
 > **input**
 ```scriban-html
-"\\(abc\\.\\*\\)" | regex.unescape }}
+{{ "\\(abc\\.\\*\\)" | regex.unescape }}
 ```
 > **output**
 ```html
@@ -2116,9 +2120,9 @@ The input string without any left whitespace characters
 ```scriban-html
 {{ '   too many spaces           ' | string.lstrip  }}
 ```
+> Highlight to see the empty spaces to the right of the string
 > **output**
 ```html
-<!-- Highlight to see the empty spaces to the right of the string -->
 too many spaces           
 ```
 
@@ -2147,11 +2151,11 @@ The singular or plural string based on number
 
 > **input**
 ```scriban-html
-{{ cart.item_count }} {{cart.item_count | string.pluralize 'item' 'items' }}
+{{ products.size }} {{products.size | string.pluralize 'product' 'products' }}
 ```
 > **output**
 ```html
-4 items
+7 products
 ```
 
 [:top:](#builtins)
@@ -2210,6 +2214,7 @@ The input string with the all occurence of a substring removed
 > **input**
 ```scriban-html
 {{ "Hello, world. Goodbye, world." | string.remove "world" }}
+```
 > **output**
 ```html
 Hello, . Goodbye, .
@@ -2240,6 +2245,7 @@ The input string with the first occurence of a substring removed
 > **input**
 ```scriban-html
 {{ "Hello, world. Goodbye, world." | string.remove_first "world" }}
+```
 > **output**
 ```html
 Hello, . Goodbye, world.
@@ -2271,6 +2277,7 @@ The input string replaced
 > **input**
 ```scriban-html
 {{ "Hello, world. Goodbye, world." | string.replace "world" "buddy" }}
+```
 > **output**
 ```html
 Hello, buddy. Goodbye, buddy.
@@ -2302,6 +2309,7 @@ The input string replaced
 > **input**
 ```scriban-html
 {{ "Hello, world. Goodbye, world." | string.replace_first "world" "buddy" }}
+```
 > **output**
 ```html
 Hello, buddy. Goodbye, world.
@@ -2332,9 +2340,9 @@ The input string without any left whitespace characters
 ```scriban-html
 {{ '   too many spaces           ' | string.rstrip  }}
 ```
+> Highlight to see the empty spaces to the right of the string
 > **output**
 ```html
-<!-- Highlight to see the empty spaces to the right of the string -->
    too many spaces
 ```
 
@@ -2372,7 +2380,7 @@ The length of the input string
 ### `string.slice`
 
 ```
-string.slice <text> <start> <length>?=0
+string.slice <text> <start> <length: 0>?
 ```
 
 #### Description
@@ -2411,7 +2419,7 @@ ell
 ### `string.slice1`
 
 ```
-string.slice1 <text> <start> <length>?=1
+string.slice1 <text> <start> <length: 1>?
 ```
 
 #### Description
@@ -2471,9 +2479,9 @@ An enumeration of the substrings
 
 > **input**
 ```scriban-html
-{{ for word in "Hi, how are you today?" | string.split ' ' 
-  word }}
-{{ endfor }}
+{{ for word in "Hi, how are you today?" | string.split ' ' ~}}
+{{ word }}
+{{ end ~}}
 ```
 > **output**
 ```html
@@ -2510,7 +2518,8 @@ Returns a boolean indicating whether the input string starts with the specified 
 ```scriban-html
 {{ "This is easy" | string.starts_with "This" }}
 ```
-```
+> **output**
+```html
 true
 ```
 
@@ -2539,9 +2548,9 @@ The input string without any left and right whitespace characters
 ```scriban-html
 {{ '   too many spaces           ' | string.strip  }}
 ```
+> Highlight to see the empty spaces to the right of the string
 > **output**
 ```html
-<!-- Highlight to see the empty spaces to the right of the string -->
 too many spaces
 ```
 
@@ -2568,19 +2577,18 @@ The input string without any breaks/newlines characters
 
 > **input**
 ```scriban-html
-{{ "This is a string.
-With another string" | string.strip_newlines  }}
+{{ "This is a string.\r\n With \nanother \rstring" | string.strip_newlines  }}
 ```
 > **output**
 ```html
-This is a string.With another string
+This is a string. With another string
 ```
 
 [:top:](#builtins)
 ### `string.truncate`
 
 ```
-string.truncate <text> <length> <ellipsis>?=
+string.truncate <text> <length> <ellipsis>?
 ```
 
 #### Description
@@ -2613,7 +2621,7 @@ The cat ca...
 ### `string.truncatewords`
 
 ```
-string.truncatewords <text> <count> <ellipsis>?=
+string.truncatewords <text> <count> <ellipsis>?
 ```
 
 #### Description
@@ -2667,7 +2675,8 @@ The input string upper case
 ```scriban-html
 {{ "test" | string.upcase }}
 ```
-```
+> **output**
+```html
 TEST
 ```
 
@@ -2696,7 +2705,8 @@ The `md5` hash of the input string
 ```scriban-html
 {{ "test" | string.md5 }}
 ```
-```
+> **output**
+```html
 098f6bcd4621d373cade4e832627b4f6
 ```
 
@@ -2725,7 +2735,8 @@ The `sha1` hash of the input string
 ```scriban-html
 {{ "test" | string.sha1 }}
 ```
-```
+> **output**
+```html
 a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
 ```
 
@@ -2754,7 +2765,8 @@ The `sha256` hash of the input string
 ```scriban-html
 {{ "test" | string.sha256 }}
 ```
-```
+> **output**
+```html
 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
 ```
 
@@ -2784,7 +2796,8 @@ The `SHA-1` hash of the input string using a hash message authentication code (H
 ```scriban-html
 {{ "test" | string.hmac_sha1 "secret" }}
 ```
-```
+> **output**
+```html
 1aa349585ed7ecbd3b9c486a30067e395ca4b356
 ```
 
@@ -2814,7 +2827,8 @@ The `SHA-256` hash of the input string using a hash message authentication code 
 ```scriban-html
 {{ "test" | string.hmac_sha256 "secret" }}
 ```
-```
+> **output**
+```html
 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
 ```
 [:top:](#builtins)
@@ -2864,7 +2878,8 @@ A timespan object
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ (timespan.from_days 5).days }}
 ```
 > **output**
@@ -2893,7 +2908,8 @@ A timespan object
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ (timespan.from_hours 5).hours }}
 ```
 > **output**
@@ -2922,7 +2938,8 @@ A timespan object
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ (timespan.from_minutes 5).minutes }}
 ```
 > **output**
@@ -2951,7 +2968,8 @@ A timespan object
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ (timespan.from_seconds 5).seconds }}
 ```
 > **output**
@@ -2980,7 +2998,8 @@ A timespan object
 
 #### Examples
 
-```
+> **input**
+```scriban-html
 {{ (timespan.from_milliseconds 5).milliseconds }}
 ```
 > **output**

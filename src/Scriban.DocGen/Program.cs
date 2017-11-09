@@ -165,10 +165,24 @@ This document describes the various built-in functions available in scriban.
                         }
                         _writer.Write(" ");
 
-                        _writer.Write($"<{parameter.Name}>");
+                        _writer.Write($"<{parameter.Name}");
                         if (parameter.IsOptional)
                         {
-                            _writer.Write($"?={parameter.DefaultValue}");
+                            var defaultValue = parameter.DefaultValue;
+                            if (defaultValue is string)
+                            {
+                                defaultValue = "\"" + defaultValue + "\"";
+                            }
+
+                            if (defaultValue != null)
+                            {
+                                defaultValue = ": " + defaultValue;
+                            }
+                            _writer.Write($"{defaultValue}>?");
+                        }
+                        else
+                        {
+                            _writer.Write(">");
                         }
                     }
                     _writer.WriteLine();
