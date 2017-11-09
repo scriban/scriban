@@ -90,28 +90,40 @@ This document describes the various built-in functions available in scriban.
             public StringWriter Body => _writerBody;
 
 
+            private bool IsBuiltinType(Type type, out string shortName)
+            {
+                shortName = null;
+                return type.Namespace == "Scriban.Functions" && _builtinClassNames.TryGetValue(type.Name, out shortName);
+            }
+
             public override void VisitMember(Member member)
             {
+                var type = member.Info as Type;
                 var methodInfo = member.Info as MethodInfo;
                 string shortName;
-                if (methodInfo != null && methodInfo.DeclaringType.Namespace == "Scriban.Functions" && _builtinClassNames.TryGetValue(methodInfo.DeclaringType.Name, out shortName))
+
+                _writer = _writerBody;
+
+                //                if (type != null && )
+                if (type != null && IsBuiltinType(type, out shortName))
+                {
+                    _writer.WriteLine("[:top:](#builtins)");
+                    _writer.WriteLine();
+                    _writer.WriteLine($"## `{shortName}` functions");
+                    _writer.WriteLine();
+
+                    base.VisitMember(member);
+
+                    _writer.WriteLine(_writerSummary);
+
+                    _writer.WriteLine();
+
+                    // Write the toc
+                    _writerToc.WriteLine($"- [`{shortName}` functions](#{shortName}-functions)");
+                }
+                else if (methodInfo != null && IsBuiltinType(methodInfo.DeclaringType, out shortName))
                 {
                     var methodShortName = StandardMemberRenamer.Default(methodInfo.Name);
-
-                    _writer = _writerBody;
-
-                    if (_classVisited.Add(methodInfo.DeclaringType.Name))
-                    {
-                        _writer.WriteLine("[:top:](#builtins)");
-                        _writer.WriteLine();
-                        _writer.WriteLine($"## `{shortName}` functions");
-
-                        // TODO: Write the doc of the class
-                        _writer.WriteLine();
-
-                        // Write the toc
-                        _writerToc.WriteLine($"- [`{shortName}` functions](#{shortName}-functions)");
-                    }
 
                     _writer.WriteLine();
                     _writer.WriteLine("[:top:](#builtins)");
@@ -146,22 +158,23 @@ This document describes the various built-in functions available in scriban.
                     _writer.WriteLine("#### Description");
                     _writer.WriteLine();
                     _writer.WriteLine(_writerSummary);
-                    _writerSummary = new StringWriter();
                     _writer.WriteLine();
                     _writer.WriteLine("#### Arguments");
                     _writer.WriteLine();
                     _writer.WriteLine(_writerParameters);
-                    _writerParameters = new StringWriter();
                     _writer.WriteLine("#### Returns");
                     _writer.WriteLine();
                     _writer.WriteLine(_writerReturns);
-                    _writerReturns = new StringWriter();
                     _writer.WriteLine();
                     _writer.WriteLine("#### Examples");
                     _writer.WriteLine();
                     _writer.WriteLine(_writerRemarks);
-                    _writerRemarks = new StringWriter();
                 }
+
+                _writerSummary = new StringWriter();
+                _writerParameters = new StringWriter();
+                _writerReturns = new StringWriter();
+                _writerRemarks = new StringWriter();
             }
 
             public override void VisitSummary(Summary summary)
