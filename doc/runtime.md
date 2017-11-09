@@ -21,7 +21,8 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
     - [Accessing as regular dictionary objects](#accessing-as-regular-dictionary-objects)
     - [Imports a .NET delegate](#imports-a-net-delegate)
     - [Imports functions from a .NET class](#imports-functions-from-a-net-class)
-    - [Automatic import from <code>ScriptObject</code>](#automatic-import-from-scriptobject)
+    - [Automatic functions import from <code>ScriptObject</code>](#automatic-functions-import-from-scriptobject)
+    - [Function arguments, optional and <code>params</code>](#function-arguments-optional-and-params)
     - [Accessing nested <code>ScriptObject</code>](#accessing-nested-scriptobject)
     - [Imports a <code>ScriptObject</code> into another <code>ScriptObject</code>](#imports-a-scriptobject-into-another-scriptobject)
     - [Imports a .NET object instance](#imports-a-net-object-instance)
@@ -42,7 +43,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
     - [Hyper custom functions<code>IScriptCustomFunction</code>](#hyper-custom-functionsiscriptcustomfunction)
   - [Evaluating an expression](#evaluating-an-expression)
   - [Changing the Culture](#changing-the-culture)
-  - [Safe runtime](#safe-runtime)
+  - [Safe Runtime](#safe-runtime)
       
 [:top:](#runtime)
 ## Parsing a template
@@ -254,9 +255,9 @@ This function can be imported into a ScriptObject:
 > Notice that when using a function with pipe calls like `{{description | string.strip }}``, the last argument passed to the `string.strip` function is the result of the previous pipe.
 > That's a reason why you will notice in all builtin functions in scriban that they usually take the most relevant parameter as a last parameter instead of the first parameter, to allow proper support for pipe calls.
 
-#### Automatic import from `ScriptObject`
+#### Automatic functions import from `ScriptObject`
 
-When inheriting from a `ScriptObject`, the inherited object will automatically import all public static and instance methods and properties from the class:
+When inheriting from a `ScriptObject`, the inherited object will automatically import all public static methods and properties from the class:
 
   ``` C#
   // We simply inherit from ScriptObject
@@ -292,6 +293,59 @@ Then using directly this custom `ScriptObject` as a regular object:
   ```
 
 Notice that if you want to ignore a member when importing a .NET object or .NET class, you can use the attribute `ScriptMemberIgnore`
+
+> NOTE: Because Scriban doesn't support Function overloading, it is required that functions imported from a type must have different names.
+
+#### Function arguments, optional and `params`
+
+Scriban runtime supports regular function arguments, optional arguments (with a default value) and `params XXX[] array` arguments:
+
+  ``` C#
+  // We simply inherit from ScriptObject
+  // All functions defined in the object will be imported
+  public class MyCustomFunctions : ScriptObject
+  {
+      // A function an optional argument
+      public static string HelloOpt(string text, string option = null)
+      {
+          return $"hello {text} with option:{option}";
+      }
+
+      // A function with params
+      public static string HelloArgs(params object[] args)
+      {
+          return $"hello {(string.Join(",", args))}";
+      }
+  }
+  ```
+
+Using the function above from a script could be like this:
+
+> **input**
+```scriban-html
+{{ hello_opt "test" }}
+{{ hello_opt "test" "my_option" }}
+{{ hello_opt "test" option: "my_option" }}
+{{ hello_opt text: "test"  }}
+{{ hello_args "this" "is" "a" "test"}}
+{{ hello_args "this" "is" args: "a" args: "test"}}
+```
+
+> **output**
+```scriban-html
+hello test with option:
+hello test with option:my_option
+hello test with option:my_option
+hello test with option:
+hello this,is,a,test
+hello this,is,a,test
+```
+
+Notice that we can have a mix of regular and named arguments, assuming that named arguments are always coming last when calling a function.
+
+Also, we can see that named arguments are also working with `params` arguments.
+
+If a regular argument (not optional) is missing, the runtime will complain about the missing argument giving precise source location of the error.
 
 #### Accessing nested `ScriptObject`
 
@@ -703,7 +757,7 @@ It is sometimes required for a custom function to have access to the current `Te
 
 #### Advanced custom functions
 
-In the [`ScriptObject`](#the-ScriptObject) section we described how to easily import a custom function either by using a delegate or a pre-defined .NET static/instance functions.
+In the [`ScriptObject`](#the-ScriptObject) section we described how to easily import a custom function either by using a delegate or a pre-defined .NET static functions/properties.
 
 In some cases, you also need to have access to the current `TemplateContext` and also, the current `SourceSpan` (original location position in the text template code).
 By simply adding as a first parameter `TemplateContext`, and optionally as a second parameter, a `SourceSpan` a custom function can have access to the current evaluation context:
