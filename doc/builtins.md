@@ -2394,9 +2394,9 @@ The input string sliced
 
 > **input**
 ```scriban-html
-{{ "hello" | slice: 0 }}
-{{ "hello" | slice: 1 }}
-{{ "hello" | slice: 1, 3 }}
+{{ "hello" | string.slice 0 }}
+{{ "hello" | string.slice 1 }}
+{{ "hello" | string.slice 1, 3 }}
 ```
 > **output**
 ```html
@@ -2431,9 +2431,9 @@ The input string sliced
 
 > **input**
 ```scriban-html
-{{ "hello" | slice: 0 }}
-{{ "hello" | slice: 1 }}
-{{ "hello" | slice: 1, 3 }}
+{{ "hello" | string.slice1 0 }}
+{{ "hello" | string.slice1 1 }}
+{{ "hello" | string.slice1 1, 3 }}
 ```
 > **output**
 ```html

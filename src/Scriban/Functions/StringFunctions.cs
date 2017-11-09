@@ -417,9 +417,9 @@ namespace Scriban.Functions
         /// <returns>The input string sliced</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "hello" | slice: 0 }}
-        /// {{ "hello" | slice: 1 }}
-        /// {{ "hello" | slice: 1, 3 }}
+        /// {{ "hello" | string.slice 0 }}
+        /// {{ "hello" | string.slice 1 }}
+        /// {{ "hello" | string.slice 1, 3 }}
         /// ```
         /// ```html
         /// hello
@@ -472,9 +472,9 @@ namespace Scriban.Functions
         /// <returns>The input string sliced</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "hello" | slice: 0 }}
-        /// {{ "hello" | slice: 1 }}
-        /// {{ "hello" | slice: 1, 3 }}
+        /// {{ "hello" | string.slice1 0 }}
+        /// {{ "hello" | string.slice1 1 }}
+        /// {{ "hello" | string.slice1 1, 3 }}
         /// ```
         /// ```html
         /// h
