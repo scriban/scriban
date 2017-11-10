@@ -44,6 +44,7 @@ var result = template.Render(new { products = this.ProductList });
 - **Compatible with `liquid`** by using the `Template.ParseLiquid` method
   - While the `liquid` language is less powerful than scriban, this mode allows to migrate from `liquid` to `scriban` language easily
   - With the [AST to text](doc/runtime.md#ast-to-text) mode, you can convert a `liquid` script to a scriban script using `Template.ToText` on a template parsed with `Template.ParseLiquid`
+  - As the liquid language is not strictly defined and there are in fact various versions of liquid syntax, there are restrictions while using liquid templates with scriban, see the document [liquid support in scriban](doc/liquid-support.md) for more details.
 - **Extensible runtime** providing many extensibility points
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
 - [Full featured language](doc/language.md) including `if`/`else`/`for`/`while`, [expressions](doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
