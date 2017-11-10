@@ -1,6 +1,6 @@
 # Liquid Support in Scriban
 
-Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/) tags and filters except implicit symbols, as described in the [known issue](#known-issues))
+Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/) tags and filters.
 
 ## Examples
 
@@ -156,20 +156,9 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
 ```
 As you can notice, Scriban will translate a call to a liquid tag to the corresponding scriban tag. But scriban also provides supports for direct tags calls using the `LiquidTemplateContext`. See [liquid support in runtime](runtime.md#liquid-support)
 
-## Known issues
+## Converting to scriban using `liquid2scriban`
 
-Liquid allows to pass implicit string to a filter using the following syntax:
+If you compile this repository, you will find a tool `liquid2scriban` that allows to convert a liquid script to scriban.
 
-> **liquid**
-```liquid
-http://mycompany.com/logo.gif | upcase
-```
-
-But in scriban, you will have to escape the string:
-
-> **scriban**
-```scriban
-"http://mycompany.com/logo.gif" | string.upcase
-```
-
-The liquid parser of scriban won't be able to interpret correctly the implicit string as it brings contextual parsing to the parser which is unknown at lexer time (and would require a cumbersome interaction between the parser and lexer to allow this kind of constructs).
+The `liquid2scriban` has one option that allows to parse Jekyll liquid templates that are passing to the include directive raw strings without quotes (e.g `{% include /this/is/partial.html %}`)
+In that case, you can pass the option `--relaxed-include` to liquid2scriban, to allow the convertor to recognize this parameter as an implicit string instead.
