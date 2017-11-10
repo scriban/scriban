@@ -53,7 +53,7 @@ namespace Scriban.Parsing
 
                 case "endfor":
                     startStatement = FindFirstStatementExpectingEnd() as ScriptForStatement;
-                    pendingStart = "`unless`";
+                    pendingStart = "`for`";
                     break;
 
                 case "endcase":
@@ -298,25 +298,30 @@ namespace Scriban.Parsing
             CheckNotInCase(parent, startToken);
             var expressionStatement = ParseExpressionStatement();
 
-            var functionCall = expressionStatement.Expression as ScriptFunctionCall;
             var statement = expressionStatement;
 
-            // Otherwise it is an expression statement
-            if (functionCall != null)
-            {
-                if (!_isLiquidTagSection)
-                {
-                    LogError(startToken, $"The `{functionCall}` statement must be in a tag section `{{% ... %}}`");
-                }
-            }
-            else if (_isLiquidTagSection)
-            {
-                LogError(startToken, $"Expecting the expression `{GetAsText(startToken)}` to be in an object section `{{{{ ... }}}}`");
-            }
-            else if (!(expressionStatement.Expression is IScriptVariablePath || expressionStatement.Expression is ScriptPipeCall))
-            {
-                LogError(statement, $"The <{expressionStatement.Expression}> is not allowed in this context");
-            }
+            // NOTE: We were previously performing the following checks
+            // but as liquid doesn't have a strict syntax, we are instead not enforcing anykind of rules
+            // so that the parser can still read custom liquid tags/object expressions, assuming that
+            // they are not using fancy argument syntaxes (which are unfortunately allowed in liquid)  
+
+            //var functionCall = expressionStatement.Expression as ScriptFunctionCall;
+            //// Otherwise it is an expression statement
+            //if (functionCall != null)
+            //{
+            //    if (!_isLiquidTagSection)
+            //    {
+            //        LogError(startToken, $"The `{functionCall}` statement must be in a tag section `{{% ... %}}`");
+            //    }
+            //}
+            //else if (_isLiquidTagSection)
+            //{
+            //    LogError(startToken, $"Expecting the expression `{GetAsText(startToken)}` to be in an object section `{{{{ ... }}}}`");
+            //}
+            //else if (!(expressionStatement.Expression is IScriptVariablePath || expressionStatement.Expression is ScriptPipeCall))
+            //{
+            //    LogError(statement, $"The <{expressionStatement.Expression}> is not allowed in this context");
+            //}
             return statement;
         }
 

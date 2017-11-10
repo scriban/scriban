@@ -1,2 +1,1 @@
-text(4,4) : error : Expecting the expression `end` to be in an object section `{{ ... }}`
 text(2,4) : error : Error while parsing if statement: The `endif statement` was not found in: if <expression> ... end|else|else if
