@@ -14,18 +14,26 @@ namespace Scriban.Liquid2Scriban
         {
             if (args.Length == 0)
             {
-                Console.WriteLine("liquid2scriban.exe <files...> ");
+                Console.WriteLine("liquid2scriban.exe [--relaxed-include] <files...> ");
                 Console.WriteLine(" Converts input Liquid files to Scriban files. Write result to input file + `.sbnXXX` extension where XXX is the original extension");
-                Console.WriteLine(" <files> can be a wildcard **.htm (for recursive, or *.htm) for not recursive");
+                Console.WriteLine();
+                Console.WriteLine("    <files> can be a wildcard **.htm (for recursive, or *.htm) for not recursive");
+                Console.WriteLine();
+                Console.WriteLine("    --relaxed-include         Parse liquid include parameter as a string without quotes");
                 Environment.Exit(1);
                 return;
             }
 
             var files = new List<string>();
+            bool relaxedInclude = false;
             for (var i = 0; i < args.Length; i++)
             {
                 var arg = args[i];
-                if (arg.IndexOf("**") >= 0)
+                if (arg == "--relaxed-include")
+                {
+                    relaxedInclude = true;
+                }
+                else if (arg.IndexOf("**") >= 0)
                 {
                     var index = arg.IndexOf("**");
                     var previousdir = arg.Substring(0, index);
@@ -69,18 +77,11 @@ namespace Scriban.Liquid2Scriban
             {
                 var text = File.ReadAllText(file);
 
-                var template = Template.ParseLiquid(text, file, lexerOptions: new LexerOptions() {Mode = ScriptMode.Liquid, KeepTrivia = true});
+                var template = Template.ParseLiquid(text, file, lexerOptions: new LexerOptions() {Mode = ScriptMode.Liquid, KeepTrivia = true, EnableIncludeImplicitString = relaxedInclude });
 
                 if (template.HasErrors)
                 {
-                    Console.WriteLine($"Error while parsing the template: {file}");
-                    foreach (var message in template.Messages)
-                    {
-                        var color = Console.ForegroundColor;
-                        Console.ForegroundColor = ConsoleColor.Red;
-                        Console.WriteLine("  " + message);
-                        Console.ForegroundColor = color;
-                    }
+                    DumpMessages(template, "parsing the liquid template", file);
                 }
                 else
                 {
@@ -100,6 +101,28 @@ namespace Scriban.Liquid2Scriban
                     var color = Console.ForegroundColor;
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine($"Scriban file generated: {outputFile}");
+                    Console.ForegroundColor = color;
+
+                    // Try to reparse the generated template to verify that we don't have any errors
+                    var newTemplate = Template.Parse(scriban, outputFile);
+                    if (newTemplate.HasErrors)
+                    {
+                        DumpMessages(template, "verifying the generated scriban template", outputFile);
+                    }
+                }
+            }
+        }
+
+        private static void DumpMessages(Template template, string parsingContext, string file)
+        {
+            if (template.HasErrors)
+            {
+                Console.WriteLine($"Error while {parsingContext}: {file}");
+                foreach (var message in template.Messages)
+                {
+                    var color = Console.ForegroundColor;
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("  " + message);
                     Console.ForegroundColor = color;
                 }
             }
