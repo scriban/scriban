@@ -1,12 +1,25 @@
 # Liquid Support in Scriban
 
-Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/) tags and filters.
+Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/) tags and filters, except the following known issue.
+
+## Known issues
+
+> NOTE: The liquid syntax has never been strictly formalized, and custom tags implementation can choose whatever syntax for their arguments.
+>
+> This is a known issue in liquid itself, for example:
+>  - [issue 507: Custom tags: what’s the preferred method of providing arguments containing quotes](https://github.com/Shopify/liquid/issues/507)
+>  - [issue 671: Using liquid class libraries inside Liquid::Tag](https://github.com/Shopify/liquid/issues/671)
+>  - [issue 560: Unified syntax for tag arguments [RFC]](https://github.com/Shopify/liquid/issues/560)
+>
+> There is in fact multiple versions of the liquid language, supporting different syntaxes for tags.
+>
+> As a consequence, **the liquid parser implemented in Scriban cannot parse any custom liquid tags that are using custom arguments parsing**
 
 ## Examples
 
-In the following section, you will find a few example about how scriban translates a liquid template into a scriban template. 
+In the following sections, you will find a few examples about how scriban translates a liquid template into a scriban template. 
 
-> NOTE: All the following example are using the feature [**Ast to text**](runtime.md#ast-to-text) that
+> NOTE: All the following examples are using the feature [**Ast to text**](runtime.md#ast-to-text) that
 allowed to translate liquid code into scriban code automatically
 
 ### Variable and properties accessors
