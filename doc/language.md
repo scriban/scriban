@@ -179,24 +179,24 @@ Scriban provides **two modes** for controlling whitespace:
   * Strip on the right:  
     > **input**
     ```scriban-html
-    This is <{{ name -}} 
-    > a text:       
+    This is a <{{ name -}} 
+    > text:       
     ``` 
     > **output**
     ```html
-    This is a <foo> a text
+    This is a <foo> text
     ```
   
   * Strip on both left and right:  
     > **input**
     ```scriban-html
-    This is <
+    This is a <
     {{- name -}} 
-    > a text:       
+    > text:       
     ```
     > **output**
     ```html
-    This is a <foo> a text
+    This is a <foo> text
     ```
 
 - The **non greedy mode** using the character `~`
