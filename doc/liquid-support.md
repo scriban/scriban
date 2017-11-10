@@ -30,7 +30,7 @@ Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/)
 > There is in fact multiple versions of the liquid language, supporting different syntaxes for tags, which are completely arbitrary and not unified.
 >
 > As a consequence, **the liquid parser implemented in Scriban cannot parse any custom liquid tags/filters that are using custom arguments parsing**
-> but only regular arguments separated by spaces.
+> but only regular arguments (strings, numbers, variables, variable properties) separated by spaces.
 
 ## Examples
 
