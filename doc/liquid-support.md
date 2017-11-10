@@ -1,6 +1,24 @@
-# Liquid Support in Scriban
+# Liquid Support
 
-Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/) tags and filters, except the following known issue.
+Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/) types, operators, tags and filters.
+
+- [Known issues](#known-issues)
+- [Supported types](#supported-types)
+- [Supported operators](#supported-operators)
+- [Supported tags](#supported-tags)
+  - [Variable and properties accessors](#variable-and-properties-accessors)
+  - [<code>comment</code> tag](#comment-tag)
+  - [<code>raw</code> tag](#raw-tag)
+  - [<code>assign</code> tag](#assign-tag)
+  - [<code>if</code> tag](#if-tag)
+  - [<code>unless</code> tag](#unless-tag)
+  - [<code>case</code> and <code>when</code> tags](#case-and-when-tags)
+  - [<code>for</code> tag](#for-tag)
+  - [<code>tablerow</code> tag](#tablerow-tag)
+  - [<code>capture</code> tag](#capture-tag)
+  - [Pipe calls](#pipe-calls)
+- [Supported filters](#supported-filters)
+- [Converting <code>liquid</code> to <code>scriban</code> using <code>liquid2scriban</code>](#converting-liquid-to-scriban-using-liquid2scriban)
 
 ## Known issues
 
@@ -32,13 +50,42 @@ Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/)
 > As a consequence, **the liquid parser implemented in Scriban cannot parse any custom liquid tags/filters that are using custom arguments parsing**
 > but only regular arguments (strings, numbers, variables, variable properties) separated by spaces.
 
-## Examples
+[:top:](#liquid-support)
+## Supported types
 
-In the following sections, you will find a few examples about how scriban translates a liquid template into a scriban template. 
+Liquid types are translated to the same types in scriban:
+
+- [string](language.md#31-strings)
+- [number](language.md#32-numbers)
+- [boolean](language.md#33-boolean)
+
+The `nil` value (which can't be expressed in liquid) is equivalent to the expression [`null`](language.md#34-null) in scriban.
+
+- [array](language.md#6-arrays) are also supported, except that scriban allows to create arrays directly from the language unlike liquid
+
+In addition to this, scriban supports the creation of an [`object`](language.md#5-objects)
+
+[:top:](#liquid-support)
+## Supported operators
+
+Liquid supports only conditional expressions and they directly translate to [conditionnal expressions](language.md#85-conditional-expressions) in scriban.
+
+In addition to this, scriban supports:
+
+- [binary operators](language.md#84-arithmetic-expressions)
+- [unary operators](language.md#86-unary-expressions)
+- [range `1..x` expressions](language.md#87-range-expressions)
+- [The null coalescing operator `??`](language.md#88-the-null-coalescing-operator-)
+
+[:top:](#liquid-support)
+## Supported tags
+
+In the following sections, you will find a list of the supported liquid tags and how scriban translates a liquid template into a scriban template. 
 
 > NOTE: All the following examples are using the feature [**Ast to text**](runtime.md#ast-to-text) that
 allowed to translate liquid code into scriban code automatically
 
+[:top:](#liquid-support)
 ### Variable and properties accessors
 
 | Liquid                           | Scriban
@@ -52,7 +99,10 @@ allowed to translate liquid code into scriban code automatically
 | `{{ products[0].title }}`        | `{{ products[0].title }}`
 | `{{ product.empty? }}`           | `{{ product.empty? }}`
 
+[:top:](#liquid-support)
 ### `comment` tag
+
+Liquid `comment`/`endcomment` tags translate to a code block `{{` ... `}}` embracing a [multiline comments `##`](language.md#2-comments)
 
 > **liquid**
 ```liquid
@@ -63,7 +113,10 @@ This is plain {% comment %}This is comment {% with ## some tag %} and comment{% 
 This is plain {{## This is comment {% with \#\# some tag %\} and comment ##}}
 ```
 
+[:top:](#liquid-support)
 ### `raw` tag
+
+Liquid raw tag block translate to an [escape block](language.md#13-escape-block)
 
 > **liquid**
 ```liquid
@@ -74,7 +127,26 @@ This is plain {% raw %}This is raw {% with some tag %} and raw{% endraw %}
 This is plain {%{This is raw {% with some tag %} and raw}%}
 ```
 
+[:top:](#liquid-support)
+### `assign` tag
+
+Liquid `assign` tag translates to a simple [assignment expression](language.md#82-assign-expression)
+
+> **liquid**
+```liquid
+{% assign variable = 1 %}
+{{ variable }}
+```
+> **scriban**
+```scriban
+{{ variable = 1 }}
+{{ variable }}
+```
+
+[:top:](#liquid-support)
 ### `if` tag
+
+Liquid `if <expression>`/`endif` tags translate to a [`if <expression>`/`end`](language.md#92-if-expression-else-else-if-expression)
 
 > **liquid**
 ```liquid
@@ -83,7 +155,6 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
   This is a variable with 1
 {% endif %}
 ```
-
 > **scriban**
 ```scriban
 {{ variable = 1 }}
@@ -91,7 +162,11 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
   This is a variable with 1
 {{ end }}
 ```
+
+[:top:](#liquid-support)
 ### `unless` tag
+
+Liquid `unless <expression>`/`endunless` tags translate to a [`if <expression>`/`end`](language.md#92-if-expression-else-else-if-expression) with a reversed nested `!(expression)`
 
 > **liquid**
 ```liquid
@@ -109,7 +184,10 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
 {{ end }}
 ```
 
+[:top:](#liquid-support)
 ### `case` and `when` tags
+
+Liquid `case <variable>`/`when <expression>`/`endcase` tags translate to a [`case <expression>`/`when <expression>`/`end`](language.md#93-case-and-when)
 
 > **liquid**
 ```liquid
@@ -137,7 +215,10 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
 {{ end }}
 ```
 
+[:top:](#liquid-support)
 ### `for` tag
+
+Liquid `for <variable> in <expression>`/`endfor` tags translate to the same [`for`/`end`](language.md#for-variable-in-expression--end)
 
 > **liquid**
 ```liquid
@@ -153,7 +234,33 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
 {{ end }}
 ```
 
+> NOTE: Scriban supports all tags arguments: `limit`, `offset`, `reversed`
+
+[:top:](#liquid-support)
+### `tablerow` tag
+
+Liquid `tablerow <variable> in <expression>`/`endtablerow` tags translate to the same [`tablerow`/`end`](language.md#tablerow-variable-in-expression--end)
+
+> **liquid**
+```liquid
+{%- tablerow variable in (1..5) -%}
+    This is variable {{variable}}
+{% endtablerow -%}
+```
+
+> **scriban**
+```scriban
+{{ tablerow variable in (1..5) -}}
+    This is variable {{variable}}
+{{ end }}
+```
+
+> NOTE: Scriban supports all tags arguments for `tablerow`: `cols`, `limit`, `offset`, `reversed`
+
+[:top:](#liquid-support)
 ### `capture` tag
+
+Liquid `capture <variable>`/`endcapture` tags translate to a [`capture <expression>`/`end`](language.md#94-capture-variable--end)
 
 > **liquid**
 ```liquid
@@ -171,7 +278,10 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
 {{ variable }}
 ```
 
+[:top:](#liquid-support)
 ### Pipe calls
+
+Liquid pipe call translates to the same [`pipe call`](language.md#89-function-call-expression)
 
 > **liquid**
 ```liquid
@@ -186,7 +296,17 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
 ```
 As you can notice, Scriban will translate a call to a liquid tag to the corresponding scriban tag. But scriban also provides supports for direct tags calls using the `LiquidTemplateContext`. See [liquid support in runtime](runtime.md#liquid-support)
 
-## Converting to scriban using `liquid2scriban`
+[:top:](#liquid-support)
+## Supported filters
+
+By default, all liquid filters are translated to scriban [builtin functions](builtins.md) (through objects like `string` or `array`)
+
+The translation is performed by the [TryLiquidToScriban](https://github.com/lunet-io/scriban/blob/4ecb68deab3065c3163d46e3b51956712ec75e49/src/Scriban/Functions/LiquidBuiltinsFunctions.cs#L30) function at parsing time.
+
+This translation can be disabled by setting the `ParserOptions.LiquidFunctionsToScriban` to `false`
+
+[:top:](#liquid-support)
+## Converting `liquid` to `scriban` using `liquid2scriban`
 
 If you compile this repository, you will find a tool `liquid2scriban` that allows to convert a liquid script to scriban.
 
