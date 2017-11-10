@@ -1153,7 +1153,7 @@ namespace Scriban.Parsing
 
                 var startPath = _position;
                 var endPath = startPath;
-                while (!char.IsWhiteSpace(c) && c != 0)
+                while (!char.IsWhiteSpace(c) && c != 0 && c != '%' && PeekChar() != '}')
                 {
                     endPath = _position;
                     NextChar();
