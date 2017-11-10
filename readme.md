@@ -86,7 +86,7 @@ Compatible with the following .NET framework profiles:
 - `.NET4.0+`
 -  .NET PCL profile `portable40-net40+sl5+win8+wp8+wpa81`
 - `UAP10.0+`
-- `NetStandard1.1+` running on `CoreCLR`
+- `NetStandard1.1+` and `NetStandard1.3+` running on `CoreCLR`
 
 Also [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet package provides signed assemblies.
 
