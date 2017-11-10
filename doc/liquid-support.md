@@ -11,9 +11,26 @@ Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/)
 >  - [issue 671: Using liquid class libraries inside Liquid::Tag](https://github.com/Shopify/liquid/issues/671)
 >  - [issue 560: Unified syntax for tag arguments [RFC]](https://github.com/Shopify/liquid/issues/560)
 >
-> There is in fact multiple versions of the liquid language, supporting different syntaxes for tags.
+> For example in liquid, you usually pass arguments to tags and filters like this (supported by scriban):
 >
-> As a consequence, **the liquid parser implemented in Scriban cannot parse any custom liquid tags that are using custom arguments parsing**
+> ```liquid
+> {{ "this is a string" | function "arg1" 15 16 }}
+> ```
+>
+> ```liquid
+> {% custom_tag "arg1" 15 16 %}
+> ```
+>
+> But some liquid tag/filter implementations may in fact choose to accept different ways of passing arguments:
+>
+> ```liquid
+> {% avatar user=author size=24 %}
+> ```
+>
+> There is in fact multiple versions of the liquid language, supporting different syntaxes for tags, which are completely arbitrary and not unified.
+>
+> As a consequence, **the liquid parser implemented in Scriban cannot parse any custom liquid tags/filters that are using custom arguments parsing**
+> but only regular arguments separated by spaces.
 
 ## Examples
 
