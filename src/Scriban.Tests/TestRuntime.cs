@@ -220,5 +220,151 @@ namespace Scriban.Tests
 
             TextAssert.AreEqual(expected, result);
         }
+
+        [Test]
+        public void TestScriptObjectImport()
+        {
+            {
+                var obj = new ScriptObject();
+                obj.Import(typeof(MyStaticObject));
+
+                Assert.That(obj, Does.ContainKey("static_field_a"));
+                Assert.AreEqual("ValueStaticFieldA", obj["static_field_a"]);
+                Assert.True(obj.ContainsKey("static_field_b"));
+                Assert.AreEqual("ValueStaticFieldB", obj["static_field_b"]);
+                Assert.True(obj.ContainsKey("static_property_a"));
+                Assert.AreEqual("ValueStaticPropertyA", obj["static_property_a"]);
+                Assert.True(obj.ContainsKey("static_property_b"));
+                Assert.AreEqual("ValueStaticPropertyB", obj["static_property_b"]);
+                Assert.True(obj.ContainsKey("static_yoyo"));
+                Assert.False(obj.ContainsKey("invalid"));
+            }
+
+            // Test MemberFilterDelegate
+            {
+                var obj = new ScriptObject();
+                obj.Import(typeof(MyStaticObject), filter: member => member.Name.Contains("Property"));
+
+                Assert.That(obj, Does.Not.ContainKey("static_field_a"));
+                Assert.That(obj, Does.Not.ContainKey("static_field_b"));
+                Assert.That(obj, Does.ContainKey("static_property_a"));
+                Assert.AreEqual("ValueStaticPropertyA", obj["static_property_a"]);
+                Assert.That(obj, Does.ContainKey("static_property_b"));
+                Assert.AreEqual("ValueStaticPropertyB", obj["static_property_b"]);
+                Assert.That(obj, Does.Not.ContainKey("static_yoyo"));
+                Assert.That(obj, Does.Not.ContainKey("invalid"));
+            }
+
+            // Test MemberRenamerDelegate
+            {
+                var obj = new ScriptObject();
+                obj.Import(typeof(MyStaticObject), renamer: member => member.Name);
+
+                Assert.That(obj, Does.ContainKey(nameof(MyStaticObject.StaticFieldA)));
+                Assert.That(obj, Does.ContainKey(nameof(MyStaticObject.StaticFieldB)));
+                Assert.That(obj, Does.ContainKey(nameof(MyStaticObject.StaticPropertyA)));
+                Assert.AreEqual("ValueStaticPropertyA", obj[nameof(MyStaticObject.StaticPropertyA)]);
+                Assert.That(obj, Does.ContainKey(nameof(MyStaticObject.StaticPropertyB)));
+                Assert.AreEqual("ValueStaticPropertyB", obj[nameof(MyStaticObject.StaticPropertyB)]);
+                Assert.That(obj, Does.ContainKey(nameof(MyStaticObject.StaticYoyo)));
+                Assert.That(obj, Does.Not.ContainKey(nameof(MyStaticObject.Invalid)));
+            }
+        }
+
+
+        [Test]
+        public void TestScriptObjectAccessor()
+        {
+            {
+                var context = new TemplateContext();
+                var obj = new MyObject();
+                var accessor = context.GetMemberAccessor(obj);
+
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, "field_a"));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, "field_b"));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, "property_a"));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, "property_b"));
+
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "static_field_a"));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "static_field_b"));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "static_property_a"));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "static_property_b"));
+            }
+
+            // Test Filter
+            {
+                var context = new TemplateContext {MemberFilter = member => member is PropertyInfo};
+                var obj = new MyObject();
+                var accessor = context.GetMemberAccessor(obj);
+
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "field_a"));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "field_b"));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, "property_a"));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, "property_b"));
+
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "static_field_a"));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "static_field_b"));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "static_property_a"));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "static_property_b"));
+            }
+
+
+            // Test Renamer
+            {
+                var context = new TemplateContext { MemberRenamer = member => member.Name };
+                var obj = new MyObject();
+                var accessor = context.GetMemberAccessor(obj);
+
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyObject.FieldA)));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyObject.FieldB)));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj,  nameof(MyObject.PropertyA)));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj,  nameof(MyObject.PropertyB)));
+
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyStaticObject.StaticFieldA)));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyStaticObject.StaticFieldB)));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyStaticObject.StaticPropertyA)));
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyStaticObject.StaticPropertyB)));
+            }
+        }
+
+
+        private class MyObject : MyStaticObject
+        {
+            public string FieldA;
+
+            public string FieldB;
+
+            public string PropertyA { get; set; }
+
+            public string PropertyB { get; set; }
+
+        }
+
+        private class MyStaticObject
+        {
+            static MyStaticObject()
+            {
+                StaticPropertyA = "ValueStaticPropertyA";
+                StaticPropertyB = "ValueStaticPropertyB";
+            }
+
+            public static string StaticFieldA = "ValueStaticFieldA";
+
+            public static string StaticFieldB = "ValueStaticFieldB";
+
+            public static string StaticPropertyA { get; set; }
+
+            public static string StaticPropertyB { get; set; }
+
+            public string Invalid()
+            {
+                return null;
+            }
+
+            public static string StaticYoyo(string text)
+            {
+                return "yoyo " + text;
+            }
+        }
     }
 }

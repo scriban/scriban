@@ -16,7 +16,7 @@ namespace Scriban.Runtime
     /// Base runtime object used to store properties.
     /// </summary>
     /// <seealso cref="System.Collections.IEnumerable" />
-    public class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject
+    public class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject, IDictionary
     {
         internal Dictionary<string, InternalValue> Store { get; private set; }
 
@@ -50,6 +50,11 @@ namespace Scriban.Runtime
             }
         }
 
+        void IDictionary.Add(object key, object value)
+        {
+            ((IDictionary) Store).Add(key, value);
+        }
+
         /// <summary>
         /// Clears all members stored in this object.
         /// </summary>
@@ -58,16 +63,57 @@ namespace Scriban.Runtime
             Store.Clear();
         }
 
+        bool IDictionary.Contains(object key)
+        {
+            return ((IDictionary) Store).Contains(key);
+        }
+
+        IDictionaryEnumerator IDictionary.GetEnumerator()
+        {
+            return ((IDictionary) Store).GetEnumerator();
+        }
+
+        void IDictionary.Remove(object key)
+        {
+            ((IDictionary) Store).Remove(key);
+        }
+
+        bool IDictionary.IsFixedSize
+        {
+            get { return ((IDictionary) Store).IsFixedSize; }
+        }
+
+        void ICollection.CopyTo(Array array, int index)
+        {
+            ((ICollection) Store).CopyTo(array, index);
+        }
+
         /// <summary>
         /// Gets the number of members.
         /// </summary>
         public int Count => Store.Count;
+
+        bool ICollection.IsSynchronized
+        {
+            get { return ((ICollection) Store).IsSynchronized; }
+        }
+
+        object ICollection.SyncRoot
+        {
+            get { return ((ICollection) Store).SyncRoot; }
+        }
 
         /// <summary>
         /// Gets a value indicating whether this instance is read-only.
         /// </summary>
         /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
         public virtual bool IsReadOnly { get; set; }
+
+        object IDictionary.this[object key]
+        {
+            get { return ((IDictionary) Store)[key]; }
+            set { ((IDictionary) Store)[key] = value; }
+        }
 
         public IEnumerable<string> GetMembers()
         {
@@ -149,6 +195,15 @@ namespace Scriban.Runtime
         }
 
         public ICollection<string> Keys => Store.Keys;
+        ICollection IDictionary.Values
+        {
+            get { return ((IDictionary) Store).Values; }
+        }
+
+        ICollection IDictionary.Keys
+        {
+            get { return ((IDictionary) Store).Keys; }
+        }
 
         public ICollection<object> Values
         {
