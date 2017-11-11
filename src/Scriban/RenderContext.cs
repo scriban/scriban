@@ -2,13 +2,14 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using Scriban.Helpers;
+using Scriban.Parsing;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
-namespace Scriban.Syntax
+namespace Scriban
 {
     /// <summary>
     /// Render context used to write an AST/<see cref="ScriptNode"/> tree back to a text.
@@ -32,6 +33,10 @@ namespace Scriban.Syntax
         {
             _isWhileLoop = new FastStack<bool>(4);
             Options = options;
+            if (options.Mode != ScriptMode.Default)
+            {
+                throw new ArgumentException($"The rendering mode `{options.Mode}` is not supported. Only `ScriptMode.Default` is currently supported");
+            }
             _output = output;          
         }
 
