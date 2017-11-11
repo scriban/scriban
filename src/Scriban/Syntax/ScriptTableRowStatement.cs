@@ -64,7 +64,7 @@ namespace Scriban.Syntax
             return result;
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write("tablerow").ExpectSpace();
             context.Write(Variable).ExpectSpace();

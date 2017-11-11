@@ -68,7 +68,7 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(Span, $"Operator `{Operator}` is not supported");
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write(Operator.ToText());
             context.Write(Right);

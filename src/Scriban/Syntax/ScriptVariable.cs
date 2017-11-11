@@ -138,7 +138,7 @@ namespace Scriban.Syntax
             context.SetValue(this, valueToSet);
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write(ToString());
         }
@@ -171,7 +171,7 @@ namespace Scriban.Syntax
         {
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             if (context.IsInWhileLoop)
             {

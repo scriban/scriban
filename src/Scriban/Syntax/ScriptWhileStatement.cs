@@ -29,7 +29,7 @@ namespace Scriban.Syntax
             AfterLoop(context);
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write("while").ExpectSpace();
             context.Write(Condition);

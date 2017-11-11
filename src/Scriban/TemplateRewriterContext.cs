@@ -12,9 +12,9 @@ using Scriban.Syntax;
 namespace Scriban
 {
     /// <summary>
-    /// Render context used to write an AST/<see cref="ScriptNode"/> tree back to a text.
+    /// Rewriter context used to write an AST/<see cref="ScriptNode"/> tree back to a text.
     /// </summary>
-    public class RenderContext
+    public class TemplateRewriterContext
     {
         private readonly IScriptOutput _output;
         private bool _isInCode;
@@ -29,7 +29,7 @@ namespace Scriban
         private FastStack<bool> _isWhileLoop;
         private ScriptRawStatement _previousRawStatement;
 
-        public RenderContext(IScriptOutput output, RenderOptions options = default(RenderOptions))
+        public TemplateRewriterContext(IScriptOutput output, TemplateRewriterOptions options = default(TemplateRewriterOptions))
         {
             _isWhileLoop = new FastStack<bool>(4);
             Options = options;
@@ -43,13 +43,13 @@ namespace Scriban
         /// <summary>
         /// Gets the options for rendering
         /// </summary>
-        public readonly RenderOptions Options;
+        public readonly TemplateRewriterOptions Options;
 
         public bool PreviousHasSpace => _previousHasSpace;
 
         public bool IsInWhileLoop => _isWhileLoop.Count > 0 && _isWhileLoop.Peek();
 
-        public RenderContext Write(ScriptNode node)
+        public TemplateRewriterContext Write(ScriptNode node)
         {
             if (node != null)
             {
@@ -81,14 +81,14 @@ namespace Scriban
             return this;
         }
 
-        public RenderContext Write(string text)
+        public TemplateRewriterContext Write(string text)
         {
             _previousHasSpace = text.Length > 0 && char.IsWhiteSpace(text[text.Length - 1]);
             _output.Write(text);
             return this;
         }
 
-        public RenderContext ExpectEos()
+        public TemplateRewriterContext ExpectEos()
         {
             if (!_hasEndOfStatement)
             {
@@ -97,20 +97,20 @@ namespace Scriban
             return this;
         }
 
-        public RenderContext ExpectSpace()
+        public TemplateRewriterContext ExpectSpace()
         {
             _expectSpace = true;
             return this;
         }
 
-        public RenderContext ExpectEnd()
+        public TemplateRewriterContext ExpectEnd()
         {
             _expectEnd = true;
             ExpectEos();
             return this;
         }
 
-        public RenderContext WriteListWithCommas<T>(IList<T> list) where T : ScriptNode
+        public TemplateRewriterContext WriteListWithCommas<T>(IList<T> list) where T : ScriptNode
         {
             if (list == null)
             {
@@ -130,7 +130,7 @@ namespace Scriban
             return this;
         }
 
-        public RenderContext WriteEnterCode(int escape = 0)
+        public TemplateRewriterContext WriteEnterCode(int escape = 0)
         {
             Write("{");
             for (int i = 0; i < escape; i++)
@@ -151,7 +151,7 @@ namespace Scriban
             return this;
         }
 
-        public RenderContext WriteExitCode(int escape = 0)
+        public TemplateRewriterContext WriteExitCode(int escape = 0)
         {
             if (_nextRStrip != ScriptTriviaType.Empty)
             {

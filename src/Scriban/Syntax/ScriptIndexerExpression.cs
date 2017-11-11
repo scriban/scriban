@@ -26,7 +26,7 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write(Target);
             var isSpecialArgumentsArray = Equals(Target, ScriptVariable.Arguments) && Index is ScriptLiteral &&

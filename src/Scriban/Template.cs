@@ -191,11 +191,11 @@ namespace Scriban
         /// </summary>
         /// <param name="options">The rendering options</param>
         /// <returns>The template converted back to a textual representation of the template</returns>
-        public string ToText(RenderOptions options = default(RenderOptions))
+        public string ToText(TemplateRewriterOptions options = default(TemplateRewriterOptions))
         {
             CheckErrors();
             var writer = new TextWriterOutput();
-            var renderContext = new RenderContext(writer, options);
+            var renderContext = new TemplateRewriterContext(writer, options);
             renderContext.Write(Page);
 
             return writer.ToString();

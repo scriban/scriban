@@ -36,7 +36,7 @@ namespace Scriban.Syntax
             return true;
         }
 
-        public abstract void Write(RenderContext context);
+        public abstract void Write(TemplateRewriterContext context);
     }
 
     public static class ScriptNodeExtensions
@@ -131,7 +131,7 @@ namespace Scriban.Syntax
 
         public readonly string Text;
 
-        public void Write(RenderContext context)
+        public void Write(TemplateRewriterContext context)
         {
             var rawText = ToString();
 

@@ -15,7 +15,7 @@ namespace Scriban.Syntax
             return context.Evaluate(Expression);
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write("ret").ExpectSpace();
             context.Write(Expression);

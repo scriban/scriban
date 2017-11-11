@@ -12,7 +12,7 @@ namespace Scriban.Syntax
             return Function;
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write("do").ExpectSpace();
             context.Write(Function);

@@ -10,7 +10,7 @@ namespace Scriban
     /// <summary>
     /// Defines the options used for rendering back an AST/<see cref="ScriptNode"/> to a text.
     /// </summary>
-    public struct RenderOptions
+    public struct TemplateRewriterOptions
     {
         /// <summary>
         /// The mode used to render back an AST

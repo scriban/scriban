@@ -36,7 +36,7 @@ namespace Scriban.Syntax
             }
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write("wrap").ExpectSpace();
             context.Write(Target);

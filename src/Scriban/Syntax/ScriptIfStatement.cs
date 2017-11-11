@@ -34,7 +34,7 @@ namespace Scriban.Syntax
             return conditionValue ? context.Evaluate(Then) : context.Evaluate(Else);
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             if (IsElseIf)
             {

@@ -16,7 +16,7 @@ namespace Scriban.Syntax
             container.NamedArguments.Add(argument);
         }
 
-        public static void Write(this RenderContext context, List<ScriptNamedArgument> parameters)
+        public static void Write(this TemplateRewriterContext context, List<ScriptNamedArgument> parameters)
         {
             if (parameters == null)
             {

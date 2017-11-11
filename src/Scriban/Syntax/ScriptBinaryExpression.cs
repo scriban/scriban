@@ -34,7 +34,7 @@ namespace Scriban.Syntax
             return Evaluate(context, Span, Operator, leftValue, rightValue);
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write(Left);
             // Because a-b is a variable name, we need to transform binary op a-b to a - b

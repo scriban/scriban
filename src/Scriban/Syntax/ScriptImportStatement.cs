@@ -28,7 +28,7 @@ namespace Scriban.Syntax
             return null;
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write("import").ExpectSpace();
             context.Write(Expression);

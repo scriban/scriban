@@ -23,7 +23,7 @@ namespace Scriban.Syntax
             return result;
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write(Expression);
             context.ExpectEos();

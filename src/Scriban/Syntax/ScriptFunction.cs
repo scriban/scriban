@@ -30,7 +30,7 @@ namespace Scriban.Syntax
             return $"func {Name} ... end";
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             if (Name != null)
             {

@@ -71,7 +71,7 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             if (Value == null)
             {

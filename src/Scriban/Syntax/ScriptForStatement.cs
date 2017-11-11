@@ -109,7 +109,7 @@ namespace Scriban.Syntax
             }
         }
 
-        public override void Write(RenderContext context)
+        public override void Write(TemplateRewriterContext context)
         {
             context.Write("for").ExpectSpace();
             context.Write(Variable).ExpectSpace();
