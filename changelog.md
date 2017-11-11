@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.16.0 (11 Nov 2017)
+
+- Work towards 1.0.0-beta
+- Change MemberRenamer to receive a MemberInfo instead
+- Change MemberFilter to receive a MemberInfo instead. Add support to setup a MemberFilter on a TemplateContext as a MemberRenamer
+- Rename `RenderContext`/`RenderOptions` to `TemplateRewriterContext`/`TemplateRewriterOptions`
+- Allow liquid parser to accept anykind of tags in tag sections and not only the defaults
+
 ## 0.15.0 (09 Nov 2017)
 
 - Add changelog.md
