@@ -12,13 +12,15 @@ namespace Scriban.Runtime.Accessors
 {
     public class TypedObjectAccessor : IObjectAccessor
     {
+        private readonly MemberFilterDelegate _filter;
         private readonly Type _type;
         private readonly MemberRenamerDelegate _renamer;
         private readonly Dictionary<string, MemberInfo> _members;
 
-        public TypedObjectAccessor(Type targetType, MemberRenamerDelegate renamer)
+        public TypedObjectAccessor(Type targetType, MemberFilterDelegate filter, MemberRenamerDelegate renamer)
         {
             _type = targetType ?? throw new ArgumentNullException(nameof(targetType));
+            _filter = filter;
             _renamer = renamer ?? StandardMemberRenamer.Default;
             _members = new Dictionary<string, MemberInfo>();
             PrepareMembers();
@@ -83,9 +85,9 @@ namespace Scriban.Runtime.Accessors
             foreach (var field in _type.GetTypeInfo().GetDeclaredFields())
             {
                 var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                if (keep && !field.IsStatic && field.IsPublic)
+                if (keep && !field.IsStatic && field.IsPublic && (_filter == null || _filter(field)))
                 {
-                    var newFieldName = Rename(field.Name);
+                    var newFieldName = Rename(field);
                     if (string.IsNullOrEmpty(newFieldName))
                     {
                         newFieldName = field.Name;
@@ -100,9 +102,9 @@ namespace Scriban.Runtime.Accessors
             foreach (var property in _type.GetTypeInfo().GetDeclaredProperties())
             {
                 var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                if (keep && property.CanRead && !property.GetGetMethod().IsStatic && property.GetGetMethod().IsPublic)
+                if (keep && property.CanRead && !property.GetGetMethod().IsStatic && property.GetGetMethod().IsPublic && (_filter == null || _filter(property)))
                 {
-                    var newPropertyName = Rename(property.Name);
+                    var newPropertyName = Rename(property);
                     if (string.IsNullOrEmpty(newPropertyName))
                     {
                         newPropertyName = property.Name;
@@ -115,9 +117,9 @@ namespace Scriban.Runtime.Accessors
             }
         }
 
-        private string Rename(string name)
+        private string Rename(MemberInfo member)
         {
-            return _renamer(name);
+            return _renamer(member);
         }
     }
 }

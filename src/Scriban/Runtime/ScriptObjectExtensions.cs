@@ -18,13 +18,6 @@ namespace Scriban.Runtime
     public static class ScriptObjectExtensions
     {
         /// <summary>
-        /// Allows to filter a member.
-        /// </summary>
-        /// <param name="member">The member.</param>
-        /// <returns></returns>
-        public delegate bool FilterMemberDelegate(string member);
-
-        /// <summary>
         /// Asserts that the specified script object is not readonly or throws a <see cref="ScriptRuntimeException"/>
         /// </summary>
         /// <param name="scriptObject">The script object.</param>
@@ -51,7 +44,7 @@ namespace Scriban.Runtime
         /// <li>If <paramref name="obj"/> is a plain object, this method will import the public fields/properties of the specified object into the <see cref="ScriptObject"/>.</li>
         /// </ul>
         /// </remarks>
-        public static void Import(this IScriptObject script, object obj, FilterMemberDelegate filter = null, MemberRenamerDelegate renamer = null)
+        public static void Import(this IScriptObject script, object obj, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
         {
             if (obj is IScriptObject)
             {
@@ -171,7 +164,7 @@ namespace Scriban.Runtime
         /// <param name="exportName">Name of the member name replacement. If null, use the default renamer will be used.</param>
         public static void ImportMember(this IScriptObject script, object obj, string memberName, string exportName = null)
         {
-            script.Import(obj, ScriptMemberImportFlags.All | ScriptMemberImportFlags.MethodInstance, member => member == memberName, exportName != null ? name => exportName: (MemberRenamerDelegate)null);
+            script.Import(obj, ScriptMemberImportFlags.All | ScriptMemberImportFlags.MethodInstance, member => member.Name == memberName, exportName != null ? name => exportName: (MemberRenamerDelegate)null);
         }
 
 
@@ -184,7 +177,7 @@ namespace Scriban.Runtime
         /// <param name="filter">A filter applied on each member</param>
         /// <param name="renamer">The member renamer.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
-        public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, FilterMemberDelegate filter = null, MemberRenamerDelegate renamer = null)
+        public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
         {
             if (obj == null)
             {
@@ -220,7 +213,7 @@ namespace Scriban.Runtime
                     {
                         continue;
                     }
-                    if (filter != null && !filter(field.Name))
+                    if (filter != null && !filter(field))
                     {
                         continue;
                     }
@@ -228,7 +221,7 @@ namespace Scriban.Runtime
                     var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && ((field.IsStatic && useStatic) || useInstance))
                     {
-                        var newFieldName = renamer(field.Name);
+                        var newFieldName = renamer(field);
                         if (String.IsNullOrEmpty(newFieldName))
                         {
                             newFieldName = field.Name;
@@ -249,7 +242,7 @@ namespace Scriban.Runtime
                         continue;
                     }
 
-                    if (filter != null && !filter(property.Name))
+                    if (filter != null && !filter(property))
                     {
                         continue;
                     }
@@ -257,7 +250,7 @@ namespace Scriban.Runtime
                     var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && (((property.GetGetMethod().IsStatic && useStatic) || useInstance)))
                     {
-                        var newPropertyName = renamer(property.Name);
+                        var newPropertyName = renamer(property);
                         if (String.IsNullOrEmpty(newPropertyName))
                         {
                             newPropertyName = property.Name;
@@ -274,7 +267,7 @@ namespace Scriban.Runtime
             {
                 foreach (var method in typeInfo.GetDeclaredMethods())
                 {
-                    if (filter != null && !filter(method.Name))
+                    if (filter != null && !filter(method))
                     {
                         continue;
                     }
@@ -282,7 +275,7 @@ namespace Scriban.Runtime
                     var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && method.IsPublic && ((useMethodInstance && !method.IsStatic) || (useStatic && method.IsStatic)) && !method.IsSpecialName)
                     {
-                        var newMethodName = renamer(method.Name);
+                        var newMethodName = renamer(method);
                         if (String.IsNullOrEmpty(newMethodName))
                         {
                             newMethodName = method.Name;

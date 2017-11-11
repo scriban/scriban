@@ -143,7 +143,7 @@ This document describes the various built-in functions available in scriban.
                 }
                 else if (methodInfo != null && IsBuiltinType(methodInfo.DeclaringType, out shortName))
                 {
-                    var methodShortName = StandardMemberRenamer.Default(methodInfo.Name);
+                    var methodShortName = StandardMemberRenamer.Default(methodInfo);
 
                     var classWriter = _classWriters[shortName];
 

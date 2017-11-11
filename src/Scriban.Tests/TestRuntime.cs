@@ -3,6 +3,7 @@
 
 using System;
 using System.Globalization;
+using System.Reflection;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Scriban.Parsing;
@@ -195,7 +196,7 @@ namespace Scriban.Tests
             var template = Template.Parse(myTemplate);
 
             // Render
-            var context = new TemplateContext { MemberRenamer = name => name };
+            var context = new TemplateContext { MemberRenamer = member => member.Name };
             var scriptObject = new ScriptObject();
             scriptObject.Import(new { tb = parsed });
             context.PushGlobal(scriptObject);

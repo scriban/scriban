@@ -154,9 +154,14 @@ namespace Scriban
         public LexerOptions TemplateLoaderLexerOptions { get; set; }
 
         /// <summary>
-        /// A global settings used to rename property names of exposed objects.
+        /// A global settings used to rename property names of exposed .NET objects.
         /// </summary>
         public MemberRenamerDelegate MemberRenamer { get; set; }
+        
+        /// <summary>
+        /// A global settings used to filter field/property names of exposed .NET objects.
+        /// </summary>
+        public MemberFilterDelegate MemberFilter { get; set; }
 
         /// <summary>
         /// A loop limit that can be used at runtime to limit the number of loops. Default is 1000.
@@ -683,7 +688,7 @@ namespace Scriban
             }
             else
             {
-                accessor = new TypedObjectAccessor(type, MemberRenamer);
+                accessor = new TypedObjectAccessor(type, MemberFilter, MemberRenamer);
             }
             return accessor;
         }

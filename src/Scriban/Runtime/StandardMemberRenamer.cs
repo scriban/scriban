@@ -1,6 +1,8 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
+using System.Reflection;
 using System.Text;
 
 namespace Scriban.Runtime
@@ -15,15 +17,16 @@ namespace Scriban.Runtime
         /// <summary>
         /// Renames a camel/pascalcase member to a lowercase and `_` name. e.g `ThisIsAnExample` becomes `this_is_an_example`.
         /// </summary>
-        /// <param name="member">The member name to rename</param>
+        /// <param name="member">The member to rename</param>
         /// <returns>The member name renamed</returns>
-        public static string Rename(string member)
+        public static string Rename(MemberInfo member)
         {
+            string name = member.Name;
             var builder = new StringBuilder();
             bool previousUpper = false;
-            for (int i = 0; i < member.Length; i++)
+            for (int i = 0; i < name.Length; i++)
             {
-                var c = member[i];
+                var c = name[i];
                 if (char.IsUpper(c))
                 {
                     if (i > 0 && !previousUpper)
