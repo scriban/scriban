@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-beta-001 (12 Nov 2017)
+
+- Bump version from 0.16.0 to 1.0.0-beta-001
+
 ## 0.16.0 (11 Nov 2017)
 
 - Work towards 1.0.0-beta
