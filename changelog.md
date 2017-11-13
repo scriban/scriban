@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.0-beta-002 (13 Nov 2017)
+
+- Add support for decimal
+- Add support for nullable types for user functions
+
 ## 1.0.0-beta-001 (12 Nov 2017)
 
 - Bump version from 0.16.0 to 1.0.0-beta-001
