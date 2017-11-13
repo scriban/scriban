@@ -166,9 +166,10 @@ namespace Scriban
         /// <summary>
         /// Called when evaluating a value to a boolean. Can be overriden for specific object scenarios.
         /// </summary>
+        /// <param name="span">The span requiring this conversion</param>
         /// <param name="value">An object value</param>
         /// <returns>The boolean representation of the object</returns>
-        public virtual bool ToBool(object value)
+        public virtual bool ToBool(SourceSpan span, object value)
         {
             // null -> false
             if (value == null || value == EmptyScriptObject.Default)
@@ -194,29 +195,13 @@ namespace Scriban
         {
             try
             {
+                if (value == null) return 0;
+                if (value is int) return (int) value;
                 return Convert.ToInt32(value, CurrentCulture);
             }
             catch (FormatException ex)
             {
                 throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to int", ex);
-            }
-        }
-
-        /// <summary>
-        /// Called when evaluating a value to an double. Can be overriden.
-        /// </summary>
-        /// <param name="span">The span requiring this conversion</param>
-        /// <param name="value">The value of the object to convert</param>
-        /// <returns>The double value</returns>
-        public virtual double ToDouble(SourceSpan span, object value)
-        {
-            try
-            {
-                return Convert.ToDouble(value, CurrentCulture);
-            }
-            catch (FormatException ex)
-            {
-                throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to double", ex);
             }
         }
 
@@ -231,53 +216,59 @@ namespace Scriban
         {
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
 
+            // Make sure that we are using the underlying type of a a Nullable type
+            destinationType = Nullable.GetUnderlyingType(destinationType) ?? destinationType;
+
+            if (destinationType == typeof(string))
+            {
+                return ToString(span, value);
+            }
+
+            if (destinationType == typeof(int))
+            {
+                return ToInt(span, value);
+            }
+
+            if (destinationType == typeof(bool))
+            {
+                return ToBool(span, value);
+            }
+
             // Handle null case
             if (value == null)
             {
-                if (destinationType == typeof(bool))
-                {
-                    return false;
-                }
-
-                if (destinationType == typeof(string))
-                {
-                    return string.Empty;
-                }
-
-                // TODO: Couldn't we get a converter method that support null to -> 0?
-                if (destinationType == typeof(int))
-                {
-                    return (int)0;
-                }
-                else if (destinationType == typeof(double))
+                if (destinationType == typeof(double))
                 {
                     return (double)0.0;
                 }
-                else if (destinationType == typeof(float))
+
+                if (destinationType == typeof(float))
                 {
                     return (float)0.0f;
                 }
-                else if (destinationType == typeof(long))
+
+                if (destinationType == typeof(long))
                 {
                     return (long)0L;
+                }
+
+                if (destinationType == typeof(decimal))
+                {
+                    return (decimal)0;
                 }
 
                 return null;
             }
 
             var type = value.GetType();
-            var typeInfo = type.GetTypeInfo();
-            var destTypeInfo = destinationType.GetTypeInfo();
-
-            if (destTypeInfo == typeInfo || destTypeInfo.IsAssignableFrom(typeInfo))
+            if (destinationType == type)
             {
                 return value;
             }
 
-            if (destinationType == typeof(string))
-            {
-                return ToString(span, value);
-            }
+            // Check for inheritance
+            var typeInfo = type.GetTypeInfo();
+            var destTypeInfo = destinationType.GetTypeInfo();
 
             if (typeInfo.IsPrimitive && destTypeInfo.IsPrimitive)
             {
@@ -294,6 +285,11 @@ namespace Scriban
             if (destinationType == typeof(IList))
             {
                 return ToList(span, value);
+            }
+
+            if (destTypeInfo.IsAssignableFrom(typeInfo))
+            {
+                return value;
             }
 
             throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`");

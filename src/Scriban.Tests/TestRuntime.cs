@@ -327,6 +327,17 @@ namespace Scriban.Tests
             }
         }
 
+        [Test]
+        public void TestNullableArgument()
+        {
+            var template = Template.Parse("{{ tester 'input1' 1 }}");
+            var context = new TemplateContext();
+            var testerObj = new ScriptObjectWithNullable();
+            context.PushGlobal(testerObj);
+            var result = template.Render(context);
+            TextAssert.AreEqual("input1 Value: 1", result);
+        }
+
 
         private class MyObject : MyStaticObject
         {
@@ -364,6 +375,14 @@ namespace Scriban.Tests
             public static string StaticYoyo(string text)
             {
                 return "yoyo " + text;
+            }
+        }
+
+        public class ScriptObjectWithNullable : ScriptObject
+        {
+            public static string Tester(string text, int? value = null)
+            {
+                return value.HasValue ? text + " Value: " + value.Value : text;
             }
         }
     }

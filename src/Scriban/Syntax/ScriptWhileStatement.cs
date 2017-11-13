@@ -15,7 +15,7 @@ namespace Scriban.Syntax
             BeforeLoop(context);
             while (context.StepLoop(this))
             {
-                var conditionResult = context.ToBool(context.Evaluate(Condition));
+                var conditionResult = context.ToBool(Condition.Span, context.Evaluate(Condition));
                 if (!conditionResult)
                 {
                     break;

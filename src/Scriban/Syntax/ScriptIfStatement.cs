@@ -26,7 +26,7 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            var conditionValue = context.ToBool(context.Evaluate(Condition));
+            var conditionValue = context.ToBool(Condition.Span, context.Evaluate(Condition));
             if (InvertCondition)
             {
                 conditionValue = !conditionValue;

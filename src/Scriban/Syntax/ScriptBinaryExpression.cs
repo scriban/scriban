@@ -69,8 +69,8 @@ namespace Scriban.Syntax
             }
             else if (op == ScriptBinaryOperator.And || op == ScriptBinaryOperator.Or)
             {
-                var leftBoolValue = context.ToBool(leftValue);
-                var rightBoolValue = context.ToBool(rightValue);
+                var leftBoolValue = context.ToBool(span, leftValue);
+                var rightBoolValue = context.ToBool(span, rightValue);
                 if (op == ScriptBinaryOperator.And)
                 {
                     return leftBoolValue && rightBoolValue;
@@ -368,7 +368,20 @@ namespace Scriban.Syntax
             var leftType = leftValue.GetType();
             var rightType = rightValue.GetType();
 
-            // The order matters: double, float, long, int
+
+            // The order matters: decimal, double, float, long, int
+            if (leftType == typeof(decimal))
+            {
+                var rightDecimal = (decimal)context.ToObject(span, rightValue, typeof(decimal));
+                return CalculateDecimal(op, span, (decimal)leftValue, rightDecimal);
+            }
+
+            if (rightType == typeof(decimal))
+            {
+                var leftDecimal = (decimal)context.ToObject(span, leftValue, typeof(decimal));
+                return CalculateDecimal(op, span, leftDecimal, (decimal)rightValue);
+            }
+
             if (leftType == typeof(double))
             {
                 var rightDouble = (double)context.ToObject(span, rightValue, typeof(double));
@@ -377,7 +390,6 @@ namespace Scriban.Syntax
 
             if (rightType == typeof(double))
             {
-                if (leftValue == null) return null;
                 var leftDouble = (double)context.ToObject(span, leftValue, typeof(double));
                 return CalculateDouble(op, span, leftDouble, (double)rightValue);
             }
@@ -490,7 +502,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Multiply:
                     return left * right;
                 case ScriptBinaryOperator.Divide:
-                    return (float)left / right;
+                    return (double)left / right;
                 case ScriptBinaryOperator.DivideRound:
                     return left / right;
                 case ScriptBinaryOperator.Modulus:
@@ -523,9 +535,9 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Multiply:
                     return left * right;
                 case ScriptBinaryOperator.Divide:
-                    return (float)left / right;
+                    return left / right;
                 case ScriptBinaryOperator.DivideRound:
-                    return (double)(int)(left / right);
+                    return Math.Round(left / right);
                 case ScriptBinaryOperator.Modulus:
                     return left % right;
                 case ScriptBinaryOperator.CompareEqual:
@@ -542,6 +554,38 @@ namespace Scriban.Syntax
                     return left <= right;
             }
             throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for double<->double");
+        }
+
+        private static object CalculateDecimal(ScriptBinaryOperator op, SourceSpan span, decimal left, decimal right)
+        {
+            switch (op)
+            {
+                case ScriptBinaryOperator.Add:
+                    return left + right;
+                case ScriptBinaryOperator.Substract:
+                    return left - right;
+                case ScriptBinaryOperator.Multiply:
+                    return left * right;
+                case ScriptBinaryOperator.Divide:
+                    return left / right;
+                case ScriptBinaryOperator.DivideRound:
+                    return Math.Round(left / right);
+                case ScriptBinaryOperator.Modulus:
+                    return left % right;
+                case ScriptBinaryOperator.CompareEqual:
+                    return left == right;
+                case ScriptBinaryOperator.CompareNotEqual:
+                    return left != right;
+                case ScriptBinaryOperator.CompareGreater:
+                    return left > right;
+                case ScriptBinaryOperator.CompareLess:
+                    return left < right;
+                case ScriptBinaryOperator.CompareGreaterOrEqual:
+                    return left >= right;
+                case ScriptBinaryOperator.CompareLessOrEqual:
+                    return left <= right;
+            }
+            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for decimal<->decimal");
         }
 
         private static object CalculateFloat(ScriptBinaryOperator op, SourceSpan span, float left, float right)
