@@ -1,6 +1,6 @@
 # Benchmarks
 
-Latest benchmark update: 4 November 2017
+Latest benchmark update: 13 November 2017
 
 > NOTE: This is a micro benchmark, so results may vary vastly on use cases. The goal here is to demonstrate on a very simple example how the different engines behave
 > Also, while Scriban is compared here to `liquid` and `mustache` like templating engines, you should  keep in mind that language-wise, Scriban is allowing a lot more language constructions/expressions.
@@ -12,7 +12,7 @@ The benchmark was performed on two aspects of the libraries:
 
 Libraries used in this comparison:
 
-- Scriban (0.11.0), Syntax: Scriban
+- Scriban (1.0.0-beta-001), Syntax: Scriban
 - [Fluid](https://github.com/sebastienros/fluid/) (Fluid.Core.1.0.0-beta-9334), Syntax: Liquid based
 - [DotLiquid](https://github.com/dotliquid/dotliquid) (2.0.200), Syntax: Liquid based
 - [Stubble](https://github.com/StubbleOrg/Stubble) (1.0.42-alpha17), Syntax: Mustache+ based
