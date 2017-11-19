@@ -86,6 +86,11 @@ namespace Scriban.Runtime
             return true;
         }
 
+        public static void SetValue(this IScriptObject @this, string member, object value, bool readOnly)
+        {
+            @this.SetValue(null, new SourceSpan(), member, value, readOnly);
+        }
+
         /// <summary>
         /// Imports the specified <see cref="ScriptObject"/> into this instance by copying the member values into this object.
         /// </summary>
