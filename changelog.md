@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-beta-004 (19 Nov 2017)
+
+- Add better exception with span if an error occured when getPath/Load a template include
+
 ## 1.0.0-beta-003 (19 Nov 2017)
 
 - Add extension method IScripObject.SetValue
