@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-beta-003 (19 Nov 2017)
+
+- Add extension method IScripObject.SetValue
+
 ## 1.0.0-beta-002 (13 Nov 2017)
 
 - Add support for decimal
