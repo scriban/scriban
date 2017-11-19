@@ -44,7 +44,16 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.TemplateLoader");
             }
 
-            var templatePath = templateLoader.GetPath(context, callerContext.Span, templateName);
+            string templatePath;
+
+            try
+            {
+                templatePath = templateLoader.GetPath(context, callerContext.Span, templateName);
+            }
+            catch (Exception ex) when (!(ex is ScriptRuntimeException))
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while getting the path for the include name `{templateName}`", ex);
+            }
             // If template name is empty, throw an exception
             if (templatePath == null)
             {
@@ -65,7 +74,15 @@ namespace Scriban.Functions
             if (!context.CachedTemplates.TryGetValue(templatePath, out template))
             {
 
-                var templateText = templateLoader.Load(context, callerContext.Span, templatePath);
+                string templateText;
+                try
+                {
+                    templateText = templateLoader.Load(context, callerContext.Span, templatePath);
+                }
+                catch (Exception ex) when (!(ex is ScriptRuntimeException))
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while loading the include `{templateName}` from path `{templatePath}`", ex);
+                }
 
                 if (templateText == null)
                 {
