@@ -598,7 +598,7 @@ Note that renaming can be changed at two levels:
   var scriptObject1 = new ScriptObject();
   // Here the renamer will just return a same member name as the original
   // hence importing .NET member name as-is
-  scriptObject1.Import(new MyObject(), renamer: member => member);
+  scriptObject1.Import(new MyObject(), renamer: member => member.Name);
   
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
@@ -613,7 +613,7 @@ Note that renaming can be changed at two levels:
 
   ```C#
   // Setup a default renamer at the `TemplateContext` level
-  var context = new TemplateContext {MemberRenamer = member => member};
+  var context = new TemplateContext {MemberRenamer = member => member.Name};
   ```
 
   It is important to setup this on the `TemplateContext` for any .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the correct naming convention. 
