@@ -256,6 +256,8 @@ This function can be imported into a ScriptObject:
 > Notice that when using a function with pipe calls like `{{description | string.strip }}``, the last argument passed to the `string.strip` function is the result of the previous pipe.
 > That's a reason why you will notice in all builtin functions in scriban that they usually take the most relevant parameter as a last parameter instead of the first parameter, to allow proper support for pipe calls.
 
+> NOTE: The members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
+
 #### Automatic functions import from `ScriptObject`
 
 When inheriting from a `ScriptObject`, the inherited object will automatically import all public static methods and properties from the class:
@@ -296,6 +298,8 @@ Then using directly this custom `ScriptObject` as a regular object:
 Notice that if you want to ignore a member when importing a .NET object or .NET class, you can use the attribute `ScriptMemberIgnore`
 
 > NOTE: Because Scriban doesn't support Function overloading, it is required that functions imported from a type must have different names.
+
+> NOTE: The members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
 
 #### Function arguments, optional and `params`
 
@@ -418,7 +422,7 @@ and import the properties/functions of this object into a ScriptObject, via `Scr
 
 Also any objects inheriting from `IDictionary<TKey, TValue>` or `IDictionary` will be also accessible automatically. Typically, you can usually access directly any generic JSON objects that was parsed by a JSON library.
 
-> You will notice that the members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
+> NOTE: The members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
 
 #### Accessing a .NET object
 
@@ -443,6 +447,8 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
   // Prints This is MyFunctions.Hello: `hello from method!`
   Console.WriteLine(context.Output.ToString());
   ```
+
+> NOTE: The members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
 
 #### read-only properties
 
