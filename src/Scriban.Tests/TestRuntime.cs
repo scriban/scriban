@@ -269,6 +269,16 @@ namespace Scriban.Tests
                 Assert.That(obj, Does.ContainKey(nameof(MyStaticObject.StaticYoyo)));
                 Assert.That(obj, Does.Not.ContainKey(nameof(MyStaticObject.Invalid)));
             }
+
+            {
+                var obj = new ScriptObject();
+                obj.Import(new MyObject2(), renamer: member => member.Name);
+
+                Assert.AreEqual(9, obj.Count);
+                Assert.That(obj, Does.ContainKey(nameof(MyStaticObject.StaticFieldA)));
+                Assert.That(obj, Does.ContainKey(nameof(MyObject.PropertyA)));
+                Assert.That(obj, Does.ContainKey(nameof(MyObject2.PropertyC)));
+            }
         }
 
 
@@ -349,6 +359,11 @@ namespace Scriban.Tests
 
             public string PropertyB { get; set; }
 
+        }
+
+        private class MyObject2 : MyObject
+        {
+            public string PropertyC { get; set; }            
         }
 
         private class MyStaticObject

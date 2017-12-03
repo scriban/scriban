@@ -210,85 +210,94 @@ namespace Scriban.Runtime
 
             renamer = renamer ?? StandardMemberRenamer.Default;
 
-            if ((flags & ScriptMemberImportFlags.Field) != 0)
+            while (typeInfo != null)
             {
-                foreach (var field in typeInfo.GetDeclaredFields())
+                if ((flags & ScriptMemberImportFlags.Field) != 0)
                 {
-                    if (!field.IsPublic)
+                    foreach (var field in typeInfo.GetDeclaredFields())
                     {
-                        continue;
-                    }
-                    if (filter != null && !filter(field))
-                    {
-                        continue;
-                    }
-
-                    var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                    if (keep && ((field.IsStatic && useStatic) || useInstance))
-                    {
-                        var newFieldName = renamer(field);
-                        if (String.IsNullOrEmpty(newFieldName))
+                        if (!field.IsPublic)
                         {
-                            newFieldName = field.Name;
+                            continue;
+                        }
+                        if (filter != null && !filter(field))
+                        {
+                            continue;
                         }
 
-                        // If field is init only or literal, it cannot be set back so we mark it as read-only
-                        script.SetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                        var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                        if (keep && ((field.IsStatic && useStatic) || useInstance))
+                        {
+                            var newFieldName = renamer(field);
+                            if (String.IsNullOrEmpty(newFieldName))
+                            {
+                                newFieldName = field.Name;
+                            }
+
+                            // If field is init only or literal, it cannot be set back so we mark it as read-only
+                            script.SetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                        }
                     }
                 }
-            }
 
-            if ((flags & ScriptMemberImportFlags.Property) != 0)
-            {
-                foreach (var property in typeInfo.GetDeclaredProperties())
+                if ((flags & ScriptMemberImportFlags.Property) != 0)
                 {
-                    if (!property.CanRead || !property.GetGetMethod().IsPublic)
+                    foreach (var property in typeInfo.GetDeclaredProperties())
                     {
-                        continue;
-                    }
-
-                    if (filter != null && !filter(property))
-                    {
-                        continue;
-                    }
-
-                    var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                    if (keep && (((property.GetGetMethod().IsStatic && useStatic) || useInstance)))
-                    {
-                        var newPropertyName = renamer(property);
-                        if (String.IsNullOrEmpty(newPropertyName))
+                        if (!property.CanRead || !property.GetGetMethod().IsPublic)
                         {
-                            newPropertyName = property.Name;
+                            continue;
                         }
 
-                        // Initially, we were setting readonly depending on the precense of a set method, but this is not compatible with liquid implems, so we remove readonly restriction
-                        //script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
-                        script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
-                    }
-                }
-            }
-
-            if ((flags & ScriptMemberImportFlags.Method) != 0 && (useStatic || useMethodInstance))
-            {
-                foreach (var method in typeInfo.GetDeclaredMethods())
-                {
-                    if (filter != null && !filter(method))
-                    {
-                        continue;
-                    }
-
-                    var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                    if (keep && method.IsPublic && ((useMethodInstance && !method.IsStatic) || (useStatic && method.IsStatic)) && !method.IsSpecialName)
-                    {
-                        var newMethodName = renamer(method);
-                        if (String.IsNullOrEmpty(newMethodName))
+                        if (filter != null && !filter(property))
                         {
-                            newMethodName = method.Name;
+                            continue;
                         }
 
-                        script.SetValue(null, new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
+                        var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                        if (keep && (((property.GetGetMethod().IsStatic && useStatic) || useInstance)))
+                        {
+                            var newPropertyName = renamer(property);
+                            if (String.IsNullOrEmpty(newPropertyName))
+                            {
+                                newPropertyName = property.Name;
+                            }
+
+                            // Initially, we were setting readonly depending on the precense of a set method, but this is not compatible with liquid implems, so we remove readonly restriction
+                            //script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
+                            script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
+                        }
                     }
                 }
+
+                if ((flags & ScriptMemberImportFlags.Method) != 0 && (useStatic || useMethodInstance))
+                {
+                    foreach (var method in typeInfo.GetDeclaredMethods())
+                    {
+                        if (filter != null && !filter(method))
+                        {
+                            continue;
+                        }
+
+                        var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                        if (keep && method.IsPublic && ((useMethodInstance && !method.IsStatic) || (useStatic && method.IsStatic)) && !method.IsSpecialName)
+                        {
+                            var newMethodName = renamer(method);
+                            if (String.IsNullOrEmpty(newMethodName))
+                            {
+                                newMethodName = method.Name;
+                            }
+
+                            script.SetValue(null, new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
+                        }
+                    }
+                }
+
+                if (typeInfo.BaseType == typeof(object))
+                {
+                    break;
+                }
+                typeInfo = typeInfo.BaseType.GetTypeInfo();
             }
         }
 
