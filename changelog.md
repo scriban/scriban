@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-beta-005 (03 Dec 2017)
+
+- Fix bug when importing an object to import also parent properties/fields/methods (#35)
+
 ## 1.0.0-beta-004 (19 Nov 2017)
 
 - Add better exception with span if an error occured when getPath/Load a template include
