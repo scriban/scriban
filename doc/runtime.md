@@ -630,6 +630,15 @@ Note that renaming can be changed at two levels:
 
   It is important to setup this on the `TemplateContext` for any .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the correct naming convention. 
 
+The method `Template.Render(object, renamer)` takes also a member renamer, imports the object model with the renamer and setup correctly the renamer on the underlying `TemplateContext`.
+
+So you can rewrite the previous example with the shorter version:
+
+```C#
+var template = Template.Parse("This is Hello: `{{Hello}}`");
+template.Render(new MyObject(), member => member.Name);
+```
+
 [:top:](#runtime)
 ### Member filter
 
