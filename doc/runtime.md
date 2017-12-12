@@ -256,7 +256,9 @@ This function can be imported into a ScriptObject:
 > Notice that when using a function with pipe calls like `{{description | string.strip }}``, the last argument passed to the `string.strip` function is the result of the previous pipe.
 > That's a reason why you will notice in all builtin functions in scriban that they usually take the most relevant parameter as a last parameter instead of the first parameter, to allow proper support for pipe calls.
 
-> NOTE: The members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
+> **NOTE**
+> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
 #### Automatic functions import from `ScriptObject`
 
@@ -299,7 +301,9 @@ Notice that if you want to ignore a member when importing a .NET object or .NET 
 
 > NOTE: Because Scriban doesn't support Function overloading, it is required that functions imported from a type must have different names.
 
-> NOTE: The members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
+> **NOTE**
+> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
 #### Function arguments, optional and `params`
 
@@ -422,7 +426,9 @@ and import the properties/functions of this object into a ScriptObject, via `Scr
 
 Also any objects inheriting from `IDictionary<TKey, TValue>` or `IDictionary` will be also accessible automatically. Typically, you can usually access directly any generic JSON objects that was parsed by a JSON library.
 
-> NOTE: The members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
+> **NOTE**
+> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
 #### Accessing a .NET object
 
@@ -448,7 +454,9 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
   Console.WriteLine(context.Output.ToString());
   ```
 
-> NOTE: The members of a .NET object are exposed using only lowercase characters and introducing `_` whenever there is a uppercase character. It means that by default the string `MyMethodIsNice`  will be exposed `my_method_is_nice`. This is done via a member renamer delegate. You can setup a member renamer when importing an existing .NET object but also a default member renamer on the `TemplateContext`. See [Member renamer](#member-renamer) in advanced usages about this topic.
+> **NOTE**
+> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
 #### read-only properties
 
@@ -514,7 +522,7 @@ The `TemplateContext` stack is setup like this:  `scriptObject2` => `scriptObjec
 
 As you can see the variable `var1` will be resolved from `scriptObject1` but the variable `var2` will be resolved from `scriptObject2` as there is an override here.
 
-> **NOTE**: If a variable is not found, the runtime will not throw an error but will return `null` instead. It allows to check for a variable existence `if !page` for example. In case you want your script to throw an exception if a variable was not found, you can specify `TemplateContext.StrictVariables = true` to enforce checks. See the [safe runtime](#safe-runtime) section for more details.
+> **NOTE** If a variable is not found, the runtime will not throw an error but will return `null` instead. It allows to check for a variable existence `if !page` for example. In case you want your script to throw an exception if a variable was not found, you can specify `TemplateContext.StrictVariables = true` to enforce checks. See the [safe runtime](#safe-runtime) section for more details.
 
 When writing to a variable, only the `ScriptObject` at the top of the `TemplateContext` will be used. This top object is accessible through `TemplateContext.CurrentGlobal` property. It the previous example, if we had something like this in a template:
 

@@ -35,6 +35,10 @@ var template = Template.Parse(@"
 var result = template.Render(new { Products = this.ProductList });
 ```
 
+> **NOTE**
+> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> If you want to change this behavior, you need to use a [`MemberRenamer`](doc/runtime.md#member-renamer) delegate
+
 ## Features
 
 - Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly. Check the [benchmarks](doc/benchmarks.md) for more details.

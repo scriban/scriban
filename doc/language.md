@@ -446,6 +446,10 @@ If the object is a "pure" scriban objects (created with a `{...}` or  instantiat
 may be
 ``` 
 
+> **NOTE**
+> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> If you want to change this behavior, you need to use a [`MemberRenamer`](runtime.md#member-renamer) delegate
+
 ### 5.1 The special property `empty?`
 
 Any object can respond the the property `.empty?` to check if it is empty or not:
