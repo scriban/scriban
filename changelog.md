@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0-beta-006 (12 Dec 2017)
+
+- Add member renamer parameter to the method `Template.Render(object, renamer)`
+
 ## 1.0.0-beta-005 (03 Dec 2017)
 
 - Fix bug when importing an object to import also parent properties/fields/methods (#35)
