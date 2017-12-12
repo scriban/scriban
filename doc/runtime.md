@@ -256,7 +256,8 @@ This function can be imported into a ScriptObject:
 > Notice that when using a function with pipe calls like `{{description | string.strip }}``, the last argument passed to the `string.strip` function is the result of the previous pipe.
 > That's a reason why you will notice in all builtin functions in scriban that they usually take the most relevant parameter as a last parameter instead of the first parameter, to allow proper support for pipe calls.
 
-> **NOTE**
+> **NOTICE**
+>
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
@@ -301,7 +302,8 @@ Notice that if you want to ignore a member when importing a .NET object or .NET 
 
 > NOTE: Because Scriban doesn't support Function overloading, it is required that functions imported from a type must have different names.
 
-> **NOTE**
+> **NOTICE**
+>
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
@@ -426,7 +428,8 @@ and import the properties/functions of this object into a ScriptObject, via `Scr
 
 Also any objects inheriting from `IDictionary<TKey, TValue>` or `IDictionary` will be also accessible automatically. Typically, you can usually access directly any generic JSON objects that was parsed by a JSON library.
 
-> **NOTE**
+> **NOTICE**
+>
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
@@ -454,7 +457,8 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
   Console.WriteLine(context.Output.ToString());
   ```
 
-> **NOTE**
+> **NOTICE**
+>
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
