@@ -600,7 +600,7 @@ namespace Scriban.Runtime
 
 The [`StandardMemberRenamer`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Runtime/StandardMemberRenamer.cs) is used to convert string camel/pascal case strings to "ruby" like strings.
 
-If you want to import a .NET object without changing the cases, you can use the simple nop member renamer `member => member`.
+If you want to import a .NET object without changing the cases, you can use the simple nop member renamer `member => member.Name`.
 
 Note that renaming can be changed at two levels:
 
