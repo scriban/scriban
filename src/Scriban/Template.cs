@@ -172,16 +172,18 @@ namespace Scriban
         /// Renders this template using the specified object model.
         /// </summary>
         /// <param name="model">The object model.</param>
+        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
         /// <returns>A rendering result as a string </returns>
-        public string Render(object model = null)
+        public string Render(object model = null, MemberRenamerDelegate memberRenamer = null)
         {
             var scriptObject = new ScriptObject();
             if (model != null)
             {
-                scriptObject.Import(model);
+                scriptObject.Import(model, renamer: memberRenamer);
             }
 
             var context = _lexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
+            context.MemberRenamer = memberRenamer;
             context.PushGlobal(scriptObject);
             return Render(context);
         }
