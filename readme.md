@@ -6,7 +6,7 @@ Scriban is a fast, powerful, safe and lightweight text templating language and e
 
 ```C#
 // Parse a scriban template
-var template = Template.Parse("Hello {{name}}!")
+var template = Template.Parse("Hello {{name}}!");
 var result = template.Render(new { Name = "World" }); // => "Hello World!" 
 ```
 
@@ -14,7 +14,7 @@ Parse a Liquid template using the Liquid language:
 
 ```C#
 // Parse a liquid template
-var template = Template.ParseLiquid("Hello {{name}}!")
+var template = Template.ParseLiquid("Hello {{name}}!");
 var result = template.Render(new { Name = "World" }); // => "Hello World!" 
 ```
 
