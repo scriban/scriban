@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.0 (24 Dec 2017)
+
+- Bump to 1.0.0
+
 ## 1.0.0-beta-006 (12 Dec 2017)
 
 - Add member renamer parameter to the method `Template.Render(object, renamer)`
