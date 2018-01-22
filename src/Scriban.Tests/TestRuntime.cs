@@ -16,6 +16,16 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestNullDateTime()
+        {
+            var template = Template.Parse("{{ null | date.to_string '%g' }}");
+            var context = new TemplateContext();
+            var result = template.Render(context);
+
+            Assert.AreEqual(string.Empty, result);
+        }
+
+        [Test]
         public void TestCulture()
         {
             var number = 11232.123;

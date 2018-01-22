@@ -79,10 +79,7 @@ namespace Scriban.Functions
         public DateTimeFunctions()
         {
             Format = DefaultFormat;
-
-            // This function is very specific, as it is calling a member function of this instance
-            // in order to retrieve the `date.format`
-            this.Import("to_string", new Func<TemplateContext, DateTime, string, string>((context, date, pattern) => ToString(date, pattern, context.CurrentCulture)));
+            CreateImportFunctions();
         }
 
         /// <summary>
@@ -222,11 +219,11 @@ namespace Scriban.Functions
         /// 05 Jan 2016
         /// ```
         /// </remarks>
-        public static DateTime Parse(TemplateContext context, string text)
+        public static DateTime? Parse(TemplateContext context, string text)
         {
             if (string.IsNullOrEmpty(text))
             {
-                return new DateTime();
+                return null;
             }
             DateTime result;
             if (DateTime.TryParse(text, context.CurrentCulture, DateTimeStyles.None, out result))
@@ -239,7 +236,8 @@ namespace Scriban.Functions
         public override IScriptObject Clone(bool deep)
         {
             var dateFunctions = (DateTimeFunctions)base.Clone(deep);
-            dateFunctions.Import("to_string", new Func<TemplateContext, DateTime, string, string>((context, date, pattern) => dateFunctions.ToString(date, pattern, context.CurrentCulture)));
+            // This is important to call the CreateImportFunctions as it is instance specific (using DefaultFormat from `date` object)
+            dateFunctions.CreateImportFunctions();
             return dateFunctions;
         }
 
@@ -300,9 +298,10 @@ namespace Scriban.Functions
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public virtual string ToString(DateTime datetime, string pattern, CultureInfo culture)
+        public virtual string ToString(DateTime? datetime, string pattern, CultureInfo culture)
         {
             if (pattern == null) throw new ArgumentNullException(nameof(pattern));
+            if (!datetime.HasValue) return null;
 
             // If pattern is %g only, use the default date
             if (pattern == "%g")
@@ -330,7 +329,7 @@ namespace Scriban.Functions
 
                     if (Formats.TryGetValue(format, out formatter))
                     {
-                        builder.Append(formatter.Invoke(datetime, culture));
+                        builder.Append(formatter.Invoke(datetime.Value, culture));
                     }
                     else
                     {
@@ -361,6 +360,13 @@ namespace Scriban.Functions
                 default:
                     throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{arguments.Count}` for `date` object/function.");
             }
+        }
+
+        private void CreateImportFunctions()
+        {
+            // This function is very specific, as it is calling a member function of this instance
+            // in order to retrieve the `date.format`
+            this.Import("to_string", new Func<TemplateContext, DateTime?, string, string>((context, date, pattern) => ToString(date, pattern, context.CurrentCulture)));
         }
     }
 }

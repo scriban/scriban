@@ -305,7 +305,7 @@ namespace Scriban.Runtime
                     continue;
                 }
 
-                if (method.Parameters.Any(p => p.ParameterType.IsGenericInstance))
+                if (method.Parameters.Any(p => p.ParameterType.IsGenericInstance) || method.ReturnType.IsGenericInstance)
                 {
                     continue;
                 }

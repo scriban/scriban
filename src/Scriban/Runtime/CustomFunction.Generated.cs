@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 08-Nov-17 23:04:05 by Scriban.CodeGen
+// This file was automatically generated - 22-Jan-18 07:31:49 by Scriban.CodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -22,7 +22,6 @@ namespace Scriban.Runtime
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Contains)), method => new Functionbool_string_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.AddDays)), method => new FunctionDateTime_DateTime_double(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.AddMonths)), method => new FunctionDateTime_DateTime_int(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.Parse)), method => new FunctionDateTime_TemplateContext_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Ceil)), method => new Functiondouble_double(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Round)), method => new Functiondouble_double_int___Opt(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Reverse)), method => new FunctionIEnumerable_IEnumerable(method));
@@ -313,66 +312,6 @@ namespace Scriban.Runtime
                 }
 
                 return _delegate(arg0, arg1);
-            }
-        }
-
-        /// <summary>
-        /// Optimized custom function for: DateTime (TemplateContext, string)
-        /// </summary>
-        private class FunctionDateTime_TemplateContext_string : DynamicCustomFunction
-        {
-            private delegate DateTime InternalDelegate(TemplateContext arg0, string arg1);
-
-            private readonly InternalDelegate _delegate;
-
-            public FunctionDateTime_TemplateContext_string(MethodInfo method) : base(method)
-            {
-                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-            }
-
-            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-            {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 1;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-
-                return _delegate(context, arg0);
             }
         }
 
