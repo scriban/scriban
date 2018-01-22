@@ -358,6 +358,21 @@ namespace Scriban.Tests
             TextAssert.AreEqual("input1 Value: 1", result);
         }
 
+        [Test]
+        public void TestPropertyInheritance()
+        {
+            var scriptObject = new ScriptObject
+            {
+                {"a", new MyObject {PropertyA = "ClassA"}},
+                {"b", new MyObject2 {PropertyA = "ClassB", PropertyC = "ClassB-PropC"}}
+            };
+
+            var context = new TemplateContext();
+            context.PushGlobal(scriptObject);
+
+            var result = Template.Parse("{{a.property_a}}-{{b.property_a}}-{{b.property_c}}").Render(context);
+            TextAssert.AreEqual("ClassA-ClassB-ClassB-PropC", result);
+        }
 
         private class MyObject : MyStaticObject
         {

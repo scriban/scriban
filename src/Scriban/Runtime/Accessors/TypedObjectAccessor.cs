@@ -82,38 +82,51 @@ namespace Scriban.Runtime.Accessors
 
         private void PrepareMembers()
         {
-            foreach (var field in _type.GetTypeInfo().GetDeclaredFields())
-            {
-                var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                if (keep && !field.IsStatic && field.IsPublic && (_filter == null || _filter(field)))
-                {
-                    var newFieldName = Rename(field);
-                    if (string.IsNullOrEmpty(newFieldName))
-                    {
-                        newFieldName = field.Name;
-                    }
-                    if (!_members.ContainsKey(newFieldName))
-                    {
-                        _members.Add(newFieldName, field);
-                    }
-                }
-            }
+            var type = this._type.GetTypeInfo();
 
-            foreach (var property in _type.GetTypeInfo().GetDeclaredProperties())
+            while (type != null)
             {
-                var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                if (keep && property.CanRead && !property.GetGetMethod().IsStatic && property.GetGetMethod().IsPublic && (_filter == null || _filter(property)))
+                foreach (var field in type.GetDeclaredFields())
                 {
-                    var newPropertyName = Rename(property);
-                    if (string.IsNullOrEmpty(newPropertyName))
+                    var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                    if (keep && !field.IsStatic && field.IsPublic && (_filter == null || _filter(field)))
                     {
-                        newPropertyName = property.Name;
-                    }
-                    if (!_members.ContainsKey(newPropertyName))
-                    {
-                        _members.Add(newPropertyName, property);
+                        var newFieldName = Rename(field);
+                        if (string.IsNullOrEmpty(newFieldName))
+                        {
+                            newFieldName = field.Name;
+                        }
+
+                        if (!_members.ContainsKey(newFieldName))
+                        {
+                            _members.Add(newFieldName, field);
+                        }
                     }
                 }
+
+                foreach (var property in type.GetDeclaredProperties())
+                {
+                    var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                    if (keep && property.CanRead && !property.GetGetMethod().IsStatic && property.GetGetMethod().IsPublic && (_filter == null || _filter(property)))
+                    {
+                        var newPropertyName = Rename(property);
+                        if (string.IsNullOrEmpty(newPropertyName))
+                        {
+                            newPropertyName = property.Name;
+                        }
+
+                        if (!_members.ContainsKey(newPropertyName))
+                        {
+                            _members.Add(newPropertyName, property);
+                        }
+                    }
+                }
+
+                if (type.BaseType == typeof(object))
+                {
+                    break;
+                }
+                type = type.BaseType.GetTypeInfo();
             }
         }
 
