@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.0 (22 Jan 2018)
+
+- Fix `date.to_string` and `date.parse` to accept/return nullable DateTime and return null accordingly (#42)
+
 ## 1.0.0 (24 Dec 2017)
 
 - Bump to 1.0.0
