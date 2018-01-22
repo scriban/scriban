@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.1.1 (22 Jan 2018)
+
+- Take into account inheritance when accessing properties for auto-import .NET object (#43)
+
 ## 1.1.0 (22 Jan 2018)
 
 - Fix `date.to_string` and `date.parse` to accept/return nullable DateTime and return null accordingly (#42)
