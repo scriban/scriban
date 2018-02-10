@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.0 (10 Feb 2018)
+
+- Remove support for importing method instance as this is confusing and actually not supported. Update the documentation. (#44)
+
 ## 1.1.1 (22 Jan 2018)
 
 - Take into account inheritance when accessing properties for auto-import .NET object (#43)
