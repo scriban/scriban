@@ -169,7 +169,7 @@ namespace Scriban.Runtime
         /// <param name="exportName">Name of the member name replacement. If null, use the default renamer will be used.</param>
         public static void ImportMember(this IScriptObject script, object obj, string memberName, string exportName = null)
         {
-            script.Import(obj, ScriptMemberImportFlags.All | ScriptMemberImportFlags.MethodInstance, member => member.Name == memberName, exportName != null ? name => exportName: (MemberRenamerDelegate)null);
+            script.Import(obj, ScriptMemberImportFlags.All, member => member.Name == memberName, exportName != null ? name => exportName: (MemberRenamerDelegate)null);
         }
 
 
@@ -196,7 +196,6 @@ namespace Scriban.Runtime
             var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();
             bool useStatic = false;
             bool useInstance = false;
-            bool useMethodInstance = false;
             if (obj is Type)
             {
                 useStatic = true;
@@ -205,7 +204,6 @@ namespace Scriban.Runtime
             else
             {
                 useInstance = true;
-                useMethodInstance = (flags & ScriptMemberImportFlags.MethodInstance) != 0;
             }
 
             renamer = renamer ?? StandardMemberRenamer.Default;
@@ -270,7 +268,7 @@ namespace Scriban.Runtime
                     }
                 }
 
-                if ((flags & ScriptMemberImportFlags.Method) != 0 && (useStatic || useMethodInstance))
+                if ((flags & ScriptMemberImportFlags.Method) != 0 && useStatic)
                 {
                     foreach (var method in typeInfo.GetDeclaredMethods())
                     {
@@ -280,7 +278,7 @@ namespace Scriban.Runtime
                         }
 
                         var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                        if (keep && method.IsPublic && ((useMethodInstance && !method.IsStatic) || (useStatic && method.IsStatic)) && !method.IsSpecialName)
+                        if (keep && method.IsPublic && method.IsStatic && !method.IsSpecialName)
                         {
                             var newMethodName = renamer(method);
                             if (String.IsNullOrEmpty(newMethodName))

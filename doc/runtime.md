@@ -258,7 +258,7 @@ This function can be imported into a ScriptObject:
 
 > **NOTICE**
 >
-> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> By default, Properties and static methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
 #### Automatic functions import from `ScriptObject`
@@ -394,7 +394,11 @@ The properties/functions of a `ScriptObject` can be imported into another instan
 
 #### Imports a .NET object instance
 
-You can easily import a .NET object instance (including its public properties and methods) into a `ScriptObject`
+You can easily import a .NET object instance (including its public properties and static methods) into a `ScriptObject`
+
+NOTE that when importing into a ScriptObject, the **import actually copies the property values into the ScriptObject**. The original .NET object is no longer used.
+
+Importing a .NET object instance is thus different from [accessing a .NET object](#accessing-a-net-object) instance through a ScriptObject.
 
 Let's define a standard .NET object:
 
@@ -426,18 +430,19 @@ and import the properties/functions of this object into a ScriptObject, via `Scr
   Console.WriteLine(context.Output.ToString());
   ```
 
+
 Also any objects inheriting from `IDictionary<TKey, TValue>` or `IDictionary` will be also accessible automatically. Typically, you can usually access directly any generic JSON objects that was parsed by a JSON library.
 
 > **NOTICE**
 >
-> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> By default, Properties and static methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
 #### Accessing a .NET object
 
 This is an important feature of scriban. Every .NET objects made accessible through a ScriptObject is directly accessible without importing it. It means that Scriban will directly work on the .NET object instance instead of a copy (e.g when we do a `ScriptObject.Import` instead)
 
-> Note that for security reason, only the properties of .NET objects accessed through another `ScriptObject` are made accessible from a Template.
+> Note that for security reason, only the properties of .NET objects accessed through another `ScriptObject` are made accessible from a Template. Methods and static methods are not automatically imported.
 
 For example, if we re-use the previous `MyObject` directly as a variable in a `ScriptObject`:
 
@@ -459,7 +464,7 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
 
 > **NOTICE**
 >
-> By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
+> By default, Properties and static methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](#member-renamer) delegate
 
 #### read-only properties

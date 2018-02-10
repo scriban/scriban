@@ -14,6 +14,7 @@ namespace Scriban.Runtime
 
         Method = 4,
 
+        [Obsolete("Importing Method Instance is actually not supported - This flag will be removed in a future release")]
         MethodInstance = 8,
 
         All = Field | Property | Method
