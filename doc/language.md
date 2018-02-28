@@ -42,7 +42,7 @@ This document describes the syntax of the scriban templating language.
 - [9 Statements](#9-statements)
   - [9.1 Single expression](#91-single-expression)
   - [9.2 <code>if &lt;expression&gt;</code>, <code>else</code>, <code>else if &lt;expression&gt;</code>](#92-if-expression-else-else-if-expression)
-    - [Trusty and Falsy](#trusty-and-falsy)
+    - [Truthy and Falsy](#truthy-and-falsy)
   - [9.3 <code>case</code> and <code>when</code>](#93-case-and-when)
   - [9.3 Loops](#93-loops)
     - [<code>for &lt;variable&gt; in &lt;expression&gt; ... end</code>](#for-variable-in-expression--end)
@@ -843,7 +843,7 @@ An `if` statement must be closed by an `end` or followed by a `else` or `else if
 
 An expression evaluated for a `if` or `else if` will be converted to a boolean.
 
-#### Trusty and Falsy
+#### Truthy and Falsy
 
 By default, only the `null` and boolean `false` are considered as `false` when evaluated as booleans.
 
