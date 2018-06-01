@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.1 (1 June 2018)
+
+- Add `string.to_int` `string.to_long` `string.to_float` `string.to_double`. (#55)
+
 ## 1.2.0 (10 Feb 2018)
 
 - Remove support for importing method instance as this is confusing and actually not supported. Update the documentation. (#44)
