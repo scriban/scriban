@@ -616,6 +616,78 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Converts a string to an integer
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>A 32 bit integer or null if conversion failed</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "123" | string.to_int + 1 }}
+        /// ```
+        /// ```html
+        /// 124
+        /// ```
+        /// </remarks>
+        public static object ToInt(string text)
+        {
+            return int.TryParse(text, out int result) ? (object) result : null;
+        }
+
+        /// <summary>
+        /// Converts a string to a long 64 bit integer
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>A 64 bit integer or null if conversion failed</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "123678912345678" | string.to_long + 1 }}
+        /// ```
+        /// ```html
+        /// 123678912345679
+        /// ```
+        /// </remarks>
+        public static object ToLong(string text)
+        {
+            return long.TryParse(text, out long result) ? (object)result : null;
+        }
+
+        /// <summary>
+        /// Converts a string to a float
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>A 32 bit float or null if conversion failed</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "123.4" | string.to_float + 1 }}
+        /// ```
+        /// ```html
+        /// 124.4
+        /// ```
+        /// </remarks>
+        public static object ToFloat(string text)
+        {
+            return float.TryParse(text, out float result) ? (object)result : null;
+        }
+
+        /// <summary>
+        /// Converts a string to a double
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>A 64 bit float or null if conversion failed</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "123.4" | string.to_double + 1 }}
+        /// ```
+        /// ```html
+        /// 124.4
+        /// ```
+        /// </remarks>
+        public static object ToDouble(string text)
+        {
+            return double.TryParse(text, out double result) ? (object)result : null;
+        }
+
+        /// <summary>
         /// Truncates a string down to the number of characters passed as the first parameter. 
         /// An ellipsis (...) is appended to the truncated string and is included in the character count
         /// </summary>

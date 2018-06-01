@@ -267,10 +267,10 @@ name = 'yes'
         private static Template ParseTemplate(string text, LexerOptions? lexerOptions = null, ParserOptions? parserOptions = null)
         {
             var template = Template.Parse(text, "text", parserOptions, lexerOptions);
-            foreach (var message in template.Messages)
-            {
-                Console.WriteLine(message);
-            }
+                    foreach (var message in template.Messages)
+                    {
+                        Console.WriteLine(message);
+                    }
             Assert.False(template.HasErrors);
             return template;
         }

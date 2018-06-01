@@ -1873,6 +1873,10 @@ String functions available through the builtin object 'string`.
 - [`string.starts_with`](#stringstarts_with)
 - [`string.strip`](#stringstrip)
 - [`string.strip_newlines`](#stringstrip_newlines)
+- [`string.to_int`](#stringto_int)
+- [`string.to_long`](#stringto_long)
+- [`string.to_float`](#stringto_float)
+- [`string.to_double`](#stringto_double)
 - [`string.truncate`](#stringtruncate)
 - [`string.truncatewords`](#stringtruncatewords)
 - [`string.upcase`](#stringupcase)
@@ -2582,6 +2586,126 @@ The input string without any breaks/newlines characters
 > **output**
 ```html
 This is a string. With another string
+```
+
+[:top:](#builtins)
+### `string.to_int`
+
+```
+string.to_int <text>
+```
+
+#### Description
+
+Converts a string to an integer
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+A 32 bit integer or null if conversion failed
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "123" | string.to_int + 1 }}
+```
+> **output**
+```html
+124
+```
+
+[:top:](#builtins)
+### `string.to_long`
+
+```
+string.to_long <text>
+```
+
+#### Description
+
+Converts a string to a long 64 bit integer
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+A 64 bit integer or null if conversion failed
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "123678912345678" | string.to_long + 1 }}
+```
+> **output**
+```html
+123678912345679
+```
+
+[:top:](#builtins)
+### `string.to_float`
+
+```
+string.to_float <text>
+```
+
+#### Description
+
+Converts a string to a float
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+A 32 bit float or null if conversion failed
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "123.4" | string.to_float + 1 }}
+```
+> **output**
+```html
+124.4
+```
+
+[:top:](#builtins)
+### `string.to_double`
+
+```
+string.to_double <text>
+```
+
+#### Description
+
+Converts a string to a double
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+A 64 bit float or null if conversion failed
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "123.4" | string.to_double + 1 }}
+```
+> **output**
+```html
+124.4
 ```
 
 [:top:](#builtins)

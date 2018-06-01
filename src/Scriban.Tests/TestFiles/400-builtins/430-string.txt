@@ -72,3 +72,8 @@ null | string.starts_with "ta": {{ null | string.starts_with "ta" }}
 "tota" | string.ends_with "to": {{ "tota" | string.ends_with "to" }}
 null | string.ends_with "ta": {{ null | string.ends_with "ta" }}
 "tota" | string.ends_with null: {{ "tota" | string.ends_with null }}
+Test Convert from string to numbers:
+"123" | string.to_int + 1: {{ "123" | string.to_int + 1 }}
+"1234567891234567" | string.to_long + 1: {{ "1234567891234567" | string.to_long + 1 }}
+"123.2" | string.to_float + 1: {{ "123.2" | string.to_float + 1 }}
+"123.2" | string.to_double + 1: {{ "123.2" | string.to_double + 1 }}

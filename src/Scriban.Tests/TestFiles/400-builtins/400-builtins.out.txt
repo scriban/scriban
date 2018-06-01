@@ -58,6 +58,10 @@ List of all the builtin <string> functions:
  starts_with
  strip
  strip_newlines
+ to_double
+ to_float
+ to_int
+ to_long
  truncate
  truncatewords
  upcase
