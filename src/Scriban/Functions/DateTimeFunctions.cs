@@ -102,7 +102,7 @@ namespace Scriban.Functions
         /// 2017
         /// ```
         /// </remarks>
-        public static DateTime Now => DateTime.Now;
+        public static DateTime Now() => DateTime.Now;
 
         /// <summary>
         /// Adds the specified number of days to the input date. 
