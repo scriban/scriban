@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.2 (3 July 2018)
+
+- Fix `date.now` that was actually caching the value on initialization (#60)
+
 ## 1.2.1 (1 June 2018)
 
 - Add `string.to_int` `string.to_long` `string.to_float` `string.to_double`. (#55)
