@@ -2,12 +2,14 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Functions
 {
@@ -33,6 +35,35 @@ namespace Scriban.Functions
         public static object Default(object value, object @default)
         {
             return value == null || (value is string && string.IsNullOrEmpty((string)value)) ? @default : value;
+        }
+
+        /// <summary>
+        /// Formats an object using specified format.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value</param>
+        /// <param name="format">The format string.</param>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ 255 | object.format "X4" }}
+        /// ```
+        /// ```html
+        /// 00FF
+        /// ```
+        /// </remarks>
+        public static string Format(TemplateContext context, SourceSpan span, object value, string format)
+        {
+            if (value == null)
+            {
+                return string.Empty;
+            }
+            format = format ?? string.Empty;
+            if (!(value is IFormattable formattable))
+            {
+                throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable object");
+            }
+            return formattable.ToString(format, context.CurrentCulture);
         }
 
         /// <summary>

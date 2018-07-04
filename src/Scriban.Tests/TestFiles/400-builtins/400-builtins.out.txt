@@ -91,6 +91,7 @@ List of all the builtin <timespan> functions:
 
 List of all the builtin <object> functions:
  default
+ format
  has_key
  has_value
  keys
