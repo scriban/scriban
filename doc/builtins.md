@@ -615,6 +615,7 @@ Other comparison operators(`==`, `!=`, `<=`, `>=`, `<`, `>`) are also working wi
 
 A `timespan` and also the added to a `datetime` object.
 
+- [`date.now`](#datenow)
 - [`date.add_days`](#dateadd_days)
 - [`date.add_months`](#dateadd_months)
 - [`date.add_years`](#dateadd_years)
@@ -624,6 +625,35 @@ A `timespan` and also the added to a `datetime` object.
 - [`date.add_milliseconds`](#dateadd_milliseconds)
 - [`date.parse`](#dateparse)
 - [`date.to_string`](#dateto_string)
+
+[:top:](#builtins)
+### `date.now`
+
+```
+date.now
+```
+
+#### Description
+
+Returns a datetime object of the current time, including the hour, minutes, seconds and milliseconds.
+
+#### Arguments
+
+
+#### Returns
+
+
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ date.now.year }}
+```
+> **output**
+```html
+2018
+```
 
 [:top:](#builtins)
 ### `date.add_days`
