@@ -1424,6 +1424,7 @@ The results of the multiplication: `value` * `with`
 Object functions available through the builtin object 'object'.
 
 - [`object.default`](#objectdefault)
+- [`object.format`](#objectformat)
 - [`object.has_key`](#objecthas_key)
 - [`object.has_value`](#objecthas_value)
 - [`object.keys`](#objectkeys)
@@ -1460,6 +1461,37 @@ The `default` value is returned if the input `value` is null or an empty string 
 > **output**
 ```html
 Yo
+```
+
+[:top:](#builtins)
+### `object.format`
+
+```
+object.format <value> <format>
+```
+
+#### Description
+
+Formats an object using specified format.
+
+#### Arguments
+
+- `value`: The input value
+- `format`: The format string.
+
+#### Returns
+
+
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ 255 | object.format "X4" }}
+```
+> **output**
+```html
+00FF
 ```
 
 [:top:](#builtins)
