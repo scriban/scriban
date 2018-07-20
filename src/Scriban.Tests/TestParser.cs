@@ -129,18 +129,18 @@ raw
         public void TestDateNow()
         {
             // default is dd MM yyyy
-            var dateNow = DateTime.Now.ToString("dd MMM yyyy", CultureInfo.CurrentCulture);
+            var dateNow = DateTime.Now.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
             var template = ParseTemplate(@"{{ date.now }}");
             var result = template.Render();
             Assert.AreEqual(dateNow, result);
 
             template = ParseTemplate(@"{{ date.format = '%Y'; date.now }}");
             result = template.Render();
-            Assert.AreEqual(DateTime.Now.ToString("yyyy", CultureInfo.CurrentCulture), result);
+            Assert.AreEqual(DateTime.Now.ToString("yyyy", CultureInfo.InvariantCulture), result);
 
             template = ParseTemplate(@"{{ date.format = '%Y'; date.now | date.add_years 1 }}");
             result = template.Render();
-            Assert.AreEqual(DateTime.Now.AddYears(1).ToString("yyyy", CultureInfo.CurrentCulture), result);
+            Assert.AreEqual(DateTime.Now.AddYears(1).ToString("yyyy", CultureInfo.InvariantCulture), result);
         }
 
         [Test]
