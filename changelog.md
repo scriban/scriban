@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.3 (20 July 2018)
+
+- Add support for passing `MemberFilterDelegate` directly to `Template.Render` and `Template.Evaluate` (#64)
+
 ## 1.2.2 (3 July 2018)
 
 - Fix `date.now` that was actually caching the value on initialization (#60)
