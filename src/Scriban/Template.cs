@@ -96,13 +96,15 @@ namespace Scriban
         /// </summary>
         /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
         /// <param name="model">An object instance used as a model for evaluating this expression</param>
+        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
+        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <returns>The result of the evaluation of the expression</returns>
-        public static object Evaluate(string expression, object model)
+        public static object Evaluate(string expression, object model, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             if (expression == null) throw new ArgumentNullException(nameof(expression));
             var lexerOption = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
             var template = Parse(expression, lexerOptions: lexerOption);
-            return template.Evaluate(model);
+            return template.Evaluate(model, memberRenamer, memberFilter);
         }
 
         /// <summary>
@@ -130,17 +132,24 @@ namespace Scriban
         /// Evaluates the template using the specified context
         /// </summary>
         /// <param name="model">An object model to use with the evaluation.</param>
+        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
+        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
         /// <returns>Returns the result of the last statement</returns>
-        public object Evaluate(object model = null)
+        public object Evaluate(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             var scriptObject = new ScriptObject();
             if (model != null)
             {
-                scriptObject.Import(model);
+                scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
             }
 
-            var context = new TemplateContext {EnableOutput = false};
+            var context = new TemplateContext
+            {
+                EnableOutput = false,
+                MemberRenamer = memberRenamer,
+                MemberFilter = memberFilter
+            };
             context.PushGlobal(scriptObject);
             var result = Evaluate(context);
             context.PopGlobal();
@@ -173,17 +182,19 @@ namespace Scriban
         /// </summary>
         /// <param name="model">The object model.</param>
         /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
+        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <returns>A rendering result as a string </returns>
-        public string Render(object model = null, MemberRenamerDelegate memberRenamer = null)
+        public string Render(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             var scriptObject = new ScriptObject();
             if (model != null)
             {
-                scriptObject.Import(model, renamer: memberRenamer);
+                scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
             }
 
             var context = _lexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
             context.MemberRenamer = memberRenamer;
+            context.MemberFilter = memberFilter;
             context.PushGlobal(scriptObject);
             return Render(context);
         }
