@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 03-Jul-18 20:53:37 by Scriban.CodeGen
+// This file was automatically generated - 21-Aug-18 17:37:57 by Scriban.CodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -54,7 +54,7 @@ namespace Scriban.Runtime
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Append)), method => new Functionstring_string_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Replace)), method => new Functionstring_string_string_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Join)), method => new Functionstring_TemplateContext_SourceSpan_IEnumerable_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Format)), method => new Functionstring_TemplateContext_SourceSpan_object_string(method));
+            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Format)), method => new Functionstring_TemplateContext_SourceSpan_object_string_string___Opt(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.HtmlFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.HtmlFunctions.Strip)), method => new Functionstring_TemplateContext_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.RegexFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.RegexFunctions.Replace)), method => new Functionstring_TemplateContext_string_string_string_string___Opt(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.TimeSpanFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.TimeSpanFunctions.FromDays)), method => new FunctionTimeSpan_double(method));
@@ -2369,28 +2369,31 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
-        /// Optimized custom function for: string (TemplateContext, SourceSpan, object, string)
+        /// Optimized custom function for: string (TemplateContext, SourceSpan, object, string, string = ...)
         /// </summary>
-        private class Functionstring_TemplateContext_SourceSpan_object_string : DynamicCustomFunction
+        private class Functionstring_TemplateContext_SourceSpan_object_string_string___Opt : DynamicCustomFunction
         {
-            private delegate string InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, string arg3);
+            private delegate string InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, string arg3, string arg4);
 
             private readonly InternalDelegate _delegate;
+            private readonly string defaultArg2;
 
-            public Functionstring_TemplateContext_SourceSpan_object_string(MethodInfo method) : base(method)
+            public Functionstring_TemplateContext_SourceSpan_object_string_string___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+                defaultArg2 = (string)Parameters[4].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
+                if (arguments.Count < 2 || arguments.Count > 3)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
                 }
                 var arg0 = default(object);
                 var arg1 = default(string);
-                int argMask = 0;
+                var arg2 = defaultArg2;
+                int argMask = 4;
 
                 int argOrderedIndex = 0;
                 for (int i = 0; i < arguments.Count; i++)
@@ -2420,16 +2423,19 @@ namespace Scriban.Runtime
                             arg1 = context.ToString(callerContext.Span, arg);
                             argMask |= (1 << 1);
                             break;
+                        case 2:
+                            arg2 = context.ToString(callerContext.Span, arg);
+                            break;
 
                     }
                 }
 
-                if (argMask != (1 << 2) - 1)
+                if (argMask != (1 << 3) - 1)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
                 }
 
-                return _delegate(context, callerContext.Span, arg0, arg1);
+                return _delegate(context, callerContext.Span, arg0, arg1, arg2);
             }
         }
 

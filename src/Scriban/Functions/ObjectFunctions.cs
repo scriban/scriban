@@ -5,6 +5,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -44,15 +45,18 @@ namespace Scriban.Functions
         /// <param name="span">The source span</param>
         /// <param name="value">The input value</param>
         /// <param name="format">The format string.</param>
+        /// <param name="culture">The culture as a string (e.g `en-US`). By default the culture from <see cref="TemplateContext.CurrentCulture"/> is used</param>
         /// <remarks>
         /// ```scriban-html
         /// {{ 255 | object.format "X4" }}
+        /// {{ 1523 | object.format "N" "fr-FR" }}
         /// ```
         /// ```html
         /// 00FF
+        /// 1 523,00
         /// ```
         /// </remarks>
-        public static string Format(TemplateContext context, SourceSpan span, object value, string format)
+        public static string Format(TemplateContext context, SourceSpan span, object value, string format, string culture = null)
         {
             if (value == null)
             {
@@ -63,7 +67,8 @@ namespace Scriban.Functions
             {
                 throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable object");
             }
-            return formattable.ToString(format, context.CurrentCulture);
+
+            return formattable.ToString(format, culture != null ? new CultureInfo(culture) : context.CurrentCulture);
         }
 
         /// <summary>

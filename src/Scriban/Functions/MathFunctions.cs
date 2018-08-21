@@ -161,6 +161,7 @@ namespace Scriban.Functions
         /// <param name="span">The source span</param>
         /// <param name="value">The input value</param>
         /// <param name="format">The format string.</param>
+        /// <param name="culture">The culture as a string (e.g `en-US`). By default the culture from <see cref="TemplateContext.CurrentCulture"/> is used</param>
         /// <returns>The largest integer less than or equal to the specified number.</returns>
         /// <remarks>
         /// ```scriban-html
@@ -170,7 +171,7 @@ namespace Scriban.Functions
         /// 00FF
         /// ```
         /// </remarks>
-        public static string Format(TemplateContext context, SourceSpan span, object value, string format)
+        public static string Format(TemplateContext context, SourceSpan span, object value, string format, string culture = null)
         {
             if (value == null)
             {
@@ -182,7 +183,7 @@ namespace Scriban.Functions
             {
                 throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable number");
             }
-            return formattable.ToString(format, context.CurrentCulture);
+            return formattable.ToString(format, culture != null ? new CultureInfo(culture) : context.CurrentCulture);
         }
 
         /// <summary>

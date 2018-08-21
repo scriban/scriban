@@ -1497,7 +1497,7 @@ Yo
 ### `object.format`
 
 ```
-object.format <value> <format>
+object.format <value> <format> <culture>?
 ```
 
 #### Description
@@ -1508,6 +1508,7 @@ Formats an object using specified format.
 
 - `value`: The input value
 - `format`: The format string.
+- `culture`: The culture as a string (e.g `en-us`). null by default, so default culture from 
 
 #### Returns
 
@@ -1518,10 +1519,12 @@ Formats an object using specified format.
 > **input**
 ```scriban-html
 {{ 255 | object.format "X4" }}
+{{ 1523 | object.format "N" "fr-FR" }}
 ```
 > **output**
 ```html
 00FF
+1 523,00
 ```
 
 [:top:](#builtins)
