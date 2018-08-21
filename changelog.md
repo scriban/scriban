@@ -1,7 +1,11 @@
 # Changelog
 
-## 1.2.3 (20 July 2018)
+## 1.2.4 (21 Aug 2018)
+- Add support for passing culture info directly to `math.format` and `object.format` (#68)
+- Add support for netstandard2.0
+- Add support for github sourcelink debugging
 
+## 1.2.3 (20 July 2018)
 - Add support for passing `MemberFilterDelegate` directly to `Template.Render` and `Template.Evaluate` (#64)
 
 ## 1.2.2 (3 July 2018)
