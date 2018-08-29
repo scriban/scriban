@@ -139,7 +139,7 @@ namespace Scriban.Helpers
         {
             return type.DeclaredMethods;
         }
-#if !UAP
+#if !UAP && !NETSTANDARD2_0
         public static MethodInfo GetGetMethod(this PropertyInfo prop)
         {
             return prop.GetMethod;

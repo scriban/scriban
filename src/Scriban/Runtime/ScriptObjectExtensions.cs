@@ -242,7 +242,13 @@ namespace Scriban.Runtime
                 {
                     foreach (var property in typeInfo.GetDeclaredProperties())
                     {
-                        if (!property.CanRead || !property.GetGetMethod().IsPublic)
+                        // Workaround with .NET Core, extension method is not working (retuning null despite doing property.GetMethod), so we need to inline it here
+#if NET35 || NET40 || PCL328
+                        var getMethod = property.GetGetMethod();
+#else
+                        var getMethod = property.GetMethod;
+#endif
+                        if (!property.CanRead || !getMethod.IsPublic)
                         {
                             continue;
                         }
@@ -253,7 +259,7 @@ namespace Scriban.Runtime
                         }
 
                         var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                        if (keep && (((property.GetGetMethod().IsStatic && useStatic) || useInstance)))
+                        if (keep && (((getMethod.IsStatic && useStatic) || useInstance)))
                         {
                             var newPropertyName = renamer(property);
                             if (String.IsNullOrEmpty(newPropertyName))
