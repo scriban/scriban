@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.5 (29 Aug 2018)
+- Fix a bug with `netstandard2.0` throwing a `NullReferenceException` when using internally reflection
+
 ## 1.2.4 (21 Aug 2018)
 - Add support for passing culture info directly to `math.format` and `object.format` (#68)
 - Add support for netstandard2.0
