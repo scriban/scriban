@@ -22,8 +22,8 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestParser
     {
-        private const string RelativeBasePath = @"..\..\TestFiles";
-        private const string BuiltinMarkdownDocFile = @"..\..\..\..\doc\builtins.md";
+        private const string RelativeBasePath = @"..\..\..\TestFiles";
+        private const string BuiltinMarkdownDocFile = @"..\..\..\..\..\doc\builtins.md";
         private const string InputFilePattern = "*.txt";
         private const string OutputEndFileExtension = ".out.txt";
 

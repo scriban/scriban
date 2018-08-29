@@ -5,7 +5,7 @@ VisualStudioVersion = 15.0.27004.2005
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban", "Scriban\Scriban.csproj", "{8A58A7E2-627C-4F41-933F-5AC92ADFAB48}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.Tests", "Scriban.Tests\Scriban.Tests.csproj", "{A0C5CB5F-5568-40AB-B945-D6D2664D51B0}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.Tests", "Scriban.Tests\Scriban.Tests.csproj", "{A0C5CB5F-5568-40AB-B945-D6D2664D51B0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8A58A7E2-627C-4F41-933F-5AC92ADFAB48} = {8A58A7E2-627C-4F41-933F-5AC92ADFAB48}
 	EndProjectSection
