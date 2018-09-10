@@ -933,5 +933,43 @@ namespace Scriban.Functions
             throw new NotSupportedException("`string.hmac_sha256` is not supported on this .NET platform");
         }
 #endif
+
+        /// <summary>
+        /// Pads a string with leading spaces to a specified total length.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="width">The number of characters in the resulting string</param>
+        /// <returns>The input string padded</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// hello{{ "world" | string.pad_left 10 }}
+        /// ```
+        /// ```html
+        /// hello     world
+        /// ```
+        /// </remarks>
+        public static string PadLeft(string text, int width)
+        {
+            return (text ?? string.Empty).PadLeft(width);
+        }
+
+        /// <summary>
+        /// Pads a string with trailing spaces to a specified total length.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="width">The number of characters in the resulting string</param>
+        /// <returns>The input string padded</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "hello" | string.pad_right 10 }}world
+        /// ```
+        /// ```html
+        /// hello     world
+        /// ```
+        /// </remarks> 
+        public static string PadRight(string text, int width)
+        {
+            return (text ?? string.Empty).PadRight(width);
+        }
     }
 }

@@ -42,6 +42,8 @@ List of all the builtin <string> functions:
  hmac_sha256
  lstrip
  md5
+ pad_left
+ pad_right
  pluralize
  prepend
  remove
