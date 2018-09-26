@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -137,7 +137,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Returns the size of the input object. 
+        /// Returns the size of the input object.
         /// - If the input object is a string, it will return the length
         /// - If the input is a list, it will return the number of elements
         /// - If the input is an object, it will return the number of members
@@ -171,7 +171,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Returns string representing the type of the input object. The type can be `string`, `boolean`, `number`, `array`, `iterator` and `object` 
+        /// Returns string representing the type of the input object. The type can be `string`, `boolean`, `number`, `array`, `iterator` and `object`
         /// </summary>
         /// <param name="value">The input object.</param>
         /// <remarks>
@@ -187,7 +187,7 @@ namespace Scriban.Functions
         /// {{ object | object.typeof }}
         /// ```
         /// ```html
-        /// 
+        ///
         /// boolean
         /// number
         /// number
@@ -217,7 +217,7 @@ namespace Scriban.Functions
             }
 
             // We assume that we are only using int/double/long for integers and shortcut to IsPrimitive
-            if (typeInfo.IsPrimitive)
+            if (type.IsPrimitiveOrDecimal())
             {
                 return "number";
             }

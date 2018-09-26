@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -64,6 +64,10 @@ namespace Scriban.Functions
             if (value is long)
             {
                 return Math.Abs((long)value);
+            }
+            if (value is decimal)
+            {
+                return Math.Abs((decimal)value);
             }
 
             // If it is a primitive it is already unsigned

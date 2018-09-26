@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -38,7 +38,7 @@ namespace Scriban
             {
                 return !((IEnumerable)against).GetEnumerator().MoveNext();
             }
-            if (against.GetType().GetTypeInfo().IsPrimitive)
+            if (against.GetType().IsPrimitiveOrDecimal())
             {
                 return false;
             }
@@ -89,7 +89,7 @@ namespace Scriban
 
             // If we have a primitive, we can try to convert it
             var type = value.GetType();
-            if (type.GetTypeInfo().IsPrimitive)
+            if (type.IsPrimitiveOrDecimal())
             {
                 try
                 {
@@ -270,7 +270,7 @@ namespace Scriban
             var typeInfo = type.GetTypeInfo();
             var destTypeInfo = destinationType.GetTypeInfo();
 
-            if (typeInfo.IsPrimitive && destTypeInfo.IsPrimitive)
+            if (type.IsPrimitiveOrDecimal() && destinationType.IsPrimitiveOrDecimal())
             {
                 try
                 {

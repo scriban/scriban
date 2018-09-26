@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -158,7 +158,7 @@ namespace Scriban.Runtime
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             var obj = this[name];
-            // If value is null, the property does no exist, 
+            // If value is null, the property does no exist,
             // so we can safely return immediately with the default value
             if (obj == null)
             {
@@ -397,7 +397,7 @@ namespace Scriban.Runtime
             }
 
             var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();
-            return !(obj is string || typeInfo.IsPrimitive || typeInfo.IsEnum || typeInfo.IsArray);
+            return !(obj is string || typeInfo.IsPrimitive || typeInfo == typeof(decimal).GetTypeInfo() || typeInfo.IsEnum || typeInfo.IsArray);
         }
 
         // Methods for ICollection<KeyValuePair<string, object>> that we don't care to implement

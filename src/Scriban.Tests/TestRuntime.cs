@@ -26,6 +26,15 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void TestDecimal()
+        {
+            var template = Template.Parse("{{ if value > 0 }}yes{{end}}");
+            decimal x = 5;
+            var result = template.Render(new { value =  x });
+            Assert.AreEqual("yes", result);
+        }
+
+        [Test]
         public void TestCulture()
         {
             var number = 11232.123;

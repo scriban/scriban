@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -10,6 +10,11 @@ namespace Scriban.Helpers
     internal static class ReflectionHelper
     {
 #if NET35 || NET40 || PCL328
+        public static bool IsPrimitiveOrDecimal(this Type type)
+        {
+            return type.IsPrimitive || type == typeof(decimal);
+        }
+
         public static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
         {
             if (type == null)
@@ -92,6 +97,11 @@ namespace Scriban.Helpers
             return del.Method;
         }
 #else
+        public static bool IsPrimitiveOrDecimal(this Type type)
+        {
+            return type.GetTypeInfo().IsPrimitive || type == typeof(decimal);
+        }
+
         public static Type GetBaseOrInterface(this Type type, Type lookInterfaceTypeArg)
         {
             if (type == null)

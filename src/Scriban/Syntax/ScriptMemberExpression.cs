@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.IO;
@@ -82,7 +82,7 @@ namespace Scriban.Syntax
                     throw new ScriptRuntimeException(this.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
                 }
             }
-            else if (targetObject is string || targetObject.GetType().GetTypeInfo().IsPrimitive)
+            else if (targetObject is string || targetObject.GetType().IsPrimitiveOrDecimal())
             {
                 if (isSet || !context.EnableRelaxedMemberAccess)
                 {
