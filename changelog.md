@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.6 (26 Sep 2018)
+- Fix a an exception when using a decimal in a binary operation (#72)
+
 ## 1.2.5 (29 Aug 2018)
 - Fix a bug with `netstandard2.0` throwing a `NullReferenceException` when using internally reflection
 
