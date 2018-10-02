@@ -640,7 +640,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static bool Contains(IEnumerable list, object item)
         {
-            foreach (var element in array)
+            foreach (var element in list)
                 if (element.Equals(item)) return true;
             return false;
         }
