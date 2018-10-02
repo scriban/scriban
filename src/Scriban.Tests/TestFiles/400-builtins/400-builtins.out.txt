@@ -3,6 +3,7 @@ List of all the builtin <array> functions:
  add_range
  compact
  concat
+ contains
  cycle
  first
  insert_at
@@ -16,7 +17,7 @@ List of all the builtin <array> functions:
  size
  sort
  uniq
- contains
+ 
 
 List of all the builtin <math> functions:
  abs
