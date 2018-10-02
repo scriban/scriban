@@ -624,6 +624,27 @@ namespace Scriban.Functions
             return list?.Cast<object>().Distinct();
         }
 
+        /// <summary>
+        /// Returns if an array contains an specifique element 
+        /// </summary>
+        /// <param name="array"></param>
+        /// <param name="item"></param>
+        /// <returns>**true** if element is in array; otherwise **false**</returns>
+        /// ```scriban-html
+        /// {{ [1, 2, 3, 4] | array.contains 4 }}
+        /// ```
+        /// ```html
+        /// true
+        /// ```
+        public static bool Contains(IEnumerable array, object item)
+        {
+            foreach (var element in array)
+                if (element.Equals(item)) return true;
+            return false;
+        }
+
+
+
         private class CycleKey : IEquatable<CycleKey>
         {
             public readonly string Group;
