@@ -625,18 +625,20 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Returns if an array contains an specifique element 
+        /// Returns if an `list` contains an specifique element 
         /// </summary>
-        /// <param name="array"></param>
-        /// <param name="item"></param>
-        /// <returns>**true** if element is in array; otherwise **false**</returns>
+        /// <param name="list">the input list</param>
+        /// <param name="item">the input item</param>
+        /// <returns>**true** if element is in `list`; otherwise **false**</returns>
+        /// <remarks>
         /// ```scriban-html
         /// {{ [1, 2, 3, 4] | array.contains 4 }}
         /// ```
         /// ```html
         /// true
         /// ```
-        public static bool Contains(IEnumerable array, object item)
+        /// </remarks>
+        public static bool Contains(IEnumerable list, object item)
         {
             foreach (var element in array)
                 if (element.Equals(item)) return true;
