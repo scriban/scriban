@@ -17,7 +17,6 @@ List of all the builtin <array> functions:
  size
  sort
  uniq
- 
 
 List of all the builtin <math> functions:
  abs
