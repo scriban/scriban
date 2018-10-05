@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Text;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -49,7 +50,7 @@ namespace Scriban.Parsing
 
             var text = GetAsText(Current);
             double floatResult;
-            if (double.TryParse(text, out floatResult))
+            if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
             {
                 literal.Value = floatResult;
             }
@@ -77,7 +78,7 @@ namespace Scriban.Parsing
 
             var text = GetAsText(Current);
             long result;
-            if (!long.TryParse(text, out result))
+            if (!long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out result))
             {
                 LogError($"Unable to parse the integer {text}");
             }
@@ -246,7 +247,7 @@ namespace Scriban.Parsing
 
                 // Convert $0, $1... $n variable into $[0] $[1]...$[n] variables
                 int index;
-                if (int.TryParse(text, out index))
+                if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
                 {
                     var indexerExpression = new ScriptIndexerExpression
                     {
