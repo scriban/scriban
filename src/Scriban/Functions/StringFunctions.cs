@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -618,6 +619,7 @@ namespace Scriban.Functions
         /// <summary>
         /// Converts a string to an integer
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="text">The input string</param>
         /// <returns>A 32 bit integer or null if conversion failed</returns>
         /// <remarks>
@@ -628,14 +630,15 @@ namespace Scriban.Functions
         /// 124
         /// ```
         /// </remarks>
-        public static object ToInt(string text)
+        public static object ToInt(TemplateContext context, string text)
         {
-            return int.TryParse(text, out int result) ? (object) result : null;
+            return int.TryParse(text, NumberStyles.Integer, context.CurrentCulture, out int result) ? (object) result : null;
         }
 
         /// <summary>
         /// Converts a string to a long 64 bit integer
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="text">The input string</param>
         /// <returns>A 64 bit integer or null if conversion failed</returns>
         /// <remarks>
@@ -646,14 +649,15 @@ namespace Scriban.Functions
         /// 123678912345679
         /// ```
         /// </remarks>
-        public static object ToLong(string text)
+        public static object ToLong(TemplateContext context, string text)
         {
-            return long.TryParse(text, out long result) ? (object)result : null;
+            return long.TryParse(text, NumberStyles.Integer, context.CurrentCulture, out long result) ? (object)result : null;
         }
 
         /// <summary>
         /// Converts a string to a float
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="text">The input string</param>
         /// <returns>A 32 bit float or null if conversion failed</returns>
         /// <remarks>
@@ -664,14 +668,15 @@ namespace Scriban.Functions
         /// 124.4
         /// ```
         /// </remarks>
-        public static object ToFloat(string text)
+        public static object ToFloat(TemplateContext context, string text)
         {
-            return float.TryParse(text, out float result) ? (object)result : null;
+            return float.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, context.CurrentCulture, out float result) ? (object)result : null;
         }
 
         /// <summary>
         /// Converts a string to a double
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="text">The input string</param>
         /// <returns>A 64 bit float or null if conversion failed</returns>
         /// <remarks>
@@ -682,9 +687,9 @@ namespace Scriban.Functions
         /// 124.4
         /// ```
         /// </remarks>
-        public static object ToDouble(string text)
+        public static object ToDouble(TemplateContext context, string text)
         {
-            return double.TryParse(text, out double result) ? (object)result : null;
+            return double.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, context.CurrentCulture, out double result) ? (object)result : null;
         }
 
         /// <summary>
