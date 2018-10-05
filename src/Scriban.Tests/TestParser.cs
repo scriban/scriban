@@ -400,7 +400,7 @@ end
 
         private static void TestFile(string inputName)
         {
-            var isSupportingExactRoundTrip = !NotSupportingExactRoundtrip.Contains(Path.GetFileName(inputName));
+            var isSupportingExactRoundtrip = !NotSupportingExactRoundtrip.Contains(Path.GetFileName(inputName));
 
             var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
 
@@ -413,7 +413,7 @@ end
 
             var isLiquid = inputName.Contains("liquid");
 
-            AssertTemplate(expectedOutputText, inputText, isLiquid, false, isSupportingExactRoundTrip);
+            AssertTemplate(expectedOutputText, inputText, isLiquid, false, isSupportingExactRoundtrip);
         }
 
         private void AssertRoundtrip(string inputText, bool isLiquid = false)
@@ -435,7 +435,7 @@ end
             "470-html.txt"
         };
 
-        public static void AssertTemplate(string expected, string input, bool isLiquid = false, bool isRoundTripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false)
+        public static void AssertTemplate(string expected, string input, bool isLiquid = false, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false)
         {
             var parserOptions = new ParserOptions()
             {
@@ -446,7 +446,7 @@ end
                 Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default
             };
             
-            if (isRoundTripTest)
+            if (isRoundtripTest)
             {
                 lexerOptions.KeepTrivia = true;
             }
@@ -470,14 +470,14 @@ end
 #endif
             string roundtripText = null;
 
-            // We loop first on input text, then on rountrip
+            // We loop first on input text, then on roundtrip
             while (true)
             {
                 bool isRoundtrip = roundtripText != null;
                 bool hasErrors = false;
                 if (isRoundtrip)
                 {
-                    Console.WriteLine("Rountrip");
+                    Console.WriteLine("Roundtrip");
                     Console.WriteLine("======================================");
                     Console.WriteLine(roundtripText);
                     lexerOptions.Mode = ScriptMode.Default;
@@ -519,7 +519,7 @@ end
                 }
                 else
                 {
-                    if (isRoundTripTest)
+                    if (isRoundtripTest)
                     {
                         result = template.ToText();
                     }
@@ -529,7 +529,7 @@ end
 
                         if (!isRoundtrip)
                         {
-                            // Dumps the rountrip version
+                            // Dumps the roundtrip version
                             var lexerOptionsForTrivia = lexerOptions;
                             lexerOptionsForTrivia.KeepTrivia = true;
                             var templateWithTrivia = Template.Parse(input, "input",  parserOptions, lexerOptionsForTrivia);
@@ -604,7 +604,7 @@ end
 
                 TextAssert.AreEqual(expected, result);
 
-                if (isRoundTripTest || isRoundtrip || hasErrors)
+                if (isRoundtripTest || isRoundtrip || hasErrors)
                 {
                     break;
                 }
