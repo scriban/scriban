@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.2.7 (6 Oct 2018)
+- Fix numeric literals not being parsed with the invariant culture (#74)
+- Fix string to number conversion functions to use the context culture (#78)
+
 ## 1.2.6 (26 Sep 2018)
 - Fix a an exception when using a decimal in a binary operation (#72)
 

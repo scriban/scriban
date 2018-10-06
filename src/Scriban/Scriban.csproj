@@ -5,7 +5,7 @@
     <Copyright>Alexandre Mutel</Copyright>
     <AssemblyTitle>Scriban</AssemblyTitle>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>1.2.6</VersionPrefix>
+    <VersionPrefix>1.2.7</VersionPrefix>
     <!--<VersionSuffix>beta</VersionSuffix>
     <BuildNumber>006</BuildNumber>-->
     <VersionSuffix Condition="'$(VersionSuffix)' != '' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
@@ -42,8 +42,8 @@
 
     <PropertyGroup Condition=" '$(TargetFramework)' == 'net35'">
         <DefineConstants>$(DefineConstants);NET35</DefineConstants>
-    </PropertyGroup>    
-    
+    </PropertyGroup>
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
     <DefineConstants>$(DefineConstants);NET40</DefineConstants>
   </PropertyGroup>
@@ -55,17 +55,17 @@
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <DefineConstants>$(DefineConstants);NETSTD13</DefineConstants>
   </PropertyGroup>
-    
+
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
   </ItemGroup>
-    
+
   <PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">10.0.10240.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">10.0.10240.0</TargetPlatformMinVersion> 
+    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">10.0.10240.0</TargetPlatformMinVersion>
     <DefineConstants>$(DefineConstants);UAP</DefineConstants>
-  </PropertyGroup>  
+  </PropertyGroup>
 
   <PropertyGroup Condition="'$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81'">
     <DefineConstants>$(DefineConstants);PCL328</DefineConstants>
