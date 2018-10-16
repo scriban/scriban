@@ -320,7 +320,7 @@ namespace Scriban.Functions
         /// | `"%Z"` |  `"IST"`          | Gives Time Zone of the time
         /// | `"%%"` |  `"%"`            | Output the character `%`
         /// 
-        /// Note that the format is using a good part of the ruby format ([source]/// (http://apidock.com/ruby/DateTime/strftime))
+        /// Note that the format is using a good part of the ruby format ([source](http://apidock.com/ruby/DateTime/strftime))
         /// ```scriban-html
         /// {{ date.parse '2016/01/05' | date.to_string `%d %b %Y` }}
         /// ```

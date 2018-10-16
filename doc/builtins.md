@@ -897,8 +897,7 @@ For example, using `%g %d %b %Y` will output the date using an invariant culture
 
 If you are using `%g` alone, it will output the date with `date.format` using an invariant culture.
 
-Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the following table explains the
-format modifiers:
+Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the following table explains the format modifiers:
 
 | Format | Result            | Description
 |--------|-------------------|--------------------------------------------
@@ -944,7 +943,7 @@ format modifiers:
 | `"%Z"` |  `"IST"`          | Gives Time Zone of the time
 | `"%%"` |  `"%"`            | Output the character `%`
 
-Note that the format is using a good part of the ruby format ([source]/// (http://apidock.com/ruby/DateTime/strftime))
+Note that the format is using a good part of the ruby format ([source](http://apidock.com/ruby/DateTime/strftime))
 > **input**
 ```scriban-html
 {{ date.parse '2016/01/05' | date.to_string `%d %b %Y` }}
