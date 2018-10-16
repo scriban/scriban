@@ -885,45 +885,64 @@ date.to_string <datetime> <pattern> <culture>
 
 Converts a datetime object to a textual representation using the specified format string.
 
-By default, if you are using a date, it will use the format specified by `date.format` which defaults to /// `date.default_format` (readonly) which default to `%d %b %Y`
+By default, if you are using a date, it will use the format specified by `date.format` which defaults to `date.default_format` (readonly) which default to `%d %b %Y`
 
-You can override the format used for formatting all dates by assigning the a new format: `date.format = '%a /// %b %e %T %Y';`
+You can override the format used for formatting all dates by assigning the a new format: `date.format = '%a %b %e %T %Y';`
 
 You can recover the default format by using `date.format = date.default_format;`
 
-By default, the to_string format is using the **current culture**, but you can switch to an invariant /// culture by using the modifier `%g`
+By default, the to_string format is using the **current culture**, but you can switch to an invariant culture by using the modifier `%g`
 
 For example, using `%g %d %b %Y` will output the date using an invariant culture.
 
 If you are using `%g` alone, it will output the date with `date.format` using an invariant culture.
 
-Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the following table explains the /// format modifiers:
+Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the following table explains the
+format modifiers:
 
-| Format | Result        | Description
-|--------|---------------|--------------------------------------------
-| `"%a"` |  `"Thu"` 	   | Name of week day in short form of the
-| `"%A"` |  `"Thursday"` | Week day in full form of the time
-| `"%b"` |  `"Sep"` 	   | Month in short form of the time
-| `"%B"` |  `"September"`| Month in full form of the time
-| `"%c"` |               | Date and time (%a %b %e %T %Y)
-| `"%d"` |  `"12"` 	     | Day of the month of the time
-| `"%e"` |  `"12"`       | Day of the month, blank-padded ( 1..31)
-| `"%H"` |  `"22"`       | Hour of the time in 24 hour clock format
-| `"%I"` |  `"10"` 	     | Hour of the time in 12 hour clock format
-| `"%j"` |               | Day of the year (001..366) (3 digits, left padded with zero)
-| `"%m"` |  `"09"` 	     | Month of the time
-| `"%M"` |  `"49"` 	     | Minutes of the time (2 digits, left padded with zero e.g 01 02)
-| `"%p"` |  `"PM"` 	     | Gives AM / PM of the time
-| `"%S"` |  `"27"` 	     | Seconds of the time
-| `"%U"` |               | Week number of the current year, starting with the first Sunday as the first day /// of the first week (00..53)
-| `"%W"` |               | Week number of the current year, starting with the first Monday as the first day /// of the first week (00..53)
-| `"%w"` |  `"4"` 	     | Day of week of the time
-| `"%x"` |               | Preferred representation for the date alone, no time
-| `"%X"` |               | Preferred representation for the time alone, no date
-| `"%y"` |  `"13"` 	     | Gives year without century of the time
-| `"%Y"` |  `"2013"`     | Year of the time
-| `"%Z"` |  `"IST"` 	   | Gives Time Zone of the time
-| `"%%"` |  `"%"`        | Output the character `%`
+| Format | Result            | Description
+|--------|-------------------|--------------------------------------------
+| `"%a"` |  `"Thu"`          | Name of week day in short form of the
+| `"%A"` |  `"Thursday"`     | Week day in full form of the time
+| `"%b"` |  `"Sep"`          | Month in short form of the time
+| `"%B"` |  `"September"`    | Month in full form of the time
+| `"%c"` |                   | Date and time (%a %b %e %T %Y)
+| `"%C"` |  `"20"`           | Century of the time
+| `"%d"` |  `"12"`           | Day of the month of the time
+| `"%D"` |  `"09/12/13"`     | Date (%m/%d/%y)
+| `"%e"` |  `"12"`           | Day of the month, blank-padded ( 1..31)
+| `"%F"` |  `"2013-09-12"`   | ISO 8601 date (%Y-%m-%d)
+| `"%h"` |  `"Sep"`          | Alias for %b
+| `"%H"` |  `"22"`           | Hour of the time in 24 hour clock format
+| `"%I"` |  `"10"`           | Hour of the time in 12 hour clock format
+| `"%j"` |  `"255"`          | Day of the year (001..366) (3 digits, left padded with zero)
+| `"%k"` |  `"22"`           | Hour of the time in 24 hour clock format, blank-padded ( 0..23)
+| `"%l"` |  `"10"`           | Hour of the time in 12 hour clock format, blank-padded ( 0..12)
+| `"%L"` |  `"000"`          | Millisecond of the time (3 digits, left padded with zero)
+| `"%m"` |  `"09"`           | Month of the time
+| `"%M"` |  `"49"`           | Minutes of the time (2 digits, left padded with zero e.g 01 02)
+| `"%n"` |                   | Newline character (\n)
+| `"%N"` |  `"000000000"`    | Nanoseconds of the time (9 digits, left padded with zero)
+| `"%p"` |  `"PM"`           | Gives AM / PM of the time
+| `"%P"` |  `"pm"`           | Gives am / pm of the time
+| `"%r"` |  `"10:49:27 PM"`  | Long time in 12 hour clock format (%I:%M:%S %p)
+| `"%R"` |  `"22:49"`        | Short time in 24 hour clock format (%H:%M)
+| `"%s"` |                   | Number of seconds since 1970-01-01 00:00:00 +0000
+| `"%S"` |  `"27"`           | Seconds of the time
+| `"%t"` |                   | Tab character (\t)
+| `"%T"` |  `"22:49:27"`     | Long time in 24 hour clock format (%H:%M:%S)
+| `"%u"` |  `"4"`            | Day of week of the time (from 1 for Monday to 7 for Sunday)
+| `"%U"` |  `"36"`           | Week number of the current year, starting with the first Sunday as the first day of the first week (00..53)
+| `"%v"` |  `"12-SEP-2013"`  | VMS date (%e-%b-%Y) (culture invariant)
+| `"%V"` |  `"37"`           | Week number of the current year according to ISO 8601 (01..53)
+| `"%W"` |  `"36"`           | Week number of the current year, starting with the first Monday as the first day of the first week (00..53)
+| `"%w"` |  `"4"`            | Day of week of the time (from 0 for Sunday to 6 for Saturday)
+| `"%x"` |                   | Preferred representation for the date alone, no time
+| `"%X"` |                   | Preferred representation for the time alone, no date
+| `"%y"` |  `"13"`           | Gives year without century of the time
+| `"%Y"` |  `"2013"`         | Year of the time
+| `"%Z"` |  `"IST"`          | Gives Time Zone of the time
+| `"%%"` |  `"%"`            | Output the character `%`
 
 Note that the format is using a good part of the ruby format ([source]/// (http://apidock.com/ruby/DateTime/strftime))
 > **input**
@@ -1230,7 +1249,7 @@ The largest integer less than or equal to the specified number.
 ### `math.format`
 
 ```
-math.format <value> <format>
+math.format <value> <format> <culture>?
 ```
 
 #### Description
@@ -1241,6 +1260,7 @@ Formats a number value with specified [.NET standard numeric format strings](htt
 
 - `value`: The input value
 - `format`: The format string.
+- `culture`: The culture as a string (e.g `en-US`). By default the culture from  is used
 
 #### Returns
 
@@ -1508,7 +1528,7 @@ Formats an object using specified format.
 
 - `value`: The input value
 - `format`: The format string.
-- `culture`: The culture as a string (e.g `en-us`). null by default, so default culture from 
+- `culture`: The culture as a string (e.g `en-US`). By default the culture from  is used
 
 #### Returns
 
@@ -1628,7 +1648,7 @@ object.size <value>
 
 #### Description
 
-Returns the size of the input object. 
+Returns the size of the input object.
 - If the input object is a string, it will return the length
 - If the input is a list, it will return the number of elements
 - If the input is an object, it will return the number of members
@@ -1661,7 +1681,7 @@ object.typeof <value>
 
 #### Description
 
-Returns string representing the type of the input object. The type can be `string`, `boolean`, `number`, `array`, `iterator` and `object` 
+Returns string representing the type of the input object. The type can be `string`, `boolean`, `number`, `array`, `iterator` and `object`
 
 #### Arguments
 
@@ -1950,6 +1970,8 @@ String functions available through the builtin object 'string`.
 - [`string.sha256`](#stringsha256)
 - [`string.hmac_sha1`](#stringhmac_sha1)
 - [`string.hmac_sha256`](#stringhmac_sha256)
+- [`string.pad_left`](#stringpad_left)
+- [`string.pad_right`](#stringpad_right)
 
 [:top:](#builtins)
 ### `string.append`
@@ -3019,6 +3041,68 @@ The `SHA-256` hash of the input string using a hash message authentication code 
 > **output**
 ```html
 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
+```
+
+[:top:](#builtins)
+### `string.pad_left`
+
+```
+string.pad_left <text> <width>
+```
+
+#### Description
+
+Pads a string with leading spaces to a specified total length.
+
+#### Arguments
+
+- `text`: The input string
+- `width`: The number of characters in the resulting string
+
+#### Returns
+
+The input string padded
+
+#### Examples
+
+> **input**
+```scriban-html
+hello{{ "world" | string.pad_left 10 }}
+```
+> **output**
+```html
+hello     world
+```
+
+[:top:](#builtins)
+### `string.pad_right`
+
+```
+string.pad_right <text> <width>
+```
+
+#### Description
+
+Pads a string with trailing spaces to a specified total length.
+
+#### Arguments
+
+- `text`: The input string
+- `width`: The number of characters in the resulting string
+
+#### Returns
+
+The input string padded
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "hello" | string.pad_right 10 }}world
+```
+> **output**
+```html
+hello     world
 ```
 [:top:](#builtins)
 
