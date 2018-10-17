@@ -3,6 +3,7 @@ List of all the builtin <array> functions:
  add_range
  compact
  concat
+ contains
  cycle
  first
  insert_at

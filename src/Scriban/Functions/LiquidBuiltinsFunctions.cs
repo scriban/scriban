@@ -78,6 +78,7 @@ namespace Scriban.Functions
                 case "truncate": target = "string"; member = "truncate"; return true;
                 case "truncatewords": target = "string"; member = "truncatewords"; return true;
                 case "uniq": target = "array"; member = "uniq"; return true;
+                case "contains": target = "array"; member = "contains"; return true;
             }
 
             return false;
@@ -144,6 +145,7 @@ namespace Scriban.Functions
                 SetValue("truncate", str["truncate"], true);
                 SetValue("truncatewords", str["truncatewords"], true);
                 SetValue("uniq", array["uniq"], true);
+                SetValue("contains", array["contains"], true);
 
                 this.Import(typeof(LiquidBuiltinsFunctions), ScriptMemberImportFlags.All);
             }
