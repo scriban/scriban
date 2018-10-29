@@ -54,7 +54,7 @@ namespace Scriban.Functions
             {
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while getting the path for the include name `{templateName}`", ex);
             }
-            // If template name is empty, throw an exception
+            // If template path is empty (probably because template doesn't exist), throw an exception
             if (templatePath == null)
             {
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");

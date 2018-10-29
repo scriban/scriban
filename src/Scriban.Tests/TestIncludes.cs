@@ -141,7 +141,7 @@ namespace Scriban.Tests
             var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader() };
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
             Console.WriteLine(exception);
-            var expectedString = "cannot be null";
+            var expectedString = "Include template path is null";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
         }
     }
