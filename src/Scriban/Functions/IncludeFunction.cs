@@ -57,7 +57,7 @@ namespace Scriban.Functions
             // If template name is empty, throw an exception
             if (templatePath == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Include template path cannot be null");
+                throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
             }
 
             // Compute a new parameters for the include
