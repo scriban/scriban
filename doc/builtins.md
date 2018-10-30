@@ -1476,7 +1476,7 @@ The `default` value is returned if the input `value` is null or an empty string 
 #### Arguments
 
 - `value`: The input value to check if it is null or an empty string.
-- `default`: The default alue to return if the input `value` is null or an empty string.
+- `default`: The default value to return if the input `value` is null or an empty string.
 
 #### Returns
 
