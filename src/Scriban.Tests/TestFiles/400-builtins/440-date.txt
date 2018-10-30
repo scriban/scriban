@@ -33,7 +33,6 @@
 {{ x | date.to_string '%g%P' }}
 {{ x | date.to_string '%g%r' }}
 {{ x | date.to_string '%g%R' }}
-{{ x | date.to_string '%g%s' }}
 {{ x | date.to_string '%g%S' }}
 {{ x | date.to_string '%g%t' }}
 {{ x | date.to_string '%g%T' }}
