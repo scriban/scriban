@@ -266,6 +266,7 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported on string objects"); // unit test: 112-binary-string-error2.txt
         }
 
+
         private static IEnumerable<int> RangeInclude(int left, int right)
         {
             // unit test: 150-range-expression.txt
@@ -303,7 +304,45 @@ namespace Scriban.Syntax
                 }
             }
         }
-        
+
+        private static IEnumerable<long> RangeInclude(long left, long right)
+        {
+            // unit test: 150-range-expression.txt
+            if (left < right)
+            {
+                for (long i = left; i <= right; i++)
+                {
+                    yield return i;
+                }
+            }
+            else
+            {
+                for (long i = left; i >= right; i--)
+                {
+                    yield return i;
+                }
+            }
+        }
+
+        private static IEnumerable<long> RangeExclude(long left, long right)
+        {
+            // unit test: 150-range-expression.txt
+            if (left < right)
+            {
+                for (long i = left; i < right; i++)
+                {
+                    yield return i;
+                }
+            }
+            else
+            {
+                for (long i = left; i > right; i--)
+                {
+                    yield return i;
+                }
+            }
+        }
+
         private static object CalculateOthers(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {
             // Both values are null, applies the relevant binary ops
@@ -519,6 +558,10 @@ namespace Scriban.Syntax
                     return left >= right;
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
+                case ScriptBinaryOperator.RangeInclude:
+                    return RangeInclude(left, right);
+                case ScriptBinaryOperator.RangeExclude:
+                    return RangeExclude(left, right);
             }
             throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for long<->long");
         }
