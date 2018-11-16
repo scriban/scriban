@@ -39,16 +39,18 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="capacity">Initial capacity of the dictionary</param>
         /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
-        public ScriptObject(int capacity, bool autoImportStaticsFromThisType)
+        public ScriptObject(int capacity, bool? autoImportStaticsFromThisType)
         {
             Store = new Dictionary<string, InternalValue>(capacity);
 
             // Only import if we are asked for and we have a derived type
-            if (autoImportStaticsFromThisType || this.GetType() != typeof(ScriptObject))
+            if (autoImportStaticsFromThisType.GetValueOrDefault() || (!autoImportStaticsFromThisType.HasValue && this.GetType() != typeof(ScriptObject)))
             {
                 this.Import(this.GetType());
             }
         }
+
+        
 
         void IDictionary.Add(object key, object value)
         {
