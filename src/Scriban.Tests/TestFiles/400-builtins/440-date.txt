@@ -4,7 +4,46 @@
 {{ date.parse '2016/01/05' | date.add_years 1 | date.to_string '%g' }}
 {{ null | date.parse }}
 {{ null | date.to_string '%g' }}
-{{ x = date.parse '2016/01/05' -}}
+{{ x = date.parse '2016/01/05 21:22:23.024' -}}
 {{ x.year }}
 {{ x.month }}
 {{ x.day }}
+{{ x | date.to_string '%g%a' }}
+{{ x | date.to_string '%g%A' }}
+{{ x | date.to_string '%g%b' }}
+{{ x | date.to_string '%g%B' }}
+{{ x | date.to_string '%g%c' }}
+{{ x | date.to_string '%g%C' }}
+{{ x | date.to_string '%g%d' }}
+{{ x | date.to_string '%g%D' }}
+{{ x | date.to_string '%g%e' }}
+{{ x | date.to_string '%g%F' }}
+{{ x | date.to_string '%g%h' }}
+{{ x | date.to_string '%g%H' }}
+{{ x | date.to_string '%g%I' }}
+{{ x | date.to_string '%g%j' }}
+{{ x | date.to_string '%g%k' }}
+{{ x | date.to_string '%g%l' }}
+{{ x | date.to_string '%g%L' }}
+{{ x | date.to_string '%g%m' }}
+{{ x | date.to_string '%g%M' }}
+{{ x | date.to_string '%g%n' }}
+{{ x | date.to_string '%g%N' }}
+{{ x | date.to_string '%g%p' }}
+{{ x | date.to_string '%g%P' }}
+{{ x | date.to_string '%g%r' }}
+{{ x | date.to_string '%g%R' }}
+{{ x | date.to_string '%g%S' }}
+{{ x | date.to_string '%g%t' }}
+{{ x | date.to_string '%g%T' }}
+{{ x | date.to_string '%g%u' }}
+{{ x | date.to_string '%g%U' }}
+{{ x | date.to_string '%g%v' }}
+{{ x | date.to_string '%g%V' }}
+{{ x | date.to_string '%g%W' }}
+{{ x | date.to_string '%g%w' }}
+{{ x | date.to_string '%g%x' }}
+{{ x | date.to_string '%g%X' }}
+{{ x | date.to_string '%g%y' }}
+{{ x | date.to_string '%g%Y' }}
+{{ x | date.to_string '%g%%' }}

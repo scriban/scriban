@@ -23,7 +23,7 @@ namespace Scriban.Functions
         /// The `default` value is returned if the input `value` is null or an empty string "". A string containing whitespace characters will not resolve to the default value.
         /// </summary>
         /// <param name="value">The input value to check if it is null or an empty string.</param>
-        /// <param name="default">The default alue to return if the input `value` is null or an empty string.</param>
+        /// <param name="default">The default value to return if the input `value` is null or an empty string.</param>
         /// <returns>The `default` value is returned if the input `value` is null or an empty string "", otherwise it returns `value`</returns>
         /// <remarks>
         /// ```scriban-html
