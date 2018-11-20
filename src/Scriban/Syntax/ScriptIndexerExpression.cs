@@ -69,14 +69,28 @@ namespace Scriban.Syntax
             var targetObject = context.GetValue(Target);
             if (targetObject == null)
             {
-                throw new ScriptRuntimeException(Target.Span, $"Object `{Target}` is null. Cannot access indexer: {this}"); // unit test: 130-indexer-accessor-error1.txt
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new ScriptRuntimeException(Target.Span, $"Object `{Target}` is null. Cannot access indexer: {this}"); // unit test: 130-indexer-accessor-error1.txt
+                }
             }
 
             var index = context.Evaluate(Index);
             if (index == null)
             {
-                throw new ScriptRuntimeException(Index.Span,
-                    $"Cannot access target `{Target}` with a null indexer: {this}"); // unit test: 130-indexer-accessor-error2.txt
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new ScriptRuntimeException(Index.Span,
+                        $"Cannot access target `{Target}` with a null indexer: {this}"); // unit test: 130-indexer-accessor-error2.txt
+                }
             }
 
             if (targetObject is IDictionary || targetObject is ScriptObject)
