@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.Reflection;
 using Newtonsoft.Json;
@@ -30,7 +31,7 @@ namespace Scriban.Tests
         {
             var template = Template.Parse("{{ if value > 0 }}yes{{end}}");
             decimal x = 5;
-            var result = template.Render(new { value =  x });
+            var result = template.Render(new { value = x });
             Assert.AreEqual("yes", result);
         }
 
@@ -63,9 +64,9 @@ namespace Scriban.Tests
         public void TestEvaluateScriptOnly()
         {
             {
-                var lexerOptions = new LexerOptions() {Mode = ScriptMode.ScriptOnly};
+                var lexerOptions = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
                 var template = Template.Parse("y = x + 1; y;", lexerOptions: lexerOptions);
-                var result = template.Evaluate(new {x = 10});
+                var result = template.Evaluate(new { x = 10 });
                 Assert.AreEqual(11, result);
             }
             {
@@ -79,7 +80,7 @@ namespace Scriban.Tests
         {
             {
                 var template = Template.Parse("{{y = x + 1; y;}} yoyo");
-                var result = template.Evaluate(new {x = 10});
+                var result = template.Evaluate(new { x = 10 });
                 Assert.AreEqual(" yoyo", result);
             }
             {
@@ -322,7 +323,7 @@ namespace Scriban.Tests
 
             // Test Filter
             {
-                var context = new TemplateContext {MemberFilter = member => member is PropertyInfo};
+                var context = new TemplateContext { MemberFilter = member => member is PropertyInfo };
                 var obj = new MyObject();
                 var accessor = context.GetMemberAccessor(obj);
 
@@ -346,8 +347,8 @@ namespace Scriban.Tests
 
                 Assert.True(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyObject.FieldA)));
                 Assert.True(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyObject.FieldB)));
-                Assert.True(accessor.HasMember(context, new SourceSpan(), obj,  nameof(MyObject.PropertyA)));
-                Assert.True(accessor.HasMember(context, new SourceSpan(), obj,  nameof(MyObject.PropertyB)));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyObject.PropertyA)));
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyObject.PropertyB)));
 
                 Assert.False(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyStaticObject.StaticFieldA)));
                 Assert.False(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyStaticObject.StaticFieldB)));
@@ -383,6 +384,135 @@ namespace Scriban.Tests
             TextAssert.AreEqual("ClassA-ClassB-ClassB-PropC", result);
         }
 
+        [Test]
+        public void TestRelaxedMemberAccess()
+        {
+            var scriptObject = new ScriptObject
+            {
+                {"a", new MyObject {PropertyA = "A"}}
+            };
+
+            // Test unrelaxed member access.
+            {
+                var context = new TemplateContext();
+                context.PushGlobal(scriptObject);
+
+                var result = Template.Parse("{{a.property_a").Render(context);
+                Assert.AreEqual("A", result);
+
+                Assert.Catch<ScriptRuntimeException>(() =>
+                   Template.Parse("{{a.property_a.null_ref}}").Render(context));
+
+                Assert.Catch<ScriptRuntimeException>(() =>
+                   Template.Parse("{{null_ref.null_ref}}").Render(context));
+            }
+
+            // Test relaxed member access.
+            {
+                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                context.PushGlobal(scriptObject);
+
+                var result = Template.Parse("{{a.property_a").Render(context);
+                Assert.AreEqual("A", result);
+
+                result = Template.Parse("{{a.property_a.null_ref}}").Render(context);
+                Assert.AreEqual(string.Empty, result);
+
+                result = Template.Parse("{{null_ref.null_ref}}").Render(context);
+                Assert.AreEqual(string.Empty, result);
+            }
+        }
+
+        [Test]
+        public void TestRelaxedListIndexerAccess()
+        {
+            var scriptObject = new ScriptObject
+            {
+                {"list", new List<string> {"value" } }
+            };
+
+            // Test unrelaxed indexer access.
+            {
+                var context = new TemplateContext();
+                context.PushGlobal(scriptObject);
+
+                var result = Template.Parse("{{list[0]").Render(context);
+                Assert.AreEqual("value", result);
+
+                Assert.Catch<ScriptRuntimeException>(() =>
+                   Template.Parse("{{list[0].null_ref.null_ref}}").Render(context));
+
+                Assert.Catch<ScriptRuntimeException>(() =>
+                   Template.Parse("{{list[-1].null_ref}}").Render(context));
+
+                Assert.Catch<ScriptRuntimeException>(() =>
+                   Template.Parse("{{null_ref[-1].null_ref}}").Render(context));
+            }
+
+            // Test relaxed member access.
+            {
+                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                context.PushGlobal(scriptObject);
+
+                var result = Template.Parse("{{list[0]").Render(context);
+                Assert.AreEqual("value", result);
+
+                result = Template.Parse("{{list[0].null_ref.null_ref}}").Render(context);
+                Assert.AreEqual(string.Empty, result);
+
+                result = Template.Parse("{{list[-1].null_ref}}").Render(context);
+                Assert.AreEqual(string.Empty, result);
+
+                result = Template.Parse("{{null_ref[-1].null_ref}}").Render(context);
+                Assert.AreEqual(string.Empty, result);
+            }
+        }
+
+        [Test]
+        public void TestRelaxedDictionaryIndexerAccess()
+        {
+            var scriptObject = new ScriptObject
+            {
+                {"dictionary", new Dictionary<string, string> { { "key", "value" } } }
+            };
+
+            // Test unrelaxed indexer access.
+            {
+                var context = new TemplateContext();
+                context.PushGlobal(scriptObject);
+
+                var result = Template.Parse("{{dictionary['key']").Render(context);
+                Assert.AreEqual("value", result);
+
+                Assert.Catch<ScriptRuntimeException>(() =>
+                   Template.Parse("{{dictionary['key'].null_ref.null_ref}}").Render(context));
+
+                Assert.Catch<ScriptRuntimeException>(() =>
+                   Template.Parse("{{dictionary['null_ref'].null_ref}}").Render(context));
+
+                Assert.Catch<ScriptRuntimeException>(() =>
+                   Template.Parse("{{null_ref['null_ref'].null_ref}}").Render(context));
+            }
+
+            // Test relaxed member access.
+            {
+                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                context.PushGlobal(scriptObject);
+
+                var result = Template.Parse("{{dictionary['key']").Render(context);
+                Assert.AreEqual("value", result);
+
+                result = Template.Parse("{{dictionary['key'].null_ref.null_ref}}").Render(context);
+                Assert.AreEqual(string.Empty, result);
+
+                result = Template.Parse("{{dictionary['null_ref'].null_ref}}").Render(context);
+                Assert.AreEqual(string.Empty, result);
+
+                result = Template.Parse("{{null_ref['null_ref'].null_ref}}").Render(context);
+                Assert.AreEqual(string.Empty, result);
+            }
+        }
+
         private class MyObject : MyStaticObject
         {
             public string FieldA;
@@ -397,7 +527,7 @@ namespace Scriban.Tests
 
         private class MyObject2 : MyObject
         {
-            public string PropertyC { get; set; }            
+            public string PropertyC { get; set; }
         }
 
         private class MyStaticObject
