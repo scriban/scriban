@@ -641,11 +641,9 @@ namespace Scriban.Functions
         public static bool Contains(IEnumerable list, object item)
         {
             foreach (var element in list)
-                if (element.Equals(item)) return true;
+                if (element == item) return true;
             return false;
         }
-
-
 
         private class CycleKey : IEquatable<CycleKey>
         {
