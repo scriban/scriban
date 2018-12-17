@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.2.8 (17 Dec 2018)
+- Add missing datetime formatting codes (#81)
+- Add Array.Contains functionality (#76)
+- Add range operator for longs (#92)
+- Add support for relaxed indexer access (#93)
+
 ## 1.2.7 (6 Oct 2018)
 - Fix numeric literals not being parsed with the invariant culture (#74)
 - Fix string to number conversion functions to use the context culture (#78)
