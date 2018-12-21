@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.2.9 (21 Dec 2018)
+- Fix ret statement not returning the value when used inside a loop
+
 ## 1.2.8 (17 Dec 2018)
 - Add missing datetime formatting codes (#81)
 - Add Array.Contains functionality (#76)
