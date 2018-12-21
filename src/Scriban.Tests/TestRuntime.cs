@@ -17,6 +17,30 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void CheckReturnInsideLoop()
+        {
+            var text = @"
+{{-
+func match_tax
+    taxes = [5,6,7,8,9]
+    for s in taxes
+        if s == $0
+            ret true
+        end
+    end
+    ret false
+end
+-}}
+Tax: {{ 7 | match_tax }}";
+            // Tax1: {{ 1 | match_tax }}
+            var template = Template.Parse(text);
+            var context = new TemplateContext();
+            var result = template.Render(context);
+
+            Assert.AreEqual("Tax: true", result);
+        }
+
+        [Test]
         public void TestNullDateTime()
         {
             var template = Template.Parse("{{ null | date.to_string '%g' }}");

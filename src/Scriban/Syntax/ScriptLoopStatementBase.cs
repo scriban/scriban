@@ -32,7 +32,8 @@ namespace Scriban.Syntax
             context.SetValue(ScriptVariable.LoopOdd, !even);
             context.SetValue(ScriptVariable.LoopIndex, index);
 
-            context.Evaluate(Body);
+            // bug: temp workaround to correct a bug with ret. Should be handled differently
+            context.TempLoopResult = context.Evaluate(Body);
 
             // Return must bubble up to call site
             if (context.FlowState == ScriptFlowState.Return)
@@ -53,6 +54,7 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             // Notify the context that we enter a loop block (used for variable with scope Loop)
+            object result = null;
             context.EnterLoop(this);            
             try
             {
@@ -63,13 +65,19 @@ namespace Scriban.Syntax
                 // Level scope block
                 context.ExitLoop(this);
 
-                // Revert to flow state to none unless we have a return that must be handled at a higher level
-                if (context.FlowState != ScriptFlowState.Return)
+                if (context.FlowState == ScriptFlowState.Return)
                 {
+                    result = context.TempLoopResult;
+                }
+                else
+                {
+                    // Revert to flow state to none unless we have a return that must be handled at a higher level
                     context.FlowState = ScriptFlowState.None;
                 }
+
+                context.TempLoopResult = null;
             }
-            return null;
+            return result;
         }
         protected abstract void EvaluateImpl(TemplateContext context);
     }
