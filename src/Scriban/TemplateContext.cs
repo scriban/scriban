@@ -641,7 +641,7 @@ namespace Scriban
         /// <remarks>The purpose of this method is to allow to hook during the evaluation of all ScriptNode. By default calls <see cref="ScriptNode.Evaluate"/></remarks>
         protected virtual object EvaluateImpl(ScriptNode scriptNode)
         {
-            return scriptNode?.Evaluate(this);
+            return scriptNode != null ? scriptNode.Evaluate(this) : null;
         }
 
         /// <summary>
