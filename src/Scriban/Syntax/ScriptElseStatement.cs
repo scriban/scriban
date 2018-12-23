@@ -4,7 +4,7 @@
 namespace Scriban.Syntax
 {
     [ScriptSyntax("else statement", "else | else if <expression> ... end|else|else if")]
-    public class ScriptElseStatement : ScriptConditionStatement
+    public partial class ScriptElseStatement : ScriptConditionStatement
     {
         public ScriptBlockStatement Body { get; set; }
 

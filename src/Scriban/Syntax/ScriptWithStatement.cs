@@ -7,7 +7,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("with statement", "with <variable> ... end")]
-    public class ScriptWithStatement : ScriptStatement
+    public partial class ScriptWithStatement : ScriptStatement
     {
         public ScriptExpression Name { get; set; }
 

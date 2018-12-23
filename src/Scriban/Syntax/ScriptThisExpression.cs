@@ -7,7 +7,7 @@ namespace Scriban.Syntax
     /// this expression returns the current <see cref="TemplateContext.CurrentGlobal"/> script object.
     /// </summary>
     [ScriptSyntax("this expression", "this")]
-    public class ScriptThisExpression : ScriptExpression, IScriptVariablePath
+    public partial class ScriptThisExpression : ScriptExpression, IScriptVariablePath
     {
         public override object Evaluate(TemplateContext context)
         {

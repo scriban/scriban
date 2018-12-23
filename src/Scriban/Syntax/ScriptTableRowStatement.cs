@@ -8,7 +8,7 @@ namespace Scriban.Syntax
     /// <summary>
     /// Statement handling the `tablerow`
     /// </summary>
-    public class ScriptTableRowStatement : ScriptForStatement
+    public partial class ScriptTableRowStatement : ScriptForStatement
     {
         private int _columnsCount;
 

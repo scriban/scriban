@@ -10,7 +10,7 @@ using Scriban.Helpers;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("indexer expression", "<expression>[<index_expression>]")]
-    public class ScriptIndexerExpression : ScriptExpression, IScriptVariablePath
+    public partial class ScriptIndexerExpression : ScriptExpression, IScriptVariablePath
     {
         public ScriptExpression Target { get; set; }
 

@@ -7,7 +7,7 @@ using System.IO;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("expression statement", "<expression>")]
-    public class ScriptExpressionStatement : ScriptStatement
+    public partial class ScriptExpressionStatement : ScriptStatement
     {
         public ScriptExpression Expression { get; set; }
 

@@ -13,7 +13,7 @@ namespace Scriban.Syntax
     /// A for in loop statement.
     /// </summary>
     [ScriptSyntax("for statement", "for <variable> in <expression> ... end")]
-    public class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
+    public partial class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
     {
         public ScriptExpression Variable { get; set; }
 

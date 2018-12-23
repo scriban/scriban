@@ -16,7 +16,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("binary expression", "<expression> operator <expression>")]
-    public class ScriptBinaryExpression : ScriptExpression
+    public partial class ScriptBinaryExpression : ScriptExpression
     {
         public ScriptExpression Left { get; set; }
 

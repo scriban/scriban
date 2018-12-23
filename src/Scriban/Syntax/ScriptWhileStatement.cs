@@ -5,7 +5,7 @@
 namespace Scriban.Syntax
 {
     [ScriptSyntax("while statement", "while <expression> ... end")]
-    public class ScriptWhileStatement : ScriptLoopStatementBase
+    public partial class ScriptWhileStatement : ScriptLoopStatementBase
     {
         public ScriptExpression Condition { get; set; }
 

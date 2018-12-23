@@ -6,7 +6,7 @@ namespace Scriban.Syntax
     /// <summary>
     /// Base class for a loop statement
     /// </summary>
-    public abstract class ScriptLoopStatementBase : ScriptStatement
+    public abstract partial class ScriptLoopStatementBase : ScriptStatement
     {
         public ScriptBlockStatement Body { get; set; }
 

@@ -7,7 +7,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("import statement", "import <expression>")]
-    public class ScriptImportStatement : ScriptStatement
+    public partial class ScriptImportStatement : ScriptStatement
     {
         public ScriptExpression Expression { get; set; }
 

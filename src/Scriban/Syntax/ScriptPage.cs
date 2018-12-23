@@ -6,7 +6,7 @@ using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public class ScriptPage : ScriptNode
+    public partial class ScriptPage : ScriptNode
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptPage"/> class.

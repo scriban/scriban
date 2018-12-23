@@ -12,7 +12,7 @@ namespace Scriban.Syntax
     /// </summary>
     /// <remarks>This class is immutable as all variable object are being shared across all templates</remarks>
     [ScriptSyntax("variable", "<variable_name>")]
-    public abstract class ScriptVariable : ScriptExpression, IScriptVariablePath, IEquatable<ScriptVariable>
+    public abstract partial class ScriptVariable : ScriptExpression, IScriptVariablePath, IEquatable<ScriptVariable>
     {
         private readonly int _hashCode;
 

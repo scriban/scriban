@@ -9,7 +9,7 @@ using Scriban.Functions;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("when statement", "when <expression> ... end|when|else")]
-    public class ScriptWhenStatement : ScriptConditionStatement
+    public partial class ScriptWhenStatement : ScriptConditionStatement
     {
         public ScriptWhenStatement()
         {

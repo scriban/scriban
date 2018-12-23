@@ -9,7 +9,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("object initializer expression", "{ member1: <expression>, member2: ... }")]
-    public class ScriptObjectInitializerExpression : ScriptExpression
+    public partial class ScriptObjectInitializerExpression : ScriptExpression
     {
         public ScriptObjectInitializerExpression()
         {

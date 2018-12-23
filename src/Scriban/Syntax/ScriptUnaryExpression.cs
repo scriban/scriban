@@ -10,7 +10,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("unary expression", "<operator> <expression>")]
-    public class ScriptUnaryExpression : ScriptExpression
+    public partial class ScriptUnaryExpression : ScriptExpression
     {
         public ScriptUnaryOperator Operator { get; set; }
 

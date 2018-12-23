@@ -7,7 +7,7 @@ using System.IO;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("raw statement", "<raw_text>")]
-    public class ScriptRawStatement : ScriptStatement
+    public partial class ScriptRawStatement : ScriptStatement
     {
         public string Text { get; set; }
 

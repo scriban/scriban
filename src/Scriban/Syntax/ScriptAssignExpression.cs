@@ -7,7 +7,7 @@ using System.IO;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("assign expression", "<target_expression> = <value_expression>")]
-    public class ScriptAssignExpression : ScriptExpression
+    public partial class ScriptAssignExpression : ScriptExpression
     {
         public ScriptExpression Target { get; set; }
 
