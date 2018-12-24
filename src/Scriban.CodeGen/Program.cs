@@ -233,7 +233,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: {signature}
         /// </summary>
-        private class {name} : DynamicCustomFunction
+        private partial class {name} : DynamicCustomFunction
         {{
             private delegate {delegateSignature};
 
@@ -259,9 +259,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {{
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= {argOffset};
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - {argOffset};
                     }}
                     else
                     {{

@@ -5,6 +5,9 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+#if SCRIBAN_ASYNC
+using System.Threading.Tasks;
+#endif
 using Scriban.Runtime;
 using Scriban.Syntax;
 
@@ -397,6 +400,13 @@ namespace Scriban.Functions
                     throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{arguments.Count}` for `date` object/function.");
             }
         }
+
+#if SCRIBAN_ASYNC
+        public Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        {
+            return Task.FromResult(Invoke(context, callerContext, arguments, blockStatement));
+        }
+#endif
 
         private void CreateImportFunctions()
         {

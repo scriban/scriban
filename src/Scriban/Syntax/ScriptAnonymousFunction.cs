@@ -3,7 +3,7 @@
 // See license.txt file in the project root for full license information.
 namespace Scriban.Syntax
 {
-    public class ScriptAnonymousFunction : ScriptExpression
+    public partial class ScriptAnonymousFunction : ScriptExpression
     {
         public ScriptFunction Function { get; set; }
 

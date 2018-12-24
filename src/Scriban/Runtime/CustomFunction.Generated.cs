@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 06.10.2018 01:15:52 by Scriban.CodeGen
+// This file was automatically generated - 24-Dec-18 09:58:03 by Scriban.CodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -18,6 +18,7 @@ namespace Scriban.Runtime
 
         static DynamicCustomFunction()
         {
+            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Contains)), method => new Functionbool_IEnumerable_object(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.IsNumber)), method => new Functionbool_object(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Contains)), method => new Functionbool_string_string(method));
             BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.Now)), method => new FunctionDateTime(method));
@@ -64,9 +65,74 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
+        /// Optimized custom function for: bool (IEnumerable, object)
+        /// </summary>
+        private partial class Functionbool_IEnumerable_object : DynamicCustomFunction
+        {
+            private delegate bool InternalDelegate(IEnumerable arg0, object arg1);
+
+            private readonly InternalDelegate _delegate;
+
+            public Functionbool_IEnumerable_object(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                if (arguments.Count != 2)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
+                }
+                var arg0 = default(IEnumerable);
+                var arg1 = default(object);
+                int argMask = 0;
+
+                int argOrderedIndex = 0;
+                for (int i = 0; i < arguments.Count; i++)
+                {
+                    int argIndex = 0;
+                    var arg = arguments[i];
+                    var namedArg = arg as ScriptNamedArgument;
+                    if (namedArg != null)
+                    {
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
+                    }
+                    else
+                    {
+                        argIndex = argOrderedIndex;
+                        argOrderedIndex++;
+                    }
+
+                    switch (argIndex)
+                    {
+                        case 0:
+                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
+                            argMask |= (1 << 0);
+                            break;
+                        case 1:
+                            arg1 = arg;
+                            argMask |= (1 << 1);
+                            break;
+
+                    }
+                }
+
+                if (argMask != (1 << 2) - 1)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
+                }
+
+                return _delegate(arg0, arg1);
+            }
+        }
+
+        /// <summary>
         /// Optimized custom function for: bool (object)
         /// </summary>
-        private class Functionbool_object : DynamicCustomFunction
+        private partial class Functionbool_object : DynamicCustomFunction
         {
             private delegate bool InternalDelegate(object arg0);
 
@@ -94,9 +160,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -126,7 +192,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: bool (string, string)
         /// </summary>
-        private class Functionbool_string_string : DynamicCustomFunction
+        private partial class Functionbool_string_string : DynamicCustomFunction
         {
             private delegate bool InternalDelegate(string arg0, string arg1);
 
@@ -155,9 +221,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -191,7 +257,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: DateTime ()
         /// </summary>
-        private class FunctionDateTime : DynamicCustomFunction
+        private partial class FunctionDateTime : DynamicCustomFunction
         {
             private delegate DateTime InternalDelegate();
 
@@ -218,9 +284,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -246,7 +312,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: DateTime (DateTime, double)
         /// </summary>
-        private class FunctionDateTime_DateTime_double : DynamicCustomFunction
+        private partial class FunctionDateTime_DateTime_double : DynamicCustomFunction
         {
             private delegate DateTime InternalDelegate(DateTime arg0, double arg1);
 
@@ -275,9 +341,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -311,7 +377,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: DateTime (DateTime, int)
         /// </summary>
-        private class FunctionDateTime_DateTime_int : DynamicCustomFunction
+        private partial class FunctionDateTime_DateTime_int : DynamicCustomFunction
         {
             private delegate DateTime InternalDelegate(DateTime arg0, int arg1);
 
@@ -340,9 +406,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -376,7 +442,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: double (double)
         /// </summary>
-        private class Functiondouble_double : DynamicCustomFunction
+        private partial class Functiondouble_double : DynamicCustomFunction
         {
             private delegate double InternalDelegate(double arg0);
 
@@ -404,9 +470,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -436,7 +502,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: double (double, int = ...)
         /// </summary>
-        private class Functiondouble_double_int___Opt : DynamicCustomFunction
+        private partial class Functiondouble_double_int___Opt : DynamicCustomFunction
         {
             private delegate double InternalDelegate(double arg0, int arg1);
 
@@ -467,9 +533,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -502,7 +568,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: IEnumerable (IEnumerable)
         /// </summary>
-        private class FunctionIEnumerable_IEnumerable : DynamicCustomFunction
+        private partial class FunctionIEnumerable_IEnumerable : DynamicCustomFunction
         {
             private delegate IEnumerable InternalDelegate(IEnumerable arg0);
 
@@ -530,9 +596,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -562,7 +628,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: IEnumerable (IEnumerable, IEnumerable)
         /// </summary>
-        private class FunctionIEnumerable_IEnumerable_IEnumerable : DynamicCustomFunction
+        private partial class FunctionIEnumerable_IEnumerable_IEnumerable : DynamicCustomFunction
         {
             private delegate IEnumerable InternalDelegate(IEnumerable arg0, IEnumerable arg1);
 
@@ -591,9 +657,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -627,7 +693,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: IEnumerable (string, string)
         /// </summary>
-        private class FunctionIEnumerable_string_string : DynamicCustomFunction
+        private partial class FunctionIEnumerable_string_string : DynamicCustomFunction
         {
             private delegate IEnumerable InternalDelegate(string arg0, string arg1);
 
@@ -656,9 +722,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -692,7 +758,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: IEnumerable (TemplateContext, SourceSpan, object, string = ...)
         /// </summary>
-        private class FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt : DynamicCustomFunction
+        private partial class FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt : DynamicCustomFunction
         {
             private delegate IEnumerable InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, string arg3);
 
@@ -723,9 +789,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -758,7 +824,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: IEnumerable (TemplateContext, SourceSpan, object, string)
         /// </summary>
-        private class FunctionIEnumerable_TemplateContext_SourceSpan_object_string : DynamicCustomFunction
+        private partial class FunctionIEnumerable_TemplateContext_SourceSpan_object_string : DynamicCustomFunction
         {
             private delegate IEnumerable InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, string arg3);
 
@@ -787,9 +853,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -823,7 +889,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: IList (IList, int)
         /// </summary>
-        private class FunctionIList_IList_int : DynamicCustomFunction
+        private partial class FunctionIList_IList_int : DynamicCustomFunction
         {
             private delegate IList InternalDelegate(IList arg0, int arg1);
 
@@ -852,9 +918,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -888,7 +954,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: IList (IList, int, object)
         /// </summary>
-        private class FunctionIList_IList_int_object : DynamicCustomFunction
+        private partial class FunctionIList_IList_int_object : DynamicCustomFunction
         {
             private delegate IList InternalDelegate(IList arg0, int arg1, object arg2);
 
@@ -918,9 +984,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -958,7 +1024,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: IList (IList, object)
         /// </summary>
-        private class FunctionIList_IList_object : DynamicCustomFunction
+        private partial class FunctionIList_IList_object : DynamicCustomFunction
         {
             private delegate IList InternalDelegate(IList arg0, object arg1);
 
@@ -987,9 +1053,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1023,7 +1089,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: int (IEnumerable)
         /// </summary>
-        private class Functionint_IEnumerable : DynamicCustomFunction
+        private partial class Functionint_IEnumerable : DynamicCustomFunction
         {
             private delegate int InternalDelegate(IEnumerable arg0);
 
@@ -1051,9 +1117,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1083,7 +1149,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: int (string)
         /// </summary>
-        private class Functionint_string : DynamicCustomFunction
+        private partial class Functionint_string : DynamicCustomFunction
         {
             private delegate int InternalDelegate(string arg0);
 
@@ -1111,9 +1177,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1143,7 +1209,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: int (TemplateContext, SourceSpan, object)
         /// </summary>
-        private class Functionint_TemplateContext_SourceSpan_object : DynamicCustomFunction
+        private partial class Functionint_TemplateContext_SourceSpan_object : DynamicCustomFunction
         {
             private delegate int InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2);
 
@@ -1171,9 +1237,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -1203,7 +1269,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: object (IEnumerable)
         /// </summary>
-        private class Functionobject_IEnumerable : DynamicCustomFunction
+        private partial class Functionobject_IEnumerable : DynamicCustomFunction
         {
             private delegate object InternalDelegate(IEnumerable arg0);
 
@@ -1231,9 +1297,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1263,7 +1329,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: object (object, object)
         /// </summary>
-        private class Functionobject_object_object : DynamicCustomFunction
+        private partial class Functionobject_object_object : DynamicCustomFunction
         {
             private delegate object InternalDelegate(object arg0, object arg1);
 
@@ -1292,9 +1358,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1328,7 +1394,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: object (TemplateContext, SourceSpan, double, object)
         /// </summary>
-        private class Functionobject_TemplateContext_SourceSpan_double_object : DynamicCustomFunction
+        private partial class Functionobject_TemplateContext_SourceSpan_double_object : DynamicCustomFunction
         {
             private delegate object InternalDelegate(TemplateContext arg0, SourceSpan arg1, double arg2, object arg3);
 
@@ -1357,9 +1423,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -1393,7 +1459,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: object (TemplateContext, SourceSpan, IList, object = ...)
         /// </summary>
-        private class Functionobject_TemplateContext_SourceSpan_IList_object___Opt : DynamicCustomFunction
+        private partial class Functionobject_TemplateContext_SourceSpan_IList_object___Opt : DynamicCustomFunction
         {
             private delegate object InternalDelegate(TemplateContext arg0, SourceSpan arg1, IList arg2, object arg3);
 
@@ -1424,9 +1490,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -1459,7 +1525,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: object (TemplateContext, SourceSpan, object)
         /// </summary>
-        private class Functionobject_TemplateContext_SourceSpan_object : DynamicCustomFunction
+        private partial class Functionobject_TemplateContext_SourceSpan_object : DynamicCustomFunction
         {
             private delegate object InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2);
 
@@ -1487,9 +1553,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -1519,7 +1585,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: object (TemplateContext, SourceSpan, object, object)
         /// </summary>
-        private class Functionobject_TemplateContext_SourceSpan_object_object : DynamicCustomFunction
+        private partial class Functionobject_TemplateContext_SourceSpan_object_object : DynamicCustomFunction
         {
             private delegate object InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, object arg3);
 
@@ -1548,9 +1614,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -1584,7 +1650,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: object (TemplateContext, string)
         /// </summary>
-        private class Functionobject_TemplateContext_string : DynamicCustomFunction
+        private partial class Functionobject_TemplateContext_string : DynamicCustomFunction
         {
             private delegate object InternalDelegate(TemplateContext arg0, string arg1);
 
@@ -1612,9 +1678,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 1;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 1;
                     }
                     else
                     {
@@ -1644,7 +1710,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: ScriptArray (IEnumerable)
         /// </summary>
-        private class FunctionScriptArray_IEnumerable : DynamicCustomFunction
+        private partial class FunctionScriptArray_IEnumerable : DynamicCustomFunction
         {
             private delegate ScriptArray InternalDelegate(IEnumerable arg0);
 
@@ -1672,9 +1738,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1704,7 +1770,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: ScriptArray (IEnumerable, int)
         /// </summary>
-        private class FunctionScriptArray_IEnumerable_int : DynamicCustomFunction
+        private partial class FunctionScriptArray_IEnumerable_int : DynamicCustomFunction
         {
             private delegate ScriptArray InternalDelegate(IEnumerable arg0, int arg1);
 
@@ -1733,9 +1799,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1769,7 +1835,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: ScriptArray (TemplateContext, string, string, string = ...)
         /// </summary>
-        private class FunctionScriptArray_TemplateContext_string_string_string___Opt : DynamicCustomFunction
+        private partial class FunctionScriptArray_TemplateContext_string_string_string___Opt : DynamicCustomFunction
         {
             private delegate ScriptArray InternalDelegate(TemplateContext arg0, string arg1, string arg2, string arg3);
 
@@ -1801,9 +1867,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 1;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 1;
                     }
                     else
                     {
@@ -1840,7 +1906,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (int, string, string)
         /// </summary>
-        private class Functionstring_int_string_string : DynamicCustomFunction
+        private partial class Functionstring_int_string_string : DynamicCustomFunction
         {
             private delegate string InternalDelegate(int arg0, string arg1, string arg2);
 
@@ -1870,9 +1936,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1910,7 +1976,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (object)
         /// </summary>
-        private class Functionstring_object : DynamicCustomFunction
+        private partial class Functionstring_object : DynamicCustomFunction
         {
             private delegate string InternalDelegate(object arg0);
 
@@ -1938,9 +2004,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -1970,7 +2036,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (string)
         /// </summary>
-        private class Functionstring_string : DynamicCustomFunction
+        private partial class Functionstring_string : DynamicCustomFunction
         {
             private delegate string InternalDelegate(string arg0);
 
@@ -1998,9 +2064,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -2030,7 +2096,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (string, int)
         /// </summary>
-        private class Functionstring_string_int : DynamicCustomFunction
+        private partial class Functionstring_string_int : DynamicCustomFunction
         {
             private delegate string InternalDelegate(string arg0, int arg1);
 
@@ -2059,9 +2125,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -2095,7 +2161,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (string, int, int = ...)
         /// </summary>
-        private class Functionstring_string_int_int___Opt : DynamicCustomFunction
+        private partial class Functionstring_string_int_int___Opt : DynamicCustomFunction
         {
             private delegate string InternalDelegate(string arg0, int arg1, int arg2);
 
@@ -2127,9 +2193,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -2166,7 +2232,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (string, int, string = ...)
         /// </summary>
-        private class Functionstring_string_int_string___Opt : DynamicCustomFunction
+        private partial class Functionstring_string_int_string___Opt : DynamicCustomFunction
         {
             private delegate string InternalDelegate(string arg0, int arg1, string arg2);
 
@@ -2198,9 +2264,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -2237,7 +2303,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (string, string)
         /// </summary>
-        private class Functionstring_string_string : DynamicCustomFunction
+        private partial class Functionstring_string_string : DynamicCustomFunction
         {
             private delegate string InternalDelegate(string arg0, string arg1);
 
@@ -2266,9 +2332,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -2302,7 +2368,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (string, string, string)
         /// </summary>
-        private class Functionstring_string_string_string : DynamicCustomFunction
+        private partial class Functionstring_string_string_string : DynamicCustomFunction
         {
             private delegate string InternalDelegate(string arg0, string arg1, string arg2);
 
@@ -2332,9 +2398,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -2372,7 +2438,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (TemplateContext, SourceSpan, IEnumerable, string)
         /// </summary>
-        private class Functionstring_TemplateContext_SourceSpan_IEnumerable_string : DynamicCustomFunction
+        private partial class Functionstring_TemplateContext_SourceSpan_IEnumerable_string : DynamicCustomFunction
         {
             private delegate string InternalDelegate(TemplateContext arg0, SourceSpan arg1, IEnumerable arg2, string arg3);
 
@@ -2401,9 +2467,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -2437,7 +2503,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (TemplateContext, SourceSpan, object, string, string = ...)
         /// </summary>
-        private class Functionstring_TemplateContext_SourceSpan_object_string_string___Opt : DynamicCustomFunction
+        private partial class Functionstring_TemplateContext_SourceSpan_object_string_string___Opt : DynamicCustomFunction
         {
             private delegate string InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, string arg3, string arg4);
 
@@ -2469,9 +2535,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 2;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 2;
                     }
                     else
                     {
@@ -2508,7 +2574,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (TemplateContext, string)
         /// </summary>
-        private class Functionstring_TemplateContext_string : DynamicCustomFunction
+        private partial class Functionstring_TemplateContext_string : DynamicCustomFunction
         {
             private delegate string InternalDelegate(TemplateContext arg0, string arg1);
 
@@ -2536,9 +2602,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 1;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 1;
                     }
                     else
                     {
@@ -2568,7 +2634,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: string (TemplateContext, string, string, string, string = ...)
         /// </summary>
-        private class Functionstring_TemplateContext_string_string_string_string___Opt : DynamicCustomFunction
+        private partial class Functionstring_TemplateContext_string_string_string_string___Opt : DynamicCustomFunction
         {
             private delegate string InternalDelegate(TemplateContext arg0, string arg1, string arg2, string arg3, string arg4);
 
@@ -2601,9 +2667,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 1;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 1;
                     }
                     else
                     {
@@ -2644,7 +2710,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: TimeSpan (double)
         /// </summary>
-        private class FunctionTimeSpan_double : DynamicCustomFunction
+        private partial class FunctionTimeSpan_double : DynamicCustomFunction
         {
             private delegate TimeSpan InternalDelegate(double arg0);
 
@@ -2672,9 +2738,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {
@@ -2704,7 +2770,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Optimized custom function for: TimeSpan (string)
         /// </summary>
-        private class FunctionTimeSpan_string : DynamicCustomFunction
+        private partial class FunctionTimeSpan_string : DynamicCustomFunction
         {
             private delegate TimeSpan InternalDelegate(string arg0);
 
@@ -2732,9 +2798,9 @@ namespace Scriban.Runtime
                     var namedArg = arg as ScriptNamedArgument;
                     if (namedArg != null)
                     {
-                        Type argType;
-                        arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                        argIndex -= 0;
+                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index - 0;
                     }
                     else
                     {

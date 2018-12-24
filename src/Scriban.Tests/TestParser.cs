@@ -571,6 +571,8 @@ end
                                     TemplateLoader = new CustomTemplateLoader()
                                 };
 
+                            context.NewLine = "\n";
+
                             // We use a custom output to make sure that all output is using the "\n"
                             context.PushOutput(new TextWriterOutput(new StringWriter() { NewLine = "\n" })); 
 

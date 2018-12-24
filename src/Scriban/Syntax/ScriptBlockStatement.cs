@@ -26,6 +26,13 @@ namespace Scriban.Syntax
                 var expressionStatement = statement as ScriptExpressionStatement;
                 var isAssign = expressionStatement?.Expression is ScriptAssignExpression;
 
+#if SCRIBAN_ASYNC
+                // Throw if cancellation is requested
+                if (context.CancellationToken.IsCancellationRequested)
+                {
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                }
+#endif
                 result = context.Evaluate(statement);
 
                 // Top-level assignment expression don't output anything

@@ -6,7 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-//using System.Threading.Tasks;
+#if SCRIBAN_ASYNC
+using System.Threading.Tasks;
+#endif
 using Scriban.Parsing;
 
 namespace Scriban.Syntax
@@ -32,7 +34,12 @@ namespace Scriban.Syntax
         /// <param name="context">The template context.</param>
         public abstract object Evaluate(TemplateContext context);
 
-        //public abstract Task<object> EvaluateAsync(TemplateContext context);
+#if SCRIBAN_ASYNC
+        public virtual Task<object> EvaluateAsync(TemplateContext context)
+        {
+            return Task.FromResult(Evaluate(context));
+        }
+#endif
 
         public virtual bool CanHaveLeadingTrivia()
         {

@@ -5,6 +5,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if SCRIBAN_ASYNC
+using System.Threading.Tasks;
+#endif
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -129,6 +132,13 @@ namespace Scriban.Syntax
         {
             throw new ScriptRuntimeException(argument.Span, $"Unsupported argument `{argument.Name}` for statement: `{this}`");
         }
+
+#if SCRIBAN_ASYNC
+        protected virtual Task ProcessArgumentAsync(TemplateContext context, ScriptNamedArgument argument)
+        {
+            throw new ScriptRuntimeException(argument.Span, $"Unsupported argument `{argument.Name}` for statement: `{this}`");
+        }
+#endif
 
         public override string ToString()
         {

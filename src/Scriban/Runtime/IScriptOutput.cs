@@ -2,6 +2,12 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System;
+#if SCRIBAN_ASYNC
+using System.Threading;
+using System.Threading.Tasks;
+#endif
+
 namespace Scriban.Runtime
 {
     /// <summary>
@@ -9,16 +15,22 @@ namespace Scriban.Runtime
     /// </summary>
     public interface IScriptOutput
     {
-        IScriptOutput Write(char c);
-
-        IScriptOutput Write(string text);
-
-        IScriptOutput Write(int number);
-
         IScriptOutput Write(string text, int offset, int count);
-        
-        IScriptOutput WriteLine(string text);
 
-        IScriptOutput WriteLine();
+#if SCRIBAN_ASYNC
+        Task<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken);
+#endif
+    }
+
+    /// <summary>
+    /// Extensions for <see cref="IScriptOutput"/>
+    /// </summary>
+    public static partial class ScriptOutputExtensions
+    {
+        public static IScriptOutput Write(this IScriptOutput scriptOutput, string text)
+        {
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            return scriptOutput.Write(text, 0, text.Length);
+        }
     }
 }

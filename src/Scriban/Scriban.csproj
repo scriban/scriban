@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <Description>Scriban is a fast, powerful, safe and lightweight text templating language and engine for .NET, with a compatibility mode for parsing liquid templates.</Description>
     <Copyright>Alexandre Mutel</Copyright>
@@ -26,47 +25,41 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Web" />
   </ItemGroup>
-
   <ItemGroup Condition=" '$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81' ">
     <Reference Include="mscorlib" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
-
-    <PropertyGroup Condition=" '$(TargetFramework)' == 'net35'">
-        <DefineConstants>$(DefineConstants);NET35</DefineConstants>
-    </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net35'">
+    <DefineConstants>$(DefineConstants);NET35</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net40'">
     <DefineConstants>$(DefineConstants);NET40</DefineConstants>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
-    <DefineConstants>$(DefineConstants);NETSTD11</DefineConstants>
+    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC;NETSTD11</DefineConstants>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <DefineConstants>$(DefineConstants);NETSTD13</DefineConstants>
+    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC;NETSTD13</DefineConstants>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC;NETSTD20</DefineConstants>
+  </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
     <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
   </ItemGroup>
-
   <PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
     <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
     <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">10.0.10240.0</TargetPlatformVersion>
     <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">10.0.10240.0</TargetPlatformMinVersion>
-    <DefineConstants>$(DefineConstants);UAP</DefineConstants>
+    <DefineConstants>$(DefineConstants);UAP;SCRIBAN_ASYNC</DefineConstants>
   </PropertyGroup>
-
   <PropertyGroup Condition="'$(TargetFramework)' == 'portable40-net40+sl5+win8+wp8+wpa81'">
     <DefineConstants>$(DefineConstants);PCL328</DefineConstants>
     <TargetFrameworkIdentifier>.NETPortable</TargetFrameworkIdentifier>
@@ -74,17 +67,15 @@
     <TargetFrameworkProfile>Profile328</TargetFrameworkProfile>
     <LanguageTargets>$(MSBuildExtensionsPath32)\Microsoft\Portable\$(TargetFrameworkVersion)\Microsoft.Portable.CSharp.targets</LanguageTargets>
   </PropertyGroup>
-
   <PropertyGroup Condition=" '$(SignAssembly)' == 'true' ">
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
-
   <!-- Special packages and imports for UWP support -->
   <ItemGroup>
     <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.9" PrivateAssets="all" />
     <!--Add support for sourcelink-->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All"/>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
     <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="6.1.9" />
