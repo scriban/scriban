@@ -35,9 +35,9 @@ namespace Scriban.Syntax
         public abstract object Evaluate(TemplateContext context);
 
 #if SCRIBAN_ASYNC
-        public virtual Task<object> EvaluateAsync(TemplateContext context)
+        public virtual ValueTask<object> EvaluateAsync(TemplateContext context)
         {
-            return Task.FromResult(Evaluate(context));
+            return new ValueTask<object>(Evaluate(context));
         }
 #endif
 

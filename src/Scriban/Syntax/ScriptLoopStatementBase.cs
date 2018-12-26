@@ -88,13 +88,13 @@ namespace Scriban.Syntax
         protected abstract void EvaluateImpl(TemplateContext context);
 
 #if SCRIBAN_ASYNC
-        protected abstract Task EvaluateImplAsync(TemplateContext context);
+        protected abstract ValueTask EvaluateImplAsync(TemplateContext context);
 
-        protected virtual async Task BeforeLoopAsync(TemplateContext context)
+        protected virtual async ValueTask BeforeLoopAsync(TemplateContext context)
         {
         }
 
-        protected virtual async Task AfterLoopAsync(TemplateContext context)
+        protected virtual async ValueTask AfterLoopAsync(TemplateContext context)
         {
         }
 #endif

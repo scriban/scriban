@@ -134,7 +134,7 @@ namespace Scriban.Syntax
         }
 
 #if SCRIBAN_ASYNC
-        protected virtual Task ProcessArgumentAsync(TemplateContext context, ScriptNamedArgument argument)
+        protected virtual ValueTask ProcessArgumentAsync(TemplateContext context, ScriptNamedArgument argument)
         {
             throw new ScriptRuntimeException(argument.Span, $"Unsupported argument `{argument.Name}` for statement: `{this}`");
         }

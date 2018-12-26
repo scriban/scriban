@@ -34,7 +34,7 @@ namespace Scriban
         /// <param name="render"><c>true</c> to render the output to the <see cref="TemplateContext.Output"/></param>
         /// <exception cref="System.ArgumentNullException">If context is null</exception>
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
-        private async Task<object> EvaluateAndRenderAsync(TemplateContext context, bool render)
+        private async ValueTask<object> EvaluateAndRenderAsync(TemplateContext context, bool render)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             CheckErrors();
@@ -73,7 +73,7 @@ namespace Scriban
         /// <exception cref="System.ArgumentNullException">If context is null</exception>
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
         /// <returns>Returns the result of the last statement</returns>
-        public async Task<object> EvaluateAsync(TemplateContext context)
+        public async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var previousOutput = context.EnableOutput;
             try
@@ -93,7 +93,7 @@ namespace Scriban
         /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
         /// <param name="context">The template context</param>
         /// <returns>The result of the evaluation of the expression</returns>
-        public static async Task<object> EvaluateAsync(string expression, TemplateContext context)
+        public static async ValueTask<object> EvaluateAsync(string expression, TemplateContext context)
         {
             if (expression == null) throw new ArgumentNullException(nameof(expression));
             var lexerOption = new LexerOptions() {Mode = ScriptMode.ScriptOnly};
@@ -109,7 +109,7 @@ namespace Scriban
         /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
         /// <returns>Returns the result of the last statement</returns>
-        public async Task<object> EvaluateAsync(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        public async ValueTask<object> EvaluateAsync(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             var scriptObject = new ScriptObject();
             if (model != null)
@@ -137,7 +137,7 @@ namespace Scriban
         /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
         /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <returns>The result of the evaluation of the expression</returns>
-        public static async Task<object> EvaluateAsync(string expression, object model, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        public static async ValueTask<object> EvaluateAsync(string expression, object model, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             if (expression == null) throw new ArgumentNullException(nameof(expression));
             var lexerOption = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
@@ -154,7 +154,7 @@ namespace Scriban
         /// <remarks>
         /// When using this method, the result of rendering this page is output to <see cref="TemplateContext.Output"/>
         /// </remarks>
-        public async Task<string> RenderAsync(TemplateContext context)
+        public async ValueTask<string> RenderAsync(TemplateContext context)
         {
             await EvaluateAndRenderAsync(context, true).ConfigureAwait(false);
             var result = context.Output.ToString();
@@ -173,7 +173,7 @@ namespace Scriban
         /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
         /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <returns>A rendering result as a string </returns>
-        public async Task<string> RenderAsync(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        public async ValueTask<string> RenderAsync(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             var scriptObject = new ScriptObject();
             if (model != null)
@@ -200,7 +200,7 @@ namespace Scriban
         /// <param name="scriptNode">The script node.</param>
         /// <param name="aliasReturnedFunction">if set to <c>true</c> and a function would be evaluated as part of this node, return the object function without evaluating it.</param>
         /// <returns>The result of the evaluation.</returns>
-        public async Task<object> EvaluateAsync(ScriptNode scriptNode, bool aliasReturnedFunction)
+        public async ValueTask<object> EvaluateAsync(ScriptNode scriptNode, bool aliasReturnedFunction)
         {
             var previousFunctionCallState = _isFunctionCallDisabled;
             var previousLevel = _getOrSetValueLevel;
@@ -222,7 +222,7 @@ namespace Scriban
         /// </summary>
         /// <param name="scriptNode">The script node.</param>
         /// <returns>The result of the evaluation.</returns>
-        public async Task<object> EvaluateAsync(ScriptNode scriptNode)
+        public async ValueTask<object> EvaluateAsync(ScriptNode scriptNode)
         {
             return await EvaluateAsync(scriptNode, false).ConfigureAwait(false);
         }
@@ -233,7 +233,7 @@ namespace Scriban
         /// <param name="scriptNode">The script node (might be null but should not throw an error)</param>
         /// <returns>The result of the evaluation</returns>
         /// <remarks>The purpose of this method is to allow to hook during the evaluation of all ScriptNode. By default calls <see cref="ScriptNode.Evaluate"/></remarks>
-        protected virtual async Task<object> EvaluateImplAsync(ScriptNode scriptNode)
+        protected virtual async ValueTask<object> EvaluateImplAsync(ScriptNode scriptNode)
         {
             return scriptNode != null ? await  scriptNode.EvaluateAsync(this) .ConfigureAwait(false): null;
         }
@@ -245,7 +245,7 @@ namespace Scriban
         /// <param name="valueToSet">A value to set in case of a setter</param>
         /// <param name="setter">true if this a setter</param>
         /// <returns>The value of the targetExpression</returns>
-        private async Task<object> GetOrSetValueAsync(ScriptExpression targetExpression, object valueToSet, bool setter)
+        private async ValueTask<object> GetOrSetValueAsync(ScriptExpression targetExpression, object valueToSet, bool setter)
         {
             object value = null;
 
@@ -293,7 +293,7 @@ namespace Scriban
         /// </summary>
         /// <param name="target">The expression</param>
         /// <returns>The value of the expression</returns>
-        public async Task<object> GetValueAsync(ScriptExpression target)
+        public async ValueTask<object> GetValueAsync(ScriptExpression target)
         {
             _getOrSetValueLevel++;
             try
@@ -312,7 +312,7 @@ namespace Scriban
         /// <param name="target">The target expression.</param>
         /// <param name="value">The value.</param>
         /// <exception cref="System.ArgumentNullException">If target is null</exception>
-        public async Task SetValueAsync(ScriptExpression target, object value)
+        public async ValueTask SetValueAsync(ScriptExpression target, object value)
         {
             if (target == null) throw new ArgumentNullException(nameof(target));
             _getOrSetValueLevel++;
@@ -332,7 +332,7 @@ namespace Scriban
         /// <param name="text">The text.</param>
         /// <param name="startIndex">The zero-based position of the substring of text</param>
         /// <param name="count">The number of characters to output starting at <paramref name="startIndex"/> position from the text</param>
-        public async Task<TemplateContext> WriteAsync(string text, int startIndex, int count)
+        public async ValueTask<TemplateContext> WriteAsync(string text, int startIndex, int count)
         {
             if (text != null)
             {
@@ -346,7 +346,7 @@ namespace Scriban
         /// Writes the text to the current <see cref="Output"/>
         /// </summary>
         /// <param name="text">The text.</param>
-        public async Task<TemplateContext> WriteAsync(string text)
+        public async ValueTask<TemplateContext> WriteAsync(string text)
         {
             if (text != null)
             {
@@ -360,7 +360,7 @@ namespace Scriban
         /// </summary>
         /// <param name="span">The span of the object to render.</param>
         /// <param name="textAsObject">The text as object.</param>
-        public async Task<TemplateContext> WriteAsync(SourceSpan span, object textAsObject)
+        public async ValueTask<TemplateContext> WriteAsync(SourceSpan span, object textAsObject)
         {
             if (textAsObject != null)
             {
@@ -373,7 +373,7 @@ namespace Scriban
         /// <summary>
         /// Writes the a new line to the current <see cref="Output"/>
         /// </summary>
-        public async Task<TemplateContext> WriteLineAsync()
+        public async ValueTask<TemplateContext> WriteLineAsync()
         {
             await  Output.WriteAsync(NewLine, CancellationToken).ConfigureAwait(false);
             return this;
@@ -388,7 +388,7 @@ namespace Scriban.Functions
     /// </summary>
     public sealed partial class IncludeFunction     {
 
-        public async Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public async ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             if (arguments.Count == 0)
             {
@@ -500,7 +500,7 @@ namespace Scriban.Runtime
 
 
 
-        protected async Task<ArgumentValue> GetValueFromNamedArgumentAsync(TemplateContext context, ScriptNode callerContext, ScriptNamedArgument namedArg)
+        protected async ValueTask<ArgumentValue> GetValueFromNamedArgumentAsync(TemplateContext context, ScriptNode callerContext, ScriptNamedArgument namedArg)
         {
             for (int j = 0; j < Parameters.Length; j++)
             {
@@ -519,7 +519,7 @@ namespace Scriban.Runtime
     /// </summary>
     partial class GenericFunctionWrapper     {
 
-        public override async Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public override async ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             var expectedNumberOfParameters = Parameters.Length;
             if (_hasTemplateContext)
@@ -669,7 +669,7 @@ namespace Scriban.Runtime
     /// </summary>
     public static partial class ScriptOutputExtensions
     {
-        public static async Task<IScriptOutput> WriteAsync(this IScriptOutput scriptOutput, string text,CancellationToken cancellationToken)
+        public static async ValueTask<IScriptOutput> WriteAsync(this IScriptOutput scriptOutput, string text,CancellationToken cancellationToken)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
             return await  scriptOutput.WriteAsync(text, 0, text.Length, cancellationToken).ConfigureAwait(false);
@@ -680,7 +680,7 @@ namespace Scriban.Syntax
 {
     public partial class ScriptArrayInitializerExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var scriptArray = new ScriptArray();
             foreach (var value in Values)
@@ -695,7 +695,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptAssignExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var valueObject = await context.EvaluateAsync(Value).ConfigureAwait(false);
             await context.SetValueAsync(Target, valueObject).ConfigureAwait(false);
@@ -705,7 +705,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptBinaryExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var leftValueOriginal = await context.EvaluateAsync(Left).ConfigureAwait(false);
             var leftValue = leftValueOriginal;
@@ -717,7 +717,7 @@ namespace Scriban.Syntax
 
     public sealed partial class ScriptBlockStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             object result = null;
             for (int i = 0; i < Statements.Count; i++)
@@ -757,7 +757,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptCaptureStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             // unit test: 230-capture-statement.txt
             context.PushOutput();
@@ -777,7 +777,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptCaseStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var caseValue = await context.EvaluateAsync(Value).ConfigureAwait(false);
             context.PushCase(caseValue);
@@ -794,7 +794,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptElseStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             await context.EvaluateAsync(Body).ConfigureAwait(false);
             return await context.EvaluateAsync(Else).ConfigureAwait(false);
@@ -803,7 +803,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptExpressionStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var result = await context.EvaluateAsync(Expression).ConfigureAwait(false);
             // This code is necessary for wrap to work
@@ -819,7 +819,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptForStatement
     {
-        protected override async Task EvaluateImplAsync(TemplateContext context)
+        protected override async ValueTask EvaluateImplAsync(TemplateContext context)
         {
             var loopIterator = await context.EvaluateAsync(Iterator).ConfigureAwait(false);
             var list = loopIterator as IList;
@@ -904,7 +904,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptFunctionCall
     {
-        public static async Task<object> CallAsync(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, List<ScriptExpression> arguments = null)
+        public static async ValueTask<object> CallAsync(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, List<ScriptExpression> arguments = null)
         {
             if (callerContext == null)
                 throw new ArgumentNullException(nameof(callerContext));
@@ -1020,7 +1020,7 @@ namespace Scriban.Syntax
             return result;
         }
 
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
             var targetFunction = await context.EvaluateAsync(Target, true).ConfigureAwait(false);
@@ -1036,7 +1036,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptIfStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var conditionValue = context.ToBool(Condition.Span, await context.EvaluateAsync(Condition).ConfigureAwait(false));
             if (InvertCondition)
@@ -1050,7 +1050,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptImportStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var value = await context.EvaluateAsync(Expression).ConfigureAwait(false);
             if (value == null)
@@ -1071,12 +1071,12 @@ namespace Scriban.Syntax
 
     public partial class ScriptIndexerExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             return await context.GetValueAsync(this).ConfigureAwait(false);
         }
 
-        private async Task<object> GetOrSetValueAsync(TemplateContext context, object valueToSet, bool setter)
+        private async ValueTask<object> GetOrSetValueAsync(TemplateContext context, object valueToSet, bool setter)
         {
             object value = null;
             var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
@@ -1155,12 +1155,12 @@ namespace Scriban.Syntax
             return value;
         }
 
-        public async Task<object> GetValueAsync(TemplateContext context)
+        public async ValueTask<object> GetValueAsync(TemplateContext context)
         {
             return await GetOrSetValueAsync(context, null, false).ConfigureAwait(false);
         }
 
-        public async Task SetValueAsync(TemplateContext context, object valueToSet)
+        public async ValueTask SetValueAsync(TemplateContext context, object valueToSet)
         {
             await GetOrSetValueAsync(context, valueToSet, true).ConfigureAwait(false);
         }
@@ -1168,12 +1168,12 @@ namespace Scriban.Syntax
 
     public partial class ScriptIsEmptyExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             return await context.GetValueAsync(this).ConfigureAwait(false);
         }
 
-        private async Task<object> GetTargetObjectAsync(TemplateContext context, bool isSet)
+        private async ValueTask<object> GetTargetObjectAsync(TemplateContext context, bool isSet)
         {
             var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
             if (targetObject == null)
@@ -1187,7 +1187,7 @@ namespace Scriban.Syntax
             return targetObject;
         }
 
-        public async Task<object> GetValueAsync(TemplateContext context)
+        public async ValueTask<object> GetValueAsync(TemplateContext context)
         {
             var targetObject = await GetTargetObjectAsync(context, false).ConfigureAwait(false);
             return context.IsEmpty(Span, targetObject);
@@ -1199,7 +1199,7 @@ namespace Scriban.Syntax
     /// </summary>
     public abstract partial class ScriptLoopStatementBase
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             // Notify the context that we enter a loop block (used for variable with scope Loop)
             object result = null;
@@ -1236,7 +1236,7 @@ namespace Scriban.Syntax
         /// <param name = "localIndex"></param>
         /// <param name = "isLast"></param>
         /// <returns></returns>
-        protected virtual async Task<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
+        protected virtual async ValueTask<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
         {
             // Setup variable
             context.SetValue(ScriptVariable.LoopFirst, index == 0);
@@ -1261,12 +1261,12 @@ namespace Scriban.Syntax
 
     public partial class ScriptMemberExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             return await context.GetValueAsync(this).ConfigureAwait(false);
         }
 
-        private async Task<object> GetTargetObjectAsync(TemplateContext context, bool isSet)
+        private async ValueTask<object> GetTargetObjectAsync(TemplateContext context, bool isSet)
         {
             var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
             if (targetObject == null)
@@ -1293,7 +1293,7 @@ namespace Scriban.Syntax
             return targetObject;
         }
 
-        public async Task<object> GetValueAsync(TemplateContext context)
+        public async ValueTask<object> GetValueAsync(TemplateContext context)
         {
             var targetObject = await GetTargetObjectAsync(context, false).ConfigureAwait(false);
             // In case TemplateContext.EnableRelaxedMemberAccess
@@ -1313,7 +1313,7 @@ namespace Scriban.Syntax
             return value;
         }
 
-        public async Task SetValueAsync(TemplateContext context, object valueToSet)
+        public async ValueTask SetValueAsync(TemplateContext context, object valueToSet)
         {
             var targetObject = await GetTargetObjectAsync(context, true).ConfigureAwait(false);
             var accessor = context.GetMemberAccessor(targetObject);
@@ -1327,7 +1327,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptNamedArgument
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             if (Value != null)
                 return await context.EvaluateAsync(Value).ConfigureAwait(false);
@@ -1337,7 +1337,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptNestedExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             // A nested expression will reset the pipe arguments for the group
             context.PushPipeArguments();
@@ -1351,12 +1351,12 @@ namespace Scriban.Syntax
             }
         }
 
-        public async Task<object> GetValueAsync(TemplateContext context)
+        public async ValueTask<object> GetValueAsync(TemplateContext context)
         {
             return await context.EvaluateAsync(Expression).ConfigureAwait(false);
         }
 
-        public async Task SetValueAsync(TemplateContext context, object valueToSet)
+        public async ValueTask SetValueAsync(TemplateContext context, object valueToSet)
         {
             await context.SetValueAsync(Expression, valueToSet).ConfigureAwait(false);
         }
@@ -1364,7 +1364,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptObjectInitializerExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var scriptObject = new ScriptObject();
             foreach (var member in Members)
@@ -1381,7 +1381,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptPage
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             return await context.EvaluateAsync(Body).ConfigureAwait(false);
         }
@@ -1389,7 +1389,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptPipeCall
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             int beforePipeArgumentCount = context.PipeArguments.Count + 1;
             // We don't evaluate the From but we let the pipe evalute it later
@@ -1431,7 +1431,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptRawStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             if (Text == null)
                 return null;
@@ -1455,7 +1455,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptReturnStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             context.FlowState = ScriptFlowState.Return;
             return await context.EvaluateAsync(Expression).ConfigureAwait(false);
@@ -1467,17 +1467,17 @@ namespace Scriban.Syntax
     /// </summary>
     public partial class ScriptTableRowStatement
     {
-        protected override async Task AfterLoopAsync(TemplateContext context)
+        protected override async ValueTask AfterLoopAsync(TemplateContext context)
         {
             await context.Write("</tr>").WriteLineAsync().ConfigureAwait(false);
         }
 
-        protected override async Task BeforeLoopAsync(TemplateContext context)
+        protected override async ValueTask BeforeLoopAsync(TemplateContext context)
         {
             await context.WriteAsync("<tr class=\"row1\">").ConfigureAwait(false);
         }
 
-        protected override async Task<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
+        protected override async ValueTask<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
         {
             var columnIndex = localIndex % _columnsCount;
             await context.SetValueAsync(ScriptVariable.TableRowCol, columnIndex + 1).ConfigureAwait(false);
@@ -1494,7 +1494,7 @@ namespace Scriban.Syntax
             return result;
         }
 
-        protected override async Task ProcessArgumentAsync(TemplateContext context, ScriptNamedArgument argument)
+        protected override async ValueTask ProcessArgumentAsync(TemplateContext context, ScriptNamedArgument argument)
         {
             _columnsCount = 1;
             if (argument.Name == "cols")
@@ -1514,7 +1514,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptThisExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             return await context.GetValueAsync(this).ConfigureAwait(false);
         }
@@ -1522,7 +1522,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptUnaryExpression
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             switch (Operator)
             {
@@ -1580,7 +1580,7 @@ namespace Scriban.Syntax
 
     public abstract partial class ScriptVariable
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             return await context.GetValueAsync((ScriptExpression)this).ConfigureAwait(false);
         }
@@ -1588,7 +1588,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptWhenStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var caseValue = context.PeekCase();
             foreach (var value in Values)
@@ -1607,7 +1607,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptWhileStatement
     {
-        protected override async Task EvaluateImplAsync(TemplateContext context)
+        protected override async ValueTask EvaluateImplAsync(TemplateContext context)
         {
             var index = 0;
             await BeforeLoopAsync(context).ConfigureAwait(false);
@@ -1632,7 +1632,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptWithStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var target = await context.GetValueAsync(Name).ConfigureAwait(false);
             if (!(target is IScriptObject))
@@ -1656,7 +1656,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptWrapStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             // Check that the Target is actually a function
             var functionCall = Target as ScriptFunctionCall;

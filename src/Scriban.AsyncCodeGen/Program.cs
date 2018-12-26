@@ -348,14 +348,14 @@ using Scriban.Syntax;
                         TypeSyntax asyncReturnType;
                         if (methodModel.ReturnsVoid)
                         {
-                            asyncReturnType = IdentifierName("Task").WithTrailingTrivia(Space);
+                            asyncReturnType = IdentifierName("ValueTask").WithTrailingTrivia(Space);
                         }
                         else
                         {
                             var trailingTrivia = method.ReturnType.GetTrailingTrivia();
 
                             asyncReturnType = GenericName(
-                                    Identifier("Task"))
+                                    Identifier("ValueTask"))
                                 .WithTypeArgumentList(
                                     TypeArgumentList(
                                         SingletonSeparatedList(method.ReturnType.WithoutTrailingTrivia()))).WithTrailingTrivia(trailingTrivia);

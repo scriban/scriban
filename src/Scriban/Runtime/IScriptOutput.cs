@@ -18,7 +18,7 @@ namespace Scriban.Runtime
         IScriptOutput Write(string text, int offset, int count);
 
 #if SCRIBAN_ASYNC
-        Task<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken);
+        ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken);
 #endif
     }
 

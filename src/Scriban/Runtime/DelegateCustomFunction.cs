@@ -27,9 +27,9 @@ namespace Scriban.Runtime
         }
 
 #if SCRIBAN_ASYNC
-        public Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            return Task.FromResult(_customFunction(context, callerContext, arguments));
+            return new ValueTask<object>(_customFunction(context, callerContext, arguments));
         }
 #endif
     }

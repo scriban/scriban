@@ -43,10 +43,10 @@ namespace Scriban.Runtime
         }
 
 #if SCRIBAN_ASYNC
-        public async Task<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
+        public ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
         {
             Builder.Append(text, offset, count);
-            return this;
+            return new ValueTask<IScriptOutput>(this);
         }
 #endif
         public override string ToString()

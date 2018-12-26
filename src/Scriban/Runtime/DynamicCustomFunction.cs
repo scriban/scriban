@@ -43,7 +43,7 @@ namespace Scriban.Runtime
 
 
 #if SCRIBAN_ASYNC
-        protected async Task<object> ConfigureAwait(object result)
+        protected async ValueTask<object> ConfigureAwait(object result)
         {
             switch (result)
             {
@@ -72,9 +72,9 @@ namespace Scriban.Runtime
         public abstract object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
 
 #if SCRIBAN_ASYNC
-        public virtual Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public virtual ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            return Task.FromResult(Invoke(context, callerContext, arguments, blockStatement));
+            return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));
         }
 #endif
 

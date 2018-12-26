@@ -5,6 +5,7 @@ using System.Dynamic;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using Microsoft.AspNetCore.Razor.Language;
@@ -52,9 +53,12 @@ namespace Scriban.Benchmarks
             //var result5 = program.TestHandlebars();
             //var result6 = program.TestCottle();
             //var result7 = program.TestFluid();
-            BenchmarkRunner.Run<BenchParsers>();
-            BenchmarkRunner.Run<BenchRenderers>();
-        }
+            //BenchmarkRunner.Run<BenchParsers>();
+            //BenchmarkRunner.Run<BenchRenderers>();
+
+            var switcher = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly);
+            switcher.Run(args);
+        }        
     }
 
     /// <summary>
@@ -255,6 +259,20 @@ namespace Scriban.Benchmarks
             var obj = new ScriptObject { { "products", _dotLiquidProducts } };
             _liquidTemplateContext.PushGlobal(obj);
             var result = _scribanTemplate.Render(_liquidTemplateContext);
+            _liquidTemplateContext.PopGlobal();
+            return result;
+        }
+
+        [Benchmark(Description = "ScribanAsync")]
+        public async ValueTask<string> TestScribanAsync()
+        {
+            // We could use the following simpler version, but we demonstrate the use of PushGlobal/PopGlobal object context
+            // for a slightly higher efficiency and the reuse of a TemplateContext on the same thread
+            //return _scribanTemplate.Render(new { products = _dotLiquidProducts });
+
+            var obj = new ScriptObject { { "products", _dotLiquidProducts } };
+            _liquidTemplateContext.PushGlobal(obj);
+            var result = await _scribanTemplate.RenderAsync(_liquidTemplateContext);
             _liquidTemplateContext.PopGlobal();
             return result;
         }

@@ -33,7 +33,7 @@ namespace Scriban.Runtime
         /// <param name="arguments">The parameters of the call</param>
         /// <param name="blockStatement">The current block statement this call is made</param>
         /// <returns>The result of the call</returns>
-        Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
+        ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
 #endif
     }
 }

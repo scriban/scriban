@@ -402,9 +402,9 @@ namespace Scriban.Functions
         }
 
 #if SCRIBAN_ASYNC
-        public Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            return Task.FromResult(Invoke(context, callerContext, arguments, blockStatement));
+            return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));
         }
 #endif
 

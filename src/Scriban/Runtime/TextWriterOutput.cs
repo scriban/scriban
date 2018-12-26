@@ -43,7 +43,7 @@ namespace Scriban.Runtime
             return this;
         }
 #if SCRIBAN_ASYNC
-        public async Task<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
+        public async ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
         {
             // TextWriter doesn't support to pass CancellationToken oO
             await Writer.WriteAsync(text.Substring(offset, count));
