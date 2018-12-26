@@ -28,11 +28,31 @@ namespace Scriban.Runtime
 
         protected readonly ParameterInfo[] Parameters;
 
+#if SCRIBAN_ASYNC
+        protected readonly bool IsAwaitable;
+#endif
+
         protected DynamicCustomFunction(MethodInfo method)
         {
             Method = method;
             Parameters = method.GetParameters();
+#if SCRIBAN_ASYNC
+            IsAwaitable = method.ReturnType.GetTypeInfo().GetDeclaredMethod(nameof(Task.GetAwaiter)) != null;
+#endif
         }
+
+
+#if SCRIBAN_ASYNC
+        protected static object ConfigureAwait(object result)
+        {
+            if (result is Task task)
+            {
+                return task.ConfigureAwait(false);
+            }
+            return result;
+        }
+#endif
+
 
         protected ArgumentValue GetValueFromNamedArgument(TemplateContext context, ScriptNode callerContext, ScriptNamedArgument namedArg)
         {

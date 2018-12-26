@@ -510,6 +510,9 @@ namespace Scriban.Runtime
     public abstract partial class DynamicCustomFunction
     {
 
+
+
+
         protected async Task<ArgumentValue> GetValueFromNamedArgumentAsync(TemplateContext context, ScriptNode callerContext, ScriptNamedArgument namedArg)
         {
             for (int j = 0; j < Parameters.Length; j++)
@@ -528,150 +531,147 @@ namespace Scriban.Runtime
     /// Generic function wrapper handling any kind of function parameters.
     /// </summary>
     partial class GenericFunctionWrapper     {
-
-        public override async Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+public override async Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+{
+    var expectedNumberOfParameters = Parameters.Length;
+    if (_hasTemplateContext)
+    {
+        expectedNumberOfParameters--;
+        if (_hasSpan)
         {
-            var expectedNumberOfParameters = Parameters.Length;
-            if (_hasTemplateContext)
-            {
-                expectedNumberOfParameters--;
-                if (_hasSpan)
-                {
-                    expectedNumberOfParameters--;
-                }
-            }
-
-            var minimumRequiredParameters = expectedNumberOfParameters - _optionalParameterCount;
-
-            // Check parameters
-            if ((_hasObjectParams && arguments.Count < minimumRequiredParameters - 1) || (!_hasObjectParams && arguments.Count < minimumRequiredParameters))
-            {
-                if (minimumRequiredParameters != expectedNumberOfParameters)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
-                }
-                else
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
-                }
-            }
-
-            // Convert arguments
-            object[] paramArguments = null;
-            if (_hasObjectParams)
-            {
-                paramArguments = new object[arguments.Count - _lastParamsIndex];
-                _arguments[_lastParamsIndex] = paramArguments;
-            }
-
-            // Copy TemplateContext/SourceSpan parameters
-            int argOffset = 0;
-            var argMask = 0;
-            if (_hasTemplateContext)
-            {
-                _arguments[0] = context;
-                argOffset++;
-                argMask |= 1;
-                if (_hasSpan)
-                {
-                    _arguments[1] = callerContext.Span;
-                    argOffset++;
-                    argMask |= 2;
-                }
-            }
-
-            var argOrderedIndex = argOffset;
-
-            // Setup any default parameters
-            if (_optionalParameterCount > 0)
-            {
-                for (int i = Parameters.Length - 1; i >= Parameters.Length - _optionalParameterCount; i--)
-                {
-                    _arguments[i] = Parameters[i].DefaultValue;
-                    argMask |= 1 << i;
-                }
-            }
-
-            int paramsIndex = 0;
-            for (int i = 0; i < arguments.Count; i++)
-            {
-                Type argType = null;
-                try
-                {
-                    int argIndex;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = await GetValueFromNamedArgumentAsync(context, callerContext, namedArg).ConfigureAwait(false);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index;
-                        argType = namedArgValue.Type;
-                        if (_hasObjectParams && argIndex == _lastParamsIndex)
-                        {
-                            argType = _paramsElementType;
-                            argIndex = argIndex + paramsIndex;
-                            paramsIndex++;
-                        }
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        if (_hasObjectParams && argIndex == _lastParamsIndex)
-                        {
-                            argType = _paramsElementType;
-                            argIndex = argIndex + paramsIndex;
-                            paramsIndex++;
-                        }
-                        else
-                        {
-                            argType = Parameters[argIndex].ParameterType;
-                            argOrderedIndex++;
-                        }
-                    }
-
-                    var argValue = context.ToObject(callerContext.Span, arg, argType);
-                    if (paramArguments != null && argIndex >= _lastParamsIndex)
-                    {
-                        paramArguments[argIndex - _lastParamsIndex] = argValue;
-                        argMask |= 1 << _lastParamsIndex;
-                    }
-                    else
-                    {
-                        _arguments[argIndex] = argValue;
-                        argMask |= 1 << argIndex;
-                    }
-                }
-                catch (Exception exception)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{arguments[i]?.GetType()}` to type `{argType}`", exception);
-                }
-            }
-
-            // In case we have named arguments we need to verify that all arguments were set
-            if (argMask != (1 << Parameters.Length) - 1)
-            {
-                if (minimumRequiredParameters != expectedNumberOfParameters)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
-                }
-                else
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
-                }
-            }
-
-            // Call method
-            try
-            {
-                var result = Method.Invoke(_target, _arguments);
-return result is Task<object> ? await ((Task<object>)result).ConfigureAwait(false) : result;            }
-            catch (TargetInvocationException exception)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception.InnerException);
-            }
+            expectedNumberOfParameters--;
         }
     }
+
+    var minimumRequiredParameters = expectedNumberOfParameters - _optionalParameterCount;
+    // Check parameters
+    if ((_hasObjectParams && arguments.Count < minimumRequiredParameters - 1) || (!_hasObjectParams && arguments.Count < minimumRequiredParameters))
+    {
+        if (minimumRequiredParameters != expectedNumberOfParameters)
+        {
+            throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
+        }
+        else
+        {
+            throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
+        }
+    }
+
+    // Convert arguments
+    object[] paramArguments = null;
+    if (_hasObjectParams)
+    {
+        paramArguments = new object[arguments.Count - _lastParamsIndex];
+        _arguments[_lastParamsIndex] = paramArguments;
+    }
+
+    // Copy TemplateContext/SourceSpan parameters
+    int argOffset = 0;
+    var argMask = 0;
+    if (_hasTemplateContext)
+    {
+        _arguments[0] = context;
+        argOffset++;
+        argMask |= 1;
+        if (_hasSpan)
+        {
+            _arguments[1] = callerContext.Span;
+            argOffset++;
+            argMask |= 2;
+        }
+    }
+
+    var argOrderedIndex = argOffset;
+    // Setup any default parameters
+    if (_optionalParameterCount > 0)
+    {
+        for (int i = Parameters.Length - 1; i >= Parameters.Length - _optionalParameterCount; i--)
+        {
+            _arguments[i] = Parameters[i].DefaultValue;
+            argMask |= 1 << i;
+        }
+    }
+
+    int paramsIndex = 0;
+    for (int i = 0; i < arguments.Count; i++)
+    {
+        Type argType = null;
+        try
+        {
+            int argIndex;
+            var arg = arguments[i];
+            var namedArg = arg as ScriptNamedArgument;
+            if (namedArg != null)
+            {
+                var namedArgValue = await GetValueFromNamedArgumentAsync(context, callerContext, namedArg).ConfigureAwait(false);
+                arg = namedArgValue.Value;
+                argIndex = namedArgValue.Index;
+                argType = namedArgValue.Type;
+                if (_hasObjectParams && argIndex == _lastParamsIndex)
+                {
+                    argType = _paramsElementType;
+                    argIndex = argIndex + paramsIndex;
+                    paramsIndex++;
+                }
+            }
+            else
+            {
+                argIndex = argOrderedIndex;
+                if (_hasObjectParams && argIndex == _lastParamsIndex)
+                {
+                    argType = _paramsElementType;
+                    argIndex = argIndex + paramsIndex;
+                    paramsIndex++;
+                }
+                else
+                {
+                    argType = Parameters[argIndex].ParameterType;
+                    argOrderedIndex++;
+                }
+            }
+
+            var argValue = context.ToObject(callerContext.Span, arg, argType);
+            if (paramArguments != null && argIndex >= _lastParamsIndex)
+            {
+                paramArguments[argIndex - _lastParamsIndex] = argValue;
+                argMask |= 1 << _lastParamsIndex;
+            }
+            else
+            {
+                _arguments[argIndex] = argValue;
+                argMask |= 1 << argIndex;
+            }
+        }
+        catch (Exception exception)
+        {
+            throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{arguments[i]?.GetType()}` to type `{argType}`", exception);
+        }
+    }
+
+    // In case we have named arguments we need to verify that all arguments were set
+    if (argMask != (1 << Parameters.Length) - 1)
+    {
+        if (minimumRequiredParameters != expectedNumberOfParameters)
+        {
+            throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
+        }
+        else
+        {
+            throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
+        }
+    }
+
+    // Call method
+    try
+    {
+        var result = Method.Invoke(_target, _arguments);
+        return IsAwaitable ? await(dynamic)ConfigureAwait(result) :  result ; 
+    }
+    catch (TargetInvocationException exception)
+    {
+        throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception.InnerException);
+    }
+}    }
 }
 namespace Scriban.Syntax
 {
@@ -809,16 +809,6 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptAssignExpression
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var valueObject = await context.EvaluateAsync(Value).ConfigureAwait(false);
-            await context.SetValueAsync(Target, valueObject).ConfigureAwait(false);
-            return valueObject;
-        }
-    }
-
     public partial class ScriptCaptureStatement
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
@@ -836,6 +826,16 @@ namespace Scriban.Syntax
             }
 
             return null;
+        }
+    }
+
+    public partial class ScriptAssignExpression
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            var valueObject = await context.EvaluateAsync(Value).ConfigureAwait(false);
+            await context.SetValueAsync(Target, valueObject).ConfigureAwait(false);
+            return valueObject;
         }
     }
 
@@ -865,18 +865,6 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptBinaryExpression
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var leftValueOriginal = await context.EvaluateAsync(Left).ConfigureAwait(false);
-            var leftValue = leftValueOriginal;
-            var rightValueOriginal = await context.EvaluateAsync(Right).ConfigureAwait(false);
-            object rightValue = rightValueOriginal;
-            return Evaluate(context, Span, Operator, leftValue, rightValue);
-        }
-    }
-
     public partial class ScriptImportStatement
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
@@ -898,17 +886,19 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptIfStatement
+    public partial class ScriptExpressionStatement
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
         {
-            var conditionValue = context.ToBool(Condition.Span, await context.EvaluateAsync(Condition).ConfigureAwait(false));
-            if (InvertCondition)
+            var result = await context.EvaluateAsync(Expression).ConfigureAwait(false);
+            // This code is necessary for wrap to work
+            var codeDelegate = result as ScriptNode;
+            if (codeDelegate != null)
             {
-                conditionValue = !conditionValue;
+                return await context.EvaluateAsync(codeDelegate).ConfigureAwait(false);
             }
 
-            return conditionValue ? await context.EvaluateAsync(Then).ConfigureAwait(false) : await context.EvaluateAsync(Else).ConfigureAwait(false);
+            return result;
         }
     }
 
@@ -1009,16 +999,6 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptNamedArgument
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            if (Value != null)
-                return await context.EvaluateAsync(Value).ConfigureAwait(false);
-            return true;
-        }
-    }
-
     /// <summary>
     /// Base class for a loop statement
     /// </summary>
@@ -1081,6 +1061,30 @@ namespace Scriban.Syntax
             }
 
             return result;
+        }
+    }
+
+    public partial class ScriptIfStatement
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            var conditionValue = context.ToBool(Condition.Span, await context.EvaluateAsync(Condition).ConfigureAwait(false));
+            if (InvertCondition)
+            {
+                conditionValue = !conditionValue;
+            }
+
+            return conditionValue ? await context.EvaluateAsync(Then).ConfigureAwait(false) : await context.EvaluateAsync(Else).ConfigureAwait(false);
+        }
+    }
+
+    public partial class ScriptNamedArgument
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            if (Value != null)
+                return await context.EvaluateAsync(Value).ConfigureAwait(false);
+            return true;
         }
     }
 
@@ -1269,19 +1273,15 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptExpressionStatement
+    public partial class ScriptBinaryExpression
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
         {
-            var result = await context.EvaluateAsync(Expression).ConfigureAwait(false);
-            // This code is necessary for wrap to work
-            var codeDelegate = result as ScriptNode;
-            if (codeDelegate != null)
-            {
-                return await context.EvaluateAsync(codeDelegate).ConfigureAwait(false);
-            }
-
-            return result;
+            var leftValueOriginal = await context.EvaluateAsync(Left).ConfigureAwait(false);
+            var leftValue = leftValueOriginal;
+            var rightValueOriginal = await context.EvaluateAsync(Right).ConfigureAwait(false);
+            object rightValue = rightValueOriginal;
+            return Evaluate(context, Span, Operator, leftValue, rightValue);
         }
     }
 
@@ -1297,46 +1297,6 @@ namespace Scriban.Syntax
             }
 
             return scriptArray;
-        }
-    }
-
-    public sealed partial class ScriptBlockStatement
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            object result = null;
-            for (int i = 0; i < Statements.Count; i++)
-            {
-                var statement = Statements[i];
-                var expressionStatement = statement as ScriptExpressionStatement;
-                var isAssign = expressionStatement?.Expression is ScriptAssignExpression;
-#if SCRIBAN_ASYNC
-                // Throw if cancellation is requested
-                if (context.CancellationToken.IsCancellationRequested)
-                {
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                }
-#endif
-                result = await context.EvaluateAsync(statement).ConfigureAwait(false);
-                // Top-level assignment expression don't output anything
-                if (isAssign)
-                {
-                    result = null;
-                }
-                else if (result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
-                {
-                    await context.WriteAsync(Span, result).ConfigureAwait(false);
-                    result = null;
-                }
-
-                // If flow state is different, we need to exit this loop
-                if (context.FlowState != ScriptFlowState.None)
-                {
-                    break;
-                }
-            }
-
-            return result;
         }
     }
 
@@ -1674,6 +1634,46 @@ namespace Scriban.Syntax
             }
 
             return await context.EvaluateAsync(Next).ConfigureAwait(false);
+        }
+    }
+
+    public sealed partial class ScriptBlockStatement
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            object result = null;
+            for (int i = 0; i < Statements.Count; i++)
+            {
+                var statement = Statements[i];
+                var expressionStatement = statement as ScriptExpressionStatement;
+                var isAssign = expressionStatement?.Expression is ScriptAssignExpression;
+#if SCRIBAN_ASYNC
+                // Throw if cancellation is requested
+                if (context.CancellationToken.IsCancellationRequested)
+                {
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                }
+#endif
+                result = await context.EvaluateAsync(statement).ConfigureAwait(false);
+                // Top-level assignment expression don't output anything
+                if (isAssign)
+                {
+                    result = null;
+                }
+                else if (result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
+                {
+                    await context.WriteAsync(Span, result).ConfigureAwait(false);
+                    result = null;
+                }
+
+                // If flow state is different, we need to exit this loop
+                if (context.FlowState != ScriptFlowState.None)
+                {
+                    break;
+                }
+            }
+
+            return result;
         }
     }
 }

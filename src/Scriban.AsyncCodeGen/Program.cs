@@ -236,29 +236,7 @@ using Scriban.Syntax;
                     typeDecl = typeDecl.RemoveNodes(typeDecl.ChildNodes().ToList(), SyntaxRemoveOptions.KeepNoTrivia);
 
                     // Remove if/endif directive
-                    var leadingTrivias = typeDecl.CloseBraceToken.LeadingTrivia;
-                    int inDirective = 0;
-                    for (int i = 0; i < leadingTrivias.Count; i++)
-                    {
-                        if (leadingTrivias[i].Kind() == SyntaxKind.IfDirectiveTrivia)
-                        {
-                            leadingTrivias = leadingTrivias.RemoveAt(i);
-                            i--;
-                            inDirective++;
-                        }
-                        else if (leadingTrivias[i].Kind() == SyntaxKind.EndIfDirectiveTrivia)
-                        {
-                            leadingTrivias = leadingTrivias.RemoveAt(i);
-                            i--;
-                            inDirective--;
-                        }
-                        else if (inDirective > 0)
-                        {
-                            leadingTrivias = leadingTrivias.RemoveAt(i);
-                            i--;
-                        }
-                    }
-                    typeDecl = typeDecl.WithCloseBraceToken(Token(leadingTrivias, SyntaxKind.CloseBraceToken, typeDecl.CloseBraceToken.TrailingTrivia));
+                    typeDecl = typeDecl.WithCloseBraceToken(Token(RemoveIfDef(typeDecl.CloseBraceToken.LeadingTrivia), SyntaxKind.CloseBraceToken, typeDecl.CloseBraceToken.TrailingTrivia));
 
                     foreach (var callingMethod in callingClass.MethodCalls)
                     {
@@ -363,8 +341,8 @@ using Scriban.Syntax;
                             // into:
                             //     return result is Task<object> ? await ((Task<object>)result).ConfigureAwait(false)
 
-                            var newReturnStatement = ParseStatement("return result is Task<object> ? await ((Task<object>)result).ConfigureAwait(false) : result;");
-                            method = method.ReplaceNode(returnStatement, newReturnStatement);
+                            var newReturnStatement = ParseStatement("return IsAwaitable ? await (dynamic)ConfigureAwait(result) : result;");
+                            method = method.ReplaceNode(returnStatement, newReturnStatement).NormalizeWhitespace();
                         }
 
                         TypeSyntax asyncReturnType;
@@ -390,6 +368,9 @@ using Scriban.Syntax;
 
                         // Add async keyword to the method
                         method = method.WithModifiers(method.Modifiers.Add(Token(SyntaxKind.AsyncKeyword).WithTrailingTrivia(Space)));
+
+                        // Remove any if/def
+                        method = method.WithLeadingTrivia(RemoveIfDef(method.GetLeadingTrivia()));
 
                         typeDecl = typeDecl.AddMembers(method);
 
@@ -464,6 +445,32 @@ using Scriban.Syntax;
                 result = restOfResult + '.' + result;
 
             return result;
+        }
+
+        public static SyntaxTriviaList RemoveIfDef(SyntaxTriviaList trivia)
+        {
+            int inDirective = 0;
+            for (int i = 0; i < trivia.Count; i++)
+            {
+                if (trivia[i].Kind() == SyntaxKind.IfDirectiveTrivia)
+                {
+                    trivia = trivia.RemoveAt(i);
+                    i--;
+                    inDirective++;
+                }
+                else if (trivia[i].Kind() == SyntaxKind.EndIfDirectiveTrivia)
+                {
+                    trivia = trivia.RemoveAt(i);
+                    i--;
+                    inDirective--;
+                }
+                else if (inDirective > 0)
+                {
+                    trivia = trivia.RemoveAt(i);
+                    i--;
+                }
+            }
+            return trivia;
         }
 
         public static bool InheritFrom(ITypeSymbol type, string nameSpace, string typeName)
