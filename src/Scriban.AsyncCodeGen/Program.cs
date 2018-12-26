@@ -341,8 +341,8 @@ using Scriban.Syntax;
                             // into:
                             //     return result is Task<object> ? await ((Task<object>)result).ConfigureAwait(false)
 
-                            var newReturnStatement = ParseStatement("return IsAwaitable ? await (dynamic)ConfigureAwait(result) : result;");
-                            method = method.ReplaceNode(returnStatement, newReturnStatement).NormalizeWhitespace();
+                            var newReturnStatement = ParseStatement("return IsAwaitable ? await ConfigureAwait(result) : result ;").WithLeadingTrivia(returnStatement.GetLeadingTrivia());
+                            method = method.ReplaceNode(returnStatement, newReturnStatement);
                         }
 
                         TypeSyntax asyncReturnType;
@@ -377,6 +377,12 @@ using Scriban.Syntax;
                         methods.Push(callingMethod.MethodSymbol);
                     }
 
+                    Debug.Assert(typeDecl.Members.All(x => x is MethodDeclarationSyntax));
+
+                    // Order members
+                    var orderedMembers = typeDecl.Members.OfType<MethodDeclarationSyntax>().OrderBy(m => m.Identifier.Text).ToArray();
+                    typeDecl = typeDecl.WithMembers(new SyntaxList<MemberDeclarationSyntax>(orderedMembers));
+
                     // Update namespace
                     namespaces[callingClass.Namespace] = namespaces[callingClass.Namespace].AddMembers(typeDecl);
 
@@ -384,15 +390,26 @@ using Scriban.Syntax;
                 }
 
                 //methodSymbol.ContainingType.
-
             }
 
             // ----------------------------------------------------------------------------------
             // 4) Output codegen
             // ----------------------------------------------------------------------------------
 
-            // Add #endif at the end
+            // Reorder members
             var nsList = namespaces.Values.OrderBy(ns => ns.Name.ToString()).ToList();
+            for (var i = 0; i < nsList.Count; i++)
+            {
+                var ns = nsList[i];
+                Debug.Assert(ns.Members.All(m => m is TypeDeclarationSyntax));
+
+                var types = ns.Members.OfType<TypeDeclarationSyntax>().OrderBy(t => t.Identifier.Text).ToList();
+                ns = ns.WithMembers(new SyntaxList<MemberDeclarationSyntax>(types));
+
+                nsList[i] = ns;
+            }
+
+            // Add #endif at the end
             var lastns = nsList[nsList.Count - 1];
             nsList[nsList.Count - 1] = lastns.WithCloseBraceToken(lastns.CloseBraceToken.WithTrailingTrivia(Trivia(EndIfDirectiveTrivia(true)))).NormalizeWhitespace();
 

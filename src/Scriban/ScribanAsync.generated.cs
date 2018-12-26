@@ -22,21 +22,177 @@ using Scriban.Syntax;
 namespace Scriban
 {
     /// <summary>
+    /// Basic entry point class to parse templates and render them. For more advanced scenario, you should use <see cref="TemplateContext"/> directly.
+    /// </summary>
+    public partial class Template
+    {
+
+        /// <summary>
+        /// Evaluates the template using the specified context. See remarks.
+        /// </summary>
+        /// <param name="context">The template context.</param>
+        /// <param name="render"><c>true</c> to render the output to the <see cref="TemplateContext.Output"/></param>
+        /// <exception cref="System.ArgumentNullException">If context is null</exception>
+        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
+        private async Task<object> EvaluateAndRenderAsync(TemplateContext context, bool render)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            CheckErrors();
+
+            // Make sure that we are using the same parserOptions
+            if (SourceFilePath != null)
+            {
+                context.PushSourceFile(SourceFilePath);
+            }
+
+            try
+            {
+                var result = await  context.EvaluateAsync(Page).ConfigureAwait(false);
+                if (render)
+                {
+                    if (Page != null && context.EnableOutput && result != null)
+                    {
+                        await  context.WriteAsync(Page.Span, result).ConfigureAwait(false);
+                    }
+                }
+                return result;
+            }
+            finally
+            {
+                if (SourceFilePath != null)
+                {
+                    context.PopSourceFile();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Evaluates the template using the specified context. See remarks.
+        /// </summary>
+        /// <param name="context">The template context.</param>
+        /// <exception cref="System.ArgumentNullException">If context is null</exception>
+        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
+        /// <returns>Returns the result of the last statement</returns>
+        public async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            var previousOutput = context.EnableOutput;
+            try
+            {
+                context.EnableOutput = false;
+                return await EvaluateAndRenderAsync(context, false).ConfigureAwait(false);
+            }
+            finally
+            {
+                context.EnableOutput = previousOutput;
+            }        
+        }
+
+        /// <summary>
+        /// Parse and evaluates a code only expression (without enclosing `{{` and `}}`) within the specified context.
+        /// </summary>
+        /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
+        /// <param name="context">The template context</param>
+        /// <returns>The result of the evaluation of the expression</returns>
+        public static async Task<object> EvaluateAsync(string expression, TemplateContext context)
+        {
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            var lexerOption = new LexerOptions() {Mode = ScriptMode.ScriptOnly};
+            var template = Parse(expression, lexerOptions: lexerOption);
+            return await  template.EvaluateAsync(context).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Evaluates the template using the specified context
+        /// </summary>
+        /// <param name="model">An object model to use with the evaluation.</param>
+        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
+        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
+        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
+        /// <returns>Returns the result of the last statement</returns>
+        public async Task<object> EvaluateAsync(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        {
+            var scriptObject = new ScriptObject();
+            if (model != null)
+            {
+                scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
+            }
+
+            var context = new TemplateContext
+            {
+                EnableOutput = false,
+                MemberRenamer = memberRenamer,
+                MemberFilter = memberFilter
+            };
+            context.PushGlobal(scriptObject);
+            var result = await EvaluateAsync(context).ConfigureAwait(false);
+            context.PopGlobal();
+            return result;
+        }
+
+        /// <summary>
+        /// Parse and evaluates a code only expression (without enclosing `{{` and `}}`) within the specified context.
+        /// </summary>
+        /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
+        /// <param name="model">An object instance used as a model for evaluating this expression</param>
+        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
+        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
+        /// <returns>The result of the evaluation of the expression</returns>
+        public static async Task<object> EvaluateAsync(string expression, object model, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        {
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            var lexerOption = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
+            var template = Parse(expression, lexerOptions: lexerOption);
+            return await  template.EvaluateAsync(model, memberRenamer, memberFilter).ConfigureAwait(false);
+        }
+        
+        /// <summary>
+        /// Renders this template using the specified context. See remarks.
+        /// </summary>
+        /// <param name="context">The template context.</param>
+        /// <exception cref="System.ArgumentNullException">If context is null</exception>
+        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
+        /// <remarks>
+        /// When using this method, the result of rendering this page is output to <see cref="TemplateContext.Output"/>
+        /// </remarks>
+        public async Task<string> RenderAsync(TemplateContext context)
+        {
+            await EvaluateAndRenderAsync(context, true).ConfigureAwait(false);
+            var result = context.Output.ToString();
+            var output = context.Output as StringBuilderOutput;
+            if (output != null)
+            {
+                output.Builder.Length = 0;
+            }
+            return result;
+        }
+
+        /// <summary>
+        /// Renders this template using the specified object model.
+        /// </summary>
+        /// <param name="model">The object model.</param>
+        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
+        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
+        /// <returns>A rendering result as a string </returns>
+        public async Task<string> RenderAsync(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        {
+            var scriptObject = new ScriptObject();
+            if (model != null)
+            {
+                scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
+            }
+
+            var context = _lexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
+            context.MemberRenamer = memberRenamer;
+            context.MemberFilter = memberFilter;
+            context.PushGlobal(scriptObject);
+            return await RenderAsync(context).ConfigureAwait(false);
+        }
+    }
+    /// <summary>
     /// The template context contains the state of the page, the model.
     /// </summary>
     public partial class TemplateContext
     {
-
-        /// <summary>
-        /// Evaluates the specified script node by calling <see cref="ScriptNode.Evaluate"/>
-        /// </summary>
-        /// <param name="scriptNode">The script node (might be null but should not throw an error)</param>
-        /// <returns>The result of the evaluation</returns>
-        /// <remarks>The purpose of this method is to allow to hook during the evaluation of all ScriptNode. By default calls <see cref="ScriptNode.Evaluate"/></remarks>
-        protected virtual async Task<object> EvaluateImplAsync(ScriptNode scriptNode)
-        {
-            return scriptNode != null ? await  scriptNode.EvaluateAsync(this) .ConfigureAwait(false): null;
-        }
 
         /// <summary>
         /// Evaluates the specified script node.
@@ -69,6 +225,17 @@ namespace Scriban
         public async Task<object> EvaluateAsync(ScriptNode scriptNode)
         {
             return await EvaluateAsync(scriptNode, false).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Evaluates the specified script node by calling <see cref="ScriptNode.Evaluate"/>
+        /// </summary>
+        /// <param name="scriptNode">The script node (might be null but should not throw an error)</param>
+        /// <returns>The result of the evaluation</returns>
+        /// <remarks>The purpose of this method is to allow to hook during the evaluation of all ScriptNode. By default calls <see cref="ScriptNode.Evaluate"/></remarks>
+        protected virtual async Task<object> EvaluateImplAsync(ScriptNode scriptNode)
+        {
+            return scriptNode != null ? await  scriptNode.EvaluateAsync(this) .ConfigureAwait(false): null;
         }
 
         /// <summary>
@@ -189,15 +356,6 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Writes the a new line to the current <see cref="Output"/>
-        /// </summary>
-        public async Task<TemplateContext> WriteLineAsync()
-        {
-            await  Output.WriteAsync(NewLine, CancellationToken).ConfigureAwait(false);
-            return this;
-        }
-
-        /// <summary>
         /// Writes an object value to the current <see cref="Output"/>.
         /// </summary>
         /// <param name="span">The span of the object to render.</param>
@@ -211,172 +369,14 @@ namespace Scriban
             }
             return this;
         }
-    }
-    /// <summary>
-    /// Basic entry point class to parse templates and render them. For more advanced scenario, you should use <see cref="TemplateContext"/> directly.
-    /// </summary>
-    public partial class Template
-    {
 
         /// <summary>
-        /// Evaluates the template using the specified context. See remarks.
+        /// Writes the a new line to the current <see cref="Output"/>
         /// </summary>
-        /// <param name="context">The template context.</param>
-        /// <param name="render"><c>true</c> to render the output to the <see cref="TemplateContext.Output"/></param>
-        /// <exception cref="System.ArgumentNullException">If context is null</exception>
-        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
-        private async Task<object> EvaluateAndRenderAsync(TemplateContext context, bool render)
+        public async Task<TemplateContext> WriteLineAsync()
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            CheckErrors();
-
-            // Make sure that we are using the same parserOptions
-            if (SourceFilePath != null)
-            {
-                context.PushSourceFile(SourceFilePath);
-            }
-
-            try
-            {
-                var result = await  context.EvaluateAsync(Page).ConfigureAwait(false);
-                if (render)
-                {
-                    if (Page != null && context.EnableOutput && result != null)
-                    {
-                        await  context.WriteAsync(Page.Span, result).ConfigureAwait(false);
-                    }
-                }
-                return result;
-            }
-            finally
-            {
-                if (SourceFilePath != null)
-                {
-                    context.PopSourceFile();
-                }
-            }
-        }
-
-        /// <summary>
-        /// Evaluates the template using the specified context. See remarks.
-        /// </summary>
-        /// <param name="context">The template context.</param>
-        /// <exception cref="System.ArgumentNullException">If context is null</exception>
-        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
-        /// <returns>Returns the result of the last statement</returns>
-        public async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var previousOutput = context.EnableOutput;
-            try
-            {
-                context.EnableOutput = false;
-                return await EvaluateAndRenderAsync(context, false).ConfigureAwait(false);
-            }
-            finally
-            {
-                context.EnableOutput = previousOutput;
-            }        
-        }
-        
-        /// <summary>
-        /// Renders this template using the specified context. See remarks.
-        /// </summary>
-        /// <param name="context">The template context.</param>
-        /// <exception cref="System.ArgumentNullException">If context is null</exception>
-        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
-        /// <remarks>
-        /// When using this method, the result of rendering this page is output to <see cref="TemplateContext.Output"/>
-        /// </remarks>
-        public async Task<string> RenderAsync(TemplateContext context)
-        {
-            await EvaluateAndRenderAsync(context, true).ConfigureAwait(false);
-            var result = context.Output.ToString();
-            var output = context.Output as StringBuilderOutput;
-            if (output != null)
-            {
-                output.Builder.Length = 0;
-            }
-            return result;
-        }
-
-        /// <summary>
-        /// Renders this template using the specified object model.
-        /// </summary>
-        /// <param name="model">The object model.</param>
-        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
-        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
-        /// <returns>A rendering result as a string </returns>
-        public async Task<string> RenderAsync(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
-        {
-            var scriptObject = new ScriptObject();
-            if (model != null)
-            {
-                scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
-            }
-
-            var context = _lexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
-            context.MemberRenamer = memberRenamer;
-            context.MemberFilter = memberFilter;
-            context.PushGlobal(scriptObject);
-            return await RenderAsync(context).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Parse and evaluates a code only expression (without enclosing `{{` and `}}`) within the specified context.
-        /// </summary>
-        /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
-        /// <param name="context">The template context</param>
-        /// <returns>The result of the evaluation of the expression</returns>
-        public static async Task<object> EvaluateAsync(string expression, TemplateContext context)
-        {
-            if (expression == null) throw new ArgumentNullException(nameof(expression));
-            var lexerOption = new LexerOptions() {Mode = ScriptMode.ScriptOnly};
-            var template = Parse(expression, lexerOptions: lexerOption);
-            return await  template.EvaluateAsync(context).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Evaluates the template using the specified context
-        /// </summary>
-        /// <param name="model">An object model to use with the evaluation.</param>
-        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
-        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
-        /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
-        /// <returns>Returns the result of the last statement</returns>
-        public async Task<object> EvaluateAsync(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
-        {
-            var scriptObject = new ScriptObject();
-            if (model != null)
-            {
-                scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
-            }
-
-            var context = new TemplateContext
-            {
-                EnableOutput = false,
-                MemberRenamer = memberRenamer,
-                MemberFilter = memberFilter
-            };
-            context.PushGlobal(scriptObject);
-            var result = await EvaluateAsync(context).ConfigureAwait(false);
-            context.PopGlobal();
-            return result;
-        }
-
-        /// <summary>
-        /// Parse and evaluates a code only expression (without enclosing `{{` and `}}`) within the specified context.
-        /// </summary>
-        /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
-        /// <param name="model">An object instance used as a model for evaluating this expression</param>
-        /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
-        /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
-        /// <returns>The result of the evaluation of the expression</returns>
-        public static async Task<object> EvaluateAsync(string expression, object model, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
-        {
-            if (expression == null) throw new ArgumentNullException(nameof(expression));
-            var lexerOption = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
-            var template = Parse(expression, lexerOptions: lexerOption);
-            return await  template.EvaluateAsync(model, memberRenamer, memberFilter).ConfigureAwait(false);
+            await  Output.WriteAsync(NewLine, CancellationToken).ConfigureAwait(false);
+            return this;
         }
     }
 }
@@ -495,21 +495,8 @@ namespace Scriban.Functions
 
 namespace Scriban.Runtime
 {
-
-    /// <summary>
-    /// Extensions for <see cref="IScriptOutput"/>
-    /// </summary>
-    public static partial class ScriptOutputExtensions
-    {
-        public static async Task<IScriptOutput> WriteAsync(this IScriptOutput scriptOutput, string text,CancellationToken cancellationToken)
-        {
-            if (text == null) throw new ArgumentNullException(nameof(text));
-            return await  scriptOutput.WriteAsync(text, 0, text.Length, cancellationToken).ConfigureAwait(false);
-        }
-    }
     public abstract partial class DynamicCustomFunction
     {
-
 
 
 
@@ -531,281 +518,240 @@ namespace Scriban.Runtime
     /// Generic function wrapper handling any kind of function parameters.
     /// </summary>
     partial class GenericFunctionWrapper     {
-public override async Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-{
-    var expectedNumberOfParameters = Parameters.Length;
-    if (_hasTemplateContext)
-    {
-        expectedNumberOfParameters--;
-        if (_hasSpan)
-        {
-            expectedNumberOfParameters--;
-        }
-    }
 
-    var minimumRequiredParameters = expectedNumberOfParameters - _optionalParameterCount;
-    // Check parameters
-    if ((_hasObjectParams && arguments.Count < minimumRequiredParameters - 1) || (!_hasObjectParams && arguments.Count < minimumRequiredParameters))
-    {
-        if (minimumRequiredParameters != expectedNumberOfParameters)
+        public override async Task<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
-        }
-        else
-        {
-            throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
-        }
-    }
-
-    // Convert arguments
-    object[] paramArguments = null;
-    if (_hasObjectParams)
-    {
-        paramArguments = new object[arguments.Count - _lastParamsIndex];
-        _arguments[_lastParamsIndex] = paramArguments;
-    }
-
-    // Copy TemplateContext/SourceSpan parameters
-    int argOffset = 0;
-    var argMask = 0;
-    if (_hasTemplateContext)
-    {
-        _arguments[0] = context;
-        argOffset++;
-        argMask |= 1;
-        if (_hasSpan)
-        {
-            _arguments[1] = callerContext.Span;
-            argOffset++;
-            argMask |= 2;
-        }
-    }
-
-    var argOrderedIndex = argOffset;
-    // Setup any default parameters
-    if (_optionalParameterCount > 0)
-    {
-        for (int i = Parameters.Length - 1; i >= Parameters.Length - _optionalParameterCount; i--)
-        {
-            _arguments[i] = Parameters[i].DefaultValue;
-            argMask |= 1 << i;
-        }
-    }
-
-    int paramsIndex = 0;
-    for (int i = 0; i < arguments.Count; i++)
-    {
-        Type argType = null;
-        try
-        {
-            int argIndex;
-            var arg = arguments[i];
-            var namedArg = arg as ScriptNamedArgument;
-            if (namedArg != null)
+            var expectedNumberOfParameters = Parameters.Length;
+            if (_hasTemplateContext)
             {
-                var namedArgValue = await GetValueFromNamedArgumentAsync(context, callerContext, namedArg).ConfigureAwait(false);
-                arg = namedArgValue.Value;
-                argIndex = namedArgValue.Index;
-                argType = namedArgValue.Type;
-                if (_hasObjectParams && argIndex == _lastParamsIndex)
+                expectedNumberOfParameters--;
+                if (_hasSpan)
                 {
-                    argType = _paramsElementType;
-                    argIndex = argIndex + paramsIndex;
-                    paramsIndex++;
+                    expectedNumberOfParameters--;
                 }
             }
-            else
+
+            var minimumRequiredParameters = expectedNumberOfParameters - _optionalParameterCount;
+
+            // Check parameters
+            if ((_hasObjectParams && arguments.Count < minimumRequiredParameters - 1) || (!_hasObjectParams && arguments.Count < minimumRequiredParameters))
             {
-                argIndex = argOrderedIndex;
-                if (_hasObjectParams && argIndex == _lastParamsIndex)
+                if (minimumRequiredParameters != expectedNumberOfParameters)
                 {
-                    argType = _paramsElementType;
-                    argIndex = argIndex + paramsIndex;
-                    paramsIndex++;
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
                 }
                 else
                 {
-                    argType = Parameters[argIndex].ParameterType;
-                    argOrderedIndex++;
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
                 }
             }
 
-            var argValue = context.ToObject(callerContext.Span, arg, argType);
-            if (paramArguments != null && argIndex >= _lastParamsIndex)
+            // Convert arguments
+            object[] paramArguments = null;
+            if (_hasObjectParams)
             {
-                paramArguments[argIndex - _lastParamsIndex] = argValue;
-                argMask |= 1 << _lastParamsIndex;
+                paramArguments = new object[arguments.Count - _lastParamsIndex];
+                _arguments[_lastParamsIndex] = paramArguments;
             }
-            else
+
+            // Copy TemplateContext/SourceSpan parameters
+            int argOffset = 0;
+            var argMask = 0;
+            if (_hasTemplateContext)
             {
-                _arguments[argIndex] = argValue;
-                argMask |= 1 << argIndex;
+                _arguments[0] = context;
+                argOffset++;
+                argMask |= 1;
+                if (_hasSpan)
+                {
+                    _arguments[1] = callerContext.Span;
+                    argOffset++;
+                    argMask |= 2;
+                }
             }
-        }
-        catch (Exception exception)
-        {
-            throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{arguments[i]?.GetType()}` to type `{argType}`", exception);
+
+            var argOrderedIndex = argOffset;
+
+            // Setup any default parameters
+            if (_optionalParameterCount > 0)
+            {
+                for (int i = Parameters.Length - 1; i >= Parameters.Length - _optionalParameterCount; i--)
+                {
+                    _arguments[i] = Parameters[i].DefaultValue;
+                    argMask |= 1 << i;
+                }
+            }
+
+            int paramsIndex = 0;
+            for (int i = 0; i < arguments.Count; i++)
+            {
+                Type argType = null;
+                try
+                {
+                    int argIndex;
+                    var arg = arguments[i];
+                    var namedArg = arg as ScriptNamedArgument;
+                    if (namedArg != null)
+                    {
+                        var namedArgValue = await GetValueFromNamedArgumentAsync(context, callerContext, namedArg).ConfigureAwait(false);
+                        arg = namedArgValue.Value;
+                        argIndex = namedArgValue.Index;
+                        argType = namedArgValue.Type;
+                        if (_hasObjectParams && argIndex == _lastParamsIndex)
+                        {
+                            argType = _paramsElementType;
+                            argIndex = argIndex + paramsIndex;
+                            paramsIndex++;
+                        }
+                    }
+                    else
+                    {
+                        argIndex = argOrderedIndex;
+                        if (_hasObjectParams && argIndex == _lastParamsIndex)
+                        {
+                            argType = _paramsElementType;
+                            argIndex = argIndex + paramsIndex;
+                            paramsIndex++;
+                        }
+                        else
+                        {
+                            argType = Parameters[argIndex].ParameterType;
+                            argOrderedIndex++;
+                        }
+                    }
+
+                    var argValue = context.ToObject(callerContext.Span, arg, argType);
+                    if (paramArguments != null && argIndex >= _lastParamsIndex)
+                    {
+                        paramArguments[argIndex - _lastParamsIndex] = argValue;
+                        argMask |= 1 << _lastParamsIndex;
+                    }
+                    else
+                    {
+                        _arguments[argIndex] = argValue;
+                        argMask |= 1 << argIndex;
+                    }
+                }
+                catch (Exception exception)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{arguments[i]?.GetType()}` to type `{argType}`", exception);
+                }
+            }
+
+            // In case we have named arguments we need to verify that all arguments were set
+            if (argMask != (1 << Parameters.Length) - 1)
+            {
+                if (minimumRequiredParameters != expectedNumberOfParameters)
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
+                }
+                else
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
+                }
+            }
+
+            // Call method
+            try
+            {
+                var result = Method.Invoke(_target, _arguments);
+                // NOTE: The following line should not be touch as it is being matched by ScribanAsyncCodeGen
+                return IsAwaitable ? await ConfigureAwait(result) : result ;            }
+            catch (TargetInvocationException exception)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception.InnerException);
+            }
         }
     }
 
-    // In case we have named arguments we need to verify that all arguments were set
-    if (argMask != (1 << Parameters.Length) - 1)
+    /// <summary>
+    /// Extensions for <see cref="IScriptOutput"/>
+    /// </summary>
+    public static partial class ScriptOutputExtensions
     {
-        if (minimumRequiredParameters != expectedNumberOfParameters)
+        public static async Task<IScriptOutput> WriteAsync(this IScriptOutput scriptOutput, string text,CancellationToken cancellationToken)
         {
-            throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
-        }
-        else
-        {
-            throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
+            if (text == null) throw new ArgumentNullException(nameof(text));
+            return await  scriptOutput.WriteAsync(text, 0, text.Length, cancellationToken).ConfigureAwait(false);
         }
     }
-
-    // Call method
-    try
-    {
-        var result = Method.Invoke(_target, _arguments);
-        return IsAwaitable ? await(dynamic)ConfigureAwait(result) :  result ; 
-    }
-    catch (TargetInvocationException exception)
-    {
-        throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception.InnerException);
-    }
-}    }
 }
 namespace Scriban.Syntax
 {
-    public partial class ScriptRawStatement
+    public partial class ScriptArrayInitializerExpression
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
         {
-            if (Text == null)
-                return null;
-            var length = Span.End.Offset - Span.Start.Offset + 1;
-            if (length > 0)
+            var scriptArray = new ScriptArray();
+            foreach (var value in Values)
             {
-                // If we are in the context of output, output directly to TemplateContext.Output
-                if (context.EnableOutput)
-                {
-                    await context.WriteAsync(Text, Span.Start.Offset, length).ConfigureAwait(false);
-                }
-                else
-                {
-                    return Text.Substring(Span.Start.Offset, length);
-                }
+                var valueEval = await context.EvaluateAsync(value).ConfigureAwait(false);
+                scriptArray.Add(valueEval);
             }
 
-            return null;
+            return scriptArray;
         }
     }
 
-    public partial class ScriptIsEmptyExpression
+    public partial class ScriptAssignExpression
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
         {
-            return await context.GetValueAsync(this).ConfigureAwait(false);
-        }
-
-        private async Task<object> GetTargetObjectAsync(TemplateContext context, bool isSet)
-        {
-            var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
-            if (targetObject == null)
-            {
-                if (isSet || !context.EnableRelaxedMemberAccess)
-                {
-                    throw new ScriptRuntimeException(this.Span, $"Object `{this.Target}` is null. Cannot access property `empty?`");
-                }
-            }
-
-            return targetObject;
-        }
-
-        public async Task<object> GetValueAsync(TemplateContext context)
-        {
-            var targetObject = await GetTargetObjectAsync(context, false).ConfigureAwait(false);
-            return context.IsEmpty(Span, targetObject);
+            var valueObject = await context.EvaluateAsync(Value).ConfigureAwait(false);
+            await context.SetValueAsync(Target, valueObject).ConfigureAwait(false);
+            return valueObject;
         }
     }
 
-    public partial class ScriptThisExpression
+    public partial class ScriptBinaryExpression
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
         {
-            return await context.GetValueAsync(this).ConfigureAwait(false);
+            var leftValueOriginal = await context.EvaluateAsync(Left).ConfigureAwait(false);
+            var leftValue = leftValueOriginal;
+            var rightValueOriginal = await context.EvaluateAsync(Right).ConfigureAwait(false);
+            object rightValue = rightValueOriginal;
+            return Evaluate(context, Span, Operator, leftValue, rightValue);
         }
     }
 
-    public partial class ScriptMemberExpression
+    public sealed partial class ScriptBlockStatement
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
         {
-            return await context.GetValueAsync(this).ConfigureAwait(false);
-        }
-
-        private async Task<object> GetTargetObjectAsync(TemplateContext context, bool isSet)
-        {
-            var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
-            if (targetObject == null)
+            object result = null;
+            for (int i = 0; i < Statements.Count; i++)
             {
-                if (isSet || !context.EnableRelaxedMemberAccess)
+                var statement = Statements[i];
+                var expressionStatement = statement as ScriptExpressionStatement;
+                var isAssign = expressionStatement?.Expression is ScriptAssignExpression;
+#if SCRIBAN_ASYNC
+                // Throw if cancellation is requested
+                if (context.CancellationToken.IsCancellationRequested)
                 {
-                    throw new ScriptRuntimeException(this.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
+                    context.CancellationToken.ThrowIfCancellationRequested();
+                }
+#endif
+                result = await context.EvaluateAsync(statement).ConfigureAwait(false);
+                // Top-level assignment expression don't output anything
+                if (isAssign)
+                {
+                    result = null;
+                }
+                else if (result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
+                {
+                    await context.WriteAsync(Span, result).ConfigureAwait(false);
+                    result = null;
+                }
+
+                // If flow state is different, we need to exit this loop
+                if (context.FlowState != ScriptFlowState.None)
+                {
+                    break;
                 }
             }
-            else if (targetObject is string || targetObject.GetType().IsPrimitiveOrDecimal())
-            {
-                if (isSet || !context.EnableRelaxedMemberAccess)
-                {
-                    throw new ScriptRuntimeException(this.Span, $"Cannot get or set a member on the primitive `{targetObject}/{targetObject.GetType()}` when accessing member: {this}"); // unit test: 132-member-accessor-error2.txt
-                }
 
-                // If this is relaxed, set the target object to null
-                if (context.EnableRelaxedMemberAccess)
-                {
-                    targetObject = null;
-                }
-            }
-
-            return targetObject;
-        }
-
-        public async Task<object> GetValueAsync(TemplateContext context)
-        {
-            var targetObject = await GetTargetObjectAsync(context, false).ConfigureAwait(false);
-            // In case TemplateContext.EnableRelaxedMemberAccess
-            if (targetObject == null)
-            {
-                return null;
-            }
-
-            var accessor = context.GetMemberAccessor(targetObject);
-            var memberName = this.Member.Name;
-            object value;
-            if (!accessor.TryGetValue(context, Span, targetObject, memberName, out value))
-            {
-                context.TryGetMember?.Invoke(context, Span, targetObject, memberName, out value);
-            }
-
-            return value;
-        }
-
-        public async Task SetValueAsync(TemplateContext context, object valueToSet)
-        {
-            var targetObject = await GetTargetObjectAsync(context, true).ConfigureAwait(false);
-            var accessor = context.GetMemberAccessor(targetObject);
-            var memberName = this.Member.Name;
-            if (!accessor.TrySetValue(context, this.Span, targetObject, memberName, valueToSet))
-            {
-                throw new ScriptRuntimeException(this.Member.Span, $"Cannot set a value for the readonly member: {this}"); // unit test: 132-member-accessor-error3.txt
-            }
-        }
-    }
-
-    public abstract partial class ScriptVariable
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            return await context.GetValueAsync((ScriptExpression)this).ConfigureAwait(false);
+            return result;
         }
     }
 
@@ -829,25 +775,6 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptAssignExpression
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var valueObject = await context.EvaluateAsync(Value).ConfigureAwait(false);
-            await context.SetValueAsync(Target, valueObject).ConfigureAwait(false);
-            return valueObject;
-        }
-    }
-
-    public partial class ScriptElseStatement
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            await context.EvaluateAsync(Body).ConfigureAwait(false);
-            return await context.EvaluateAsync(Else).ConfigureAwait(false);
-        }
-    }
-
     public partial class ScriptCaseStatement
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
@@ -865,24 +792,12 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptImportStatement
+    public partial class ScriptElseStatement
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
         {
-            var value = await context.EvaluateAsync(Expression).ConfigureAwait(false);
-            if (value == null)
-            {
-                return null;
-            }
-
-            var scriptObject = value as ScriptObject;
-            if (scriptObject == null)
-            {
-                throw new ScriptRuntimeException(Expression.Span, $"Unexpected value `{value.GetType()}` for import. Expecting an plain script object {{}}");
-            }
-
-            context.CurrentGlobal.Import(scriptObject);
-            return null;
+            await context.EvaluateAsync(Body).ConfigureAwait(false);
+            return await context.EvaluateAsync(Else).ConfigureAwait(false);
         }
     }
 
@@ -899,404 +814,6 @@ namespace Scriban.Syntax
             }
 
             return result;
-        }
-    }
-
-    public partial class ScriptIndexerExpression
-    {
-        private async Task<object> GetOrSetValueAsync(TemplateContext context, object valueToSet, bool setter)
-        {
-            object value = null;
-            var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
-            if (targetObject == null)
-            {
-                if (context.EnableRelaxedMemberAccess)
-                {
-                    return null;
-                }
-                else
-                {
-                    throw new ScriptRuntimeException(Target.Span, $"Object `{Target}` is null. Cannot access indexer: {this}"); // unit test: 130-indexer-accessor-error1.txt
-                }
-            }
-
-            var index = await context.EvaluateAsync(Index).ConfigureAwait(false);
-            if (index == null)
-            {
-                if (context.EnableRelaxedMemberAccess)
-                {
-                    return null;
-                }
-                else
-                {
-                    throw new ScriptRuntimeException(Index.Span, $"Cannot access target `{Target}` with a null indexer: {this}"); // unit test: 130-indexer-accessor-error2.txt
-                }
-            }
-
-            if (targetObject is IDictionary || targetObject is ScriptObject)
-            {
-                var accessor = context.GetMemberAccessor(targetObject);
-                var indexAsString = context.ToString(Index.Span, index);
-                if (setter)
-                {
-                    if (!accessor.TrySetValue(context, Span, targetObject, indexAsString, valueToSet))
-                    {
-                        throw new ScriptRuntimeException(Index.Span, $"Cannot set a value for the readonly member `{indexAsString}` in the indexer: {Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
-                    }
-                }
-                else
-                {
-                    if (!accessor.TryGetValue(context, Span, targetObject, indexAsString, out value))
-                    {
-                        context.TryGetMember?.Invoke(context, Span, targetObject, indexAsString, out value);
-                    }
-                }
-            }
-            else
-            {
-                var accessor = context.GetListAccessor(targetObject);
-                if (accessor == null)
-                {
-                    throw new ScriptRuntimeException(Target.Span, $"Expecting a list. Invalid value `{targetObject}/{targetObject.GetType().Name}` for the target `{Target}` for the indexer: {this}"); // unit test: 130-indexer-accessor-error4.txt
-                }
-
-                int i = context.ToInt(Index.Span, index);
-                // Allow negative index from the end of the array
-                if (i < 0)
-                {
-                    i = accessor.GetLength(context, Span, targetObject) + i;
-                }
-
-                if (i >= 0)
-                {
-                    if (setter)
-                    {
-                        accessor.SetValue(context, Span, targetObject, i, valueToSet);
-                    }
-                    else
-                    {
-                        value = accessor.GetValue(context, Span, targetObject, i);
-                    }
-                }
-            }
-
-            return value;
-        }
-
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            return await context.GetValueAsync(this).ConfigureAwait(false);
-        }
-
-        public async Task<object> GetValueAsync(TemplateContext context)
-        {
-            return await GetOrSetValueAsync(context, null, false).ConfigureAwait(false);
-        }
-
-        public async Task SetValueAsync(TemplateContext context, object valueToSet)
-        {
-            await GetOrSetValueAsync(context, valueToSet, true).ConfigureAwait(false);
-        }
-    }
-
-    /// <summary>
-    /// Base class for a loop statement
-    /// </summary>
-    public abstract partial class ScriptLoopStatementBase
-    {
-        /// <summary>
-        /// Base implementation for a loop single iteration
-        /// </summary>
-        /// <param name = "context">The context</param>
-        /// <param name = "index">The index in the loop</param>
-        /// <param name = "localIndex"></param>
-        /// <param name = "isLast"></param>
-        /// <returns></returns>
-        protected virtual async Task<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
-        {
-            // Setup variable
-            context.SetValue(ScriptVariable.LoopFirst, index == 0);
-            var even = (index & 1) == 0;
-            context.SetValue(ScriptVariable.LoopEven, even);
-            await context.SetValueAsync(ScriptVariable.LoopOdd, !even).ConfigureAwait(false);
-            context.SetValue(ScriptVariable.LoopIndex, index);
-            // bug: temp workaround to correct a bug with ret. Should be handled differently
-            context.TempLoopResult = await context.EvaluateAsync(Body).ConfigureAwait(false);
-            // Return must bubble up to call site
-            if (context.FlowState == ScriptFlowState.Return)
-            {
-                return false;
-            }
-
-            // If we need to break, restore to none state
-            var result = context.FlowState != ScriptFlowState.Break;
-            context.FlowState = ScriptFlowState.None;
-            return result;
-        }
-
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            // Notify the context that we enter a loop block (used for variable with scope Loop)
-            object result = null;
-            context.EnterLoop(this);
-            try
-            {
-                await EvaluateImplAsync(context).ConfigureAwait(false);
-            }
-            finally
-            {
-                // Level scope block
-                context.ExitLoop(this);
-                if (context.FlowState == ScriptFlowState.Return)
-                {
-                    result = context.TempLoopResult;
-                }
-                else
-                {
-                    // Revert to flow state to none unless we have a return that must be handled at a higher level
-                    context.FlowState = ScriptFlowState.None;
-                }
-
-                context.TempLoopResult = null;
-            }
-
-            return result;
-        }
-    }
-
-    public partial class ScriptIfStatement
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var conditionValue = context.ToBool(Condition.Span, await context.EvaluateAsync(Condition).ConfigureAwait(false));
-            if (InvertCondition)
-            {
-                conditionValue = !conditionValue;
-            }
-
-            return conditionValue ? await context.EvaluateAsync(Then).ConfigureAwait(false) : await context.EvaluateAsync(Else).ConfigureAwait(false);
-        }
-    }
-
-    public partial class ScriptNamedArgument
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            if (Value != null)
-                return await context.EvaluateAsync(Value).ConfigureAwait(false);
-            return true;
-        }
-    }
-
-    public partial class ScriptNestedExpression
-    {
-        public async Task<object> GetValueAsync(TemplateContext context)
-        {
-            return await context.EvaluateAsync(Expression).ConfigureAwait(false);
-        }
-
-        public async Task SetValueAsync(TemplateContext context, object valueToSet)
-        {
-            await context.SetValueAsync(Expression, valueToSet).ConfigureAwait(false);
-        }
-
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            // A nested expression will reset the pipe arguments for the group
-            context.PushPipeArguments();
-            try
-            {
-                return await context.GetValueAsync(this).ConfigureAwait(false);
-            }
-            finally
-            {
-                context.PopPipeArguments();
-            }
-        }
-    }
-
-    public partial class ScriptPage
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            return await context.EvaluateAsync(Body).ConfigureAwait(false);
-        }
-    }
-
-    public partial class ScriptReturnStatement
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            context.FlowState = ScriptFlowState.Return;
-            return await context.EvaluateAsync(Expression).ConfigureAwait(false);
-        }
-    }
-
-    /// <summary>
-    /// Statement handling the `tablerow`
-    /// </summary>
-    public partial class ScriptTableRowStatement
-    {
-        protected override async Task ProcessArgumentAsync(TemplateContext context, ScriptNamedArgument argument)
-        {
-            _columnsCount = 1;
-            if (argument.Name == "cols")
-            {
-                _columnsCount = context.ToInt(argument.Value.Span, await context.EvaluateAsync(argument.Value).ConfigureAwait(false));
-                if (_columnsCount <= 0)
-                {
-                    _columnsCount = 1;
-                }
-
-                return;
-            }
-
-            await base.ProcessArgumentAsync(context, argument).ConfigureAwait(false);
-        }
-
-        protected override async Task<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
-        {
-            var columnIndex = localIndex % _columnsCount;
-            await context.SetValueAsync(ScriptVariable.TableRowCol, columnIndex + 1).ConfigureAwait(false);
-            if (columnIndex == 0 && localIndex > 0)
-            {
-                await context.Write("</tr>").WriteAsync(context.NewLine).ConfigureAwait(false);
-                var rowIndex = (localIndex / _columnsCount) + 1;
-                await context.Write("<tr class=\"row").Write(rowIndex.ToString(CultureInfo.InvariantCulture)).WriteAsync("\">").ConfigureAwait(false);
-            }
-
-            await context.Write("<td class=\"col").Write((columnIndex + 1).ToString(CultureInfo.InvariantCulture)).WriteAsync("\">").ConfigureAwait(false);
-            var result = await base.LoopAsync(context, index, localIndex, isLast).ConfigureAwait(false);
-            await context.WriteAsync("</td>").ConfigureAwait(false);
-            return result;
-        }
-
-        protected override async Task AfterLoopAsync(TemplateContext context)
-        {
-            await context.Write("</tr>").WriteLineAsync().ConfigureAwait(false);
-        }
-
-        protected override async Task BeforeLoopAsync(TemplateContext context)
-        {
-            await context.WriteAsync("<tr class=\"row1\">").ConfigureAwait(false);
-        }
-    }
-
-    public partial class ScriptPipeCall
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            int beforePipeArgumentCount = context.PipeArguments.Count + 1;
-            // We don't evaluate the From but we let the pipe evalute it later
-            var leftResult = await context.EvaluateAsync(From).ConfigureAwait(false);
-            // Support for Parameters expansion
-            var unaryExpression = From as ScriptUnaryExpression;
-            if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
-            {
-                // TODO: Pipe calls will not work correctly in case of (a | b) | ( c | d)
-                var valueEnumerator = leftResult as IEnumerable;
-                if (valueEnumerator != null)
-                {
-                    var pipeArguments = context.PipeArguments;
-                    foreach (var subValue in valueEnumerator)
-                    {
-                        pipeArguments.Add(subValue);
-                    }
-                }
-                else
-                {
-                    context.PipeArguments.Add(leftResult);
-                }
-            }
-            else
-            {
-                context.PipeArguments.Add(leftResult);
-            }
-
-            var result = await context.EvaluateAsync(To).ConfigureAwait(false);
-            int afterPipeArgumentCount = context.PipeArguments.Count;
-            if (afterPipeArgumentCount >= beforePipeArgumentCount)
-            {
-                throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
-            }
-
-            return result;
-        }
-    }
-
-    public partial class ScriptWhileStatement
-    {
-        protected override async Task EvaluateImplAsync(TemplateContext context)
-        {
-            var index = 0;
-            await BeforeLoopAsync(context).ConfigureAwait(false);
-            while (context.StepLoop(this))
-            {
-                var conditionResult = context.ToBool(Condition.Span, await context.EvaluateAsync(Condition).ConfigureAwait(false));
-                if (!conditionResult)
-                {
-                    break;
-                }
-
-                if (!await LoopAsync(context, index++, index, false).ConfigureAwait(false))
-                {
-                    break;
-                }
-            }
-
-            ;
-            await AfterLoopAsync(context).ConfigureAwait(false);
-        }
-    }
-
-    public partial class ScriptWithStatement
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var target = await context.GetValueAsync(Name).ConfigureAwait(false);
-            if (!(target is IScriptObject))
-            {
-                var targetName = target?.GetType().Name ?? "null";
-                throw new ScriptRuntimeException(Name.Span, $"Invalid target property `{Name}` used for [with] statement. Must be a ScriptObject instead of `{targetName}`");
-            }
-
-            context.PushGlobal((IScriptObject)target);
-            try
-            {
-                var result = await context.EvaluateAsync(Body).ConfigureAwait(false);
-                return result;
-            }
-            finally
-            {
-                context.PopGlobal();
-            }
-        }
-    }
-
-    public partial class ScriptBinaryExpression
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var leftValueOriginal = await context.EvaluateAsync(Left).ConfigureAwait(false);
-            var leftValue = leftValueOriginal;
-            var rightValueOriginal = await context.EvaluateAsync(Right).ConfigureAwait(false);
-            object rightValue = rightValueOriginal;
-            return Evaluate(context, Span, Operator, leftValue, rightValue);
-        }
-    }
-
-    public partial class ScriptArrayInitializerExpression
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var scriptArray = new ScriptArray();
-            foreach (var value in Values)
-            {
-                var valueEval = await context.EvaluateAsync(value).ConfigureAwait(false);
-                scriptArray.Add(valueEval);
-            }
-
-            return scriptArray;
         }
     }
 
@@ -1385,38 +902,8 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptObjectInitializerExpression
-    {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            var scriptObject = new ScriptObject();
-            foreach (var member in Members)
-            {
-                var variable = member.Key as ScriptVariable;
-                var literal = member.Key as ScriptLiteral;
-                var name = variable?.Name ?? literal?.Value?.ToString();
-                scriptObject.SetValue(context, Span, name, await context.EvaluateAsync(member.Value).ConfigureAwait(false), false);
-            }
-
-            return scriptObject;
-        }
-    }
-
     public partial class ScriptFunctionCall
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
-        {
-            // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
-            var targetFunction = await context.EvaluateAsync(Target, true).ConfigureAwait(false);
-            // Throw an exception if the target function is null
-            if (targetFunction == null)
-            {
-                throw new ScriptRuntimeException(Target.Span, $"The target `{Target}` function is null");
-            }
-
-            return await CallAsync(context, this, targetFunction, context.AllowPipeArguments, Arguments).ConfigureAwait(false);
-        }
-
         public static async Task<object> CallAsync(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, List<ScriptExpression> arguments = null)
         {
             if (callerContext == null)
@@ -1532,31 +1019,504 @@ namespace Scriban.Syntax
             context.FlowState = ScriptFlowState.None;
             return result;
         }
+
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
+            var targetFunction = await context.EvaluateAsync(Target, true).ConfigureAwait(false);
+            // Throw an exception if the target function is null
+            if (targetFunction == null)
+            {
+                throw new ScriptRuntimeException(Target.Span, $"The target `{Target}` function is null");
+            }
+
+            return await CallAsync(context, this, targetFunction, context.AllowPipeArguments, Arguments).ConfigureAwait(false);
+        }
     }
 
-    public partial class ScriptWrapStatement
+    public partial class ScriptIfStatement
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
         {
-            // Check that the Target is actually a function
-            var functionCall = Target as ScriptFunctionCall;
-            if (functionCall == null)
+            var conditionValue = context.ToBool(Condition.Span, await context.EvaluateAsync(Condition).ConfigureAwait(false));
+            if (InvertCondition)
             {
-                var parameterLessFunction = await context.EvaluateAsync(Target, true).ConfigureAwait(false);
-                if (!(parameterLessFunction is IScriptCustomFunction))
-                {
-                    var targetPrettyname = ScriptSyntaxAttribute.Get(Target);
-                    throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyname.Name}`");
-                }
+                conditionValue = !conditionValue;
+            }
 
-                context.BlockDelegates.Push(Body);
-                return await ScriptFunctionCall.CallAsync(context, this, parameterLessFunction, false).ConfigureAwait(false);
+            return conditionValue ? await context.EvaluateAsync(Then).ConfigureAwait(false) : await context.EvaluateAsync(Else).ConfigureAwait(false);
+        }
+    }
+
+    public partial class ScriptImportStatement
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            var value = await context.EvaluateAsync(Expression).ConfigureAwait(false);
+            if (value == null)
+            {
+                return null;
+            }
+
+            var scriptObject = value as ScriptObject;
+            if (scriptObject == null)
+            {
+                throw new ScriptRuntimeException(Expression.Span, $"Unexpected value `{value.GetType()}` for import. Expecting an plain script object {{}}");
+            }
+
+            context.CurrentGlobal.Import(scriptObject);
+            return null;
+        }
+    }
+
+    public partial class ScriptIndexerExpression
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            return await context.GetValueAsync(this).ConfigureAwait(false);
+        }
+
+        private async Task<object> GetOrSetValueAsync(TemplateContext context, object valueToSet, bool setter)
+        {
+            object value = null;
+            var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
+            if (targetObject == null)
+            {
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new ScriptRuntimeException(Target.Span, $"Object `{Target}` is null. Cannot access indexer: {this}"); // unit test: 130-indexer-accessor-error1.txt
+                }
+            }
+
+            var index = await context.EvaluateAsync(Index).ConfigureAwait(false);
+            if (index == null)
+            {
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    return null;
+                }
+                else
+                {
+                    throw new ScriptRuntimeException(Index.Span, $"Cannot access target `{Target}` with a null indexer: {this}"); // unit test: 130-indexer-accessor-error2.txt
+                }
+            }
+
+            if (targetObject is IDictionary || targetObject is ScriptObject)
+            {
+                var accessor = context.GetMemberAccessor(targetObject);
+                var indexAsString = context.ToString(Index.Span, index);
+                if (setter)
+                {
+                    if (!accessor.TrySetValue(context, Span, targetObject, indexAsString, valueToSet))
+                    {
+                        throw new ScriptRuntimeException(Index.Span, $"Cannot set a value for the readonly member `{indexAsString}` in the indexer: {Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
+                    }
+                }
+                else
+                {
+                    if (!accessor.TryGetValue(context, Span, targetObject, indexAsString, out value))
+                    {
+                        context.TryGetMember?.Invoke(context, Span, targetObject, indexAsString, out value);
+                    }
+                }
             }
             else
             {
-                context.BlockDelegates.Push(Body);
-                return await context.EvaluateAsync(functionCall).ConfigureAwait(false);
+                var accessor = context.GetListAccessor(targetObject);
+                if (accessor == null)
+                {
+                    throw new ScriptRuntimeException(Target.Span, $"Expecting a list. Invalid value `{targetObject}/{targetObject.GetType().Name}` for the target `{Target}` for the indexer: {this}"); // unit test: 130-indexer-accessor-error4.txt
+                }
+
+                int i = context.ToInt(Index.Span, index);
+                // Allow negative index from the end of the array
+                if (i < 0)
+                {
+                    i = accessor.GetLength(context, Span, targetObject) + i;
+                }
+
+                if (i >= 0)
+                {
+                    if (setter)
+                    {
+                        accessor.SetValue(context, Span, targetObject, i, valueToSet);
+                    }
+                    else
+                    {
+                        value = accessor.GetValue(context, Span, targetObject, i);
+                    }
+                }
             }
+
+            return value;
+        }
+
+        public async Task<object> GetValueAsync(TemplateContext context)
+        {
+            return await GetOrSetValueAsync(context, null, false).ConfigureAwait(false);
+        }
+
+        public async Task SetValueAsync(TemplateContext context, object valueToSet)
+        {
+            await GetOrSetValueAsync(context, valueToSet, true).ConfigureAwait(false);
+        }
+    }
+
+    public partial class ScriptIsEmptyExpression
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            return await context.GetValueAsync(this).ConfigureAwait(false);
+        }
+
+        private async Task<object> GetTargetObjectAsync(TemplateContext context, bool isSet)
+        {
+            var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
+            if (targetObject == null)
+            {
+                if (isSet || !context.EnableRelaxedMemberAccess)
+                {
+                    throw new ScriptRuntimeException(this.Span, $"Object `{this.Target}` is null. Cannot access property `empty?`");
+                }
+            }
+
+            return targetObject;
+        }
+
+        public async Task<object> GetValueAsync(TemplateContext context)
+        {
+            var targetObject = await GetTargetObjectAsync(context, false).ConfigureAwait(false);
+            return context.IsEmpty(Span, targetObject);
+        }
+    }
+
+    /// <summary>
+    /// Base class for a loop statement
+    /// </summary>
+    public abstract partial class ScriptLoopStatementBase
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            // Notify the context that we enter a loop block (used for variable with scope Loop)
+            object result = null;
+            context.EnterLoop(this);
+            try
+            {
+                await EvaluateImplAsync(context).ConfigureAwait(false);
+            }
+            finally
+            {
+                // Level scope block
+                context.ExitLoop(this);
+                if (context.FlowState == ScriptFlowState.Return)
+                {
+                    result = context.TempLoopResult;
+                }
+                else
+                {
+                    // Revert to flow state to none unless we have a return that must be handled at a higher level
+                    context.FlowState = ScriptFlowState.None;
+                }
+
+                context.TempLoopResult = null;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Base implementation for a loop single iteration
+        /// </summary>
+        /// <param name = "context">The context</param>
+        /// <param name = "index">The index in the loop</param>
+        /// <param name = "localIndex"></param>
+        /// <param name = "isLast"></param>
+        /// <returns></returns>
+        protected virtual async Task<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
+        {
+            // Setup variable
+            context.SetValue(ScriptVariable.LoopFirst, index == 0);
+            var even = (index & 1) == 0;
+            context.SetValue(ScriptVariable.LoopEven, even);
+            await context.SetValueAsync(ScriptVariable.LoopOdd, !even).ConfigureAwait(false);
+            context.SetValue(ScriptVariable.LoopIndex, index);
+            // bug: temp workaround to correct a bug with ret. Should be handled differently
+            context.TempLoopResult = await context.EvaluateAsync(Body).ConfigureAwait(false);
+            // Return must bubble up to call site
+            if (context.FlowState == ScriptFlowState.Return)
+            {
+                return false;
+            }
+
+            // If we need to break, restore to none state
+            var result = context.FlowState != ScriptFlowState.Break;
+            context.FlowState = ScriptFlowState.None;
+            return result;
+        }
+    }
+
+    public partial class ScriptMemberExpression
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            return await context.GetValueAsync(this).ConfigureAwait(false);
+        }
+
+        private async Task<object> GetTargetObjectAsync(TemplateContext context, bool isSet)
+        {
+            var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
+            if (targetObject == null)
+            {
+                if (isSet || !context.EnableRelaxedMemberAccess)
+                {
+                    throw new ScriptRuntimeException(this.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
+                }
+            }
+            else if (targetObject is string || targetObject.GetType().IsPrimitiveOrDecimal())
+            {
+                if (isSet || !context.EnableRelaxedMemberAccess)
+                {
+                    throw new ScriptRuntimeException(this.Span, $"Cannot get or set a member on the primitive `{targetObject}/{targetObject.GetType()}` when accessing member: {this}"); // unit test: 132-member-accessor-error2.txt
+                }
+
+                // If this is relaxed, set the target object to null
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    targetObject = null;
+                }
+            }
+
+            return targetObject;
+        }
+
+        public async Task<object> GetValueAsync(TemplateContext context)
+        {
+            var targetObject = await GetTargetObjectAsync(context, false).ConfigureAwait(false);
+            // In case TemplateContext.EnableRelaxedMemberAccess
+            if (targetObject == null)
+            {
+                return null;
+            }
+
+            var accessor = context.GetMemberAccessor(targetObject);
+            var memberName = this.Member.Name;
+            object value;
+            if (!accessor.TryGetValue(context, Span, targetObject, memberName, out value))
+            {
+                context.TryGetMember?.Invoke(context, Span, targetObject, memberName, out value);
+            }
+
+            return value;
+        }
+
+        public async Task SetValueAsync(TemplateContext context, object valueToSet)
+        {
+            var targetObject = await GetTargetObjectAsync(context, true).ConfigureAwait(false);
+            var accessor = context.GetMemberAccessor(targetObject);
+            var memberName = this.Member.Name;
+            if (!accessor.TrySetValue(context, this.Span, targetObject, memberName, valueToSet))
+            {
+                throw new ScriptRuntimeException(this.Member.Span, $"Cannot set a value for the readonly member: {this}"); // unit test: 132-member-accessor-error3.txt
+            }
+        }
+    }
+
+    public partial class ScriptNamedArgument
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            if (Value != null)
+                return await context.EvaluateAsync(Value).ConfigureAwait(false);
+            return true;
+        }
+    }
+
+    public partial class ScriptNestedExpression
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            // A nested expression will reset the pipe arguments for the group
+            context.PushPipeArguments();
+            try
+            {
+                return await context.GetValueAsync(this).ConfigureAwait(false);
+            }
+            finally
+            {
+                context.PopPipeArguments();
+            }
+        }
+
+        public async Task<object> GetValueAsync(TemplateContext context)
+        {
+            return await context.EvaluateAsync(Expression).ConfigureAwait(false);
+        }
+
+        public async Task SetValueAsync(TemplateContext context, object valueToSet)
+        {
+            await context.SetValueAsync(Expression, valueToSet).ConfigureAwait(false);
+        }
+    }
+
+    public partial class ScriptObjectInitializerExpression
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            var scriptObject = new ScriptObject();
+            foreach (var member in Members)
+            {
+                var variable = member.Key as ScriptVariable;
+                var literal = member.Key as ScriptLiteral;
+                var name = variable?.Name ?? literal?.Value?.ToString();
+                scriptObject.SetValue(context, Span, name, await context.EvaluateAsync(member.Value).ConfigureAwait(false), false);
+            }
+
+            return scriptObject;
+        }
+    }
+
+    public partial class ScriptPage
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            return await context.EvaluateAsync(Body).ConfigureAwait(false);
+        }
+    }
+
+    public partial class ScriptPipeCall
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            int beforePipeArgumentCount = context.PipeArguments.Count + 1;
+            // We don't evaluate the From but we let the pipe evalute it later
+            var leftResult = await context.EvaluateAsync(From).ConfigureAwait(false);
+            // Support for Parameters expansion
+            var unaryExpression = From as ScriptUnaryExpression;
+            if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
+            {
+                // TODO: Pipe calls will not work correctly in case of (a | b) | ( c | d)
+                var valueEnumerator = leftResult as IEnumerable;
+                if (valueEnumerator != null)
+                {
+                    var pipeArguments = context.PipeArguments;
+                    foreach (var subValue in valueEnumerator)
+                    {
+                        pipeArguments.Add(subValue);
+                    }
+                }
+                else
+                {
+                    context.PipeArguments.Add(leftResult);
+                }
+            }
+            else
+            {
+                context.PipeArguments.Add(leftResult);
+            }
+
+            var result = await context.EvaluateAsync(To).ConfigureAwait(false);
+            int afterPipeArgumentCount = context.PipeArguments.Count;
+            if (afterPipeArgumentCount >= beforePipeArgumentCount)
+            {
+                throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
+            }
+
+            return result;
+        }
+    }
+
+    public partial class ScriptRawStatement
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            if (Text == null)
+                return null;
+            var length = Span.End.Offset - Span.Start.Offset + 1;
+            if (length > 0)
+            {
+                // If we are in the context of output, output directly to TemplateContext.Output
+                if (context.EnableOutput)
+                {
+                    await context.WriteAsync(Text, Span.Start.Offset, length).ConfigureAwait(false);
+                }
+                else
+                {
+                    return Text.Substring(Span.Start.Offset, length);
+                }
+            }
+
+            return null;
+        }
+    }
+
+    public partial class ScriptReturnStatement
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            context.FlowState = ScriptFlowState.Return;
+            return await context.EvaluateAsync(Expression).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// Statement handling the `tablerow`
+    /// </summary>
+    public partial class ScriptTableRowStatement
+    {
+        protected override async Task AfterLoopAsync(TemplateContext context)
+        {
+            await context.Write("</tr>").WriteLineAsync().ConfigureAwait(false);
+        }
+
+        protected override async Task BeforeLoopAsync(TemplateContext context)
+        {
+            await context.WriteAsync("<tr class=\"row1\">").ConfigureAwait(false);
+        }
+
+        protected override async Task<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
+        {
+            var columnIndex = localIndex % _columnsCount;
+            await context.SetValueAsync(ScriptVariable.TableRowCol, columnIndex + 1).ConfigureAwait(false);
+            if (columnIndex == 0 && localIndex > 0)
+            {
+                await context.Write("</tr>").WriteAsync(context.NewLine).ConfigureAwait(false);
+                var rowIndex = (localIndex / _columnsCount) + 1;
+                await context.Write("<tr class=\"row").Write(rowIndex.ToString(CultureInfo.InvariantCulture)).WriteAsync("\">").ConfigureAwait(false);
+            }
+
+            await context.Write("<td class=\"col").Write((columnIndex + 1).ToString(CultureInfo.InvariantCulture)).WriteAsync("\">").ConfigureAwait(false);
+            var result = await base.LoopAsync(context, index, localIndex, isLast).ConfigureAwait(false);
+            await context.WriteAsync("</td>").ConfigureAwait(false);
+            return result;
+        }
+
+        protected override async Task ProcessArgumentAsync(TemplateContext context, ScriptNamedArgument argument)
+        {
+            _columnsCount = 1;
+            if (argument.Name == "cols")
+            {
+                _columnsCount = context.ToInt(argument.Value.Span, await context.EvaluateAsync(argument.Value).ConfigureAwait(false));
+                if (_columnsCount <= 0)
+                {
+                    _columnsCount = 1;
+                }
+
+                return;
+            }
+
+            await base.ProcessArgumentAsync(context, argument).ConfigureAwait(false);
+        }
+    }
+
+    public partial class ScriptThisExpression
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            return await context.GetValueAsync(this).ConfigureAwait(false);
         }
     }
 
@@ -1618,6 +1578,14 @@ namespace Scriban.Syntax
         }
     }
 
+    public abstract partial class ScriptVariable
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            return await context.GetValueAsync((ScriptExpression)this).ConfigureAwait(false);
+        }
+    }
+
     public partial class ScriptWhenStatement
     {
         public override async Task<object> EvaluateAsync(TemplateContext context)
@@ -1637,43 +1605,78 @@ namespace Scriban.Syntax
         }
     }
 
-    public sealed partial class ScriptBlockStatement
+    public partial class ScriptWhileStatement
     {
-        public override async Task<object> EvaluateAsync(TemplateContext context)
+        protected override async Task EvaluateImplAsync(TemplateContext context)
         {
-            object result = null;
-            for (int i = 0; i < Statements.Count; i++)
+            var index = 0;
+            await BeforeLoopAsync(context).ConfigureAwait(false);
+            while (context.StepLoop(this))
             {
-                var statement = Statements[i];
-                var expressionStatement = statement as ScriptExpressionStatement;
-                var isAssign = expressionStatement?.Expression is ScriptAssignExpression;
-#if SCRIBAN_ASYNC
-                // Throw if cancellation is requested
-                if (context.CancellationToken.IsCancellationRequested)
+                var conditionResult = context.ToBool(Condition.Span, await context.EvaluateAsync(Condition).ConfigureAwait(false));
+                if (!conditionResult)
                 {
-                    context.CancellationToken.ThrowIfCancellationRequested();
-                }
-#endif
-                result = await context.EvaluateAsync(statement).ConfigureAwait(false);
-                // Top-level assignment expression don't output anything
-                if (isAssign)
-                {
-                    result = null;
-                }
-                else if (result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
-                {
-                    await context.WriteAsync(Span, result).ConfigureAwait(false);
-                    result = null;
+                    break;
                 }
 
-                // If flow state is different, we need to exit this loop
-                if (context.FlowState != ScriptFlowState.None)
+                if (!await LoopAsync(context, index++, index, false).ConfigureAwait(false))
                 {
                     break;
                 }
             }
 
-            return result;
+            ;
+            await AfterLoopAsync(context).ConfigureAwait(false);
+        }
+    }
+
+    public partial class ScriptWithStatement
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            var target = await context.GetValueAsync(Name).ConfigureAwait(false);
+            if (!(target is IScriptObject))
+            {
+                var targetName = target?.GetType().Name ?? "null";
+                throw new ScriptRuntimeException(Name.Span, $"Invalid target property `{Name}` used for [with] statement. Must be a ScriptObject instead of `{targetName}`");
+            }
+
+            context.PushGlobal((IScriptObject)target);
+            try
+            {
+                var result = await context.EvaluateAsync(Body).ConfigureAwait(false);
+                return result;
+            }
+            finally
+            {
+                context.PopGlobal();
+            }
+        }
+    }
+
+    public partial class ScriptWrapStatement
+    {
+        public override async Task<object> EvaluateAsync(TemplateContext context)
+        {
+            // Check that the Target is actually a function
+            var functionCall = Target as ScriptFunctionCall;
+            if (functionCall == null)
+            {
+                var parameterLessFunction = await context.EvaluateAsync(Target, true).ConfigureAwait(false);
+                if (!(parameterLessFunction is IScriptCustomFunction))
+                {
+                    var targetPrettyname = ScriptSyntaxAttribute.Get(Target);
+                    throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyname.Name}`");
+                }
+
+                context.BlockDelegates.Push(Body);
+                return await ScriptFunctionCall.CallAsync(context, this, parameterLessFunction, false).ConfigureAwait(false);
+            }
+            else
+            {
+                context.BlockDelegates.Push(Body);
+                return await context.EvaluateAsync(functionCall).ConfigureAwait(false);
+            }
         }
     }
 }

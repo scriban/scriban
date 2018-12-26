@@ -43,16 +43,18 @@ namespace Scriban.Runtime
 
 
 #if SCRIBAN_ASYNC
-        protected static object ConfigureAwait(object result)
+        protected async Task<object> ConfigureAwait(object result)
         {
-            if (result is Task task)
+            switch (result)
             {
-                return task.ConfigureAwait(false);
+                case Task<object> taskObj:
+                    return await taskObj.ConfigureAwait(false);
+                case Task<string> taskStr:
+                    return await taskStr.ConfigureAwait(false);
             }
-            return result;
+            return await (dynamic)result;
         }
 #endif
-
 
         protected ArgumentValue GetValueFromNamedArgument(TemplateContext context, ScriptNode callerContext, ScriptNamedArgument namedArg)
         {
