@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using Scriban.Functions;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -98,6 +99,8 @@ namespace Scriban
             TemplateLoaderParserOptions = new ParserOptions();
             TemplateLoaderLexerOptions = LexerOptions.Default;
 
+            NewLine = Environment.NewLine;
+
             _outputs = new FastStack<IScriptOutput>(4);
             _output = new StringBuilderOutput();
             _outputs.Push(_output);
@@ -145,6 +148,18 @@ namespace Scriban
         /// Gets or sets the <see cref="ITemplateLoader"/> used by the include directive. Must be set in order for the include directive to work.
         /// </summary>
         public ITemplateLoader TemplateLoader { get; set; }
+
+        /// <summary>
+        /// String used for new-line.
+        /// </summary>
+        public string NewLine { get; set; }
+
+#if SCRIBAN_ASYNC
+        /// <summary>
+        /// Gets or sets the cancellation token used for async evaluation
+        /// </summary>
+        public CancellationToken CancellationToken { get; set; }
+#endif
 
         /// <summary>
         /// The <see cref="ParserOptions"/> used by the <see cref="TemplateLoader"/> via the include directive.
@@ -580,7 +595,7 @@ namespace Scriban
         /// </summary>
         public TemplateContext WriteLine()
         {
-            Output.WriteLine();
+            Output.Write(NewLine);
             return this;
         }
 
@@ -641,7 +656,7 @@ namespace Scriban
         /// <remarks>The purpose of this method is to allow to hook during the evaluation of all ScriptNode. By default calls <see cref="ScriptNode.Evaluate"/></remarks>
         protected virtual object EvaluateImpl(ScriptNode scriptNode)
         {
-            return scriptNode?.Evaluate(this);
+            return scriptNode != null ? scriptNode.Evaluate(this) : null;
         }
 
         /// <summary>

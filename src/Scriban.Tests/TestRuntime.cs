@@ -3,8 +3,11 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Scriban.Parsing;
@@ -16,6 +19,36 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+
+        [Test]
+        public async Task TestAsyncAwait()
+        {
+            var text = @"{{ wait_and_see }}";
+            // Tax1: {{ 1 | match_tax }}
+            var template = Template.Parse(text);
+            var context = new TemplateContext();
+            const int MinDelay = 100;
+            context.CurrentGlobal.Import("wait_and_see", new Func<Task<string>>(async () =>
+            {
+                await Task.Delay(MinDelay);
+                return "yes";
+            }));
+            var clock = Stopwatch.StartNew();
+            var result = await template.RenderAsync(context);
+            clock.Stop();
+            Console.WriteLine(clock.ElapsedMilliseconds);
+
+            Assert.GreaterOrEqual(clock.ElapsedMilliseconds, MinDelay);
+
+            Assert.AreEqual("yes", result);
+        }
+
+        private bool Function(MemberInfo member)
+        {
+            throw new NotImplementedException();
+        }
+
+
         [Test]
         public void CheckReturnInsideLoop()
         {
@@ -36,6 +69,8 @@ Tax: {{ 7 | match_tax }}";
             var template = Template.Parse(text);
             var context = new TemplateContext();
             var result = template.Render(context);
+
+            //Task<string> x = Task.FromResult("yo");
 
             Assert.AreEqual("Tax: true", result);
         }

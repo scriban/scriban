@@ -3,7 +3,7 @@
 // See license.txt file in the project root for full license information.
 namespace Scriban.Syntax
 {
-    public class ScriptNamedArgument : ScriptExpression
+    public partial class ScriptNamedArgument : ScriptExpression
     {
         public ScriptNamedArgument()
         {

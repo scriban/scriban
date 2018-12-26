@@ -2,13 +2,15 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
+using System.Globalization;
+using Scriban.Runtime;
 
 namespace Scriban.Syntax
 {
     /// <summary>
     /// Statement handling the `tablerow`
     /// </summary>
-    public class ScriptTableRowStatement : ScriptForStatement
+    public partial class ScriptTableRowStatement : ScriptForStatement
     {
         private int _columnsCount;
 
@@ -44,22 +46,21 @@ namespace Scriban.Syntax
 
         protected override bool Loop(TemplateContext context, int index, int localIndex, bool isLast)
         {
-            var output = context.Output;
-
             var columnIndex = localIndex % _columnsCount;
 
             context.SetValue(ScriptVariable.TableRowCol, columnIndex + 1);
 
             if (columnIndex == 0 && localIndex > 0)
             {
-                output.Write("</tr>").WriteLine();
-                output.Write("<tr class=\"row").Write((localIndex / _columnsCount) + 1).Write("\">");
+                context.Write("</tr>").Write(context.NewLine);
+                var rowIndex = (localIndex / _columnsCount) + 1;
+                context.Write("<tr class=\"row").Write(rowIndex.ToString(CultureInfo.InvariantCulture)).Write("\">");
             }
-            output.Write("<td class=\"col").Write(columnIndex + 1).Write("\">");
+            context.Write("<td class=\"col").Write((columnIndex + 1).ToString(CultureInfo.InvariantCulture)).Write("\">");
 
             var result = base.Loop(context, index, localIndex, isLast);
 
-            output.Write("</td>");
+            context.Write("</td>");
 
             return result;
         }

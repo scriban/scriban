@@ -5,7 +5,7 @@
 namespace Scriban.Syntax
 {
     [ScriptSyntax("return statement", "return <expression>?")]
-    public class ScriptReturnStatement : ScriptStatement
+    public partial class ScriptReturnStatement : ScriptStatement
     {
         public ScriptExpression Expression { get; set; }
 

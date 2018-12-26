@@ -4,7 +4,7 @@
 namespace Scriban.Syntax
 {
     [ScriptSyntax("case statement", "case <expression> ... end|when|else")]
-    public class ScriptCaseStatement : ScriptConditionStatement
+    public partial class ScriptCaseStatement : ScriptConditionStatement
     {
         /// <summary>
         /// Get or sets the value used to check against When clause.

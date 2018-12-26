@@ -6,7 +6,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("capture statement", "capture <variable> ... end")]
-    public class ScriptCaptureStatement : ScriptStatement
+    public partial class ScriptCaptureStatement : ScriptStatement
     {
         public ScriptExpression Target { get; set; }
 

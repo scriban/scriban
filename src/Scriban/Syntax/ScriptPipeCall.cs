@@ -9,7 +9,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("pipe expression", "<expression> | <expression>")]
-    public class ScriptPipeCall : ScriptExpression
+    public partial class ScriptPipeCall : ScriptExpression
     {
         public ScriptExpression From { get; set; }
 

@@ -5,9 +5,12 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+#if SCRIBAN_ASYNC
+using System.Threading.Tasks;
+#endif
 using Scriban.Helpers;
-using Scriban.Parsing;
 using Scriban.Syntax;
+
 
 namespace Scriban.Runtime
 {
@@ -25,28 +28,55 @@ namespace Scriban.Runtime
 
         protected readonly ParameterInfo[] Parameters;
 
+#if SCRIBAN_ASYNC
+        protected readonly bool IsAwaitable;
+#endif
+
         protected DynamicCustomFunction(MethodInfo method)
         {
             Method = method;
             Parameters = method.GetParameters();
+#if SCRIBAN_ASYNC
+            IsAwaitable = method.ReturnType.GetTypeInfo().GetDeclaredMethod(nameof(Task.GetAwaiter)) != null;
+#endif
         }
 
-        protected object GetNamedArgument(TemplateContext context, ScriptNode callerContext, ScriptNamedArgument namedArg, out int argIndex, out Type argType)
+
+#if SCRIBAN_ASYNC
+        protected async ValueTask<object> ConfigureAwait(object result)
+        {
+            switch (result)
+            {
+                case Task<object> taskObj:
+                    return await taskObj.ConfigureAwait(false);
+                case Task<string> taskStr:
+                    return await taskStr.ConfigureAwait(false);
+            }
+            return await (dynamic)result;
+        }
+#endif
+
+        protected ArgumentValue GetValueFromNamedArgument(TemplateContext context, ScriptNode callerContext, ScriptNamedArgument namedArg)
         {
             for (int j = 0; j < Parameters.Length; j++)
             {
                 var arg = Parameters[j];
                 if (arg.Name == namedArg.Name)
                 {
-                    argIndex = j;
-                    argType = arg.ParameterType;
-                    return context.Evaluate(namedArg);
+                    return new ArgumentValue(j, arg.ParameterType, context.Evaluate(namedArg));
                 }
             }
             throw new ScriptRuntimeException(callerContext.Span, $"Invalid argument `{namedArg.Name}` not found for function `{callerContext}`");
         }
 
         public abstract object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
+
+#if SCRIBAN_ASYNC
+        public virtual ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        {
+            return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));
+        }
+#endif
 
         /// <summary>
         /// Returns a <see cref="DynamicCustomFunction"/> from the specified object target and <see cref="MethodInfo"/>.
@@ -66,204 +96,25 @@ namespace Scriban.Runtime
             return new GenericFunctionWrapper(target, method);
         }
 
-        /// <summary>
-        /// Generic function wrapper handling any kind of function parameters.
-        /// </summary>
-        private class GenericFunctionWrapper : DynamicCustomFunction
+
+        protected struct ArgumentValue
         {
-            private readonly object _target;
-            private readonly bool _hasObjectParams;
-            private readonly int _lastParamsIndex;
-            private readonly bool _hasTemplateContext;
-            private readonly bool _hasSpan;
-            private readonly object[] _arguments;
-            private readonly int _optionalParameterCount;
-            private readonly Type _paramsElementType;
-
-            public GenericFunctionWrapper(object target, MethodInfo method) : base(method)
+            public ArgumentValue(int index, Type type, object value)
             {
-                _target = target;
-                _lastParamsIndex = Parameters.Length - 1;
-                if (Parameters.Length > 0)
-                {
-                    // Check if we have TemplateContext+SourceSpan as first parameters
-                    if (typeof(TemplateContext).GetTypeInfo().IsAssignableFrom(Parameters[0].ParameterType.GetTypeInfo()))
-                    {
-                        _hasTemplateContext = true;
-                        if (Parameters.Length > 1)
-                        {
-                            _hasSpan = typeof(SourceSpan).GetTypeInfo().IsAssignableFrom(Parameters[1].ParameterType.GetTypeInfo());
-                        }
-                    }
-
-                    var lastParam = Parameters[_lastParamsIndex];
-                    if (lastParam.ParameterType.IsArray)
-                    {
-                        foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
-                        {
-                            _hasObjectParams = true;
-                            _paramsElementType = lastParam.ParameterType.GetElementType();
-                            break;
-                        }
-                    }
-                }
-
-                if (!_hasObjectParams)
-                {
-                    for (int i = 0; i < Parameters.Length; i++)
-                    {
-                        if (Parameters[i].IsOptional)
-                        {
-                            _optionalParameterCount++;
-                        }
-                    }
-                }
-
-                _arguments = new object[Parameters.Length];
+                Index = index;
+                Type = type;
+                Value = value;
             }
 
-            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
-            {
-                var expectedNumberOfParameters = Parameters.Length;
-                if (_hasTemplateContext)
-                {
-                    expectedNumberOfParameters--;
-                    if (_hasSpan)
-                    {
-                        expectedNumberOfParameters--;
-                    }
-                }
+            public readonly int Index;
 
-                var minimumRequiredParameters = expectedNumberOfParameters - _optionalParameterCount;
+            public readonly Type Type;
 
-                // Check parameters
-                if ((_hasObjectParams && arguments.Count < minimumRequiredParameters - 1) || (!_hasObjectParams && arguments.Count < minimumRequiredParameters))
-                {
-                    if (minimumRequiredParameters != expectedNumberOfParameters)
-                    {
-                        throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
-                    }
-                    else
-                    {
-                        throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
-                    }
-                }
-
-                // Convert arguments
-                object[] paramArguments = null;
-                if (_hasObjectParams)
-                {
-                    paramArguments = new object[arguments.Count - _lastParamsIndex];
-                    _arguments[_lastParamsIndex] = paramArguments;
-                }
-
-                // Copy TemplateContext/SourceSpan parameters
-                int argOffset = 0;
-                var argMask = 0;
-                if (_hasTemplateContext)
-                {
-                    _arguments[0] = context;
-                    argOffset++;
-                    argMask |= 1;
-                    if (_hasSpan)
-                    {
-                        _arguments[1] = callerContext.Span;
-                        argOffset++;
-                        argMask |= 2;
-                    }
-                }
-
-                var argOrderedIndex = argOffset;
-
-                // Setup any default parameters
-                if (_optionalParameterCount > 0)
-                {
-                    for (int i = Parameters.Length - 1; i >= Parameters.Length - _optionalParameterCount; i--)
-                    {
-                        _arguments[i] = Parameters[i].DefaultValue;
-                        argMask |= 1 << i;
-                    }
-                }
-
-                int paramsIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    Type argType = null;
-                    try
-                    {
-                        int argIndex;
-                        var arg = arguments[i];
-                        var namedArg = arg as ScriptNamedArgument;
-                        if (namedArg != null)
-                        {
-                            arg = GetNamedArgument(context, callerContext, namedArg, out argIndex, out argType);
-                            if (_hasObjectParams && argIndex == _lastParamsIndex)
-                            {
-                                argType = _paramsElementType;
-                                argIndex = argIndex + paramsIndex;
-                                paramsIndex++;
-                            }
-                        }
-                        else
-                        {
-                            argIndex = argOrderedIndex;
-                            if (_hasObjectParams && argIndex == _lastParamsIndex)
-                            {
-                                argType = _paramsElementType;
-                                argIndex = argIndex + paramsIndex;
-                                paramsIndex++;
-                            }
-                            else
-                            {
-                                argType = Parameters[argIndex].ParameterType;
-                                argOrderedIndex++;
-                            }
-                        }
-
-                        var argValue = context.ToObject(callerContext.Span, arg, argType);
-                        if (paramArguments != null && argIndex >= _lastParamsIndex)
-                        {
-                            paramArguments[argIndex - _lastParamsIndex] = argValue;
-                            argMask |= 1 << _lastParamsIndex;
-                        }
-                        else
-                        {
-                            _arguments[argIndex] = argValue;
-                            argMask |= 1 << argIndex;
-                        }
-                    }
-                    catch (Exception exception)
-                    {
-                        throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{arguments[i]?.GetType()}` to type `{argType}`", exception);
-                    }
-                }
-
-                // In case we have named arguments we need to verify that all arguments were set
-                if (argMask != (1 << Parameters.Length) - 1)
-                {
-                    if (minimumRequiredParameters != expectedNumberOfParameters)
-                    {
-                        throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
-                    }
-                    else
-                    {
-                        throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
-                    }
-                }
-
-                // Call method
-                try
-                {
-                    var result = Method.Invoke(_target, _arguments);
-                    return result;
-                }
-                catch (TargetInvocationException exception)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception.InnerException);
-                }
-            }
+            public readonly object Value;
         }
 
+
+    
         private class MethodComparer : IEqualityComparer<MethodInfo>
         {
             public static readonly MethodComparer Default = new MethodComparer();

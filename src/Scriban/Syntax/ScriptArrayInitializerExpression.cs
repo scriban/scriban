@@ -10,7 +10,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("array initializer", "[item1, item2,...]")]
-    public class ScriptArrayInitializerExpression : ScriptExpression
+    public partial class ScriptArrayInitializerExpression : ScriptExpression
     {
         public ScriptArrayInitializerExpression()
         {

@@ -790,7 +790,7 @@ namespace Scriban.Functions
             return text?.ToUpperInvariant();
         }
 
-#if !PCL328 && !NETSTD11
+#if !NETSTANDARD1_1
         /// <summary>
         /// Computes the `md5` hash of the input string
         /// </summary>

@@ -7,7 +7,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("empty expression", "<expression>.empty?")]
-    public class ScriptIsEmptyExpression: ScriptExpression, IScriptVariablePath
+    public partial class ScriptIsEmptyExpression: ScriptExpression, IScriptVariablePath
     {
         public ScriptExpression Target { get; set; }
 

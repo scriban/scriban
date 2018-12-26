@@ -3,6 +3,10 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.IO;
+using System.Threading;
+#if SCRIBAN_ASYNC
+using System.Threading.Tasks;
+#endif
 
 namespace Scriban.Runtime
 {
@@ -32,42 +36,20 @@ namespace Scriban.Runtime
         /// </summary>
         public TextWriter Writer { get; }
 
-        public IScriptOutput Write(char c)
-        {
-            Writer.Write(c);
-            return this;
-        }
-
-        public IScriptOutput Write(string text)
-        {
-            Writer.Write(text);
-            return this;
-        }
-
-        public IScriptOutput Write(int number)
-        {
-            Writer.Write(number);
-            return this;
-        }
-
         public IScriptOutput Write(string text, int offset, int count)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
             Writer.Write(text.Substring(offset, count));
             return this;
         }
-
-        public IScriptOutput WriteLine(string text)
+#if SCRIBAN_ASYNC
+        public async ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
         {
-            Writer.WriteLine(text);
+            // TextWriter doesn't support to pass CancellationToken oO
+            await Writer.WriteAsync(text.Substring(offset, count));
             return this;
         }
-
-        public IScriptOutput WriteLine()
-        {
-            Writer.WriteLine();
-            return this;
-        }
+#endif
 
         public override string ToString()
         {

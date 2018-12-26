@@ -5,7 +5,7 @@
 namespace Scriban.Syntax
 {
     [ScriptSyntax("if statement", "if <expression> ... end|else|else if")]
-    public class ScriptIfStatement : ScriptConditionStatement
+    public partial class ScriptIfStatement : ScriptConditionStatement
     {
         /// <summary>
         /// Get or sets the condition of this if statement.

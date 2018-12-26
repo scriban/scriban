@@ -15,7 +15,7 @@ namespace Scriban.Functions
     /// <summary>
     /// Math functions available through the object 'math' in scriban.
     /// </summary>
-    public class MathFunctions : ScriptObject
+    public partial class MathFunctions : ScriptObject
     {
         /// <summary>
         /// Returns the absolute value of a specified number.

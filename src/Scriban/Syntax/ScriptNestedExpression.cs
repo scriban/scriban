@@ -7,7 +7,7 @@ using System.IO;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("nested expression", "(<expression>)")]
-    public class ScriptNestedExpression : ScriptExpression, IScriptVariablePath
+    public partial class ScriptNestedExpression : ScriptExpression, IScriptVariablePath
     {
         public ScriptExpression Expression { get; set; }
 

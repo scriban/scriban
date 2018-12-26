@@ -5,6 +5,9 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+#if SCRIBAN_ASYNC
+using System.Threading.Tasks;
+#endif
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -13,7 +16,7 @@ namespace Scriban.Syntax
     /// A for in loop statement.
     /// </summary>
     [ScriptSyntax("for statement", "for <variable> in <expression> ... end")]
-    public class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
+    public partial class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
     {
         public ScriptExpression Variable { get; set; }
 
@@ -129,6 +132,13 @@ namespace Scriban.Syntax
         {
             throw new ScriptRuntimeException(argument.Span, $"Unsupported argument `{argument.Name}` for statement: `{this}`");
         }
+
+#if SCRIBAN_ASYNC
+        protected virtual ValueTask ProcessArgumentAsync(TemplateContext context, ScriptNamedArgument argument)
+        {
+            throw new ScriptRuntimeException(argument.Span, $"Unsupported argument `{argument.Name}` for statement: `{this}`");
+        }
+#endif
 
         public override string ToString()
         {

@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using DotLiquid.Tests.Tags;
 using NUnit.Framework;
 using Scriban.Helpers;
@@ -475,6 +476,7 @@ end
             {
                 bool isRoundtrip = roundtripText != null;
                 bool hasErrors = false;
+                bool hasException = false;
                 if (isRoundtrip)
                 {
                     Console.WriteLine("Roundtrip");
@@ -500,6 +502,7 @@ end
                 var template = Template.Parse(input, "text", parserOptions, lexerOptions);
 
                 var result = string.Empty;
+                var resultAsync = string.Empty;
                 if (template.HasErrors)
                 {
                     hasErrors = true;
@@ -561,27 +564,29 @@ end
                                 model = scriptObj;
                             }
 
-                            var context = isLiquid
-                                ? new LiquidTemplateContext()
-                                {
-                                    TemplateLoader = new LiquidCustomTemplateLoader()
-                                }
-                                : new TemplateContext()
-                                {
-                                    TemplateLoader = new CustomTemplateLoader()
-                                };
+                            // Render sync
+                            {
+                                var context = NewTemplateContext(isLiquid);
+                                context.PushOutput(new TextWriterOutput(new StringWriter() {NewLine = "\n"}));
+                                var contextObj = new ScriptObject();
+                                contextObj.Import(model);
+                                context.PushGlobal(contextObj);
+                                result = template.Render(context);
+                            }
 
-                            // We use a custom output to make sure that all output is using the "\n"
-                            context.PushOutput(new TextWriterOutput(new StringWriter() { NewLine = "\n" })); 
-
-                            var contextObj = new ScriptObject();
-                            contextObj.Import(model);
-                            context.PushGlobal(contextObj);
-
-                            result = template.Render(context);
+                            // Render async
+                            {
+                                var asyncContext = NewTemplateContext(isLiquid);
+                                asyncContext.PushOutput(new TextWriterOutput(new StringWriter() {NewLine = "\n"}));
+                                var contextObj = new ScriptObject();
+                                contextObj.Import(model);
+                                asyncContext.PushGlobal(contextObj);
+                                resultAsync = template.RenderAsync(asyncContext).Result;
+                            }
                         }
-                        catch (Exception exception) 
+                        catch (Exception exception)
                         {
+                            hasException = true;
                             if (specialLiquid)
                             {
                                 throw;
@@ -604,6 +609,13 @@ end
 
                 TextAssert.AreEqual(expected, result);
 
+                if (!isRoundtrip && !isRoundtripTest && !hasErrors && !hasException)
+                {
+                    Console.WriteLine("Checking async");
+                    Console.WriteLine("======================================");
+                    TextAssert.AreEqual(expected, resultAsync);
+                }
+
                 if (isRoundtripTest || isRoundtrip || hasErrors)
                 {
                     break;
@@ -611,7 +623,21 @@ end
             }
         }
 
-
+        private static TemplateContext NewTemplateContext(bool isLiquid)
+        {
+            var context = isLiquid
+                ? new LiquidTemplateContext()
+                {
+                    TemplateLoader = new LiquidCustomTemplateLoader()
+                }
+                : new TemplateContext()
+                {
+                    TemplateLoader = new CustomTemplateLoader()
+                };
+            // We use a custom output to make sure that all output is using the "\n"
+            context.NewLine = "\n";
+            return context;
+        }
 
         private static string GetReason(Exception ex)
         {

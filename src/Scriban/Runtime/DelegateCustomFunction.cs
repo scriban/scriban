@@ -1,7 +1,10 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
+#if SCRIBAN_ASYNC
+using System.Threading.Tasks;
+#endif
 using Scriban.Syntax;
 
 namespace Scriban.Runtime
@@ -22,5 +25,12 @@ namespace Scriban.Runtime
         {
             return _customFunction(context, callerContext, arguments);
         }
+
+#if SCRIBAN_ASYNC
+        public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        {
+            return new ValueTask<object>(_customFunction(context, callerContext, arguments));
+        }
+#endif
     }
 }

@@ -9,7 +9,7 @@ using Scriban.Helpers;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("member expression", "<expression>.<variable_name>")]
-    public class ScriptMemberExpression : ScriptExpression, IScriptVariablePath
+    public partial class ScriptMemberExpression : ScriptExpression, IScriptVariablePath
     {
         public ScriptExpression Target { get; set; }
 

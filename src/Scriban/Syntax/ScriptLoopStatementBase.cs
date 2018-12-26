@@ -1,12 +1,17 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
+#if SCRIBAN_ASYNC
+using System.Threading.Tasks;
+#endif
+
 namespace Scriban.Syntax
 {
     /// <summary>
     /// Base class for a loop statement
     /// </summary>
-    public abstract class ScriptLoopStatementBase : ScriptStatement
+    public abstract partial class ScriptLoopStatementBase : ScriptStatement
     {
         public ScriptBlockStatement Body { get; set; }
 
@@ -79,6 +84,19 @@ namespace Scriban.Syntax
             }
             return result;
         }
+
         protected abstract void EvaluateImpl(TemplateContext context);
+
+#if SCRIBAN_ASYNC
+        protected abstract ValueTask EvaluateImplAsync(TemplateContext context);
+
+        protected virtual async ValueTask BeforeLoopAsync(TemplateContext context)
+        {
+        }
+
+        protected virtual async ValueTask AfterLoopAsync(TemplateContext context)
+        {
+        }
+#endif
     }
 }

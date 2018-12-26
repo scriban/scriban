@@ -7,7 +7,7 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("wrap statement", "wrap <function_call> ... end")]
-    public class ScriptWrapStatement : ScriptStatement
+    public partial class ScriptWrapStatement : ScriptStatement
     {
         public ScriptExpression Target { get; set; }
 
