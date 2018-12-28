@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.0-alpha-001 (28 Dec 2018)
+- Breaking change: Add support for async/await template evaluation
+
 ## 1.2.9 (21 Dec 2018)
 - Fix ret statement not returning the value when used inside a loop
 
