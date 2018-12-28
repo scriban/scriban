@@ -447,7 +447,7 @@ namespace Scriban.Functions
                 string templateText;
                 try
                 {
-                    templateText = templateLoader.Load(context, callerContext.Span, templatePath);
+                    templateText = await  templateLoader.LoadAsync(context, callerContext.Span, templatePath).ConfigureAwait(false);
                 }
                 catch (Exception ex) when (!(ex is ScriptRuntimeException))
                 {

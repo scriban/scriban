@@ -43,7 +43,7 @@ namespace Scriban.AsyncCodeGen
                         var interfaceDecl = (InterfaceDeclarationSyntax) methodDeclaration.Parent;
 
                         var interfaceType = model.GetDeclaredSymbol(interfaceDecl);
-                        if (interfaceType != null && interfaceType.ContainingNamespace.Name == "Runtime" && (interfaceType.Name == "IScriptOutput" || interfaceType.Name == "IScriptCustomFunction"))
+                        if (interfaceType != null && interfaceType.ContainingNamespace.Name == "Runtime" && (interfaceType.Name == "IScriptOutput" || interfaceType.Name == "IScriptCustomFunction" || (interfaceType.Name == "ITemplateLoader" && methodDeclaration.Identifier.Text == "Load")))
                         {
                             var method = model.GetDeclaredSymbol(methodDeclaration);
                             if (visited.Add(method))

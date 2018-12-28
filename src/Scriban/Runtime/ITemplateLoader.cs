@@ -1,7 +1,12 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
+
 using Scriban.Parsing;
+#if SCRIBAN_ASYNC
+using System.Threading;
+using System.Threading.Tasks;
+#endif
 
 namespace Scriban.Runtime
 {
@@ -28,5 +33,16 @@ namespace Scriban.Runtime
         /// <param name="templatePath">The path/key previously returned by <see cref="GetPath"/></param>
         /// <returns>The content string loaded from the specified template path/key</returns>
         string Load(TemplateContext context, SourceSpan callerSpan, string templatePath);
+
+#if SCRIBAN_ASYNC
+        /// <summary>
+        /// Loads a template using the specified template path/key.
+        /// </summary>
+        /// <param name="context">The current context called from</param>
+        /// <param name="callerSpan">The current span called from</param>
+        /// <param name="templatePath">The path/key previously returned by <see cref="GetPath"/></param>
+        /// <returns>The content string loaded from the specified template path/key</returns>
+        ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath);
+#endif
     }
 }

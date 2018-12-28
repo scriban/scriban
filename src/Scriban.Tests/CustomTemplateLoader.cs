@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using Scriban.Parsing;
 using Scriban.Runtime;
 
@@ -53,6 +54,11 @@ namespace Scriban.Tests
                     return templatePath;
             }
         }
+
+        public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        {
+            return new ValueTask<string>(Load(context, callerSpan, templatePath));
+        }
     }
 
     class LiquidCustomTemplateLoader : ITemplateLoader
@@ -81,6 +87,11 @@ namespace Scriban.Tests
                 default:
                     return templatePath;
             }
+        }
+
+        public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        {
+            return new ValueTask<string>(Load(context, callerSpan, templatePath));
         }
     }
 }
