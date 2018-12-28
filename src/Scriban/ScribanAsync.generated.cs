@@ -181,7 +181,7 @@ namespace Scriban
                 scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
             }
 
-            var context = _lexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
+            var context = LexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
             context.MemberRenamer = memberRenamer;
             context.MemberFilter = memberFilter;
             context.PushGlobal(scriptObject);

@@ -16,13 +16,10 @@ namespace Scriban
     /// </summary>
     public partial class Template
     {
-        private readonly ParserOptions _parserOptions;
-        private readonly LexerOptions _lexerOptions;
-
         private Template(ParserOptions? parserOptions, LexerOptions? lexerOptions, string sourceFilePath)
         {
-            _parserOptions = parserOptions ?? new ParserOptions();
-            _lexerOptions = lexerOptions ?? new LexerOptions();
+            ParserOptions = parserOptions ?? new ParserOptions();
+            LexerOptions = lexerOptions ?? new LexerOptions();
             Messages = new List<LogMessage>();
             this.SourceFilePath = sourceFilePath;
         }
@@ -46,6 +43,16 @@ namespace Scriban
         /// Gets the lexer and parsing messages.
         /// </summary>
         public List<LogMessage> Messages { get; private set; }
+
+        /// <summary>
+        /// The parser options used by this Template
+        /// </summary>
+        public ParserOptions ParserOptions { get; }
+
+        /// <summary>
+        /// The lexer options used by this template
+        /// </summary>
+        public LexerOptions LexerOptions { get; }
 
         /// <summary>
         /// Parses the specified scripting text into a <see cref="Template"/> .
@@ -192,7 +199,7 @@ namespace Scriban
                 scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
             }
 
-            var context = _lexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
+            var context = LexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
             context.MemberRenamer = memberRenamer;
             context.MemberFilter = memberFilter;
             context.PushGlobal(scriptObject);
@@ -269,8 +276,8 @@ namespace Scriban
                 return;
             }
 
-            var lexer = new Lexer(text, sourceFilePath, _lexerOptions);
-            var parser = new Parser(lexer, _parserOptions);
+            var lexer = new Lexer(text, sourceFilePath, LexerOptions);
+            var parser = new Parser(lexer, ParserOptions);
 
             Page = parser.Run();
 
