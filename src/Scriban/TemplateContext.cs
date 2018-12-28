@@ -48,9 +48,6 @@ namespace Scriban
         private FastStack<Dictionary<object, object>> _availableTags;
         private ScriptPipeArguments _currentPipeArguments;
 
-        // Workaround to correct a bug with loop not retuning a result from a ret
-        internal object TempLoopResult;
-
         internal bool AllowPipeArguments => _getOrSetValueLevel <= 1;
 
         /// <summary>

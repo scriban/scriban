@@ -44,7 +44,7 @@ namespace Scriban.Syntax
             context.Write("</tr>").WriteLine();
         }
 
-        protected override bool Loop(TemplateContext context, int index, int localIndex, bool isLast)
+        protected override object LoopItem(TemplateContext context, int index, int localIndex, bool isLast)
         {
             var columnIndex = localIndex % _columnsCount;
 
@@ -58,7 +58,7 @@ namespace Scriban.Syntax
             }
             context.Write("<td class=\"col").Write((columnIndex + 1).ToString(CultureInfo.InvariantCulture)).Write("\">");
 
-            var result = base.Loop(context, index, localIndex, isLast);
+            var result = base.LoopItem(context, index, localIndex, isLast);
 
             context.Write("</td>");
 

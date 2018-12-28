@@ -819,7 +819,7 @@ namespace Scriban.Syntax
 
     public partial class ScriptForStatement
     {
-        protected override async ValueTask EvaluateImplAsync(TemplateContext context)
+        protected override async ValueTask<object> EvaluateImplAsync(TemplateContext context)
         {
             var loopIterator = await context.EvaluateAsync(Iterator).ConfigureAwait(false);
             var list = loopIterator as IList;
@@ -834,6 +834,7 @@ namespace Scriban.Syntax
 
             if (list != null)
             {
+                object loopResult = null;
                 await context.SetValueAsync(ScriptVariable.LoopLength, list.Count).ConfigureAwait(false);
                 object previousValue = null;
                 bool reversed = false;
@@ -871,7 +872,7 @@ namespace Scriban.Syntax
                 {
                     if (!context.StepLoop(this))
                     {
-                        return;
+                        return null;
                     }
 
                     // We update on next run on previous value (in order to handle last)
@@ -881,7 +882,8 @@ namespace Scriban.Syntax
                     await context.SetValueAsync(ScriptVariable.LoopChanged, isFirst || !Equals(previousValue, value)).ConfigureAwait(false);
                     await context.SetValueAsync(ScriptVariable.LoopRIndex, list.Count - index - 1).ConfigureAwait(false);
                     await context.SetValueAsync(Variable, value).ConfigureAwait(false);
-                    if (!await LoopAsync(context, index, i, isLast).ConfigureAwait(false))
+                    loopResult = await LoopItemAsync(context, index, i, isLast).ConfigureAwait(false);
+                    if (!ContinueLoop(context))
                     {
                         break;
                     }
@@ -894,11 +896,15 @@ namespace Scriban.Syntax
 
                 await AfterLoopAsync(context).ConfigureAwait(false);
                 await context.SetValueAsync(ScriptVariable.Continue, index).ConfigureAwait(false);
+                return loopResult;
             }
-            else if (loopIterator != null)
+
+            if (loopIterator != null)
             {
                 throw new ScriptRuntimeException(Iterator.Span, $"Unexpected type `{loopIterator.GetType()}` for iterator");
             }
+
+            return null;
         }
     }
 
@@ -1206,23 +1212,17 @@ namespace Scriban.Syntax
             context.EnterLoop(this);
             try
             {
-                await EvaluateImplAsync(context).ConfigureAwait(false);
+                result = await EvaluateImplAsync(context).ConfigureAwait(false);
             }
             finally
             {
                 // Level scope block
                 context.ExitLoop(this);
-                if (context.FlowState == ScriptFlowState.Return)
-                {
-                    result = context.TempLoopResult;
-                }
-                else
+                if (context.FlowState != ScriptFlowState.Return)
                 {
                     // Revert to flow state to none unless we have a return that must be handled at a higher level
                     context.FlowState = ScriptFlowState.None;
                 }
-
-                context.TempLoopResult = null;
             }
 
             return result;
@@ -1236,7 +1236,7 @@ namespace Scriban.Syntax
         /// <param name = "localIndex"></param>
         /// <param name = "isLast"></param>
         /// <returns></returns>
-        protected virtual async ValueTask<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
+        protected virtual async ValueTask<object> LoopItemAsync(TemplateContext context, int index, int localIndex, bool isLast)
         {
             // Setup variable
             context.SetValue(ScriptVariable.LoopFirst, index == 0);
@@ -1245,17 +1245,7 @@ namespace Scriban.Syntax
             await context.SetValueAsync(ScriptVariable.LoopOdd, !even).ConfigureAwait(false);
             context.SetValue(ScriptVariable.LoopIndex, index);
             // bug: temp workaround to correct a bug with ret. Should be handled differently
-            context.TempLoopResult = await context.EvaluateAsync(Body).ConfigureAwait(false);
-            // Return must bubble up to call site
-            if (context.FlowState == ScriptFlowState.Return)
-            {
-                return false;
-            }
-
-            // If we need to break, restore to none state
-            var result = context.FlowState != ScriptFlowState.Break;
-            context.FlowState = ScriptFlowState.None;
-            return result;
+            return await context.EvaluateAsync(Body).ConfigureAwait(false);
         }
     }
 
@@ -1477,7 +1467,7 @@ namespace Scriban.Syntax
             await context.WriteAsync("<tr class=\"row1\">").ConfigureAwait(false);
         }
 
-        protected override async ValueTask<bool> LoopAsync(TemplateContext context, int index, int localIndex, bool isLast)
+        protected override async ValueTask<object> LoopItemAsync(TemplateContext context, int index, int localIndex, bool isLast)
         {
             var columnIndex = localIndex % _columnsCount;
             await context.SetValueAsync(ScriptVariable.TableRowCol, columnIndex + 1).ConfigureAwait(false);
@@ -1489,7 +1479,7 @@ namespace Scriban.Syntax
             }
 
             await context.Write("<td class=\"col").Write((columnIndex + 1).ToString(CultureInfo.InvariantCulture)).WriteAsync("\">").ConfigureAwait(false);
-            var result = await base.LoopAsync(context, index, localIndex, isLast).ConfigureAwait(false);
+            var result = await base.LoopItemAsync(context, index, localIndex, isLast).ConfigureAwait(false);
             await context.WriteAsync("</td>").ConfigureAwait(false);
             return result;
         }
@@ -1607,9 +1597,10 @@ namespace Scriban.Syntax
 
     public partial class ScriptWhileStatement
     {
-        protected override async ValueTask EvaluateImplAsync(TemplateContext context)
+        protected override async ValueTask<object> EvaluateImplAsync(TemplateContext context)
         {
             var index = 0;
+            object result = null;
             await BeforeLoopAsync(context).ConfigureAwait(false);
             while (context.StepLoop(this))
             {
@@ -1619,7 +1610,8 @@ namespace Scriban.Syntax
                     break;
                 }
 
-                if (!await LoopAsync(context, index++, index, false).ConfigureAwait(false))
+                result = await LoopItemAsync(context, index++, index, false).ConfigureAwait(false);
+                if (!ContinueLoop(context))
                 {
                     break;
                 }
@@ -1627,6 +1619,7 @@ namespace Scriban.Syntax
 
             ;
             await AfterLoopAsync(context).ConfigureAwait(false);
+            return result;
         }
     }
 

@@ -9,9 +9,10 @@ namespace Scriban.Syntax
     {
         public ScriptExpression Condition { get; set; }
 
-        protected override void EvaluateImpl(TemplateContext context)
+        protected override object EvaluateImpl(TemplateContext context)
         {
             var index = 0;
+            object result = null;
             BeforeLoop(context);
             while (context.StepLoop(this))
             {
@@ -21,12 +22,15 @@ namespace Scriban.Syntax
                     break;
                 }
 
-                if (!Loop(context, index++, index, false))
+                result = LoopItem(context, index++, index, false);
+
+                if (!ContinueLoop(context))
                 {
                     break;
                 }
             };
             AfterLoop(context);
+            return result;
         }
 
         public override void Write(TemplateRewriterContext context)

@@ -28,7 +28,7 @@ namespace Scriban.Syntax
         /// <param name="localIndex"></param>
         /// <param name="isLast"></param>
         /// <returns></returns>
-        protected virtual bool Loop(TemplateContext context, int index, int localIndex, bool isLast)
+        protected virtual object LoopItem(TemplateContext context, int index, int localIndex, bool isLast)
         {
             // Setup variable
             context.SetValue(ScriptVariable.LoopFirst, index == 0);
@@ -38,8 +38,11 @@ namespace Scriban.Syntax
             context.SetValue(ScriptVariable.LoopIndex, index);
 
             // bug: temp workaround to correct a bug with ret. Should be handled differently
-            context.TempLoopResult = context.Evaluate(Body);
+            return context.Evaluate(Body);
+        }
 
+        protected bool ContinueLoop(TemplateContext context)
+        {
             // Return must bubble up to call site
             if (context.FlowState == ScriptFlowState.Return)
             {
@@ -63,32 +66,26 @@ namespace Scriban.Syntax
             context.EnterLoop(this);            
             try
             {
-                EvaluateImpl(context);
+                result = EvaluateImpl(context);
             }
             finally
             {
                 // Level scope block
                 context.ExitLoop(this);
 
-                if (context.FlowState == ScriptFlowState.Return)
-                {
-                    result = context.TempLoopResult;
-                }
-                else
+                if (context.FlowState != ScriptFlowState.Return)
                 {
                     // Revert to flow state to none unless we have a return that must be handled at a higher level
                     context.FlowState = ScriptFlowState.None;
                 }
-
-                context.TempLoopResult = null;
             }
             return result;
         }
 
-        protected abstract void EvaluateImpl(TemplateContext context);
+        protected abstract object EvaluateImpl(TemplateContext context);
 
 #if SCRIBAN_ASYNC
-        protected abstract ValueTask EvaluateImplAsync(TemplateContext context);
+        protected abstract ValueTask<object> EvaluateImplAsync(TemplateContext context);
 
         protected virtual async ValueTask BeforeLoopAsync(TemplateContext context)
         {

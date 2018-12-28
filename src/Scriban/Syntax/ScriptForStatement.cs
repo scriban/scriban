@@ -28,7 +28,7 @@ namespace Scriban.Syntax
             ? NamedArguments[NamedArguments.Count - 1]
             : Iterator;
 
-        protected override void EvaluateImpl(TemplateContext context)
+        protected override object EvaluateImpl(TemplateContext context)
         {
             var loopIterator = context.Evaluate(Iterator);
             var list = loopIterator as IList;
@@ -43,6 +43,7 @@ namespace Scriban.Syntax
 
             if (list != null)
             {
+                object loopResult = null;
                 context.SetValue(ScriptVariable.LoopLength, list.Count);
                 object previousValue = null;
 
@@ -81,7 +82,7 @@ namespace Scriban.Syntax
                 {
                     if (!context.StepLoop(this))
                     {
-                        return;
+                        return null;
                     }
 
                     // We update on next run on previous value (in order to handle last)
@@ -92,7 +93,8 @@ namespace Scriban.Syntax
                     context.SetValue(ScriptVariable.LoopRIndex, list.Count - index - 1);
                     context.SetValue(Variable, value);
 
-                    if (!Loop(context, index, i, isLast))
+                    loopResult = LoopItem(context, index, i, isLast);
+                    if (!ContinueLoop(context))
                     {
                         break;
                     }
@@ -105,11 +107,15 @@ namespace Scriban.Syntax
                 AfterLoop(context);
 
                 context.SetValue(ScriptVariable.Continue, index);
+                return loopResult;
             }
-            else if (loopIterator != null)
+
+            if (loopIterator != null)
             {
                 throw new ScriptRuntimeException(Iterator.Span, $"Unexpected type `{loopIterator.GetType()}` for iterator");
             }
+
+            return null;
         }
 
         public override void Write(TemplateRewriterContext context)
