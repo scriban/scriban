@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.0-alpha-002 (01 Jan 2019)
+- Fix precedence for binary operations (#100)
+
 ## 2.0.0-alpha-001 (28 Dec 2018)
 - Breaking change: Add support for async/await template evaluation
 
