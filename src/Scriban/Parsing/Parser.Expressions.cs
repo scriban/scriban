@@ -240,7 +240,7 @@ namespace Scriban.Parsing
                         var newPrecedence = GetOperatorPrecedence(binaryOperatorType);
 
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
-                        if (newPrecedence < precedence)
+                        if (newPrecedence <= precedence)
                             break;
 
                         // We fake entering an expression here to limit the number of expression
