@@ -35,6 +35,7 @@ Array functions available through the object 'array' in scriban.
 - [`array.size`](#arraysize)
 - [`array.sort`](#arraysort)
 - [`array.uniq`](#arrayuniq)
+- [`array.contains`](#arraycontains)
 
 [:top:](#builtins)
 ### `array.add`
@@ -589,6 +590,37 @@ A list of unique elements of the input `list`.
 ```html
 [1, 4, 5, 8]
 ```
+
+[:top:](#builtins)
+### `array.contains`
+
+```
+array.contains <list> <item>
+```
+
+#### Description
+
+Returns if an `list` contains an specifique element 
+
+#### Arguments
+
+- `list`: the input list
+- `item`: the input item
+
+#### Returns
+
+**true** if element is in `list`; otherwise **false**
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ [1, 2, 3, 4] | array.contains 4 }}
+```
+> **output**
+```html
+true
+```
 [:top:](#builtins)
 
 ## `date` functions
@@ -652,7 +684,7 @@ Returns a datetime object of the current time, including the hour, minutes, seco
 ```
 > **output**
 ```html
-2018
+2019
 ```
 
 [:top:](#builtins)
@@ -1495,7 +1527,7 @@ The `default` value is returned if the input `value` is null or an empty string 
 #### Arguments
 
 - `value`: The input value to check if it is null or an empty string.
-- `default`: The default alue to return if the input `value` is null or an empty string.
+- `default`: The default value to return if the input `value` is null or an empty string.
 
 #### Returns
 
