@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.0.0-alpha-003 (03 Jan 2019)
+- Fix issue with endraw not being parsed correctly if there is anything after (#102)
+
 ## 2.0.0-alpha-002 (01 Jan 2019)
 - Fix precedence for binary operations (#100)
 
