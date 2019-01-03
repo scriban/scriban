@@ -419,6 +419,8 @@ namespace Scriban.Parsing
                                                 _token = new Token(TokenType.Escape, start, end);
                                                 _pendingTokens.Enqueue(new Token(TokenType.EscapeCount1, end, end));
                                             }
+
+                                            _isLiquidTagBlock = false;
                                             return true;
                                         }
                                     }

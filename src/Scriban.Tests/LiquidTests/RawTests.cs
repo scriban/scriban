@@ -18,5 +18,12 @@ namespace DotLiquid.Tests.Tags
             Helper.AssertTemplateResult ("{{ test }}",
                 "{% raw %}{{ test }}{% endraw %}");
         }
+
+        [Test]
+        public void TestRawAndFollowing()
+        {
+            Helper.AssertTemplateResult("{{ test }}65",
+                "{% raw %}{{ test }}{% endraw %}6{{ 5 }}");
+        }
     }
 }
