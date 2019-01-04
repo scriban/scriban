@@ -90,7 +90,7 @@ namespace Scriban.Syntax
             var argumentValues = new ScriptArray();
 
             // Handle pipe arguments here
-            if (processPipeArguments && context.PipeArguments.Count > 0)
+            if (processPipeArguments && context.PipeArguments != null && context.PipeArguments.Count > 0)
             {
                 argumentValues.AddRange(context.PipeArguments);
                 context.PipeArguments.Clear();

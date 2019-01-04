@@ -936,7 +936,7 @@ namespace Scriban.Syntax
             // So we absolutely need to generate a new array everytime we call a function
             var argumentValues = new ScriptArray();
             // Handle pipe arguments here
-            if (processPipeArguments && context.PipeArguments.Count > 0)
+            if (processPipeArguments && context.PipeArguments != null && context.PipeArguments.Count > 0)
             {
                 argumentValues.AddRange(context.PipeArguments);
                 context.PipeArguments.Clear();
@@ -1381,41 +1381,43 @@ namespace Scriban.Syntax
     {
         public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
-            int beforePipeArgumentCount = context.PipeArguments.Count + 1;
-            // We don't evaluate the From but we let the pipe evalute it later
+            // We don't evaluate the From but we let the pipe evaluate it later
             var leftResult = await context.EvaluateAsync(From).ConfigureAwait(false);
-            // Support for Parameters expansion
-            var unaryExpression = From as ScriptUnaryExpression;
-            if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
+            // Push a new pipe arguments
+            context.PushPipeArguments();
+            try
             {
-                // TODO: Pipe calls will not work correctly in case of (a | b) | ( c | d)
-                var valueEnumerator = leftResult as IEnumerable;
-                if (valueEnumerator != null)
+                // Support for Parameters expansion
+                var unaryExpression = From as ScriptUnaryExpression;
+                if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
                 {
-                    var pipeArguments = context.PipeArguments;
-                    foreach (var subValue in valueEnumerator)
+                    // TODO: Pipe calls will not work correctly in case of (a | b) | ( c | d)
+                    var valueEnumerator = leftResult as IEnumerable;
+                    if (valueEnumerator != null)
                     {
-                        pipeArguments.Add(subValue);
+                        var pipeArguments = context.PipeArguments;
+                        foreach (var subValue in valueEnumerator)
+                        {
+                            pipeArguments.Add(subValue);
+                        }
+                    }
+                    else
+                    {
+                        context.PipeArguments.Add(leftResult);
                     }
                 }
                 else
                 {
                     context.PipeArguments.Add(leftResult);
                 }
-            }
-            else
-            {
-                context.PipeArguments.Add(leftResult);
-            }
 
-            var result = await context.EvaluateAsync(To).ConfigureAwait(false);
-            int afterPipeArgumentCount = context.PipeArguments.Count;
-            if (afterPipeArgumentCount >= beforePipeArgumentCount)
-            {
-                throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
+                var result = await context.EvaluateAsync(To).ConfigureAwait(false);
+                return result;
             }
-
-            return result;
+            finally
+            {
+                context.PopPipeArguments();
+            }
         }
     }
 

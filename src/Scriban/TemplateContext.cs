@@ -130,8 +130,6 @@ namespace Scriban
 
             Tags = new Dictionary<object, object>();
 
-            PushPipeArguments();
-
             // Ensure that builtin is registered first
             PushGlobal(BuiltinObject);
         }
@@ -314,7 +312,7 @@ namespace Scriban
 
         internal void PopPipeArguments()
         {
-            if (_pipeArguments.Count == 1)
+            if (_pipeArguments.Count == 0)
             {
                 throw new InvalidOperationException("Cannot PopPipeArguments more than PushPipeArguments");
             }
@@ -323,7 +321,7 @@ namespace Scriban
             // Might be not null in case of an exception
             pipeArguments.Clear();
             _availablePipeArguments.Push(pipeArguments);
-            _currentPipeArguments = _pipeArguments.Peek();
+            _currentPipeArguments = _pipeArguments.Count > 0 ? _pipeArguments.Peek() : null;
         }
 
         /// <summary>

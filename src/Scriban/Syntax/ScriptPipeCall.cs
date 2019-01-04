@@ -17,43 +17,51 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            int beforePipeArgumentCount = context.PipeArguments.Count + 1;
-
-            // We don't evaluate the From but we let the pipe evalute it later
+            // We don't evaluate the From but we let the pipe evaluate it later
             var leftResult = context.Evaluate(From);
 
-            // Support for Parameters expansion
-            var unaryExpression = From as ScriptUnaryExpression;
-            if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
+            // Push a new pipe arguments
+            context.PushPipeArguments();
+            try
             {
-                // TODO: Pipe calls will not work correctly in case of (a | b) | ( c | d)
-                var valueEnumerator = leftResult as IEnumerable;
-                if (valueEnumerator != null)
+                // Support for Parameters expansion
+                var unaryExpression = From as ScriptUnaryExpression;
+                if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
                 {
-                    var pipeArguments = context.PipeArguments;
-                    foreach (var subValue in valueEnumerator)
+                    // TODO: Pipe calls will not work correctly in case of (a | b) | ( c | d)
+                    var valueEnumerator = leftResult as IEnumerable;
+                    if (valueEnumerator != null)
                     {
-                        pipeArguments.Add(subValue);
+                        var pipeArguments = context.PipeArguments;
+                        foreach (var subValue in valueEnumerator)
+                        {
+                            pipeArguments.Add(subValue);
+                        }
+                    }
+                    else
+                    {
+                        context.PipeArguments.Add(leftResult);
                     }
                 }
                 else
                 {
                     context.PipeArguments.Add(leftResult);
                 }
-            }
-            else
-            {
-                context.PipeArguments.Add(leftResult);
-            }
 
-            var result = context.Evaluate(To);
+                var result = context.Evaluate(To);
 
-            int afterPipeArgumentCount = context.PipeArguments.Count;
-            if (afterPipeArgumentCount >= beforePipeArgumentCount)
-            {
-                throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
+                // If we have still remaining arguments, it is likely that the destination expression is not a function
+                // so pipe arguments were not picked up and this is an error
+                if (context.PipeArguments.Count > 0)
+                {
+                    throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
+                }
+                return result;
             }
-            return result;
+            finally
+            {
+                context.PopPipeArguments();
+            }
         }
 
         public override bool CanHaveLeadingTrivia()

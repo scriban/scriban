@@ -19,6 +19,33 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+        public static class MyPipeFunctions
+        {
+            public static string A(TemplateContext context, object input, string currencyCode = null)
+            {
+                return input.ToString() + "A";
+            }
+            public static string B(object input)
+            {
+                return input.ToString() + "B";
+            }
+        }
+
+
+        [Test]
+        public void InvalidPipe()
+        {
+            var parsedTemplate = Template.ParseLiquid("{{ 22.00 | a | b | string.upcase }}");
+            Assert.False(parsedTemplate.HasErrors);
+
+            var scriptObject = new ScriptObject();
+            scriptObject.Import(typeof(MyPipeFunctions));
+            var context = new TemplateContext();
+            context.PushGlobal(scriptObject);
+
+            var result = parsedTemplate.Render(context);
+            TextAssert.AreEqual("22AB", result);
+        }
 
         [Test]
         public async Task TestAsyncAwait()
@@ -42,12 +69,6 @@ namespace Scriban.Tests
 
             Assert.AreEqual("yes", result);
         }
-
-        private bool Function(MemberInfo member)
-        {
-            throw new NotImplementedException();
-        }
-
 
         [Test]
         public void CheckReturnInsideLoop()
