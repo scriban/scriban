@@ -548,15 +548,25 @@ namespace Scriban.Runtime
 
             // Convert arguments
             object[] paramArguments = null;
+            var argMask = 0;
             if (_hasObjectParams)
             {
-                paramArguments = new object[arguments.Count - _lastParamsIndex];
+                var objectParamsCount = arguments.Count - _lastParamsIndex;
+                if (_hasTemplateContext)
+                {
+                    objectParamsCount++;
+                    if (_hasSpan)
+                    {
+                        objectParamsCount++;
+                    }
+                }
+                paramArguments = new object[objectParamsCount];
                 _arguments[_lastParamsIndex] = paramArguments;
+                argMask |= 1 << _lastParamsIndex;
             }
 
             // Copy TemplateContext/SourceSpan parameters
             int argOffset = 0;
-            var argMask = 0;
             if (_hasTemplateContext)
             {
                 _arguments[0] = context;
@@ -624,7 +634,6 @@ namespace Scriban.Runtime
                     if (paramArguments != null && argIndex >= _lastParamsIndex)
                     {
                         paramArguments[argIndex - _lastParamsIndex] = argValue;
-                        argMask |= 1 << _lastParamsIndex;
                     }
                     else
                     {
@@ -1412,6 +1421,13 @@ namespace Scriban.Syntax
                 }
 
                 var result = await context.EvaluateAsync(To).ConfigureAwait(false);
+                // If we have still remaining arguments, it is likely that the destination expression is not a function
+                // so pipe arguments were not picked up and this is an error
+                if (context.PipeArguments.Count > 0)
+                {
+                    throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
+                }
+
                 return result;
             }
             finally

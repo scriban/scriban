@@ -95,15 +95,25 @@ namespace Scriban.Runtime
 
             // Convert arguments
             object[] paramArguments = null;
+            var argMask = 0;
             if (_hasObjectParams)
             {
-                paramArguments = new object[arguments.Count - _lastParamsIndex];
+                var objectParamsCount = arguments.Count - _lastParamsIndex;
+                if (_hasTemplateContext)
+                {
+                    objectParamsCount++;
+                    if (_hasSpan)
+                    {
+                        objectParamsCount++;
+                    }
+                }
+                paramArguments = new object[objectParamsCount];
                 _arguments[_lastParamsIndex] = paramArguments;
+                argMask |= 1 << _lastParamsIndex;
             }
 
             // Copy TemplateContext/SourceSpan parameters
             int argOffset = 0;
-            var argMask = 0;
             if (_hasTemplateContext)
             {
                 _arguments[0] = context;
@@ -171,7 +181,6 @@ namespace Scriban.Runtime
                     if (paramArguments != null && argIndex >= _lastParamsIndex)
                     {
                         paramArguments[argIndex - _lastParamsIndex] = argValue;
-                        argMask |= 1 << _lastParamsIndex;
                     }
                     else
                     {

@@ -29,8 +29,40 @@ namespace Scriban.Tests
             {
                 return input.ToString() + "B";
             }
+            public static string T(TemplateContext context, object input, params object[] variables)
+            {
+                return input + (variables.Length > 0 ? string.Join(",", variables) : string.Empty);
+            }
         }
 
+        [Test]
+        public void TestFunctionWithTemplateContextAndObjectParams()
+        {
+            {
+                var parsedTemplate = Template.ParseLiquid("{{ 'yoyo' | t }}");
+                Assert.False(parsedTemplate.HasErrors);
+
+                var scriptObject = new ScriptObject();
+                scriptObject.Import(typeof(MyPipeFunctions));
+                var context = new TemplateContext();
+                context.PushGlobal(scriptObject);
+
+                var result = parsedTemplate.Render(context);
+                TextAssert.AreEqual("yoyo", result);
+            }
+            {
+                var parsedTemplate = Template.ParseLiquid("{{ 'yoyo' | t 1 2 3}}");
+                Assert.False(parsedTemplate.HasErrors);
+
+                var scriptObject = new ScriptObject();
+                scriptObject.Import(typeof(MyPipeFunctions));
+                var context = new TemplateContext();
+                context.PushGlobal(scriptObject);
+
+                var result = parsedTemplate.Render(context);
+                TextAssert.AreEqual("yoyo1,2,3", result);
+            }
+        }
 
         [Test]
         public void InvalidPipe()
