@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0-alpha-004 (04 Jan 2019)
+- Fix invalid handling of pipe arguments (#103)
+- Fix issue OverflowException when using a script function with a TemplateContext and object params (#104)
+
 ## 2.0.0-alpha-003 (03 Jan 2019)
 - Fix issue with endraw not being parsed correctly if there is anything after (#102)
 
