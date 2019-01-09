@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
@@ -11,17 +11,16 @@ namespace Scriban.Syntax
 {
     public class ScriptRuntimeException : Exception
     {
-        public ScriptRuntimeException(SourceSpan span, string message) : base(message)
+        public ScriptRuntimeException(SourceSpan span, string message) : this(span, message, null)
+        {
+        }
+
+        public ScriptRuntimeException(SourceSpan span, string message, Exception innerException) : base(new LogMessage(ParserMessageType.Error, span, message).ToString(), innerException)
         {
             Span = span;
         }
 
-        public ScriptRuntimeException(SourceSpan span, string message, Exception innerException) : base(message, innerException)
-        {
-            Span = span;
-        }
-
-        public SourceSpan Span { get;  }
+        public SourceSpan Span { get; }
 
         public override string ToString()
         {
