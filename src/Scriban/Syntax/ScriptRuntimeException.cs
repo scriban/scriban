@@ -11,17 +11,14 @@ namespace Scriban.Syntax
 {
     public class ScriptRuntimeException : Exception
     {
-        private string _message;
         public ScriptRuntimeException(SourceSpan span, string message) : base(message)
         {
             Span = span;
-            _message = message;
         }
 
         public ScriptRuntimeException(SourceSpan span, string message, Exception innerException) : base(message, innerException)
         {
             Span = span;
-            _message = message;
         }
 
         public SourceSpan Span { get; }
@@ -30,12 +27,12 @@ namespace Scriban.Syntax
         {
             get
             {
-                return ToString();
+                return new LogMessage(ParserMessageType.Error, Span, base.Message).ToString();
             }
         }
         public override string ToString()
         {
-            return new LogMessage(ParserMessageType.Error, Span, _message).ToString();
+            return Message;
         }
     }
 
