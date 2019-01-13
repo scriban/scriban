@@ -47,4 +47,3 @@ b == empty: false
 
 c = a
 a == c: true
-
