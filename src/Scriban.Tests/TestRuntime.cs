@@ -65,6 +65,19 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void TestPipeAndFunction()
+        {
+            var template = Template.Parse(@"
+{{- func format_number
+    ret $0 | math.format '0.00' | string.replace '.' ''
+end -}}
+{{ 123 | format_number -}}
+");
+            var result = template.Render();
+            TextAssert.AreEqual("12300", result);
+        }
+
+        [Test]
         public void InvalidPipe()
         {
             var parsedTemplate = Template.ParseLiquid("{{ 22.00 | a | b | string.upcase }}");
