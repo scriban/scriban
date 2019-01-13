@@ -60,7 +60,7 @@ namespace Scriban.Syntax
             return false;
         }
 
-        
+
         public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {
             if (op == ScriptBinaryOperator.EmptyCoalescing)
@@ -160,7 +160,7 @@ namespace Scriban.Syntax
         {
 
             var leftIsEmptyObject = leftValue == EmptyScriptObject.Default;
-            var rightIsEmptyObject = rightValue== EmptyScriptObject.Default;
+            var rightIsEmptyObject = rightValue == EmptyScriptObject.Default;
 
             // If both are empty, we return false or empty
             if (leftIsEmptyObject && rightIsEmptyObject)
@@ -190,7 +190,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareEqual:
                     return againstEmpty;
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return againstEmpty is bool ? !(bool)againstEmpty : againstEmpty; 
+                    return againstEmpty is bool ? !(bool)againstEmpty : againstEmpty;
                 case ScriptBinaryOperator.CompareGreater:
                 case ScriptBinaryOperator.CompareLess:
                     return false;
@@ -234,7 +234,7 @@ namespace Scriban.Syntax
                     {
                         var rightText = context.ToString(span, right);
                         var builder = new StringBuilder();
-                        for (int i = 0; i < (int) left; i++)
+                        for (int i = 0; i < (int)left; i++)
                         {
                             builder.Append(rightText);
                         }
@@ -457,16 +457,16 @@ namespace Scriban.Syntax
                 return CalculateLong(op, span, leftLong, (long)rightValue);
             }
 
-            if (leftType == typeof (int) || (leftType != null && leftType.GetTypeInfo().IsEnum))
+            if (leftType == typeof(int) || (leftType != null && leftType.GetTypeInfo().IsEnum))
             {
-                var rightInt = (int) context.ToObject(span, rightValue, typeof (int));
-                return CalculateInt(op, span, (int) leftValue, rightInt);
+                var rightInt = (int)context.ToObject(span, rightValue, typeof(int));
+                return CalculateInt(op, span, (int)leftValue, rightInt);
             }
 
-            if (rightType == typeof (int) || (rightType != null && rightType.GetTypeInfo().IsEnum))
+            if (rightType == typeof(int) || (rightType != null && rightType.GetTypeInfo().IsEnum))
             {
-                var leftInt = (int) context.ToObject(span, leftValue, typeof (int));
-                return CalculateInt(op, span, leftInt, (int) rightValue);
+                var leftInt = (int)context.ToObject(span, leftValue, typeof(int));
+                return CalculateInt(op, span, leftInt, (int)rightValue);
             }
 
             if (leftType == typeof(bool))
@@ -489,6 +489,12 @@ namespace Scriban.Syntax
             if (leftType == typeof(DateTime) && rightType == typeof(TimeSpan))
             {
                 return CalculateDateTime(op, span, (DateTime)leftValue, (TimeSpan)rightValue);
+            }
+
+            //allows to check equality for objects with not only primitive types
+            if (op == ScriptBinaryOperator.CompareEqual)
+            {
+                return leftValue.Equals(rightValue);
             }
 
             throw new ScriptRuntimeException(span, $"Unsupported types `{leftValue}/{leftType}` {op.ToText()} `{rightValue}/{rightType}` for binary operation");

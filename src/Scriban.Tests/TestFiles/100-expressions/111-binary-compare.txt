@@ -47,3 +47,8 @@ a == empty: {{
     a == empty
 }}
 b == empty: {{b == empty}}
+c = a
+a == c: {{
+    c = a
+    a == c
+}}

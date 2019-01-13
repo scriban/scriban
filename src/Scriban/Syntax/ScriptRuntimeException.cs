@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
@@ -21,11 +21,18 @@ namespace Scriban.Syntax
             Span = span;
         }
 
-        public SourceSpan Span { get;  }
+        public SourceSpan Span { get; }
 
+        public override string Message
+        {
+            get
+            {
+                return new LogMessage(ParserMessageType.Error, Span, base.Message).ToString();
+            }
+        }
         public override string ToString()
         {
-            return new LogMessage(ParserMessageType.Error, Span, Message).ToString();
+            return Message;
         }
     }
 

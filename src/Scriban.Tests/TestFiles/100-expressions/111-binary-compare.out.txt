@@ -43,3 +43,5 @@ a = {}
 b = [1, 2]
 a == empty: true
 b == empty: false
+c = a
+a == c: true
