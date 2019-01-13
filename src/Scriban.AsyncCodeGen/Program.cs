@@ -21,10 +21,13 @@ namespace Scriban.AsyncCodeGen
     {
         static async Task Main(string[] args)
         {
-            var workspace = MSBuildWorkspace.Create();
+            var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>()
+            {
+                {"TargetFramework", "net35"}
+            });
 
-            var solution = await workspace.OpenSolutionAsync(@"..\..\..\..\scriban.sln");
-            var project = solution.Projects.First(p => Path.GetFileName(p.FilePath) == "Scriban.csproj");
+            var project = await workspace.OpenProjectAsync(@"../../../../Scriban/Scriban.csproj");
+            var solution = project.Solution;
             var compilation = await project.GetCompilationAsync();
             var models = compilation.SyntaxTrees.Select(tree => compilation.GetSemanticModel(tree)).ToList();
 
