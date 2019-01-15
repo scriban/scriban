@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.0-alpha-005 (15 Jan 2019)
+- Allow binary compare to work on any objects and object.Equals for non primitives (#109)
+- Fix issue with return statement not being propagated properly when used with pipe functions (#105)
+
 ## 2.0.0-alpha-004 (04 Jan 2019)
 - Fix invalid handling of pipe arguments (#103)
 - Fix issue OverflowException when using a script function with a TemplateContext and object params (#104)
