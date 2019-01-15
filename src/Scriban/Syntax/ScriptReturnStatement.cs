@@ -11,8 +11,9 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
+            var result = context.Evaluate(Expression);
             context.FlowState = ScriptFlowState.Return;
-            return context.Evaluate(Expression);
+            return result;
         }
 
         public override void Write(TemplateRewriterContext context)

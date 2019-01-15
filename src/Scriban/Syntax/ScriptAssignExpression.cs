@@ -17,7 +17,7 @@ namespace Scriban.Syntax
         {
             var valueObject = context.Evaluate(Value);
             context.SetValue(Target, valueObject);
-            return valueObject;
+            return null;
         }
 
         public override bool CanHaveLeadingTrivia()

@@ -708,7 +708,7 @@ namespace Scriban.Syntax
         {
             var valueObject = await context.EvaluateAsync(Value).ConfigureAwait(false);
             await context.SetValueAsync(Target, valueObject).ConfigureAwait(false);
-            return valueObject;
+            return null;
         }
     }
 
@@ -1465,8 +1465,9 @@ namespace Scriban.Syntax
     {
         public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
+            var result = await context.EvaluateAsync(Expression).ConfigureAwait(false);
             context.FlowState = ScriptFlowState.Return;
-            return await context.EvaluateAsync(Expression).ConfigureAwait(false);
+            return result;
         }
     }
 

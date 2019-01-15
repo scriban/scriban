@@ -77,6 +77,25 @@ end -}}
             TextAssert.AreEqual("12300", result);
         }
 
+
+        [Test]
+        public void TestPipeAndFunctionAndLoop()
+        {
+            var template = Template.Parse(@"
+{{- func format_number
+    ret $0 | math.format '0.00' | string.replace '.' ''
+end -}}
+{{
+for $i in 1..3
+    temp_variable = $i | format_number
+end
+-}}
+{{ temp_variable -}}
+");
+            var result = template.Render();
+            TextAssert.AreEqual("300", result);
+        }
+
         [Test]
         public void InvalidPipe()
         {
