@@ -909,7 +909,7 @@ The expression can be an array or a range iterator:
 
 * Loop on a range: `{{ for x in 1..n }}This is the loop step [{{x}}]{{ end }}`  
 
-The for loop (along with the `tablerow` statement below) suports additional parameters, `offset`, `limit` and `reversed` that can also be used togethers:
+The for loop (along with the `tablerow` statement below) supports additional parameters, `offset`, `limit` and `reversed` that can also be used togethers:
 
 ##### The `offset` parameter
 
