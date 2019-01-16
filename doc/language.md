@@ -807,7 +807,7 @@ arg[1]: World
 [:top:](#language)
 ## 9 Statements
 
-Each statement must be terminated by a code block `}}` or an EOL within a code block.
+Each statement must be terminated by a code block `}}` or an EOL within a code block, or a semicolon to separate multiple statements on a single line within a code block.
 
 [:top:](#language)
 ### 9.1 Single expression
