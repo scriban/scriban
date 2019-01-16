@@ -628,7 +628,7 @@ Scriban supports conventional unary and binary expressions.
 A variable path expression contains the path to a variable:
 
 * A simple variable access: `{{ name }}` e.g resolve to the top level variable `name`
-* An array access: `{{ myarray[1] }}` e.g resolve to the top level variable `name`
+* An array access: `{{ myarray[1] }}` e.g resolve to the top level variable `myarray` and an indexer to the array
 * A member access: `{{ myobject.member1.myarray[2] }}` e.g resolve to the top level variable `myobject`, then the property `member1` this object, the property `myarray` and an indexer to the array returned by `myarray`
 
 Note that a variable path can either point to a simple variable or can result into calling a parameter less function. 
