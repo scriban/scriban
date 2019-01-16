@@ -628,7 +628,7 @@ Scriban supports conventional unary and binary expressions.
 A variable path expression contains the path to a variable:
 
 * A simple variable access: `{{ name }}` e.g resolve to the top level variable `name`
-* An array access: `{{ myarray[1] }}` e.g resolve to the top level variable `name`
+* An array access: `{{ myarray[1] }}` e.g resolve to the top level variable `myarray` and an indexer to the array
 * A member access: `{{ myobject.member1.myarray[2] }}` e.g resolve to the top level variable `myobject`, then the property `member1` this object, the property `myarray` and an indexer to the array returned by `myarray`
 
 Note that a variable path can either point to a simple variable or can result into calling a parameter less function. 
@@ -779,7 +779,7 @@ with a pipe we could rewrite this to:
 ```
 > Note that once arguments are named, the following arguments must be all named.
 
-In a custom function with declared with `func` named arguments are accessible through the variable arguments variable `$`, but as properties (and not as part of the default array arguments):
+In a custom function declared with `func` named arguments are accessible through the variable arguments variable `$`, but as properties (and not as part of the default array arguments):
 
 > **input**
 ```scriban-html
@@ -807,7 +807,7 @@ arg[1]: World
 [:top:](#language)
 ## 9 Statements
 
-Each statement must be terminated by a code block `}}` or an EOL within a code block.
+Each statement must be terminated by a code block `}}` or an EOL within a code block, or a semicolon to separate multiple statements on a single line within a code block.
 
 [:top:](#language)
 ### 9.1 Single expression
@@ -909,7 +909,7 @@ The expression can be an array or a range iterator:
 
 * Loop on a range: `{{ for x in 1..n }}This is the loop step [{{x}}]{{ end }}`  
 
-The for loop (along the `tablerow` statement) suports additional parameters, `offset`, `limit` and `reversed` that can also be used togethers:
+The for loop (along with the `tablerow` statement below) supports additional parameters, `offset`, `limit` and `reversed` that can also be used togethers:
 
 ##### The `offset` parameter
 
