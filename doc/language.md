@@ -779,7 +779,7 @@ with a pipe we could rewrite this to:
 ```
 > Note that once arguments are named, the following arguments must be all named.
 
-In a custom function with declared with `func` named arguments are accessible through the variable arguments variable `$`, but as properties (and not as part of the default array arguments):
+In a custom function declared with `func` named arguments are accessible through the variable arguments variable `$`, but as properties (and not as part of the default array arguments):
 
 > **input**
 ```scriban-html
