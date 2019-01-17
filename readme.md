@@ -54,7 +54,7 @@ var result = template.Render(new { Products = this.ProductList });
 - Support for `async`/`await` evaluation of scripts (e.g `Template.RenderAsync`)
 - [Precise control of whitespace text output](doc/language.md#14-whitespace-control)
 - [Full featured language](doc/language.md) including `if`/`else`/`for`/`while`, [expressions](doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
-- [Function calls and pipes](doc/language.md#88-function-call-expression) (`myvar | string.capitalize`)
+- [Function calls and pipes](doc/language.md#89-function-call-expression) (`myvar | string.capitalize`)
   - [Custom functions](doc/language.md#7-functions) directly into the language via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
   - Bind [.NET custom functions](doc/runtime.md#imports-functions-from-a-net-class) from the runtime API with [many options](doc/runtime.md#the-scriptobject) for interfacing with .NET objects.
 - [Complex objects](doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
