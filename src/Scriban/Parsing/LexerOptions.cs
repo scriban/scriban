@@ -43,5 +43,11 @@ namespace Scriban.Parsing
         /// The lexer will return whitespaces tokens
         /// </summary>
         public bool KeepTrivia { get; set; }
+
+        /// <summary>
+        /// The lexer will ignore HTML-Tags and HTML-Entities within code blocks.
+        /// Newlines are ignored, too. br-Tags and closing p-Tags are converted into newlines.
+        /// </summary>
+        public bool IgnoreHtmlNoise { get; set; }
     }
 }

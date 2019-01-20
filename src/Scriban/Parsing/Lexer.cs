@@ -461,6 +461,73 @@ namespace Scriban.Parsing
             }
         }
 
+        // Looks if following code is an html entity like &nbsp; or &#1234;
+        private bool PeekIsHtmlEntity()
+        {
+            int i = 1;
+            while (true)
+            {
+                var nc = PeekChar(i);
+
+                // check for entity end
+                if (nc == ';')
+                    return true;
+
+                // check for entity char
+                if (
+                    (nc == '#') ||
+                    (nc >= 'a' && nc <= 'z') ||
+                    (nc >= 'A' && nc <= 'Z') ||
+                    (nc >= '0' && nc <= '9')
+                    )
+                {
+                    i++;
+                    continue;
+                }
+
+                // invalid char;
+                return false;
+            }
+        }
+
+        // looks if the following code is a html tag like <tag> or <tag arg="value">
+        private bool PeekIsHtmlToken()
+        {
+            int i = 1;
+            bool isString = false;
+            while (true)
+            {
+                var nc = PeekChar(i);
+
+                // extra validate first char
+                if (i == 1)
+                {
+                    // exit when fist char is whitespace
+                    if (nc == ' ' || nc == '\t' || nc == '\r' || nc == '\n')
+                        return false;
+
+                    // exit when fist char is digit
+                    if (nc >= '0' && nc <= '9')
+                        return false;
+                }
+
+                // exit when code block end is found
+                if (nc == '}' && PeekChar(i + 1) == '}')
+                    return false;
+
+                // detect strings
+                if (nc == '\"')
+                    isString = !isString;
+
+                // check for tag end
+                if (!isString && nc == '>')
+                    return true;
+
+                // follow tag content
+                i++;
+                continue;
+            }
+        }
 
         private bool TryMatchPeek(string text, int offset, out int offsetOut)
         {
@@ -684,10 +751,11 @@ namespace Scriban.Parsing
         {
             bool hasTokens = true;
             var start = _position;
+            var newLineTokenType = Options.IgnoreHtmlNoise ? TokenType.Whitespace : TokenType.NewLine;
             switch (c)
             {
                 case '\n':
-                    _token = new Token(TokenType.NewLine, start, _position);
+                    _token = new Token(newLineTokenType, start, _position);
                     NextChar();
                     // consume all remaining space including new lines
                     ConsumeWhitespace(false, ref _token.End);
@@ -701,14 +769,14 @@ namespace Scriban.Parsing
                     // case of: \r\n
                     if (c == '\n')
                     {
-                        _token = new Token(TokenType.NewLine, start, _position);
+                        _token = new Token(newLineTokenType, start, _position);
                         NextChar();
                         // consume all remaining space including new lines
                         ConsumeWhitespace(false, ref _token.End);
                         break;
                     }
                     // case of \r
-                    _token = new Token(TokenType.NewLine, start, start);
+                    _token = new Token(newLineTokenType, start, start);
                     // consume all remaining space including new lines
                     ConsumeWhitespace(false, ref _token.End);
                     break;
@@ -755,14 +823,18 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '&':
-                    NextChar();
-                    if (c == '&')
+                    if (PeekChar() == '&')
                     {
+                        NextChar();
                         _token = new Token(TokenType.And, start, _position);
                         NextChar();
                         break;
                     }
-
+                    if (Options.IgnoreHtmlNoise && PeekIsHtmlEntity())
+                    {
+                        ReadHtmlEntity();
+                        break;
+                    }
                     // & is an invalid char alone
                     _token = new Token(TokenType.Invalid, start, start);
                     break;
@@ -828,17 +900,24 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.Equal, start, start);
                     break;
                 case '<':
-                    NextChar();
-                    if (c == '=')
+                    var pc = PeekChar();
+                    if (pc == '=')
                     {
+                        NextChar();
                         _token = new Token(TokenType.CompareLessOrEqual, start, _position);
                         NextChar();
                         break;
                     }
-                    if (c == '<')
+                    if (pc == '<')
                     {
+                        NextChar();
                         _token = new Token(TokenType.ShiftLeft, start, _position);
                         NextChar();
+                        break;
+                    }
+                    if (Options.IgnoreHtmlNoise && PeekIsHtmlToken())
+                    {
+                        ReadHtmlToken();
                         break;
                     }
                     _token = new Token(TokenType.CompareLess, start, start);
@@ -1231,6 +1310,71 @@ namespace Scriban.Parsing
             }
 
             _token = new Token(hasDot ? TokenType.Float : TokenType.Integer, start, end);
+        }
+
+        private void ReadHtmlEntity()
+        {
+            var start = _position;
+            var end = _position;
+            while (true)
+            {
+                NextChar();
+
+                if (c == ';')
+                {
+                    end = _position;
+                    NextChar();
+                    break;
+                }
+            }
+
+            _token = new Token(TokenType.Comment, start, end);
+        }
+
+        private void ReadHtmlToken()
+        {
+            var start = _position;
+            var end = _position;
+            var isString = false;
+
+            var tagName = "";
+            var tagNameIsCompleted = false;
+            var isEndTag = false;
+
+            while (true)
+            {
+                NextChar();
+
+                if (c == '\"')
+                {
+                    isString = !isString;
+                    NextChar();
+                }
+
+                if (!isString && c == '>')
+                {
+                    end = _position;
+                    NextChar();
+                    break;
+                }
+
+                if (c == ' ' || c == '\t')
+                    tagNameIsCompleted = true;
+
+                if (!tagNameIsCompleted)
+                    tagName += c;
+            }
+
+            if (tagName.ToLower() == "br" || tagName.ToLower() == "br/" || tagName.ToLower() == "/p")
+            {
+                // is newline HTMLTag
+                _token = new Token(TokenType.NewLine, start, end);
+            }
+            else
+            {
+                // is noise HTMLTag
+                _token = new Token(TokenType.Comment, start, end);
+            }
         }
 
         private void ReadString()
