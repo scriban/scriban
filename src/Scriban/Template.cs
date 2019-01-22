@@ -232,7 +232,7 @@ namespace Scriban
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             CheckErrors();
-
+            
             // Make sure that we are using the same parserOptions
             if (SourceFilePath != null)
             {

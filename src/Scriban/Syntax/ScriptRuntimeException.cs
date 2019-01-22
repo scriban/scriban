@@ -30,6 +30,18 @@ namespace Scriban.Syntax
                 return new LogMessage(ParserMessageType.Error, Span, base.Message).ToString();
             }
         }
+
+        /// <summary>
+        /// Provides the exception message without the source span prefix.
+        /// </summary>
+        public string OriginalMessage
+        {
+            get
+            {
+                return base.Message;
+            }
+        }
+
         public override string ToString()
         {
             return Message;
