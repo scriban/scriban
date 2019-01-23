@@ -72,6 +72,20 @@ namespace Scriban
         public delegate bool TryGetVariableDelegate(TemplateContext context, SourceSpan span, ScriptVariable variable, out object value);
 
         /// <summary>
+        /// A delegate used to format <see cref="ScriptRuntimeException"/>s while rendering the template.
+        /// The result from the delegate call will be rendered into the output.
+        /// </summary>
+        /// <param name="exception">The exception which occoured while rendering the template.</param>
+        /// <returns>The string which will be written to the output at the position where the exception occoured.</returns>
+        public delegate string RenderRuntimeExceptionDelegate(ScriptRuntimeException exception);
+
+        /// <summary>
+        /// This <see cref="RenderRuntimeExceptionDelegate"/> implementation provides a default template for rendering <see cref="ScriptRuntimeException"/>s.
+        /// Assign it to the <see cref="RenderRuntimeException"/> property to get exceptions formatted as [exception message] in the output.
+        /// </summary>
+        public static RenderRuntimeExceptionDelegate RenderRuntimeExceptionDefault = ex => string.Format("[{0}]", ex.OriginalMessage);
+
+        /// <summary>
         /// Initializes a new instance of the <see cref="T:Scriban.TemplateContext" /> class.
         /// </summary>
         public TemplateContext() : this(null)
@@ -170,7 +184,7 @@ namespace Scriban
         /// A global settings used to rename property names of exposed .NET objects.
         /// </summary>
         public MemberRenamerDelegate MemberRenamer { get; set; }
-        
+
         /// <summary>
         /// A global settings used to filter field/property names of exposed .NET objects.
         /// </summary>
@@ -220,6 +234,13 @@ namespace Scriban
         /// Gets or sets a callback function that is called when a variable is being resolved and was not found from any scopes.
         /// </summary>
         public TryGetVariableDelegate TryGetVariable { get; set; }
+
+        /// <summary>
+        /// Gets ot sets a callback function which formats a <see cref="ScriptRuntimeException"/> to a string.
+        /// The result from the delegate call will be rendered into the output where the exception occoured.
+        /// You can assign <see cref="TemplateContext.RenderRuntimeExceptionDefault"/> to this property to easy get default exception rendering behavior.
+        /// </summary>
+        public RenderRuntimeExceptionDelegate RenderRuntimeException { get; set; }
 
         /// <summary>
         /// Gets or sets the fallback accessor when accessing a member of an object and the member was not found, this accessor will be called.
@@ -651,7 +672,14 @@ namespace Scriban
         /// <remarks>The purpose of this method is to allow to hook during the evaluation of all ScriptNode. By default calls <see cref="ScriptNode.Evaluate"/></remarks>
         protected virtual object EvaluateImpl(ScriptNode scriptNode)
         {
-            return scriptNode != null ? scriptNode.Evaluate(this) : null;
+            try
+            {
+                return scriptNode != null ? scriptNode.Evaluate(this) : null;
+            }
+            catch (ScriptRuntimeException ex) when (this.RenderRuntimeException != null)
+            {
+                return this.RenderRuntimeException(ex);
+            }
         }
 
         /// <summary>

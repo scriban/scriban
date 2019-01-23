@@ -529,6 +529,28 @@ Tax: {{ 7 | match_tax }}";
         }
 
         [Test]
+        public void TestRenderRuntimeException()
+        {
+            var template = Template.Parse("Test {{ 'error' | unknown }} behind");
+            var context = new TemplateContext();
+            context.RenderRuntimeException = TemplateContext.RenderRuntimeExceptionDefault;
+            context.Evaluate(template.Page);
+            var result = context.Output.ToString();
+            Assert.True(System.Text.RegularExpressions.Regex.IsMatch(result, @"^Test \[.+\] behind$"));
+        }
+
+        [Test]
+        public void TestRenderRuntimeExceptionWithCustomFormat()
+        {
+            var template = Template.Parse("Test {{ 'error' | unknown }} behind");
+            var context = new TemplateContext();
+            context.RenderRuntimeException = ex => string.Format("#Scriban-Exception:{0}#", ex.OriginalMessage);
+            context.Evaluate(template.Page);
+            var result = context.Output.ToString();
+            Assert.True(System.Text.RegularExpressions.Regex.IsMatch(result, @"^Test #Scriban-Exception:.+# behind$"));
+        }
+
+        [Test]
         public void TestRelaxedMemberAccess()
         {
             var scriptObject = new ScriptObject
