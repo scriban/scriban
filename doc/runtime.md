@@ -366,7 +366,7 @@ A nested ScriptObject can be accessed indirectly through another `ScriptObject`:
   var scriptObject1 = new ScriptObject();
   var nestedObject = new ScriptObject();
   nestedObject["x"] = 5;
-  scriptObject1.Add("subObject", scriptObject1);
+  scriptObject1.Add("subObject", nestedObject);
 
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
