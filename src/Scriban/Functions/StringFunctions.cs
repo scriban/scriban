@@ -978,59 +978,41 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        ///  Encodes a string into an array of UTF-8-encoded bytes.
+        /// Encodes a string to its Base64 representation.
+        /// Its character encoded will be UTF-8.
         /// </summary>
         /// <param name="text">The string to encode</param>
-        /// <returns>The encoded bytes</returns>
-        public static byte[] Utf8Encode(string text)
-        {
-            return Encoding.UTF8.GetBytes(text ?? string.Empty);
-        }
-
-        /// <summary>
-        /// Decodes an array of UTF-8-encoded bytes into a string.
-        /// </summary>
-        /// <param name="bytes">The bytes to decode</param>
-        /// <returns>The decoded string</returns>
-        public static string Utf8Decode(byte[] bytes)
-        {
-            return bytes != null ? Encoding.UTF8.GetString(bytes) : string.Empty;
-        }
-
-        /// <summary>
-        /// Encodes a byte array to its Base64 representation.
-        /// </summary>
-        /// <param name="bytes">The bytes to encode</param>
         /// <returns>The encoded string</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "hello" | string.utf8_encode | string.base64_encode }}
+        /// {{ "hello" | string.base64_encode }}
         /// ```
         /// ```html
         /// aGVsbG8=
         /// ```
         /// </remarks>
-        public static string Base64Encode(byte[] bytes)
+        public static string Base64Encode(string text)
         {
-            return bytes != null ? Convert.ToBase64String(bytes) : string.Empty;
+            return Convert.ToBase64String(Encoding.UTF8.GetBytes(text ?? string.Empty));
         }
 
         /// <summary>
         ///  Decodes a Base64-encoded string to a byte array.
+        /// The encoding of the bytes is assumed to be UTF-8.
         /// </summary>
         /// <param name="text">The string to decode</param>
-        /// <returns>The decoded byte array</returns>
+        /// <returns>The decoded string</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "aGVsbG8=" | string.base64_decode | string.utf8_decode }}
+        /// {{ "aGVsbG8=" | string.base64_decode }}
         /// ```
         /// ```html
         /// hello
         /// ```
         /// </remarks>
-        public static byte[] Base64Decode(string text)
+        public static string Base64Decode(string text)
         {
-            return Convert.FromBase64String(text ?? string.Empty);
+            return Encoding.UTF8.GetString(Convert.FromBase64String(text ?? string.Empty));
         }
     }
 }
