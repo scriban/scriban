@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -216,7 +216,7 @@ namespace Scriban.Functions
         /// ```
         /// > Highlight to see the empty spaces to the right of the string
         /// ```html
-        /// too many spaces           
+        /// too many spaces
         /// ```
         /// </remarks>
         public static string LStrip(string text)
@@ -225,7 +225,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Outputs the singular or plural version of a string based on the value of a number. 
+        /// Outputs the singular or plural version of a string based on the value of a number.
         /// </summary>
         /// <param name="number">The number to check</param>
         /// <param name="singular">The singular string to return if number is == 1</param>
@@ -413,7 +413,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring. 
+        /// The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring.
         /// If no second parameter is given, a substring with the remaining characters will be returned.
         /// </summary>
         /// <param name="text">The input string</param>
@@ -470,7 +470,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring. 
+        /// The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring.
         /// If no second parameter is given, a substring with the first character will be returned.
         /// </summary>
         /// <param name="text">The input string</param>
@@ -518,7 +518,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// The `split` function takes on a substring as a parameter. 
+        /// The `split` function takes on a substring as a parameter.
         /// The substring is used as a delimiter to divide a string into an array. You can output different parts of an array using `array` functions.
         /// </summary>
         /// <param name="text">The input string</param>
@@ -693,7 +693,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Truncates a string down to the number of characters passed as the first parameter. 
+        /// Truncates a string down to the number of characters passed as the first parameter.
         /// An ellipsis (...) is appended to the truncated string and is included in the character count
         /// </summary>
         /// <param name="text">The input string</param>
@@ -727,7 +727,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Truncates a string down to the number of words passed as the first parameter. 
+        /// Truncates a string down to the number of words passed as the first parameter.
         /// An ellipsis (...) is appended to the truncated string.
         /// </summary>
         /// <param name="text">The input string</param>
@@ -971,10 +971,66 @@ namespace Scriban.Functions
         /// ```html
         /// hello     world
         /// ```
-        /// </remarks> 
+        /// </remarks>
         public static string PadRight(string text, int width)
         {
             return (text ?? string.Empty).PadRight(width);
+        }
+
+        /// <summary>
+        ///  Encodes a string into an array of UTF-8-encoded bytes.
+        /// </summary>
+        /// <param name="text">The string to encode</param>
+        /// <returns>The encoded bytes</returns>
+        public static byte[] Utf8Encode(string text)
+        {
+            return Encoding.UTF8.GetBytes(text ?? string.Empty);
+        }
+
+        /// <summary>
+        /// Decodes an array of UTF-8-encoded bytes into a string.
+        /// </summary>
+        /// <param name="bytes">The bytes to decode</param>
+        /// <returns>The decoded string</returns>
+        public static string Utf8Decode(byte[] bytes)
+        {
+            return bytes != null ? Encoding.UTF8.GetString(bytes) : string.Empty;
+        }
+
+        /// <summary>
+        /// Encodes a byte array to its Base64 representation.
+        /// </summary>
+        /// <param name="bytes">The bytes to encode</param>
+        /// <returns>The encoded string</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "hello" | string.utf8_encode | string.base64_encode }}
+        /// ```
+        /// ```html
+        /// aGVsbG8=
+        /// ```
+        /// </remarks>
+        public static string Base64Encode(byte[] bytes)
+        {
+            return bytes != null ? Convert.ToBase64String(bytes) : string.Empty;
+        }
+
+        /// <summary>
+        ///  Decodes a Base64-encoded string to a byte array.
+        /// </summary>
+        /// <param name="text">The string to decode</param>
+        /// <returns>The decoded byte array</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "aGVsbG8=" | string.base64_decode | string.utf8_decode }}
+        /// ```
+        /// ```html
+        /// hello
+        /// ```
+        /// </remarks>
+        public static byte[] Base64Decode(string text)
+        {
+            return Convert.FromBase64String(text ?? string.Empty);
         }
     }
 }
