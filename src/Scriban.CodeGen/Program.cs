@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using Mono.Cecil;
 
 namespace Scriban.CodeGen
@@ -428,7 +427,7 @@ namespace Scriban.Runtime
                 : typeReference.FullName;
         }
 
-        static void Main(string[] args)
+        static void Main()
         {
             var program = new Program();
             program.Run();
