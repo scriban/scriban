@@ -1,12 +1,11 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 
 using System;
 using System.Reflection;
 using Scriban.Parsing;
 using Scriban.Syntax;
 using Scriban.Helpers;
-using Scriban.Syntax;
 
 namespace Scriban.Runtime
 {
