@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -38,7 +39,7 @@ namespace Scriban.CodeGen
 
             _writer = new StreamWriter(@"..\..\..\Scriban\Runtime\CustomFunction.Generated.cs");
             _writer.WriteLine("// ----------------------------------------------------------------------------------");
-            _writer.WriteLine($"// This file was automatically generated - {DateTime.Now} by Scriban.CodeGen");
+            _writer.WriteLine($"// This file was automatically generated - {DateTime.Now.ToString(CultureInfo.InvariantCulture.DateTimeFormat)} by Scriban.CodeGen");
             _writer.WriteLine("// DOT NOT EDIT THIS FILE MANUALLY");
             _writer.WriteLine("// ----------------------------------------------------------------------------------");
 
@@ -95,7 +96,7 @@ namespace Scriban.Runtime
             var delegateCallArgs = new StringBuilder();
             var defaultParamDeclaration = new StringBuilder();
             var defaultParamConstructors = new StringBuilder();
-            
+
             int argumentCount = 0;
             int argOffset = 0;
             for (var i = 0; i < method.Parameters.Count; i++)
@@ -161,7 +162,7 @@ namespace Scriban.Runtime
                 {
                     caseArguments.Append($"context.ToInt(callerContext.Span, arg)");
                 }
-                else 
+                else
                 {
                     if (type.MetadataType != MetadataType.Object)
                     {
@@ -181,7 +182,7 @@ namespace Scriban.Runtime
                 }
                 caseArguments.AppendLine(";");
 
-                // If argument is optional, we don't need to update the mask as it is aslready taken into account into the mask init
+                // If argument is optional, we don't need to update the mask as it is already taken into account into the mask init
                 if (!arg.IsOptional)
                 {
                     caseArguments.AppendLine($"                            argMask |= (1 << {argIndex});");
@@ -192,7 +193,7 @@ namespace Scriban.Runtime
                 argIndex++;
             }
 
-            // Outptu default argument masking
+            // Output default argument masking
             var defaultArgMask = 0;
             for (int i = minimunArg; i < argumentCount; i++)
             {
@@ -296,7 +297,7 @@ namespace Scriban.Runtime
                 throw new InvalidOperationException($"Unable to find type {type}");
             }
 
-            
+
             foreach (var method in typeDefinition.Methods)
             {
                 if (method.IsConstructor || !method.IsPublic || !method.IsStatic || method.IsGetter)

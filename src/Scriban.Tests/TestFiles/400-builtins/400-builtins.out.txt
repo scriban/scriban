@@ -33,6 +33,8 @@ List of all the builtin <math> functions:
 
 List of all the builtin <string> functions:
  append
+ base64_decode
+ base64_encode
  capitalize
  capitalizewords
  contains
