@@ -18,7 +18,7 @@ var template = Template.ParseLiquid("Hello {{name}}!");
 var result = template.Render(new { Name = "World" }); // => "Hello World!" 
 ```
 
-The language is very versatile, easy to read and use, similar to [liquid](http://liquidmarkup.org/) templates:
+The language is very versatile, easy to read and use, similar to [liquid](https://shopify.github.io/liquid/) templates:
 
 ```C#
 var template = Template.Parse(@"
@@ -89,13 +89,13 @@ Scriban is available as a NuGet package: [![NuGet](https://img.shields.io/nuget/
 
 Compatible with the following .NET framework profiles:
 
-- `.NET3.5`
-- `.NET4.0+`
--  .NET PCL profile `portable40-net40+sl5+win8+wp8+wpa81`
-- `UAP10.0+`
-- `NetStandard1.1+` and `NetStandard1.3+` running on `CoreCLR`
+- .NET Framework 3.5
+- .NET Framework 4.0
+- .NET Framework 4.5+ (supports asynchronous code and timeouts for regular expressions)
+- .NET Standard1.1+ (some features are not available)
+- .NET Standard1.3+ (which means .NET Core, Xamarin, UWP, Unity etc.)
 
-Also [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet package provides signed assemblies.
+Also the [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet package provides signed assemblies.
 
 ## Benchmarks
 
@@ -103,7 +103,7 @@ Also [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet pack
 
 ## License
 
-This software is released under the [BSD-Clause 2 license](http://opensource.org/licenses/BSD-2-Clause). 
+This software is released under the [BSD-Clause 2 license](https://opensource.org/licenses/BSD-2-Clause). 
 
 ## Related projects
 

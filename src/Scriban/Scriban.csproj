@@ -17,7 +17,7 @@
     <PackageReleaseNotes>https://github.com/lunet-io/scriban/blob/master/changelog.md</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/img/scriban.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/lunet-io/scriban/blob/master/license.txt</PackageLicenseUrl>
+    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <!--Add support for sourcelink-->
