@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 #if SCRIBAN_ASYNC
@@ -63,7 +63,7 @@ namespace Scriban.Syntax
         {
             // Notify the context that we enter a loop block (used for variable with scope Loop)
             object result = null;
-            context.EnterLoop(this);            
+            context.EnterLoop(this);
             try
             {
                 result = EvaluateImpl(context);
@@ -87,12 +87,14 @@ namespace Scriban.Syntax
 #if SCRIBAN_ASYNC
         protected abstract ValueTask<object> EvaluateImplAsync(TemplateContext context);
 
-        protected virtual async ValueTask BeforeLoopAsync(TemplateContext context)
+        protected virtual ValueTask BeforeLoopAsync(TemplateContext context)
         {
+            return new ValueTask();
         }
 
-        protected virtual async ValueTask AfterLoopAsync(TemplateContext context)
+        protected virtual ValueTask AfterLoopAsync(TemplateContext context)
         {
+            return new ValueTask();
         }
 #endif
     }
