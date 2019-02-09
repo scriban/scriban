@@ -378,13 +378,13 @@ Tax: {{ 7 | match_tax }}";
             var expected =
                 @"
 [
-  {
+  { 
     ""N"": Hello,
     ""M"": World
-
+    
     ""N"": Bonjour,
     ""M"": le monde
-
+    
   },
 ]
 [[[Hello], [World]], [[Bonjour], [le monde]]]
