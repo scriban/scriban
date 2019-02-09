@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -19,7 +19,7 @@ namespace Scriban.Runtime
     /// </summary>
     public abstract partial class DynamicCustomFunction : IScriptCustomFunction
     {
-        private static readonly Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>> BuiltinFunctions = new Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>>(MethodComparer.Default);
+        private static readonly Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>> BuiltinFunctionDelegates = new Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>>(MethodComparer.Default);
 
         /// <summary>
         /// Gets the reflection method associated to this dynamic call.
@@ -88,8 +88,7 @@ namespace Scriban.Runtime
         {
             if (method == null) throw new ArgumentNullException(nameof(method));
 
-            Func<MethodInfo, DynamicCustomFunction> newFunction;
-            if (target == null && method.IsStatic && BuiltinFunctions.TryGetValue(method, out newFunction))
+            if (target == null && method.IsStatic && BuiltinFunctionDelegates.TryGetValue(method, out var newFunction))
             {
                 return newFunction(method);
             }
@@ -114,7 +113,7 @@ namespace Scriban.Runtime
         }
 
 
-    
+
         private class MethodComparer : IEqualityComparer<MethodInfo>
         {
             public static readonly MethodComparer Default = new MethodComparer();
