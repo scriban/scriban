@@ -1012,7 +1012,12 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Base64Decode(string text)
         {
-            return Encoding.UTF8.GetString(Convert.FromBase64String(text ?? string.Empty));
+            var decoded = Convert.FromBase64String(text ?? string.Empty);
+#if NETSTANDARD1_1
+            return Encoding.UTF8.GetString(decoded, 0, decoded.Length);
+#else
+            return Encoding.UTF8.GetString(decoded);
+#endif
         }
     }
 }
