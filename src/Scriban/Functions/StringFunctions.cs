@@ -1013,11 +1013,11 @@ namespace Scriban.Functions
         public static string Base64Decode(string text)
         {
             var decoded = Convert.FromBase64String(text ?? string.Empty);
-#if NETSTANDARD1_1
+            #if NETSTANDARD1_1
             return Encoding.UTF8.GetString(decoded, 0, decoded.Length);
-#else
+            #else
             return Encoding.UTF8.GetString(decoded);
-#endif
+            #endif
         }
     }
 }

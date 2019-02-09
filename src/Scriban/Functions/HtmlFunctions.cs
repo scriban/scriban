@@ -39,14 +39,13 @@ namespace Scriban.Functions
             {
                 return text;
             }
-#if !NET35 && !NET40 && !PCL328
+#if !NET35 && !NET40
             var stripHtml = new Regex(RegexMatchHtml, RegexOptions.IgnoreCase|RegexOptions.Singleline, context.RegexTimeOut);
 #endif
 
             return stripHtml.Replace(text, string.Empty);
         }
 
-#if !PCL328
         /// <summary>
         /// Escapes a HTML input string (replacing `&amp;` by `&amp;amp;`)
         /// </summary>
@@ -116,22 +115,5 @@ namespace Scriban.Functions
             }
             return Uri.EscapeUriString(text);
         }
-#else
-
-        public static string Escape(string text)
-        {
-            throw new NotSupportedException("This method is not supported by this .NET profile");
-        }
-        
-        public static string UrlEncode(string text)
-        {
-            throw new NotSupportedException("This method is not supported by this .NET profile");
-        }
-
-        public static string UrlEscape(string text)
-        {
-            throw new NotSupportedException("This method is not supported by this .NET profile");
-        }
-#endif
     }
 }

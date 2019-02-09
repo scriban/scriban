@@ -9,7 +9,7 @@ namespace Scriban.Helpers
 {
     internal static class ReflectionHelper
     {
-#if NET35 || NET40 || PCL328
+#if NET35 || NET40
         public static bool IsPrimitiveOrDecimal(this Type type)
         {
             return type.IsPrimitive || type == typeof(decimal);
