@@ -10,7 +10,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
+#endif
 using DotLiquid.Tests.Tags;
 using NUnit.Framework;
 using Scriban.Helpers;
@@ -446,7 +448,7 @@ end
             {
                 Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default
             };
-            
+
             if (isRoundtripTest)
             {
                 lexerOptions.KeepTrivia = true;
@@ -502,7 +504,9 @@ end
                 var template = Template.Parse(input, "text", parserOptions, lexerOptions);
 
                 var result = string.Empty;
+#if SCRIBAN_ASYNC
                 var resultAsync = string.Empty;
+#endif
                 if (template.HasErrors)
                 {
                     hasErrors = true;
@@ -574,6 +578,7 @@ end
                                 result = template.Render(context);
                             }
 
+#if SCRIBAN_ASYNC
                             // Render async
                             {
                                 var asyncContext = NewTemplateContext(isLiquid);
@@ -583,6 +588,7 @@ end
                                 asyncContext.PushGlobal(contextObj);
                                 resultAsync = template.RenderAsync(asyncContext).Result;
                             }
+#endif
                         }
                         catch (Exception exception)
                         {
@@ -609,12 +615,14 @@ end
 
                 TextAssert.AreEqual(expected, result);
 
+#if SCRIBAN_ASYNC
                 if (!isRoundtrip && !isRoundtripTest && !hasErrors && !hasException)
                 {
                     Console.WriteLine("Checking async");
                     Console.WriteLine("======================================");
                     TextAssert.AreEqual(expected, resultAsync);
                 }
+#endif
 
                 if (isRoundtripTest || isRoundtrip || hasErrors)
                 {
@@ -735,7 +743,7 @@ end
         {
             var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
             foreach (var file in
-                Directory.EnumerateFiles(Path.Combine(baseDir, folder), InputFilePattern, SearchOption.AllDirectories)
+                Directory.GetFiles(Path.Combine(baseDir, folder), InputFilePattern, SearchOption.AllDirectories)
                     .Where(f => !f.EndsWith(OutputEndFileExtension))
                     .Select(f => f.StartsWith(baseDir) ? f.Substring(baseDir.Length + 1) : f)
                     .OrderBy(f => f))
@@ -773,10 +781,14 @@ end
         {
             get
             {
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1
                 var assembly = Assembly.GetExecutingAssembly();
                 var codebase = new Uri(assembly.CodeBase);
                 var path = codebase.LocalPath;
                 return Path.GetDirectoryName(path);
+#else
+                return Directory.GetCurrentDirectory();
+#endif
             }
         }
     }

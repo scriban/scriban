@@ -1,25 +1,24 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
-    <TargetFrameworks>netcoreapp2.1;net461</TargetFrameworks>
-
+    <TargetFrameworks>net35;net40;net45;netcoreapp1.0;netcoreapp1.1;netcoreapp2.1</TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
-
+  <PropertyGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
+    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <Compile Remove="LiquidTests\AssignTests.cs" />
     <Compile Remove="LiquidTests\LiteralTests.cs" />
   </ItemGroup>
-
-  <ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\Scriban\Scriban.csproj" />
   </ItemGroup>
-
 </Project>
