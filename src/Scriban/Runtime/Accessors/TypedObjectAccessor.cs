@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -109,7 +109,7 @@ namespace Scriban.Runtime.Accessors
                     var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
 
                     // Workaround with .NET Core, extension method is not working (retuning null despite doing property.GetMethod), so we need to inline it here
-#if NET35 || NET40 || PCL328
+#if NET35 || NET40
                     var getMethod = property.GetGetMethod();
 #else
                     var getMethod = property.GetMethod;

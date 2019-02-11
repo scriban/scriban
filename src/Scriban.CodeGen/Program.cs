@@ -22,7 +22,7 @@ namespace Scriban.CodeGen
 
         public Program()
         {
-            _assemblyDefinition = AssemblyDefinition.ReadAssembly(@"..\..\..\Scriban\bin\Debug\net40\Scriban.dll");
+            _assemblyDefinition = AssemblyDefinition.ReadAssembly(@"..\..\..\..\Scriban\bin\Debug\net40\Scriban.dll");
             _methods = new Dictionary<string, MethodDefinition>();
         }
 
@@ -37,7 +37,7 @@ namespace Scriban.CodeGen
             CollectMethods("Scriban.Functions.StringFunctions");
             CollectMethods("Scriban.Functions.TimeSpanFunctions");
 
-            _writer = new StreamWriter(@"..\..\..\Scriban\Runtime\CustomFunction.Generated.cs");
+            _writer = new StreamWriter(@"..\..\..\..\Scriban\Runtime\CustomFunction.Generated.cs");
             _writer.WriteLine("// ----------------------------------------------------------------------------------");
             _writer.WriteLine($"// This file was automatically generated - {DateTime.Now.ToString(CultureInfo.InvariantCulture.DateTimeFormat)} by Scriban.CodeGen");
             _writer.WriteLine("// DOT NOT EDIT THIS FILE MANUALLY");
@@ -67,7 +67,7 @@ namespace Scriban.Runtime
                 var name = "Function" + GetSignature(method, SignatureMode.Name);
 
                 var methodName = method.Name;
-                _writer.WriteLine($@"            BuiltinFunctions.Add(typeof({method.DeclaringType.FullName}).GetTypeInfo().GetDeclaredMethod(nameof({method.DeclaringType.FullName}.{methodName})), method => new {name}(method));");
+                _writer.WriteLine($@"            BuiltinFunctionDelegates.Add(typeof({method.DeclaringType.FullName}).GetTypeInfo().GetDeclaredMethod(nameof({method.DeclaringType.FullName}.{methodName})), method => new {name}(method));");
             }
             _writer.Write(@"
         }
@@ -92,7 +92,8 @@ namespace Scriban.Runtime
             var delegateSignature = GetSignature(method, SignatureMode.Delegate);
 
             var arguments = new StringBuilder();
-            var caseArguments = new StringBuilder();
+            var caseArguments = "";
+            var caseArgumentsBuilder = new StringBuilder();
             var delegateCallArgs = new StringBuilder();
             var defaultParamDeclaration = new StringBuilder();
             var defaultParamConstructors = new StringBuilder();
@@ -137,8 +138,8 @@ namespace Scriban.Runtime
                 }
 
                 arguments.Append($"                var arg{argIndex} = ");
-                caseArguments.AppendLine($"                        case {argIndex}:");
-                caseArguments.Append($"                            arg{argIndex} = ");
+                caseArgumentsBuilder.AppendLine($"                        case {argIndex}:");
+                caseArgumentsBuilder.Append($"                            arg{argIndex} = ");
 
                 if (arg.IsOptional)
                 {
@@ -156,11 +157,11 @@ namespace Scriban.Runtime
 
                 if (type.MetadataType == MetadataType.String)
                 {
-                    caseArguments.Append($"context.ToString(callerContext.Span, arg)");
+                    caseArgumentsBuilder.Append($"context.ToString(callerContext.Span, arg)");
                 }
                 else if (type.MetadataType == MetadataType.Int32)
                 {
-                    caseArguments.Append($"context.ToInt(callerContext.Span, arg)");
+                    caseArgumentsBuilder.Append($"context.ToInt(callerContext.Span, arg)");
                 }
                 else
                 {
@@ -168,29 +169,38 @@ namespace Scriban.Runtime
                     {
                         if (type.Name == "IList")
                         {
-                            caseArguments.Append($"context.ToList(callerContext.Span, arg)");
+                            caseArgumentsBuilder.Append($"context.ToList(callerContext.Span, arg)");
                         }
                         else
                         {
-                            caseArguments.Append($"({PrettyType(type)})context.ToObject(callerContext.Span, arg, typeof({PrettyType(type)}))");
+                            caseArgumentsBuilder.Append($"({PrettyType(type)})context.ToObject(callerContext.Span, arg, typeof({PrettyType(type)}))");
                         }
                     }
                     else
                     {
-                        caseArguments.Append($"arg");
+                        caseArgumentsBuilder.Append($"arg");
                     }
                 }
-                caseArguments.AppendLine(";");
+                caseArgumentsBuilder.AppendLine(";");
 
                 // If argument is optional, we don't need to update the mask as it is already taken into account into the mask init
                 if (!arg.IsOptional)
                 {
-                    caseArguments.AppendLine($"                            argMask |= (1 << {argIndex});");
+                    caseArgumentsBuilder.AppendLine($"                            argMask |= (1 << {argIndex});");
                 }
-                caseArguments.AppendLine($"                            break;");
+                caseArgumentsBuilder.AppendLine($"                            break;");
 
                 delegateCallArgs.Append($"arg{argIndex}");
                 argIndex++;
+            }
+
+            if (method.Parameters.Count != 0)
+            {
+                caseArguments = $@"
+                    switch (argIndex)
+                    {{
+{caseArgumentsBuilder}
+                    }}";
             }
 
             // Output default argument masking
@@ -268,11 +278,7 @@ namespace Scriban.Runtime
                         argIndex = argOrderedIndex;
                         argOrderedIndex++;
                     }}
-
-                    switch (argIndex)
-                    {{
 {caseArguments}
-                    }}
                 }}
 
                 if ({argCheckMask})

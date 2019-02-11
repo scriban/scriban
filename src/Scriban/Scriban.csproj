@@ -9,7 +9,7 @@
     <BuildNumber>005</BuildNumber>
     <VersionSuffix Condition="'$(VersionSuffix)' != '' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
     <Authors>Alexandre Mutel</Authors>
-    <TargetFrameworks>net35;net40;net45;net471;netstandard1.1;netstandard1.3;netstandard2.0;uap10.0;netcoreapp2.0</TargetFrameworks>
+    <TargetFrameworks>net35;net40;net45;netstandard1.1;netstandard1.3;netstandard2.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
     <PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>
@@ -17,7 +17,7 @@
     <PackageReleaseNotes>https://github.com/lunet-io/scriban/blob/master/changelog.md</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/img/scriban.png</PackageIconUrl>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/lunet-io/scriban/blob/master/license.txt</PackageLicenseUrl>
+    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.1' ">1.6.1</NetStandardImplicitPackageVersion>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
@@ -25,64 +25,22 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40'">
-    <Reference Include="mscorlib" />
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
-    <Reference Include="System.Web" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40' AND '$(TargetFramework)' != 'net471'">
-    <PackageReference Include="System.Threading.Tasks.Extensions">
-      <Version>4.5.1</Version>
-    </PackageReference>
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45'">
+  <PropertyGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
     <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net471' ">
-    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.1' ">
-    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.0' ">
-    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC</DefineConstants>
-  </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard1.3' ">
-    <PackageReference Include="System.Security.Cryptography.Algorithms" Version="4.3.0" />
-  </ItemGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
-    <TargetPlatformIdentifier>UAP</TargetPlatformIdentifier>
-    <TargetPlatformVersion Condition="'$(TargetPlatformVersion)' == ''">10.0.10240.0</TargetPlatformVersion>
-    <TargetPlatformMinVersion Condition="'$(TargetPlatformMinVersion)' == ''">10.0.10240.0</TargetPlatformMinVersion>
-    <DefineConstants>$(DefineConstants);UAP;SCRIBAN_ASYNC</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(SignAssembly)' == 'true' ">
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
   </PropertyGroup>
-  <!-- Special packages and imports for UWP support -->
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
+    <Reference Include="System.Web" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
+  </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSBuild.Sdk.Extras" Version="1.0.9" PrivateAssets="all" />
     <!--Add support for sourcelink-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'uap10.0' ">
-    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform " Version="6.1.9" />
-  </ItemGroup>
-  <ItemGroup>
-    <Reference Include="System.Threading.Tasks.Extensions">
-      <HintPath>..\..\..\..\..\Program Files\dotnet\sdk\NuGetFallbackFolder\system.threading.tasks.extensions\4.5.1\ref\netstandard1.0\System.Threading.Tasks.Extensions.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <Import Project="$(MSBuildSDKExtrasTargets)" Condition="Exists('$(MSBuildSDKExtrasTargets)')" />
 </Project>

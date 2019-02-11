@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 11.01.2019 17:53:05 by Scriban.CodeGen
+// This file was automatically generated - 02/09/2019 14:39:16 by Scriban.CodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -18,49 +18,49 @@ namespace Scriban.Runtime
 
         static DynamicCustomFunction()
         {
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Contains)), method => new Functionbool_IEnumerable_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.IsNumber)), method => new Functionbool_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Contains)), method => new Functionbool_string_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.Now)), method => new FunctionDateTime(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.AddDays)), method => new FunctionDateTime_DateTime_double(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.AddMonths)), method => new FunctionDateTime_DateTime_int(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Ceil)), method => new Functiondouble_double(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Round)), method => new Functiondouble_double_int___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Reverse)), method => new FunctionIEnumerable_IEnumerable(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.AddRange)), method => new FunctionIEnumerable_IEnumerable_IEnumerable(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Split)), method => new FunctionIEnumerable_string_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Sort)), method => new FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Map)), method => new FunctionIEnumerable_TemplateContext_SourceSpan_object_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.RemoveAt)), method => new FunctionIList_IList_int(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.InsertAt)), method => new FunctionIList_IList_int_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Add)), method => new FunctionIList_IList_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Size)), method => new Functionint_IEnumerable(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Size)), method => new Functionint_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Size)), method => new Functionint_TemplateContext_SourceSpan_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.First)), method => new Functionobject_IEnumerable(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Default)), method => new Functionobject_object_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.DividedBy)), method => new Functionobject_TemplateContext_SourceSpan_double_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Cycle)), method => new Functionobject_TemplateContext_SourceSpan_IList_object___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Abs)), method => new Functionobject_TemplateContext_SourceSpan_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Minus)), method => new Functionobject_TemplateContext_SourceSpan_object_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.ToInt)), method => new Functionobject_TemplateContext_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Compact)), method => new FunctionScriptArray_IEnumerable(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Limit)), method => new FunctionScriptArray_IEnumerable_int(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.RegexFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.RegexFunctions.Match)), method => new FunctionScriptArray_TemplateContext_string_string_string___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Pluralize)), method => new Functionstring_int_string_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Typeof)), method => new Functionstring_object(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.HtmlFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.HtmlFunctions.Escape)), method => new Functionstring_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.PadLeft)), method => new Functionstring_string_int(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Slice)), method => new Functionstring_string_int_int___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Truncate)), method => new Functionstring_string_int_string___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Append)), method => new Functionstring_string_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Replace)), method => new Functionstring_string_string_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Join)), method => new Functionstring_TemplateContext_SourceSpan_IEnumerable_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Format)), method => new Functionstring_TemplateContext_SourceSpan_object_string_string___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.HtmlFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.HtmlFunctions.Strip)), method => new Functionstring_TemplateContext_string(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.RegexFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.RegexFunctions.Replace)), method => new Functionstring_TemplateContext_string_string_string_string___Opt(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.TimeSpanFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.TimeSpanFunctions.FromDays)), method => new FunctionTimeSpan_double(method));
-            BuiltinFunctions.Add(typeof(Scriban.Functions.TimeSpanFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.TimeSpanFunctions.Parse)), method => new FunctionTimeSpan_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Contains)), method => new Functionbool_IEnumerable_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.IsNumber)), method => new Functionbool_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Contains)), method => new Functionbool_string_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.Now)), method => new FunctionDateTime(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.AddDays)), method => new FunctionDateTime_DateTime_double(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.DateTimeFunctions.AddMonths)), method => new FunctionDateTime_DateTime_int(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Ceil)), method => new Functiondouble_double(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Round)), method => new Functiondouble_double_int___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Reverse)), method => new FunctionIEnumerable_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.AddRange)), method => new FunctionIEnumerable_IEnumerable_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Split)), method => new FunctionIEnumerable_string_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Sort)), method => new FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Map)), method => new FunctionIEnumerable_TemplateContext_SourceSpan_object_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.RemoveAt)), method => new FunctionIList_IList_int(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.InsertAt)), method => new FunctionIList_IList_int_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Add)), method => new FunctionIList_IList_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Size)), method => new Functionint_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Size)), method => new Functionint_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Size)), method => new Functionint_TemplateContext_SourceSpan_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.First)), method => new Functionobject_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Default)), method => new Functionobject_object_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.DividedBy)), method => new Functionobject_TemplateContext_SourceSpan_double_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Cycle)), method => new Functionobject_TemplateContext_SourceSpan_IList_object___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Abs)), method => new Functionobject_TemplateContext_SourceSpan_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Minus)), method => new Functionobject_TemplateContext_SourceSpan_object_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.ToInt)), method => new Functionobject_TemplateContext_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Compact)), method => new FunctionScriptArray_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Limit)), method => new FunctionScriptArray_IEnumerable_int(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.RegexFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.RegexFunctions.Match)), method => new FunctionScriptArray_TemplateContext_string_string_string___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Pluralize)), method => new Functionstring_int_string_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ObjectFunctions.Typeof)), method => new Functionstring_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.HtmlFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.HtmlFunctions.Escape)), method => new Functionstring_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.PadLeft)), method => new Functionstring_string_int(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Slice)), method => new Functionstring_string_int_int___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Truncate)), method => new Functionstring_string_int_string___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Append)), method => new Functionstring_string_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.StringFunctions.Replace)), method => new Functionstring_string_string_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.ArrayFunctions.Join)), method => new Functionstring_TemplateContext_SourceSpan_IEnumerable_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.MathFunctions.Format)), method => new Functionstring_TemplateContext_SourceSpan_object_string_string___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.HtmlFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.HtmlFunctions.Strip)), method => new Functionstring_TemplateContext_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.RegexFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.RegexFunctions.Replace)), method => new Functionstring_TemplateContext_string_string_string_string___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.TimeSpanFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.TimeSpanFunctions.FromDays)), method => new FunctionTimeSpan_double(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.TimeSpanFunctions).GetTypeInfo().GetDeclaredMethod(nameof(Scriban.Functions.TimeSpanFunctions.Parse)), method => new FunctionTimeSpan_string(method));
 
         }
 
@@ -294,10 +294,6 @@ namespace Scriban.Runtime
                         argOrderedIndex++;
                     }
 
-                    switch (argIndex)
-                    {
-
-                    }
                 }
 
                 if (argMask != (1 << 0) - 1)

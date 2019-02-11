@@ -3,11 +3,16 @@
 
 using System;
 using System.Collections.Generic;
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1
+using System.Data;
+#endif
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
-using System.Runtime.CompilerServices;
+#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
+#endif
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Scriban.Parsing;
@@ -31,7 +36,7 @@ namespace Scriban.Tests
             }
             public static string T(TemplateContext context, object input, params object[] variables)
             {
-                return input + (variables.Length > 0 ? string.Join(",", variables) : string.Empty);
+                return input + (variables.Length > 0 ? string.Join(",", variables.Select(s => s.ToString()).ToArray()) : string.Empty);
             }
         }
 
@@ -111,6 +116,7 @@ end
             TextAssert.AreEqual("22AB", result);
         }
 
+#if SCRIBAN_ASYNC
         [Test]
         public async Task TestAsyncAwait()
         {
@@ -133,6 +139,7 @@ end
 
             Assert.AreEqual("yes", result);
         }
+#endif
 
         [Test]
         public void CheckReturnInsideLoop()
@@ -319,17 +326,18 @@ Tax: {{ 7 | match_tax }}";
             TextAssert.AreEqual("Test with a dynamic yes", result);
         }
 
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1
         [Test]
         public void TestJson()
         {
             // issue: https://github.com/lunet-io/scriban/issues/11
             // fixed: https://github.com/lunet-io/scriban/issues/15
 
-            System.Data.DataTable dataTable = new System.Data.DataTable();
+            DataTable dataTable = new DataTable();
             dataTable.Columns.Add("Column1");
             dataTable.Columns.Add("Column2");
 
-            System.Data.DataRow dataRow = dataTable.NewRow();
+            DataRow dataRow = dataTable.NewRow();
             dataRow["Column1"] = "Hello";
             dataRow["Column2"] = "World";
             dataTable.Rows.Add(dataRow);
@@ -384,6 +392,7 @@ Tax: {{ 7 | match_tax }}";
 
             TextAssert.AreEqual(expected, result);
         }
+#endif
 
         [Test]
         public void TestScriptObjectImport()

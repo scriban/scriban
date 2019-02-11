@@ -9,7 +9,7 @@ namespace Scriban.Helpers
 {
     internal static class ReflectionHelper
     {
-#if NET35 || NET40 || PCL328
+#if NET35 || NET40
         public static bool IsPrimitiveOrDecimal(this Type type)
         {
             return type.IsPrimitive || type == typeof(decimal);
@@ -149,16 +149,6 @@ namespace Scriban.Helpers
         {
             return type.DeclaredMethods;
         }
-#if !UAP && !NETSTANDARD2_0
-        public static MethodInfo GetGetMethod(this PropertyInfo prop)
-        {
-            return prop.GetMethod;
-        }
-        public static MethodInfo GetSetMethod(this PropertyInfo prop)
-        {
-            return prop.SetMethod;
-        }
-#endif
 #endif
     }
 }

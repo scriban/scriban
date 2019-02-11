@@ -112,7 +112,11 @@ namespace Scriban.Tests
                         return $"\\u{(int) c:X};";
                 }
             }
+#if !NETCOREAPP1_0 && !NETCOREAPP1_1
             return c.ToString(CultureInfo.InvariantCulture);
+#else
+            return c.ToString();
+#endif
         }
     }
 }
