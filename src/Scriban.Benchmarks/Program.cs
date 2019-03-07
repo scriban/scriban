@@ -1,17 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using Microsoft.AspNetCore.Razor.Language;
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Text;
+using DotLiquid;
 using Scriban.Functions;
 using Scriban.Runtime;
 
@@ -201,6 +195,7 @@ namespace Scriban.Benchmarks
         private const string Lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
 
         private readonly List<Product> _products;
+        private readonly List<ScriptObject> _scribanProducts;
         private readonly List<DotLiquid.Hash> _dotLiquidProducts;
 
         private readonly Dictionary<Cottle.Value, Cottle.Value> _cottleStringStore;
@@ -222,15 +217,20 @@ namespace Scriban.Benchmarks
 
             const int ProductCount = 500;
             _products = new List<Product>(ProductCount);
+            _scribanProducts = new List<ScriptObject>();
             _dotLiquidProducts = new List<DotLiquid.Hash>(ProductCount);
-            
             var cottleValues = new List<Cottle.Value>();
+
             for (int i = 0; i < ProductCount; i++)
             {
                 var product = new Product("Name" + i, i, Lorem);
                 _products.Add(product);
-                var hash = DotLiquid.Hash.FromAnonymousObject(product);
+
+                var hash = new Hash() { ["name"] = product.Name, ["price"] = product.Price, ["description"] = product.Description };
                 _dotLiquidProducts.Add(hash);
+
+                var obj = new ScriptObject {["name"] = product.Name, ["price"] = product.Price, ["description"] = product.Description};
+                _scribanProducts.Add(obj);
                 cottleValues.Add(new Cottle.Values.ReflectionValue(product)); 
             }
 
@@ -256,12 +256,15 @@ namespace Scriban.Benchmarks
             // for a slightly higher efficiency and the reuse of a TemplateContext on the same thread
             //return _scribanTemplate.Render(new { products = _dotLiquidProducts });
 
-            var obj = new ScriptObject { { "products", _dotLiquidProducts } };
+            var obj = new ScriptObject { { "products", _scribanProducts } };
             _liquidTemplateContext.PushGlobal(obj);
+            _liquidTemplateContext.PushOutput(StringBuilderOutput.GetThreadInstance());
             var result = _scribanTemplate.Render(_liquidTemplateContext);
+            _liquidTemplateContext.PopOutput();
             _liquidTemplateContext.PopGlobal();
             return result;
         }
+
 
         [Benchmark(Description = "ScribanAsync")]
         public async ValueTask<string> TestScribanAsync()

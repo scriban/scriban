@@ -1,7 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net472</TargetFramework>
     <LangVersion>7.3</LangVersion>
   </PropertyGroup>
 
@@ -13,13 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.11.3" />
-    <PackageReference Include="Cottle" Version="1.4.0.4" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.11.4" />
+    <PackageReference Include="Cottle" Version="1.4.2" />
     <PackageReference Include="DotLiquid" Version="2.0.298" />
-    <PackageReference Include="Fluid.Core" Version="1.0.0-beta-9334" />
+    <PackageReference Include="Fluid.Core" Version="1.0.0-beta-9545" />
     <PackageReference Include="Handlebars.Net" Version="1.9.5" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="2.2.0" />
     <PackageReference Include="Nustache" Version="1.16.0.8" />
-    <PackageReference Include="Stubble.Core" Version="1.1.2" />
+    <PackageReference Include="Stubble.Core" Version="1.2.7" />
   </ItemGroup>
 </Project>
