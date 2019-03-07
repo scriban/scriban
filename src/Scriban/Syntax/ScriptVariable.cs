@@ -22,26 +22,11 @@ namespace Scriban.Syntax
 
         public static readonly ScriptVariableLocal Continue = new ScriptVariableLocal("continue");
 
-        public static readonly ScriptVariableLoop LoopFirst = new ScriptVariableLoop("for.first");
+        public static readonly ScriptVariableLoop ForObject = new ScriptVariableLoop("for");
 
-        public static readonly ScriptVariableLoop LoopLast = new ScriptVariableLoop("for.last");
+        public static readonly ScriptVariableLoop TablerowObject = new ScriptVariableLoop("tablerow");
 
-        public static readonly ScriptVariableLoop LoopEven = new ScriptVariableLoop("for.even");
-
-        public static readonly ScriptVariableLoop LoopOdd = new ScriptVariableLoop("for.odd");
-
-        public static readonly ScriptVariableLoop LoopIndex = new ScriptVariableLoop("for.index");
-
-        public static readonly ScriptVariableLoop LoopRIndex = new ScriptVariableLoop("for.rindex");
-
-        public static readonly ScriptVariableLoop LoopLength = new ScriptVariableLoop("for.length");
-
-        public static readonly ScriptVariableLoop TableRowCol = new ScriptVariableLoop("tablerow.col");
-
-        /// <summary>
-        /// A boolean variable indicating if the value changed from the previous value in a loop iteration
-        /// </summary>
-        public static readonly ScriptVariableLoop LoopChanged = new ScriptVariableLoop("for.changed");
+        public static readonly ScriptVariableLoop WhileObject = new ScriptVariableLoop("while");
 
         protected ScriptVariable(string name, ScriptVariableScope scope)
         {

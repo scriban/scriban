@@ -159,6 +159,11 @@ namespace Scriban
         public ITemplateLoader TemplateLoader { get; set; }
 
         /// <summary>
+        /// Gets a boolean if the context is being used  with liquid
+        /// </summary>
+        public bool IsLiquid { get; protected set; }
+
+        /// <summary>
         /// String used for new-line.
         /// </summary>
         public string NewLine { get; set; }
@@ -385,6 +390,15 @@ namespace Scriban
             {
                 _getOrSetValueLevel--;
             }
+        }
+
+
+        private static readonly object TrueObject = true;
+        private static readonly object FalseObject = false;
+
+        public void SetValue(ScriptVariableLoop variable, bool value)
+        {
+            SetValue(variable, value ? TrueObject : FalseObject);
         }
 
         /// <summary>
@@ -716,7 +730,7 @@ namespace Scriban
             {
                 accessor = ScriptObjectAccessor.Default;
             }
-            else if (DictionaryAccessor.TryGet(type, out accessor))
+            else if (DictionaryAccessor.TryGet(target, out accessor))
             {
             }
             else if (type.GetTypeInfo().IsArray)
@@ -1136,6 +1150,7 @@ namespace Scriban
 
             TemplateLoaderLexerOptions = new LexerOptions() {Mode = ScriptMode.Liquid};
             TemplateLoaderParserOptions = new ParserOptions() {LiquidFunctionsToScriban = true};
+            IsLiquid = true;
         }
     }
 }

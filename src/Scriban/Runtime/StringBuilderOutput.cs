@@ -15,6 +15,8 @@ namespace Scriban.Runtime
     /// </summary>
     public class StringBuilderOutput : IScriptOutput
     {
+        [ThreadStatic] private static StringBuilder TlsBuilder;
+
         /// <summary>
         /// Initialize a new instance of <see cref="StringBuilderOutput"/>
         /// </summary>
@@ -41,6 +43,21 @@ namespace Scriban.Runtime
             Builder.Append(text, offset, count);
             return this;
         }
+
+        /// <summary>
+        /// Returns a thread local instance
+        /// </summary>
+        /// <returns></returns>
+        public static StringBuilderOutput GetThreadInstance()
+        {
+            if (TlsBuilder == null)
+            {
+                TlsBuilder = new StringBuilder();
+            }
+            TlsBuilder.Length = 0;
+            return new StringBuilderOutput(TlsBuilder);
+        }
+
 
 #if SCRIBAN_ASYNC
         public ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)

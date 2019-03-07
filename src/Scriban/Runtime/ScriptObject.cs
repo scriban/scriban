@@ -44,13 +44,11 @@ namespace Scriban.Runtime
             Store = new Dictionary<string, InternalValue>(capacity);
 
             // Only import if we are asked for and we have a derived type
-            if (autoImportStaticsFromThisType.GetValueOrDefault() || (!autoImportStaticsFromThisType.HasValue && this.GetType() != typeof(ScriptObject)))
+            if (this.GetType() != typeof(ScriptObject) && autoImportStaticsFromThisType.GetValueOrDefault())
             {
                 this.Import(this.GetType());
             }
         }
-
-        
 
         void IDictionary.Add(object key, object value)
         {

@@ -2,8 +2,18 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System.Collections.Generic;
+using System.Linq;
+using Scriban.Helpers;
+using Scriban.Parsing;
+using Scriban.Runtime;
+
 #if SCRIBAN_ASYNC
 using System.Threading.Tasks;
+using Scriban.Helpers;
+using Scriban.Parsing;
+using Scriban.Runtime;
+
 #endif
 
 namespace Scriban.Syntax
@@ -28,18 +38,13 @@ namespace Scriban.Syntax
         /// <param name="localIndex"></param>
         /// <param name="isLast"></param>
         /// <returns></returns>
-        protected virtual object LoopItem(TemplateContext context, int index, int localIndex, bool isLast)
+        protected virtual object LoopItem(TemplateContext context, LoopState state)
         {
-            // Setup variable
-            context.SetValue(ScriptVariable.LoopFirst, index == 0);
-            var even = (index & 1) == 0;
-            context.SetValue(ScriptVariable.LoopEven, even);
-            context.SetValue(ScriptVariable.LoopOdd, !even);
-            context.SetValue(ScriptVariable.LoopIndex, index);
-
             // bug: temp workaround to correct a bug with ret. Should be handled differently
             return context.Evaluate(Body);
         }
+
+        protected virtual LoopState CreateLoopState() {  return new LoopState(); }
 
         protected bool ContinueLoop(TemplateContext context)
         {
@@ -97,5 +102,143 @@ namespace Scriban.Syntax
             return new ValueTask();
         }
 #endif
+
+        /// <summary>
+        /// Store the loop state
+        /// </summary>
+        protected class LoopState : IScriptObject
+        {
+            private int _length;
+            private object _lengthObject;
+
+            public int Index { get; set; }
+
+            public int LocalIndex { get; set; }
+
+            public bool IsFirst => Index == 0;
+
+            public bool IsEven => (Index & 1) == 0;
+
+            public bool IsOdd => !IsEven;
+
+            public bool ValueChanged { get; set; }
+
+            public bool IsLast { get; set; }
+
+            public int Length
+            {
+                get => _length;
+                set
+                {
+                    _length = value;
+                    _lengthObject = value;
+                }
+            }
+
+            public int Count { get; set; }
+
+            public IEnumerable<string> GetMembers()
+            {
+                return Enumerable.Empty<string>();
+            }
+
+            public virtual bool Contains(string member)
+            {
+                switch (member)
+                {
+                    case "index":
+                    case "index0":
+                    case "first":
+                    case "even":
+                    case "odd":
+                    case "last":
+                        return true;
+                    case "length":
+                        return _lengthObject != null;
+                    case "rindex":
+                    case "rindex0":
+                        return _lengthObject != null;
+                    case "changed":
+                        return true;
+                }
+                return false;
+            }
+
+            public bool IsReadOnly { get; set; }
+
+            public virtual  bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
+            {
+                value = null;
+                var isLiquid = context.IsLiquid;
+                switch (member)
+                {
+                    case "index":
+                        value = isLiquid ? Index + 1 : Index;
+                        return true;
+                    case "length":
+                        value = _lengthObject;
+                        return _lengthObject != null;
+                    case "first":
+                        value = IsFirst ? BoxHelper.TrueObject : BoxHelper.FalseObject;
+                        return true;
+                    case "even":
+                        value = IsEven ? BoxHelper.TrueObject : BoxHelper.FalseObject;
+                        return true;
+                    case "odd":
+                        value = IsOdd ? BoxHelper.TrueObject : BoxHelper.FalseObject;
+                        return true;
+                    case "last":
+                        value = IsLast ? BoxHelper.TrueObject : BoxHelper.FalseObject;
+                        return true;
+                    case "changed":
+                        value = ValueChanged ? BoxHelper.TrueObject : BoxHelper.FalseObject;
+                        return true;
+                    case "rindex":
+                        if (_lengthObject != null)
+                        {
+                            value = isLiquid ? _length - Index : _length - Index - 1;
+                        }
+                        return _lengthObject != null;
+                    default:
+                        if (isLiquid)
+                        {
+                            if (member == "index0")
+                            {
+                                value = Index;
+                                return true;
+                            }
+                            if (member == "rindex0")
+                            {
+                                value = _length - Index - 1;
+                                return true;
+                            }
+                        }
+                        return false;
+                }
+            }
+
+            public bool CanWrite(string member)
+            {
+                throw new System.NotImplementedException();
+            }
+
+            public void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+            {
+            }
+
+            public bool Remove(string member)
+            {
+                return false;
+            }
+
+            public void SetReadOnly(string member, bool readOnly)
+            {
+            }
+
+            public IScriptObject Clone(bool deep)
+            {
+                return (IScriptObject)MemberwiseClone();
+            }
+        }
     }
 }

@@ -3,6 +3,8 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Globalization;
+using Scriban.Helpers;
+using Scriban.Parsing;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -19,6 +21,11 @@ namespace Scriban.Syntax
             _columnsCount = 1;
         }
 
+        protected override ScriptVariable GetLoopVariable(TemplateContext context)
+        {
+            return ScriptVariable.TablerowObject;
+        }
+        
         protected override void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)
         {
             _columnsCount = 1;
@@ -44,11 +51,16 @@ namespace Scriban.Syntax
             context.Write("</tr>").WriteLine();
         }
 
-        protected override object LoopItem(TemplateContext context, int index, int localIndex, bool isLast)
+        protected override object LoopItem(TemplateContext context, LoopState state)
         {
+            var localIndex = state.LocalIndex;
+
             var columnIndex = localIndex % _columnsCount;
 
-            context.SetValue(ScriptVariable.TableRowCol, columnIndex + 1);
+            var tableRowLoopState = (TableRowLoopState) state;
+            tableRowLoopState.Col = columnIndex;
+            tableRowLoopState.ColFirst = columnIndex == 0;
+            tableRowLoopState.ColLast = ((localIndex + 1) % _columnsCount) == 0;
 
             if (columnIndex == 0 && localIndex > 0)
             {
@@ -58,7 +70,7 @@ namespace Scriban.Syntax
             }
             context.Write("<td class=\"col").Write((columnIndex + 1).ToString(CultureInfo.InvariantCulture)).Write("\">");
 
-            var result = base.LoopItem(context, index, localIndex, isLast);
+            var result = base.LoopItem(context, state);
 
             context.Write("</td>");
 
@@ -75,6 +87,66 @@ namespace Scriban.Syntax
             context.ExpectEos();
             context.Write(Body);
             context.ExpectEnd();
+        }
+
+        protected override LoopState CreateLoopState()
+        {
+            return new TableRowLoopState();
+        }
+
+        /// <summary>
+        /// State for a tablerow
+        /// </summary>
+        protected class TableRowLoopState : LoopState
+        {
+            public int Col { get; set; }
+
+            public bool ColFirst { get; set; }
+
+            public bool ColLast { get; set; }
+
+            public override bool Contains(string member)
+            {
+                if (!base.Contains(member))
+                {
+                    switch (member)
+                    {
+                        case "col":
+                        case "col0":
+                        case "col_first":
+                        case "col_last":
+                            return true;
+                    }
+                    return false;
+                }
+                return true;
+            }
+
+
+            public override bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
+            {
+                if (!base.TryGetValue(context, span, member, out value))
+                {
+                    switch (member)
+                    {
+                        case "col":
+                            value = context.IsLiquid ? Col + 1 : Col;
+                            return true;
+                        case "col0":
+                            value = Col;
+                            return true;
+                        case "col_first":
+                            value = ColFirst ? BoxHelper.TrueObject : BoxHelper.FalseObject;
+                            return true;
+                        case "col_last":
+                            value = ColLast ? BoxHelper.TrueObject : BoxHelper.FalseObject;
+                            return true;
+                    }
+                    return false;
+                }
+
+                return true;
+            }
         }
     }
 }

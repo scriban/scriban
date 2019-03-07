@@ -28,6 +28,11 @@ namespace Scriban.Syntax
             ? NamedArguments[NamedArguments.Count - 1]
             : Iterator;
 
+        protected virtual ScriptVariable GetLoopVariable(TemplateContext context)
+        {
+            return ScriptVariable.ForObject;
+        }
+
         protected override object EvaluateImpl(TemplateContext context)
         {
             var loopIterator = context.Evaluate(Iterator);
@@ -44,7 +49,6 @@ namespace Scriban.Syntax
             if (list != null)
             {
                 object loopResult = null;
-                context.SetValue(ScriptVariable.LoopLength, list.Count);
                 object previousValue = null;
 
                 bool reversed = false;
@@ -78,6 +82,11 @@ namespace Scriban.Syntax
                 bool isFirst = true;
                 int i = 0;
                 BeforeLoop(context);
+
+                var loopState = CreateLoopState();
+                context.SetValue(GetLoopVariable(context), loopState);
+                loopState.Length = list.Count;
+
                 while (!reversed && index <= endIndex || reversed && index >= startIndex)
                 {
                     if (!context.StepLoop(this))
@@ -88,12 +97,13 @@ namespace Scriban.Syntax
                     // We update on next run on previous value (in order to handle last)
                     var value = list[index];
                     bool isLast = reversed ? index == startIndex : index == endIndex;
-                    context.SetValue(ScriptVariable.LoopLast, isLast);
-                    context.SetValue(ScriptVariable.LoopChanged, isFirst || !Equals(previousValue, value));
-                    context.SetValue(ScriptVariable.LoopRIndex, list.Count - index - 1);
+                    loopState.Index = index;
+                    loopState.LocalIndex = i;
+                    loopState.IsLast = isLast;
+                    loopState.ValueChanged = isFirst || !Equals(previousValue, value);
                     context.SetValue(Variable, value);
 
-                    loopResult = LoopItem(context, index, i, isLast);
+                    loopResult = LoopItem(context, loopState);
                     if (!ContinueLoop(context))
                     {
                         break;

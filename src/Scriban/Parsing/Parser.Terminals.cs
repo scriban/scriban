@@ -277,65 +277,23 @@ namespace Scriban.Parsing
             {
                 if (Current.Type == TokenType.Dot)
                 {
-                    NextToken();
-                    if (Current.Type == TokenType.Identifier)
+                    scope = ScriptVariableScope.Loop;
+                    var token = PeekToken();
+                    if (token.Type == TokenType.Identifier)
                     {
-                        endSpan = CurrentSpan;
-                        var loopVariableText = GetAsText(Current);
-                        NextToken();
-
-                        scope = ScriptVariableScope.Loop;
+                        //endSpan = GetSpanForToken(token);
+                        var loopVariableText = GetAsText(token);
                         if (_isLiquid)
                         {
                             switch (loopVariableText)
                             {
                                 case "first":
-                                    text = ScriptVariable.LoopFirst.Name;
-                                    break;
                                 case "last":
-                                    text = ScriptVariable.LoopLast.Name;
-                                    break;
                                 case "index0":
-                                    text = ScriptVariable.LoopIndex.Name;
-                                    break;
                                 case "rindex0":
-                                    text = ScriptVariable.LoopRIndex.Name;
-                                    break;
-                                case "rindex":
                                 case "index":
-                                    // Because forloop.index is 1 based index, we need to create a binary expression
-                                    // to support it here
-                                    bool isrindex = loopVariableText == "rindex";
-
-                                    var nested = new ScriptNestedExpression()
-                                    {
-                                        Expression = new ScriptBinaryExpression()
-                                        {
-                                            Operator = ScriptBinaryOperator.Add,
-                                            Left = new ScriptVariableLoop(isrindex ? ScriptVariable.LoopRIndex.Name : ScriptVariable.LoopIndex.Name)
-                                            {
-                                                Span = currentSpan
-                                            },
-                                            Right = new ScriptLiteral(1)
-                                            {
-                                                Span = currentSpan
-                                            },
-                                            Span = currentSpan
-                                        },
-                                        Span = currentSpan
-                                    };
-
-                                    if (_isKeepTrivia)
-                                    {
-                                        if (triviasBefore != null)
-                                        {
-                                            nested.AddTrivias(triviasBefore, true);
-                                        }
-                                        FlushTrivias(nested, false);
-                                    }
-                                    return nested;
+                                case "rindex":
                                 case "length":
-                                    text = ScriptVariable.LoopLength.Name;
                                     break;
                                 case "col":
                                     if (text != "tablerowloop")
@@ -343,62 +301,35 @@ namespace Scriban.Parsing
                                         // unit test: 108-variable-loop-error2.txt
                                         LogError(currentToken, $"The loop variable <{text}.col> is invalid");
                                     }
-                                    text = ScriptVariable.TableRowCol.Name;
                                     break;
 
                                 default:
-                                    text = text + "." + loopVariableText;
-                                    LogError(currentToken, $"The liquid loop variable <{text}> is not supported");
+                                    LogError(currentToken, $"The liquid loop variable <{text}.{loopVariableText}> is not supported");
                                     break;
                             }
+
+                            if (text == "forloop") text = "for";
+                            else if (text == "tablerowloop") text = "tablerow";
                         }
                         else
                         {
                             switch (loopVariableText)
                             {
+                                // supported by both for and while
                                 case "first":
-                                    text = ScriptVariable.LoopFirst.Name;
+                                case "even":
+                                case "odd":
+                                case "index":
                                     break;
                                 case "last":
-                                    if (text == "while")
-                                    {
-                                        // unit test: 108-variable-loop-error2.txt
-                                        LogError(currentToken, "The loop variable <while.last> is invalid");
-                                    }
-                                    text = ScriptVariable.LoopLast.Name;
-                                    break;
                                 case "changed":
-                                    if (text == "while")
-                                    {
-                                        // unit test: 108-variable-loop-error2.txt
-                                        LogError(currentToken, "The loop variable <while.changed> is invalid");
-                                    }
-                                    text = ScriptVariable.LoopChanged.Name;
-                                    break;
                                 case "length":
-                                    if (text == "while")
-                                    {
-                                        // unit test: 108-variable-loop-error2.txt
-                                        LogError(currentToken, "The loop variable <while.length> is invalid");
-                                    }
-                                    text = ScriptVariable.LoopLength.Name;
-                                    break;
-                                case "even":
-                                    text = ScriptVariable.LoopEven.Name;
-                                    break;
-                                case "odd":
-                                    text = ScriptVariable.LoopOdd.Name;
-                                    break;
-                                case "index":
-                                    text = ScriptVariable.LoopIndex.Name;
-                                    break;
                                 case "rindex":
                                     if (text == "while")
                                     {
                                         // unit test: 108-variable-loop-error2.txt
-                                        LogError(currentToken, "The loop variable <while.rindex> is invalid");
+                                        LogError(currentToken, $"The loop variable <while.{loopVariableText}> is invalid");
                                     }
-                                    text = ScriptVariable.LoopRIndex.Name;
                                     break;
                                 case "col":
                                     if (text != "tablerow")
@@ -406,25 +337,17 @@ namespace Scriban.Parsing
                                         // unit test: 108-variable-loop-error2.txt
                                         LogError(currentToken, $"The loop variable <{text}.col> is invalid");
                                     }
-                                    text = ScriptVariable.TableRowCol.Name;
                                     break;
                                 default:
-                                    text = text + "." + loopVariableText;
                                     // unit test: 108-variable-loop-error1.txt
-                                    LogError(currentToken, $"The loop variable <{text}> is not supported");
+                                    LogError(currentToken, $"The loop variable <{text}.{loopVariableText}> is not supported");
                                     break;
                             }
                         }
-
-                        // We no longer checks at parse time usage of loop variables, as they can be used in a wrap context
-                        //if (!IsInLoop())
-                        //{
-                        //    LogError(currentToken, $"Unexpected variable <{text}> outside of a loop");
-                        //}
                     }
                     else
                     {
-                        LogError(currentToken, $"Invalid token `{Current.Type}`. The loop variable <{text}> dot must be followed by an identifier");
+                        LogError(currentToken, $"Invalid token `{GetAsText(Current)}`. The loop variable <{text}> dot must be followed by an identifier");
                     }
                 }
             }

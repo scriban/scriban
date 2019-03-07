@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Scriban.Runtime;
@@ -18,6 +19,17 @@ namespace Scriban.Functions
     /// </summary>
     public class StringFunctions : ScriptObject
     {
+        [ThreadStatic] private static StringBuilder _tlsBuilder;
+
+        private static StringBuilder GetTempStringBuilder()
+        {
+            var builder = _tlsBuilder;
+            if (builder == null) builder = _tlsBuilder = new StringBuilder(1024);
+            return builder;
+        }
+
+        private static void ReleaseBuilder(StringBuilder builder) => builder.Length = 0;
+
         /// <summary>
         /// Concatenates two strings
         /// </summary>
@@ -57,9 +69,15 @@ namespace Scriban.Functions
                 return text ?? string.Empty;
             }
 
-            var builder = new StringBuilder(text);
-            builder[0] = char.ToUpper(builder[0]);
-            return builder.ToString();
+            var builder = GetTempStringBuilder();
+            builder.Append(char.ToUpper(text[0]));
+            if (text.Length > 1)
+            {
+                builder.Append(text, 1, text.Length - 1);
+            }
+            var result = builder.ToString();
+            ReleaseBuilder(builder);
+            return result;
         }
 
         /// <summary>
@@ -82,7 +100,7 @@ namespace Scriban.Functions
                 return string.Empty;
             }
 
-            var builder = new StringBuilder(text.Length);
+            var builder = GetTempStringBuilder();
             var previousSpace = true;
             for (int i = 0; i < text.Length; i++)
             {
@@ -99,7 +117,9 @@ namespace Scriban.Functions
                 }
                 builder.Append(c);
             }
-            return builder.ToString();
+            var result = builder.ToString();
+            ReleaseBuilder(builder);
+            return result;
         }
 
         /// <summary>
@@ -182,7 +202,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Handleize(string text)
         {
-            var builder = new StringBuilder();
+            var builder = GetTempStringBuilder();
             char lastChar = (char) 0;
             for (int i = 0; i < text.Length; i++)
             {
@@ -202,7 +222,9 @@ namespace Scriban.Functions
             {
                 builder.Length--;
             }
-            return builder.ToString();
+            var result = builder.ToString();
+            ReleaseBuilder(builder);
+            return result;
         }
 
         /// <summary>
@@ -367,12 +389,14 @@ namespace Scriban.Functions
                 return text;
             }
 
-            var builder = new StringBuilder();
+            var builder = GetTempStringBuilder();
             builder.Append(text.Substring(0, indexOfMatch));
             builder.Append(replace);
             builder.Append(text.Substring(indexOfMatch + match.Length));
 
-            return builder.ToString();
+            var result = builder.ToString();
+            ReleaseBuilder(builder);
+            return result;
         }
 
         /// <summary>
@@ -718,10 +742,11 @@ namespace Scriban.Functions
             int lMinusTruncate = length - ellipsis.Length;
             if (text.Length > length)
             {
-                var builder = new StringBuilder(length);
+                var builder = GetTempStringBuilder();
                 builder.Append(text, 0, lMinusTruncate < 0 ? 0 : lMinusTruncate);
                 builder.Append(ellipsis);
-                return builder.ToString();
+                text = builder.ToString();
+                ReleaseBuilder(builder);
             }
             return text;
         }
@@ -749,7 +774,7 @@ namespace Scriban.Functions
                 return string.Empty;
             }
 
-            var builder = new StringBuilder();
+            var builder = GetTempStringBuilder();
             bool isFirstWord = true;
             foreach (var word in Regex.Split(text, @"\s+"))
             {
@@ -769,7 +794,9 @@ namespace Scriban.Functions
                 count--;
             }
             builder.Append("...");
-            return builder.ToString();
+            var result = builder.ToString();
+            ReleaseBuilder(builder);
+            return result;
         }
 
         /// <summary>
@@ -904,13 +931,15 @@ namespace Scriban.Functions
             text = text ?? string.Empty;
             var bytes = Encoding.UTF8.GetBytes(text);
             var hash = algo.ComputeHash(bytes);
-            var sb = new StringBuilder(hash.Length * 2);
+            var sb = GetTempStringBuilder();
             for (var i = 0; i < hash.Length; i++)
             {
                 var b = hash[i];
                 sb.Append(b.ToString("x2"));
             }
-            return sb.ToString();
+            var result = sb.ToString();
+            ReleaseBuilder(sb);
+            return result;
         }
 #else
         public static string Md5(string text)

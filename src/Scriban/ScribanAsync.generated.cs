@@ -852,7 +852,6 @@ namespace Scriban.Syntax
             if (list != null)
             {
                 object loopResult = null;
-                await context.SetValueAsync(ScriptVariable.LoopLength, list.Count).ConfigureAwait(false);
                 object previousValue = null;
                 bool reversed = false;
                 int startIndex = 0;
@@ -885,6 +884,9 @@ namespace Scriban.Syntax
                 bool isFirst = true;
                 int i = 0;
                 await BeforeLoopAsync(context).ConfigureAwait(false);
+                var loopState = CreateLoopState();
+                context.SetValue(GetLoopVariable(context), loopState);
+                loopState.Length = list.Count;
                 while (!reversed && index <= endIndex || reversed && index >= startIndex)
                 {
                     if (!context.StepLoop(this))
@@ -895,11 +897,12 @@ namespace Scriban.Syntax
                     // We update on next run on previous value (in order to handle last)
                     var value = list[index];
                     bool isLast = reversed ? index == startIndex : index == endIndex;
-                    context.SetValue(ScriptVariable.LoopLast, isLast);
-                    await context.SetValueAsync(ScriptVariable.LoopChanged, isFirst || !Equals(previousValue, value)).ConfigureAwait(false);
-                    await context.SetValueAsync(ScriptVariable.LoopRIndex, list.Count - index - 1).ConfigureAwait(false);
+                    loopState.Index = index;
+                    loopState.LocalIndex = i;
+                    loopState.IsLast = isLast;
+                    loopState.ValueChanged = isFirst || !Equals(previousValue, value);
                     await context.SetValueAsync(Variable, value).ConfigureAwait(false);
-                    loopResult = await LoopItemAsync(context, index, i, isLast).ConfigureAwait(false);
+                    loopResult = await LoopItemAsync(context, loopState).ConfigureAwait(false);
                     if (!ContinueLoop(context))
                     {
                         break;
@@ -951,12 +954,22 @@ namespace Scriban.Syntax
 
             // We can't cache this array because it might be collect by the function
             // So we absolutely need to generate a new array everytime we call a function
-            var argumentValues = new ScriptArray();
+            ScriptArray argumentValues;
             // Handle pipe arguments here
             if (processPipeArguments && context.PipeArguments != null && context.PipeArguments.Count > 0)
             {
-                argumentValues.AddRange(context.PipeArguments);
-                context.PipeArguments.Clear();
+                var args = context.PipeArguments;
+                argumentValues = new ScriptArray(args.Count);
+                for (int i = 0; i < args.Count; i++)
+                {
+                    argumentValues.Add(args[i]);
+                }
+
+                args.Clear();
+            }
+            else
+            {
+                argumentValues = new ScriptArray(arguments?.Count ?? 0);
             }
 
             // Process direct arguments
@@ -1253,14 +1266,8 @@ namespace Scriban.Syntax
         /// <param name = "localIndex"></param>
         /// <param name = "isLast"></param>
         /// <returns></returns>
-        protected virtual async ValueTask<object> LoopItemAsync(TemplateContext context, int index, int localIndex, bool isLast)
+        protected virtual async ValueTask<object> LoopItemAsync(TemplateContext context, LoopState state)
         {
-            // Setup variable
-            context.SetValue(ScriptVariable.LoopFirst, index == 0);
-            var even = (index & 1) == 0;
-            context.SetValue(ScriptVariable.LoopEven, even);
-            await context.SetValueAsync(ScriptVariable.LoopOdd, !even).ConfigureAwait(false);
-            context.SetValue(ScriptVariable.LoopIndex, index);
             // bug: temp workaround to correct a bug with ret. Should be handled differently
             return await context.EvaluateAsync(Body).ConfigureAwait(false);
         }
@@ -1494,10 +1501,14 @@ namespace Scriban.Syntax
             await context.WriteAsync("<tr class=\"row1\">").ConfigureAwait(false);
         }
 
-        protected override async ValueTask<object> LoopItemAsync(TemplateContext context, int index, int localIndex, bool isLast)
+        protected override async ValueTask<object> LoopItemAsync(TemplateContext context, LoopState state)
         {
+            var localIndex = state.LocalIndex;
             var columnIndex = localIndex % _columnsCount;
-            await context.SetValueAsync(ScriptVariable.TableRowCol, columnIndex + 1).ConfigureAwait(false);
+            var tableRowLoopState = (TableRowLoopState)state;
+            tableRowLoopState.Col = columnIndex;
+            tableRowLoopState.ColFirst = columnIndex == 0;
+            tableRowLoopState.ColLast = ((localIndex + 1) % _columnsCount) == 0;
             if (columnIndex == 0 && localIndex > 0)
             {
                 await context.Write("</tr>").WriteAsync(context.NewLine).ConfigureAwait(false);
@@ -1506,7 +1517,7 @@ namespace Scriban.Syntax
             }
 
             await context.Write("<td class=\"col").Write((columnIndex + 1).ToString(CultureInfo.InvariantCulture)).WriteAsync("\">").ConfigureAwait(false);
-            var result = await base.LoopItemAsync(context, index, localIndex, isLast).ConfigureAwait(false);
+            var result = await base.LoopItemAsync(context, state).ConfigureAwait(false);
             await context.WriteAsync("</td>").ConfigureAwait(false);
             return result;
         }
@@ -1629,6 +1640,8 @@ namespace Scriban.Syntax
             var index = 0;
             object result = null;
             await BeforeLoopAsync(context).ConfigureAwait(false);
+            var loopState = CreateLoopState();
+            context.SetValue(ScriptVariable.WhileObject, loopState);
             while (context.StepLoop(this))
             {
                 var conditionResult = context.ToBool(Condition.Span, await context.EvaluateAsync(Condition).ConfigureAwait(false));
@@ -1637,7 +1650,10 @@ namespace Scriban.Syntax
                     break;
                 }
 
-                result = await LoopItemAsync(context, index++, index, false).ConfigureAwait(false);
+                loopState.Index = index++;
+                loopState.LocalIndex = index;
+                loopState.IsLast = false;
+                result = await LoopItemAsync(context, loopState).ConfigureAwait(false);
                 if (!ContinueLoop(context))
                 {
                     break;

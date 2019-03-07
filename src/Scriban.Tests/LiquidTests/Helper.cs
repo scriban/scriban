@@ -11,9 +11,9 @@ namespace DotLiquid.Tests.Tags
 {
     public class Helper
     {
-        public static void AssertTemplateResult(string result, string input, object model = null)
+        public static void AssertTemplateResult(string result, string input, object model = null, bool hasForVariableNotSupportedByScriban = false)
         {
-            TestParser.AssertTemplate(result, input, true, false, false, model, true);
+            TestParser.AssertTemplate(result, input, true, false, false, model, true, expectParsingErrorForRountrip: hasForVariableNotSupportedByScriban);
         }
     }
 

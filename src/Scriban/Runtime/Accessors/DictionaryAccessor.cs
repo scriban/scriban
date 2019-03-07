@@ -19,15 +19,22 @@ namespace Scriban.Runtime.Accessors
         }
 
 
-        public static bool TryGet(Type type, out IObjectAccessor accessor)
+        public static bool TryGet(object target, out IObjectAccessor accessor)
         {
-            if (type == null) throw new ArgumentNullException(nameof(type));
-            if (typeof(IDictionary).GetTypeInfo().IsAssignableFrom(type.GetTypeInfo()))
+            if (target == null) throw new ArgumentNullException(nameof(target));
+            if (target is IDictionary<string, object>)
+            {
+                accessor = DictionaryStringObjectAccessor.Default;
+                return true;
+            }
+
+            if (target is IDictionary)
             {
                 accessor = Default;
                 return true;
             }
 
+            var type = target.GetType();
             var dictionaryType = type.GetBaseOrInterface(typeof(IDictionary<,>));
             accessor = null;
             if (dictionaryType == null) return false;
@@ -73,6 +80,11 @@ namespace Scriban.Runtime.Accessors
             ((IDictionary) target)[member] = value;
             return true;
         }
+    }
+
+    class DictionaryStringObjectAccessor : GenericDictionaryAccessor<string, object>
+    {
+        public readonly static DictionaryStringObjectAccessor Default = new DictionaryStringObjectAccessor();
     }
 
     class GenericDictionaryAccessor<TKey, TValue> : IObjectAccessor

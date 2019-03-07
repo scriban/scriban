@@ -87,13 +87,22 @@ namespace Scriban.Syntax
 
             // We can't cache this array because it might be collect by the function
             // So we absolutely need to generate a new array everytime we call a function
-            var argumentValues = new ScriptArray();
+            ScriptArray argumentValues;
 
             // Handle pipe arguments here
             if (processPipeArguments && context.PipeArguments != null && context.PipeArguments.Count > 0)
             {
-                argumentValues.AddRange(context.PipeArguments);
-                context.PipeArguments.Clear();
+                var args = context.PipeArguments;
+                argumentValues = new ScriptArray(args.Count);
+                for (int i = 0; i < args.Count; i++)
+                {
+                    argumentValues.Add(args[i]);
+                }
+                args.Clear();
+            }
+            else
+            {
+                argumentValues = new ScriptArray(arguments?.Count ?? 0);
             }
 
             // Process direct arguments

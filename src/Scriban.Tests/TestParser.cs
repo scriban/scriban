@@ -403,7 +403,8 @@ end
 
         private static void TestFile(string inputName)
         {
-            var isSupportingExactRoundtrip = !NotSupportingExactRoundtrip.Contains(Path.GetFileName(inputName));
+            var filename = Path.GetFileName(inputName);
+            var isSupportingExactRoundtrip = !NotSupportingExactRoundtrip.Contains(filename);
 
             var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
 
@@ -416,7 +417,7 @@ end
 
             var isLiquid = inputName.Contains("liquid");
 
-            AssertTemplate(expectedOutputText, inputText, isLiquid, false, isSupportingExactRoundtrip);
+            AssertTemplate(expectedOutputText, inputText, isLiquid, false, isSupportingExactRoundtrip, expectParsingErrorForRountrip: filename == "513-liquid-statement-for.variables.txt");
         }
 
         private void AssertRoundtrip(string inputText, bool isLiquid = false)
@@ -438,7 +439,7 @@ end
             "470-html.txt"
         };
 
-        public static void AssertTemplate(string expected, string input, bool isLiquid = false, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false)
+        public static void AssertTemplate(string expected, string input, bool isLiquid = false, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false)
         {
             var parserOptions = new ParserOptions()
             {
@@ -519,7 +520,7 @@ end
                         }
                         result += message;
                     }
-                    if (specialLiquid)
+                    if (specialLiquid && !isRoundtrip)
                     {
                         throw new InvalidOperationException("Parser errors: " + result);
                     }
@@ -567,7 +568,7 @@ end
                                 scriptObj.Import(typeof(SpecialFunctionProvider));
                                 model = scriptObj;
                             }
-
+                            
                             // Render sync
                             {
                                 var context = NewTemplateContext(isLiquid);
@@ -613,7 +614,15 @@ end
                 Console.WriteLine("======================================");
                 Console.WriteLine(expected);
 
-                TextAssert.AreEqual(expected, result);
+                if (isRoundtrip && expectParsingErrorForRountrip)
+                {
+                    Assert.True(hasErrors, "The roundtrip test is expecting an error");
+                    Assert.AreNotEqual(expected, result);
+                }
+                else
+                {
+                    TextAssert.AreEqual(expected, result);
+                }
 
 #if SCRIBAN_ASYNC
                 if (!isRoundtrip && !isRoundtripTest && !hasErrors && !hasException)

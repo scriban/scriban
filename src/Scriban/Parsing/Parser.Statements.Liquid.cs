@@ -329,7 +329,7 @@ namespace Scriban.Parsing
         {
             var statement = Open<ScriptIfStatement>();
             NextToken(); // skip ifchanged token
-            statement.Condition = new ScriptVariableLoop(ScriptVariable.LoopChanged.Name);
+            statement.Condition = new ScriptMemberExpression() { Target = ScriptVariable.Create(ScriptVariable.ForObject.Name, ScriptVariableScope.Loop), Member = ScriptVariable.Create("changed", ScriptVariableScope.Global) };
             statement.Then = ParseBlockStatement(statement);
             Close(statement);
             statement.Condition.Span = statement.Span;

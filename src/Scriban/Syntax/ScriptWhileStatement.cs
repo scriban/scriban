@@ -14,6 +14,10 @@ namespace Scriban.Syntax
             var index = 0;
             object result = null;
             BeforeLoop(context);
+
+            var loopState = CreateLoopState();
+            context.SetValue(ScriptVariable.WhileObject, loopState);
+
             while (context.StepLoop(this))
             {
                 var conditionResult = context.ToBool(Condition.Span, context.Evaluate(Condition));
@@ -22,7 +26,11 @@ namespace Scriban.Syntax
                     break;
                 }
 
-                result = LoopItem(context, index++, index, false);
+                loopState.Index = index++;
+                loopState.LocalIndex = index;
+                loopState.IsLast = false;
+                
+                result = LoopItem(context, loopState);
 
                 if (!ContinueLoop(context))
                 {

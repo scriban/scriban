@@ -136,8 +136,8 @@ namespace DotLiquid.Tests.Tags
             Helper.AssertTemplateResult(" 1/3  2/3  3/3 ",
                 "{%for item in values%} {{forloop.index}}/{{forloop.length}} {%endfor%}", assigns);
             Helper.AssertTemplateResult(" 1  2  3 ", "{%for item in values%} {{forloop.index}} {%endfor%}", assigns);
-            Helper.AssertTemplateResult(" 0  1  2 ", "{%for item in values%} {{forloop.index0}} {%endfor%}", assigns);
-            Helper.AssertTemplateResult(" 2  1  0 ", "{%for item in values%} {{forloop.rindex0}} {%endfor%}", assigns);
+            Helper.AssertTemplateResult(" 0  1  2 ", "{%for item in values%} {{forloop.index0}} {%endfor%}", assigns, hasForVariableNotSupportedByScriban: true);
+            Helper.AssertTemplateResult(" 2  1  0 ", "{%for item in values%} {{forloop.rindex0}} {%endfor%}", assigns, hasForVariableNotSupportedByScriban: true);
             Helper.AssertTemplateResult(" 3  2  1 ", "{%for item in values%} {{forloop.rindex}} {%endfor%}", assigns);
             Helper.AssertTemplateResult(" true  false  false ", "{%for item in values%} {{forloop.first}} {%endfor%}", assigns);
             Helper.AssertTemplateResult(" false  false  true ", "{%for item in values%} {{forloop.last}} {%endfor%}", assigns);
