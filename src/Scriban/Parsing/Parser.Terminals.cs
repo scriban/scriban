@@ -155,10 +155,12 @@ namespace Scriban.Parsing
                         case 'u':
                         {
                             i++;
-                            var value = (text[i++].HexToInt() << 12) +
-                                        (text[i++].HexToInt() << 8) +
-                                        (text[i++].HexToInt() << 4) +
-                                        text[i].HexToInt();
+                            int value = 0;
+                            if (i < text.Length) value = text[i++].HexToInt();
+                            if (i < text.Length) value = (value << 4) | text[i++].HexToInt();
+                            if (i < text.Length) value = (value << 4) | text[i++].HexToInt();
+                            if (i < text.Length) value = (value << 4) | text[i].HexToInt();
+
                             // Is it correct?
                             builder.Append(ConvertFromUtf32(value));
                             break;
@@ -166,8 +168,9 @@ namespace Scriban.Parsing
                         case 'x':
                         {
                             i++;
-                            var value = (text[i++].HexToInt() << 4) +
-                                        text[i++].HexToInt();
+                            int value = 0;
+                            if (i < text.Length) value = text[i++].HexToInt();
+                            if (i < text.Length) value = (value << 4) | text[i].HexToInt();
                             builder.Append((char) value);
                             break;
                         }

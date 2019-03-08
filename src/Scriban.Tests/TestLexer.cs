@@ -638,37 +638,37 @@ single line
                 var lexer = new Lexer("{{ '\\u' }}");
                 var tokens = lexer.ToList();
                 Assert.True(lexer.HasErrors);
-                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+                StringAssert.Contains("Unexpected hex number", lexer.Errors.First().Message);
             }
             {
                 var lexer = new Lexer("{{ '\\u1' }}");
                 var tokens = lexer.ToList();
                 Assert.True(lexer.HasErrors);
-                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+                StringAssert.Contains("Unexpected hex number", lexer.Errors.First().Message);
             }
             {
                 var lexer = new Lexer("{{ '\\u12' }}");
                 var tokens = lexer.ToList();
                 Assert.True(lexer.HasErrors);
-                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+                StringAssert.Contains("Unexpected hex number", lexer.Errors.First().Message);
             }
             {
                 var lexer = new Lexer("{{ '\\u123' }}");
                 var tokens = lexer.ToList();
                 Assert.True(lexer.HasErrors);
-                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+                StringAssert.Contains("Unexpected hex number", lexer.Errors.First().Message);
             }
             {
                 var lexer = new Lexer("{{ '\\x' }}");
                 var tokens = lexer.ToList();
                 Assert.True(lexer.HasErrors);
-                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+                StringAssert.Contains("Unexpected hex number", lexer.Errors.First().Message);
             }
             {
                 var lexer = new Lexer("{{ '\\x1' }}");
                 var tokens = lexer.ToList();
                 Assert.True(lexer.HasErrors);
-                StringAssert.Contains("Unexpected escape character", lexer.Errors.First().Message);
+                StringAssert.Contains("Unexpected hex number", lexer.Errors.First().Message);
             }
             {
                 var lexer = new Lexer("{{ '");

@@ -1299,6 +1299,7 @@ namespace Scriban.Parsing
                                     }
                                 }
                             }
+                            AddError($"Unexpected hex number `{c}` following `\\u`. Expecting `\\u0000` to `\\uffff`.", _position, _position);
                             break;
                         case 'x':
                             end = _position;
@@ -1315,6 +1316,7 @@ namespace Scriban.Parsing
                                     continue;
                                 }
                             }
+                            AddError($"Unexpected hex number `{c}` following `\\x`. Expecting `\\x00` to `\\xff`", _position, _position);
                             break;
 
                     }

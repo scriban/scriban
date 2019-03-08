@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
@@ -28,7 +28,8 @@ namespace Scriban.Parsing
             {
                 return c - 'A' + 10;
             }
-            throw new ArgumentOutOfRangeException(nameof(c), $"The character '{c}' is not an hexa [0a-fA-F] character");
+            // Don't throw an exception as we are checking and logging an error if IsHex is false already
+            return 0;
         }
     }
 }
