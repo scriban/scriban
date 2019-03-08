@@ -70,6 +70,14 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void TestInvalidConvertToInt()
+        {
+            var template = Template.ParseLiquid("{{html>0}}");
+            var ex = Assert.Catch<ScriptRuntimeException>(() => template.Render(new {x = 0}));
+            Assert.AreEqual("<input>(1,7) : error : Unable to convert type `Scriban.Functions.HtmlFunctions` to int", ex.Message);
+        }
+
+        [Test]
         public void TestPipeAndFunction()
         {
             var template = Template.Parse(@"

@@ -95,7 +95,7 @@ namespace Scriban
                 {
                     return Convert.ToString(value, CurrentCulture);
                 }
-                catch (FormatException ex)
+                catch (Exception ex)
                 {
                     throw new ScriptRuntimeException(span, $"Unable to convert value of type `{value.GetType()}` to string", ex);
                 }
@@ -199,7 +199,7 @@ namespace Scriban
                 if (value is int) return (int) value;
                 return Convert.ToInt32(value, CurrentCulture);
             }
-            catch (FormatException ex)
+            catch (Exception ex)
             {
                 throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to int", ex);
             }
@@ -276,7 +276,7 @@ namespace Scriban
                 {
                     return Convert.ChangeType(value, destinationType, CurrentCulture);
                 }
-                catch (FormatException ex)
+                catch (Exception ex)
                 {
                     throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`", ex);
                 }
