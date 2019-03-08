@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.0 (08 Mar 2019)
+- Fix Template.ParseLiquid throws NullReferenceException #120
+- Fix ArgumentOutOfRangeException when parsing invalid escape \u \x in strings (#121)
+- Fix InvalidCastException when an invalid conversion is occuring (#122)
+- Fix operator precedence for unary operators (#136)
+
 ## 2.0.0-alpha-006 (07 Mar 2019)
 - Improve performance of for loops
 - Reduce allocations for string functions
