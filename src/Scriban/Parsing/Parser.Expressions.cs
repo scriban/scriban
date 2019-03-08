@@ -825,7 +825,7 @@ namespace Scriban.Parsing
                 case ScriptUnaryOperator.Plus:
                 case ScriptUnaryOperator.FunctionAlias:
                 case ScriptUnaryOperator.FunctionParametersExpand:
-                    return 10;
+                    return 100;
                 default:
                     return 0;
             }

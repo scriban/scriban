@@ -176,6 +176,16 @@ Tax: {{ 7 | match_tax }}";
         }
 
         [Test]
+        public void TestOperatorPrecedenceNegate()
+        {
+            var template = Template.Parse("{{ if -5.32 < 0 }}yo{{ end }}");
+            Assert.False(template.HasErrors);
+            var text = template.Render();
+            Assert.AreEqual("yo", text);
+        }
+
+
+        [Test]
         public void TestNullDateTime()
         {
             var template = Template.Parse("{{ null | date.to_string '%g' }}");
