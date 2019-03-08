@@ -215,11 +215,13 @@ namespace Scriban.Parsing
                 {
                     LogError(startToken, $"Unable to find a pending {pendingStart} for this `{identifier}`");
                 }
-
-                ExpectEndOfStatement(startStatement);
-                if (_isKeepTrivia)
+                else
                 {
-                    FlushTrivias(startStatement, false);
+                    ExpectEndOfStatement(startStatement);
+                    if (_isKeepTrivia)
+                    {
+                        FlushTrivias(startStatement, false);
+                    }
                 }
             }
         }

@@ -45,6 +45,15 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void TestLiquidError()
+        {
+            var template = Template.ParseLiquid("{%endunless");
+            Assert.True(template.HasErrors);
+            Assert.AreEqual(1, template.Messages.Count);
+            Assert.AreEqual("<input>(1,3) : error : Unable to find a pending `unless` for this `endunless`", template.Messages[0].ToString());
+        }
+
+        [Test]
         public void RoundtripFunction()
         {
             var text = @"{{ func inc
