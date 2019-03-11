@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Reflection;
@@ -19,12 +19,18 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="member">The member to rename</param>
         /// <returns>The member name renamed</returns>
-        public static string Rename(MemberInfo member)
+        public static string Rename(MemberInfo member) => Rename(member.Name);
+
+        /// <summary>
+        /// Renames a camel/pascalcase method name to a lowercase and `_` name. e.g `ThisIsAnExample` becomes `this_is_an_example`.
+        /// </summary>
+        /// <param name="name">The method name to rename</param>
+        /// <returns>The renamed method name</returns>
+        public static string Rename(string name)
         {
-            string name = member.Name;
             var builder = new StringBuilder();
-            bool previousUpper = false;
-            for (int i = 0; i < name.Length; i++)
+            var previousUpper = false;
+            for (var i = 0; i < name.Length; i++)
             {
                 var c = name[i];
                 if (char.IsUpper(c))
