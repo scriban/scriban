@@ -50,11 +50,14 @@ namespace Scriban.Syntax
 
         public List<LogMessage> ParserMessages { get; }
 
-        public override string ToString()
+        public override string Message
         {
-            var messagesAsText = StringHelper.Join("\n", ParserMessages);
-
-            return $"{base.ToString()} Parser messages:\n {messagesAsText}";
+            get
+            {
+                var messagesAsText = StringHelper.Join("\n", ParserMessages);
+                return $"{base.Message} Parser messages:\n {messagesAsText}";
+            }
         }
+
     }
 }
