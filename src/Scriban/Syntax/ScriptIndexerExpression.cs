@@ -93,7 +93,8 @@ namespace Scriban.Syntax
                 }
             }
 
-            if (targetObject is IDictionary || targetObject is ScriptObject)
+            var listAccessor = context.GetListAccessor(targetObject);
+            if (targetObject is IDictionary || targetObject is IScriptObject || listAccessor == null)
             {
                 var accessor = context.GetMemberAccessor(targetObject);
                 var indexAsString = context.ToString(Index.Span, index);
@@ -115,29 +116,23 @@ namespace Scriban.Syntax
             }
             else
             {
-                var accessor = context.GetListAccessor(targetObject);
-                if (accessor == null)
-                {
-                    throw new ScriptRuntimeException(Target.Span, $"Expecting a list. Invalid value `{targetObject}/{targetObject.GetType().Name}` for the target `{Target}` for the indexer: {this}"); // unit test: 130-indexer-accessor-error4.txt
-                }
-
                 int i = context.ToInt(Index.Span, index);
 
                 // Allow negative index from the end of the array
                 if (i < 0)
                 {
-                    i = accessor.GetLength(context, Span, targetObject) + i;
+                    i = listAccessor.GetLength(context, Span, targetObject) + i;
                 }
 
                 if (i >= 0)
                 {
                     if (setter)
                     {
-                        accessor.SetValue(context, Span, targetObject, i, valueToSet);
+                        listAccessor.SetValue(context, Span, targetObject, i, valueToSet);
                     }
                     else
                     {
-                        value = accessor.GetValue(context, Span, targetObject, i);
+                        value = listAccessor.GetValue(context, Span, targetObject, i);
                     }
                 }
             }

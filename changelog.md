@@ -1,5 +1,9 @@
 # Changelog
 
+## 2.0.1 WIP
+- Fix accessing object property using indexer notation when this is a .NET object (#116)
+- Fix for appearance parser errors in ASP.NET Core developer exception page Continue to fix problem described in this PR https://github.com/lunet-io/scriban/pull/109
+
 ## 2.0.0 (08 Mar 2019)
 - Fix Template.ParseLiquid throws NullReferenceException #120
 - Fix ArgumentOutOfRangeException when parsing invalid escape \u \x in strings (#121)

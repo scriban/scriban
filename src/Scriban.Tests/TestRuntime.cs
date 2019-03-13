@@ -706,6 +706,14 @@ Tax: {{ 7 | match_tax }}";
             }
         }
 
+        [Test]
+        public void TestIndexerOnNET()
+        {
+            var myobject = new MyObject() { FieldA = "yo"};
+            var result = Template.Parse("{{obj['field_a']}}").Render(new ScriptObject() {{"obj", myobject}});
+            Assert.AreEqual("yo", result);
+        }
+
         private class MyObject : MyStaticObject
         {
             public string FieldA;
