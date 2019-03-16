@@ -194,10 +194,10 @@ A `ScriptObject` is mainly an extended version of a `IDictionary<string, object>
   context.PushGlobal(scriptObject1);
   
   var template = Template.Parse("This is var1: `{{var1}}`");
-  template.Render(context);
+  var result = template.Render(context);
   
   // Prints: This is var1: `Variable 1`
-  Console.WriteLine(context.Output.ToString());
+  Console.WriteLine(result);
   ```
 
 Note that any `IDictionary<string, object>` put as a property will be accessible as well.
@@ -215,10 +215,10 @@ Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
   context.PushGlobal(scriptObject1);
   
   var template = Template.Parse("This is myfunc: `{{myfunc}}`");
-  template.Render(context);
+  var result = template.Render(context);
   
   // Prints: This is myfunc: `Yes`
-  Console.WriteLine(context.Output.ToString());
+  Console.WriteLine(result);
   ```
 
 #### Imports functions from a .NET class
@@ -247,10 +247,10 @@ This function can be imported into a ScriptObject:
   context.PushGlobal(scriptObject1);
   
   var template = Template.Parse("This is MyFunctions.Hello: `{{hello}}`");
-  template.Render(context);
+  var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
-  Console.WriteLine(context.Output.ToString());
+  Console.WriteLine(result);
   ```
 
 > Notice that when using a function with pipe calls like `{{description | string.strip }}``, the last argument passed to the `string.strip` function is the result of the previous pipe.
@@ -292,10 +292,10 @@ Then using directly this custom `ScriptObject` as a regular object:
   context.PushGlobal(scriptObject1);
   
   var template = Template.Parse("This is MyFunctions.Hello: `{{hello}}`");
-  template.Render(context);
+  var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
-  Console.WriteLine(context.Output.ToString());
+  Console.WriteLine(result);
   ```
 
 Notice that if you want to ignore a member when importing a .NET object or .NET class, you can use the attribute `ScriptMemberIgnore`
@@ -424,10 +424,10 @@ and import the properties/functions of this object into a ScriptObject, via `Scr
   context.PushGlobal(scriptObject1);
   
   var template = Template.Parse("This is Hello: `{{hello}}`");
-  template.Render(context);
+  var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
-  Console.WriteLine(context.Output.ToString());
+  Console.WriteLine(result);
   ```
 
 
@@ -456,10 +456,10 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
   context.PushGlobal(scriptObject1);
   
   var template = Template.Parse("This is Hello: `{{myobject.hello}}`");
-  template.Render(context);
+  var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
-  Console.WriteLine(context.Output.ToString());
+  Console.WriteLine(result);
   ```
 
 > **NOTICE**
@@ -521,10 +521,10 @@ context.PushGlobal(scriptObject1);
 context.PushGlobal(scriptObject2);
 
 var template = Template.Parse("This is var1: `{{var1}}` and var2: `{{var2}}");
-template.Render(context);
+var result = template.Render(context);
 
 // Prints: "This is var1: `Variable 1` and var2: `Variable 2 - from ScriptObject 2"
-Console.WriteLine(context.Output.ToString());
+Console.WriteLine(result);
 ```
 
 The `TemplateContext` stack is setup like this:  `scriptObject2` => `scriptObject1` => `builtins`
@@ -538,10 +538,10 @@ When writing to a variable, only the `ScriptObject` at the top of the `TemplateC
 ```C#
 var template2 = Template.Parse("This is var1: `{{var1}}` and var2: `{{var2}}`{{var2 = 5}} and new var2: `{{var2}}");
 
-template2.Render(context);
+var result = template2.Render(context);
 
 // Prints: "This is var1: `Variable 1` and var2: `Variable 2 - from ScriptObject 2 and new var2: `5`"
-Console.WriteLine(context.Output.ToString());
+Console.WriteLine(result);
 ```
 
 The `scriptObject2` object will now contain the `var2 = 5`
@@ -621,10 +621,10 @@ Note that renaming can be changed at two levels:
   context.PushGlobal(scriptObject1);
   
   var template = Template.Parse("This is Hello: `{{Hello}}`");
-  template.Render(context);
+  var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
-  Console.WriteLine(context.Output.ToString());
+  Console.WriteLine(result);
   ```
 - By setting the default member renamer on the `TemplateContext`
 
