@@ -9,6 +9,11 @@ namespace Scriban.Syntax
     {
         public ScriptExpression Condition { get; set; }
 
+        protected override object LoopItem(TemplateContext context, LoopState state)
+        {
+            return context.Evaluate(Body);
+        }
+
         protected override object EvaluateImpl(TemplateContext context)
         {
             var index = 0;

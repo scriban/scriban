@@ -38,11 +38,7 @@ namespace Scriban.Syntax
         /// <param name="localIndex"></param>
         /// <param name="isLast"></param>
         /// <returns></returns>
-        protected virtual object LoopItem(TemplateContext context, LoopState state)
-        {
-            // bug: temp workaround to correct a bug with ret. Should be handled differently
-            return context.Evaluate(Body);
-        }
+        protected abstract object LoopItem(TemplateContext context, LoopState state);
 
         protected virtual LoopState CreateLoopState() {  return new LoopState(); }
 
@@ -91,6 +87,8 @@ namespace Scriban.Syntax
 
 #if SCRIBAN_ASYNC
         protected abstract ValueTask<object> EvaluateImplAsync(TemplateContext context);
+
+        protected abstract ValueTask<object> LoopItemAsync(TemplateContext context, LoopState state);
 
         protected virtual ValueTask BeforeLoopAsync(TemplateContext context)
         {

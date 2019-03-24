@@ -28,6 +28,11 @@ namespace Scriban.Syntax
             ? NamedArguments[NamedArguments.Count - 1]
             : Iterator;
 
+        protected override object LoopItem(TemplateContext context, LoopState state)
+        {
+            return context.Evaluate(Body);
+        }
+
         protected virtual ScriptVariable GetLoopVariable(TemplateContext context)
         {
             return ScriptVariable.ForObject;
