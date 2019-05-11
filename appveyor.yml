@@ -13,7 +13,7 @@ install:
 
     if(-Not $env:APPVEYOR_PULL_REQUEST_NUMBER) {
       if($env:appveyor_repo_tag -eq 'True') {
-        if($env:appveyor_repo_tag_name -match '^v[0-9]') {
+        if($env:appveyor_repo_tag_name -match '^[0-9]') {
            $env:appveyor_nuget_push = 'true'
         }
       }
