@@ -1,8 +1,9 @@
 # Changelog
 
-## 2.0.1 WIP
+## 2.0.1 (11 May 2019)
 - Fix accessing object property using indexer notation when this is a .NET object (#116)
 - Fix for appearance parser errors in ASP.NET Core developer exception page Continue to fix problem described in this PR https://github.com/lunet-io/scriban/pull/109
+- Fix issue with operator || evaluating right expression even if left is true (#166)
 
 ## 2.0.0 (08 Mar 2019)
 - Fix Template.ParseLiquid throws NullReferenceException #120
