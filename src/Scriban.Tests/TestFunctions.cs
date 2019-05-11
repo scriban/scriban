@@ -24,9 +24,9 @@ namespace Scriban.Tests
             }
 
             [Test]
-            public void TestSortError()
+            public void TestSortNoError()
             {
-                TestParser.AssertTemplate("text(1,19) : error : Invalid number of arguments `0` passed to `array.sort` while expecting at least `1` arguments", "{{ [1,2] || array.sort }}");
+                TestParser.AssertTemplate("true", "{{ [1,2] || array.sort }}");
             }
         }
 

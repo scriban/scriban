@@ -34,6 +34,8 @@
 1.5 < 2 && 3 < 5 = true
 
 true || false = true
+false || true = true
+false && true = false
 true && true && false = false
 true && true && false || true = true
 true && true && false || true && true = true
@@ -45,3 +47,9 @@ a == empty: true
 b == empty: false
 c = a
 a == c: true
+
+a = {}
+if !a.foo || a.foo.bar
+    "empty ok"
+end
+empty ok

@@ -26,12 +26,32 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            var leftValueOriginal = context.Evaluate(Left);
-            var leftValue = leftValueOriginal;
-            var rightValueOriginal = context.Evaluate(Right);
-            object rightValue = rightValueOriginal;
+            var leftValue = context.Evaluate(Left);
 
-            return Evaluate(context, Span, Operator, leftValue, rightValue);
+            switch (Operator)
+            {
+                case ScriptBinaryOperator.And:
+                {
+                    var leftBoolValue = context.ToBool(Left.Span, leftValue);
+                    var rightValue = context.Evaluate(Right);
+                    var rightBoolValue = context.ToBool(Right.Span, rightValue);
+                    return leftBoolValue && rightBoolValue;
+                }
+
+                case ScriptBinaryOperator.Or:
+                {
+                    var leftBoolValue = context.ToBool(Left.Span, leftValue);
+                    if (leftBoolValue) return true;
+                    var rightValue = context.Evaluate(Right);
+                    return context.ToBool(Right.Span, rightValue);
+                }
+
+                default:
+                {
+                    var rightValue = context.Evaluate(Right);
+                    return Evaluate(context, Span, Operator, leftValue, rightValue);
+                }
+            }
         }
 
         public override void Write(TemplateRewriterContext context)
@@ -60,100 +80,84 @@ namespace Scriban.Syntax
             return false;
         }
 
-
         public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {
             if (op == ScriptBinaryOperator.EmptyCoalescing)
             {
                 return leftValue ?? rightValue;
             }
-            else if (op == ScriptBinaryOperator.And || op == ScriptBinaryOperator.Or)
+
+            switch (op)
             {
-                var leftBoolValue = context.ToBool(span, leftValue);
-                var rightBoolValue = context.ToBool(span, rightValue);
-                if (op == ScriptBinaryOperator.And)
+                case ScriptBinaryOperator.ShiftLeft:
+                    var leftList = leftValue as IList;
+                    if (leftList != null)
+                    {
+                        var newList = new ScriptArray(leftList) { rightValue };
+                        return newList;
+                    }
+                    break;
+                case ScriptBinaryOperator.ShiftRight:
+                    var rightList = rightValue as IList;
+                    if (rightList != null)
+                    {
+                        var newList = new ScriptArray(rightList);
+                        newList.Insert(0, leftValue);
+                        return newList;
+                    }
+                    break;
+
+                case ScriptBinaryOperator.LiquidHasKey:
                 {
-                    return leftBoolValue && rightBoolValue;
+                    var leftDict = leftValue as IDictionary<string, object>;
+                    if (leftDict != null)
+                    {
+                        return ObjectFunctions.HasKey(leftDict, context.ToString(span, rightValue));
+                    }
                 }
-                else
+                    break;
+
+                case ScriptBinaryOperator.LiquidHasValue:
                 {
-                    return leftBoolValue || rightBoolValue;
+                    var leftDict = leftValue as IDictionary<string, object>;
+                    if (leftDict != null)
+                    {
+                        return ObjectFunctions.HasValue(leftDict, context.ToString(span, rightValue));
+                    }
                 }
+                    break;
+
+                case ScriptBinaryOperator.CompareEqual:
+                case ScriptBinaryOperator.CompareNotEqual:
+                case ScriptBinaryOperator.CompareGreater:
+                case ScriptBinaryOperator.CompareLess:
+                case ScriptBinaryOperator.CompareGreaterOrEqual:
+                case ScriptBinaryOperator.CompareLessOrEqual:
+                case ScriptBinaryOperator.Add:
+                case ScriptBinaryOperator.Substract:
+                case ScriptBinaryOperator.Multiply:
+                case ScriptBinaryOperator.Divide:
+                case ScriptBinaryOperator.DivideRound:
+                case ScriptBinaryOperator.Modulus:
+                case ScriptBinaryOperator.RangeInclude:
+                case ScriptBinaryOperator.RangeExclude:
+                case ScriptBinaryOperator.LiquidContains:
+                case ScriptBinaryOperator.LiquidStartsWith:
+                case ScriptBinaryOperator.LiquidEndsWith:
+                    if (leftValue is string || rightValue is string)
+                    {
+                        return CalculateToString(context, span, op, leftValue, rightValue);
+                    }
+                    else if (leftValue == EmptyScriptObject.Default || rightValue == EmptyScriptObject.Default)
+                    {
+                        return CalculateEmpty(context, span, op, leftValue, rightValue);
+                    }
+                    else
+                    {
+                        return CalculateOthers(context, span, op, leftValue, rightValue);
+                    }
             }
-            else
-            {
-                switch (op)
-                {
-                    case ScriptBinaryOperator.ShiftLeft:
-                        var leftList = leftValue as IList;
-                        if (leftList != null)
-                        {
-                            var newList = new ScriptArray(leftList) { rightValue };
-                            return newList;
-                        }
-                        break;
-                    case ScriptBinaryOperator.ShiftRight:
-                        var rightList = rightValue as IList;
-                        if (rightList != null)
-                        {
-                            var newList = new ScriptArray(rightList);
-                            newList.Insert(0, leftValue);
-                            return newList;
-                        }
-                        break;
-
-                    case ScriptBinaryOperator.LiquidHasKey:
-                        {
-                            var leftDict = leftValue as IDictionary<string, object>;
-                            if (leftDict != null)
-                            {
-                                return ObjectFunctions.HasKey(leftDict, context.ToString(span, rightValue));
-                            }
-                        }
-                        break;
-
-                    case ScriptBinaryOperator.LiquidHasValue:
-                        {
-                            var leftDict = leftValue as IDictionary<string, object>;
-                            if (leftDict != null)
-                            {
-                                return ObjectFunctions.HasValue(leftDict, context.ToString(span, rightValue));
-                            }
-                        }
-                        break;
-
-                    case ScriptBinaryOperator.CompareEqual:
-                    case ScriptBinaryOperator.CompareNotEqual:
-                    case ScriptBinaryOperator.CompareGreater:
-                    case ScriptBinaryOperator.CompareLess:
-                    case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    case ScriptBinaryOperator.CompareLessOrEqual:
-                    case ScriptBinaryOperator.Add:
-                    case ScriptBinaryOperator.Substract:
-                    case ScriptBinaryOperator.Multiply:
-                    case ScriptBinaryOperator.Divide:
-                    case ScriptBinaryOperator.DivideRound:
-                    case ScriptBinaryOperator.Modulus:
-                    case ScriptBinaryOperator.RangeInclude:
-                    case ScriptBinaryOperator.RangeExclude:
-                    case ScriptBinaryOperator.LiquidContains:
-                    case ScriptBinaryOperator.LiquidStartsWith:
-                    case ScriptBinaryOperator.LiquidEndsWith:
-                        if (leftValue is string || rightValue is string)
-                        {
-                            return CalculateToString(context, span, op, leftValue, rightValue);
-                        }
-                        else if (leftValue == EmptyScriptObject.Default || rightValue == EmptyScriptObject.Default)
-                        {
-                            return CalculateEmpty(context, span, op, leftValue, rightValue);
-                        }
-                        else
-                        {
-                            return CalculateOthers(context, span, op, leftValue, rightValue);
-                        }
-                }
-            }
-            throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{leftValue}` / `{rightValue}`");
+            throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{leftValue}` and `{rightValue}`");
         }
 
         private static object CalculateEmpty(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
