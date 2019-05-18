@@ -1,0 +1,9 @@
+{{
+variable = 5
+case variable = 5
+    when 5
+        "OK"
+    else
+        "Not OK"
+end
+}}
