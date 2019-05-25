@@ -24,6 +24,7 @@ build:
 before_package:
 - cmd: >-
      msbuild /t:pack /p:Configuration=Release Scriban/Scriban.csproj
+
      msbuild /t:pack /p:Configuration=Release Scriban.Signed/Scriban.Signed.csproj
 artifacts:
 - path: src\**\*.nupkg
