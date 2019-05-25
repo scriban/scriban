@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.168
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban", "Scriban\Scriban.csproj", "{8A58A7E2-627C-4F41-933F-5AC92ADFAB48}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.Signed", "Scriban.Signed\Scriban.Signed.csproj", "{1A030CC6-3512-4D1A-8DFE-044905BB61B6}"
+EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.Tests", "Scriban.Tests\Scriban.Tests.csproj", "{A0C5CB5F-5568-40AB-B945-D6D2664D51B0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{8A58A7E2-627C-4F41-933F-5AC92ADFAB48} = {8A58A7E2-627C-4F41-933F-5AC92ADFAB48}
@@ -64,6 +66,10 @@ Global
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFrameworks>net35;net40;net45;netcoreapp1.0;netcoreapp1.1;netcoreapp2.1</TargetFrameworks>
     <IsPackable>false</IsPackable>

@@ -24,12 +24,9 @@ build:
 before_package:
 - cmd: >-
      msbuild /t:pack /p:Configuration=Release Scriban/Scriban.csproj
-
-     msbuild /t:Clean Scriban/Scriban.csproj
-     
-     msbuild /t:pack /p:Configuration=Release;SignAssembly=true Scriban/Scriban.csproj
+     msbuild /t:pack /p:Configuration=Release Scriban.Signed/Scriban.Signed.csproj
 artifacts:
-- path: src\Scriban\Bin\Release\*.nupkg
+- path: src\**\*.nupkg
   name: Scriban Nugets
 deploy:
 - provider: NuGet

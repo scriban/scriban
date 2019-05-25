@@ -1,46 +1,6 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <Import Project="Scriban.props" />
   <PropertyGroup>
-    <Description>Scriban is a fast, powerful, safe and lightweight text templating language and engine for .NET, with a compatibility mode for parsing liquid templates.</Description>
-    <Copyright>Alexandre Mutel</Copyright>
-    <AssemblyTitle>Scriban</AssemblyTitle>
-    <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>2.0.1</VersionPrefix>
-    <!--<VersionSuffix>alpha</VersionSuffix>
-    <BuildNumber>006</BuildNumber>-->
-    <VersionSuffix Condition="'$(VersionSuffix)' != '' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
-    <Authors>Alexandre Mutel</Authors>
-    <TargetFrameworks>net35;net40;net45;netstandard1.1;netstandard1.3;netstandard2.0</TargetFrameworks>
-    <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
-    <!--<PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>-->
-    <PackageTags>templating;handlebars;liquid</PackageTags>
-    <PackageReleaseNotes>https://github.com/lunet-io/scriban/blob/master/changelog.md</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/img/scriban.png</PackageIconUrl>
-    <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
-    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
-    <NetStandardImplicitPackageVersion Condition=" '$(TargetFramework)' == 'netstandard1.1' ">1.6.1</NetStandardImplicitPackageVersion>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <!--Add support for sourcelink-->
-    <PublishRepositoryUrl>true</PublishRepositoryUrl>
-    <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
-    <DefineConstants>$(DefineConstants);SCRIBAN_ASYNC</DefineConstants>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(SignAssembly)' == 'true' ">
-    <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
-    <PublicSign Condition=" '$(OS)' != 'Windows_NT' ">true</PublicSign>
-  </PropertyGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
-    <Reference Include="System.Web" />
-  </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
-  </ItemGroup>
-  <ItemGroup>
-    <!--Add support for sourcelink-->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0-*" PrivateAssets="All" />
-  </ItemGroup>
 </Project>
