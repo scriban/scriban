@@ -12,7 +12,7 @@
     <TargetFrameworks>net35;net40;net45;netstandard1.1;netstandard1.3;netstandard2.0</TargetFrameworks>
     <AssemblyName>Scriban</AssemblyName>
     <PackageId>Scriban</PackageId>
-    <PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>
+    <!--<PackageId Condition="'$(SignAssembly)' == 'true'">Scriban.Signed</PackageId>-->
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>https://github.com/lunet-io/scriban/blob/master/changelog.md</PackageReleaseNotes>
     <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/img/scriban.png</PackageIconUrl>
