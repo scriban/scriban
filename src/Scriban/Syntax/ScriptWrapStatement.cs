@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using Scriban.Runtime;
@@ -20,7 +20,7 @@ namespace Scriban.Syntax
             if (functionCall == null)
             {
                 var parameterLessFunction = context.Evaluate(Target, true);
-                if (!(parameterLessFunction is IScriptCustomFunction))
+                if (!(parameterLessFunction is IScriptCustomFunction || parameterLessFunction is ScriptFunction))
                 {
                     var targetPrettyname = ScriptSyntaxAttribute.Get(Target);
                     throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyname.Name}`");
@@ -29,11 +29,9 @@ namespace Scriban.Syntax
                 context.BlockDelegates.Push(Body);
                 return ScriptFunctionCall.Call(context, this, parameterLessFunction, false);
             }
-            else
-            {
-                context.BlockDelegates.Push(Body);
-                return context.Evaluate(functionCall);
-            }
+
+            context.BlockDelegates.Push(Body);
+            return context.Evaluate(functionCall);
         }
 
         public override void Write(TemplateRewriterContext context)

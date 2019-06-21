@@ -1,0 +1,21 @@
+func wrapped
+	for $i in 1..<10
+		$$
+	end
+end
+
+wrap wrapped
+	"[$i] This is inside the wrap!"
+end
+===
+{{
+func wrapped
+	for $i in 1..<10
+		$$
+	end
+end
+
+wrap wrapped
+	$i + " -> This is inside the wrap!\n"
+end
+}}
