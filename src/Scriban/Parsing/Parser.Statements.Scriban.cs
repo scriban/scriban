@@ -242,7 +242,7 @@ namespace Scriban.Parsing
 
             // Parse the condition
             // unit test: 220-while-error1.txt
-            whileStatement.Condition = ExpectAndParseExpression(whileStatement);
+            whileStatement.Condition = ExpectAndParseExpression(whileStatement, allowAssignment: false);
 
             if (ExpectEndOfStatement(whileStatement))
             {

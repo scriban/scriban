@@ -298,7 +298,7 @@ namespace Scriban.Parsing
             var caseStatement = Open<ScriptCaseStatement>();
             NextToken(); // skip case
 
-            caseStatement.Value = ExpectAndParseExpression(caseStatement);
+            caseStatement.Value = ExpectAndParseExpression(caseStatement, allowAssignment: false);
 
             if (ExpectEndOfStatement(caseStatement))
             {
@@ -404,7 +404,7 @@ namespace Scriban.Parsing
             condition.InvertCondition = invert;
             NextToken(); // skip if
 
-            condition.Condition = ExpectAndParseExpression(condition);
+            condition.Condition = ExpectAndParseExpression(condition, allowAssignment: false);
 
             if (ExpectEndOfStatement(condition))
             {

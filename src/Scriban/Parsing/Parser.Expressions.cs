@@ -40,14 +40,14 @@ namespace Scriban.Parsing
             BinaryOperators.Add(TokenType.DoubleDotLess, ScriptBinaryOperator.RangeExclude);
         }
 
-        private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default)
+        private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             bool hasAnonymousFunction = false;
-            return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence, mode);
+            return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence, mode, allowAssignment);
         }
 
         private ScriptExpression ParseExpression(ScriptNode parentNode, ref bool hasAnonymousFunction, ScriptExpression parentExpression = null, int precedence = 0,
-            ParseExpressionMode mode = ParseExpressionMode.Default)
+            ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             int expressionCount = 0;
             _expressionLevel++;
@@ -216,7 +216,7 @@ namespace Scriban.Parsing
                     {
                         var assignExpression = Open<ScriptAssignExpression>();
 
-                        if (_expressionLevel > 1)
+                        if (_expressionLevel > 1 || !allowAssignment)
                         {
                             // unit test: 101-assign-complex-error1.txt
                             LogError(assignExpression, $"Expression is only allowed for a top level assignment");
@@ -677,11 +677,11 @@ namespace Scriban.Parsing
         }
 
         private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null,
-            ParseExpressionMode mode = ParseExpressionMode.Default)
+            ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             if (StartAsExpression())
             {
-                return ParseExpression(parentNode, parentExpression, newPrecedence, mode);
+                return ParseExpression(parentNode, parentExpression, newPrecedence, mode, allowAssignment);
             }
             LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of `{Current.Type}`");
             return null;
