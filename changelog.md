@@ -1,5 +1,10 @@
 # Changelog
 
+## 2.1.0 (30 Jun 2019)
+- Allow assignments only in top level expression statements (#169)
+- Fix issue with parameter less wrap function (#177)
+- Make for variable only local to the loop (#172)
+
 ## 2.0.1 (11 May 2019)
 - Fix accessing object property using indexer notation when this is a .NET object (#116)
 - Fix for appearance parser errors in ASP.NET Core developer exception page Continue to fix problem described in this PR https://github.com/lunet-io/scriban/pull/109
