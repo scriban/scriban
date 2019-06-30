@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -439,7 +439,6 @@ namespace Scriban
         public void SetValue(ScriptVariable variable, object value, bool asReadOnly = false)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
-
 
             var scope = variable.Scope;
             IScriptObject firstStore = null;
@@ -981,13 +980,29 @@ namespace Scriban
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
             object value = null;
-            var count = _globalStores.Count;
-            var items = _globalStores.Items;
-            for (int i = count - 1; i >= 0; i--)
+
+            if (IsInLoop)
             {
-                if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
+                var count = _loopStores.Count;
+                var items = _loopStores.Items;
+                for (int i = count - 1; i >= 0; i--)
                 {
-                    return value;
+                    if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
+                    {
+                        return value;
+                    }
+                }
+            }
+
+            {
+                var count = _globalStores.Count;
+                var items = _globalStores.Items;
+                for (int i = count - 1; i >= 0; i--)
+                {
+                    if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
+                    {
+                        return value;
+                    }
                 }
             }
 

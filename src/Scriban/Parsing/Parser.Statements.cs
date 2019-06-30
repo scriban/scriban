@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -372,7 +372,16 @@ namespace Scriban.Parsing
                     LogError(forStatement, $"Expecting a variable instead of `{forStatement.Variable}`");
                 }
 
-                // in 
+                // A global variable used in a for should always be a loop only variable
+                if (forStatement.Variable is ScriptVariableGlobal previousVar)
+                {
+                    var loopVar = ScriptVariable.Create(previousVar.Name, ScriptVariableScope.Loop);
+                    loopVar.Span = previousVar.Span;
+                    loopVar.Trivias = previousVar.Trivias;
+                    forStatement.Variable = loopVar;
+                }
+
+                // in
                 if (Current.Type != TokenType.Identifier || GetAsText(Current) != "in")
                 {
                     // unit test: 211-for-error2.txt

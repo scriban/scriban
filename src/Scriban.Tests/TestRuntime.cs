@@ -41,6 +41,27 @@ namespace Scriban.Tests
         }
 
         [Test]
+
+        public void TestLoopVariable()
+        {
+            var template = Template.Parse(@"
+{{- for x in [1,2,3,4,5]
+y = x
+end -}}
+x and y = {{ x }} and {{ y }}
+{{~ for y in [6,7,8,9,0]
+z = y
+end ~}}
+y and z = {{ y }} and {{ z -}}
+");
+            var expected = @"x and y =  and 5
+y and z = 5 and 0";
+
+            var tc = new TemplateContext();
+            var result = template.Render(tc);
+            TextAssert.AreEqual(expected, result);
+        }
+        [Test]
         public void TestFunctionWithTemplateContextAndObjectParams()
         {
             {
@@ -373,10 +394,10 @@ Tax: {{ 7 | match_tax }}";
 
             string myTemplate = @"
 [
-  { {{ for tbr in tb }}
+  { {{~ for tbr in tb }}
     ""N"": {{tbr.Column1}},
     ""M"": {{tbr.Column2}}
-    {{ end }}
+    {{~ end ~}}
   },
 ]
 {{tb}}
@@ -396,13 +417,12 @@ Tax: {{ 7 | match_tax }}";
             var expected =
                 @"
 [
-  { 
+  {
     ""N"": Hello,
     ""M"": World
-    
+
     ""N"": Bonjour,
     ""M"": le monde
-    
   },
 ]
 [[[Hello], [World]], [[Bonjour], [le monde]]]
