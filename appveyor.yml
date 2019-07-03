@@ -1,9 +1,14 @@
 version: 11.0.{build}
 image: Visual Studio 2017
 configuration: Release
+environment:
+  COVERALLS_REPO_TOKEN:
+    secure: h4MvUAY7e+c+ARSmz7e/M/ThJeLaxwlNfKUlofp1yUWAj/uHpWf5rZ1bUo+XYagz
 install:
 - ps: >-
     cd src
+
+    dotnet tool install -g coveralls.net --version 1.0.0
 
     nuget restore Scriban.sln
 
@@ -21,6 +26,16 @@ install:
 build:
   project: src/Scriban.sln
   verbosity: minimal
+test_script:
+  - cmd: >-
+      dotnet test Scriban.Tests -c Release -f netcoreapp2.1 /p:CollectCoverage=true /p:Include=\"[Scriban]*\" /p:CoverletOutputFormat=opencover /p:CoverletOutput=./coverage.xml
+after_test:
+  - ps: >-
+      if($env:APPVEYOR_REPO_BRANCH -eq "master") {
+        if (Test-Path "./coverage.xml") {
+          csmacnz.Coveralls --opencover -i "./coverage.xml" --repoToken $env:COVERALLS_REPO_TOKEN --basePath "$env:APPVEYOR_BUILD_FOLDER" --useRelativePath --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
+        }
+      }
 before_package:
 - cmd: >-
      msbuild /t:pack /p:Configuration=Release Scriban/Scriban.csproj
