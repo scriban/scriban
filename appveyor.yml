@@ -28,7 +28,7 @@ build:
   verbosity: minimal
 test_script:
   - cmd: >-
-      dotnet test Scriban.Tests -c Release -f netcoreapp2.1 /p:CollectCoverage=true /p:Include=\"[Scriban]*\" /p:CoverletOutputFormat=opencover /p:CoverletOutput=./coverage.xml
+      dotnet test Scriban.Tests -c Release -f netcoreapp2.1 /p:CollectCoverage=true /p:Include=\"[Scriban]*\" /p:CoverletOutputFormat=opencover /p:CoverletOutput=../coverage.xml
 after_test:
   - ps: >-
       if($env:APPVEYOR_REPO_BRANCH -eq "master") {
