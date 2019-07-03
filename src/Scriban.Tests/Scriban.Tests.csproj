@@ -14,6 +14,10 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="coverlet.msbuild" Version="2.6.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
