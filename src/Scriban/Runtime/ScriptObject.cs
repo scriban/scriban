@@ -30,7 +30,21 @@ namespace Scriban.Runtime
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptObject"/> class.
         /// </summary>
-        public ScriptObject(int capacity) : this(capacity, true)
+        public ScriptObject(IEqualityComparer<string> keyComparer) : this (0, true, keyComparer)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptObject"/> class.
+        /// </summary>
+        public ScriptObject(int capacity) : this(capacity, true, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptObject"/> class.
+        /// </summary>
+        public ScriptObject(int capacity, IEqualityComparer<string> keyComparer) : this(capacity, true, keyComparer)
         {
         }
 
@@ -39,9 +53,19 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="capacity">Initial capacity of the dictionary</param>
         /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
-        public ScriptObject(int capacity, bool? autoImportStaticsFromThisType)
+        public ScriptObject(int capacity, bool? autoImportStaticsFromThisType) : this(capacity, autoImportStaticsFromThisType, null)
         {
-            Store = new Dictionary<string, InternalValue>(capacity);
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ScriptObject"/> class.
+        /// </summary>
+        /// <param name="capacity">Initial capacity of the dictionary</param>
+        /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
+        /// <param name="keyComparer">Comparer to use when looking up members</param>
+        public ScriptObject(int capacity, bool? autoImportStaticsFromThisType, IEqualityComparer<string> keyComparer)
+        {
+            Store = new Dictionary<string, InternalValue>(capacity, keyComparer);
 
             // Only import if we are asked for and we have a derived type
             if (this.GetType() != typeof(ScriptObject) && autoImportStaticsFromThisType.GetValueOrDefault())
