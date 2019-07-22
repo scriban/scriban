@@ -734,6 +734,18 @@ Tax: {{ 7 | match_tax }}";
             Assert.AreEqual("yo", result);
         }
 
+        [Test]
+        public void TestCaseInsensitiveLookupOnScriptObject()
+        {
+            var obj = new ScriptObject(StringComparer.OrdinalIgnoreCase);
+            obj["Name"] = "world";
+            var context = new TemplateContext();
+            context.PushGlobal(obj);
+            var template = Template.Parse("Hello {{ name }}!");
+            var result = template.Render(context);
+            Assert.AreEqual("Hello world!", result);
+        }
+
         private class MyObject : MyStaticObject
         {
             public string FieldA;
