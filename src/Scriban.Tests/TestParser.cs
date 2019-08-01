@@ -19,16 +19,14 @@ using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
+using static Scriban.Tests.TestFilesHelper;
 
 namespace Scriban.Tests
 {
     [TestFixture]
     public class TestParser
     {
-        private const string RelativeBasePath = @"..\..\..\TestFiles";
         private const string BuiltinMarkdownDocFile = @"..\..\..\..\..\doc\builtins.md";
-        private const string InputFilePattern = "*.txt";
-        private const string OutputEndFileExtension = ".out.txt";
 
         [Test]
         public void TestRoundtrip()
@@ -422,14 +420,10 @@ end
             var filename = Path.GetFileName(inputName);
             var isSupportingExactRoundtrip = !NotSupportingExactRoundtrip.Contains(filename);
 
-            var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
-
-            var inputFile = Path.Combine(baseDir, inputName);
-            var inputText = File.ReadAllText(inputFile);
-
-            var expectedOutputFile = Path.ChangeExtension(inputFile, OutputEndFileExtension);
-            Assert.True(File.Exists(expectedOutputFile), $"Expecting output result file `{expectedOutputFile}` for input file `{inputName}`");
-            var expectedOutputText = File.ReadAllText(expectedOutputFile, Encoding.UTF8);
+            var inputText = LoadTestFile(inputName);
+            var expectedOutputName = Path.ChangeExtension(inputName, OutputEndFileExtension);
+            var expectedOutputText = LoadTestFile(expectedOutputName);
+            Assert.NotNull(expectedOutputText, $"Expecting output result file `{expectedOutputName}` for input file `{inputName}`");
 
             var isLiquid = inputName.Contains("liquid");
 
@@ -770,55 +764,7 @@ end
 
         public static IEnumerable ListTestFiles(string folder)
         {
-            var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
-            foreach (var file in
-                Directory.GetFiles(Path.Combine(baseDir, folder), InputFilePattern, SearchOption.AllDirectories)
-                    .Where(f => !f.EndsWith(OutputEndFileExtension))
-                    .Select(f => f.StartsWith(baseDir) ? f.Substring(baseDir.Length + 1) : f)
-                    .OrderBy(f => f))
-            {
-                var caseData = new TestCaseData(file);
-                var category = Path.GetDirectoryName(file);
-                caseData.TestName = category + "/" + Path.GetFileNameWithoutExtension(file);
-                caseData.SetCategory(category);
-                yield return caseData;
-            }
-        }
-
-        /// <summary>
-        /// Use an internal class to have a better display of the filename in Resharper Unit Tests runner.
-        /// </summary>
-        public struct TestFilePath
-        {
-            public TestFilePath(string filePath)
-            {
-                FilePath = filePath;
-                Category = Path.GetDirectoryName(filePath);
-            }
-
-            public string FilePath { get; }
-
-            public string Category { get; }
-
-            public override string ToString()
-            {
-                return FilePath;
-            }
-        }
-
-        private static string BaseDirectory
-        {
-            get
-            {
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
-                var assembly = Assembly.GetExecutingAssembly();
-                var codebase = new Uri(assembly.CodeBase);
-                var path = codebase.LocalPath;
-                return Path.GetDirectoryName(path);
-#else
-                return Directory.GetCurrentDirectory();
-#endif
-            }
+            return ListTestFilesInFolder(folder);
         }
     }
 }
