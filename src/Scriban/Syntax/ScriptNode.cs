@@ -104,6 +104,14 @@ namespace Scriban.Syntax
             }
             return false;
         }
+
+        public static TNode WithTriviaAndSpanFrom<TNode>(this TNode node, ScriptNode sourceNode)
+            where TNode : ScriptNode
+        {
+            node.Trivias = sourceNode?.Trivias;
+            node.Span = sourceNode?.Span ?? default;
+            return node;
+        }
     }
 
     public class ScriptTrivias

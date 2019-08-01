@@ -115,279 +115,410 @@ namespace Scriban.Syntax
 
         protected virtual ScriptNode VisitTableRowStatement(ScriptTableRowStatement node)
         {
-            return new ScriptTableRowStatement
+            var newVariable = (ScriptExpression) Visit(node.Variable);
+            var newIterator = (ScriptExpression) Visit(node.Iterator);
+            var newNamedArguments = VisitAll(node.NamedArguments);
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+
+            if (newVariable == node.Variable &&
+                newIterator == node.Iterator &&
+                newNamedArguments == node.NamedArguments &&
+                newBody == node.Body)
             {
-                Variable = (ScriptExpression)Visit(node.Variable),
-                Iterator = (ScriptExpression)Visit(node.Iterator),
-                NamedArguments = node.NamedArguments?.Select(Visit).Cast<ScriptNamedArgument>().ToList(),
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                return node;
+            }
+
+            return new ScriptTableRowStatement()
+            {
+                Variable = newVariable,
+                Iterator = newIterator,
+                NamedArguments = newNamedArguments,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitCaseStatement(ScriptCaseStatement node)
         {
+            var newValue = (ScriptExpression)Visit(node.Value);
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+
+            if (newValue == node.Value &&
+                newBody == node.Body)
+            {
+                return node;
+            }
+
             return new ScriptCaseStatement
             {
-                Value = (ScriptExpression)Visit(node.Value),
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Value = newValue,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitElseStatement(ScriptElseStatement node)
         {
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newElse = (ScriptConditionStatement)Visit(node.Else);
+
+            if (newBody == node.Body &&
+                newElse == node.Else)
+            {
+                return node;
+            }
+
             return new ScriptElseStatement
             {
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Else = (ScriptConditionStatement)Visit(node.Else),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Body = newBody,
+                Else = newElse
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitForStatement(ScriptForStatement node)
         {
+            var newVariable = (ScriptExpression)Visit(node.Variable);
+            var newIterator = (ScriptExpression)Visit(node.Iterator);
+            var newNamedArguments = VisitAll(node.NamedArguments);
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+
+            if (newVariable == node.Variable &&
+                newIterator == node.Iterator &&
+                newNamedArguments == node.NamedArguments &&
+                newBody == node.Body)
+            {
+                return node;
+            }
+
             return new ScriptForStatement
             {
-                Variable = (ScriptExpression)Visit(node.Variable),
-                Iterator = (ScriptExpression)Visit(node.Iterator),
-                NamedArguments = node.NamedArguments?.Select(Visit).Cast<ScriptNamedArgument>().ToList(),
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Variable = newVariable,
+                Iterator = newIterator,
+                NamedArguments = newNamedArguments,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitIfStatement(ScriptIfStatement node)
         {
+            var newCondition = (ScriptExpression)Visit(node.Condition);
+            var newThen = (ScriptBlockStatement)Visit(node.Then);
+            var newElse = (ScriptConditionStatement)Visit(node.Else);
+
+            if (newCondition == node.Condition &&
+                newThen == node.Then &&
+                newElse == node.Else)
+            {
+                return node;
+            }
+
             return new ScriptIfStatement
             {
-                Condition = (ScriptExpression)Visit(node.Condition),
+                Condition = newCondition,
+                Then = newThen,
+                Else = newElse,
                 InvertCondition = node.InvertCondition,
-                Then = (ScriptBlockStatement)Visit(node.Then),
-                Else = (ScriptConditionStatement)Visit(node.Else),
-                IsElseIf = node.IsElseIf,
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                IsElseIf = node.IsElseIf
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitWhenStatement(ScriptWhenStatement node)
         {
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newNext = (ScriptConditionStatement)Visit(node.Next);
+            var newValues = VisitAll(node.Values);
+
+            if (newBody == node.Body &&
+                newNext == node.Next &&
+                newValues == node.Values)
+            {
+                return node;
+            }
+
             var newStatement = new ScriptWhenStatement
             {
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Next = (ScriptConditionStatement)Visit(node.Next),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Body = newBody,
+                Next = newNext
+            }.WithTriviaAndSpanFrom(node);
 
-            newStatement.Values.AddRange(node.Values.Select(Visit).Cast<ScriptExpression>());
+            newStatement.Values.AddRange(newValues);
 
             return newStatement;
         }
 
         protected virtual ScriptNode VisitWhileStatement(ScriptWhileStatement node)
         {
+            var newCondition = (ScriptExpression)Visit(node.Condition);
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+
+            if (newCondition == node.Condition &&
+                newBody == node.Body)
+            {
+                return node;
+            }
+
             return new ScriptWhileStatement
             {
-                Condition = (ScriptExpression)Visit(node.Condition),
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Condition = newCondition,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitVariableGlobal(ScriptVariableGlobal node)
         {
-            return new ScriptVariableGlobal(node.Name)
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitVariableLocal(ScriptVariableLocal node)
         {
-            return new ScriptVariableLocal(node.Name)
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitVariableLoop(ScriptVariableLoop node)
         {
-            return new ScriptVariableLoop(node.Name)
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitArrayInitializerExpression(ScriptArrayInitializerExpression node)
         {
-            var newExpression = new ScriptArrayInitializerExpression
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            var newValues = VisitAll(node.Values);
 
-            newExpression.Values.AddRange(node.Values.Select(Visit).Cast<ScriptExpression>());
+            if (newValues == node.Values)
+            {
+                return node;
+            }
+
+            var newExpression = new ScriptArrayInitializerExpression().WithTriviaAndSpanFrom(node);
+            newExpression.Values.AddRange(newValues);
 
             return newExpression;
         }
 
         protected virtual ScriptNode VisitAssignExpression(ScriptAssignExpression node)
         {
+            var newTarget = (ScriptExpression)Visit(node.Target);
+            var newValue = (ScriptExpression)Visit(node.Value);
+
+            if (newTarget == node.Target &&
+                newValue == node.Value)
+            {
+                return node;
+            }
+
             return new ScriptAssignExpression
             {
-                Target = (ScriptExpression)Visit(node.Target),
-                Value = (ScriptExpression)Visit(node.Value),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Target = newTarget,
+                Value = newValue
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitBinaryExpression(ScriptBinaryExpression node)
         {
+            var newLeft = (ScriptExpression)Visit(node.Left);
+            var newRight = (ScriptExpression)Visit(node.Right);
+
+            if (newLeft == node.Left &&
+                newRight == node.Right)
+            {
+                return node;
+            }
+
             return new ScriptBinaryExpression
             {
-                Left = (ScriptExpression)Visit(node.Left),
+                Left = newLeft,
                 Operator = node.Operator,
-                Right = (ScriptExpression)Visit(node.Right),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Right = newRight
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitBlockStatement(ScriptBlockStatement node)
         {
-            var newStatement = new ScriptBlockStatement
+            var newStatements = VisitAll(node.Statements);
+
+            if (newStatements == node.Statements)
             {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                return node;
+            }
 
-            newStatement.Statements.AddRange(node.Statements.Select(Visit).Cast<ScriptStatement>());
+            var newBlockStatement = new ScriptBlockStatement().WithTriviaAndSpanFrom(node);
+            newBlockStatement.Statements.AddRange(newStatements);
 
-            return newStatement;
+            return newBlockStatement;
         }
 
         protected virtual ScriptNode VisitCaptureStatement(ScriptCaptureStatement node)
         {
+            var newTarget = (ScriptExpression)Visit(node.Target);
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+
+            if (newTarget == node.Target &&
+                newBody == node.Body)
+            {
+                return node;
+            }
+
             return new ScriptCaptureStatement
             {
-                Target = (ScriptExpression)Visit(node.Target),
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Target = newTarget,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitExpressionStatement(ScriptExpressionStatement node)
         {
+            var newExpression = (ScriptExpression)Visit(node.Expression);
+
+            if (newExpression == node.Expression)
+            {
+                return node;
+            }
+
             return new ScriptExpressionStatement
             {
-                Expression = (ScriptExpression)Visit(node.Expression),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Expression = newExpression
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitFunctionCall(ScriptFunctionCall node)
         {
+            var newTarget = (ScriptExpression)Visit(node.Target);
+            var newArguments = VisitAll(node.Arguments);
+
+            if (newTarget == node.Target &&
+                newArguments == node.Arguments)
+            {
+                return node;
+            }
+
             var newCall = new ScriptFunctionCall
             {
-                Target = (ScriptExpression)Visit(node.Target),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Target = newTarget
+            }.WithTriviaAndSpanFrom(node);
 
-            newCall.Arguments.AddRange(node.Arguments.Select(Visit).Cast<ScriptExpression>());
+            newCall.Arguments.AddRange(newArguments);
 
             return newCall;
         }
 
         protected virtual ScriptNode VisitImportStatement(ScriptImportStatement node)
         {
+            var newExpression = (ScriptExpression)Visit(node.Expression);
+
+            if (newExpression == node.Expression)
+            {
+                return node;
+            }
+
             return new ScriptImportStatement
             {
-                Expression = (ScriptExpression)Visit(node.Expression),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Expression = newExpression
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitIndexerExpression(ScriptIndexerExpression node)
         {
+            var newTarget = (ScriptExpression)Visit(node.Target);
+            var newIndex = (ScriptExpression)Visit(node.Index);
+
+            if (newTarget == node.Target &&
+                newIndex == node.Index)
+            {
+                return node;
+            }
+
             return new ScriptIndexerExpression
             {
-                Target = (ScriptExpression)Visit(node.Target),
-                Index = (ScriptExpression)Visit(node.Index),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Target = newTarget,
+                Index = newIndex
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitIsEmptyExpression(ScriptIsEmptyExpression node)
         {
+            var newTarget = (ScriptExpression)Visit(node.Target);
+
+            if (newTarget == node.Target)
+            {
+                return node;
+            }
+
             return new ScriptIsEmptyExpression
             {
-                Target = (ScriptExpression)Visit(node.Target),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Target = newTarget
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitMemberExpression(ScriptMemberExpression node)
         {
+            var newTarget = (ScriptExpression) Visit(node.Target);
+            var newMember = (ScriptVariable) Visit(node.Member);
+
+            if (newTarget == node.Target &&
+                newMember == node.Member)
+            {
+                return node;
+            }
+
             return new ScriptMemberExpression
             {
-                Target = (ScriptExpression)Visit(node.Target),
-                Member = (ScriptVariable)Visit(node.Member),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Target = newTarget,
+                Member = newMember
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitNamedArgument(ScriptNamedArgument node)
         {
+            var newValue = (ScriptExpression)Visit(node.Value);
+
+            if (newValue == node.Value)
+            {
+                return node;
+            }
+
             return new ScriptNamedArgument
             {
                 Name = node.Name,
-                Value = (ScriptExpression)Visit(node.Value),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Value = newValue
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitNestedExpression(ScriptNestedExpression node)
         {
+            var newExpression = (ScriptExpression)Visit(node.Expression);
+
+            if (newExpression == node.Expression)
+            {
+                return node;
+            }
+
             return new ScriptNestedExpression
             {
-                Expression = (ScriptExpression)Visit(node.Expression),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Expression = newExpression
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitObjectInitializerExpression(ScriptObjectInitializerExpression node)
         {
-            var newExpression = new ScriptObjectInitializerExpression
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
-
+            var newMembers = new Dictionary<ScriptExpression, ScriptExpression>();
+            bool changed = false;
             foreach (var member in node.Members)
             {
                 var newKey = (ScriptExpression)Visit(member.Key);
+                changed |= newKey != member.Key;
+
                 var newValue = (ScriptExpression)Visit(member.Value);
-                newExpression.Members.Add(newKey, newValue);
+                changed |= newValue != member.Value;
+
+                newMembers.Add(newKey, newValue);
+            }
+
+            if (!changed)
+            {
+                return node;
+            }
+
+            var newExpression = new ScriptObjectInitializerExpression().WithTriviaAndSpanFrom(node);
+            foreach (var member in newMembers)
+            {
+                newExpression.Members.Add(member.Key, member.Value);
             }
 
             return newExpression;
@@ -395,156 +526,203 @@ namespace Scriban.Syntax
 
         protected virtual ScriptNode VisitPipeCall(ScriptPipeCall node)
         {
+            var newFrom = (ScriptExpression)Visit(node.From);
+            var newTo = (ScriptExpression)Visit(node.To);
+
+            if (newFrom == node.From &&
+                newTo == node.To)
+            {
+                return node;
+            }
+
             return new ScriptPipeCall
             {
-                From = (ScriptExpression)Visit(node.From),
-                To = (ScriptExpression)Visit(node.To),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                From = newFrom,
+                To = newTo
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitRawStatement(ScriptRawStatement node)
         {
-            return new ScriptRawStatement
-            {
-                Text = node.Text,
-                EscapeCount = node.EscapeCount,
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitReturnStatement(ScriptReturnStatement node)
         {
+            var newExpression = (ScriptExpression)Visit(node.Expression);
+
+            if (newExpression == node.Expression)
+            {
+                return node;
+            }
+
             return new ScriptReturnStatement
             {
-                Expression = (ScriptExpression)Visit(node.Expression),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Expression = newExpression
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitThisExpression(ScriptThisExpression node)
         {
-            return new ScriptThisExpression
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitUnaryExpression(ScriptUnaryExpression node)
         {
+            var newRight = (ScriptExpression)Visit(node.Right);
+
+            if (newRight == node.Right)
+            {
+                return node;
+            }
+
             return new ScriptUnaryExpression
             {
                 Operator = node.Operator,
-                Right = (ScriptExpression)Visit(node.Right),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Right = newRight
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitWithStatement(ScriptWithStatement node)
         {
+            var newName = (ScriptExpression)Visit(node.Name);
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+
+            if (newName == node.Name &&
+                newBody == node.Body)
+            {
+                return node;
+            }
+
             return new ScriptWithStatement
             {
-                Name = (ScriptExpression)Visit(node.Name),
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Name = newName,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitWrapStatement(ScriptWrapStatement node)
         {
+            var newTarget = (ScriptExpression)Visit(node.Target);
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+
+            if (newTarget == node.Target &&
+                newBody == node.Body)
+            {
+                return node;
+            }
+
             return new ScriptWrapStatement
             {
-                Target = (ScriptExpression)Visit(node.Target),
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Target = newTarget,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitAnonymousFunction(ScriptAnonymousFunction node)
         {
+            var newFunction = (ScriptFunction)Visit(node.Function);
+
+            if (newFunction == node.Function)
+            {
+                return node;
+            }
+
             return new ScriptAnonymousFunction
             {
-                Function = (ScriptFunction)Visit(node.Function),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Function = newFunction
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitBreakStatement(ScriptBreakStatement node)
         {
-            return new ScriptBreakStatement
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitContinueStatement(ScriptContinueStatement node)
         {
-            return new ScriptContinueStatement
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitFunction(ScriptFunction node)
         {
+            var newName = (ScriptVariable)Visit(node.Name);
+            var newBody = (ScriptStatement)Visit(node.Body);
+
+            if (newName == node.Name &&
+                newBody == node.Body)
+            {
+                return node;
+            }
+
             return new ScriptFunction
             {
-                Name = (ScriptVariable)Visit(node.Name),
-                Body = (ScriptStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Name = newName,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitLiteral(ScriptLiteral node)
         {
-            return new ScriptLiteral
-            {
-                Value = node.Value,
-                StringQuoteType = node.StringQuoteType,
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitNopStatement(ScriptNopStatement node)
         {
-            return new ScriptNopStatement
-            {
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+            return node;
         }
 
         protected virtual ScriptNode VisitReadOnlyStatement(ScriptReadOnlyStatement node)
         {
+            var newVariable = (ScriptVariable)Visit(node.Variable);
+
+            if (newVariable == node.Variable)
+            {
+                return node;
+            }
+
             return new ScriptReadOnlyStatement
             {
-                Variable = (ScriptVariable)Visit(node.Variable),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                Variable = newVariable
+            }.WithTriviaAndSpanFrom(node);
         }
 
         protected virtual ScriptNode VisitPage(ScriptPage node)
         {
+            var newFrontMatter = (ScriptBlockStatement)Visit(node.FrontMatter);
+            var newBody = (ScriptBlockStatement)Visit(node.Body);
+
+            if (newFrontMatter == node.FrontMatter &&
+                newBody == node.Body)
+            {
+                return node;
+            }
+
             return new ScriptPage
             {
-                FrontMatter = (ScriptBlockStatement)Visit(node.FrontMatter),
-                Body = (ScriptBlockStatement)Visit(node.Body),
-                Trivias = node.Trivias,
-                Span = node.Span
-            };
+                FrontMatter = newFrontMatter,
+                Body = newBody
+            }.WithTriviaAndSpanFrom(node);
+        }
+
+        protected virtual List<TNode> VisitAll<TNode>(List<TNode> nodes)
+            where TNode : ScriptNode
+        {
+            if (nodes == null)
+                return null;
+
+            var newNodes = new List<TNode>();
+            bool changed = false;
+            foreach (var node in nodes)
+            {
+                var newNode = (TNode) Visit(node);
+                newNodes.Add(newNode);
+                changed |= newNode != node;
+            }
+
+            if (changed)
+                return newNodes;
+            return nodes;
         }
 
         private class ScriptVisitorContext : IScriptVisitorContext
