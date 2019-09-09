@@ -33,6 +33,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.And:
                 {
                     var leftBoolValue = context.ToBool(Left.Span, leftValue);
+                    if (!leftBoolValue) return false;
                     var rightValue = context.Evaluate(Right);
                     var rightBoolValue = context.ToBool(Right.Span, rightValue);
                     return leftBoolValue && rightBoolValue;
