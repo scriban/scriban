@@ -36,7 +36,7 @@ after_test:
   - ps: >-
       if($env:APPVEYOR_REPO_BRANCH -eq "master") {
         if (Test-Path "./coverage.xml") {
-          csmacnz.Coveralls --opencover -i "./coverage.xml" --repoToken $env:COVERALLS_REPO_TOKEN --basePath "$env:APPVEYOR_BUILD_FOLDER" --useRelativePath --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor $env:APPVEYOR_REPO_COMMIT_AUTHOR --commitEmail $env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL --commitMessage $env:APPVEYOR_REPO_COMMIT_MESSAGE --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
+          csmacnz.Coveralls --opencover -i "./coverage.xml" --repoToken "$env:COVERALLS_REPO_TOKEN" --basePath "$env:APPVEYOR_BUILD_FOLDER" --useRelativePath --commitId "$env:APPVEYOR_REPO_COMMIT" --commitBranch "$env:APPVEYOR_REPO_BRANCH" --commitAuthor "$env:APPVEYOR_REPO_COMMIT_AUTHOR" --commitEmail "$env:APPVEYOR_REPO_COMMIT_AUTHOR_EMAIL" --commitMessage "$env:APPVEYOR_REPO_COMMIT_MESSAGE" --jobId $env:APPVEYOR_BUILD_NUMBER --serviceName appveyor
         }
       }
 before_package:
