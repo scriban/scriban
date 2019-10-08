@@ -197,6 +197,7 @@ namespace Scriban.Benchmarks
         private readonly List<Product> _products;
         private readonly List<ScriptObject> _scribanProducts;
         private readonly List<DotLiquid.Hash> _dotLiquidProducts;
+        private readonly Cottle.Value _cottleProducts;
 
         private readonly Dictionary<Cottle.Value, Cottle.Value> _cottleStringStore;
 
@@ -219,7 +220,7 @@ namespace Scriban.Benchmarks
             _products = new List<Product>(ProductCount);
             _scribanProducts = new List<ScriptObject>();
             _dotLiquidProducts = new List<DotLiquid.Hash>(ProductCount);
-            var cottleValues = new List<Cottle.Value>();
+            var cottleProducts = new List<Cottle.Value>();
 
             for (int i = 0; i < ProductCount; i++)
             {
@@ -231,22 +232,19 @@ namespace Scriban.Benchmarks
 
                 var obj = new ScriptObject {["name"] = product.Name, ["price"] = product.Price, ["description"] = product.Description};
                 _scribanProducts.Add(obj);
-                cottleValues.Add(new Cottle.Values.ReflectionValue(product)); 
+
+                var value = new Dictionary<Cottle.Value, Cottle.Value> {["name"] = product.Name, ["price"] = product.Price, ["description"] = product.Description};
+                cottleProducts.Add(value);
             }
+
+            _cottleProducts = cottleProducts;
 
             _liquidTemplateContext = new LiquidTemplateContext();
 
             // For Cottle, we match the behavior of Scriban that is accessing the Truncate function via an reflection invoke
             // In Scriban, we could also have a direct Truncate function, but it is much less practical in terms of declaration
             _cottleStringStore = new Dictionary<Cottle.Value, Cottle.Value>();
-            _cottleStringStore["truncate"] = new Cottle.Functions.NativeFunction((values, store, Output) =>
-            {
-                if (values.Count != 2)
-                {
-                    throw new InvalidOperationException("Unexpected number of arguments for truncate function");
-                }
-                return StringFunctions.Truncate(values[0].AsString, Convert.ToInt32(values[1].AsNumber));
-            }, 2);
+            _cottleStringStore["truncate"] = new Cottle.Functions.NativeFunction(values => StringFunctions.Truncate(values[0].AsString, Convert.ToInt32(values[1].AsNumber)), 2);
         }
 
         [Benchmark(Description = "Scriban")]
@@ -321,10 +319,11 @@ namespace Scriban.Benchmarks
         public string TestCottle()
         {
             // This is done to match the behavior of Scriban (no preparation of the datas)
-            var cottleStore = new Cottle.Stores.BuiltinStore();
-            cottleStore["string"] = _cottleStringStore;
-            cottleStore["products"] = new Cottle.Values.ReflectionValue(_products);
-            return _cottleTemplate.Render(cottleStore);
+            return _cottleTemplate.Render(Cottle.Context.CreateBuiltin(new Dictionary<Cottle.Value, Cottle.Value>
+            {
+                ["string"] = _cottleStringStore,
+                ["products"] = _cottleProducts
+            }));
         }
 
         [Benchmark(Description = "Fluid")]
