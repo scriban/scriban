@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <PackageReference Include="BenchmarkDotNet" Version="0.11.4" />
-    <PackageReference Include="Cottle" Version="1.4.2" />
+    <PackageReference Include="Cottle" Version="1.5.4" />
     <PackageReference Include="DotLiquid" Version="2.0.298" />
     <PackageReference Include="Fluid.Core" Version="1.0.0-beta-9545" />
     <PackageReference Include="Handlebars.Net" Version="1.9.5" />
