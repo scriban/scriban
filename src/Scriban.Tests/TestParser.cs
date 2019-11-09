@@ -495,7 +495,9 @@ end
             {
                 bool isRoundtrip = roundtripText != null;
                 bool hasErrors = false;
+#if SCRIBAN_ASYNC
                 bool hasException = false;
+#endif
                 if (isRoundtrip)
                 {
                     Console.WriteLine("Roundtrip");
@@ -609,7 +611,9 @@ end
                         }
                         catch (Exception exception)
                         {
+#if SCRIBAN_ASYNC
                             hasException = true;
+#endif
                             if (specialLiquid)
                             {
                                 throw;
