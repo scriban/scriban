@@ -10,10 +10,6 @@ using Scriban.Runtime;
 
 #if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-using Scriban.Helpers;
-using Scriban.Parsing;
-using Scriban.Runtime;
-
 #endif
 
 namespace Scriban.Syntax
@@ -34,9 +30,7 @@ namespace Scriban.Syntax
         /// Base implementation for a loop single iteration
         /// </summary>
         /// <param name="context">The context</param>
-        /// <param name="index">The index in the loop</param>
-        /// <param name="localIndex"></param>
-        /// <param name="isLast"></param>
+        /// <param name="state">The state of the loop</param>
         /// <returns></returns>
         protected abstract object LoopItem(TemplateContext context, LoopState state);
 
