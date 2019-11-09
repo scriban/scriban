@@ -750,7 +750,9 @@ Tax: {{ 7 | match_tax }}";
         {
             public string FieldA;
 
+#pragma warning disable 649
             public string FieldB;
+#pragma warning restore 649
 
             public string PropertyA { get; set; }
 

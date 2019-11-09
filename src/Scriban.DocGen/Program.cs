@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using NuDoq;
 using Scriban.Functions;
 using Scriban.Parsing;
@@ -15,18 +13,18 @@ namespace Scriban.DocGen
     /// <summary>
     /// Program generating the documentation for all builtin functions by extracting the code comments from xml files
     /// </summary>
-    class Program
+    static class Program
     {
-        static void Main(string[] args)
+        static void Main()
         {
-            var options = new ReaderOptions()
+            var options = new ReaderOptions
             {
                 KeepNewLinesInText = true
             };
 
             var members = DocReader.Read(typeof(Template).Assembly, options);
 
-            var builtinClassNames = new Dictionary<string, string>()
+            var builtinClassNames = new Dictionary<string, string>
             {
                 [nameof(ArrayFunctions)] = "array",
                 [nameof(DateTimeFunctions)] = "date",
@@ -116,10 +114,8 @@ This document describes the various built-in functions available in scriban.
             {
                 var type = member.Info as Type;
                 var methodInfo = member.Info as MethodInfo;
-                string shortName;
 
-                //                if (type != null && )
-                if (type != null && IsBuiltinType(type, out shortName))
+                if (type != null && IsBuiltinType(type, out string shortName))
                 {
                     var classWriter = new ClassWriter();
                     _classWriters[shortName] = classWriter;
