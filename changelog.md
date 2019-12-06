@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.1 (06 Dec 2019)
+- Fix issue with binary operator (a && b) that was still evaluating b even if a was already true (#191)
+
 ## 2.1.0 (30 Jun 2019)
 - Allow assignments only in top level expression statements (#169)
 - Fix issue with parameter less wrap function (#177)
