@@ -36,7 +36,7 @@ namespace Scriban.DocGen
                 [nameof(TimeSpanFunctions)] = "timespan"
             };
 
-            var writer = new StreamWriter("../../../../doc/builtins.md");
+            var writer = new StreamWriter("../../../../../doc/builtins.md");
 
             writer.WriteLine(@"# Builtins
 

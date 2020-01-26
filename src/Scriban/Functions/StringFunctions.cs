@@ -238,7 +238,7 @@ namespace Scriban.Functions
         /// ```
         /// > Highlight to see the empty spaces to the right of the string
         /// ```html
-        /// too many spaces
+        /// too many spaces           
         /// ```
         /// </remarks>
         public static string LStrip(string text)

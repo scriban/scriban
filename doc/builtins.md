@@ -684,7 +684,7 @@ Returns a datetime object of the current time, including the hour, minutes, seco
 ```
 > **output**
 ```html
-2019
+2020
 ```
 
 [:top:](#builtins)
@@ -2003,6 +2003,8 @@ String functions available through the builtin object 'string`.
 - [`string.hmac_sha256`](#stringhmac_sha256)
 - [`string.pad_left`](#stringpad_left)
 - [`string.pad_right`](#stringpad_right)
+- [`string.base64_encode`](#stringbase64_encode)
+- [`string.base64_decode`](#stringbase64_decode)
 
 [:top:](#builtins)
 ### `string.append`
@@ -2257,7 +2259,7 @@ string.pluralize <number> <singular> <plural>
 
 #### Description
 
-Outputs the singular or plural version of a string based on the value of a number. 
+Outputs the singular or plural version of a string based on the value of a number.
 
 #### Arguments
 
@@ -2507,7 +2509,7 @@ string.slice <text> <start> <length: 0>?
 
 #### Description
 
-The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring. 
+The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring.
 If no second parameter is given, a substring with the remaining characters will be returned.
 
 #### Arguments
@@ -2546,7 +2548,7 @@ string.slice1 <text> <start> <length: 1>?
 
 #### Description
 
-The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring. 
+The slice returns a substring, starting at the specified index. An optional second parameter can be passed to specify the length of the substring.
 If no second parameter is given, a substring with the first character will be returned.
 
 #### Arguments
@@ -2585,7 +2587,7 @@ string.split <text> <match>
 
 #### Description
 
-The `split` function takes on a substring as a parameter. 
+The `split` function takes on a substring as a parameter.
 The substring is used as a delimiter to divide a string into an array. You can output different parts of an array using `array` functions.
 
 #### Arguments
@@ -2835,7 +2837,7 @@ string.truncate <text> <length> <ellipsis>?
 
 #### Description
 
-Truncates a string down to the number of characters passed as the first parameter. 
+Truncates a string down to the number of characters passed as the first parameter.
 An ellipsis (...) is appended to the truncated string and is included in the character count
 
 #### Arguments
@@ -2868,7 +2870,7 @@ string.truncatewords <text> <count> <ellipsis>?
 
 #### Description
 
-Truncates a string down to the number of words passed as the first parameter. 
+Truncates a string down to the number of words passed as the first parameter.
 An ellipsis (...) is appended to the truncated string.
 
 #### Arguments
@@ -3134,6 +3136,68 @@ The input string padded
 > **output**
 ```html
 hello     world
+```
+
+[:top:](#builtins)
+### `string.base64_encode`
+
+```
+string.base64_encode <text>
+```
+
+#### Description
+
+Encodes a string to its Base64 representation.
+Its character encoded will be UTF-8.
+
+#### Arguments
+
+- `text`: The string to encode
+
+#### Returns
+
+The encoded string
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "hello" | string.base64_encode }}
+```
+> **output**
+```html
+aGVsbG8=
+```
+
+[:top:](#builtins)
+### `string.base64_decode`
+
+```
+string.base64_decode <text>
+```
+
+#### Description
+
+Decodes a Base64-encoded string to a byte array.
+he encoding of the bytes is assumed to be UTF-8.
+
+#### Arguments
+
+- `text`: The string to decode
+
+#### Returns
+
+The decoded string
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "aGVsbG8=" | string.base64_decode }}
+```
+> **output**
+```html
+hello
 ```
 [:top:](#builtins)
 
