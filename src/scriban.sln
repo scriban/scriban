@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.28307.168
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban", "Scriban\Scriban.csproj", "{8A58A7E2-627C-4F41-933F-5AC92ADFAB48}"
 EndProject
@@ -22,15 +22,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{061866E2
 		..\doc\runtime.md = ..\doc\runtime.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.Benchmarks", "Scriban.Benchmarks\Scriban.Benchmarks.csproj", "{843677EB-1242-4476-A287-B300E4A60149}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.Benchmarks", "Scriban.Benchmarks\Scriban.Benchmarks.csproj", "{843677EB-1242-4476-A287-B300E4A60149}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "liquid2scriban", "liquid2scriban\liquid2scriban.csproj", "{4AE5CDC4-4D74-4FDC-988B-4B783F61C56F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "liquid2scriban", "liquid2scriban\liquid2scriban.csproj", "{4AE5CDC4-4D74-4FDC-988B-4B783F61C56F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.CodeGen", "Scriban.CodeGen\Scriban.CodeGen.csproj", "{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.CodeGen", "Scriban.CodeGen\Scriban.CodeGen.csproj", "{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.DocGen", "Scriban.DocGen\Scriban.DocGen.csproj", "{D3478C01-63D6-4BAB-8A9E-3A9D5A98C80C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.AsyncCodeGen", "Scriban.AsyncCodeGen\Scriban.AsyncCodeGen.csproj", "{9AFAFD50-E753-4058-88EA-D3A217FCB518}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.AsyncCodeGen", "Scriban.AsyncCodeGen\Scriban.AsyncCodeGen.csproj", "{9AFAFD50-E753-4058-88EA-D3A217FCB518}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,6 +42,10 @@ Global
 		{8A58A7E2-627C-4F41-933F-5AC92ADFAB48}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A58A7E2-627C-4F41-933F-5AC92ADFAB48}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A58A7E2-627C-4F41-933F-5AC92ADFAB48}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A0C5CB5F-5568-40AB-B945-D6D2664D51B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A0C5CB5F-5568-40AB-B945-D6D2664D51B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A0C5CB5F-5568-40AB-B945-D6D2664D51B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -66,10 +70,6 @@ Global
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1A030CC6-3512-4D1A-8DFE-044905BB61B6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

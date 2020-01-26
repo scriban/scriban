@@ -4,7 +4,7 @@
     <Description>Scriban is a fast, powerful, safe and lightweight text templating language and engine for .NET, with a compatibility mode for parsing liquid templates.</Description>
     <Copyright>Alexandre Mutel</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>2.1.1</VersionPrefix>
+    <VersionPrefix>2.1.2</VersionPrefix>
     <!--<VersionSuffix>alpha</VersionSuffix>
     <BuildNumber>006</BuildNumber>-->
     <VersionSuffix Condition="'$(VersionSuffix)' != '' AND '$(BuildNumber)' != ''">$(VersionSuffix)-$(BuildNumber)</VersionSuffix>
@@ -27,6 +27,10 @@
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
     <Reference Include="System.Web" />
+  </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net45'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" />
+    <PackageReference Include="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
