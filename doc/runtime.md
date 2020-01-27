@@ -253,7 +253,7 @@ This function can be imported into a ScriptObject:
   Console.WriteLine(result);
   ```
 
-> Notice that when using a function with pipe calls like `{{description | string.strip }}``, the last argument passed to the `string.strip` function is the result of the previous pipe.
+> Notice that when using a function with pipe calls like `{{description | string.strip }}`, the last argument passed to the `string.strip` function is the result of the previous pipe.
 > That's a reason why you will notice in all builtin functions in scriban that they usually take the most relevant parameter as a last parameter instead of the first parameter, to allow proper support for pipe calls.
 
 > **NOTICE**
