@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.2 (8 Mar 2020)
+- Case insensitive member lookup in ScriptObject
+
 ## 2.1.1 (06 Dec 2019)
 - Fix issue with binary operator (a && b) that was still evaluating b even if a was already true (#191)
 
