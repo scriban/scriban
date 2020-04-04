@@ -140,6 +140,8 @@ namespace Scriban.Syntax
             // Used a specialized overrides on contxet for ScriptVariableGlobal
             return context.GetValue(this);
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 
 
@@ -148,6 +150,8 @@ namespace Scriban.Syntax
         public ScriptVariableLocal(string name) : base(name, ScriptVariableScope.Local)
         {
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 
     public class ScriptVariableLoop : ScriptVariable
@@ -168,6 +172,8 @@ namespace Scriban.Syntax
                 base.Write(context);
             }
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 
 }

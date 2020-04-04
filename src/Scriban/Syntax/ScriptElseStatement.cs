@@ -22,5 +22,7 @@ namespace Scriban.Syntax
             context.Write(Body);
             context.Write(Else);
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

@@ -63,5 +63,7 @@ namespace Scriban.Syntax
             var length = Span.End.Offset - Span.Start.Offset + 1;
             return Text?.Substring(Span.Start.Offset, length) ?? string.Empty;
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

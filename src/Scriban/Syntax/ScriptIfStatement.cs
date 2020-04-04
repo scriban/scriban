@@ -66,5 +66,7 @@ namespace Scriban.Syntax
         {
             return $"if {Condition}";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

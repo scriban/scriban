@@ -103,5 +103,7 @@ namespace Scriban.Syntax
         {
             return $"{Target}.{Member}";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

@@ -56,5 +56,7 @@ namespace Scriban.Syntax
         {
             return "{...}";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

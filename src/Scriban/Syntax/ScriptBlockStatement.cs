@@ -72,5 +72,7 @@ namespace Scriban.Syntax
         {
             return $"<statements[{Statements.Count}]>";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

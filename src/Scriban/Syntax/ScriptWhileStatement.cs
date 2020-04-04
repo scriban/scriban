@@ -59,5 +59,7 @@ namespace Scriban.Syntax
         {
             return $"while {Condition} ... end";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

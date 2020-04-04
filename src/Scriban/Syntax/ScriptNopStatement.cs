@@ -16,5 +16,7 @@ namespace Scriban.Syntax
         public override void Write(TemplateRewriterContext context)
         {
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

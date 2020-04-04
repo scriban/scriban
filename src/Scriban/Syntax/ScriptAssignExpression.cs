@@ -36,5 +36,7 @@ namespace Scriban.Syntax
         {
             return $"{Target} = {Value}";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

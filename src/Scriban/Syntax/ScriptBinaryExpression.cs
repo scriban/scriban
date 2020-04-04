@@ -81,6 +81,8 @@ namespace Scriban.Syntax
             return false;
         }
 
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
         public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {
             if (op == ScriptBinaryOperator.EmptyCoalescing)

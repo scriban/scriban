@@ -80,5 +80,7 @@ namespace Scriban.Syntax
         {
             return $"{From} | {To}";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

@@ -34,5 +34,7 @@ namespace Scriban.Syntax
             context.Write(Expression);
             context.ExpectEos();
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

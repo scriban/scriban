@@ -47,6 +47,8 @@ namespace Scriban.Syntax
         }
 
         public abstract void Write(TemplateRewriterContext context);
+
+        public abstract ScriptNode Accept(ScriptVisitor visitor);
     }
 
     public static class ScriptNodeExtensions

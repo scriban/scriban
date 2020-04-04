@@ -38,5 +38,7 @@ namespace Scriban.Syntax
         {
             return $"this";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

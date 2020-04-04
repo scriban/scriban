@@ -165,5 +165,7 @@ namespace Scriban.Syntax
         {
             return $"for {Variable} in {Iterator} ... end";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

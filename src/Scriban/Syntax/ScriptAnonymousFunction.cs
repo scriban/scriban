@@ -17,5 +17,7 @@ namespace Scriban.Syntax
             context.Write("do").ExpectSpace();
             context.Write(Function);
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

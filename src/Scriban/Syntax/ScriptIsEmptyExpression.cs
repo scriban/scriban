@@ -61,5 +61,7 @@ namespace Scriban.Syntax
         {
             return $"{Target}.empty?";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

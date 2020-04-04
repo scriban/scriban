@@ -89,6 +89,8 @@ namespace Scriban.Syntax
             context.ExpectEnd();
         }
 
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
         protected override LoopState CreateLoopState()
         {
             return new TableRowLoopState();

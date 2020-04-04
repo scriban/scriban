@@ -64,22 +64,22 @@ namespace Scriban.Tests
 
         private class LeafCopyScriptVisitor : ScriptVisitor
         {
-            protected override ScriptNode VisitVariableGlobal(ScriptVariableGlobal node)
+            public override ScriptNode Visit(ScriptVariableGlobal node)
             {
                 return new ScriptVariableGlobal(node.Name).WithTriviaAndSpanFrom(node);
             }
 
-            protected override ScriptNode VisitVariableLocal(ScriptVariableLocal node)
+            public override ScriptNode Visit(ScriptVariableLocal node)
             {
                 return new ScriptVariableLocal(node.Name).WithTriviaAndSpanFrom(node);
             }
 
-            protected override ScriptNode VisitVariableLoop(ScriptVariableLoop node)
+            public override ScriptNode Visit(ScriptVariableLoop node)
             {
                 return new ScriptVariableLoop(node.Name).WithTriviaAndSpanFrom(node);
             }
 
-            protected override ScriptNode VisitRawStatement(ScriptRawStatement node)
+            public override ScriptNode Visit(ScriptRawStatement node)
             {
                 return new ScriptRawStatement
                 {
@@ -88,22 +88,22 @@ namespace Scriban.Tests
                 }.WithTriviaAndSpanFrom(node);
             }
 
-            protected override ScriptNode VisitThisExpression(ScriptThisExpression node)
+            public override ScriptNode Visit(ScriptThisExpression node)
             {
                 return new ScriptThisExpression().WithTriviaAndSpanFrom(node);
             }
 
-            protected override ScriptNode VisitBreakStatement(ScriptBreakStatement node)
+            public override ScriptNode Visit(ScriptBreakStatement node)
             {
                 return new ScriptBreakStatement().WithTriviaAndSpanFrom(node);
             }
 
-            protected override ScriptNode VisitContinueStatement(ScriptContinueStatement node)
+            public override ScriptNode Visit(ScriptContinueStatement node)
             {
                 return new ScriptContinueStatement().WithTriviaAndSpanFrom(node);
             }
 
-            protected override ScriptNode VisitLiteral(ScriptLiteral node)
+            public override ScriptNode Visit(ScriptLiteral node)
             {
                 return new ScriptLiteral
                 {
@@ -112,7 +112,7 @@ namespace Scriban.Tests
                 }.WithTriviaAndSpanFrom(node);
             }
 
-            protected override ScriptNode VisitNopStatement(ScriptNopStatement node)
+            public override ScriptNode Visit(ScriptNopStatement node)
             {
                 return new ScriptNopStatement().WithTriviaAndSpanFrom(node);
             }

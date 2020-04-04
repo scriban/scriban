@@ -39,5 +39,7 @@ namespace Scriban.Syntax
         {
             return $"case {Value}";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

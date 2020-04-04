@@ -37,6 +37,8 @@ namespace Scriban.Syntax
             return $"({Expression})";
         }
 
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
         public object GetValue(TemplateContext context)
         {
             return context.Evaluate(Expression);

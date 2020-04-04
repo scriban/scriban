@@ -14,111 +14,24 @@ namespace Scriban.Syntax
 
         public IScriptVisitorContext Context => _context;
 
-        public ScriptNode Visit(ScriptNode node)
+        private ScriptNode VisitCore(ScriptNode node)
         {
             if (node == null) return null;
 
             using (_context.Push(node))
             {
-                node = DispatchVisit(node);
+                node = node.Accept(this);
             }
 
             return node;
         }
 
-        protected virtual ScriptNode DispatchVisit(ScriptNode node)
+        public virtual ScriptNode Visit(ScriptTableRowStatement node)
         {
-            switch (node)
-            {
-                case ScriptTableRowStatement tableRowStatement:
-                    return VisitTableRowStatement(tableRowStatement);
-                case ScriptCaseStatement caseStatement:
-                    return VisitCaseStatement(caseStatement);
-                case ScriptElseStatement elseStatement:
-                    return VisitElseStatement(elseStatement);
-                case ScriptForStatement forStatement:
-                    return VisitForStatement(forStatement);
-                case ScriptIfStatement ifStatement:
-                    return VisitIfStatement(ifStatement);
-                case ScriptWhenStatement whenStatement:
-                    return VisitWhenStatement(whenStatement);
-                case ScriptWhileStatement whileStatement:
-                    return VisitWhileStatement(whileStatement);
-                case ScriptVariableGlobal variableGlobal:
-                    return VisitVariableGlobal(variableGlobal);
-                case ScriptVariableLocal variableLocal:
-                    return VisitVariableLocal(variableLocal);
-                case ScriptVariableLoop variableLoop:
-                    return VisitVariableLoop(variableLoop);
-                case ScriptArrayInitializerExpression arrayInitializerExpression:
-                    return VisitArrayInitializerExpression(arrayInitializerExpression);
-                case ScriptAssignExpression assignExpression:
-                    return VisitAssignExpression(assignExpression);
-                case ScriptBinaryExpression binaryExpression:
-                    return VisitBinaryExpression(binaryExpression);
-                case ScriptBlockStatement blockStatement:
-                    return VisitBlockStatement(blockStatement);
-                case ScriptCaptureStatement captureStatement:
-                    return VisitCaptureStatement(captureStatement);
-                case ScriptExpressionStatement expressionStatement:
-                    return VisitExpressionStatement(expressionStatement);
-                case ScriptFunctionCall functionCall:
-                    return VisitFunctionCall(functionCall);
-                case ScriptImportStatement importStatement:
-                    return VisitImportStatement(importStatement);
-                case ScriptIndexerExpression indexerExpression:
-                    return VisitIndexerExpression(indexerExpression);
-                case ScriptIsEmptyExpression isEmptyExpression:
-                    return VisitIsEmptyExpression(isEmptyExpression);
-                case ScriptMemberExpression memberExpression:
-                    return VisitMemberExpression(memberExpression);
-                case ScriptNamedArgument namedArgument:
-                    return VisitNamedArgument(namedArgument);
-                case ScriptNestedExpression nestedExpression:
-                    return VisitNestedExpression(nestedExpression);
-                case ScriptObjectInitializerExpression objectInitializerExpression:
-                    return VisitObjectInitializerExpression(objectInitializerExpression);
-                case ScriptPipeCall pipeCall:
-                    return VisitPipeCall(pipeCall);
-                case ScriptRawStatement rawStatement:
-                    return VisitRawStatement(rawStatement);
-                case ScriptReturnStatement returnStatement:
-                    return VisitReturnStatement(returnStatement);
-                case ScriptThisExpression thisExpression:
-                    return VisitThisExpression(thisExpression);
-                case ScriptUnaryExpression unaryExpression:
-                    return VisitUnaryExpression(unaryExpression);
-                case ScriptWithStatement withStatement:
-                    return VisitWithStatement(withStatement);
-                case ScriptWrapStatement wrapStatement:
-                    return VisitWrapStatement(wrapStatement);
-                case ScriptAnonymousFunction anonymousFunction:
-                    return VisitAnonymousFunction(anonymousFunction);
-                case ScriptBreakStatement breakStatement:
-                    return VisitBreakStatement(breakStatement);
-                case ScriptContinueStatement continueStatement:
-                    return VisitContinueStatement(continueStatement);
-                case ScriptFunction function:
-                    return VisitFunction(function);
-                case ScriptLiteral literal:
-                    return VisitLiteral(literal);
-                case ScriptNopStatement nopStatement:
-                    return VisitNopStatement(nopStatement);
-                case ScriptReadOnlyStatement readOnlyStatement:
-                    return VisitReadOnlyStatement(readOnlyStatement);
-                case ScriptPage page:
-                    return VisitPage(page);
-            }
-
-            return node;
-        }
-
-        protected virtual ScriptNode VisitTableRowStatement(ScriptTableRowStatement node)
-        {
-            var newVariable = (ScriptExpression) Visit(node.Variable);
-            var newIterator = (ScriptExpression) Visit(node.Iterator);
+            var newVariable = (ScriptExpression) VisitCore(node.Variable);
+            var newIterator = (ScriptExpression) VisitCore(node.Iterator);
             var newNamedArguments = VisitAll(node.NamedArguments);
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
 
             if (newVariable == node.Variable &&
                 newIterator == node.Iterator &&
@@ -137,10 +50,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitCaseStatement(ScriptCaseStatement node)
+        public virtual ScriptNode Visit(ScriptCaseStatement node)
         {
-            var newValue = (ScriptExpression)Visit(node.Value);
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newValue = (ScriptExpression)VisitCore(node.Value);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
 
             if (newValue == node.Value &&
                 newBody == node.Body)
@@ -155,10 +68,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitElseStatement(ScriptElseStatement node)
+        public virtual ScriptNode Visit(ScriptElseStatement node)
         {
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
-            var newElse = (ScriptConditionStatement)Visit(node.Else);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
+            var newElse = (ScriptConditionStatement)VisitCore(node.Else);
 
             if (newBody == node.Body &&
                 newElse == node.Else)
@@ -173,12 +86,12 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitForStatement(ScriptForStatement node)
+        public virtual ScriptNode Visit(ScriptForStatement node)
         {
-            var newVariable = (ScriptExpression)Visit(node.Variable);
-            var newIterator = (ScriptExpression)Visit(node.Iterator);
+            var newVariable = (ScriptExpression)VisitCore(node.Variable);
+            var newIterator = (ScriptExpression)VisitCore(node.Iterator);
             var newNamedArguments = VisitAll(node.NamedArguments);
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
 
             if (newVariable == node.Variable &&
                 newIterator == node.Iterator &&
@@ -197,11 +110,11 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitIfStatement(ScriptIfStatement node)
+        public virtual ScriptNode Visit(ScriptIfStatement node)
         {
-            var newCondition = (ScriptExpression)Visit(node.Condition);
-            var newThen = (ScriptBlockStatement)Visit(node.Then);
-            var newElse = (ScriptConditionStatement)Visit(node.Else);
+            var newCondition = (ScriptExpression)VisitCore(node.Condition);
+            var newThen = (ScriptBlockStatement)VisitCore(node.Then);
+            var newElse = (ScriptConditionStatement)VisitCore(node.Else);
 
             if (newCondition == node.Condition &&
                 newThen == node.Then &&
@@ -220,10 +133,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitWhenStatement(ScriptWhenStatement node)
+        public virtual ScriptNode Visit(ScriptWhenStatement node)
         {
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
-            var newNext = (ScriptConditionStatement)Visit(node.Next);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
+            var newNext = (ScriptConditionStatement)VisitCore(node.Next);
             var newValues = VisitAll(node.Values);
 
             if (newBody == node.Body &&
@@ -244,10 +157,10 @@ namespace Scriban.Syntax
             return newStatement;
         }
 
-        protected virtual ScriptNode VisitWhileStatement(ScriptWhileStatement node)
+        public virtual ScriptNode Visit(ScriptWhileStatement node)
         {
-            var newCondition = (ScriptExpression)Visit(node.Condition);
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newCondition = (ScriptExpression)VisitCore(node.Condition);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
 
             if (newCondition == node.Condition &&
                 newBody == node.Body)
@@ -262,22 +175,22 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitVariableGlobal(ScriptVariableGlobal node)
+        public virtual ScriptNode Visit(ScriptVariableGlobal node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitVariableLocal(ScriptVariableLocal node)
+        public virtual ScriptNode Visit(ScriptVariableLocal node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitVariableLoop(ScriptVariableLoop node)
+        public virtual ScriptNode Visit(ScriptVariableLoop node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitArrayInitializerExpression(ScriptArrayInitializerExpression node)
+        public virtual ScriptNode Visit(ScriptArrayInitializerExpression node)
         {
             var newValues = VisitAll(node.Values);
 
@@ -292,10 +205,10 @@ namespace Scriban.Syntax
             return newExpression;
         }
 
-        protected virtual ScriptNode VisitAssignExpression(ScriptAssignExpression node)
+        public virtual ScriptNode Visit(ScriptAssignExpression node)
         {
-            var newTarget = (ScriptExpression)Visit(node.Target);
-            var newValue = (ScriptExpression)Visit(node.Value);
+            var newTarget = (ScriptExpression)VisitCore(node.Target);
+            var newValue = (ScriptExpression)VisitCore(node.Value);
 
             if (newTarget == node.Target &&
                 newValue == node.Value)
@@ -310,10 +223,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitBinaryExpression(ScriptBinaryExpression node)
+        public virtual ScriptNode Visit(ScriptBinaryExpression node)
         {
-            var newLeft = (ScriptExpression)Visit(node.Left);
-            var newRight = (ScriptExpression)Visit(node.Right);
+            var newLeft = (ScriptExpression)VisitCore(node.Left);
+            var newRight = (ScriptExpression)VisitCore(node.Right);
 
             if (newLeft == node.Left &&
                 newRight == node.Right)
@@ -329,7 +242,7 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitBlockStatement(ScriptBlockStatement node)
+        public virtual ScriptNode Visit(ScriptBlockStatement node)
         {
             var newStatements = VisitAll(node.Statements);
 
@@ -344,10 +257,10 @@ namespace Scriban.Syntax
             return newBlockStatement;
         }
 
-        protected virtual ScriptNode VisitCaptureStatement(ScriptCaptureStatement node)
+        public virtual ScriptNode Visit(ScriptCaptureStatement node)
         {
-            var newTarget = (ScriptExpression)Visit(node.Target);
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newTarget = (ScriptExpression)VisitCore(node.Target);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
 
             if (newTarget == node.Target &&
                 newBody == node.Body)
@@ -362,9 +275,9 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitExpressionStatement(ScriptExpressionStatement node)
+        public virtual ScriptNode Visit(ScriptExpressionStatement node)
         {
-            var newExpression = (ScriptExpression)Visit(node.Expression);
+            var newExpression = (ScriptExpression)VisitCore(node.Expression);
 
             if (newExpression == node.Expression)
             {
@@ -377,9 +290,9 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitFunctionCall(ScriptFunctionCall node)
+        public virtual ScriptNode Visit(ScriptFunctionCall node)
         {
-            var newTarget = (ScriptExpression)Visit(node.Target);
+            var newTarget = (ScriptExpression)VisitCore(node.Target);
             var newArguments = VisitAll(node.Arguments);
 
             if (newTarget == node.Target &&
@@ -398,9 +311,9 @@ namespace Scriban.Syntax
             return newCall;
         }
 
-        protected virtual ScriptNode VisitImportStatement(ScriptImportStatement node)
+        public virtual ScriptNode Visit(ScriptImportStatement node)
         {
-            var newExpression = (ScriptExpression)Visit(node.Expression);
+            var newExpression = (ScriptExpression)VisitCore(node.Expression);
 
             if (newExpression == node.Expression)
             {
@@ -413,10 +326,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitIndexerExpression(ScriptIndexerExpression node)
+        public virtual ScriptNode Visit(ScriptIndexerExpression node)
         {
-            var newTarget = (ScriptExpression)Visit(node.Target);
-            var newIndex = (ScriptExpression)Visit(node.Index);
+            var newTarget = (ScriptExpression)VisitCore(node.Target);
+            var newIndex = (ScriptExpression)VisitCore(node.Index);
 
             if (newTarget == node.Target &&
                 newIndex == node.Index)
@@ -431,9 +344,9 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitIsEmptyExpression(ScriptIsEmptyExpression node)
+        public virtual ScriptNode Visit(ScriptIsEmptyExpression node)
         {
-            var newTarget = (ScriptExpression)Visit(node.Target);
+            var newTarget = (ScriptExpression)VisitCore(node.Target);
 
             if (newTarget == node.Target)
             {
@@ -446,10 +359,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitMemberExpression(ScriptMemberExpression node)
+        public virtual ScriptNode Visit(ScriptMemberExpression node)
         {
-            var newTarget = (ScriptExpression) Visit(node.Target);
-            var newMember = (ScriptVariable) Visit(node.Member);
+            var newTarget = (ScriptExpression) VisitCore(node.Target);
+            var newMember = (ScriptVariable) VisitCore(node.Member);
 
             if (newTarget == node.Target &&
                 newMember == node.Member)
@@ -464,9 +377,9 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitNamedArgument(ScriptNamedArgument node)
+        public virtual ScriptNode Visit(ScriptNamedArgument node)
         {
-            var newValue = (ScriptExpression)Visit(node.Value);
+            var newValue = (ScriptExpression)VisitCore(node.Value);
 
             if (newValue == node.Value)
             {
@@ -480,9 +393,9 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitNestedExpression(ScriptNestedExpression node)
+        public virtual ScriptNode Visit(ScriptNestedExpression node)
         {
-            var newExpression = (ScriptExpression)Visit(node.Expression);
+            var newExpression = (ScriptExpression)VisitCore(node.Expression);
 
             if (newExpression == node.Expression)
             {
@@ -495,16 +408,16 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitObjectInitializerExpression(ScriptObjectInitializerExpression node)
+        public virtual ScriptNode Visit(ScriptObjectInitializerExpression node)
         {
             var newMembers = new Dictionary<ScriptExpression, ScriptExpression>();
             bool changed = false;
             foreach (var member in node.Members)
             {
-                var newKey = (ScriptExpression)Visit(member.Key);
+                var newKey = (ScriptExpression)VisitCore(member.Key);
                 changed |= newKey != member.Key;
 
-                var newValue = (ScriptExpression)Visit(member.Value);
+                var newValue = (ScriptExpression)VisitCore(member.Value);
                 changed |= newValue != member.Value;
 
                 newMembers.Add(newKey, newValue);
@@ -524,10 +437,10 @@ namespace Scriban.Syntax
             return newExpression;
         }
 
-        protected virtual ScriptNode VisitPipeCall(ScriptPipeCall node)
+        public virtual ScriptNode Visit(ScriptPipeCall node)
         {
-            var newFrom = (ScriptExpression)Visit(node.From);
-            var newTo = (ScriptExpression)Visit(node.To);
+            var newFrom = (ScriptExpression)VisitCore(node.From);
+            var newTo = (ScriptExpression)VisitCore(node.To);
 
             if (newFrom == node.From &&
                 newTo == node.To)
@@ -542,14 +455,14 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitRawStatement(ScriptRawStatement node)
+        public virtual ScriptNode Visit(ScriptRawStatement node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitReturnStatement(ScriptReturnStatement node)
+        public virtual ScriptNode Visit(ScriptReturnStatement node)
         {
-            var newExpression = (ScriptExpression)Visit(node.Expression);
+            var newExpression = (ScriptExpression)VisitCore(node.Expression);
 
             if (newExpression == node.Expression)
             {
@@ -562,14 +475,14 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitThisExpression(ScriptThisExpression node)
+        public virtual ScriptNode Visit(ScriptThisExpression node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitUnaryExpression(ScriptUnaryExpression node)
+        public virtual ScriptNode Visit(ScriptUnaryExpression node)
         {
-            var newRight = (ScriptExpression)Visit(node.Right);
+            var newRight = (ScriptExpression)VisitCore(node.Right);
 
             if (newRight == node.Right)
             {
@@ -583,10 +496,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitWithStatement(ScriptWithStatement node)
+        public virtual ScriptNode Visit(ScriptWithStatement node)
         {
-            var newName = (ScriptExpression)Visit(node.Name);
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newName = (ScriptExpression)VisitCore(node.Name);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
 
             if (newName == node.Name &&
                 newBody == node.Body)
@@ -601,10 +514,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitWrapStatement(ScriptWrapStatement node)
+        public virtual ScriptNode Visit(ScriptWrapStatement node)
         {
-            var newTarget = (ScriptExpression)Visit(node.Target);
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newTarget = (ScriptExpression)VisitCore(node.Target);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
 
             if (newTarget == node.Target &&
                 newBody == node.Body)
@@ -619,9 +532,9 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitAnonymousFunction(ScriptAnonymousFunction node)
+        public virtual ScriptNode Visit(ScriptAnonymousFunction node)
         {
-            var newFunction = (ScriptFunction)Visit(node.Function);
+            var newFunction = (ScriptFunction)VisitCore(node.Function);
 
             if (newFunction == node.Function)
             {
@@ -634,20 +547,20 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitBreakStatement(ScriptBreakStatement node)
+        public virtual ScriptNode Visit(ScriptBreakStatement node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitContinueStatement(ScriptContinueStatement node)
+        public virtual ScriptNode Visit(ScriptContinueStatement node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitFunction(ScriptFunction node)
+        public virtual ScriptNode Visit(ScriptFunction node)
         {
-            var newName = (ScriptVariable)Visit(node.Name);
-            var newBody = (ScriptStatement)Visit(node.Body);
+            var newName = (ScriptVariable)VisitCore(node.Name);
+            var newBody = (ScriptStatement)VisitCore(node.Body);
 
             if (newName == node.Name &&
                 newBody == node.Body)
@@ -662,19 +575,19 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitLiteral(ScriptLiteral node)
+        public virtual ScriptNode Visit(ScriptLiteral node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitNopStatement(ScriptNopStatement node)
+        public virtual ScriptNode Visit(ScriptNopStatement node)
         {
             return node;
         }
 
-        protected virtual ScriptNode VisitReadOnlyStatement(ScriptReadOnlyStatement node)
+        public virtual ScriptNode Visit(ScriptReadOnlyStatement node)
         {
-            var newVariable = (ScriptVariable)Visit(node.Variable);
+            var newVariable = (ScriptVariable)VisitCore(node.Variable);
 
             if (newVariable == node.Variable)
             {
@@ -687,10 +600,10 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual ScriptNode VisitPage(ScriptPage node)
+        public virtual ScriptNode Visit(ScriptPage node)
         {
-            var newFrontMatter = (ScriptBlockStatement)Visit(node.FrontMatter);
-            var newBody = (ScriptBlockStatement)Visit(node.Body);
+            var newFrontMatter = (ScriptBlockStatement)VisitCore(node.FrontMatter);
+            var newBody = (ScriptBlockStatement)VisitCore(node.Body);
 
             if (newFrontMatter == node.FrontMatter &&
                 newBody == node.Body)
@@ -705,7 +618,7 @@ namespace Scriban.Syntax
             }.WithTriviaAndSpanFrom(node);
         }
 
-        protected virtual List<TNode> VisitAll<TNode>(List<TNode> nodes)
+        protected List<TNode> VisitAll<TNode>(List<TNode> nodes)
             where TNode : ScriptNode
         {
             if (nodes == null)
@@ -715,7 +628,7 @@ namespace Scriban.Syntax
             bool changed = false;
             foreach (var node in nodes)
             {
-                var newNode = (TNode) Visit(node);
+                var newNode = (TNode) VisitCore(node);
                 newNodes.Add(newNode);
                 changed |= newNode != node;
             }

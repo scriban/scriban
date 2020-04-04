@@ -42,5 +42,7 @@ namespace Scriban.Syntax
             context.Write(Body);
             context.ExpectEnd();
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

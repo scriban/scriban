@@ -33,5 +33,7 @@ namespace Scriban.Syntax
         {
             context.Write("break").ExpectEos();
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

@@ -59,6 +59,8 @@ namespace Scriban.Syntax
             return $"{Target} {args}";
         }
 
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
         public static bool IsFunction(object target)
         {
             return target is ScriptFunction || target is IScriptCustomFunction;

@@ -47,6 +47,8 @@ namespace Scriban.Syntax
             return $"{Target}[{Index}]";
         }
 
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
         public object GetValue(TemplateContext context)
         {
             return GetOrSetValue(context, null, false);

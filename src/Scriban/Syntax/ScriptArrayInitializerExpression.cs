@@ -41,5 +41,7 @@ namespace Scriban.Syntax
         {
             return $"[{StringHelper.Join(", ", Values)}]";
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }

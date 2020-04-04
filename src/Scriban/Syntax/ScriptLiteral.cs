@@ -143,6 +143,8 @@ namespace Scriban.Syntax
             return Value?.ToString() ?? "null";
         }
 
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
         private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, string input)
         {
             char quote;

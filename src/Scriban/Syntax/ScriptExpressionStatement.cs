@@ -33,5 +33,7 @@ namespace Scriban.Syntax
         {
             return Expression?.ToString();
         }
+
+        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
     }
 }
