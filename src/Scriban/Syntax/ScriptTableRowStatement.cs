@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -89,7 +90,20 @@ namespace Scriban.Syntax
             context.ExpectEnd();
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Variable;
+            yield return Iterator;
+            foreach (var namedArgument in NamedArguments)
+            {
+                yield return namedArgument;
+            }
+            yield return Body;
+        }
 
         protected override LoopState CreateLoopState()
         {

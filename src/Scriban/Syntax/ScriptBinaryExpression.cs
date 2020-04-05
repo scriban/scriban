@@ -81,7 +81,15 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Left;
+            yield return Right;
+        }
 
         public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {

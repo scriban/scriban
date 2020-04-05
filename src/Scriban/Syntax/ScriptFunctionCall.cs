@@ -59,7 +59,18 @@ namespace Scriban.Syntax
             return $"{Target} {args}";
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Target;
+            foreach (var argument in Arguments)
+            {
+                yield return argument;
+            }
+        }
 
         public static bool IsFunction(object target)
         {

@@ -1,7 +1,7 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
-
+using System.Collections.Generic;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -48,6 +48,14 @@ namespace Scriban.Syntax
             return $"with {Name} <...> end";
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Name;
+            yield return Body;
+        }
     }
 }

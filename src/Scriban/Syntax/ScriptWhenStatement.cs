@@ -67,6 +67,18 @@ namespace Scriban.Syntax
             return builder.ToString();
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Body;
+            yield return Next;
+            foreach (var value in Values)
+            {
+                yield return value;
+            }
+        }
     }
 }

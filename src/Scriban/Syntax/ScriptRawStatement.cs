@@ -2,7 +2,9 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Scriban.Syntax
 {
@@ -64,6 +66,13 @@ namespace Scriban.Syntax
             return Text?.Substring(Span.Start.Offset, length) ?? string.Empty;
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            return Enumerable.Empty<ScriptNode>();
+        }
     }
 }

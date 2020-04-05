@@ -11,29 +11,29 @@ using Scriban.Syntax;
 namespace Scriban.Tests
 {
     [TestFixture]
-    public class ScriptVisitorTests
+    public class ScriptRewriterTests
     {
         [TestCaseSource(typeof(TestFilesHelper), nameof(TestFilesHelper.ListAllTestFiles))]
-        public void ScriptVisitor_Returns_Original_Script(string inputFileName)
+        public void ScriptRewriter_Returns_Original_Script(string inputFileName)
         {
             var template = LoadTemplate(inputFileName);
 
-            var visitor = new ScriptVisitor();
-            var result = visitor.Visit(template.Page);
+            var rewriter = new ScriptRewriter();
+            var result = rewriter.Visit(template.Page);
 
-            // The base ScriptVisitor never changes any node, so we should end up with the same instance
+            // The base ScriptRewriter never changes any node, so we should end up with the same instance
             Assert.AreSame(template.Page, result);
         }
 
         [TestCaseSource(typeof(TestFilesHelper), nameof(TestFilesHelper.ListAllTestFiles))]
-        public void LeafCopyScriptVisitor_Returns_Identical_Script(string inputFileName)
+        public void LeafCopyScriptRewriter_Returns_Identical_Script(string inputFileName)
         {
             var template = LoadTemplate(inputFileName);
 
-            var visitor = new LeafCopyScriptVisitor();
-            var result = visitor.Visit(template.Page);
+            var rewriter = new LeafCopyScriptRewriter();
+            var result = rewriter.Visit(template.Page);
 
-            // This visitor makes copies of leaf nodes instead of returning the original nodes,
+            // This rewriter makes copies of leaf nodes instead of returning the original nodes,
             // so we should end up with another instance identical to the original.
             Assert.AreNotSame(template.Page, result);
             Assert.AreEqual(ToText(template.Page), ToText(result));
@@ -62,7 +62,7 @@ namespace Scriban.Tests
             return template;
         }
 
-        private class LeafCopyScriptVisitor : ScriptVisitor
+        private class LeafCopyScriptRewriter : ScriptRewriter
         {
             public override ScriptNode Visit(ScriptVariableGlobal node)
             {

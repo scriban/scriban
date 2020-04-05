@@ -3,7 +3,9 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.Text;
 
 namespace Scriban.Syntax
@@ -143,7 +145,14 @@ namespace Scriban.Syntax
             return Value?.ToString() ?? "null";
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            return Enumerable.Empty<ScriptNode>();
+        }
 
         private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, string input)
         {

@@ -166,6 +166,19 @@ namespace Scriban.Syntax
             return $"for {Variable} in {Iterator} ... end";
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Variable;
+            yield return Iterator;
+            foreach (var namedArgument in NamedArguments)
+            {
+                yield return namedArgument;
+            }
+            yield return Body;
+        }
     }
 }

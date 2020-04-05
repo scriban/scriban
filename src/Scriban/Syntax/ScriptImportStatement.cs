@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using Scriban.Runtime;
+using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
@@ -35,6 +36,13 @@ namespace Scriban.Syntax
             context.ExpectEos();
         }
 
-        public override ScriptNode Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Expression;
+        }
     }
 }

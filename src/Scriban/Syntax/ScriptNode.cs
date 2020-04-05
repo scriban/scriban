@@ -48,7 +48,12 @@ namespace Scriban.Syntax
 
         public abstract void Write(TemplateRewriterContext context);
 
-        public abstract ScriptNode Accept(ScriptVisitor visitor);
+        public abstract void Accept(ScriptVisitor visitor);
+        public abstract TResult Accept<TResult>(ScriptVisitor<TResult> visitor);
+
+        public IEnumerable<ScriptNode> Children { get; }
+
+        protected abstract IEnumerable<ScriptNode> GetChildren();
     }
 
     public static class ScriptNodeExtensions
