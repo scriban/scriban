@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -9,13 +9,13 @@ using System.Runtime.CompilerServices;
 namespace Scriban.Helpers
 {
     /// <summary>
-    /// Lightweight stack object for reference types
+    /// Lightweight stack object.
     /// </summary>
     /// <typeparam name="T">Type of the object</typeparam>
     internal struct FastStack<T>
     {
-        private T[] _array; // Storage for stack elements. Do not rename (binary serialization)
-        private int _size; // Number of items in the stack. Do not rename (binary serialization)
+        private T[] _array; // Storage for stack elements.
+        private int _size; // Number of items in the stack.
         private const int DefaultCapacity = 4;
 
         // Create a stack with a specific initial capacity.  The initial capacity
@@ -35,7 +35,8 @@ namespace Scriban.Helpers
         // Removes all Objects from the Stack.
         public void Clear()
         {
-            Array.Clear(_array, 0, _size); // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+            // Don't need to doc this but we clear the elements so that the gc can reclaim the references.
+            Array.Clear(_array, 0, _size);
             _size = 0;
         }
 
@@ -50,7 +51,7 @@ namespace Scriban.Helpers
             return _array[_size - 1];
         }
 
-        // Pops an item from the top of the stack.  If the stack is empty, Pop
+        // Pops an item from the top of the stack. If the stack is empty, Pop
         // throws an InvalidOperationException.
         [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
         public T Pop()
@@ -79,7 +80,7 @@ namespace Scriban.Helpers
         private void ThrowForEmptyStack()
         {
             Debug.Assert(_size == 0);
-            throw new InvalidOperationException("Invalid operation on stack. Stack is empty");
+            throw new InvalidOperationException("Stack is empty");
         }
     }
 }
