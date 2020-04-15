@@ -88,8 +88,7 @@ namespace Scriban.Syntax
                 }
                 else
                 {
-                    throw new ScriptRuntimeException(Index.Span,
-                        $"Cannot access target `{Target}` with a null indexer: {this}"); // unit test: 130-indexer-accessor-error2.txt
+                    throw new ScriptRuntimeException(Index.Span,  $"Cannot access target `{Target}` with a null indexer: {this}"); // unit test: 130-indexer-accessor-error2.txt
                 }
             }
 

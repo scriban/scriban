@@ -7,6 +7,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -325,7 +326,7 @@ Tax: {{ 7 | match_tax }}";
                 context.StrictVariables = true;
                 var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
                 var result = exception.ToString();
-                var check = "The variable `myvar2` was not found";
+                var check = "The variable or function `myvar2` was not found";
                 Assert.True(result.Contains(check), $"The exception string `{result}` does not contain the expected value");
             }
         }

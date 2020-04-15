@@ -596,7 +596,7 @@ namespace Scriban
         /// </summary>
         /// <param name="span">The span of the object to render.</param>
         /// <param name="textAsObject">The text as object.</param>
-        public TemplateContext Write(SourceSpan span, object textAsObject)
+        public virtual TemplateContext Write(SourceSpan span, object textAsObject)
         {
             if (textAsObject != null)
             {
@@ -964,10 +964,7 @@ namespace Scriban
                 }
             }
 
-            if (StrictVariables && !found)
-            {
-                throw new ScriptRuntimeException(variable.Span, $"The variable `{variable}` was not found");
-            }
+            CheckVariableFound(variable, found);
             return value;
         }
 
@@ -1015,11 +1012,16 @@ namespace Scriban
                 }
             }
 
+            CheckVariableFound(variable, found);
+            return value;
+        }
+
+        private void CheckVariableFound(ScriptVariable variable, bool found)
+        {
             if (StrictVariables && !found)
             {
-                throw new ScriptRuntimeException(variable.Span, $"The variable `{variable}` was not found");
+                throw new ScriptRuntimeException(variable.Span, $"The variable or function `{variable}` was not found");
             }
-            return value;
         }
 
         /// <summary>
@@ -1057,7 +1059,7 @@ namespace Scriban
             }
             catch (Exception readonlyException) when(_getOrSetValueLevel == 1 && !(readonlyException is ScriptRuntimeException))
             {
-                throw new ScriptRuntimeException(targetExpression.Span, $"Unexpected exception while accessing `{targetExpression}`", readonlyException);
+                throw new ScriptRuntimeException(targetExpression.Span, $"Unexpected exception while accessing `{targetExpression}`: {readonlyException.Message}", readonlyException);
             }
 
             // If the variable being returned is a function, we need to evaluate it
