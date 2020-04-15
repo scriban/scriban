@@ -204,6 +204,20 @@ namespace Scriban.Parsing
         [TokenText("]")]
         CloseBracket,
 
+        /// <summary>
+        /// Custom token
+        /// </summary>
+        Custom,
+        Custom1,
+        Custom2,
+        Custom3,
+        Custom4,
+        Custom5,
+        Custom6,
+        Custom7,
+        Custom8,
+        Custom9,
+
         Eof,
     }
 }
