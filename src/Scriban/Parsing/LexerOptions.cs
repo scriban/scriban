@@ -45,5 +45,21 @@ namespace Scriban.Parsing
         /// The lexer will return whitespaces tokens
         /// </summary>
         public bool KeepTrivia { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate to allow to match a custom token.
+        /// </summary>
+        public TryMatchCustomTokenDelegate TryMatchCustomToken { get; set; }
+
     }
+
+    /// <summary>
+    /// A delegate used for matching a custom token. NOTE: A custom token should not parse new lines (`\n` or `\r`)
+    /// </summary>
+    /// <param name="text">Text being parsed</param>
+    /// <param name="position">Current position within the string (to increment if the token is parsed, to keep it as it is if not)</param>
+    /// <param name="length">Output the number of character successfully matched at <paramref name="position"/>.</param>
+    /// <param name="tokenType">The custom token type within the range (<see cref="TokenType.Custom"/> to <see cref="TokenType.Custom9"/></param>
+    /// <returns><c>true</c> if the text at position <paramref name="position"/> is a custom token.</returns>
+    public delegate bool TryMatchCustomTokenDelegate(string text, TextPosition position, out int length, out TokenType tokenType);
 }
