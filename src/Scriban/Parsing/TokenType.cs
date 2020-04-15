@@ -64,6 +64,16 @@ namespace Scriban.Parsing
         Integer,
 
         /// <summary>
+        /// A Hexadecimal integer (int, long...)
+        /// </summary>
+        HexaInteger,
+
+        /// <summary>
+        /// A binary integer (int, long...)
+        /// </summary>
+        BinaryInteger,
+
+        /// <summary>
         /// A floating point number
         /// </summary>
         Float,
@@ -92,6 +102,9 @@ namespace Scriban.Parsing
         [TokenText("^")]
         Caret,
 
+        [TokenText("^^")]
+        DoubleCaret,
+
         [TokenText(":")]
         Colon,
 
@@ -101,20 +114,26 @@ namespace Scriban.Parsing
         [TokenText("|")]
         Pipe,  // |
 
+        [TokenText("|>")]
+        PipeGreater,  // |>
+
         [TokenText("!")]
         Not, // !
 
         [TokenText("&&")]
-        And, // &&
+        DoubleAmp, // &&
 
         [TokenText("||")]
-        Or,  // ||
+        DoublePipe,  // ||
+        
+        [TokenText("&")]
+        Amp, // &
 
         [TokenText("?")]
         Question,
 
         [TokenText("??")]
-        EmptyCoalescing,
+        DoubleQuestion,
 
         [TokenText("==")]
         CompareEqual,
@@ -153,10 +172,10 @@ namespace Scriban.Parsing
         Modulus,
 
         [TokenText("<<")]
-        ShiftLeft,
+        DoubleLess,
 
         [TokenText(">>")]
-        ShiftRight,
+        DoubleGreater,
 
         [TokenText(",")]
         Comma,

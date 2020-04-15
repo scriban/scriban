@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Reflection;
 
 namespace Scriban.Helpers
@@ -11,11 +12,9 @@ namespace Scriban.Helpers
     {
         public static bool IsPrimitiveOrDecimal(this Type type)
         {
-            return type.IsPrimitive || type == typeof(decimal);
-        }
-        public static bool IsPrimitiveOrDecimal(this Type type)
-        {
-            return type.GetTypeInfo().IsPrimitive || type == typeof(decimal);
+            var result = type.GetTypeInfo().IsPrimitive || type == typeof(decimal);
+            result = result || type == typeof(BigInteger);
+            return result;
         }
 
         public static Type GetBaseOrInterface(this Type type, Type lookInterfaceTypeArg)

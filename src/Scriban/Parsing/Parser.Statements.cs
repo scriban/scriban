@@ -473,7 +473,7 @@ namespace Scriban.Parsing
                 var variableOrLiteral = ParseVariableOrLiteral();
                 whenStatement.Values.Add(variableOrLiteral);
 
-                if (Current.Type == TokenType.Comma || (!_isLiquid && Current.Type == TokenType.Or) || (_isLiquid && GetAsText(Current) == "or"))
+                if (Current.Type == TokenType.Comma || (!_isLiquid && Current.Type == TokenType.DoublePipe) || (_isLiquid && GetAsText(Current) == "or"))
                 {
                     NextToken();
                 }

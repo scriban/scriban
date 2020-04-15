@@ -236,8 +236,8 @@ namespace Scriban.Tests
         {
             VerifyCodeBlock("{{ ! && || }}",
                 new Token(TokenType.Not, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
-                new Token(TokenType.And, new TextPosition(5, 0, 5), new TextPosition(6, 0, 6)),
-                new Token(TokenType.Or, new TextPosition(8, 0, 8), new TextPosition(9, 0, 9))
+                new Token(TokenType.DoubleAmp, new TextPosition(5, 0, 5), new TextPosition(6, 0, 6)),
+                new Token(TokenType.DoublePipe, new TextPosition(8, 0, 8), new TextPosition(9, 0, 9))
                 );
         }
 
@@ -428,6 +428,7 @@ namespace Scriban.Tests
                 {"\x01", TokenType.Invalid},
                 {"@", TokenType.Arroba},
                 {"^", TokenType.Caret},
+                {"^^", TokenType.DoubleCaret},
                 {"*", TokenType.Multiply},
                 {"+", TokenType.Plus},
                 {"-", TokenType.Minus},
@@ -437,6 +438,7 @@ namespace Scriban.Tests
                 {"=", TokenType.Equal},
                 {"!", TokenType.Not},
                 {"|", TokenType.Pipe},
+                {"|>", TokenType.PipeGreater},
                 {",", TokenType.Comma},
                 {".", TokenType.Dot},
                 {"(", TokenType.OpenParent},
@@ -448,10 +450,10 @@ namespace Scriban.Tests
                 {"==", TokenType.CompareEqual},
                 {">=", TokenType.CompareGreaterOrEqual},
                 {"<=", TokenType.CompareLessOrEqual},
-                {"&", TokenType.Invalid},
-                {"&&", TokenType.And},
-                {"??", TokenType.EmptyCoalescing},
-                {"||", TokenType.Or},
+                {"&", TokenType.Amp},
+                {"&&", TokenType.DoubleAmp},
+                {"??", TokenType.DoubleQuestion},
+                {"||", TokenType.DoublePipe},
                 {"..", TokenType.DoubleDot},
                 {"..<", TokenType.DoubleDotLess},
             });

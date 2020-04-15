@@ -4,6 +4,7 @@
 
 using System;
 using System.Globalization;
+using System.Numerics;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -217,7 +218,8 @@ namespace Scriban.Functions
                    || value is ulong
                    || value is float
                    || value is double
-                   || value is decimal;
+                   || value is decimal
+                   || value is BigInteger;
         }
 
         /// <summary>

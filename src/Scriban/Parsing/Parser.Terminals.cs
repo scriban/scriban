@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Numerics;
 using System.Text;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -24,6 +25,12 @@ namespace Scriban.Parsing
                     break;
                 case TokenType.Integer:
                     literal = ParseInteger();
+                    break;
+                case TokenType.HexaInteger:
+                    literal = ParseHexaInteger();
+                    break;
+                case TokenType.BinaryInteger:
+                    literal = ParseBinaryInteger();
                     break;
                 case TokenType.Float:
                     literal = ParseFloat();
@@ -49,14 +56,31 @@ namespace Scriban.Parsing
             var literal = Open<ScriptLiteral>();
 
             var text = GetAsText(Current);
-            double floatResult;
-            if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+            bool isFloat = text.EndsWith("f", StringComparison.OrdinalIgnoreCase);
+            if (isFloat) text = text.TrimEnd('f', 'F');
+            if (isFloat)
             {
-                literal.Value = floatResult;
+                float floatResult;
+                if (float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+                {
+                    literal.Value = floatResult;
+                }
+                else
+                {
+                    LogError($"Unable to parse float value `{text}`");
+                }
             }
             else
             {
-                LogError($"Unable to parse double value `{text}`");
+                double floatResult;
+                if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+                {
+                    literal.Value = floatResult;
+                }
+                else
+                {
+                    LogError($"Unable to parse double value `{text}`");
+                }
             }
 
             NextToken(); // Skip the float
@@ -76,20 +100,144 @@ namespace Scriban.Parsing
         {
             var literal = Open<ScriptLiteral>();
 
-            var text = GetAsText(Current);
+            var text = GetAsText(Current).Replace("_", string.Empty);
             long result;
-            if (!long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out result))
+            if (!long.TryParse(text, NumberStyles.Integer|NumberStyles.AllowExponent, CultureInfo.InvariantCulture, out result))
             {
-                LogError($"Unable to parse the integer {text}");
-            }
+                bool isValid = false;
 
-            if (result >= int.MinValue && result <= int.MaxValue)
-            {
-                literal.Value = (int) result;
+                if (BigInteger.TryParse(text, NumberStyles.Integer | NumberStyles.AllowExponent, CultureInfo.InvariantCulture, out var bigResult))
+                {
+                    literal.Value = bigResult;
+                    isValid = true;
+                }
+                if (!isValid)
+                {
+                    LogError($"Unable to parse the integer {text}");
+                }
             }
             else
             {
-                literal.Value = result;
+
+                if (result >= int.MinValue && result <= int.MaxValue)
+                {
+                    literal.Value = (int) result;
+                }
+                else
+                {
+                    literal.Value = result;
+                }
+            }
+
+            NextToken(); // Skip the literal
+            return Close(literal);
+        }
+        
+        private ScriptLiteral ParseHexaInteger()
+        {
+            var literal = Open<ScriptLiteral>();
+
+            var text = GetAsText(Current).Substring(2).Replace("_", string.Empty);
+            bool isUnsigned = false;
+            if (text.EndsWith("u", StringComparison.OrdinalIgnoreCase))
+            {
+                text = text.Substring(0, text.Length - 1);
+                isUnsigned = true;
+            }
+            ulong tempResult;
+
+            if (!ulong.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out tempResult))
+            {
+                bool isValid = false;
+
+                if (BigInteger.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var bigResult))
+                {
+                    literal.Value = bigResult;
+                    isValid = true;
+                }
+
+                if (!isValid)
+                {
+                    LogError($"Unable to parse the integer {text}");
+                }
+            }
+            else
+            {
+                if (tempResult <= uint.MaxValue)
+                {
+                    if (isUnsigned)
+                    {
+                        literal.Value = (long)(uint)tempResult;
+                    }
+                    else
+                    {
+                        literal.Value = unchecked((int)(uint)tempResult);
+                    }
+                }
+                else
+                {
+                    if (isUnsigned)
+                    {
+                        literal.Value = new BigInteger(tempResult);
+                    }
+
+                    if (literal.Value == null)
+                    {
+                        literal.Value = unchecked((long)tempResult);
+                    }
+                }
+            }
+
+            NextToken(); // Skip the literal
+            return Close(literal);
+        }
+
+        private ScriptLiteral ParseBinaryInteger()
+        {
+            var literal = Open<ScriptLiteral>();
+
+            var text = GetAsText(Current).Replace("_", string.Empty);
+            bool isUnsigned = false;
+            if (text.EndsWith("u", StringComparison.OrdinalIgnoreCase))
+            {
+                text = text.Substring(0, text.Length - 1);
+                isUnsigned = true;
+            }
+
+            var number = BigInteger.Zero;
+            for (int i = 2; i < text.Length; i++)
+            {
+                var c = text[i];
+                number <<= 1;
+                number |= c == '0' ? 0U : 1U;
+            }
+
+            if (number <= uint.MaxValue)
+            {
+                if (isUnsigned)
+                {
+                    literal.Value = (long)(uint)number;
+                }
+                else
+                {
+                    literal.Value = unchecked((int)(uint)number);
+                }
+            }
+            else if (number <= ulong.MaxValue)
+            {
+                if (isUnsigned)
+                {
+                    literal.Value = number;
+                }
+
+                if (literal.Value == null)
+                {
+                    literal.Value = unchecked((long)(ulong)number);
+                }
+            }
+            else
+            {
+                literal.Value = number;
             }
 
             NextToken(); // Skip the literal
@@ -477,6 +625,8 @@ namespace Scriban.Parsing
                 case TokenType.Identifier:
                 case TokenType.IdentifierSpecial:
                 case TokenType.Integer:
+                case TokenType.HexaInteger:
+                case TokenType.BinaryInteger:
                 case TokenType.Float:
                 case TokenType.String:
                 case TokenType.ImplicitString:

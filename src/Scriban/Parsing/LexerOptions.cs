@@ -23,6 +23,8 @@ namespace Scriban.Parsing
         /// </summary>
         public ScriptMode Mode { get; set; }
 
+        public ScriptSyntaxLevel Level { get; set; }
+
         /// <summary>
         /// If selected mode is <see cref="ScriptMode.FrontMatterOnly"/> or <see cref="ScriptMode.FrontMatterAndContent"/>, this marker will be used
         /// </summary>

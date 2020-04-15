@@ -32,6 +32,7 @@ namespace Scriban.Parsing
         private readonly char _stripWhiteSpaceRestrictedSpecialChar;
         private const char RawEscapeSpecialChar = '%';
         private readonly Queue<Token> _pendingTokens;
+        private readonly bool _isScientific;
 
         /// <summary>
         /// Lexer options.
@@ -76,6 +77,7 @@ namespace Scriban.Parsing
             _isLiquid = Options.Mode == ScriptMode.Liquid;
             _stripWhiteSpaceFullSpecialChar = '-';
             _stripWhiteSpaceRestrictedSpecialChar = '~';
+            _isScientific = !_isLiquid && Options.Level == ScriptSyntaxLevel.Scientific;
         }
 
         /// <summary>
@@ -721,8 +723,15 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '^':
-                    _token = new Token(TokenType.Caret, start, start);
                     NextChar();
+                    if (c == '^')
+                    {
+                        _token = new Token(TokenType.DoubleCaret, start, _position);
+                        NextChar();
+                        break;
+                    }
+
+                    _token = new Token(TokenType.Caret, start, start);
                     break;
                 case '*':
                     _token = new Token(TokenType.Multiply, start, start);
@@ -758,19 +767,19 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '&')
                     {
-                        _token = new Token(TokenType.And, start, _position);
+                        _token = new Token(TokenType.DoubleAmp, start, _position);
                         NextChar();
                         break;
                     }
 
                     // & is an invalid char alone
-                    _token = new Token(TokenType.Invalid, start, start);
+                    _token = new Token(TokenType.Amp, start, start);
                     break;
                 case '?':
                     NextChar();
                     if (c == '?')
                     {
-                        _token = new Token(TokenType.EmptyCoalescing, start, _position);
+                        _token = new Token(TokenType.DoubleQuestion, start, _position);
                         NextChar();
                         break;
                     }
@@ -781,10 +790,17 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '|')
                     {
-                        _token = new Token(TokenType.Or, start, _position);
+                        _token = new Token(TokenType.DoublePipe, start, _position);
                         NextChar();
                         break;
                     }
+                    else if (c == '>')
+                    {
+                        _token = new Token(TokenType.PipeGreater, start, _position);
+                        NextChar();
+                        break;
+                    }
+
                     _token = new Token(TokenType.Pipe, start, start);
                     break;
                 case '.':
@@ -837,7 +853,7 @@ namespace Scriban.Parsing
                     }
                     if (c == '<')
                     {
-                        _token = new Token(TokenType.ShiftLeft, start, _position);
+                        _token = new Token(TokenType.DoubleLess, start, _position);
                         NextChar();
                         break;
                     }
@@ -853,7 +869,7 @@ namespace Scriban.Parsing
                     }
                     if (c == '>')
                     {
-                        _token = new Token(TokenType.ShiftRight, start, _position);
+                        _token = new Token(TokenType.DoubleGreater, start, _position);
                         NextChar();
                         break;
                     }
@@ -1180,14 +1196,31 @@ namespace Scriban.Parsing
         {
             var start = _position;
             var end = _position;
-            var hasDot = false;
+            var isFloat = false;
+
+            NextChar();
+
+            if (c == 'x')
+            {
+                ReadHexa(start);
+                return;
+            }
+
+            if (c == 'b')
+            {
+                ReadBinary(start);
+                return;
+            }
 
             // Read first part
-            do
+            if (char.IsDigit(c) || c == '_')
             {
-                end = _position;
-                NextChar();
-            } while (char.IsDigit(c));
+                do
+                {
+                    end = _position;
+                    NextChar();
+                } while (char.IsDigit(c) || c == '_');
+            }
 
 
             // Read any number following
@@ -1196,7 +1229,7 @@ namespace Scriban.Parsing
                 // If the next char is a '.' it means that we have a range iterator, so we don't touch it
                 if (PeekChar() != '.')
                 {
-                    hasDot = true;
+                    isFloat = true;
                     end = _position;
                     NextChar();
                     while (char.IsDigit(c))
@@ -1230,7 +1263,71 @@ namespace Scriban.Parsing
                 }
             }
 
-            _token = new Token(hasDot ? TokenType.Float : TokenType.Integer, start, end);
+            if (c == 'f' || c == 'F')
+            {
+                isFloat = true;
+                end = _position;
+                NextChar();
+            }
+
+            _token = new Token(isFloat ? TokenType.Float : TokenType.Integer, start, end);
+        }
+
+        private static bool IsHexa(char c)
+        {
+            return char.IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+        }
+
+        private void ReadHexa(TextPosition start)
+        {
+            TextPosition end = _position;
+            // Read first part
+            bool hasHexa = false;
+
+            end = _position;
+            NextChar();
+
+            while(true)
+            {
+                if (IsHexa(c)) hasHexa = true;
+                else if (c != '_') break;
+                end = _position;
+                NextChar();
+            }
+
+            if (c == 'u' || c == 'U')
+            {
+                end = _position;
+                NextChar();
+            }
+
+            if (!hasHexa)
+            {
+                AddError($"Invalid hex number, expecting at least an hex digit [0-9a-fA-F] after 0x", start, end);
+            }
+            else
+            {
+                _token = new Token(TokenType.HexaInteger, start, end);
+            }
+        }
+
+        private void ReadBinary(TextPosition start)
+        {
+            TextPosition end = _position;
+            // Read first part
+            do
+            {
+                end = _position;
+                NextChar();
+            } while (c == '0' || c == '1' || c == '_');
+
+            if (c == 'u' || c == 'U')
+            {
+                end = _position;
+                NextChar();
+            }
+
+            _token = new Token(TokenType.BinaryInteger, start, end);
         }
 
         private void ReadString()

@@ -90,6 +90,12 @@ namespace Scriban.Parsing
                     case TokenType.Integer:
                         leftOperand = ParseInteger();
                         break;
+                    case TokenType.HexaInteger:
+                        leftOperand = ParseHexaInteger();
+                        break;
+                    case TokenType.BinaryInteger:
+                        leftOperand = ParseBinaryInteger();
+                        break;
                     case TokenType.Float:
                         leftOperand = ParseFloat();
                         break;
@@ -116,7 +122,12 @@ namespace Scriban.Parsing
                     case TokenType.Arroba:
                     case TokenType.Plus:
                     case TokenType.Caret:
-                        leftOperand = ParseUnaryExpression(ref hasAnonymousFunction);
+                    case TokenType.DoubleCaret:
+                        // In extended Caret is used for exponent
+                        if (!_isScientific || Current.Type != TokenType.Caret)
+                        {
+                            leftOperand = ParseUnaryExpression(ref hasAnonymousFunction);
+                        }
                         break;
                 }
 
@@ -603,11 +614,11 @@ namespace Scriban.Parsing
                 case TokenType.Arroba:
                     unaryExpression.Operator = ScriptUnaryOperator.FunctionAlias;
                     break;
-                case TokenType.Caret:
-                    unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
-                    break;
                 default:
-                    LogError($"Unexpected token `{Current.Type}` for unary expression");
+                    if (_isScientific && Current.Type == TokenType.DoubleCaret || !_isScientific && Current.Type == TokenType.Caret)
+                    {
+                        unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
+                    }
                     break;
             }
             var newPrecedence = GetOperatorPrecedence(unaryExpression.Operator);
@@ -716,6 +727,8 @@ namespace Scriban.Parsing
                 case TokenType.Identifier:
                 case TokenType.IdentifierSpecial:
                 case TokenType.Integer:
+                case TokenType.HexaInteger:
+                case TokenType.BinaryInteger:
                 case TokenType.Float:
                 case TokenType.String:
                 case TokenType.ImplicitString:

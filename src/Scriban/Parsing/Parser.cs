@@ -31,6 +31,7 @@ namespace Scriban.Parsing
         private bool _isExpressionDepthLimitReached;
         private int _expressionDepth;
         private bool _hasFatalError;
+        private readonly bool _isScientific;
         private readonly bool _isKeepTrivia;
         private readonly List<ScriptTrivia> _trivias;
         private readonly Queue<ScriptStatement> _pendingStatements;
@@ -45,6 +46,7 @@ namespace Scriban.Parsing
         {
             _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
             _isLiquid = _lexer.Options.Mode == ScriptMode.Liquid;
+            _isScientific = _lexer.Options.Level == ScriptSyntaxLevel.Scientific;
             _tokensPreview = new List<Token>(4);
             Messages = new List<LogMessage>();
             _trivias = new List<ScriptTrivia>();
