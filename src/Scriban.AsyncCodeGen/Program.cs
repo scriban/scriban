@@ -24,7 +24,8 @@ namespace Scriban.AsyncCodeGen
         {
             var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>()
             {
-                {"TargetFramework", "net35"}
+                {"TargetFramework", "netstandard2.0"},
+                {"DefineConstants", "SCRIBAN_NO_ASYNC" }
             });
 
             var project = await workspace.OpenProjectAsync(@"../../../../Scriban/Scriban.csproj");
@@ -50,6 +51,10 @@ namespace Scriban.AsyncCodeGen
                         if (interfaceType != null && interfaceType.ContainingNamespace.Name == "Runtime" && (interfaceType.Name == "IScriptOutput" || interfaceType.Name == "IScriptCustomFunction" || (interfaceType.Name == "ITemplateLoader" && methodDeclaration.Identifier.Text == "Load")))
                         {
                             var method = model.GetDeclaredSymbol(methodDeclaration);
+
+                            // Convert only IScriptCustomFunction.Invoke
+                            if (interfaceType.Name == "IScriptCustomFunction" && method.Name != "Invoke") continue;
+
                             if (visited.Add(method))
                             {
                                 methods.Push(method);
@@ -420,7 +425,7 @@ using Scriban.Syntax;
             var triviaList = cu.GetLeadingTrivia();
             triviaList = triviaList.Insert(0, Trivia(
                 IfDirectiveTrivia(
-                    IdentifierName("SCRIBAN_ASYNC"),
+                    IdentifierName("!SCRIBAN_NO_ASYNC"),
                     true,
                     false,
                     false)));

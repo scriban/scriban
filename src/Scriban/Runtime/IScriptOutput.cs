@@ -3,10 +3,8 @@
 // See license.txt file in the project root for full license information.
 
 using System;
-#if SCRIBAN_ASYNC
 using System.Threading;
 using System.Threading.Tasks;
-#endif
 
 namespace Scriban.Runtime
 {
@@ -17,7 +15,7 @@ namespace Scriban.Runtime
     {
         IScriptOutput Write(string text, int offset, int count);
 
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken);
 #endif
     }

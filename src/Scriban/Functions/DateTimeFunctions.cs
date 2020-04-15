@@ -5,9 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using Scriban.Runtime;
 using Scriban.Syntax;
 
@@ -401,12 +399,10 @@ namespace Scriban.Functions
             }
         }
 
-#if SCRIBAN_ASYNC
         public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));
         }
-#endif
 
         private void CreateImportFunctions()
         {

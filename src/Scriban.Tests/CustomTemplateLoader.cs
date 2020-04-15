@@ -1,6 +1,4 @@
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using Scriban.Parsing;
 using Scriban.Runtime;
 
@@ -57,12 +55,10 @@ namespace Scriban.Tests
             }
         }
 
-#if SCRIBAN_ASYNC
         public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
             return new ValueTask<string>(Load(context, callerSpan, templatePath));
         }
-#endif
     }
 
     class LiquidCustomTemplateLoader : ITemplateLoader
@@ -93,11 +89,9 @@ namespace Scriban.Tests
             }
         }
 
-#if SCRIBAN_ASYNC
         public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
             return new ValueTask<string>(Load(context, callerSpan, templatePath));
         }
-#endif
     }
 }

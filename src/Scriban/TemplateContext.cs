@@ -168,7 +168,7 @@ namespace Scriban
         /// </summary>
         public string NewLine { get; set; }
 
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         /// <summary>
         /// Gets or sets the cancellation token used for async evaluation
         /// </summary>

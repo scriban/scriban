@@ -57,11 +57,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static ScriptArray Match(TemplateContext context, string text, string pattern, string options = null)
         {
-#if NET35 || NET40
-            var match = Regex.Match(text, pattern, GetOptions(options));
-#else
             var match = Regex.Match(text, pattern, GetOptions(options), context.RegexTimeOut);
-#endif
             var matchObject = new ScriptArray();
 
             if (match.Success)
@@ -100,11 +96,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Replace(TemplateContext context, string text, string pattern, string replace, string options = null)
         {
-#if NET35 || NET40
-            return Regex.Replace(text, pattern, replace, GetOptions(options));
-#else
             return Regex.Replace(text, pattern, replace, GetOptions(options), context.RegexTimeOut);
-#endif
         }
 
         /// <summary>
@@ -130,11 +122,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static ScriptArray Split(TemplateContext context, string text, string pattern, string options = null)
         {
-#if NET35 || NET40
-            return new ScriptArray(Regex.Split(text, pattern));
-#else
             return new ScriptArray(Regex.Split(text, pattern, GetOptions(options), context.RegexTimeOut));
-#endif
         }
 
         /// <summary>

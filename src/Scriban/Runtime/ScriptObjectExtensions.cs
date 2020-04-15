@@ -243,11 +243,7 @@ namespace Scriban.Runtime
                     foreach (var property in typeInfo.GetDeclaredProperties())
                     {
                         // Workaround with .NET Core, extension method is not working (retuning null despite doing property.GetMethod), so we need to inline it here
-#if NET35 || NET40
-                        var getMethod = property.GetGetMethod();
-#else
                         var getMethod = property.GetMethod;
-#endif
                         if (!property.CanRead || !getMethod.IsPublic)
                         {
                             continue;

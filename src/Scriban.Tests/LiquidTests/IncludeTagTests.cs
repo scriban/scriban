@@ -2,9 +2,7 @@ using System;
 using NUnit.Framework;
 using System.Collections.Generic;
 using System.Globalization;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using Scriban;
 using Scriban.Parsing;
 using Scriban.Runtime;
@@ -54,12 +52,10 @@ namespace DotLiquid.Tests.Tags
                 }
             }
 
-#if SCRIBAN_ASYNC
             public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return new ValueTask<string>(Load(context, callerSpan, templatePath));
             }
-#endif
         }
 
         internal class TestTemplateFileSystem : ITemplateLoader
@@ -81,12 +77,10 @@ namespace DotLiquid.Tests.Tags
                 return _baseFileSystem.Load(context, callerSpan, templatePath);
             }
 
-#if SCRIBAN_ASYNC
             public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return _baseFileSystem.LoadAsync(context, callerSpan, templatePath);
             }
-#endif
         }
 
         private class OtherFileSystem : ITemplateLoader
@@ -101,12 +95,10 @@ namespace DotLiquid.Tests.Tags
                 return "from OtherFileSystem";
             }
 
-#if SCRIBAN_ASYNC
             public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return new ValueTask<string>(Load(context, callerSpan, templatePath));
             }
-#endif
         }
 
         private class InfiniteFileSystem : ITemplateLoader
@@ -121,12 +113,10 @@ namespace DotLiquid.Tests.Tags
                 return "-{% include 'loop' %}";
             }
 
-#if SCRIBAN_ASYNC
             public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return new ValueTask<string>(Load(context, callerSpan, templatePath));
             }
-#endif
         }
 
         [SetUp]

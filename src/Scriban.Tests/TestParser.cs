@@ -10,9 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using DotLiquid.Tests.Tags;
 using NUnit.Framework;
 using Scriban.Helpers;
@@ -495,9 +493,7 @@ end
             {
                 bool isRoundtrip = roundtripText != null;
                 bool hasErrors = false;
-#if SCRIBAN_ASYNC
                 bool hasException = false;
-#endif
                 if (isRoundtrip)
                 {
                     Console.WriteLine("Roundtrip");
@@ -523,9 +519,7 @@ end
                 var template = Template.Parse(input, "text", parserOptions, lexerOptions);
 
                 var result = string.Empty;
-#if SCRIBAN_ASYNC
                 var resultAsync = string.Empty;
-#endif
                 if (template.HasErrors)
                 {
                     hasErrors = true;
@@ -597,7 +591,6 @@ end
                                 result = template.Render(context);
                             }
 
-#if SCRIBAN_ASYNC
                             // Render async
                             {
                                 var asyncContext = NewTemplateContext(isLiquid);
@@ -607,13 +600,10 @@ end
                                 asyncContext.PushGlobal(contextObj);
                                 resultAsync = template.RenderAsync(asyncContext).Result;
                             }
-#endif
                         }
                         catch (Exception exception)
                         {
-#if SCRIBAN_ASYNC
                             hasException = true;
-#endif
                             if (specialLiquid)
                             {
                                 throw;
@@ -644,14 +634,12 @@ end
                     TextAssert.AreEqual(expected, result);
                 }
 
-#if SCRIBAN_ASYNC
                 if (!isRoundtrip && !isRoundtripTest && !hasErrors && !hasException)
                 {
                     Console.WriteLine("Checking async");
                     Console.WriteLine("======================================");
                     TextAssert.AreEqual(expected, resultAsync);
                 }
-#endif
 
                 if (isRoundtripTest || isRoundtrip || hasErrors)
                 {
@@ -810,14 +798,10 @@ end
         {
             get
             {
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
                 var assembly = Assembly.GetExecutingAssembly();
                 var codebase = new Uri(assembly.CodeBase);
                 var path = codebase.LocalPath;
                 return Path.GetDirectoryName(path);
-#else
-                return Directory.GetCurrentDirectory();
-#endif
             }
         }
     }

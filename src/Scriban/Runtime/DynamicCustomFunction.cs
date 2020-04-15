@@ -5,9 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using Scriban.Helpers;
 using Scriban.Syntax;
 
@@ -28,7 +26,7 @@ namespace Scriban.Runtime
 
         protected readonly ParameterInfo[] Parameters;
 
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         protected readonly bool IsAwaitable;
 #endif
 
@@ -36,13 +34,13 @@ namespace Scriban.Runtime
         {
             Method = method;
             Parameters = method.GetParameters();
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
             IsAwaitable = method.ReturnType.GetTypeInfo().GetDeclaredMethod(nameof(Task.GetAwaiter)) != null;
 #endif
         }
 
 
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         protected async ValueTask<object> ConfigureAwait(object result)
         {
             switch (result)
@@ -71,7 +69,8 @@ namespace Scriban.Runtime
 
         public abstract object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
 
-#if SCRIBAN_ASYNC
+
+#if !SCRIBAN_NO_ASYNC
         public virtual ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));

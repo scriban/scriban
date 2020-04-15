@@ -15,9 +15,6 @@ namespace Scriban.Functions
     {
         // From https://stackoverflow.com/a/17668453/1356325
         private const string RegexMatchHtml = @"<script.*?</script>|<!--.*?-->|<style.*?</style>|<(?:[^>=]|='[^']*'|=""[^""]*""|=[^'""][^\s>]*)*>";
-#if NET35 || NET40 || PCL328
-        private static readonly Regex stripHtml = new Regex(RegexMatchHtml, RegexOptions.IgnoreCase | RegexOptions.Singleline);
-#endif
 
         /// <summary>
         /// Removes any HTML tags from the input string
@@ -39,10 +36,7 @@ namespace Scriban.Functions
             {
                 return text;
             }
-#if !NET35 && !NET40
             var stripHtml = new Regex(RegexMatchHtml, RegexOptions.IgnoreCase|RegexOptions.Singleline, context.RegexTimeOut);
-#endif
-
             return stripHtml.Replace(text, string.Empty);
         }
 
@@ -65,11 +59,7 @@ namespace Scriban.Functions
             {
                 return text;
             }
-#if NET35
-            return System.Web.HttpUtility.HtmlEncode(text);
-#else
             return System.Net.WebUtility.HtmlEncode(text);
-#endif
         }
 
         /// <summary>

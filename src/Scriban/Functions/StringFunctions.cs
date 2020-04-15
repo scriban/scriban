@@ -817,7 +817,6 @@ namespace Scriban.Functions
             return text?.ToUpperInvariant();
         }
 
-#if !NETSTANDARD1_1
         /// <summary>
         /// Computes the `md5` hash of the input string
         /// </summary>
@@ -941,32 +940,6 @@ namespace Scriban.Functions
             ReleaseBuilder(sb);
             return result;
         }
-#else
-        public static string Md5(string text)
-        {
-            throw new NotSupportedException("`string.md5` is not supported on this .NET platform");
-        }
-
-        public static string Sha1(string text)
-        {
-            throw new NotSupportedException("`string.sha1` is not supported on this .NET platform");
-        }
-
-        public static string Sha256(string text)
-        {
-            throw new NotSupportedException("`string.sha256` is not supported on this .NET platform");
-        }
-
-        public static string HmacSha1(string text, string secretKey)
-        {
-            throw new NotSupportedException("`string.hmac_sha1` is not supported on this .NET platform");
-        }
-
-        public static string HmacSha256(string text, string secretKey)
-        {
-            throw new NotSupportedException("`string.hmac_sha256` is not supported on this .NET platform");
-        }
-#endif
 
         /// <summary>
         /// Pads a string with leading spaces to a specified total length.
@@ -1042,11 +1015,7 @@ namespace Scriban.Functions
         public static string Base64Decode(string text)
         {
             var decoded = Convert.FromBase64String(text ?? string.Empty);
-            #if NETSTANDARD1_1
-            return Encoding.UTF8.GetString(decoded, 0, decoded.Length);
-            #else
             return Encoding.UTF8.GetString(decoded);
-            #endif
         }
     }
 }

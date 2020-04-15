@@ -8,9 +8,7 @@ using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 
 namespace Scriban.Syntax
 {
@@ -79,7 +77,7 @@ namespace Scriban.Syntax
 
         protected abstract object EvaluateImpl(TemplateContext context);
 
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         protected abstract ValueTask<object> EvaluateImplAsync(TemplateContext context);
 
         protected abstract ValueTask<object> LoopItemAsync(TemplateContext context, LoopState state);

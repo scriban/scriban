@@ -4,9 +4,7 @@
 using System;
 using System.IO;
 using System.Threading;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 
 namespace Scriban.Runtime
 {
@@ -42,7 +40,7 @@ namespace Scriban.Runtime
             Writer.Write(text.Substring(offset, count));
             return this;
         }
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         public async ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
         {
             // TextWriter doesn't support to pass CancellationToken oO

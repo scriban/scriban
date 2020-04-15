@@ -4,9 +4,7 @@
 using System;
 using System.Text;
 using System.Threading;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 
 namespace Scriban.Runtime
 {
@@ -59,7 +57,7 @@ namespace Scriban.Runtime
         }
 
 
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         public ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
         {
             Builder.Append(text, offset, count);

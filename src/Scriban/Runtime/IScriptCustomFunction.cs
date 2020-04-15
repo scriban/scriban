@@ -2,9 +2,7 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using Scriban.Syntax;
 
 namespace Scriban.Runtime
@@ -24,7 +22,8 @@ namespace Scriban.Runtime
         /// <returns>The result of the call</returns>
         object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
 
-#if SCRIBAN_ASYNC
+
+#if !SCRIBAN_NO_ASYNC
         /// <summary>
         /// Calls the custom function object asynchronously.
         /// </summary>

@@ -3,16 +3,12 @@
 
 using System;
 using System.Collections.Generic;
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
 using System.Data;
-#endif
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Scriban.Parsing;
@@ -145,7 +141,6 @@ end
             TextAssert.AreEqual("22AB", result);
         }
 
-#if SCRIBAN_ASYNC
         [Test]
         public async Task TestAsyncAwait()
         {
@@ -168,7 +163,6 @@ end
 
             Assert.AreEqual("yes", result);
         }
-#endif
 
         [Test]
         public void CheckReturnInsideLoop()
@@ -365,7 +359,6 @@ Tax: {{ 7 | match_tax }}";
             TextAssert.AreEqual("Test with a dynamic yes", result);
         }
 
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
         [Test]
         public void TestJson()
         {
@@ -430,7 +423,6 @@ Tax: {{ 7 | match_tax }}";
 
             TextAssert.AreEqual(expected, result);
         }
-#endif
 
         [Test]
         public void TestScriptObjectImport()
