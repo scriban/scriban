@@ -235,7 +235,7 @@ namespace Scriban.Tests
         public void ParseLogicalOperators()
         {
             VerifyCodeBlock("{{ ! && || }}",
-                new Token(TokenType.Not, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
+                new Token(TokenType.Exclamation, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
                 new Token(TokenType.DoubleAmp, new TextPosition(5, 0, 5), new TextPosition(6, 0, 6)),
                 new Token(TokenType.DoublePipe, new TextPosition(8, 0, 8), new TextPosition(9, 0, 9))
                 );
@@ -436,7 +436,7 @@ namespace Scriban.Tests
                 {"//", TokenType.DoubleDivide},
                 {"%", TokenType.Modulus},
                 {"=", TokenType.Equal},
-                {"!", TokenType.Not},
+                {"!", TokenType.Exclamation},
                 {"|", TokenType.Pipe},
                 {"|>", TokenType.PipeGreater},
                 {",", TokenType.Comma},

@@ -118,7 +118,7 @@ namespace Scriban.Parsing
         PipeGreater,  // |>
 
         [TokenText("!")]
-        Not, // !
+        Exclamation, // !
 
         [TokenText("&&")]
         DoubleAmp, // &&

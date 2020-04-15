@@ -666,7 +666,7 @@ namespace Scriban.Parsing
                 // Else we parse standard unary operators
                 switch (unaryTokenType)
                 {
-                    case TokenType.Not:
+                    case TokenType.Exclamation:
                         unaryExpression.Operator = ScriptUnaryOperator.Not;
                         break;
                     case TokenType.Minus:
@@ -824,7 +824,7 @@ namespace Scriban.Parsing
 
             switch (Current.Type)
             {
-                case TokenType.Not:
+                case TokenType.Exclamation:
                 case TokenType.Minus:
                 case TokenType.Plus:
                 case TokenType.Arroba:

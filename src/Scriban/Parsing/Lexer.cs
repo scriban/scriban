@@ -840,7 +840,7 @@ namespace Scriban.Parsing
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.Not, start, start);
+                    _token = new Token(TokenType.Exclamation, start, start);
                     break;
 
                 case '=':
