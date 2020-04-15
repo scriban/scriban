@@ -8,6 +8,8 @@ namespace Scriban.Syntax
 {
     public enum ScriptBinaryOperator
     {
+        None,
+
         /// <summary>
         /// The empty coalescing operator ??
         /// </summary>
@@ -23,12 +25,18 @@ namespace Scriban.Syntax
 
         Multiply,
 
+        Power,
+
         Modulus,
+
+        BinaryAnd,
+
+        BinaryOr,
 
         ShiftLeft,
 
         ShiftRight,
-
+        
         RangeInclude,
 
         RangeExclude,
@@ -112,6 +120,12 @@ namespace Scriban.Syntax
                     return "| object.has_key ";
                 case ScriptBinaryOperator.LiquidHasValue:
                     return "| object.has_value ";
+                case ScriptBinaryOperator.Power:
+                    return "^";
+                case ScriptBinaryOperator.BinaryAnd:
+                    return "&";
+                case ScriptBinaryOperator.BinaryOr:
+                    return "|";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(op));
             }

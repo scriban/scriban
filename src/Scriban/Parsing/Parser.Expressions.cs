@@ -12,38 +12,53 @@ namespace Scriban.Parsing
 {
     public partial class Parser
     {
-        private static readonly Dictionary<TokenType, ScriptBinaryOperator> BinaryOperators = new Dictionary<TokenType, ScriptBinaryOperator>();
-
         private int _allowNewLineLevel = 0;
         private int _expressionLevel = 0;
-
-        static Parser()
-        {
-            BinaryOperators.Add(TokenType.Multiply, ScriptBinaryOperator.Multiply);
-            BinaryOperators.Add(TokenType.Divide, ScriptBinaryOperator.Divide);
-            BinaryOperators.Add(TokenType.DoubleDivide, ScriptBinaryOperator.DivideRound);
-            BinaryOperators.Add(TokenType.Plus, ScriptBinaryOperator.Add);
-            BinaryOperators.Add(TokenType.Minus, ScriptBinaryOperator.Substract);
-            BinaryOperators.Add(TokenType.Modulus, ScriptBinaryOperator.Modulus);
-            BinaryOperators.Add(TokenType.ShiftLeft, ScriptBinaryOperator.ShiftLeft);
-            BinaryOperators.Add(TokenType.ShiftRight, ScriptBinaryOperator.ShiftRight);
-            BinaryOperators.Add(TokenType.EmptyCoalescing, ScriptBinaryOperator.EmptyCoalescing);
-            BinaryOperators.Add(TokenType.And, ScriptBinaryOperator.And);
-            BinaryOperators.Add(TokenType.Or, ScriptBinaryOperator.Or);
-            BinaryOperators.Add(TokenType.CompareEqual, ScriptBinaryOperator.CompareEqual);
-            BinaryOperators.Add(TokenType.CompareNotEqual, ScriptBinaryOperator.CompareNotEqual);
-            BinaryOperators.Add(TokenType.CompareGreater, ScriptBinaryOperator.CompareGreater);
-            BinaryOperators.Add(TokenType.CompareGreaterOrEqual, ScriptBinaryOperator.CompareGreaterOrEqual);
-            BinaryOperators.Add(TokenType.CompareLess, ScriptBinaryOperator.CompareLess);
-            BinaryOperators.Add(TokenType.CompareLessOrEqual, ScriptBinaryOperator.CompareLessOrEqual);
-            BinaryOperators.Add(TokenType.DoubleDot, ScriptBinaryOperator.RangeInclude);
-            BinaryOperators.Add(TokenType.DoubleDotLess, ScriptBinaryOperator.RangeExclude);
-        }
 
         private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             bool hasAnonymousFunction = false;
             return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence, mode, allowAssignment);
+        }
+
+        private bool TryGetBinaryOperatorType(TokenType tokenType, out ScriptBinaryOperator binaryOperator)
+        {
+            binaryOperator = ScriptBinaryOperator.None;
+            switch (tokenType)
+            {
+                case TokenType.Multiply: binaryOperator = ScriptBinaryOperator.Multiply; break;
+                case TokenType.Divide: binaryOperator = ScriptBinaryOperator.Divide; break;
+                case TokenType.DoubleDivide: binaryOperator = ScriptBinaryOperator.DivideRound; break;
+                case TokenType.Plus: binaryOperator = ScriptBinaryOperator.Add; break;
+                case TokenType.Minus: binaryOperator = ScriptBinaryOperator.Substract; break;
+                case TokenType.Modulus: binaryOperator = ScriptBinaryOperator.Modulus; break;
+                case TokenType.DoubleLess: binaryOperator = ScriptBinaryOperator.ShiftLeft; break;
+                case TokenType.DoubleGreater: binaryOperator = ScriptBinaryOperator.ShiftRight; break;
+                case TokenType.DoubleQuestion: binaryOperator = ScriptBinaryOperator.EmptyCoalescing; break;
+                case TokenType.DoubleAmp: binaryOperator = ScriptBinaryOperator.And; break;
+                case TokenType.DoublePipe: binaryOperator = ScriptBinaryOperator.Or; break;
+                case TokenType.CompareEqual: binaryOperator = ScriptBinaryOperator.CompareEqual; break;
+                case TokenType.CompareNotEqual: binaryOperator = ScriptBinaryOperator.CompareNotEqual; break;
+                case TokenType.CompareGreater: binaryOperator = ScriptBinaryOperator.CompareGreater; break;
+                case TokenType.CompareGreaterOrEqual: binaryOperator = ScriptBinaryOperator.CompareGreaterOrEqual; break;
+                case TokenType.CompareLess: binaryOperator = ScriptBinaryOperator.CompareLess; break;
+                case TokenType.CompareLessOrEqual: binaryOperator = ScriptBinaryOperator.CompareLessOrEqual; break;
+                case TokenType.DoubleDot: binaryOperator = ScriptBinaryOperator.RangeInclude; break;
+                case TokenType.DoubleDotLess: binaryOperator = ScriptBinaryOperator.RangeExclude; break;
+                default:
+                    if (_isScientific)
+                    {
+                        switch (tokenType)
+                        {
+                            case TokenType.Caret: binaryOperator = ScriptBinaryOperator.Power; break;
+                            case TokenType.Amp: binaryOperator = ScriptBinaryOperator.BinaryAnd; break;
+                            case TokenType.Pipe: binaryOperator = ScriptBinaryOperator.BinaryOr; break;
+                        }
+                    }
+                    break;
+            }
+
+            return binaryOperator != ScriptBinaryOperator.None;
         }
 
         private ScriptExpression ParseExpression(ScriptNode parentNode, ref bool hasAnonymousFunction, ScriptExpression parentExpression = null, int precedence = 0,
@@ -197,7 +212,7 @@ namespace Scriban.Parsing
 
                     // If we have a bracket but left operand is a (variable || member || indexer), then we consider next as an indexer
                     // unit test: 130-indexer-accessor-accept1.txt
-                    if (Current.Type == TokenType.OpenBracket && leftOperand is IScriptVariablePath && !IsPreviousCharWhitespace())
+                    if (Current.Type == TokenType.OpenBracket && (leftOperand is IScriptVariablePath || leftOperand is ScriptLiteral)  && !IsPreviousCharWhitespace())
                     {
                         NextToken();
                         var indexerExpression = Open<ScriptIndexerExpression>();
@@ -241,19 +256,31 @@ namespace Scriban.Parsing
                         assignExpression.Value = ExpectAndParseExpression(assignExpression, ref hasAnonymousFunction, parentExpression);
 
                         leftOperand = Close(assignExpression);
-                        continue;
+                        break;
                     }
+
+                    // Parse unary -1 if a minus is not followed by a space
+                    bool isUnaryMinus = _isScientific && Current.Type == TokenType.Minus && !IsNextCharWhitespace();
 
                     // Handle binary operators here
                     ScriptBinaryOperator binaryOperatorType;
-                    if (BinaryOperators.TryGetValue(Current.Type, out binaryOperatorType) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType)))
+                    if (!isUnaryMinus && TryGetBinaryOperatorType(Current.Type, out binaryOperatorType) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType)))
                     {
                         var newPrecedence = GetOperatorPrecedence(binaryOperatorType);
 
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
                         if (newPrecedence <= precedence)
                             break;
-
+                        
+                        // In scientific mode, function calls are terminated by a binary operation
+                        if (_isScientific && functionCall != null)
+                        {
+                            functionCall.Arguments.Add(leftOperand);
+                            functionCall.Span.End = leftOperand.Span.End;
+                            leftOperand = functionCall;
+                            functionCall = null;
+                        }
+                        
                         // We fake entering an expression here to limit the number of expression
                         EnterExpression();
                         var binaryExpression = Open<ScriptBinaryExpression>();
@@ -269,11 +296,6 @@ namespace Scriban.Parsing
                         leftOperand = Close(binaryExpression);
 
                         continue;
-                    }
-
-                    if (precedence > 0)
-                    {
-                        break;
                     }
 
                     if (StartAsExpression())
@@ -371,8 +393,13 @@ namespace Scriban.Parsing
                         }
                         goto parseExpression;
                     }
+                    
+                    if (precedence > 0)
+                    {
+                        break;
+                    }
 
-                    if (Current.Type == TokenType.Pipe)
+                    if (_isScientific && Current.Type == TokenType.PipeGreater || !_isScientific && (Current.Type == TokenType.Pipe || Current.Type == TokenType.PipeGreater))
                     {
                         if (functionCall != null)
                         {
@@ -382,7 +409,7 @@ namespace Scriban.Parsing
 
                         var pipeCall = Open<ScriptPipeCall>();
                         pipeCall.From = leftOperand;
-                        NextToken(); // skip |
+                        NextToken(); // skip | or |>
 
                         // unit test: 310-func-pipe-error1.txt
                         pipeCall.To = ExpectAndParseExpression(pipeCall, ref hasAnonymousFunction);
@@ -619,6 +646,11 @@ namespace Scriban.Parsing
                     {
                         unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
                     }
+
+                    if (unaryExpression.Operator == ScriptUnaryOperator.None)
+                    {
+                        LogError($"Unexpected token `{Current.Type}` for unary expression");
+                    }
                     break;
             }
             var newPrecedence = GetOperatorPrecedence(unaryExpression.Operator);
@@ -790,13 +822,17 @@ namespace Scriban.Parsing
             {
                 case ScriptBinaryOperator.EmptyCoalescing:
                     return 20;
-                case ScriptBinaryOperator.ShiftLeft:
-                case ScriptBinaryOperator.ShiftRight:
-                    return 25;
                 case ScriptBinaryOperator.Or:
                     return 30;
                 case ScriptBinaryOperator.And:
                     return 40;
+
+                case ScriptBinaryOperator.BinaryOr:
+                    return 44;
+
+                case ScriptBinaryOperator.BinaryAnd:
+                    return 45;
+
                 case ScriptBinaryOperator.CompareEqual:
                 case ScriptBinaryOperator.CompareNotEqual:
                     return 50;
@@ -820,7 +856,11 @@ namespace Scriban.Parsing
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
+                case ScriptBinaryOperator.ShiftLeft:
+                case ScriptBinaryOperator.ShiftRight:
                     return 80;
+                case ScriptBinaryOperator.Power:
+                    return 85;
                 case ScriptBinaryOperator.RangeInclude:
                 case ScriptBinaryOperator.RangeExclude:
                     return 90;
@@ -848,6 +888,16 @@ namespace Scriban.Parsing
         {
             int position = Current.Start.Offset - 1;
             if (position >= 0)
+            {
+                return char.IsWhiteSpace(_lexer.Text[position]);
+            }
+            return false;
+        }
+
+        bool IsNextCharWhitespace()
+        {
+            int position = Current.End.Offset + 1;
+            if (position >= 0 && position < _lexer.Text.Length)
             {
                 return char.IsWhiteSpace(_lexer.Text[position]);
             }

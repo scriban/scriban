@@ -8,6 +8,7 @@ namespace Scriban.Syntax
 {
     public enum ScriptUnaryOperator
     {
+        None,
         Not,
         Negate,
         Plus,

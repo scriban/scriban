@@ -7,6 +7,7 @@ using System.Collections;
 using System.Reflection;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 using System.Text;
 using Scriban.Functions;
 using Scriban.Helpers;
@@ -87,7 +88,7 @@ namespace Scriban.Syntax
             {
                 return leftValue ?? rightValue;
             }
-
+            
             switch (op)
             {
                 case ScriptBinaryOperator.ShiftLeft:
@@ -97,7 +98,8 @@ namespace Scriban.Syntax
                         var newList = new ScriptArray(leftList) { rightValue };
                         return newList;
                     }
-                    break;
+                    goto case ScriptBinaryOperator.CompareEqual;
+
                 case ScriptBinaryOperator.ShiftRight:
                     var rightList = rightValue as IList;
                     if (rightList != null)
@@ -106,7 +108,7 @@ namespace Scriban.Syntax
                         newList.Insert(0, leftValue);
                         return newList;
                     }
-                    break;
+                    goto case ScriptBinaryOperator.CompareEqual;
 
                 case ScriptBinaryOperator.LiquidHasKey:
                 {
@@ -140,22 +142,40 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
+                case ScriptBinaryOperator.Power:
+                case ScriptBinaryOperator.BinaryAnd:
+                case ScriptBinaryOperator.BinaryOr:
                 case ScriptBinaryOperator.RangeInclude:
                 case ScriptBinaryOperator.RangeExclude:
                 case ScriptBinaryOperator.LiquidContains:
                 case ScriptBinaryOperator.LiquidStartsWith:
                 case ScriptBinaryOperator.LiquidEndsWith:
-                    if (leftValue is string || rightValue is string)
+                    try
                     {
-                        return CalculateToString(context, span, op, leftValue, rightValue);
+                        if (leftValue is string || rightValue is string)
+                        {
+                            return CalculateToString(context, span, op, leftValue, rightValue);
+                        }
+                        else if (leftValue == EmptyScriptObject.Default || rightValue == EmptyScriptObject.Default)
+                        {
+                            return CalculateEmpty(context, span, op, leftValue, rightValue);
+                        }
+                        // Allow custom binary operation
+                        else if (leftValue is IScriptCustomBinaryOperation leftBinaryOp)
+                        {
+                            return leftBinaryOp.Evaluate(context, span, op, leftValue, rightValue);
+                        }
+                        else if (rightValue is IScriptCustomBinaryOperation rightBinaryOp)
+                        {
+                            return rightBinaryOp.Evaluate(context, span, op, leftValue, rightValue);
+                        }
+                        {
+                            return CalculateOthers(context, span, op, leftValue, rightValue);
+                        }
                     }
-                    else if (leftValue == EmptyScriptObject.Default || rightValue == EmptyScriptObject.Default)
+                    catch (Exception ex) when(!(ex is ScriptRuntimeException))
                     {
-                        return CalculateEmpty(context, span, op, leftValue, rightValue);
-                    }
-                    else
-                    {
-                        return CalculateOthers(context, span, op, leftValue, rightValue);
+                        throw new ScriptRuntimeException(span, ex.Message);
                     }
             }
             throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{leftValue}` and `{rightValue}`");
@@ -205,6 +225,9 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Add:
                 case ScriptBinaryOperator.Substract:
                 case ScriptBinaryOperator.Multiply:
+                case ScriptBinaryOperator.Power:
+                case ScriptBinaryOperator.BinaryOr:
+                case ScriptBinaryOperator.BinaryAnd:
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
@@ -228,24 +251,31 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Add:
                     return context.ToString(span, left) + context.ToString(span, right);
                 case ScriptBinaryOperator.Multiply:
-                    if (right is int)
+                    if (right is string)
                     {
                         var temp = left;
                         left = right;
                         right = temp;
                     }
 
-                    if (left is int)
+                    // Don't fail when converting
+                    int value;
+                    try
                     {
-                        var rightText = context.ToString(span, right);
-                        var builder = new StringBuilder();
-                        for (int i = 0; i < (int)left; i++)
-                        {
-                            builder.Append(rightText);
-                        }
-                        return builder.ToString();
+                        value = context.ToInt(span, right);
                     }
-                    throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1.txt
+                    catch
+                    {
+                        throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1
+                    }
+                    var leftText = context.ToString(span, left);
+                    var builder = new StringBuilder();
+                    for (int i = 0; i < value; i++)
+                    {
+                        builder.Append(leftText);
+                    }
+                    return builder.ToString();
+
                 case ScriptBinaryOperator.CompareEqual:
                     return context.ToString(span, left) == context.ToString(span, right);
                 case ScriptBinaryOperator.CompareNotEqual:
@@ -265,85 +295,86 @@ namespace Scriban.Syntax
                     return context.ToString(span, left).StartsWith(context.ToString(span, right));
                 case ScriptBinaryOperator.LiquidEndsWith:
                     return context.ToString(span, left).EndsWith(context.ToString(span, right));
+                default:
+                    break;
             }
 
             // unit test: 150-range-expression-error1.out.txt
             throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported on string objects"); // unit test: 112-binary-string-error2.txt
         }
 
-
-        private static IEnumerable<int> RangeInclude(int left, int right)
+        private static IEnumerable<object> RangeInclude(long left, long right)
         {
             // unit test: 150-range-expression.txt
             if (left < right)
             {
-                for (int i = left; i <= right; i++)
+                for (var i = left; i <= right; i++)
                 {
-                    yield return i;
+                    yield return FitToBestInteger(i);
                 }
             }
             else
             {
-                for (int i = left; i >= right; i--)
+                for (var i = left; i >= right; i--)
                 {
-                    yield return i;
+                    yield return FitToBestInteger(i);
                 }
             }
         }
 
-        private static IEnumerable<int> RangeExclude(int left, int right)
+        private static IEnumerable<object> RangeExclude(long left, long right)
         {
             // unit test: 150-range-expression.txt
             if (left < right)
             {
-                for (int i = left; i < right; i++)
+                for (var i = left; i < right; i++)
                 {
-                    yield return i;
+                    yield return FitToBestInteger(i);
                 }
             }
             else
             {
-                for (int i = left; i > right; i--)
+                for (var i = left; i > right; i--)
                 {
-                    yield return i;
+                    yield return FitToBestInteger(i);
                 }
             }
         }
 
-        private static IEnumerable<long> RangeInclude(long left, long right)
+        private static IEnumerable<object> RangeInclude(BigInteger left, BigInteger right)
         {
             // unit test: 150-range-expression.txt
             if (left < right)
             {
-                for (long i = left; i <= right; i++)
+                for (var i = left; i <= right; i++)
                 {
-                    yield return i;
+                    yield return FitToBestInteger(i);
                 }
             }
             else
             {
-                for (long i = left; i >= right; i--)
+                for (var i = left; i >= right; i--)
                 {
-                    yield return i;
+                    yield return FitToBestInteger(i);
                 }
             }
         }
 
-        private static IEnumerable<long> RangeExclude(long left, long right)
+        private static IEnumerable<object> RangeExclude(BigInteger left, BigInteger right)
         {
             // unit test: 150-range-expression.txt
             if (left < right)
             {
-                for (long i = left; i < right; i++)
+                for (var i = left; i < right; i++)
                 {
-                    yield return i;
+                    yield return FitToBestInteger(i);
                 }
             }
             else
             {
-                for (long i = left; i > right; i--)
+                for (var i = left; i > right; i--)
                 {
-                    yield return i;
+                    yield return FitToBestInteger(i);
                 }
             }
         }
@@ -368,6 +399,11 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.Substract:
                     case ScriptBinaryOperator.Multiply:
                     case ScriptBinaryOperator.Divide:
+                    case ScriptBinaryOperator.Power:
+                    case ScriptBinaryOperator.BinaryOr:
+                    case ScriptBinaryOperator.BinaryAnd:
+                    case ScriptBinaryOperator.ShiftLeft:
+                    case ScriptBinaryOperator.ShiftRight:
                     case ScriptBinaryOperator.DivideRound:
                     case ScriptBinaryOperator.Modulus:
                     case ScriptBinaryOperator.RangeInclude:
@@ -401,6 +437,11 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.Multiply:
                     case ScriptBinaryOperator.Divide:
                     case ScriptBinaryOperator.DivideRound:
+                    case ScriptBinaryOperator.Power:
+                    case ScriptBinaryOperator.BinaryOr:
+                    case ScriptBinaryOperator.BinaryAnd:
+                    case ScriptBinaryOperator.ShiftLeft:
+                    case ScriptBinaryOperator.ShiftRight:
                     case ScriptBinaryOperator.Modulus:
                     case ScriptBinaryOperator.RangeInclude:
                     case ScriptBinaryOperator.RangeExclude:
@@ -449,6 +490,31 @@ namespace Scriban.Syntax
                 var leftFloat = (float)context.ToObject(span, leftValue, typeof(float));
                 return CalculateFloat(op, span, leftFloat, (float)rightValue);
             }
+
+            if (leftType == typeof(BigInteger))
+            {
+                var rightBig = (BigInteger)context.ToObject(span, rightValue, typeof(BigInteger));
+                return CalculateBigInteger(op, span, (BigInteger)leftValue, rightBig);
+            }
+
+            if (rightType == typeof(BigInteger))
+            {
+                var leftBig = (BigInteger)context.ToObject(span, leftValue, typeof(BigInteger));
+                return CalculateBigInteger(op, span, leftBig, (BigInteger)rightValue);
+            }
+
+            if (leftType == typeof(long))
+            {
+                var rightLong = (long)context.ToObject(span, rightValue, typeof(long));
+                return CalculateLong(op, span, (long)leftValue, rightLong);
+            }
+
+            if (rightType == typeof(long))
+            {
+                var leftLong = (long)context.ToObject(span, leftValue, typeof(long));
+                return CalculateLong(op, span, leftLong, (long)rightValue);
+            }
+
 
             if (leftType == typeof(long))
             {
@@ -507,6 +573,48 @@ namespace Scriban.Syntax
 
         private static object CalculateInt(ScriptBinaryOperator op, SourceSpan span, int left, int right)
         {
+            return FitToBestInteger(CalculateLongWithInt(op, span, left, right));
+        }
+
+        private static object FitToBestInteger(object value)
+        {
+            if (value is int) return value;
+            
+            if (value is long longValue)
+            {
+                return FitToBestInteger(longValue);
+            }
+
+            if (value is BigInteger bigInt)
+            {
+                return FitToBestInteger(bigInt);
+            }
+            return value;
+        }
+
+        private static object FitToBestInteger(long longValue)
+        {
+            if (longValue >= int.MinValue && longValue <= int.MaxValue) return (int)longValue;
+            return longValue;
+        }
+
+        private static object FitToBestInteger(BigInteger bigInt)
+        {
+            if (bigInt >= int.MinValue && bigInt <= int.MaxValue) return (int)bigInt;
+            if (bigInt >= long.MinValue && bigInt <= long.MaxValue) return (long)bigInt;
+            return bigInt;
+        }
+
+        /// <summary>
+        /// Use this value as a maximum integer
+        /// </summary>
+        private static readonly BigInteger MaxBigInteger = BigInteger.One << 1024 * 1024;
+
+        private static object CalculateLongWithInt(ScriptBinaryOperator op, SourceSpan span, int leftInt, int rightInt)
+        {
+            long left = leftInt;
+            long right = rightInt;
+
             switch (op)
             {
                 case ScriptBinaryOperator.Add:
@@ -516,11 +624,26 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Multiply:
                     return left * right;
                 case ScriptBinaryOperator.Divide:
-                    return (float)left / right;
+                    return (double)left / (double)right;
                 case ScriptBinaryOperator.DivideRound:
                     return left / right;
+
+                case ScriptBinaryOperator.Power:
+                    return BigInteger.ModPow(left, right, MaxBigInteger);
+
+                case ScriptBinaryOperator.ShiftLeft:
+                    return (BigInteger)left << (int)right;
+                case ScriptBinaryOperator.ShiftRight:
+                    return (BigInteger)left >> (int)right;
+
+                case ScriptBinaryOperator.BinaryOr:
+                    return left | right;
+                case ScriptBinaryOperator.BinaryAnd:
+                    return left & right;
+
                 case ScriptBinaryOperator.Modulus:
                     return left % right;
+
                 case ScriptBinaryOperator.CompareEqual:
                     return left == right;
                 case ScriptBinaryOperator.CompareNotEqual:
@@ -538,10 +661,20 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.RangeExclude:
                     return RangeExclude(left, right);
             }
-            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for int<->int");
+            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for long<->long");
         }
 
         private static object CalculateLong(ScriptBinaryOperator op, SourceSpan span, long left, long right)
+        {
+            return CalculateBigInteger(op, span, new BigInteger(left), new BigInteger(right));
+        }
+
+        private static object CalculateBigInteger(ScriptBinaryOperator op, SourceSpan span, BigInteger left, BigInteger right)
+        {
+            return FitToBestInteger(CalculateBigIntegerNoFit(op, span, left, right));
+        }
+
+        private static object CalculateBigIntegerNoFit(ScriptBinaryOperator op, SourceSpan span, BigInteger left, BigInteger right)
         {
             switch (op)
             {
@@ -552,9 +685,22 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Multiply:
                     return left * right;
                 case ScriptBinaryOperator.Divide:
-                    return (double)left / right;
+                    return (double)left / (double)right;
                 case ScriptBinaryOperator.DivideRound:
                     return left / right;
+                case ScriptBinaryOperator.Power:
+                    return BigInteger.ModPow(left, right, MaxBigInteger);
+
+                case ScriptBinaryOperator.ShiftLeft:
+                    return left << (int)right;
+                case ScriptBinaryOperator.ShiftRight:
+                    return left >> (int)right;
+
+                case ScriptBinaryOperator.BinaryOr:
+                    return left | right;
+                case ScriptBinaryOperator.BinaryAnd:
+                    return left & right;
+
                 case ScriptBinaryOperator.Modulus:
                     return left % right;
                 case ScriptBinaryOperator.CompareEqual:
@@ -577,7 +723,6 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for long<->long");
         }
 
-
         private static object CalculateDouble(ScriptBinaryOperator op, SourceSpan span, double left, double right)
         {
             switch (op)
@@ -590,8 +735,18 @@ namespace Scriban.Syntax
                     return left * right;
                 case ScriptBinaryOperator.Divide:
                     return left / right;
+
+                case ScriptBinaryOperator.ShiftLeft:
+                    return left * Math.Pow(2, right);
+
+                case ScriptBinaryOperator.ShiftRight:
+                    return left / Math.Pow(2, right);
+
                 case ScriptBinaryOperator.DivideRound:
                     return Math.Round(left / right);
+                case ScriptBinaryOperator.Power:
+                    return Math.Pow(left, right);
+                
                 case ScriptBinaryOperator.Modulus:
                     return left % right;
                 case ScriptBinaryOperator.CompareEqual:
@@ -624,6 +779,12 @@ namespace Scriban.Syntax
                     return left / right;
                 case ScriptBinaryOperator.DivideRound:
                     return Math.Round(left / right);
+
+                case ScriptBinaryOperator.ShiftLeft:
+                    return left * (decimal) Math.Pow(2, (double) right);
+                case ScriptBinaryOperator.ShiftRight:
+                    return left / (decimal) Math.Pow(2, (double) right);
+
                 case ScriptBinaryOperator.Modulus:
                     return left % right;
                 case ScriptBinaryOperator.CompareEqual:
@@ -656,6 +817,28 @@ namespace Scriban.Syntax
                     return (float)left / right;
                 case ScriptBinaryOperator.DivideRound:
                     return (double)(int)(left / right);
+#if NETSTANDARD2_1
+                case ScriptBinaryOperator.Power:
+                    return MathF.Pow(left, right);
+#else
+                case ScriptBinaryOperator.Power:
+                    return (float)Math.Pow(left, right);
+#endif
+
+#if NETSTANDARD2_1
+                case ScriptBinaryOperator.ShiftLeft:
+                    return left * (float)MathF.Pow(2.0f, right);
+
+                case ScriptBinaryOperator.ShiftRight:
+                    return left / (float)MathF.Pow(2.0f, right);
+#else
+                case ScriptBinaryOperator.ShiftLeft:
+                    return left * (float)Math.Pow(2, right);
+
+                case ScriptBinaryOperator.ShiftRight:
+                    return left / (float)Math.Pow(2, right);
+#endif
+
                 case ScriptBinaryOperator.Modulus:
                     return left % right;
                 case ScriptBinaryOperator.CompareEqual:

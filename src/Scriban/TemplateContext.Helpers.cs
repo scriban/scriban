@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Numerics;
 using System.Reflection; // Leave this as it is required by some .NET targets
 using System.Text;
 using Scriban.Functions;
@@ -197,6 +198,15 @@ namespace Scriban
             {
                 if (value == null) return 0;
                 if (value is int) return (int) value;
+                if (value is BigInteger bigInt)
+                {
+                    return (int) bigInt;
+                }
+
+                if (value is IScriptConvertible convertible)
+                {
+                    return (int)convertible.ConvertTo(span, typeof(int));
+                }
                 return Convert.ToInt32(value, CurrentCulture);
             }
             catch (Exception ex)
@@ -233,7 +243,7 @@ namespace Scriban
             {
                 return ToBool(span, value);
             }
-
+            
             // Handle null case
             if (value == null)
             {
@@ -257,6 +267,10 @@ namespace Scriban
                     return (decimal)0;
                 }
 
+                if (destinationType == typeof(BigInteger))
+                {
+                    return new BigInteger(0);
+                }
                 return null;
             }
 
@@ -264,6 +278,11 @@ namespace Scriban
             if (destinationType == type)
             {
                 return value;
+            }
+
+            if (value is IScriptConvertible convertible)
+            {
+                return convertible.ConvertTo(span, destinationType);
             }
 
             // Check for inheritance
@@ -274,6 +293,68 @@ namespace Scriban
             {
                 try
                 {
+                    if (destinationType == typeof(BigInteger))
+                    {
+                        if (type == typeof(char))
+                        {
+                            return new BigInteger((char)value);
+                        }
+                        if (type == typeof(bool))
+                        {
+                            return new BigInteger((bool)value ? 1 : 0);
+                        }
+                        if (type == typeof(float))
+                        {
+                            return new BigInteger((float)value);
+                        }
+                        if (type == typeof(double))
+                        {
+                            return new BigInteger((double)value);
+                        }
+                        if (type == typeof(int))
+                        {
+                            return new BigInteger((int)value);
+                        }
+                        if (type == typeof(uint))
+                        {
+                            return new BigInteger((uint)value);
+                        }
+                        if (type == typeof(long))
+                        {
+                            return new BigInteger((long)value);
+                        }
+                        if (type == typeof(ulong))
+                        {
+                            return new BigInteger((ulong)value);
+                        }
+                    }
+                    else if (type == typeof(BigInteger))
+                    {
+                        if (destinationType == typeof(char))
+                        {
+                            return (char)(int)(BigInteger) value;
+                        }
+                        if (destinationType == typeof(float))
+                        {
+                            return (float)(BigInteger)value;
+                        }
+                        if (destinationType == typeof(double))
+                        {
+                            return (double)(BigInteger)value;
+                        }
+                        if (destinationType == typeof(uint))
+                        {
+                            return (uint)(BigInteger)value;
+                        }
+                        if (destinationType == typeof(long))
+                        {
+                            return (long)(BigInteger)value;
+                        }
+                        if (destinationType == typeof(ulong))
+                        {
+                            return (ulong) (BigInteger) value;
+                        }
+                    }
                     return Convert.ChangeType(value, destinationType, CurrentCulture);
                 }
                 catch (Exception ex)
