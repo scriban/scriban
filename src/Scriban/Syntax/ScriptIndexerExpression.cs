@@ -110,7 +110,11 @@ namespace Scriban.Syntax
                 {
                     if (!accessor.TryGetValue(context, Span, targetObject, indexAsString, out value))
                     {
-                        context.TryGetMember?.Invoke(context, Span, targetObject, indexAsString, out value);
+                        var result = context.TryGetMember?.Invoke(context, Span, targetObject, indexAsString, out value) ?? false;
+                        if (!context.EnableRelaxedMemberAccess && !result)
+                        {
+                            throw new ScriptRuntimeException(Target.Span, $"Cannot access target `{Target}` with an indexer: {Index}");
+                        }
                     }
                 }
             }
