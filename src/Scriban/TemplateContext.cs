@@ -1101,6 +1101,11 @@ namespace Scriban
                 return ArrayAccessor.Default;
             }
 
+            if (type == typeof(string))
+            {
+                return StringAccessor.Default;
+            }
+
             if (target is IList)
             {
                 return ListAccessor.Default;
