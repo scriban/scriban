@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection;
+using Scriban.Runtime;
 
 namespace Scriban.Helpers
 {
@@ -63,6 +64,41 @@ namespace Scriban.Helpers
         public static IEnumerable<MethodInfo> GetDeclaredMethods(this TypeInfo type)
         {
             return type.DeclaredMethods;
+        }
+        
+        public static string ScriptFriendlyName(this Type type)
+        {
+            if (type == null) return "null";
+
+            if (type == typeof(byte)) return "byte";
+            if (type == typeof(sbyte)) return "sbyte";
+            if (type == typeof(ushort)) return "ushort";
+            if (type == typeof(short)) return "short";
+            if (type == typeof(uint)) return "uint";
+            if (type == typeof(int)) return "int";
+            if (type == typeof(ulong)) return "ulong";
+            if (type == typeof(long)) return "long";
+            if (type == typeof(string)) return "string";
+            if (type == typeof(float)) return "float";
+            if (type == typeof(double)) return "double";
+            if (type == typeof(decimal)) return "decimal";
+            if (type == typeof(BigInteger)) return "BigInteger";
+
+            string name = type.Name;
+
+            // For any Scriban ScriptXxxYyy name, return xxx_yyy
+            if (type.Namespace != null && type.Namespace.StartsWith("Scriban."))
+            {
+                name = type.Name;
+                if (name.StartsWith("Script"))
+                {
+                    name = name.Substring("Script".Length);
+                }
+
+                return StandardMemberRenamer.Rename(name);
+            }
+
+            return name;
         }
     }
 }

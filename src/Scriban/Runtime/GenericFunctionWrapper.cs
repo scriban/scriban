@@ -187,9 +187,9 @@ namespace Scriban.Runtime
                         argMask |= 1 << argIndex;
                     }
                 }
-                catch (Exception exception)
+                catch
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Unable to convert parameter #{i} of type `{arguments[i]?.GetType()}` to type `{argType}`", exception);
+                    throw new ScriptArgumentException(i, $"Unable to convert parameter of type `{arguments[i]?.GetType().ScriptFriendlyName()}` to type `{argType?.ScriptFriendlyName()}`");
                 }
             }
 
@@ -215,7 +215,11 @@ namespace Scriban.Runtime
             }
             catch (TargetInvocationException exception)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}", exception.InnerException);
+                if (exception.InnerException != null)
+                {
+                    throw exception.InnerException;
+                }
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}");
             }
         }
     }
