@@ -69,6 +69,25 @@ namespace Scriban.Runtime
 
         public abstract object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
 
+        public bool IsExpressionParameter(int index)
+        {
+            if (index >= 0 && index < Parameters.Length)
+            {
+                return typeof(ScriptExpression).GetTypeInfo().IsAssignableFrom(Parameters[index].ParameterType.GetTypeInfo());
+            }
+            return false;
+        }
+
+        public int GetParameterIndex(string name)
+        {
+            for (var i = 0; i < Parameters.Length; i++)
+            {
+                var param = Parameters[i];
+                if (param.Name == name) return i;
+            }
+
+            return -1;
+        }
 
 #if !SCRIBAN_NO_ASYNC
         public virtual ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)

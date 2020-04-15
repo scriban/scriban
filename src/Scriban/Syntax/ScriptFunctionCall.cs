@@ -108,8 +108,9 @@ namespace Scriban.Syntax
             // Process direct arguments
             if (arguments != null)
             {
-                foreach (var argument in arguments)
+                for (var argIndex = 0; argIndex < arguments.Count; argIndex++)
                 {
+                    var argument = arguments[argIndex];
                     object value;
 
                     // Handle named arguments
@@ -137,7 +138,14 @@ namespace Scriban.Syntax
                     }
                     else
                     {
-                        value = context.Evaluate(argument);
+                        if (externFunction != null && externFunction.IsExpressionParameter(argIndex))
+                        {
+                            value = argument;
+                        }
+                        else
+                        {
+                            value = context.Evaluate(argument);
+                        }
                     }
 
                     // Handle parameters expansion for a function call when the operator ^ is used
@@ -151,6 +159,7 @@ namespace Scriban.Syntax
                             {
                                 argumentValues.Add(subValue);
                             }
+
                             continue;
                         }
                     }
@@ -165,7 +174,29 @@ namespace Scriban.Syntax
             {
                 if (externFunction != null)
                 {
-                    result = externFunction.Invoke(context, callerContext, argumentValues, blockDelegate);
+                    try
+                    {
+                        result = externFunction.Invoke(context, callerContext, argumentValues, blockDelegate);
+                    }
+                    catch (ArgumentException ex)
+                    {
+                        var index = externFunction.GetParameterIndex(ex.ParamName);
+                        if (index >= 0 && arguments != null && index < arguments.Count)
+                        {
+                            throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
+                        }
+
+                        throw;
+                    }
+                    catch (ScriptArgumentException ex)
+                    {
+                        var index = ex.ArgumentIndex;
+                        if (index >= 0 && arguments != null && index < arguments.Count)
+                        {
+                            throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
+                        }
+                        throw;
+                    }
                 }
                 else
                 {

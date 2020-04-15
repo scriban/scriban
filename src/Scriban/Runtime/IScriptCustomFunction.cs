@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Scriban.Syntax;
 
 namespace Scriban.Runtime
@@ -22,6 +23,15 @@ namespace Scriban.Runtime
         /// <returns>The result of the call</returns>
         object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
 
+
+        bool IsExpressionParameter(int index);
+        
+        /// <summary>
+        /// Gets the argument index for the specified argument name.
+        /// </summary>
+        /// <param name="name">Argument name</param>
+        /// <returns>Argument index.</returns>
+        int GetParameterIndex(string name);
 
 #if !SCRIBAN_NO_ASYNC
         /// <summary>

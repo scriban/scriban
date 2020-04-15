@@ -120,5 +120,15 @@ namespace Scriban.Functions
 
             return result;
         }
+
+        public bool IsExpressionParameter(int index)
+        {
+            return false;
+        }
+
+        public int GetParameterIndex(string name)
+        {
+            return -1;
+        }
     }
 }

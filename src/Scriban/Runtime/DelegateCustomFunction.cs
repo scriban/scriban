@@ -4,6 +4,7 @@
 using System;
 using System.Threading.Tasks;
 using Scriban.Syntax;
+using System.Reflection;
 
 namespace Scriban.Runtime
 {
@@ -24,6 +25,21 @@ namespace Scriban.Runtime
             return _customFunction(context, callerContext, arguments);
         }
 
+        public bool IsExpressionParameter(int index)
+        {
+            return false;
+        }
+
+        public int GetParameterIndex(string name)
+        {
+            var parameters = _customFunction.Method.GetParameters();
+            for(int i = 0; i < parameters.Length; i++)
+            {
+                var param = parameters[i];
+                if (param.Name == name) return i;
+            }
+            return -1;
+        }
 
 #if !SCRIBAN_NO_ASYNC
         public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)

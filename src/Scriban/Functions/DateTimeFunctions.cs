@@ -399,6 +399,16 @@ namespace Scriban.Functions
             }
         }
 
+        public bool IsExpressionParameter(int index)
+        {
+            return false;
+        }
+
+        public int GetParameterIndex(string name)
+        {
+            return name == "text" ? 0 : -1;
+        }
+
         public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));
