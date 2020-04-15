@@ -23,6 +23,10 @@ namespace Scriban.Syntax
 
         public ScriptBinaryOperator Operator { get; set; }
 
+        public ScriptVerbatim OperatorVerbatim { get; set; }
+
+        public string OperatorAsText => OperatorVerbatim?.Value ?? Operator.ToText();
+
         public ScriptExpression Right { get; set; }
 
         public override object Evaluate(TemplateContext context)
@@ -64,7 +68,16 @@ namespace Scriban.Syntax
             {
                 context.Write(" ");
             }
-            context.Write(Operator.ToText());
+
+            if (OperatorVerbatim != null)
+            {
+                context.Write(OperatorVerbatim);
+            }
+            else
+            {
+                context.Write(Operator.ToText());
+            }
+
             if (Operator == ScriptBinaryOperator.Substract)
             {
                 context.ExpectSpace();
@@ -74,7 +87,7 @@ namespace Scriban.Syntax
 
         public override string ToString()
         {
-            return $"{Left} {Operator.ToText()} {Right}";
+            return $"{Left} {OperatorAsText} {Right}";
         }
 
         public override bool CanHaveLeadingTrivia()

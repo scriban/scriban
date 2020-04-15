@@ -21,8 +21,18 @@ namespace Scriban.Parsing
             return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence, mode, allowAssignment);
         }
 
-        private bool TryGetBinaryOperatorType(TokenType tokenType, out ScriptBinaryOperator binaryOperator)
+        private bool TryBinaryOperator(out ScriptBinaryOperator binaryOperator, out int precedence)
         {
+            var tokenType = Current.Type;
+
+            precedence = 0;
+
+            if (_customParser != null && _customParser.IsCustomBinaryOperator(tokenType, GetAsText(Current), out precedence))
+            {
+                binaryOperator = ScriptBinaryOperator.Custom;
+                return true;
+            }
+            
             binaryOperator = ScriptBinaryOperator.None;
             switch (tokenType)
             {
@@ -58,6 +68,11 @@ namespace Scriban.Parsing
                     break;
             }
 
+            if (binaryOperator != ScriptBinaryOperator.None)
+            {
+                precedence = GetDefaultBinaryOperatorPrecedence(binaryOperator);
+            }
+            
             return binaryOperator != ScriptBinaryOperator.None;
         }
 
@@ -132,14 +147,8 @@ namespace Scriban.Parsing
                     case TokenType.OpenBracket:
                         leftOperand = ParseArrayInitializer();
                         break;
-                    case TokenType.Not:
-                    case TokenType.Minus:
-                    case TokenType.Arroba:
-                    case TokenType.Plus:
-                    case TokenType.Caret:
-                    case TokenType.DoubleCaret:
-                        // In extended Caret is used for exponent
-                        if (!_isScientific || Current.Type != TokenType.Caret)
+                    default:
+                        if (IsStartingAsUnaryExpression())
                         {
                             leftOperand = ParseUnaryExpression(ref hasAnonymousFunction);
                         }
@@ -264,10 +273,9 @@ namespace Scriban.Parsing
 
                     // Handle binary operators here
                     ScriptBinaryOperator binaryOperatorType;
-                    if (!isUnaryMinus && TryGetBinaryOperatorType(Current.Type, out binaryOperatorType) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType)))
+                    int newPrecedence;
+                    if (!isUnaryMinus && TryBinaryOperator(out binaryOperatorType, out newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
                     {
-                        var newPrecedence = GetOperatorPrecedence(binaryOperatorType);
-
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
                         if (newPrecedence <= precedence)
                             break;
@@ -286,9 +294,16 @@ namespace Scriban.Parsing
                         var binaryExpression = Open<ScriptBinaryExpression>();
                         binaryExpression.Left = leftOperand;
                         binaryExpression.Operator = binaryOperatorType;
+                        
+                        // Parse the operator
+                        binaryExpression.OperatorVerbatim = ParseTokenAsVerbatim();
 
-                        NextToken(); // skip the operator
-
+                        // Special case for liquid, we revert the verbatim to the original scriban operator
+                        if (_isLiquid && binaryOperatorType != ScriptBinaryOperator.Custom)
+                        {
+                            binaryExpression.OperatorVerbatim.Value = binaryOperatorType.ToText();
+                        }
+                        
                         // unit test: 110-binary-simple-error1.txt
                         binaryExpression.Right = ExpectAndParseExpression(binaryExpression, ref hasAnonymousFunction,
                             functionCall ?? parentExpression, newPrecedence,
@@ -298,7 +313,7 @@ namespace Scriban.Parsing
                         continue;
                     }
 
-                    if (StartAsExpression())
+                    if (IsStartingAsExpression())
                     {
                         // If we can parse a statement, we have a method call
                         if (parentExpression != null)
@@ -557,7 +572,7 @@ namespace Scriban.Parsing
                     // TODO: record as trivia
                     NextToken(); // Skip :
 
-                    if (!StartAsExpression())
+                    if (!IsStartingAsExpression())
                     {
                         // unit test: 140-object-initializer-error5.txt
                         LogError($"Unexpected token `{Current.Type}`. Expecting an expression for the value of the member instead of `{GetAsText(Current)}`");
@@ -623,38 +638,61 @@ namespace Scriban.Parsing
             return Close(expression);
         }
 
+        private ScriptVerbatim ParseTokenAsVerbatim()
+        {
+            var verbatim = Open<ScriptVerbatim>();
+            verbatim.Value = GetAsText(Current);
+            NextToken();
+            return Close(verbatim);
+        }
+
         private ScriptExpression ParseUnaryExpression(ref bool hasAnonymousFunction)
         {
             // unit test: 113-unary.txt
             var unaryExpression = Open<ScriptUnaryExpression>();
-            switch (Current.Type)
-            {
-                case TokenType.Not:
-                    unaryExpression.Operator = ScriptUnaryOperator.Not;
-                    break;
-                case TokenType.Minus:
-                    unaryExpression.Operator = ScriptUnaryOperator.Negate;
-                    break;
-                case TokenType.Plus:
-                    unaryExpression.Operator = ScriptUnaryOperator.Plus;
-                    break;
-                case TokenType.Arroba:
-                    unaryExpression.Operator = ScriptUnaryOperator.FunctionAlias;
-                    break;
-                default:
-                    if (_isScientific && Current.Type == TokenType.DoubleCaret || !_isScientific && Current.Type == TokenType.Caret)
-                    {
-                        unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
-                    }
+            int newPrecedence;
 
-                    if (unaryExpression.Operator == ScriptUnaryOperator.None)
-                    {
-                        LogError($"Unexpected token `{Current.Type}` for unary expression");
-                    }
-                    break;
+            // Parse the operator as verbatim text
+            var unaryTokenType = Current.Type;
+            unaryExpression.OperatorVerbatim = ParseTokenAsVerbatim();
+
+            // Parse a custom unary operator?
+            if (_customParser != null && _customParser.IsCustomUnaryOperator(unaryTokenType, unaryExpression.OperatorVerbatim.Value, out newPrecedence))
+            {
+                unaryExpression.Operator = ScriptUnaryOperator.Custom;
             }
-            var newPrecedence = GetOperatorPrecedence(unaryExpression.Operator);
-            NextToken();
+            else
+            {
+                // Else we parse standard unary operators
+                switch (unaryTokenType)
+                {
+                    case TokenType.Not:
+                        unaryExpression.Operator = ScriptUnaryOperator.Not;
+                        break;
+                    case TokenType.Minus:
+                        unaryExpression.Operator = ScriptUnaryOperator.Negate;
+                        break;
+                    case TokenType.Plus:
+                        unaryExpression.Operator = ScriptUnaryOperator.Plus;
+                        break;
+                    case TokenType.Arroba:
+                        unaryExpression.Operator = ScriptUnaryOperator.FunctionAlias;
+                        break;
+                    default:
+                        if (_isScientific && unaryTokenType == TokenType.DoubleCaret || !_isScientific && unaryTokenType == TokenType.Caret)
+                        {
+                            unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
+                        }
+
+                        if (unaryExpression.Operator == ScriptUnaryOperator.None)
+                        {
+                            LogError($"Unexpected token `{unaryTokenType}` for unary expression");
+                        }
+                        break;
+                }
+                newPrecedence = GetDefaultUnaryOperatorPrecedence(unaryExpression.Operator);
+            }
+
             // unit test: 115-unary-error1.txt
             unaryExpression.Right = ExpectAndParseExpression(unaryExpression, ref hasAnonymousFunction, null, newPrecedence);
             return Close(unaryExpression);
@@ -722,7 +760,7 @@ namespace Scriban.Parsing
         private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null,
             ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
-            if (StartAsExpression())
+            if (IsStartingAsExpression())
             {
                 return ParseExpression(parentNode, parentExpression, newPrecedence, mode, allowAssignment);
             }
@@ -733,7 +771,7 @@ namespace Scriban.Parsing
         private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ref bool hasAnonymousExpression, ScriptExpression parentExpression = null, int newPrecedence = 0,
             string message = null, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
-            if (StartAsExpression())
+            if (IsStartingAsExpression())
             {
                 return ParseExpression(parentNode, ref hasAnonymousExpression, parentExpression, newPrecedence, mode);
             }
@@ -744,7 +782,7 @@ namespace Scriban.Parsing
         private ScriptExpression ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, out bool hasAnonymousFunction, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
             hasAnonymousFunction = false;
-            if (StartAsExpression())
+            if (IsStartingAsExpression())
             {
                 return ParseExpression(parentNode, ref hasAnonymousFunction, null, 0, mode);
             }
@@ -752,8 +790,10 @@ namespace Scriban.Parsing
             return null;
         }
 
-        private bool StartAsExpression()
+        private bool IsStartingAsExpression()
         {
+            if (IsStartingAsUnaryExpression()) return true;
+
             switch (Current.Type)
             {
                 case TokenType.Identifier:
@@ -768,55 +808,93 @@ namespace Scriban.Parsing
                 case TokenType.OpenParent:
                 case TokenType.OpenBrace:
                 case TokenType.OpenBracket:
-                case TokenType.Not:
-                case TokenType.Minus:
-                case TokenType.Plus:
-                case TokenType.Arroba:
-                case TokenType.Caret:
                     return true;
             }
 
             return false;
         }
 
-        private bool TryLiquidBinaryOperator(out ScriptBinaryOperator binOp)
+        private bool IsStartingAsUnaryExpression()
         {
-            binOp = 0;
+            // If we have a custom unary operator, it is the start of an expression
+            if (_customParser != null && _customParser.IsCustomUnaryOperator(Current.Type, GetAsText(Current), out _))
+            {
+                return true;
+            }
+
+            switch (Current.Type)
+            {
+                case TokenType.Not:
+                case TokenType.Minus:
+                case TokenType.Plus:
+                case TokenType.Arroba:
+                    return true;
+
+                case TokenType.Caret:
+                case TokenType.DoubleCaret:
+                    // In scientific Caret is used for exponent (so it is a binary operator)
+                    if (_isScientific && Current.Type == TokenType.DoubleCaret || !_isScientific && Current.Type == TokenType.Caret)
+                    {
+                        return true;
+                    }
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool TryLiquidBinaryOperator(out ScriptBinaryOperator binaryOperator, out int precedence)
+        {
+            binaryOperator = ScriptBinaryOperator.None;
+            precedence = 0;
+
+            var text = GetAsText(Current);
+
+            if (_customParser != null && _customParser.IsCustomBinaryOperator(Current.Type, text, out precedence))
+            {
+                binaryOperator = ScriptBinaryOperator.Custom;
+                return true;
+            }
+            
             if (Current.Type != TokenType.Identifier)
             {
                 return false;
             }
 
-            var text = GetAsText(Current);
             switch (text)
             {
                 case "or":
-                    binOp = ScriptBinaryOperator.Or;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.Or;
+                    break;
                 case "and":
-                    binOp = ScriptBinaryOperator.And;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.And;
+                    break;
                 case "contains":
-                    binOp = ScriptBinaryOperator.LiquidContains;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidContains;
+                    break;
                 case "startsWith":
-                    binOp = ScriptBinaryOperator.LiquidStartsWith;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidStartsWith;
+                    break;
                 case "endsWith":
-                    binOp = ScriptBinaryOperator.LiquidEndsWith;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidEndsWith;
+                    break;
                 case "hasKey":
-                    binOp = ScriptBinaryOperator.LiquidHasKey;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidHasKey;
+                    break;
                 case "hasValue":
-                    binOp = ScriptBinaryOperator.LiquidHasValue;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidHasValue;
+                    break;
             }
 
-            return false;
+            if (binaryOperator != ScriptBinaryOperator.None)
+            {
+                precedence = GetDefaultBinaryOperatorPrecedence(binaryOperator);
+            }
+
+            return binaryOperator != ScriptBinaryOperator.None;
         }
 
-        private static int GetOperatorPrecedence(ScriptBinaryOperator op)
+        private static int GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator op)
         {
             switch (op)
             {
@@ -828,48 +906,49 @@ namespace Scriban.Parsing
                     return 40;
 
                 case ScriptBinaryOperator.BinaryOr:
-                    return 44;
+                    return 50;
 
                 case ScriptBinaryOperator.BinaryAnd:
-                    return 45;
+                    return 60;
 
                 case ScriptBinaryOperator.CompareEqual:
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return 50;
+                    return 70;
+
                 case ScriptBinaryOperator.CompareLess:
                 case ScriptBinaryOperator.CompareLessOrEqual:
                 case ScriptBinaryOperator.CompareGreater:
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return 60;
+                    return 80;
 
                 case ScriptBinaryOperator.LiquidContains:
                 case ScriptBinaryOperator.LiquidStartsWith:
                 case ScriptBinaryOperator.LiquidEndsWith:
                 case ScriptBinaryOperator.LiquidHasKey:
                 case ScriptBinaryOperator.LiquidHasValue:
-                    return 65;
+                    return 90;
 
                 case ScriptBinaryOperator.Add:
                 case ScriptBinaryOperator.Substract:
-                    return 70;
+                    return 100;
                 case ScriptBinaryOperator.Multiply:
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
                 case ScriptBinaryOperator.ShiftLeft:
                 case ScriptBinaryOperator.ShiftRight:
-                    return 80;
+                    return 110;
                 case ScriptBinaryOperator.Power:
-                    return 85;
+                    return 120;
                 case ScriptBinaryOperator.RangeInclude:
                 case ScriptBinaryOperator.RangeExclude:
-                    return 90;
+                    return 130;
                 default:
                     return 0;
             }
         }
 
-        private static int GetOperatorPrecedence(ScriptUnaryOperator op)
+        private static int GetDefaultUnaryOperatorPrecedence(ScriptUnaryOperator op)
         {
             switch (op)
             {
@@ -878,7 +957,7 @@ namespace Scriban.Parsing
                 case ScriptUnaryOperator.Plus:
                 case ScriptUnaryOperator.FunctionAlias:
                 case ScriptUnaryOperator.FunctionParametersExpand:
-                    return 100;
+                    return 200;
                 default:
                     return 0;
             }

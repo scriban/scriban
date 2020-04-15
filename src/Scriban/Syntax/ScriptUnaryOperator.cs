@@ -13,7 +13,8 @@ namespace Scriban.Syntax
         Negate,
         Plus,
         FunctionAlias,
-        FunctionParametersExpand
+        FunctionParametersExpand,
+        Custom
     }
 
     public static class ScriptUnaryOperatorExtensions

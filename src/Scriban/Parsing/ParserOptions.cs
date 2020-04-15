@@ -18,5 +18,10 @@ namespace Scriban.Parsing
         /// <c>true</c> to convert liquid builtin function calls to scriban function calls (e.g abs = math.abs, downcase = string.downcase)
         /// </summary>
         public bool LiquidFunctionsToScriban { get; set; }
+
+        /// <summary>
+        /// Gets or sets a custom parser for expressions.
+        /// </summary>
+        public ICustomParser CustomParser { get; set; }
     }
 }

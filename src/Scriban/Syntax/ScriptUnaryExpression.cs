@@ -15,6 +15,10 @@ namespace Scriban.Syntax
     {
         public ScriptUnaryOperator Operator { get; set; }
 
+        public ScriptVerbatim OperatorVerbatim { get; set; }
+
+        public string OperatorAsText => OperatorVerbatim?.Value ?? Operator.ToText();
+
         public ScriptExpression Right { get; set; }
 
         public override object Evaluate(TemplateContext context)
@@ -83,18 +87,25 @@ namespace Scriban.Syntax
                     return context.Evaluate(Right);
             }
 
-            throw new ScriptRuntimeException(Span, $"Operator `{Operator}` is not supported");
+            throw new ScriptRuntimeException(Span, $"Operator `{OperatorAsText}` is not supported");
         }
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write(Operator.ToText());
+            if (OperatorVerbatim != null)
+            {
+                context.Write(OperatorVerbatim);
+            }
+            else
+            {
+                context.Write(Operator.ToText());
+            }
             context.Write(Right);
         }
 
         public override string ToString()
         {
-            return $"{Operator}{Right}";
+            return $"{OperatorAsText}{Right}";
         }
     }
 }

@@ -256,7 +256,7 @@ namespace Scriban.Parsing
                                 }
                                 break;
                             default:
-                                if (StartAsExpression())
+                                if (IsStartingAsExpression())
                                 {
                                     statement = ParseExpressionStatement();
                                 }

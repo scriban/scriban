@@ -57,6 +57,8 @@ namespace Scriban.Syntax
 
         Or,
 
+        Custom,
+
         LiquidContains,
         LiquidStartsWith,
         LiquidEndsWith,
