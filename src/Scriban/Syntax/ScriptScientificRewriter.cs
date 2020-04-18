@@ -82,7 +82,7 @@ namespace Scriban.Syntax
             binaryExpression.OperatorToken.AddSpaceBefore();
             binaryExpression.OperatorToken.AddSpaceAfter();
 
-            if (binaryExpression.Operator == ScriptBinaryOperator.Divide || binaryExpression.Operator == ScriptBinaryOperator.DivideRound)
+            if (binaryExpression.Operator == ScriptBinaryOperator.Divide || binaryExpression.Operator == ScriptBinaryOperator.DivideRound || (_context.UseScientific && binaryExpression.Operator == ScriptBinaryOperator.Power))
             {
                 return new ScriptNestedExpression()
                 {
@@ -91,6 +91,15 @@ namespace Scriban.Syntax
             }
 
             return binaryExpression;
+        }
+
+        public override ScriptNode Visit(ScriptExpressionStatement node)
+        {
+            var stmt = (ScriptExpressionStatement) base.Visit(node);
+
+            // De-nest top-level expressions
+            stmt.Expression = DeNestExpression(stmt.Expression);
+            return stmt;
         }
 
         public override ScriptNode Visit(ScriptFunctionCall node)
@@ -112,10 +121,7 @@ namespace Scriban.Syntax
                 var arg = functionCall.Arguments[i];
 
                 // No need to nest expression for arguments
-                if (arg is ScriptNestedExpression nested)
-                {
-                    functionCall.Arguments[i] = nested.Expression;
-                }
+                functionCall.Arguments[i] = DeNestExpression(functionCall.Arguments[i]);
                 
                 if (i > 0)
                 {
@@ -124,6 +130,16 @@ namespace Scriban.Syntax
             }
 
             return functionCall;
+        }
+
+        private static ScriptExpression DeNestExpression(ScriptExpression expr)
+        {
+            while (expr is ScriptNestedExpression nested)
+            {
+                expr = nested.Expression;
+            }
+
+            return expr;
         }
     }
 }
