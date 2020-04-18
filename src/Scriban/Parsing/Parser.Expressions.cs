@@ -339,6 +339,8 @@ namespace Scriban.Parsing
 
                             functionCall.AddArgument(binaryArgument);
 
+                            precedence = newPrecedence;
+
                             goto parseExpression;
                         }
 
