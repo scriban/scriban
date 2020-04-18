@@ -185,6 +185,7 @@ using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
+using System.Numerics;
 ").GetRoot();
 
             solution = project.Solution;
