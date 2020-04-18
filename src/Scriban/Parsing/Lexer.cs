@@ -1242,15 +1242,16 @@ namespace Scriban.Parsing
             var end = _position;
             var isFloat = false;
 
+            var isZero = c == '0';
             NextChar();
 
-            if (c == 'x')
+            if (isZero && c == 'x')
             {
                 ReadHexa(start);
                 return;
             }
 
-            if (c == 'b')
+            if (isZero && c == 'b')
             {
                 ReadBinary(start);
                 return;
