@@ -53,7 +53,7 @@ namespace Scriban.Syntax
 
         public ScriptToken CloseParen { get; set; }
 
-        public bool DirectCall { get; set; }
+        public bool ExplicitCall { get; set; }
         
         public void AddArgument(ScriptExpression argument)
         {
@@ -67,7 +67,9 @@ namespace Scriban.Syntax
         
         public override object Evaluate(TemplateContext context)
         {
-            if (context.UseScientific && !DirectCall)
+            // If we are in scientific mode and we have a function which takes arguments, and is not an explicit call (e.g sin(x) rather then sin x)
+            // Then we need to rewrite the call to a proper expression.
+            if (context.UseScientific && !ExplicitCall && Arguments.Count > 0)
             {
                 var rewrite = new ScientificFunctionCallRewriter(1 + Arguments.Count);
                 rewrite.Add(Target);

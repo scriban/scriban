@@ -477,6 +477,8 @@ namespace Scriban.Parsing
                                 // Regular function call target(arg0, arg1, arg3, arg4...)
                                 if (Current.Type == TokenType.OpenParent)
                                 {
+                                    // This is an explicit call
+                                    functionCall.ExplicitCall = true;
                                     functionCall.OpenParent = ParseTokenAsVerbatim();
 
                                     bool isFirst = true;

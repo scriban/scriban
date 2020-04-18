@@ -102,7 +102,7 @@ namespace Scriban.Syntax
                         {
                             if (PrecedenceTopLevel == precedence || leftValue == null)
                             {
-                                var functionCall = new ScriptFunctionCall { Target = nextExpression, DirectCall = true };
+                                var functionCall = new ScriptFunctionCall { Target = nextExpression, ExplicitCall = true };
                                 _index++;
 
                                 var arg = Rewrite(context, 0);
