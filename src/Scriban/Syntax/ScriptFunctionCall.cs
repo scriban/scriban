@@ -5,12 +5,38 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using Scriban.Helpers;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
 {
+
+    public class ScriptArgumentBinary : ScriptExpression
+    {
+        public ScriptBinaryOperator Operator { get; set; }
+        
+        public ScriptToken OperatorToken { get; set; }
+
+
+        public override object Evaluate(TemplateContext context)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override void Write(TemplateRewriterContext context)
+        {
+            
+        }
+
+        public override string ToString()
+        {
+            return OperatorToken?.ToString() ?? Operator.ToText();
+        }
+    }
+
+
     [ScriptSyntax("function call expression", "<target_expression> <arguemnt[0]> ... <arguement[n]>")]
     public partial class ScriptFunctionCall : ScriptExpression
     {
@@ -21,10 +47,35 @@ namespace Scriban.Syntax
 
         public ScriptExpression Target { get; set; }
 
+        public ScriptToken OpenParent { get; set; }
+
         public List<ScriptExpression> Arguments { get; private set; }
 
+        public ScriptToken CloseParen { get; set; }
+
+        public bool DirectCall { get; set; }
+        
+        public void AddArgument(ScriptExpression argument)
+        {
+            if (argument == null) throw new ArgumentNullException(nameof(argument));
+            Arguments.Add(argument);
+            if (CloseParen == null && !argument.Span.IsEmpty)
+            {
+                Span.End = argument.Span.End;
+            }
+        }
+        
         public override object Evaluate(TemplateContext context)
         {
+            if (context.UseScientific && !DirectCall)
+            {
+                var rewrite = new ScientificFunctionCallRewriter(1 + Arguments.Count);
+                rewrite.Add(Target);
+                rewrite.AddRange(Arguments);
+                var expression = rewrite.Rewrite(context);
+                return context.Evaluate(expression);
+            }
+
             // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
             var targetFunction = context.Evaluate(Target, true);
 
@@ -34,9 +85,8 @@ namespace Scriban.Syntax
                 throw new ScriptRuntimeException(Target.Span, $"The function `{Target}` was not found");
             }
 
-            return Call(context, this, targetFunction, context.AllowPipeArguments, Arguments);
+            return Call(context, Target, targetFunction, context.AllowPipeArguments, Arguments);
         }
-
 
         public override void Write(TemplateRewriterContext context)
         {
@@ -61,7 +111,7 @@ namespace Scriban.Syntax
 
         public static bool IsFunction(object target)
         {
-            return target is ScriptFunction || target is IScriptCustomFunction;
+            return target is IScriptCustomFunction;
         }
 
         public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, List<ScriptExpression> arguments = null)
@@ -74,9 +124,9 @@ namespace Scriban.Syntax
             var function = functionObject as ScriptFunction;
             var externFunction = functionObject as IScriptCustomFunction;
 
-            if (function == null && externFunction == null)
+            if (externFunction == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{callerContext}`( as `{functionObject?.GetType()}`)");
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{callerContext}` ({functionObject?.GetType().ScriptFriendlyName()})");
             }
 
             ScriptBlockStatement blockDelegate = null;
@@ -118,7 +168,7 @@ namespace Scriban.Syntax
                     if (namedArg != null)
                     {
                         // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
-                        if (externFunction == null)
+                        if (function != null)
                         {
                             // We can't add an argument that is "size" for array
                             if (argumentValues.CanWrite(namedArg.Name))
@@ -138,7 +188,7 @@ namespace Scriban.Syntax
                     }
                     else
                     {
-                        if (externFunction != null && externFunction.IsExpressionParameter(argIndex))
+                        if (externFunction.IsExpressionParameter(argIndex))
                         {
                             value = argument;
                         }
@@ -172,42 +222,28 @@ namespace Scriban.Syntax
             context.EnterFunction(callerContext);
             try
             {
-                if (externFunction != null)
+                try
                 {
-                    try
-                    {
-                        result = externFunction.Invoke(context, callerContext, argumentValues, blockDelegate);
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        var index = externFunction.GetParameterIndex(ex.ParamName);
-                        if (index >= 0 && arguments != null && index < arguments.Count)
-                        {
-                            throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
-                        }
-
-                        throw;
-                    }
-                    catch (ScriptArgumentException ex)
-                    {
-                        var index = ex.ArgumentIndex;
-                        if (index >= 0 && arguments != null && index < arguments.Count)
-                        {
-                            throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
-                        }
-                        throw;
-                    }
+                    result = externFunction.Invoke(context, callerContext, argumentValues, blockDelegate);
                 }
-                else
+                catch (ArgumentException ex)
                 {
-                    context.SetValue(ScriptVariable.Arguments, argumentValues, true);
-
-                    // Set the block delegate
-                    if (blockDelegate != null)
+                    var index = externFunction.GetParameterIndex(ex.ParamName);
+                    if (index >= 0 && arguments != null && index < arguments.Count)
                     {
-                        context.SetValue(ScriptVariable.BlockDelegate, blockDelegate, true);
+                        throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
                     }
-                    result = context.Evaluate(function.Body);
+
+                    throw;
+                }
+                catch (ScriptArgumentException ex)
+                {
+                    var index = ex.ArgumentIndex;
+                    if (index >= 0 && arguments != null && index < arguments.Count)
+                    {
+                        throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
+                    }
+                    throw;
                 }
             }
             finally

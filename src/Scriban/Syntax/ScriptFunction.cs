@@ -2,10 +2,13 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System.Threading.Tasks;
+using Scriban.Runtime;
+
 namespace Scriban.Syntax
 {
     [ScriptSyntax("function statement", "func <variable> ... end")]
-    public class ScriptFunction : ScriptStatement
+    public partial class ScriptFunction : ScriptStatement, IScriptCustomFunction
     {
         public ScriptVariable Name { get; set; }
 
@@ -41,5 +44,23 @@ namespace Scriban.Syntax
             context.Write(Body);
             context.ExpectEnd();
         }
+
+        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        {
+            context.SetValue(ScriptVariable.Arguments, arguments, true);
+
+            // Set the block delegate
+            if (blockStatement != null)
+            {
+                context.SetValue(ScriptVariable.BlockDelegate, blockStatement, true);
+            }
+            return context.Evaluate(Body);
+        }
+
+        public int RequiredParameterCount => 0;
+
+        public bool IsExpressionParameter(int index) => false;
+
+        public int GetParameterIndex(string name) => -1;
     }
 }

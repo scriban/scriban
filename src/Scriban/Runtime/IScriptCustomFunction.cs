@@ -22,8 +22,9 @@ namespace Scriban.Runtime
         /// <param name="blockStatement">The current block statement this call is made</param>
         /// <returns>The result of the call</returns>
         object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
-
-
+        
+        int RequiredParameterCount { get; }
+        
         bool IsExpressionParameter(int index);
         
         /// <summary>

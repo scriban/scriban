@@ -216,6 +216,11 @@ namespace Scriban
         public IScriptOutput Output => _output;
 
         /// <summary>
+        /// 
+        /// </summary>
+        public bool UseScientific { get; set; }
+
+        /// <summary>
         /// Gets the builtin objects (that can be setup via the constructor). Default is retrieved via <see cref="GetDefaultBuiltinObject"/>.
         /// </summary>
         public ScriptObject BuiltinObject { get; }

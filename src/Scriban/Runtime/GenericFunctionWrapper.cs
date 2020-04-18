@@ -15,80 +15,30 @@ namespace Scriban.Runtime
     partial class GenericFunctionWrapper : DynamicCustomFunction
     {
         private readonly object _target;
-        private readonly bool _hasObjectParams;
-        private readonly int _lastParamsIndex;
-        private readonly bool _hasTemplateContext;
-        private readonly bool _hasSpan;
         private readonly object[] _arguments;
-        private readonly int _optionalParameterCount;
-        private readonly Type _paramsElementType;
 
         public GenericFunctionWrapper(object target, MethodInfo method) : base(method)
         {
             _target = target;
-            _lastParamsIndex = Parameters.Length - 1;
-            if (Parameters.Length > 0)
-            {
-                // Check if we have TemplateContext+SourceSpan as first parameters
-                if (typeof(TemplateContext).GetTypeInfo().IsAssignableFrom(Parameters[0].ParameterType.GetTypeInfo()))
-                {
-                    _hasTemplateContext = true;
-                    if (Parameters.Length > 1)
-                    {
-                        _hasSpan = typeof(SourceSpan).GetTypeInfo().IsAssignableFrom(Parameters[1].ParameterType.GetTypeInfo());
-                    }
-                }
-
-                var lastParam = Parameters[_lastParamsIndex];
-                if (lastParam.ParameterType.IsArray)
-                {
-                    foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
-                    {
-                        _hasObjectParams = true;
-                        _paramsElementType = lastParam.ParameterType.GetElementType();
-                        break;
-                    }
-                }
-            }
-
-            if (!_hasObjectParams)
-            {
-                for (int i = 0; i < Parameters.Length; i++)
-                {
-                    if (Parameters[i].IsOptional)
-                    {
-                        _optionalParameterCount++;
-                    }
-                }
-            }
-
             _arguments = new object[Parameters.Length];
         }
 
         public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            var expectedNumberOfParameters = Parameters.Length;
-            if (_hasTemplateContext)
-            {
-                expectedNumberOfParameters--;
-                if (_hasSpan)
-                {
-                    expectedNumberOfParameters--;
-                }
-            }
-
-            var minimumRequiredParameters = expectedNumberOfParameters - _optionalParameterCount;
-
             // Check parameters
-            if ((_hasObjectParams && arguments.Count < minimumRequiredParameters - 1) || (!_hasObjectParams && arguments.Count < minimumRequiredParameters))
+            if ((_hasObjectParams && arguments.Count < _minimumRequiredParameters - 1) || (!_hasObjectParams && (arguments.Count < _minimumRequiredParameters || arguments.Count > _expectedNumberOfParameters)))
             {
-                if (minimumRequiredParameters != expectedNumberOfParameters)
+                if (_minimumRequiredParameters != _expectedNumberOfParameters)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{_minimumRequiredParameters}` arguments");
                 }
                 else
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
+                    if (arguments.Count > 0)
+                    {
+                        throw new ScriptArgumentException(arguments.Count - 1, $"Invalid number of arguments `{arguments.Count}` passed in `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
+                    }
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed in `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
                 }
             }
 
@@ -196,13 +146,13 @@ namespace Scriban.Runtime
             // In case we have named arguments we need to verify that all arguments were set
             if (argMask != (1 << Parameters.Length) - 1)
             {
-                if (minimumRequiredParameters != expectedNumberOfParameters)
+                if (_minimumRequiredParameters != _expectedNumberOfParameters)
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{minimumRequiredParameters}` arguments");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{_minimumRequiredParameters}` arguments");
                 }
                 else
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{expectedNumberOfParameters}` arguments");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
                 }
             }
 

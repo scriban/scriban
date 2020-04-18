@@ -256,7 +256,7 @@ namespace Scriban.Parsing
                                 }
                                 break;
                             default:
-                                if (IsStartingAsExpression())
+                                if (IsStartOfExpression())
                                 {
                                     statement = ParseExpressionStatement();
                                 }
@@ -544,7 +544,7 @@ namespace Scriban.Parsing
                 return true;
             }
             // If we are not finding an end of statement, log a fatal error
-            LogError(statement, $"Invalid token found `{GetAsText(Current)}`. Expecting <EOL>/end of line after", true);
+            LogError(CurrentSpan, $"Invalid token found `{GetAsText(Current)}`. Expecting <EOL>/end of line.", true);
             return false;
         }
 

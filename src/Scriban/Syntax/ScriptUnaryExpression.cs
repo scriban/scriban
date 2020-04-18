@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Numerics;
+using Scriban.Helpers;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -15,9 +16,9 @@ namespace Scriban.Syntax
     {
         public ScriptUnaryOperator Operator { get; set; }
 
-        public ScriptVerbatim OperatorVerbatim { get; set; }
+        public ScriptToken OperatorToken { get; set; }
 
-        public string OperatorAsText => OperatorVerbatim?.Value ?? Operator.ToText();
+        public string OperatorAsText => OperatorToken?.Value ?? Operator.ToText();
 
         public ScriptExpression Right { get; set; }
 
@@ -39,7 +40,18 @@ namespace Scriban.Syntax
             {
                 case ScriptUnaryOperator.Not:
                 {
-                    return !context.ToBool(Right.Span, value);
+                    if (context.UseScientific)
+                    {
+                        if (!(value is bool))
+                        {
+                            throw new ScriptRuntimeException(Right.Span, $"Expecting a boolean instead of {value?.GetType().ScriptFriendlyName()} value: {value}");
+                        }
+                        return !(bool) value;
+                    }
+                    else
+                    {
+                        return !context.ToBool(Right.Span, value);
+                    }
                 }
                 case ScriptUnaryOperator.Negate:
                 case ScriptUnaryOperator.Plus:
@@ -92,9 +104,9 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            if (OperatorVerbatim != null)
+            if (OperatorToken != null)
             {
-                context.Write(OperatorVerbatim);
+                context.Write(OperatorToken);
             }
             else
             {

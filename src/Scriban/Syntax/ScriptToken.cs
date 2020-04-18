@@ -7,13 +7,13 @@ namespace Scriban.Syntax
     /// <summary>
     /// A verbatim node (use for custom parsing).
     /// </summary>
-    public class ScriptVerbatim : ScriptNode
+    public class ScriptToken : ScriptNode
     {
-        public ScriptVerbatim()
+        public ScriptToken()
         {
         }
 
-        public ScriptVerbatim(string value)
+        public ScriptToken(string value)
         {
             Value = value;
         }

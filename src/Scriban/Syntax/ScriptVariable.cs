@@ -14,7 +14,7 @@ namespace Scriban.Syntax
     [ScriptSyntax("variable", "<variable_name>")]
     public abstract partial class ScriptVariable : ScriptExpression, IScriptVariablePath, IEquatable<ScriptVariable>
     {
-        private readonly int _hashCode;
+        private int _hashCode;
 
         public static readonly ScriptVariableLocal Arguments = new ScriptVariableLocal(string.Empty);
 
@@ -62,7 +62,16 @@ namespace Scriban.Syntax
         /// <summary>
         /// Gets or sets the name of the variable (without the $ sign for local variable)
         /// </summary>
-        public string Name { get; }
+        public string Name { get; private set; }
+
+        internal void ChangeName(string name)
+        {
+            Name = name;
+            unchecked
+            {
+                _hashCode = (Name.GetHashCode() * 397) ^ (int)Scope;
+            }
+        }
 
         /// <summary>
         /// Gets or sets a boolean indicating whether this variable is a local variable (starting with $ in the template ) or global.

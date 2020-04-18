@@ -23,9 +23,9 @@ namespace Scriban.Syntax
 
         public ScriptBinaryOperator Operator { get; set; }
 
-        public ScriptVerbatim OperatorVerbatim { get; set; }
+        public ScriptToken OperatorToken { get; set; }
 
-        public string OperatorAsText => OperatorVerbatim?.Value ?? Operator.ToText();
+        public string OperatorAsText => OperatorToken?.Value ?? Operator.ToText();
 
         public ScriptExpression Right { get; set; }
 
@@ -69,9 +69,9 @@ namespace Scriban.Syntax
                 context.Write(" ");
             }
 
-            if (OperatorVerbatim != null)
+            if (OperatorToken != null)
             {
-                context.Write(OperatorVerbatim);
+                context.Write(OperatorToken);
             }
             else
             {

@@ -15,6 +15,10 @@ namespace Scriban.Parsing
         private int _allowNewLineLevel = 0;
         private int _expressionLevel = 0;
 
+        public int ExpressionLevel => _expressionLevel;
+
+        private static readonly int PrecedenceOfMultiply = GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator.Multiply);
+        
         private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             bool hasAnonymousFunction = false;
@@ -82,7 +86,10 @@ namespace Scriban.Parsing
                 ScriptFunctionCall functionCall = null;
                 parseExpression:
                 expressionCount++;
+
+                // Allow custom parsing for a first pre-expression
                 ScriptExpression leftOperand = null;
+                
                 switch (Current.Type)
                 {
                     case TokenType.Identifier:
@@ -148,6 +155,8 @@ namespace Scriban.Parsing
                         }
                         break;
                 }
+
+                skipFirstExpression:
 
                 // Should not happen but in case
                 if (leftOperand == null)
@@ -245,7 +254,7 @@ namespace Scriban.Parsing
                     {
                         var assignExpression = Open<ScriptAssignExpression>();
 
-                        if (_expressionLevel > 1 || !allowAssignment)
+                        if (leftOperand != null && !(leftOperand is IScriptVariablePath) ||  functionCall != null || _expressionLevel > 1 || !allowAssignment)
                         {
                             // unit test: 101-assign-complex-error1.txt
                             LogError(assignExpression, $"Expression is only allowed for a top level assignment");
@@ -272,17 +281,69 @@ namespace Scriban.Parsing
                     {
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
                         if (newPrecedence <= precedence)
-                            break;
-                        
-                        // In scientific mode, function calls are terminated by a binary operation
-                        if (_isScientific && functionCall != null)
                         {
-                            functionCall.Arguments.Add(leftOperand);
-                            functionCall.Span.End = leftOperand.Span.End;
-                            leftOperand = functionCall;
-                            functionCall = null;
+                            if (_isScientific)
+                            {
+                                if (functionCall != null)
+                                {
+                                    // if we were in the middle of a function call and the new operator
+                                    // doesn't have the same associativity (/*%^) we will transform
+                                    // the pending call into a left operand and let the current operator (eg +)
+                                    // to work on it. Example: cos 2x + 1
+                                    // functionCall: cos 2
+                                    // leftOperand: x
+                                    // binaryOperatorType: Add
+                                    if (newPrecedence < precedence)
+                                    {
+                                        functionCall.AddArgument(leftOperand);
+                                        leftOperand = functionCall;
+                                        functionCall = null;
+                                    }
+                                    precedence = newPrecedence;
+                                }
+                                else
+                                {
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                break;
+                            }
                         }
-                        
+
+                        // In scientific mode, with a pending function call, we can't detect how
+                        // operations of similar precedence (*/%^) are going to behave until
+                        // we resolve the functions (to detect if they take a parameter or not)
+                        // In fact case, we need create a ScriptArgumentBinary for the operator
+                        // and push it as an argument of the function call:
+                        // expression to parse: cos 2x * cos 2x
+                        // function call will be => cos(2, x, *, cos, 2, x)
+                        // which is incorrect so we will rewrite it to cos(2 * x) * cos(2 * x)
+                        if (_isScientific && (functionCall != null || newPrecedence >= PrecedenceOfMultiply))
+                        {
+                            // Store %*/^ in a pseudo function call
+                            if (functionCall == null)
+                            {
+                                functionCall = Open<ScriptFunctionCall>();
+                                functionCall.Target = leftOperand;
+                                functionCall.Span = leftOperand.Span;
+                            }
+                            else
+                            {
+                                functionCall.AddArgument(leftOperand);
+                            }
+
+                            var binaryArgument = Open<ScriptArgumentBinary>();
+                            binaryArgument.Operator = binaryOperatorType;
+                            binaryArgument.OperatorToken = ParseTokenAsVerbatim();
+                            Close(binaryArgument);
+
+                            functionCall.AddArgument(binaryArgument);
+
+                            goto parseExpression;
+                        }
+
                         // We fake entering an expression here to limit the number of expression
                         EnterExpression();
                         var binaryExpression = Open<ScriptBinaryExpression>();
@@ -290,12 +351,12 @@ namespace Scriban.Parsing
                         binaryExpression.Operator = binaryOperatorType;
                         
                         // Parse the operator
-                        binaryExpression.OperatorVerbatim = ParseTokenAsVerbatim();
+                        binaryExpression.OperatorToken = ParseTokenAsVerbatim();
 
                         // Special case for liquid, we revert the verbatim to the original scriban operator
                         if (_isLiquid && binaryOperatorType != ScriptBinaryOperator.Custom)
                         {
-                            binaryExpression.OperatorVerbatim.Value = binaryOperatorType.ToText();
+                            binaryExpression.OperatorToken.Value = binaryOperatorType.ToText();
                         }
                         
                         // unit test: 110-binary-simple-error1.txt
@@ -307,7 +368,7 @@ namespace Scriban.Parsing
                         continue;
                     }
 
-                    if (IsStartingAsExpression())
+                    if (IsStartOfExpression())
                     {
                         // If we can parse a statement, we have a method call
                         if (parentExpression != null)
@@ -317,7 +378,7 @@ namespace Scriban.Parsing
 
                         // Parse named parameters
                         var paramContainer = parentNode as IScriptNamedArgumentContainer;
-                        if (Current.Type == TokenType.Identifier && (parentNode is IScriptNamedArgumentContainer || !_isLiquid && PeekToken().Type == TokenType.Colon))
+                        if (!_isScientific && Current.Type == TokenType.Identifier && (parentNode is IScriptNamedArgumentContainer || !_isLiquid && PeekToken().Type == TokenType.Colon))
                         {
                             if (paramContainer == null)
                             {
@@ -331,6 +392,7 @@ namespace Scriban.Parsing
                                 {
                                     functionCall.Arguments.Add(leftOperand);
                                 }
+
                                 Close(leftOperand);
                             }
 
@@ -382,9 +444,23 @@ namespace Scriban.Parsing
                             // We don't allow anything after named parameters
                             break;
                         }
+                    
 
                         if (functionCall == null)
                         {
+                            if (_isScientific && Current.Type != TokenType.OpenParent)
+                            {
+                                newPrecedence = PrecedenceOfMultiply;
+
+                                if (newPrecedence <= precedence)
+                                {
+                                    break;
+                                }
+
+                                precedence = newPrecedence;
+                            }
+
+
                             functionCall = Open<ScriptFunctionCall>();
                             functionCall.Target = leftOperand;
 
@@ -395,10 +471,67 @@ namespace Scriban.Parsing
                             }
 
                             functionCall.Span.Start = leftOperand.Span.Start;
+
+                            if (_isScientific)
+                            {
+                                // Regular function call target(arg0, arg1, arg3, arg4...)
+                                if (Current.Type == TokenType.OpenParent)
+                                {
+                                    functionCall.OpenParent = ParseTokenAsVerbatim();
+
+                                    bool isFirst = true;
+                                    while (true)
+                                    {
+                                        // Parse any required comma (before each new non-first argument)
+                                        // Or closing parent (and we exit the loop)
+                                        if (Current.Type == TokenType.CloseParent)
+                                        {
+                                            functionCall.CloseParen = ParseTokenAsVerbatim();
+                                            break;
+                                        }
+
+                                        if (!isFirst)
+                                        {
+                                            if (Current.Type == TokenType.Comma)
+                                            {
+                                                PushTokenToTrivia();
+                                                NextToken();
+                                            }
+                                            else
+                                            {
+                                                LogError(Current, "Expecting a comma to separate arguments in a function call.");
+                                            }
+                                        }
+                                        isFirst = false;
+
+                                        // Else we expect an expression
+                                        if (IsStartOfExpression())
+                                        {
+                                            var arg = ParseExpression(functionCall);
+                                            functionCall.Arguments.Add(arg);
+                                            functionCall.Span.End = arg.Span.End;
+                                        }
+                                        else
+                                        {
+                                            LogError(Current, "Expecting an expression for argument function calls instead of this token.");
+                                            break;
+                                        }
+                                    }
+
+                                    if (functionCall.CloseParen == null)
+                                    {
+                                        LogError(Current, "Expecting a closing parenthesis for a function call.");
+                                    }
+
+                                    leftOperand = functionCall;
+                                    functionCall = null;
+                                    continue;
+                                }
+                            }
                         }
                         else
                         {
-                            functionCall.Arguments.Add(leftOperand);
+                            functionCall.AddArgument(leftOperand);
                         }
                         goto parseExpression;
                     }
@@ -427,6 +560,8 @@ namespace Scriban.Parsing
 
                     break;
                 }
+
+                breakParsingExpression:
 
                 if (functionCall != null)
                 {
@@ -566,7 +701,7 @@ namespace Scriban.Parsing
                     // TODO: record as trivia
                     NextToken(); // Skip :
 
-                    if (!IsStartingAsExpression())
+                    if (!IsStartOfExpression())
                     {
                         // unit test: 140-object-initializer-error5.txt
                         LogError($"Unexpected token `{Current.Type}`. Expecting an expression for the value of the member instead of `{GetAsText(Current)}`");
@@ -632,9 +767,9 @@ namespace Scriban.Parsing
             return Close(expression);
         }
 
-        private ScriptVerbatim ParseTokenAsVerbatim()
+        private ScriptToken ParseTokenAsVerbatim()
         {
-            var verbatim = Open<ScriptVerbatim>();
+            var verbatim = Open<ScriptToken>();
             verbatim.Value = GetAsText(Current);
             NextToken();
             return Close(verbatim);
@@ -648,44 +783,36 @@ namespace Scriban.Parsing
 
             // Parse the operator as verbatim text
             var unaryTokenType = Current.Type;
-            unaryExpression.OperatorVerbatim = ParseTokenAsVerbatim();
 
-            // Parse a custom unary operator?
-            if (_customParser != null && _customParser.IsCustomUnaryOperator(unaryTokenType, unaryExpression.OperatorVerbatim.Value, out newPrecedence))
+            unaryExpression.OperatorToken = ParseTokenAsVerbatim();
+            // Else we parse standard unary operators
+            switch (unaryTokenType)
             {
-                unaryExpression.Operator = ScriptUnaryOperator.Custom;
-            }
-            else
-            {
-                // Else we parse standard unary operators
-                switch (unaryTokenType)
-                {
-                    case TokenType.Exclamation:
-                        unaryExpression.Operator = ScriptUnaryOperator.Not;
-                        break;
-                    case TokenType.Minus:
-                        unaryExpression.Operator = ScriptUnaryOperator.Negate;
-                        break;
-                    case TokenType.Plus:
-                        unaryExpression.Operator = ScriptUnaryOperator.Plus;
-                        break;
-                    case TokenType.Arroba:
-                        unaryExpression.Operator = ScriptUnaryOperator.FunctionAlias;
-                        break;
-                    default:
-                        if (_isScientific && unaryTokenType == TokenType.DoubleCaret || !_isScientific && unaryTokenType == TokenType.Caret)
-                        {
-                            unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
-                        }
+                case TokenType.Exclamation:
+                    unaryExpression.Operator = ScriptUnaryOperator.Not;
+                    break;
+                case TokenType.Minus:
+                    unaryExpression.Operator = ScriptUnaryOperator.Negate;
+                    break;
+                case TokenType.Plus:
+                    unaryExpression.Operator = ScriptUnaryOperator.Plus;
+                    break;
+                case TokenType.Arroba:
+                    unaryExpression.Operator = ScriptUnaryOperator.FunctionAlias;
+                    break;
+                default:
+                    if (_isScientific && unaryTokenType == TokenType.DoubleCaret || !_isScientific && unaryTokenType == TokenType.Caret)
+                    {
+                        unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
+                    }
 
-                        if (unaryExpression.Operator == ScriptUnaryOperator.None)
-                        {
-                            LogError($"Unexpected token `{unaryTokenType}` for unary expression");
-                        }
-                        break;
-                }
-                newPrecedence = GetDefaultUnaryOperatorPrecedence(unaryExpression.Operator);
+                    if (unaryExpression.Operator == ScriptUnaryOperator.None)
+                    {
+                        LogError($"Unexpected token `{unaryTokenType}` for unary expression");
+                    }
+                    break;
             }
+            newPrecedence = GetDefaultUnaryOperatorPrecedence(unaryExpression.Operator);
 
             // unit test: 115-unary-error1.txt
             unaryExpression.Right = ExpectAndParseExpression(unaryExpression, ref hasAnonymousFunction, null, newPrecedence);
@@ -754,7 +881,7 @@ namespace Scriban.Parsing
         private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null,
             ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
-            if (IsStartingAsExpression())
+            if (IsStartOfExpression())
             {
                 return ParseExpression(parentNode, parentExpression, newPrecedence, mode, allowAssignment);
             }
@@ -765,7 +892,7 @@ namespace Scriban.Parsing
         private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ref bool hasAnonymousExpression, ScriptExpression parentExpression = null, int newPrecedence = 0,
             string message = null, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
-            if (IsStartingAsExpression())
+            if (IsStartOfExpression())
             {
                 return ParseExpression(parentNode, ref hasAnonymousExpression, parentExpression, newPrecedence, mode);
             }
@@ -776,7 +903,7 @@ namespace Scriban.Parsing
         private ScriptExpression ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, out bool hasAnonymousFunction, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
             hasAnonymousFunction = false;
-            if (IsStartingAsExpression())
+            if (IsStartOfExpression())
             {
                 return ParseExpression(parentNode, ref hasAnonymousFunction, null, 0, mode);
             }
@@ -784,7 +911,7 @@ namespace Scriban.Parsing
             return null;
         }
 
-        private bool IsStartingAsExpression()
+        public bool IsStartOfExpression()
         {
             if (IsStartingAsUnaryExpression()) return true;
 
@@ -876,7 +1003,7 @@ namespace Scriban.Parsing
             return binaryOperator != ScriptBinaryOperator.None;
         }
 
-        private static int GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator op)
+        internal static int GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator op)
         {
             switch (op)
             {

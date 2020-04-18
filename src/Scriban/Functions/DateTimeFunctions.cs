@@ -399,6 +399,8 @@ namespace Scriban.Functions
             }
         }
 
+        public int RequiredParameterCount => 0;
+
         public bool IsExpressionParameter(int index)
         {
             return false;

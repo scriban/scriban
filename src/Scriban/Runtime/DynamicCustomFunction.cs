@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Threading.Tasks;
 using Scriban.Helpers;
+using Scriban.Parsing;
 using Scriban.Syntax;
 
 
@@ -29,6 +30,14 @@ namespace Scriban.Runtime
 #if !SCRIBAN_NO_ASYNC
         protected readonly bool IsAwaitable;
 #endif
+        protected readonly bool _hasObjectParams;
+        protected readonly int _lastParamsIndex;
+        protected readonly bool _hasTemplateContext;
+        protected readonly bool _hasSpan;
+        protected readonly int _optionalParameterCount;
+        protected readonly Type _paramsElementType;
+        protected readonly int _expectedNumberOfParameters;
+        protected readonly int _minimumRequiredParameters;
 
         protected DynamicCustomFunction(MethodInfo method)
         {
@@ -37,6 +46,54 @@ namespace Scriban.Runtime
 #if !SCRIBAN_NO_ASYNC
             IsAwaitable = method.ReturnType.GetTypeInfo().GetDeclaredMethod(nameof(Task.GetAwaiter)) != null;
 #endif
+
+            _lastParamsIndex = Parameters.Length - 1;
+            if (Parameters.Length > 0)
+            {
+                // Check if we have TemplateContext+SourceSpan as first parameters
+                if (typeof(TemplateContext).GetTypeInfo().IsAssignableFrom(Parameters[0].ParameterType.GetTypeInfo()))
+                {
+                    _hasTemplateContext = true;
+                    if (Parameters.Length > 1)
+                    {
+                        _hasSpan = typeof(SourceSpan).GetTypeInfo().IsAssignableFrom(Parameters[1].ParameterType.GetTypeInfo());
+                    }
+                }
+
+                var lastParam = Parameters[_lastParamsIndex];
+                if (lastParam.ParameterType.IsArray)
+                {
+                    foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
+                    {
+                        _hasObjectParams = true;
+                        _paramsElementType = lastParam.ParameterType.GetElementType();
+                        break;
+                    }
+                }
+            }
+
+            if (!_hasObjectParams)
+            {
+                for (int i = 0; i < Parameters.Length; i++)
+                {
+                    if (Parameters[i].IsOptional)
+                    {
+                        _optionalParameterCount++;
+                    }
+                }
+            }
+
+            _expectedNumberOfParameters = Parameters.Length;
+            if (_hasTemplateContext)
+            {
+                _expectedNumberOfParameters--;
+                if (_hasSpan)
+                {
+                    _expectedNumberOfParameters--;
+                }
+            }
+
+            _minimumRequiredParameters = _expectedNumberOfParameters - _optionalParameterCount;
         }
 
 
@@ -68,6 +125,8 @@ namespace Scriban.Runtime
         }
 
         public abstract object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
+
+        public int RequiredParameterCount => _minimumRequiredParameters;
 
         public bool IsExpressionParameter(int index)
         {

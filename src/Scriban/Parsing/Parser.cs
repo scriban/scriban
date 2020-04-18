@@ -155,6 +155,10 @@ namespace Scriban.Parsing
                 {
                     _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.SemiColon, _lexer.Text));
                 }
+                else if (_isScientific && Current.Type == TokenType.Comma)
+                {
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Comma, _lexer.Text));
+                }
             }
         }
 

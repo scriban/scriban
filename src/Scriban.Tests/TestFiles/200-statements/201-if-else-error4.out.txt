@@ -1,1 +1,1 @@
-text(7,1) : error : Error while parsing else statement: Invalid token found `test`. Expecting <EOL>/end of line after: else | else if <expression> ... end|else|else if
+text(7,6) : error : Invalid token found `test`. Expecting <EOL>/end of line.

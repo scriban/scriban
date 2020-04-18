@@ -226,7 +226,7 @@ namespace Scriban.Parsing
             var ret = Open<ScriptReturnStatement>();
             NextToken(); // skip ret
 
-            if (IsStartingAsExpression())
+            if (IsStartOfExpression())
             {
                 ret.Expression = ParseExpression(ret);
             }
