@@ -35,7 +35,6 @@ namespace Scriban.Parsing
         private readonly bool _isKeepTrivia;
         private readonly List<ScriptTrivia> _trivias;
         private readonly Queue<ScriptStatement> _pendingStatements;
-        private readonly ICustomParser _customParser;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -56,7 +55,6 @@ namespace Scriban.Parsing
             CurrentParsingMode = lexer.Options.Mode;
 
             _isKeepTrivia = lexer.Options.KeepTrivia;
-            _customParser = Options.CustomParser;
 
             _pendingStatements = new Queue<ScriptStatement>(2);
             Blocks = new Stack<ScriptNode>();

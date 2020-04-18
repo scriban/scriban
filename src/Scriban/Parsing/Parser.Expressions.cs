@@ -27,12 +27,6 @@ namespace Scriban.Parsing
 
             precedence = 0;
 
-            if (_customParser != null && _customParser.IsCustomBinaryOperator(tokenType, GetAsText(Current), out precedence))
-            {
-                binaryOperator = ScriptBinaryOperator.Custom;
-                return true;
-            }
-            
             binaryOperator = ScriptBinaryOperator.None;
             switch (tokenType)
             {
@@ -816,12 +810,6 @@ namespace Scriban.Parsing
 
         private bool IsStartingAsUnaryExpression()
         {
-            // If we have a custom unary operator, it is the start of an expression
-            if (_customParser != null && _customParser.IsCustomUnaryOperator(Current.Type, GetAsText(Current), out _))
-            {
-                return true;
-            }
-
             switch (Current.Type)
             {
                 case TokenType.Exclamation:
@@ -850,12 +838,6 @@ namespace Scriban.Parsing
 
             var text = GetAsText(Current);
 
-            if (_customParser != null && _customParser.IsCustomBinaryOperator(Current.Type, text, out precedence))
-            {
-                binaryOperator = ScriptBinaryOperator.Custom;
-                return true;
-            }
-            
             if (Current.Type != TokenType.Identifier)
             {
                 return false;
