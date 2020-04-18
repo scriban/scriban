@@ -105,6 +105,7 @@ namespace Scriban.Parsing
                     }
                     break;
                 case "tablerow":
+                    if (_isScientific) goto default;
                     CheckNotInCase(parent, startToken);
                     if (PeekToken().Type == TokenType.Dot)
                     {
