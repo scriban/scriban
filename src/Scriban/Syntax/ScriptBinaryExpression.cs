@@ -407,6 +407,7 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.CompareLess:
                     case ScriptBinaryOperator.CompareGreaterOrEqual:
                     case ScriptBinaryOperator.CompareLessOrEqual:
+                        if (context.UseScientific) throw new ScriptRuntimeException(span, $"Both left and right expressions are null. Cannot perform this operation on null values.");
                         return false;
                     case ScriptBinaryOperator.Add:
                     case ScriptBinaryOperator.Substract:
@@ -421,6 +422,7 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.Modulus:
                     case ScriptBinaryOperator.RangeInclude:
                     case ScriptBinaryOperator.RangeExclude:
+                        if (context.UseScientific) throw new ScriptRuntimeException(span, $"Both left and right expressions are null. Cannot perform this operation on null values.");
                         return null;
                     case ScriptBinaryOperator.LiquidContains:
                     case ScriptBinaryOperator.LiquidStartsWith:
@@ -437,6 +439,7 @@ namespace Scriban.Syntax
                 {
                     case ScriptBinaryOperator.CompareEqual:
                     case ScriptBinaryOperator.CompareNotEqual:
+                        return false;
                     case ScriptBinaryOperator.CompareGreater:
                     case ScriptBinaryOperator.CompareLess:
                     case ScriptBinaryOperator.CompareGreaterOrEqual:
@@ -444,6 +447,7 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.LiquidContains:
                     case ScriptBinaryOperator.LiquidStartsWith:
                     case ScriptBinaryOperator.LiquidEndsWith:
+                        if (context.UseScientific) throw new ScriptRuntimeException(span, $"The {(leftValue == null ? "left" : "right")} expression is null. Cannot perform this operation on a null value.");
                         return false;
                     case ScriptBinaryOperator.Add:
                     case ScriptBinaryOperator.Substract:
@@ -458,6 +462,8 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.Modulus:
                     case ScriptBinaryOperator.RangeInclude:
                     case ScriptBinaryOperator.RangeExclude:
+                        if (context.UseScientific) throw new ScriptRuntimeException(span, $"The {(leftValue == null ? "left" : "right")} expression is null. Cannot perform this operation on a null value.");
+
                         return null;
                 }
                 return null;
