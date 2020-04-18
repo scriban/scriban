@@ -18,7 +18,7 @@ namespace Scriban.Tests
         {
             var template = LoadTemplate(inputFileName);
 
-            var rewriter = new ScriptRewriter();
+            var rewriter = new NopScriptRewriter();
             var result = rewriter.Visit(template.Page);
 
             // The base ScriptRewriter never changes any node, so we should end up with the same instance
@@ -60,6 +60,10 @@ namespace Scriban.Tests
                 Assert.Ignore("Template didn't parse correctly");
 
             return template;
+        }
+
+        private class NopScriptRewriter : ScriptRewriter
+        {
         }
 
         private class LeafCopyScriptRewriter : ScriptRewriter

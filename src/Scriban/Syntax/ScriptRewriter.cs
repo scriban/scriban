@@ -6,7 +6,10 @@ using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
-    public class ScriptRewriter : ScriptVisitor<ScriptNode>
+    /// <summary>
+    /// Base class for a script rewriter.
+    /// </summary>
+    public abstract class ScriptRewriter : ScriptVisitor<ScriptNode>
     {
         public override ScriptNode Visit(ScriptNode node)
         {
@@ -623,7 +626,7 @@ namespace Scriban.Syntax
                     {
                         Operator = node.Operator, // TODO support rewriting?
                         OperatorToken = newToken
-                    };
+                    }.WithTriviaAndSpanFrom(node);
                 }
             }
 
