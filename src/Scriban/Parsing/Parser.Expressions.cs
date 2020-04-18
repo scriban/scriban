@@ -156,8 +156,6 @@ namespace Scriban.Parsing
                         break;
                 }
 
-                skipFirstExpression:
-
                 // Should not happen but in case
                 if (leftOperand == null)
                 {
@@ -562,8 +560,6 @@ namespace Scriban.Parsing
 
                     break;
                 }
-
-                breakParsingExpression:
 
                 if (functionCall != null)
                 {
