@@ -107,6 +107,15 @@ namespace Scriban.AsyncCodeGen
                 foreach (var referencer in finds.Where(f => f.IsDirect))
                 {
                     var callingMethodSymbol = (IMethodSymbol)referencer.CallingSymbol;
+
+                    // Skip methods over than Evaluate for ScriptNode
+                    // Skip also entirely any methods related to ScriptVisitor
+                    if ((callingMethodSymbol.OverriddenMethod != null && callingMethodSymbol.OverriddenMethod.ContainingType.Name == "ScriptNode" && callingMethodSymbol.Name != "Evaluate") ||
+                        InheritFrom(callingMethodSymbol.ContainingType, "Syntax", "ScriptVisitor"))
+                    {
+                        continue;
+                    }
+
                     methods.Push(callingMethodSymbol);
 
                     // Push the method overriden
