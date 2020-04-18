@@ -28,15 +28,19 @@ namespace Scriban
         private bool _hasEndOfStatement;
         private FastStack<bool> _isWhileLoop;
         private ScriptRawStatement _previousRawStatement;
+        private bool _isScriptOnly;
 
         public TemplateRewriterContext(IScriptOutput output, TemplateRewriterOptions options = default(TemplateRewriterOptions))
         {
             _isWhileLoop = new FastStack<bool>(4);
             Options = options;
-            if (options.Mode != ScriptMode.Default)
+            if (options.Mode != ScriptMode.Default && options.Mode != ScriptMode.ScriptOnly)
             {
-                throw new ArgumentException($"The rendering mode `{options.Mode}` is not supported. Only `ScriptMode.Default` is currently supported");
+                throw new ArgumentException($"The rendering mode `{options.Mode}` is not supported. Only `ScriptMode.Default` or `ScriptMode.ScriptOnly` are currently supported");
             }
+
+            _isScriptOnly = options.Mode == ScriptMode.ScriptOnly;
+            _isInCode = _isScriptOnly;
             _output = output;          
         }
 
@@ -255,7 +259,7 @@ namespace Scriban
 
             if (node is ScriptPage)
             {
-                if (_isInCode)
+                if (_isInCode && !_isScriptOnly)
                 {
                     WriteExitCode();
                 }
