@@ -176,11 +176,11 @@ namespace Scriban.Parsing
             }
         }
 
-        private T Close<T>(T statement) where T : ScriptNode
+        private T Close<T>(T node) where T : ScriptNode
         {
-            statement.Span.End = Previous.End;
-            FlushTrivias(statement, false);
-            return statement;
+            node.Span.End = Previous.End;
+            FlushTrivias(node, false);
+            return node;
         }
 
         private string GetAsText(Token localToken)
