@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using Scriban.Runtime;
 
@@ -79,6 +80,16 @@ namespace Scriban.Syntax
         public override string ToString()
         {
             return $"{From} | {To}";
+        }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return From;
+            yield return To;
         }
     }
 }

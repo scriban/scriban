@@ -6,6 +6,7 @@ using System.Collections;
 using System.IO;
 using Scriban.Runtime;
 using Scriban.Helpers;
+using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
@@ -45,6 +46,16 @@ namespace Scriban.Syntax
         public override string ToString()
         {
             return $"{Target}[{Index}]";
+        }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Target;
+            yield return Index;
         }
 
         public object GetValue(TemplateContext context)

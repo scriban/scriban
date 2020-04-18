@@ -4,6 +4,8 @@
 
 using System.Threading.Tasks;
 using Scriban.Runtime;
+using System.Collections.Generic;
+
 
 namespace Scriban.Syntax
 {
@@ -43,6 +45,16 @@ namespace Scriban.Syntax
             context.ExpectEos();
             context.Write(Body);
             context.ExpectEnd();
+        }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Name;
+            yield return Body;
         }
 
         public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)

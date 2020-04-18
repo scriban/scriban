@@ -3,7 +3,9 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 
 namespace Scriban.Syntax
 {
@@ -107,6 +109,11 @@ namespace Scriban.Syntax
             return Scope == ScriptVariableScope.Local ? $"${Name}" : Name;
         }
 
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            return Enumerable.Empty<ScriptNode>();
+        }
+
         public static bool operator ==(ScriptVariable left, ScriptVariable right)
         {
             return Equals(left, right);
@@ -149,6 +156,10 @@ namespace Scriban.Syntax
             // Used a specialized overrides on contxet for ScriptVariableGlobal
             return context.GetValue(this);
         }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
 
@@ -157,6 +168,10 @@ namespace Scriban.Syntax
         public ScriptVariableLocal(string name) : base(name, ScriptVariableScope.Local)
         {
         }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
     public class ScriptVariableLoop : ScriptVariable
@@ -177,6 +192,10 @@ namespace Scriban.Syntax
                 base.Write(context);
             }
         }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
 }

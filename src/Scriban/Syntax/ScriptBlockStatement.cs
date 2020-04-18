@@ -72,5 +72,19 @@ namespace Scriban.Syntax
         {
             return $"<statements[{Statements.Count}]>";
         }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+#if NET35
+            foreach (var statement in Statements)
+                yield return statement;
+#else
+            return Statements;
+#endif
+        }
     }
 }

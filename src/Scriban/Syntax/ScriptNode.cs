@@ -45,6 +45,13 @@ namespace Scriban.Syntax
         }
 
         public abstract void Write(TemplateRewriterContext context);
+
+        public abstract void Accept(ScriptVisitor visitor);
+        public abstract TResult Accept<TResult>(ScriptVisitor<TResult> visitor);
+
+        public IEnumerable<ScriptNode> Children { get; }
+
+        protected abstract IEnumerable<ScriptNode> GetChildren();
     }
 
     public static class ScriptNodeExtensions
@@ -101,6 +108,14 @@ namespace Scriban.Syntax
                 }
             }
             return false;
+        }
+
+        public static TNode WithTriviaAndSpanFrom<TNode>(this TNode node, ScriptNode sourceNode)
+            where TNode : ScriptNode
+        {
+            node.Trivias = sourceNode?.Trivias;
+            node.Span = sourceNode?.Span ?? default;
+            return node;
         }
     }
 

@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System.Collections.Generic;
+
 namespace Scriban.Syntax
 {
     [ScriptSyntax("readonly statement", "readonly <variable>")]
@@ -21,6 +23,15 @@ namespace Scriban.Syntax
             context.Write("readonly").ExpectSpace();
             context.Write(Variable);
             context.ExpectEos();
+        }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+
+        protected override IEnumerable<ScriptNode> GetChildren()
+        {
+            yield return Variable;
         }
     }
 }
