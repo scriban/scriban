@@ -11,6 +11,12 @@ namespace Scriban.Syntax
     /// </summary>
     public class ScriptToken : ScriptNode
     {
+        public static ScriptToken Equal() => new ScriptToken("=");
+
+        public static ScriptToken OpenParen() => new ScriptToken("(");
+
+        public static ScriptToken CloseParen() => new ScriptToken(")");
+        
         public ScriptToken()
         {
         }

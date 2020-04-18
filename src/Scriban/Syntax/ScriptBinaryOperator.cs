@@ -68,6 +68,11 @@ namespace Scriban.Syntax
 
     public static class ScriptBinaryOperatorExtensions
     {
+        public static ScriptToken ToToken(this ScriptBinaryOperator op)
+        {
+            return new ScriptToken(op.ToText());
+        }
+
         public static string ToText(this ScriptBinaryOperator op)
         {
             switch (op)

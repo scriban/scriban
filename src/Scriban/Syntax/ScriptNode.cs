@@ -47,6 +47,7 @@ namespace Scriban.Syntax
         public abstract void Write(TemplateRewriterContext context);
 
         public abstract void Accept(ScriptVisitor visitor);
+
         public abstract TResult Accept<TResult>(ScriptVisitor<TResult> visitor);
 
         public IEnumerable<ScriptNode> Children { get; }
@@ -56,7 +57,30 @@ namespace Scriban.Syntax
 
     public static class ScriptNodeExtensions
     {
+        public static ScriptNode AddSpaceBefore(this ScriptNode node)
+        {
+            node.AddTrivia(ScriptTrivia.Space, true);
+            return node;
+        }
 
+        public static ScriptNode AddComma(this ScriptNode node)
+        {
+            node.AddTrivia(ScriptTrivia.Comma, true);
+            return node;
+        }
+
+        public static ScriptNode AddSemiColon(this ScriptNode node)
+        {
+            node.AddTrivia(ScriptTrivia.SemiColon, true);
+            return node;
+        }
+
+        public static ScriptNode AddSpaceAfter(this ScriptNode node)
+        {
+            node.AddTrivia(ScriptTrivia.Space, false);
+            return node;
+        }
+        
         public static void AddTrivia(this ScriptNode node, ScriptTrivia trivia, bool before)
         {
             var trivias = node.Trivias;
@@ -132,8 +156,14 @@ namespace Scriban.Syntax
         public List<ScriptTrivia> After { get; }
     }
 
-    public struct ScriptTrivia
+    public readonly struct ScriptTrivia
     {
+        public static readonly ScriptTrivia Space = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.Whitespace, " ");
+
+        public static readonly ScriptTrivia Comma = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.Comma, ",");
+
+        public static readonly ScriptTrivia SemiColon = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.SemiColon, ";");
+
         public ScriptTrivia(SourceSpan span, ScriptTriviaType type)
         {
             Span = span;

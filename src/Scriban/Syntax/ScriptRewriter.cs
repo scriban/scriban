@@ -11,6 +11,13 @@ namespace Scriban.Syntax
     /// </summary>
     public abstract class ScriptRewriter : ScriptVisitor<ScriptNode>
     {
+        protected ScriptRewriter()
+        {
+            CopyTrivias = true;
+        }
+        
+        public bool CopyTrivias { get; set; }
+        
         public override ScriptNode Visit(ScriptNode node)
         {
             if (node == null) return null;
@@ -21,6 +28,15 @@ namespace Scriban.Syntax
             }
 
             return node;
+        }
+
+        protected virtual ScriptNode Normalize(ScriptNode newNode, ScriptNode previousNode)
+        {
+            if (CopyTrivias && newNode != previousNode)
+            {
+                return newNode.WithTriviaAndSpanFrom(previousNode);
+            }
+            return newNode;
         }
 
         public override ScriptNode Visit(ScriptTableRowStatement node)
@@ -38,13 +54,13 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptTableRowStatement()
+            return Normalize(new ScriptTableRowStatement()
             {
                 Variable = newVariable,
                 Iterator = newIterator,
                 NamedArguments = newNamedArguments,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptCaseStatement node)
@@ -58,11 +74,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptCaseStatement
+            return Normalize(new ScriptCaseStatement
             {
                 Value = newValue,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptElseStatement node)
@@ -76,11 +92,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptElseStatement
+            return Normalize(new ScriptElseStatement
             {
                 Body = newBody,
                 Else = newElse
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptForStatement node)
@@ -98,13 +114,13 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptForStatement
+            return Normalize(new ScriptForStatement
             {
                 Variable = newVariable,
                 Iterator = newIterator,
                 NamedArguments = newNamedArguments,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptIfStatement node)
@@ -120,14 +136,14 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptIfStatement
+            return Normalize(new ScriptIfStatement
             {
                 Condition = newCondition,
                 Then = newThen,
                 Else = newElse,
                 InvertCondition = node.InvertCondition,
                 IsElseIf = node.IsElseIf
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptWhenStatement node)
@@ -143,11 +159,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            var newStatement = new ScriptWhenStatement
+            var newStatement = (ScriptWhenStatement)Normalize(new ScriptWhenStatement
             {
                 Body = newBody,
                 Next = newNext
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
 
             newStatement.Values.AddRange(newValues);
 
@@ -165,11 +181,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptWhileStatement
+            return Normalize(new ScriptWhileStatement
             {
                 Condition = newCondition,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptVariableGlobal node)
@@ -196,7 +212,7 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            var newExpression = new ScriptArrayInitializerExpression().WithTriviaAndSpanFrom(node);
+            var newExpression = (ScriptArrayInitializerExpression)Normalize(new ScriptArrayInitializerExpression(), node);
             newExpression.Values.AddRange(newValues);
 
             return newExpression;
@@ -205,38 +221,44 @@ namespace Scriban.Syntax
         public override ScriptNode Visit(ScriptAssignExpression node)
         {
             var newTarget = (ScriptExpression)Visit(node.Target);
+            var newEqual = node.EqualToken != null ? (ScriptToken) Visit(node.EqualToken) : ScriptToken.Equal();
             var newValue = (ScriptExpression)Visit(node.Value);
 
             if (newTarget == node.Target &&
-                newValue == node.Value)
+                newValue == node.Value &&
+                newEqual == node.EqualToken)
             {
                 return node;
             }
 
-            return new ScriptAssignExpression
+            return Normalize(new ScriptAssignExpression
             {
                 Target = newTarget,
+                EqualToken = newEqual,
                 Value = newValue
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptBinaryExpression node)
         {
             var newLeft = (ScriptExpression)Visit(node.Left);
             var newRight = (ScriptExpression)Visit(node.Right);
+            var newOperatorToken = node.OperatorToken != null ? (ScriptToken)Visit(node.OperatorToken) : node.Operator.ToToken();
 
             if (newLeft == node.Left &&
-                newRight == node.Right)
+                newRight == node.Right &&
+                newOperatorToken == node.OperatorToken)
             {
                 return node;
             }
 
-            return new ScriptBinaryExpression
+            return Normalize(new ScriptBinaryExpression
             {
                 Left = newLeft,
                 Operator = node.Operator,
+                OperatorToken = newOperatorToken,
                 Right = newRight
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptBlockStatement node)
@@ -248,7 +270,7 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            var newBlockStatement = new ScriptBlockStatement().WithTriviaAndSpanFrom(node);
+            var newBlockStatement = (ScriptBlockStatement)Normalize(new ScriptBlockStatement(), node);
             newBlockStatement.Statements.AddRange(newStatements);
 
             return newBlockStatement;
@@ -265,11 +287,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptCaptureStatement
+            return Normalize(new ScriptCaptureStatement
             {
                 Target = newTarget,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptExpressionStatement node)
@@ -281,10 +303,10 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptExpressionStatement
+            return Normalize(new ScriptExpressionStatement
             {
                 Expression = newExpression
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptFunctionCall node)
@@ -298,10 +320,10 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            var newCall = new ScriptFunctionCall
+            var newCall = (ScriptFunctionCall)Normalize(new ScriptFunctionCall
             {
                 Target = newTarget
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
 
             newCall.Arguments.AddRange(newArguments);
 
@@ -317,10 +339,10 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptImportStatement
+            return Normalize(new ScriptImportStatement
             {
                 Expression = newExpression
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptIndexerExpression node)
@@ -334,11 +356,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptIndexerExpression
+            return Normalize(new ScriptIndexerExpression
             {
                 Target = newTarget,
                 Index = newIndex
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptIsEmptyExpression node)
@@ -350,10 +372,10 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptIsEmptyExpression
+            return Normalize(new ScriptIsEmptyExpression
             {
                 Target = newTarget
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptMemberExpression node)
@@ -367,11 +389,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptMemberExpression
+            return Normalize(new ScriptMemberExpression
             {
                 Target = newTarget,
                 Member = newMember
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptNamedArgument node)
@@ -383,11 +405,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptNamedArgument
+            return Normalize(new ScriptNamedArgument
             {
                 Name = node.Name,
                 Value = newValue
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptNestedExpression node)
@@ -399,10 +421,10 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptNestedExpression
+            return Normalize(new ScriptNestedExpression
             {
                 Expression = newExpression
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptObjectInitializerExpression node)
@@ -425,7 +447,7 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            var newExpression = new ScriptObjectInitializerExpression().WithTriviaAndSpanFrom(node);
+            var newExpression = (ScriptObjectInitializerExpression)Normalize(new ScriptObjectInitializerExpression(), node);
             foreach (var member in newMembers)
             {
                 newExpression.Members.Add(member.Key, member.Value);
@@ -445,11 +467,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptPipeCall
+            return Normalize(new ScriptPipeCall
             {
                 From = newFrom,
                 To = newTo
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptRawStatement node)
@@ -466,10 +488,10 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptReturnStatement
+            return Normalize(new ScriptReturnStatement
             {
                 Expression = newExpression
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptThisExpression node)
@@ -486,11 +508,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptUnaryExpression
+            return Normalize(new ScriptUnaryExpression
             {
                 Operator = node.Operator,
                 Right = newRight
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptWithStatement node)
@@ -504,11 +526,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptWithStatement
+            return Normalize(new ScriptWithStatement
             {
                 Name = newName,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptWrapStatement node)
@@ -522,11 +544,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptWrapStatement
+            return Normalize(new ScriptWrapStatement
             {
                 Target = newTarget,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptAnonymousFunction node)
@@ -538,10 +560,10 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptAnonymousFunction
+            return Normalize(new ScriptAnonymousFunction
             {
                 Function = newFunction
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptBreakStatement node)
@@ -565,11 +587,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptFunction
+            return Normalize(new ScriptFunction
             {
                 Name = newName,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptLiteral node)
@@ -591,10 +613,10 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptReadOnlyStatement
+            return Normalize(new ScriptReadOnlyStatement
             {
                 Variable = newVariable
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
 
         public override ScriptNode Visit(ScriptPage node)
@@ -608,11 +630,11 @@ namespace Scriban.Syntax
                 return node;
             }
 
-            return new ScriptPage
+            return Normalize(new ScriptPage
             {
                 FrontMatter = newFrontMatter,
                 Body = newBody
-            }.WithTriviaAndSpanFrom(node);
+            }, node);
         }
         
         public override ScriptNode Visit(ScriptArgumentBinary node)
@@ -622,11 +644,11 @@ namespace Scriban.Syntax
                 var newToken = (ScriptToken)Visit((ScriptNode)node.OperatorToken);
                 if (newToken != node.OperatorToken)
                 {
-                    return new ScriptArgumentBinary()
+                    return Normalize(new ScriptArgumentBinary()
                     {
                         Operator = node.Operator, // TODO support rewriting?
                         OperatorToken = newToken
-                    }.WithTriviaAndSpanFrom(node);
+                    }, node);
                 }
             }
 

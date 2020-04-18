@@ -39,8 +39,8 @@ namespace Scriban.Syntax
                 Span.End = argument.Span.End;
             }
         }
-        
-        public override object Evaluate(TemplateContext context)
+
+        public ScriptExpression GetScientificExpression(TemplateContext context)
         {
             // If we are in scientific mode and we have a function which takes arguments, and is not an explicit call (e.g sin(x) rather then sin x)
             // Then we need to rewrite the call to a proper expression.
@@ -49,8 +49,18 @@ namespace Scriban.Syntax
                 var rewrite = new ScientificFunctionCallRewriter(1 + Arguments.Count);
                 rewrite.Add(Target);
                 rewrite.AddRange(Arguments);
-                var expression = rewrite.Rewrite(context);
-                return context.Evaluate(expression);
+                return rewrite.Rewrite(context);
+            }
+            return this;
+        }
+
+        public override object Evaluate(TemplateContext context)
+        {
+            // Double check if the expression can be rewritten
+            var newExpression = GetScientificExpression(context);
+            if (newExpression != this)
+            {
+                return context.Evaluate(newExpression);
             }
 
             // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
@@ -68,11 +78,18 @@ namespace Scriban.Syntax
         public override void Write(TemplateRewriterContext context)
         {
             context.Write(Target);
-            foreach (var scriptExpression in Arguments)
+            if (OpenParent != null) context.Write(OpenParent);
+            for (var i = 0; i < Arguments.Count; i++)
             {
-                context.ExpectSpace();
+                var scriptExpression = Arguments[i];
+                if (OpenParent == null || i > 0)
+                {
+                    context.ExpectSpace();
+                }
                 context.Write(scriptExpression);
             }
+
+            if (CloseParen != null) context.Write(CloseParen);
         }
 
         public override bool CanHaveLeadingTrivia()

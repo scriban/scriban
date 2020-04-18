@@ -12,6 +12,8 @@ namespace Scriban.Syntax
     {
         public ScriptExpression Target { get; set; }
 
+        public ScriptToken EqualToken { get; set; }
+
         public ScriptExpression Value { get; set; }
 
         public override object Evaluate(TemplateContext context)
@@ -29,7 +31,8 @@ namespace Scriban.Syntax
         public override void Write(TemplateRewriterContext context)
         {
             context.Write(Target);
-            context.Write("=");
+            if (EqualToken == null) context.Write("=");
+            else context.Write(EqualToken);
             context.Write(Value);
         }
 

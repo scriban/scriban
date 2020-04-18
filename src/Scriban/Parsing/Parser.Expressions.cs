@@ -258,7 +258,7 @@ namespace Scriban.Parsing
                             LogError(assignExpression, $"Expression is only allowed for a top level assignment");
                         }
 
-                        NextToken();
+                        assignExpression.EqualToken = ParseToken(); // eat equal token
 
                         assignExpression.Target = TransformKeyword(leftOperand);
 
@@ -334,7 +334,7 @@ namespace Scriban.Parsing
 
                             var binaryArgument = Open<ScriptArgumentBinary>();
                             binaryArgument.Operator = binaryOperatorType;
-                            binaryArgument.OperatorToken = ParseTokenAsVerbatim();
+                            binaryArgument.OperatorToken = ParseToken();
                             Close(binaryArgument);
 
                             functionCall.AddArgument(binaryArgument);
@@ -351,7 +351,7 @@ namespace Scriban.Parsing
                         binaryExpression.Operator = binaryOperatorType;
                         
                         // Parse the operator
-                        binaryExpression.OperatorToken = ParseTokenAsVerbatim();
+                        binaryExpression.OperatorToken = ParseToken();
 
                         // Special case for liquid, we revert the verbatim to the original scriban operator
                         if (_isLiquid && binaryOperatorType != ScriptBinaryOperator.Custom)
@@ -479,7 +479,7 @@ namespace Scriban.Parsing
                                 {
                                     // This is an explicit call
                                     functionCall.ExplicitCall = true;
-                                    functionCall.OpenParent = ParseTokenAsVerbatim();
+                                    functionCall.OpenParent = ParseToken();
 
                                     bool isFirst = true;
                                     while (true)
@@ -488,7 +488,7 @@ namespace Scriban.Parsing
                                         // Or closing parent (and we exit the loop)
                                         if (Current.Type == TokenType.CloseParent)
                                         {
-                                            functionCall.CloseParen = ParseTokenAsVerbatim();
+                                            functionCall.CloseParen = ParseToken();
                                             break;
                                         }
 
@@ -767,7 +767,7 @@ namespace Scriban.Parsing
             return Close(expression);
         }
 
-        private ScriptToken ParseTokenAsVerbatim()
+        private ScriptToken ParseToken()
         {
             var verbatim = Open<ScriptToken>();
             verbatim.Value = GetAsText(Current);
@@ -784,7 +784,7 @@ namespace Scriban.Parsing
             // Parse the operator as verbatim text
             var unaryTokenType = Current.Type;
 
-            unaryExpression.OperatorToken = ParseTokenAsVerbatim();
+            unaryExpression.OperatorToken = ParseToken();
             // Else we parse standard unary operators
             switch (unaryTokenType)
             {
