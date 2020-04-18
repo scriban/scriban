@@ -12,31 +12,6 @@ using Scriban.Runtime;
 
 namespace Scriban.Syntax
 {
-
-    public class ScriptArgumentBinary : ScriptExpression
-    {
-        public ScriptBinaryOperator Operator { get; set; }
-        
-        public ScriptToken OperatorToken { get; set; }
-
-
-        public override object Evaluate(TemplateContext context)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Write(TemplateRewriterContext context)
-        {
-            
-        }
-
-        public override string ToString()
-        {
-            return OperatorToken?.ToString() ?? Operator.ToText();
-        }
-    }
-
-
     [ScriptSyntax("function call expression", "<target_expression> <arguemnt[0]> ... <arguement[n]>")]
     public partial class ScriptFunctionCall : ScriptExpression
     {
@@ -118,10 +93,12 @@ namespace Scriban.Syntax
         protected override IEnumerable<ScriptNode> GetChildren()
         {
             yield return Target;
+            if (OpenParent != null) yield return OpenParent;
             foreach (var argument in Arguments)
             {
                 yield return argument;
             }
+            if (CloseParen != null) yield return CloseParen;
         }
 
         public static bool IsFunction(object target)

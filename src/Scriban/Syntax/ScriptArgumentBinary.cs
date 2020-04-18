@@ -2,35 +2,29 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
 using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
     /// <summary>
-    /// A verbatim node (use for custom parsing).
+    /// A binary operation argument used with <see cref="ScriptFunctionCall"/>
+    /// when parsing with scientific mode.
     /// </summary>
-    public class ScriptToken : ScriptNode
+    public class ScriptArgumentBinary : ScriptExpression
     {
-        public ScriptToken()
-        {
-        }
-
-        public ScriptToken(string value)
-        {
-            Value = value;
-        }
-
-        public string Value { get; set; }
-
+        public ScriptBinaryOperator Operator { get; set; }
+        
+        public ScriptToken OperatorToken { get; set; }
+        
         public override object Evaluate(TemplateContext context)
         {
-            // Nothing to evaluate
-            return null;
+            throw new NotImplementedException();
         }
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write(Value);
+            
         }
 
         public override void Accept(ScriptVisitor visitor)
@@ -45,12 +39,12 @@ namespace Scriban.Syntax
 
         protected override IEnumerable<ScriptNode> GetChildren()
         {
-            yield break;
+            if (OperatorToken != null) yield return OperatorToken;
         }
 
         public override string ToString()
         {
-            return Value;
+            return OperatorToken?.ToString() ?? Operator.ToText();
         }
     }
 }

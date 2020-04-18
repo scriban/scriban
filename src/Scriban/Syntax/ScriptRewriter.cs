@@ -611,6 +611,29 @@ namespace Scriban.Syntax
                 Body = newBody
             }.WithTriviaAndSpanFrom(node);
         }
+        
+        public override ScriptNode Visit(ScriptArgumentBinary node)
+        {
+            if (node.OperatorToken != null)
+            {
+                var newToken = (ScriptToken)Visit((ScriptNode)node.OperatorToken);
+                if (newToken != node.OperatorToken)
+                {
+                    return new ScriptArgumentBinary()
+                    {
+                        Operator = node.Operator, // TODO support rewriting?
+                        OperatorToken = newToken
+                    };
+                }
+            }
+
+            return node;
+        }
+
+        public override ScriptNode Visit(ScriptToken node)
+        {
+            return node;
+        }
 
         protected List<TNode> VisitAll<TNode>(List<TNode> nodes)
             where TNode : ScriptNode

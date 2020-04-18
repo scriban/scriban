@@ -112,6 +112,10 @@ namespace Scriban.Syntax
         public virtual void Visit(ScriptReadOnlyStatement node) => DefaultVisit(node);
 
         public virtual void Visit(ScriptPage node) => DefaultVisit(node);
+
+        public virtual void Visit(ScriptToken node) => DefaultVisit(node);
+
+        public virtual void Visit(ScriptArgumentBinary node) => DefaultVisit(node);
     }
 
     public abstract class ScriptVisitor<TResult>
@@ -223,5 +227,9 @@ namespace Scriban.Syntax
         public virtual TResult Visit(ScriptReadOnlyStatement node) => DefaultVisit(node);
 
         public virtual TResult Visit(ScriptPage node) => DefaultVisit(node);
+
+        public virtual TResult Visit(ScriptToken node) => DefaultVisit(node);
+
+        public virtual TResult Visit(ScriptArgumentBinary node) => DefaultVisit(node);
     }
 }
