@@ -87,7 +87,19 @@ namespace Scriban.Syntax
 
                 if (nextExpression is IScriptVariablePath)
                 {
-                    var result = context.Evaluate(nextExpression, true);
+                    var restoreStrictVariables = context.StrictVariables;
+
+                    // Don't fail on trying to lookup for a variable
+                    context.StrictVariables = false;
+                    object result = null;
+                    try
+                    {
+                        result = context.Evaluate(nextExpression, true);
+                    }
+                    finally
+                    {
+                        context.StrictVariables = restoreStrictVariables;
+                    }
 
                     // If one argument is a function, the remaining arguments 
                     if (result is IScriptCustomFunction function)
@@ -95,7 +107,7 @@ namespace Scriban.Syntax
                         var maxArg = function.RequiredParameterCount;
                         if (maxArg > 1)
                         {
-                            throw new ScriptRuntimeException(leftValue.Span, $"Cannot use a function with more than 1 argument ({maxArg}) in a sequence of implicit multiplications.");
+                            throw new ScriptRuntimeException(nextExpression.Span, $"Cannot use a function with more than 1 argument ({maxArg}) in a sequence of implicit multiplications.");
                         }
 
                         if (maxArg == 1 || function.IsExpressionParameter(0))

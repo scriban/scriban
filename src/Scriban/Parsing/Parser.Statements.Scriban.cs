@@ -193,10 +193,66 @@ namespace Scriban.Parsing
             if (!isAnonymous)
             {
                 scriptFunction.Name = ExpectAndParseVariable(scriptFunction);
-            }
-            ExpectEndOfStatement(scriptFunction);
 
+                // If we have parenthesis, this is a function with explicit parameters
+                if (Current.Type == TokenType.OpenParent)
+                {
+                    scriptFunction.OpenParen = ParseToken();
+                    scriptFunction.Parameters = new List<ScriptVariable>();
+
+                    bool isFirst = true;
+                    while (true)
+                    {
+                        // Parse any required comma (before each new non-first argument)
+                        // Or closing parent (and we exit the loop)
+                        if (Current.Type == TokenType.CloseParent)
+                        {
+                            scriptFunction.CloseParen = ParseToken();
+                            break;
+                        }
+
+                        if (!isFirst)
+                        {
+                            if (Current.Type == TokenType.Comma)
+                            {
+                                PushTokenToTrivia();
+                                NextToken();
+                            }
+                            else
+                            {
+                                LogError(Current, "Expecting a comma to separate arguments in a function call.");
+                            }
+                        }
+                        isFirst = false;
+
+                        // Else we expect an expression
+                        if (IsStartOfExpression())
+                        {
+                            var arg = ExpectAndParseVariable(scriptFunction);
+                            if (!(arg is ScriptVariableGlobal))
+                            {
+                                LogError(arg.Span, "Expecting only a simple name parameter for a function");
+                            }
+                            scriptFunction.Parameters.Add(arg);
+                            scriptFunction.Span.End = arg.Span.End;
+                        }
+                        else
+                        {
+                            LogError(Current, "Expecting an expression for argument function calls instead of this token.");
+                            break;
+                        }
+                    }
+
+                    if (scriptFunction.CloseParen == null)
+                    {
+                        LogError(Current, "Expecting a closing parenthesis for a function call.");
+                    }
+                }
+            }
+
+            ExpectEndOfStatement(scriptFunction);
             scriptFunction.Body = ParseBlockStatement(scriptFunction);
+
             return Close(scriptFunction);
         }
 

@@ -585,7 +585,7 @@ namespace Scriban.Syntax
             var newOpenParent = (ScriptToken) Visit(node.OpenParen);
             var newParameters = VisitAll(node.Parameters);
             var newCloseParent = (ScriptToken)Visit(node.CloseParen);
-            var newEqualToken = (ScriptToken)Visit(node.EqualToken);
+            var newEqualToken = node.EqualToken != null ? (ScriptToken)Visit(node.EqualToken) : null;
             var newBody = (ScriptStatement)Visit(node.Body);
 
             if (newName == node.Name &&

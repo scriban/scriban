@@ -46,7 +46,7 @@ namespace Scriban.Syntax
             {
                 Name = name,
                 OpenParen = OpenParent,
-                Parameters = new List<ScriptVariableGlobal>(),
+                Parameters = new List<ScriptVariable>(),
                 CloseParen = CloseParen,
                 Span = Span
             };

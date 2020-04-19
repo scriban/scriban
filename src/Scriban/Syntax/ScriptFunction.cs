@@ -18,7 +18,7 @@ namespace Scriban.Syntax
 
         public ScriptToken OpenParen { get; set; }
         
-        public List<ScriptVariableGlobal> Parameters { get; set; }
+        public List<ScriptVariable> Parameters { get; set; }
         
         public ScriptToken CloseParen { get; set; }
         
