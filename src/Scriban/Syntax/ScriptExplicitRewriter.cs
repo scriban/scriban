@@ -3,14 +3,15 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public partial class ScriptScientificRewriter : ScriptRewriter
+    public partial class ScriptExplicitRewriter : ScriptRewriter
     {
         private readonly TemplateContext _context;
 
-        public ScriptScientificRewriter(TemplateContext context)
+        public ScriptExplicitRewriter(TemplateContext context)
         {
             _context = context ?? throw new ArgumentNullException(nameof(context));
             CopyTrivias = false; // We rewrite trivias entirely here.
@@ -75,12 +76,57 @@ namespace Scriban.Syntax
             return newNode;
         }
 
+
+        private static bool HasSimilarPrecedenceThanMultiply(ScriptBinaryOperator op)
+        {
+            switch (op)
+            {
+                case ScriptBinaryOperator.Multiply:
+                case ScriptBinaryOperator.Divide:
+                case ScriptBinaryOperator.DivideRound:
+                case ScriptBinaryOperator.Modulus:
+                case ScriptBinaryOperator.ShiftLeft:
+                case ScriptBinaryOperator.ShiftRight:
+                case ScriptBinaryOperator.Power:
+                    return true;
+            }
+
+            return false;
+        }
+
+        public override ScriptNode Visit(ScriptPipeCall node)
+        {
+            var pipeCall = (ScriptPipeCall) base.Visit(node);
+
+            pipeCall.PipeToken.AddSpaceBefore();
+            pipeCall.PipeToken.AddSpaceAfter();
+
+            return pipeCall;
+        }
+
         public override ScriptNode Visit(ScriptBinaryExpression node)
         {
             var binaryExpression = (ScriptBinaryExpression) base.Visit((ScriptBinaryExpression)node);
 
-            binaryExpression.OperatorToken.AddSpaceBefore();
-            binaryExpression.OperatorToken.AddSpaceAfter();
+            // We don't surround range with spaces
+            if (binaryExpression.Operator < ScriptBinaryOperator.RangeInclude)
+            {
+                binaryExpression.OperatorToken.AddSpaceBefore();
+                binaryExpression.OperatorToken.AddSpaceAfter();
+            }
+            
+            if (binaryExpression.Operator == ScriptBinaryOperator.Divide || binaryExpression.Operator == ScriptBinaryOperator.DivideRound || (_context.UseScientific && binaryExpression.Operator == ScriptBinaryOperator.Power))
+            {
+                if (binaryExpression.Left is ScriptBinaryExpression leftBin && HasSimilarPrecedenceThanMultiply(leftBin.Operator))
+                {
+                    binaryExpression.Left = new ScriptNestedExpression(leftBin);
+                }
+
+                if (binaryExpression.Right is ScriptBinaryExpression rightBin && HasSimilarPrecedenceThanMultiply(rightBin.Operator))
+                {
+                    binaryExpression.Right = new ScriptNestedExpression(rightBin);
+                }
+            }
 
             if (binaryExpression.Operator == ScriptBinaryOperator.Divide || binaryExpression.Operator == ScriptBinaryOperator.DivideRound || (_context.UseScientific && binaryExpression.Operator == ScriptBinaryOperator.Power))
             {

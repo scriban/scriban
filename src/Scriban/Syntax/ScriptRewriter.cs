@@ -459,9 +459,11 @@ namespace Scriban.Syntax
         public override ScriptNode Visit(ScriptPipeCall node)
         {
             var newFrom = (ScriptExpression)Visit(node.From);
+            var newPipeToken = (ScriptToken)Visit(node.PipeToken);
             var newTo = (ScriptExpression)Visit(node.To);
 
             if (newFrom == node.From &&
+                newPipeToken == node.PipeToken &&
                 newTo == node.To)
             {
                 return node;
@@ -470,6 +472,7 @@ namespace Scriban.Syntax
             return Normalize(new ScriptPipeCall
             {
                 From = newFrom,
+                PipeToken = newPipeToken,
                 To = newTo
             }, node);
         }

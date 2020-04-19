@@ -14,6 +14,8 @@ namespace Scriban.Syntax
     {
         public ScriptExpression From { get; set; }
 
+        public ScriptToken PipeToken { get; set; }
+
         public ScriptExpression To { get; set; }
 
         public override object Evaluate(TemplateContext context)
@@ -73,13 +75,13 @@ namespace Scriban.Syntax
         public override void Write(TemplateRewriterContext context)
         {
             context.Write(From);
-            context.Write("|");
+            context.Write(PipeToken);
             context.Write(To);
         }
 
         public override string ToString()
         {
-            return $"{From} | {To}";
+            return $"{From} {PipeToken} {To}";
         }
 
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);

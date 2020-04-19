@@ -10,6 +10,15 @@ namespace Scriban.Syntax
     [ScriptSyntax("nested expression", "(<expression>)")]
     public partial class ScriptNestedExpression : ScriptExpression, IScriptVariablePath
     {
+        public ScriptNestedExpression()
+        {
+        }
+
+        public ScriptNestedExpression(ScriptExpression expression)
+        {
+            Expression = expression;
+        }
+
         public ScriptExpression Expression { get; set; }
 
         public override object Evaluate(TemplateContext context)

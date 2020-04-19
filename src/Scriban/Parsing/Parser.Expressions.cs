@@ -554,7 +554,8 @@ namespace Scriban.Parsing
 
                         var pipeCall = Open<ScriptPipeCall>();
                         pipeCall.From = leftOperand;
-                        NextToken(); // skip | or |>
+
+                        pipeCall.PipeToken = ParseToken(); // skip | or |>
 
                         // unit test: 310-func-pipe-error1.txt
                         pipeCall.To = ExpectAndParseExpression(pipeCall, ref hasAnonymousFunction);

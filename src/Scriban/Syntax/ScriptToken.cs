@@ -13,6 +13,10 @@ namespace Scriban.Syntax
     {
         public static ScriptToken Equal() => new ScriptToken("=");
 
+        public static ScriptToken Pipe() => new ScriptToken("|");
+
+        public static ScriptToken PipeGreater() => new ScriptToken("|>");
+
         public static ScriptToken OpenParen() => new ScriptToken("(");
 
         public static ScriptToken CloseParen() => new ScriptToken(")");
