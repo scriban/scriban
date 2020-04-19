@@ -72,12 +72,20 @@ namespace Scriban.Parsing
             }
             else
             {
-                double floatResult;
-                if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+                if (Options.ParseFloatAsDecimal && decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var decimalResult))
                 {
-                    literal.Value = floatResult;
+                    literal.Value = decimalResult;
                 }
                 else
+                {
+                    double floatResult;
+                    if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+                    {
+                        literal.Value = floatResult;
+                    }
+                }
+
+                if (literal.Value == null)
                 {
                     LogError($"Unable to parse double value `{text}`");
                 }
