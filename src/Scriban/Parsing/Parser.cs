@@ -45,8 +45,8 @@ namespace Scriban.Parsing
         public Parser(Lexer lexer, ParserOptions? options = null)
         {
             _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
-            _isLiquid = _lexer.Options.Mode == ScriptMode.Liquid;
-            _isScientific = _lexer.Options.Level == ScriptSyntaxLevel.Scientific;
+            _isLiquid = _lexer.Options.Lang == ScriptLang.Liquid;
+            _isScientific = _lexer.Options.Lang == ScriptLang.Scientific;
             _tokensPreview = new List<Token>(4);
             Messages = new List<LogMessage>();
             _trivias = new List<ScriptTrivia>();

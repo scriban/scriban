@@ -804,7 +804,7 @@ end}}This is a test";
 
         private List<Token> ParseTokens(string text, bool isLiquid = false, bool keepTrivia = false, bool isJekyll = false)
         {
-            var lexer = new Lexer(text, options: new LexerOptions() { Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default, KeepTrivia = keepTrivia, EnableIncludeImplicitString = isJekyll});
+            var lexer = new Lexer(text, options: new LexerOptions() { Lang = isLiquid ? ScriptLang.Liquid : ScriptLang.Default, KeepTrivia = keepTrivia, EnableIncludeImplicitString = isJekyll});
             foreach (var error in lexer.Errors)
             {
                 Console.WriteLine(error);

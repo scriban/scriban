@@ -77,7 +77,7 @@ namespace Scriban.Liquid2Scriban
             {
                 var text = File.ReadAllText(file);
 
-                var template = Template.ParseLiquid(text, file, lexerOptions: new LexerOptions() {Mode = ScriptMode.Liquid, KeepTrivia = true, EnableIncludeImplicitString = relaxedInclude });
+                var template = Template.ParseLiquid(text, file, lexerOptions: new LexerOptions() {Lang = ScriptLang.Liquid, KeepTrivia = true, EnableIncludeImplicitString = relaxedInclude });
 
                 if (template.HasErrors)
                 {

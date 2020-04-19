@@ -455,7 +455,7 @@ end
             };
             var lexerOptions = new LexerOptions()
             {
-                Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default
+                Lang = isLiquid ? ScriptLang.Liquid : ScriptLang.Default
             };
 
             if (isRoundtripTest)
@@ -493,9 +493,9 @@ end
                     Console.WriteLine("Roundtrip");
                     Console.WriteLine("======================================");
                     Console.WriteLine(roundtripText);
-                    lexerOptions.Mode = ScriptMode.Default;
+                    lexerOptions.Lang = ScriptLang.Default;
 
-                    if (lexerOptions.Mode == ScriptMode.Default && !isLiquid && supportExactRoundtrip)
+                    if (!isLiquid && supportExactRoundtrip)
                     {
                         Console.WriteLine("Checking Exact Roundtrip - Input");
                         Console.WriteLine("======================================");

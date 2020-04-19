@@ -1175,7 +1175,7 @@ namespace Scriban
             EnableBreakAndContinueAsReturnOutsideLoop = true;
             EnableRelaxedMemberAccess = true;
 
-            TemplateLoaderLexerOptions = new LexerOptions() {Mode = ScriptMode.Liquid};
+            TemplateLoaderLexerOptions = new LexerOptions() {Lang = ScriptLang.Liquid};
             TemplateLoaderParserOptions = new ParserOptions() {LiquidFunctionsToScriban = true};
             IsLiquid = true;
         }

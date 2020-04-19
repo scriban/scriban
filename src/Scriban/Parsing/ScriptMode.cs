@@ -4,27 +4,22 @@
 namespace Scriban.Parsing
 {
     /// <summary>
-    /// Defines how the parser should parse a scriban text.
+    /// Defines how the parser should parse a script text.
     /// </summary>
     public enum ScriptMode
     {
         /// <summary>
-        /// The template contains a regular scriban content (text and script mixed).
+        /// The template contains a regular script content (text and script mixed).
         /// </summary>
         Default,
 
         /// <summary>
-        /// The template contains a liquid content (text and script mixed).
-        /// </summary>
-        Liquid,
-
-        /// <summary>
-        /// The template contains a scriban frontmatter (script only) and the parser will parse only this part.
+        /// The template contains a script frontmatter (script only) and the parser will parse only this part.
         /// </summary>
         FrontMatterOnly,
 
         /// <summary>
-        /// The template contains a scriban frontmatter (script only) and a content (text and script mixed) and will parse both.
+        /// The template contains a script frontmatter (script only) and a content (text and script mixed) and will parse both.
         /// </summary>
         FrontMatterAndContent,
 

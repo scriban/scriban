@@ -16,7 +16,7 @@ namespace Scriban.Tests
         public void TestJekyllInclude()
         {
             var input = "{% include /this/is/a/test.htm %}";
-            var template = Template.ParseLiquid(input, lexerOptions: new LexerOptions() { EnableIncludeImplicitString = true, Mode = ScriptMode.Liquid });
+            var template = Template.ParseLiquid(input, lexerOptions: new LexerOptions() { EnableIncludeImplicitString = true, Lang = ScriptLang.Liquid });
             var context = new TemplateContext { TemplateLoader = new LiquidCustomTemplateLoader() };
             var result = template.Render(context);
             TextAssert.AreEqual("/this/is/a/test.htm", result);

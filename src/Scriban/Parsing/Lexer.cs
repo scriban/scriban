@@ -32,7 +32,6 @@ namespace Scriban.Parsing
         private readonly char _stripWhiteSpaceRestrictedSpecialChar;
         private const char RawEscapeSpecialChar = '%';
         private readonly Queue<Token> _pendingTokens;
-        private readonly bool _isScientific;
         private readonly TryMatchCustomTokenDelegate _tryMatchCustomToken;
 
         /// <summary>
@@ -77,10 +76,9 @@ namespace Scriban.Parsing
 
             _isExpectingFrontMatter = Options.Mode == ScriptMode.FrontMatterOnly ||
                                      Options.Mode == ScriptMode.FrontMatterAndContent;
-            _isLiquid = Options.Mode == ScriptMode.Liquid;
+            _isLiquid = Options.Lang == ScriptLang.Liquid;
             _stripWhiteSpaceFullSpecialChar = '-';
             _stripWhiteSpaceRestrictedSpecialChar = '~';
-            _isScientific = !_isLiquid && Options.Level == ScriptSyntaxLevel.Scientific;
         }
 
         /// <summary>

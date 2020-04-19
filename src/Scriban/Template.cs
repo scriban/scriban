@@ -80,7 +80,7 @@ namespace Scriban
         public static Template ParseLiquid(string text, string sourceFilePath = null, ParserOptions? parserOptions = null, LexerOptions? lexerOptions = null)
         {
             var localLexerOptions = lexerOptions ?? new LexerOptions();
-            localLexerOptions.Mode = ScriptMode.Liquid;
+            localLexerOptions.Lang = ScriptLang.Liquid;
             return Parse(text, sourceFilePath, parserOptions, localLexerOptions);
         }
 
@@ -199,7 +199,7 @@ namespace Scriban
                 scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
             }
 
-            var context = LexerOptions.Mode == ScriptMode.Liquid ? new LiquidTemplateContext() : new TemplateContext();
+            var context = LexerOptions.Lang == ScriptLang.Liquid ? new LiquidTemplateContext() : new TemplateContext();
             context.MemberRenamer = memberRenamer;
             context.MemberFilter = memberFilter;
             context.PushGlobal(scriptObject);

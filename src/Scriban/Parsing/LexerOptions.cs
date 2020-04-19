@@ -23,7 +23,10 @@ namespace Scriban.Parsing
         /// </summary>
         public ScriptMode Mode { get; set; }
 
-        public ScriptSyntaxLevel Level { get; set; }
+        /// <summary>
+        /// Gets or sets the scripting language used (e.g default, liquid, scientific...).
+        /// </summary>
+        public ScriptLang Lang { get; set; }
 
         /// <summary>
         /// If selected mode is <see cref="ScriptMode.FrontMatterOnly"/> or <see cref="ScriptMode.FrontMatterAndContent"/>, this marker will be used
@@ -32,7 +35,7 @@ namespace Scriban.Parsing
 
         /// <summary>
         /// <c>true</c> to parse the include target as an implicit string (to support Jekyll passing raw path /a/b/c.txt as an include target).
-        /// Only valid if Mode == <see cref="ScriptMode.Liquid"/> as well.
+        /// Only valid if Lang == <see cref="ScriptLang.Liquid"/> as well.
         /// </summary>
         public bool EnableIncludeImplicitString { get; set; }
 
