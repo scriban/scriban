@@ -10,7 +10,13 @@ namespace Scriban.Syntax
     [ScriptSyntax("import statement", "import <expression>")]
     public partial class ScriptImportStatement : ScriptStatement
     {
-        public ScriptExpression Expression { get; set; }
+        private ScriptExpression _expression;
+
+        public ScriptExpression Expression
+        {
+            get => _expression;
+            set => ParentToThis(ref _expression, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -35,9 +41,5 @@ namespace Scriban.Syntax
             context.Write(Expression);
             context.ExpectEos();
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

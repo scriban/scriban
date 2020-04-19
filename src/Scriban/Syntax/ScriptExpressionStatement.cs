@@ -10,7 +10,13 @@ namespace Scriban.Syntax
     [ScriptSyntax("expression statement", "<expression>")]
     public partial class ScriptExpressionStatement : ScriptStatement
     {
-        public ScriptExpression Expression { get; set; }
+        private ScriptExpression _expression;
+
+        public ScriptExpression Expression
+        {
+            get => _expression;
+            set => ParentToThis(ref _expression, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -34,9 +40,5 @@ namespace Scriban.Syntax
         {
             return Expression?.ToString();
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

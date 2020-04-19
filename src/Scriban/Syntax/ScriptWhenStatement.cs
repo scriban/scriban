@@ -11,19 +11,35 @@ namespace Scriban.Syntax
     [ScriptSyntax("when statement", "when <expression> ... end|when|else")]
     public partial class ScriptWhenStatement : ScriptConditionStatement
     {
+        private ScriptList<ScriptExpression> _values;
+        private ScriptBlockStatement _body;
+        private ScriptConditionStatement _next;
+
         public ScriptWhenStatement()
         {
-            Values = new List<ScriptExpression>();
+            Values = new ScriptList<ScriptExpression>();
         }
 
         /// <summary>
         /// Get or sets the value used to check against When clause.
         /// </summary>
-        public List<ScriptExpression> Values { get; }
+        public ScriptList<ScriptExpression> Values
+        {
+            get => _values;
+            set => ParentToThis(ref _values, value);
+        }
 
-        public ScriptBlockStatement Body { get; set; }
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
+        }
 
-        public ScriptConditionStatement Next { get; set; }
+        public ScriptConditionStatement Next
+        {
+            get => _next;
+            set => ParentToThis(ref _next, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -66,9 +82,5 @@ namespace Scriban.Syntax
 
             return builder.ToString();
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

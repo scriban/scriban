@@ -7,11 +7,16 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("readonly statement", "readonly <variable>")]
-    public class ScriptReadOnlyStatement : ScriptStatement
+    public partial class ScriptReadOnlyStatement : ScriptStatement
     {
-        public ScriptVariable Variable { get; set; }
+        private ScriptVariable _variable;
 
-
+        public ScriptVariable Variable
+        {
+            get => _variable;
+            set => ParentToThis(ref _variable, value);
+        }
+        
         public override object Evaluate(TemplateContext context)
         {
             context.SetReadOnly(Variable);
@@ -24,9 +29,5 @@ namespace Scriban.Syntax
             context.Write(Variable);
             context.ExpectEos();
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

@@ -1,1 +1,1 @@
-text(4,12) : error : Invalid token `CodeExit`. Expecting closing ) for opening `(54:3,0)`
+text(4,12) : error : Invalid token `}}`. Expecting a closing `)`.

@@ -8,7 +8,7 @@ using System.Linq;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("break statement", "break")]
-    public class ScriptBreakStatement : ScriptStatement
+    public partial class ScriptBreakStatement : ScriptStatement
     {
         public override object Evaluate(TemplateContext context)
         {
@@ -36,9 +36,5 @@ namespace Scriban.Syntax
         {
             context.Write("break").ExpectEos();
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

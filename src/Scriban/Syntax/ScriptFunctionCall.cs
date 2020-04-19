@@ -15,18 +15,39 @@ namespace Scriban.Syntax
     [ScriptSyntax("function call expression", "<target_expression> <arguemnt[0]> ... <arguement[n]>")]
     public partial class ScriptFunctionCall : ScriptExpression
     {
+        private ScriptExpression _target;
+        private ScriptToken _openParent;
+        private ScriptList<ScriptExpression> _arguments;
+        private ScriptToken _closeParen;
+
         public ScriptFunctionCall()
         {
-            Arguments = new List<ScriptExpression>();
+            Arguments = new ScriptList<ScriptExpression>();
         }
 
-        public ScriptExpression Target { get; set; }
+        public ScriptExpression Target
+        {
+            get => _target;
+            set => ParentToThis(ref _target, value);
+        }
 
-        public ScriptToken OpenParent { get; set; }
+        public ScriptToken OpenParent
+        {
+            get => _openParent;
+            set => ParentToThis(ref _openParent, value);
+        }
 
-        public List<ScriptExpression> Arguments { get; private set; }
+        public ScriptList<ScriptExpression> Arguments
+        {
+            get => _arguments;
+            set => ParentToThis(ref _arguments, value);
+        }
 
-        public ScriptToken CloseParen { get; set; }
+        public ScriptToken CloseParen
+        {
+            get => _closeParen;
+            set => ParentToThis(ref _closeParen, value);
+        }
 
         public bool ExplicitCall { get; set; }
 
@@ -46,7 +67,7 @@ namespace Scriban.Syntax
             {
                 Name = name,
                 OpenParen = OpenParent,
-                Parameters = new List<ScriptVariable>(),
+                Parameters = new ScriptList<ScriptVariable>(),
                 CloseParen = CloseParen,
                 Span = Span
             };
@@ -132,17 +153,12 @@ namespace Scriban.Syntax
             var args = StringHelper.Join(" ", Arguments);
             return $"{Target} {args}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
         public static bool IsFunction(object target)
         {
             return target is IScriptCustomFunction;
         }
 
-        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, List<ScriptExpression> arguments = null)
+        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, IList<ScriptExpression> arguments = null)
         {
             if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (functionObject == null)

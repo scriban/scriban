@@ -2,10 +2,6 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
 namespace Scriban.Syntax
 {
     [ScriptSyntax("raw statement", "<raw_text>")]
@@ -13,23 +9,26 @@ namespace Scriban.Syntax
     {
         public string Text { get; set; }
 
+        public int SliceIndex { get; set; }
+
+        public int SliceLength { get; set; }
+
         public int EscapeCount { get; set; }
 
         public override object Evaluate(TemplateContext context)
         {
             if (Text == null) return null;
 
-            var length = Span.End.Offset - Span.Start.Offset + 1;
-            if (length > 0)
+            if (SliceLength > 0)
             {
                 // If we are in the context of output, output directly to TemplateContext.Output
                 if (context.EnableOutput)
                 {
-                    context.Write(Text, Span.Start.Offset, length);
+                    context.Write(Text, SliceIndex, SliceLength);
                 }
                 else
                 {
-                    return Text.Substring(Span.Start.Offset, length);
+                    return Text.Substring(SliceIndex, SliceLength);
                 }
             }
             return null;
@@ -48,10 +47,9 @@ namespace Scriban.Syntax
             }
 
             // TODO: handle escape
-            var length = Span.End.Offset - Span.Start.Offset + 1;
-            if (length > 0)
+            if (SliceLength > 0)
             {
-                context.Write(Text.Substring(Span.Start.Offset, length));
+                context.Write(Text.Substring(SliceIndex, SliceLength));
             }
 
             if (EscapeCount > 0)
@@ -62,12 +60,7 @@ namespace Scriban.Syntax
 
         public override string ToString()
         {
-            var length = Span.End.Offset - Span.Start.Offset + 1;
-            return Text?.Substring(Span.Start.Offset, length) ?? string.Empty;
+            return Text?.Substring(SliceIndex, SliceLength) ?? string.Empty;
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

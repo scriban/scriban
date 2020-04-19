@@ -8,9 +8,20 @@ namespace Scriban.Syntax
     [ScriptSyntax("else statement", "else | else if <expression> ... end|else|else if")]
     public partial class ScriptElseStatement : ScriptConditionStatement
     {
-        public ScriptBlockStatement Body { get; set; }
+        private ScriptBlockStatement _body;
+        private ScriptConditionStatement _else;
 
-        public ScriptConditionStatement Else { get; set; }
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
+        }
+
+        public ScriptConditionStatement Else
+        {
+            get => _else;
+            set => ParentToThis(ref _else, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -24,9 +35,5 @@ namespace Scriban.Syntax
             context.Write(Body);
             context.Write(Else);
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

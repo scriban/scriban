@@ -17,56 +17,6 @@ namespace Scriban.Syntax
             CopyTrivias = false; // We rewrite trivias entirely here.
         }
 
-        public override ScriptNode Visit(ScriptVariableGlobal node)
-        {
-            return new ScriptVariableGlobal(node.Name);
-        }
-
-        public override ScriptNode Visit(ScriptVariableLocal node)
-        {
-            return new ScriptVariableLocal(node.Name);
-        }
-
-        public override ScriptNode Visit(ScriptVariableLoop node)
-        {
-            return new ScriptVariableLoop(node.Name);
-        }
-
-        public override ScriptNode Visit(ScriptRawStatement node)
-        {
-            return new ScriptRawStatement() {Text = node.Text, EscapeCount = node.EscapeCount};
-        }
-
-        public override ScriptNode Visit(ScriptThisExpression node)
-        {
-            return new ScriptThisExpression();
-        }
-
-        public override ScriptNode Visit(ScriptBreakStatement node)
-        {
-            return new ScriptBreakStatement();
-        }
-
-        public override ScriptNode Visit(ScriptContinueStatement node)
-        {
-            return new ScriptContinueStatement();
-        }
-
-        public override ScriptNode Visit(ScriptLiteral node)
-        {
-            return new ScriptLiteral(node.Value) { StringQuoteType = node.StringQuoteType };
-        }
-
-        public override ScriptNode Visit(ScriptNopStatement node)
-        {
-            return new ScriptNopStatement();
-        }
-
-        public override ScriptNode Visit(ScriptToken node)
-        {
-            return new ScriptToken(node.Value);
-        }
-
         public override ScriptNode Visit(ScriptAssignExpression node)
         {
             var newNode = (ScriptAssignExpression)base.Visit(node);
@@ -75,8 +25,7 @@ namespace Scriban.Syntax
             newNode.EqualToken.AddSpaceAfter();
             return newNode;
         }
-
-
+        
         private static bool HasSimilarPrecedenceThanMultiply(ScriptBinaryOperator op)
         {
             switch (op)
@@ -153,7 +102,7 @@ namespace Scriban.Syntax
             var newNode = node.GetScientificExpression(_context);
             if (newNode != node)
             {
-                return newNode.Accept(this);
+                return Visit((ScriptNode) newNode);
             }
 
             var functionCall = (ScriptFunctionCall)base.Visit((ScriptFunctionCall)newNode);

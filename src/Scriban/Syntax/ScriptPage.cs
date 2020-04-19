@@ -9,6 +9,9 @@ namespace Scriban.Syntax
 {
     public partial class ScriptPage : ScriptNode
     {
+        private ScriptBlockStatement _frontMatter;
+        private ScriptBlockStatement _body;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptPage"/> class.
         /// </summary>
@@ -22,9 +25,17 @@ namespace Scriban.Syntax
         /// <remarks>
         /// Note that this code block is not executed when evaluating this page. It has to be evaluated separately (usually before evaluating the page).
         /// </remarks>
-        public ScriptBlockStatement FrontMatter { get; set; }
+        public ScriptBlockStatement FrontMatter
+        {
+            get => _frontMatter;
+            set => ParentToThis(ref _frontMatter, value);
+        }
 
-        public ScriptBlockStatement Body { get; set; }
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -35,9 +46,5 @@ namespace Scriban.Syntax
         {
             context.Write(Body);
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

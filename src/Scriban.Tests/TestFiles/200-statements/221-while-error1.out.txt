@@ -1,1 +1,2 @@
-text(5,28) : error : Error while parsing while statement: Expecting <expression> instead of `NewLine` in: while <expression> ... end
+text(5,28) : error : Error while parsing while statement: Expecting <expression> instead of `
+` in: while <expression> ... end

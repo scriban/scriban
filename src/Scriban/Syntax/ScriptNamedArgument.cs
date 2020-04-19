@@ -7,6 +7,8 @@ namespace Scriban.Syntax
 {
     public partial class ScriptNamedArgument : ScriptExpression
     {
+        private ScriptExpression _value;
+
         public ScriptNamedArgument()
         {
         }
@@ -24,9 +26,12 @@ namespace Scriban.Syntax
 
         public string Name { get; set; }
 
-        public ScriptExpression Value { get; set; }
-
-
+        public ScriptExpression Value
+        {
+            get => _value;
+            set => ParentToThis(ref _value, value);
+        }
+        
         public override object Evaluate(TemplateContext context)
         {
             if (Value != null) return context.Evaluate(Value);
@@ -52,9 +57,5 @@ namespace Scriban.Syntax
         {
             return $"{Name}: {Value}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

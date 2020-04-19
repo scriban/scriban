@@ -9,7 +9,7 @@ namespace Scriban.Syntax
     /// <summary>
     /// Empty instruction for an empty code block
     /// </summary>
-    public class ScriptNopStatement : ScriptStatement
+    public partial class ScriptNopStatement : ScriptStatement
     {
         public override object Evaluate(TemplateContext context)
         {
@@ -19,9 +19,5 @@ namespace Scriban.Syntax
         public override void Write(TemplateRewriterContext context)
         {
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

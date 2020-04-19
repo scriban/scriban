@@ -3,7 +3,7 @@
 // See license.txt file in the project root for full license information.
 namespace Scriban.Syntax
 {
-    public abstract class ScriptConditionStatement : ScriptStatement
+    public abstract partial class ScriptConditionStatement : ScriptStatement
     {
     }
 }

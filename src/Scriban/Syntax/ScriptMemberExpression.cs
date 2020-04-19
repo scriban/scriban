@@ -12,9 +12,20 @@ namespace Scriban.Syntax
     [ScriptSyntax("member expression", "<expression>.<variable_name>")]
     public partial class ScriptMemberExpression : ScriptExpression, IScriptVariablePath
     {
-        public ScriptExpression Target { get; set; }
+        private ScriptExpression _target;
+        private ScriptVariable _member;
 
-        public ScriptVariable Member { get; set; }
+        public ScriptExpression Target
+        {
+            get => _target;
+            set => ParentToThis(ref _target, value);
+        }
+
+        public ScriptVariable Member
+        {
+            get => _member;
+            set => ParentToThis(ref _member, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -104,9 +115,5 @@ namespace Scriban.Syntax
         {
             return $"{Target}.{Member}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

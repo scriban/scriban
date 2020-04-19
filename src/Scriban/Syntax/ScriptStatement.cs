@@ -10,7 +10,7 @@ namespace Scriban.Syntax
     /// Base class for all statements.
     /// </summary>
     /// <seealso cref="ScriptNode" />
-    public abstract class ScriptStatement : ScriptNode
+    public abstract partial class ScriptStatement : ScriptNode
     {
     }
 }

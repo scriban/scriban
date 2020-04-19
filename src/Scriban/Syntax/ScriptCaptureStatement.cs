@@ -9,9 +9,20 @@ namespace Scriban.Syntax
     [ScriptSyntax("capture statement", "capture <variable> ... end")]
     public partial class ScriptCaptureStatement : ScriptStatement
     {
-        public ScriptExpression Target { get; set; }
+        private ScriptExpression _target;
+        private ScriptBlockStatement _body;
 
-        public ScriptBlockStatement Body { get; set; }
+        public ScriptExpression Target
+        {
+            get => _target;
+            set => ParentToThis(ref _target, value);
+        }
+
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -37,9 +48,5 @@ namespace Scriban.Syntax
             context.Write(Body);
             context.ExpectEnd();
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

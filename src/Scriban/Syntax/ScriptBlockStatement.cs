@@ -9,12 +9,18 @@ namespace Scriban.Syntax
     [ScriptSyntax("block statement", "<statement>...end")]
     public sealed partial class ScriptBlockStatement : ScriptStatement
     {
+        private ScriptList<ScriptStatement> _statements;
+
         public ScriptBlockStatement()
         {
-            Statements = new List<ScriptStatement>();
+            Statements = new ScriptList<ScriptStatement>();
         }
 
-        public List<ScriptStatement> Statements { get; private set; }
+        public ScriptList<ScriptStatement> Statements
+        {
+            get => _statements;
+            set => ParentToThis(ref _statements, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -72,9 +78,5 @@ namespace Scriban.Syntax
         {
             return $"<statements[{Statements.Count}]>";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

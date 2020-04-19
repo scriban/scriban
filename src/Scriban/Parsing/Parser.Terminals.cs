@@ -375,6 +375,7 @@ namespace Scriban.Parsing
                     return Close(falseValue);
                 case "do":
                     var functionExp = Open<ScriptAnonymousFunction>();
+                    ExpectAndParseTokenTo(functionExp.DoToken, "do");
                     functionExp.Function = ParseFunctionStatement(true);
                     var func = Close(functionExp);
                     return func;

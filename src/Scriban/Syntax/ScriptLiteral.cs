@@ -11,7 +11,7 @@ using System.Text;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("literal", "<value>")]
-    public class ScriptLiteral : ScriptExpression
+    public partial class ScriptLiteral : ScriptExpression
     {
         public ScriptLiteral()
         {
@@ -144,11 +144,6 @@ namespace Scriban.Syntax
         {
             return Value is string ? $"\"{Value}\"" : Value?.ToString() ?? "null";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
         private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, string input)
         {
             char quote;

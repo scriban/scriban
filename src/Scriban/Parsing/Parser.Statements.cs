@@ -263,7 +263,7 @@ namespace Scriban.Parsing
                                 else
                                 {
                                     nextStatement = false;
-                                    LogError($"Unexpected token {Current.Type}");
+                                    LogError($"Unexpected token {GetAsText(Current)}");
                                 }
                                 break;
                         }
@@ -271,7 +271,7 @@ namespace Scriban.Parsing
                     else
                     {
                         nextStatement = false;
-                        LogError($"Unexpected token {Current.Type} while not in a code block {{ ... }}");
+                        LogError($"Unexpected token {GetAsText(Current)} while not in a code block {{ ... }}");
                         // LOG an ERROR. Don't expect any other tokens outside a code section
                     }
                     break;
@@ -429,7 +429,7 @@ namespace Scriban.Parsing
                 if (Current.Type != TokenType.Identifier || GetAsText(Current) != "in")
                 {
                     // unit test: 211-for-error2.txt
-                    LogError(forStatement, $"Expecting 'in' word instead of `{Current.Type} {GetAsText(Current)}`");
+                    LogError(forStatement, $"Expecting 'in' word instead of `{GetAsText(Current)}`");
                 }
                 else
                 {
@@ -473,6 +473,7 @@ namespace Scriban.Parsing
             var scriptStatement = Open<ScriptRawStatement>();
 
             // We keep span End here to update it with the raw span
+            var spanStart = Current.Start;
             var spanEnd = Current.End;
 
             // If we have an escape, we can fetch the escape count
@@ -490,11 +491,17 @@ namespace Scriban.Parsing
             }
 
             scriptStatement.Text = _lexer.Text;
+
             NextToken(); // Skip raw or escape count
             Close(scriptStatement);
             // Because the previous will update the ScriptStatement with the wrong Span End for escape (escapecount1+)
             // We make sure that we use the span end of the Raw token
             scriptStatement.Span.End = spanEnd;
+
+            // Update the index of the slice/length
+            scriptStatement.SliceIndex = spanStart.Offset;
+            scriptStatement.SliceLength = spanEnd.Offset - spanStart.Offset + 1;
+            
             return scriptStatement;
         }
 
@@ -564,7 +571,7 @@ namespace Scriban.Parsing
             }
             else
             {
-                LogError(parentNode, $"Expecting a variable instead of `{Current.Type}`");
+                LogError(parentNode, $"Expecting a variable instead of `{GetAsText(Current)}`");
             }
             return null;
         }

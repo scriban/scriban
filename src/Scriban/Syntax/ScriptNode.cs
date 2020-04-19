@@ -38,7 +38,27 @@ namespace Scriban.Syntax
         /// <param name="context">The template context.</param>
         public abstract object Evaluate(TemplateContext context);
 
+        public virtual int ChildrenCount => 0;
+        
+        /// <summary>
+        /// Clones this node including its trivias.
+        /// </summary>
+        /// <returns>Return a clone of this node.</returns>
+        public ScriptNode Clone()
+        {
+            return Clone(true);
+        }
 
+        /// <summary>
+        /// Clones this node.
+        /// </summary>
+        /// <param name="withTrivias"><c>true</c> to copy the trivias.</param>
+        /// <returns>Return a clone of this node.</returns>
+        public ScriptNode Clone(bool withTrivias)
+        {
+            var cloner = withTrivias ? ScriptCloner.WithTrivias : ScriptCloner.Instance;
+            return cloner.Visit(this);
+        }
 
         /// <summary>
         /// Gets a children at the specified index.
@@ -58,17 +78,7 @@ namespace Scriban.Syntax
         /// <param name="index">Index of the children</param>
         /// <returns>A children at the specified index</returns>
         /// <remarks>The index is safe to use</remarks>
-#if !SCRIBAN_NO_CHILDREN
-        //        protected abstract ScriptNode GetChildrenImpl(int index);
-#else
-        public abstract int ChildrenCount { get; }
-
-        protected abstract ScriptNode GetChildrenImpl(int index);
-#endif
-        public virtual int ChildrenCount => 0;
-
         protected virtual ScriptNode GetChildrenImpl(int index) => null;
-
 
 #if !SCRIBAN_NO_ASYNC
         public virtual ValueTask<object> EvaluateAsync(TemplateContext context)
@@ -84,9 +94,9 @@ namespace Scriban.Syntax
 
         public abstract void Write(TemplateRewriterContext context);
 
-        public abstract void Accept(ScriptVisitor visitor);
+        public virtual void Accept(ScriptVisitor visitor) => throw new NotImplementedException($"This method must be implemented by the type {this.GetType()}");
 
-        public abstract TResult Accept<TResult>(ScriptVisitor<TResult> visitor);
+        public virtual TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => throw new NotImplementedException($"This method must be implemented by the type {this.GetType()}");
 
         public IEnumerable<ScriptNode> Children
         {

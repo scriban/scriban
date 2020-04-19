@@ -13,9 +13,20 @@ namespace Scriban.Syntax
     [ScriptSyntax("indexer expression", "<expression>[<index_expression>]")]
     public partial class ScriptIndexerExpression : ScriptExpression, IScriptVariablePath
     {
-        public ScriptExpression Target { get; set; }
+        private ScriptExpression _target;
+        private ScriptExpression _index;
 
-        public ScriptExpression Index { get; set; }
+        public ScriptExpression Target
+        {
+            get => _target;
+            set => ParentToThis(ref _target, value);
+        }
+
+        public ScriptExpression Index
+        {
+            get => _index;
+            set => ParentToThis(ref _index, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -47,11 +58,6 @@ namespace Scriban.Syntax
         {
             return $"{Target}[{Index}]";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
         public object GetValue(TemplateContext context)
         {
             return GetOrSetValue(context, null, false);

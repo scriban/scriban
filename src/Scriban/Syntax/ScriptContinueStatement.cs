@@ -8,7 +8,7 @@ using System.Linq;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("continue statement", "continue")]
-    public class ScriptContinueStatement : ScriptStatement
+    public partial class ScriptContinueStatement : ScriptStatement
     {
         public override object Evaluate(TemplateContext context)
         {
@@ -36,9 +36,5 @@ namespace Scriban.Syntax
         {
             context.Write("continue").ExpectEos();
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

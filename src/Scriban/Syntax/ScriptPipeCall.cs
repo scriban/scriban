@@ -12,11 +12,27 @@ namespace Scriban.Syntax
     [ScriptSyntax("pipe expression", "<expression> | <expression>")]
     public partial class ScriptPipeCall : ScriptExpression
     {
-        public ScriptExpression From { get; set; }
+        private ScriptExpression _from;
+        private ScriptToken _pipeToken;
+        private ScriptExpression _to;
 
-        public ScriptToken PipeToken { get; set; }
+        public ScriptExpression From
+        {
+            get => _from;
+            set => ParentToThis(ref _from, value);
+        }
 
-        public ScriptExpression To { get; set; }
+        public ScriptToken PipeToken
+        {
+            get => _pipeToken;
+            set => ParentToThis(ref _pipeToken, value);
+        }
+
+        public ScriptExpression To
+        {
+            get => _to;
+            set => ParentToThis(ref _to, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -83,9 +99,5 @@ namespace Scriban.Syntax
         {
             return $"{From} {PipeToken} {To}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

@@ -11,7 +11,7 @@ namespace Scriban.Syntax
         {
             if (container.NamedArguments == null)
             {
-                container.NamedArguments = new List<ScriptNamedArgument>();
+                container.NamedArguments = new ScriptList<ScriptNamedArgument>();
             }
             container.NamedArguments.Add(argument);
         }

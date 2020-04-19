@@ -1,1 +1,1 @@
-text(3,4) : error : Error while parsing unary expression: Expecting <expression> instead of `CodeExit` in: <operator> <expression>
+text(3,4) : error : Error while parsing unary expression: Expecting <expression> instead of `}}` in: <operator> <expression>

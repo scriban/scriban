@@ -2,8 +2,6 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
-using System.Collections.Generic;
-using System.IO;
 using Scriban.Helpers;
 using Scriban.Runtime;
 
@@ -12,12 +10,34 @@ namespace Scriban.Syntax
     [ScriptSyntax("array initializer", "[item1, item2,...]")]
     public partial class ScriptArrayInitializerExpression : ScriptExpression
     {
+        private ScriptList<ScriptExpression> _values;
+        private ScriptToken _openBracketToken;
+        private ScriptToken _closeBracketToken;
+
         public ScriptArrayInitializerExpression()
         {
-            Values = new List<ScriptExpression>();
+            OpenBracketToken = new ScriptToken("[");
+            Values = new ScriptList<ScriptExpression>();
+            CloseBracketToken = new ScriptToken("]");
         }
 
-        public List<ScriptExpression> Values { get; private set; }
+        public ScriptToken OpenBracketToken
+        {
+            get => _openBracketToken;
+            set => ParentToThis(ref _openBracketToken, value);
+        }
+
+        public ScriptList<ScriptExpression> Values
+        {
+            get => _values;
+            set => ParentToThis(ref _values, value);
+        }
+
+        public ScriptToken CloseBracketToken
+        {
+            get => _closeBracketToken;
+            set => ParentToThis(ref _closeBracketToken, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -32,18 +52,14 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("[");
+            context.Write(OpenBracketToken);
             context.WriteListWithCommas(Values);
-            context.Write("]");
+            context.Write(CloseBracketToken);
         }
 
         public override string ToString()
         {
             return $"[{StringHelper.Join(", ", Values)}]";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

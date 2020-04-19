@@ -162,6 +162,13 @@ namespace Scriban.Parsing
             }
         }
 
+        private T Open<T>(T element) where T : ScriptNode
+        {
+            element.Span = new SourceSpan() { FileName = _lexer.SourcePath, Start = Current.Start };
+            FlushTrivias(element, true);
+            return element;
+        }
+
         private T Open<T>() where T : ScriptNode, new()
         {
             var element = new T() { Span = {FileName = _lexer.SourcePath, Start = Current.Start}};
@@ -188,6 +195,11 @@ namespace Scriban.Parsing
         private string GetAsText(Token localToken)
         {
             return localToken.GetText(_lexer.Text);
+        }
+
+        private bool MatchText(Token localToken, string text)
+        {
+            return localToken.Match(text, _lexer.Text);
         }
 
         private void NextToken()

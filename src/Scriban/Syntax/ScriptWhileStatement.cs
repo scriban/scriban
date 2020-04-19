@@ -8,7 +8,13 @@ namespace Scriban.Syntax
     [ScriptSyntax("while statement", "while <expression> ... end")]
     public partial class ScriptWhileStatement : ScriptLoopStatementBase
     {
-        public ScriptExpression Condition { get; set; }
+        private ScriptExpression _condition;
+
+        public ScriptExpression Condition
+        {
+            get => _condition;
+            set => ParentToThis(ref _condition, value);
+        }
 
         protected override object LoopItem(TemplateContext context, LoopState state)
         {
@@ -60,9 +66,5 @@ namespace Scriban.Syntax
         {
             return $"while {Condition} ... end";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

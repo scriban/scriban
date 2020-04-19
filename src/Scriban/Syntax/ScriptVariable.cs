@@ -19,15 +19,10 @@ namespace Scriban.Syntax
         private int _hashCode;
 
         public static readonly ScriptVariableLocal Arguments = new ScriptVariableLocal(string.Empty);
-
         public static readonly ScriptVariableLocal BlockDelegate = new ScriptVariableLocal("$");
-
         public static readonly ScriptVariableLocal Continue = new ScriptVariableLocal("continue");
-
         public static readonly ScriptVariableLoop ForObject = new ScriptVariableLoop("for");
-
         public static readonly ScriptVariableLoop TablerowObject = new ScriptVariableLoop("tablerow");
-
         public static readonly ScriptVariableLoop WhileObject = new ScriptVariableLoop("while");
 
         protected ScriptVariable(string name, ScriptVariableScope scope)
@@ -140,7 +135,7 @@ namespace Scriban.Syntax
         }
     }
 
-    public class ScriptVariableGlobal : ScriptVariable
+    public partial class ScriptVariableGlobal : ScriptVariable
     {
         public ScriptVariableGlobal(string name) : base(name, ScriptVariableScope.Global)
         {
@@ -151,25 +146,17 @@ namespace Scriban.Syntax
             // Used a specialized overrides on contxet for ScriptVariableGlobal
             return context.GetValue(this);
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
 
-    public class ScriptVariableLocal : ScriptVariable
+    public partial class ScriptVariableLocal : ScriptVariable
     {
         public ScriptVariableLocal(string name) : base(name, ScriptVariableScope.Local)
         {
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
-    public class ScriptVariableLoop : ScriptVariable
+    public partial class ScriptVariableLoop : ScriptVariable
     {
         public ScriptVariableLoop(string name) : base(name, ScriptVariableScope.Loop)
         {
@@ -187,10 +174,6 @@ namespace Scriban.Syntax
                 base.Write(context);
             }
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
 }

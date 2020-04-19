@@ -64,21 +64,14 @@ namespace Scriban.Parsing
             return "<error>";
         }
 
-        public bool Match(string text, string lexerText)
+        public bool Match(string textToMatch, string lexerText)
         {
             var length = End.Offset - Start.Offset + 1;
-            if (text.Length != length)
+            if (textToMatch.Length != length)
             {
                 return false;
             }
-            for (int i = 0; i < text.Length; i++)
-            {
-                if (lexerText[Start.Offset + i] != text[i])
-                {
-                    return false;
-                }
-            }
-            return true;
+            return string.CompareOrdinal(textToMatch, 0, lexerText, Start.Offset, length) == 0;
         }
 
         public bool Equals(Token other)

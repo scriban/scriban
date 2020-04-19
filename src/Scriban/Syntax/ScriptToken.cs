@@ -9,7 +9,7 @@ namespace Scriban.Syntax
     /// <summary>
     /// A verbatim node (use for custom parsing).
     /// </summary>
-    public class ScriptToken : ScriptNode
+    public partial class ScriptToken : ScriptNode
     {
         public static ScriptToken Equal() => new ScriptToken("=");
 
@@ -41,16 +41,6 @@ namespace Scriban.Syntax
         public override void Write(TemplateRewriterContext context)
         {
             context.Write(Value);
-        }
-
-        public override void Accept(ScriptVisitor visitor)
-        {
-            visitor.Visit(this);
-        }
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor)
-        {
-            return visitor.Visit(this);
         }
 
         public override string ToString()

@@ -15,13 +15,23 @@ namespace Scriban.Syntax
     [ScriptSyntax("unary expression", "<operator> <expression>")]
     public partial class ScriptUnaryExpression : ScriptExpression
     {
+        private ScriptToken _operatorToken;
+        private ScriptExpression _right;
         public ScriptUnaryOperator Operator { get; set; }
 
-        public ScriptToken OperatorToken { get; set; }
+        public ScriptToken OperatorToken
+        {
+            get => _operatorToken;
+            set => ParentToThis(ref _operatorToken, value);
+        }
 
         public string OperatorAsText => OperatorToken?.Value ?? Operator.ToText();
 
-        public ScriptExpression Right { get; set; }
+        public ScriptExpression Right
+        {
+            get => _right;
+            set => ParentToThis(ref _right, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -120,9 +130,5 @@ namespace Scriban.Syntax
         {
             return $"{OperatorAsText}{Right}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

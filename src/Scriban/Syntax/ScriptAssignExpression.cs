@@ -10,11 +10,27 @@ namespace Scriban.Syntax
     [ScriptSyntax("assign expression", "<target_expression> = <value_expression>")]
     public partial class ScriptAssignExpression : ScriptExpression
     {
-        public ScriptExpression Target { get; set; }
+        private ScriptExpression _target;
+        private ScriptToken _equalToken;
+        private ScriptExpression _value;
 
-        public ScriptToken EqualToken { get; set; }
+        public ScriptExpression Target
+        {
+            get => _target;
+            set => ParentToThis(ref _target, value);
+        }
 
-        public ScriptExpression Value { get; set; }
+        public ScriptToken EqualToken
+        {
+            get => _equalToken;
+            set => ParentToThis(ref _equalToken, value);
+        }
+
+        public ScriptExpression Value
+        {
+            get => _value;
+            set => ParentToThis(ref _value, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -40,9 +56,5 @@ namespace Scriban.Syntax
         {
             return $"{Target} = {Value}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

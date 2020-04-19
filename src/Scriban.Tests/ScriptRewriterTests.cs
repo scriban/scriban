@@ -18,11 +18,11 @@ namespace Scriban.Tests
         {
             var template = LoadTemplate(inputFileName);
 
-            var rewriter = new NopScriptRewriter();
+            var rewriter = new TestCloneScriptRewriter();
             var result = rewriter.Visit(template.Page);
 
             // The base ScriptRewriter never changes any node, so we should end up with the same instance
-            Assert.AreSame(template.Page, result);
+            Assert.AreNotSame(template.Page, result);
         }
 
         [TestCaseSource(typeof(TestFilesHelper), nameof(TestFilesHelper.ListAllTestFiles))]
@@ -30,7 +30,7 @@ namespace Scriban.Tests
         {
             var template = LoadTemplate(inputFileName);
 
-            var rewriter = new LeafCopyScriptRewriter();
+            var rewriter = new TestCloneScriptRewriter();
             var result = rewriter.Visit(template.Page);
 
             // This rewriter makes copies of leaf nodes instead of returning the original nodes,
@@ -61,65 +61,9 @@ namespace Scriban.Tests
 
             return template;
         }
-
-        private class NopScriptRewriter : ScriptRewriter
+        
+        private class TestCloneScriptRewriter : ScriptRewriter
         {
-        }
-
-        private class LeafCopyScriptRewriter : ScriptRewriter
-        {
-            public override ScriptNode Visit(ScriptVariableGlobal node)
-            {
-                return new ScriptVariableGlobal(node.Name).WithTriviaAndSpanFrom(node);
-            }
-
-            public override ScriptNode Visit(ScriptVariableLocal node)
-            {
-                return new ScriptVariableLocal(node.Name).WithTriviaAndSpanFrom(node);
-            }
-
-            public override ScriptNode Visit(ScriptVariableLoop node)
-            {
-                return new ScriptVariableLoop(node.Name).WithTriviaAndSpanFrom(node);
-            }
-
-            public override ScriptNode Visit(ScriptRawStatement node)
-            {
-                return new ScriptRawStatement
-                {
-                    Text = node.Text,
-                    EscapeCount = node.EscapeCount
-                }.WithTriviaAndSpanFrom(node);
-            }
-
-            public override ScriptNode Visit(ScriptThisExpression node)
-            {
-                return new ScriptThisExpression().WithTriviaAndSpanFrom(node);
-            }
-
-            public override ScriptNode Visit(ScriptBreakStatement node)
-            {
-                return new ScriptBreakStatement().WithTriviaAndSpanFrom(node);
-            }
-
-            public override ScriptNode Visit(ScriptContinueStatement node)
-            {
-                return new ScriptContinueStatement().WithTriviaAndSpanFrom(node);
-            }
-
-            public override ScriptNode Visit(ScriptLiteral node)
-            {
-                return new ScriptLiteral
-                {
-                    Value = node.Value,
-                    StringQuoteType = node.StringQuoteType
-                }.WithTriviaAndSpanFrom(node);
-            }
-
-            public override ScriptNode Visit(ScriptNopStatement node)
-            {
-                return new ScriptNopStatement().WithTriviaAndSpanFrom(node);
-            }
         }
     }
 }

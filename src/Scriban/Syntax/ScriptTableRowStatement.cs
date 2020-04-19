@@ -84,16 +84,18 @@ namespace Scriban.Syntax
             context.Write(Variable).ExpectSpace();
             context.Write("in").ExpectSpace();
             context.Write(Iterator);
-            context.Write(NamedArguments);
+            if (NamedArguments != null)
+            {
+                foreach (var arg in NamedArguments)
+                {
+                    context.ExpectSpace();
+                    context.Write(arg);
+                }
+            }
             context.ExpectEos();
             context.Write(Body);
             context.ExpectEnd();
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
         protected override LoopState CreateLoopState()
         {
             return new TableRowLoopState();

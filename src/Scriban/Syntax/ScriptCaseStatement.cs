@@ -8,13 +8,24 @@ namespace Scriban.Syntax
     [ScriptSyntax("case statement", "case <expression> ... end|when|else")]
     public partial class ScriptCaseStatement : ScriptConditionStatement
     {
+        private ScriptExpression _value;
+        private ScriptBlockStatement _body;
+
         /// <summary>
         /// Get or sets the value used to check against When clause.
         /// </summary>
-        public ScriptExpression Value { get; set; }
+        public ScriptExpression Value
+        {
+            get => _value;
+            set => ParentToThis(ref _value, value);
+        }
 
-        public ScriptBlockStatement Body { get; set; }
-        
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
+        }
+
         public override object Evaluate(TemplateContext context)
         {
             var caseValue = context.Evaluate(Value);
@@ -41,9 +52,5 @@ namespace Scriban.Syntax
         {
             return $"case {Value}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

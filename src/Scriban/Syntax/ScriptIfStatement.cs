@@ -9,21 +9,36 @@ namespace Scriban.Syntax
     [ScriptSyntax("if statement", "if <expression> ... end|else|else if")]
     public partial class ScriptIfStatement : ScriptConditionStatement
     {
+        private ScriptExpression _condition;
+        private ScriptBlockStatement _then;
+        private ScriptConditionStatement _else;
+
         /// <summary>
         /// Get or sets the condition of this if statement.
         /// </summary>
-        public ScriptExpression Condition { get; set; }
+        public ScriptExpression Condition
+        {
+            get => _condition;
+            set => ParentToThis(ref _condition, value);
+        }
 
         /// <summary>
         /// Gets or sets a boolean indicating that the result of the condition is inverted
         /// </summary>
         public bool InvertCondition { get; set; }
 
-        public ScriptBlockStatement Then { get; set; }
+        public ScriptBlockStatement Then
+        {
+            get => _then;
+            set => ParentToThis(ref _then, value);
+        }
 
-        public ScriptConditionStatement Else { get; set; }
-
-
+        public ScriptConditionStatement Else
+        {
+            get => _else;
+            set => ParentToThis(ref _else, value);
+        }
+        
         public bool IsElseIf { get; set; }
 
         public override object Evaluate(TemplateContext context)
@@ -68,9 +83,5 @@ namespace Scriban.Syntax
         {
             return $"if {Condition}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

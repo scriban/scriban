@@ -16,11 +16,27 @@ namespace Scriban.Syntax
     [ScriptSyntax("for statement", "for <variable> in <expression> ... end")]
     public partial class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
     {
-        public ScriptExpression Variable { get; set; }
+        private ScriptExpression _variable;
+        private ScriptExpression _iterator;
+        private ScriptList<ScriptNamedArgument> _namedArguments;
 
-        public ScriptExpression Iterator { get; set; }
+        public ScriptExpression Variable
+        {
+            get => _variable;
+            set => ParentToThis(ref _variable, value);
+        }
 
-        public List<ScriptNamedArgument> NamedArguments { get; set; }
+        public ScriptExpression Iterator
+        {
+            get => _iterator;
+            set => ParentToThis(ref _iterator, value);
+        }
+
+        public ScriptList<ScriptNamedArgument> NamedArguments
+        {
+            get => _namedArguments;
+            set => ParentToThis(ref _namedArguments, value);
+        }
 
         internal ScriptNode IteratorOrLastParameter => NamedArguments != null && NamedArguments.Count > 0
             ? NamedArguments[NamedArguments.Count - 1]
@@ -141,7 +157,14 @@ namespace Scriban.Syntax
             }
             context.Write("in").ExpectSpace();
             context.Write(Iterator);
-            context.Write(NamedArguments);
+            if (NamedArguments != null)
+            {
+                foreach (var arg in NamedArguments)
+                {
+                    context.ExpectSpace();
+                    context.Write(arg);
+                }
+            }
             context.ExpectEos();
             context.Write(Body);
             context.ExpectEnd();
@@ -163,9 +186,5 @@ namespace Scriban.Syntax
         {
             return $"for {Variable} in {Iterator} ... end";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

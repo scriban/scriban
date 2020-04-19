@@ -9,9 +9,20 @@ namespace Scriban.Syntax
     [ScriptSyntax("with statement", "with <variable> ... end")]
     public partial class ScriptWithStatement : ScriptStatement
     {
-        public ScriptExpression Name { get; set; }
+        private ScriptExpression _name;
+        private ScriptBlockStatement _body;
 
-        public ScriptBlockStatement Body { get; set; }
+        public ScriptExpression Name
+        {
+            get => _name;
+            set => ParentToThis(ref _name, value);
+        }
+
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -47,9 +58,5 @@ namespace Scriban.Syntax
         {
             return $"with {Name} <...> end";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

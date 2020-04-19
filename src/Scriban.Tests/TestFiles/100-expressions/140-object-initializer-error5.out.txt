@@ -1,2 +1,2 @@
-text(3,8) : error : Unexpected token `Modulus`. Expecting an expression for the value of the member instead of `%`
+text(3,8) : error : Unexpected token `%`. Expecting an expression for the value of the member.
 text(3,9) : error : Invalid token found `}`. Expecting <EOL>/end of line.

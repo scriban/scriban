@@ -13,18 +13,50 @@ namespace Scriban.Syntax
     [ScriptSyntax("function statement", "func <variable> ... end")]
     public partial class ScriptFunction : ScriptStatement, IScriptCustomFunction
     {
-        public ScriptVariable Name { get; set; }
+        private ScriptVariable _name;
+        private ScriptToken _openParen;
+        private ScriptList<ScriptVariable> _parameters;
+        private ScriptToken _closeParen;
+        private ScriptToken _equalToken;
+        private ScriptStatement _body;
 
+        public ScriptVariable Name
+        {
+            get => _name;
+            set => ParentToThis(ref _name, value);
+        }
 
-        public ScriptToken OpenParen { get; set; }
-        
-        public List<ScriptVariable> Parameters { get; set; }
-        
-        public ScriptToken CloseParen { get; set; }
-        
-        public ScriptToken EqualToken { get; set; }
-        
-        public ScriptStatement Body { get; set; }
+        public ScriptToken OpenParen
+        {
+            get => _openParen;
+            set => ParentToThis(ref _openParen, value);
+        }
+
+        public ScriptList<ScriptVariable> Parameters
+        {
+            get => _parameters;
+            set => ParentToThis(ref _parameters, value);
+        }
+
+        public ScriptToken CloseParen
+        {
+            get => _closeParen;
+            set => ParentToThis(ref _closeParen, value);
+        }
+
+        public ScriptToken EqualToken
+        {
+            get => _equalToken;
+            set => ParentToThis(ref _equalToken, value);
+        }
+
+        public ScriptStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
+        }
+
+        public bool IsAnonymous { get; set; }
 
         public bool HasParameters => Parameters != null;
 
@@ -82,26 +114,29 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            if (Body is ScriptBlockStatement)
+            if (!IsAnonymous)
             {
-                context.Write("func").ExpectSpace();
-            }
-            context.Write(Name);
-
-            if (OpenParen != null) context.Write(OpenParen);
-            if (HasParameters)
-            {
-                for (var i = 0; i < Parameters.Count; i++)
+                if (Body is ScriptBlockStatement)
                 {
-                    var param = Parameters[i];
-                    if (OpenParen == null || i > 0)
-                    {
-                        context.ExpectSpace();
-                    }
-                    context.Write(param);
+                    context.Write("func").ExpectSpace();
                 }
+                context.Write(Name);
+
+                if (OpenParen != null) context.Write(OpenParen);
+                if (HasParameters)
+                {
+                    for (var i = 0; i < Parameters.Count; i++)
+                    {
+                        var param = Parameters[i];
+                        if (OpenParen == null || i > 0)
+                        {
+                            context.ExpectSpace();
+                        }
+                        context.Write(param);
+                    }
+                }
+                if (CloseParen != null) context.Write(CloseParen);
             }
-            if (CloseParen != null) context.Write(CloseParen);
 
             if (Body is ScriptBlockStatement)
             {
@@ -115,11 +150,6 @@ namespace Scriban.Syntax
                 context.Write(Body);
             }
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
         public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             if (HasParameters)

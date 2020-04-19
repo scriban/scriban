@@ -394,7 +394,7 @@ namespace Scriban.Parsing
                     assignExpression.Target = new ScriptIndexerExpression()
                     {
                         Target = new ScriptThisExpression {Span = CurrentSpan},
-                        Index = templateName
+                        Index = (ScriptExpression)templateName?.Clone(),
                     };
 
                     assignExpression.Value = ExpectAndParseExpression(include, mode: ParseExpressionMode.BasicExpression);
@@ -422,7 +422,7 @@ namespace Scriban.Parsing
                     forStatement.Variable = new ScriptIndexerExpression()
                     {
                         Target = new ScriptThisExpression {Span = CurrentSpan},
-                        Index = templateName
+                        Index = (ScriptExpression)templateName?.Clone(),
                     };
 
                     forStatement.Iterator = ExpectAndParseExpression(include, mode: ParseExpressionMode.BasicExpression);

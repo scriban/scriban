@@ -19,15 +19,27 @@ namespace Scriban.Syntax
     [ScriptSyntax("binary expression", "<expression> operator <expression>")]
     public partial class ScriptBinaryExpression : ScriptExpression
     {
-        public ScriptExpression Left { get; set; }
+        public ScriptExpression Left
+        {
+            get => _left;
+            set => ParentToThis(ref _left, value);
+        }
 
         public ScriptBinaryOperator Operator { get; set; }
 
-        public ScriptToken OperatorToken { get; set; }
+        public ScriptToken OperatorToken
+        {
+            get => _operatorToken;
+            set => ParentToThis(ref _operatorToken, value);
+        }
 
         public string OperatorAsText => OperatorToken?.Value ?? Operator.ToText();
 
-        public ScriptExpression Right { get; set; }
+        public ScriptExpression Right
+        {
+            get => _right;
+            set => ParentToThis(ref _right, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -94,11 +106,6 @@ namespace Scriban.Syntax
         {
             return false;
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
         public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {
             if (op == ScriptBinaryOperator.EmptyCoalescing)
@@ -631,6 +638,10 @@ namespace Scriban.Syntax
         /// Use this value as a maximum integer
         /// </summary>
         private static readonly BigInteger MaxBigInteger = BigInteger.One << 1024 * 1024;
+
+        private ScriptExpression _left;
+        private ScriptToken _operatorToken;
+        private ScriptExpression _right;
 
         private static object CalculateLongWithInt(ScriptBinaryOperator op, SourceSpan span, int leftInt, int rightInt)
         {

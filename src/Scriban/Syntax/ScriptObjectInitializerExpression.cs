@@ -11,25 +11,35 @@ namespace Scriban.Syntax
     [ScriptSyntax("object initializer expression", "{ member1: <expression>, member2: ... }")]
     public partial class ScriptObjectInitializerExpression : ScriptExpression
     {
+        private ScriptList<ScriptObjectMember> _members;
+
         public ScriptObjectInitializerExpression()
         {
-            Members = new Dictionary<ScriptExpression, ScriptExpression>();
+            Members = new ScriptList<ScriptObjectMember>();
         }
 
-        public Dictionary<ScriptExpression, ScriptExpression> Members { get; private set; }
+        public ScriptList<ScriptObjectMember> Members
+        {
+            get => _members;
+            set => ParentToThis(ref _members, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
-            var scriptObject = new ScriptObject();
-            foreach (var member in Members)
+            var obj = new ScriptObject();
+            context.PushGlobal(obj);
+            try
             {
-                var variable = member.Key as ScriptVariable;
-                var literal = member.Key as ScriptLiteral;
-
-                var name = variable?.Name ?? literal?.Value?.ToString();
-                scriptObject.SetValue(context, Span, name, context.Evaluate(member.Value), false);
+                foreach (var member in Members)
+                {
+                    member.Evaluate(context);
+                }
             }
-            return scriptObject;
+            finally
+            {
+                context.PopGlobal();
+            }
+            return obj;
         }
 
         public override void Write(TemplateRewriterContext context)
@@ -43,9 +53,7 @@ namespace Scriban.Syntax
                     context.Write(",");
                 }
 
-                context.Write(member.Key);
-                context.Write(":");
-                context.Write(member.Value);
+                context.Write(member);
 
                 // If the value didn't have any Comma Trivia, we can emit it
                 isAfterFirst = !member.Value.HasTrivia(ScriptTriviaType.Comma, false);
@@ -56,9 +64,5 @@ namespace Scriban.Syntax
         {
             return "{...}";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

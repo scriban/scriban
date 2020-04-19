@@ -11,12 +11,17 @@ namespace Scriban.Syntax
     /// A binary operation argument used with <see cref="ScriptFunctionCall"/>
     /// when parsing with scientific mode.
     /// </summary>
-    public class ScriptArgumentBinary : ScriptExpression
+    public partial class ScriptArgumentBinary : ScriptExpression
     {
+        private ScriptToken _operatorToken;
         public ScriptBinaryOperator Operator { get; set; }
-        
-        public ScriptToken OperatorToken { get; set; }
-        
+
+        public ScriptToken OperatorToken
+        {
+            get => _operatorToken;
+            set => ParentToThis(ref _operatorToken, value);
+        }
+
         public override object Evaluate(TemplateContext context)
         {
             throw new NotImplementedException();
@@ -25,16 +30,6 @@ namespace Scriban.Syntax
         public override void Write(TemplateRewriterContext context)
         {
             
-        }
-
-        public override void Accept(ScriptVisitor visitor)
-        {
-            visitor.Visit(this);
-        }
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor)
-        {
-            return visitor.Visit(this);
         }
 
         public override string ToString()

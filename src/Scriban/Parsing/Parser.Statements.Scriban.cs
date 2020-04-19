@@ -188,7 +188,12 @@ namespace Scriban.Parsing
         private ScriptFunction ParseFunctionStatement(bool isAnonymous)
         {
             var scriptFunction = Open<ScriptFunction>();
-            NextToken(); // skip func or do
+            if (!isAnonymous)
+            {
+                NextToken(); // skip func or do
+            }
+
+            scriptFunction.IsAnonymous = isAnonymous;
 
             if (!isAnonymous)
             {
@@ -198,7 +203,7 @@ namespace Scriban.Parsing
                 if (Current.Type == TokenType.OpenParent)
                 {
                     scriptFunction.OpenParen = ParseToken();
-                    scriptFunction.Parameters = new List<ScriptVariable>();
+                    scriptFunction.Parameters = new ScriptList<ScriptVariable>();
 
                     bool isFirst = true;
                     while (true)

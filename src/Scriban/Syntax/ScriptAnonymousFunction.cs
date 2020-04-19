@@ -7,7 +7,25 @@ namespace Scriban.Syntax
 {
     public partial class ScriptAnonymousFunction : ScriptExpression
     {
-        public ScriptFunction Function { get; set; }
+        private ScriptFunction _function;
+        private ScriptToken _doToken;
+        
+        public ScriptAnonymousFunction()
+        {
+            DoToken = new ScriptToken("do");
+        }
+        
+        public ScriptToken DoToken
+        {
+            get => _doToken;
+            set => ParentToThis(ref _doToken, value);
+        }
+        
+        public ScriptFunction Function
+        {
+            get => _function;
+            set => ParentToThis(ref _function, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -16,12 +34,8 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("do").ExpectSpace();
+            context.Write(DoToken).ExpectSpace();
             context.Write(Function);
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

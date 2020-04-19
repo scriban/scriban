@@ -1,2 +1,2 @@
-text(6,7) : error : Error while parsing indexer expression: Expecting <index_expression> instead of `CodeExit` in: <expression>[<index_expression>]
-text(6,7) : error : Unexpected `CodeExit`. Expecting ']'
+text(6,7) : error : Error while parsing indexer expression: Expecting <index_expression> instead of `}}` in: <expression>[<index_expression>]
+text(6,7) : error : Unexpected `}}`. Expecting ']'

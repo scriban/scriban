@@ -10,7 +10,13 @@ namespace Scriban.Syntax
     [ScriptSyntax("empty expression", "<expression>.empty?")]
     public partial class ScriptIsEmptyExpression: ScriptExpression, IScriptVariablePath
     {
-        public ScriptExpression Target { get; set; }
+        private ScriptExpression _target;
+
+        public ScriptExpression Target
+        {
+            get => _target;
+            set => ParentToThis(ref _target, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -62,9 +68,5 @@ namespace Scriban.Syntax
         {
             return $"{Target}.empty?";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 }

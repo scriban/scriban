@@ -10,6 +10,8 @@ namespace Scriban.Syntax
     [ScriptSyntax("nested expression", "(<expression>)")]
     public partial class ScriptNestedExpression : ScriptExpression, IScriptVariablePath
     {
+        private ScriptExpression _expression;
+
         public ScriptNestedExpression()
         {
         }
@@ -19,7 +21,11 @@ namespace Scriban.Syntax
             Expression = expression;
         }
 
-        public ScriptExpression Expression { get; set; }
+        public ScriptExpression Expression
+        {
+            get => _expression;
+            set => ParentToThis(ref _expression, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -46,11 +52,6 @@ namespace Scriban.Syntax
         {
             return $"({Expression})";
         }
-
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
         public object GetValue(TemplateContext context)
         {
             return context.Evaluate(Expression);

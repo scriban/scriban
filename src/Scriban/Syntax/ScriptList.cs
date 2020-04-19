@@ -11,14 +11,16 @@ namespace Scriban.Syntax
     /// <summary>
     /// Abstract list of <see cref="ScriptNode"/>
     /// </summary>
-    public abstract class SyntaxList : ScriptNode
+    public abstract class ScriptList : ScriptNode
     {
         protected readonly List<ScriptNode> _children;
 
-        internal SyntaxList()
+        internal ScriptList()
         {
             _children = new List<ScriptNode>();
         }
+
+        public int Count => ChildrenCount;
 
         public sealed override int ChildrenCount => _children.Count;
 
@@ -32,12 +34,12 @@ namespace Scriban.Syntax
     /// Abstract list of <see cref="ScriptNode"/>
     /// </summary>
     /// <typeparam name="TScriptNode">Type of the node</typeparam>
-    public sealed class SyntaxList<TScriptNode> : SyntaxList, IEnumerable<TScriptNode> where TScriptNode : ScriptNode
+    public sealed class ScriptList<TScriptNode> : ScriptList, IList<TScriptNode> where TScriptNode : ScriptNode
     {
         /// <summary>
-        /// Creates an instance of <see cref="SyntaxList{TScriptNode}"/>
+        /// Creates an instance of <see cref="ScriptList{TScriptNode}"/>
         /// </summary>
-        public SyntaxList()
+        public ScriptList()
         {
         }
 
@@ -52,6 +54,51 @@ namespace Scriban.Syntax
             _children.Add(node);
             node.Parent = this;
         }
+
+        public void AddRange(IEnumerable<TScriptNode> nodes)
+        {
+            if (nodes == null) throw new ArgumentNullException(nameof(nodes));
+            foreach (var node in nodes)
+            {
+                Add(node);
+            }
+        }
+
+        public void Clear()
+        {
+            foreach (var item in _children)
+            {
+                if (item != null)
+                {
+                    item.Parent = null;
+                }
+            }
+            _children.Clear();
+        }
+
+        public bool Contains(TScriptNode item)
+        {
+            return _children.Contains(item);
+        }
+
+        public void CopyTo(TScriptNode[] array, int arrayIndex)
+        {
+            _children.CopyTo((ScriptNode[])array, arrayIndex);
+        }
+
+        public bool Remove(TScriptNode item)
+        {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (_children.Remove(item))
+            {
+                item.Parent = null;
+                return true;
+            }
+
+            return false;
+        }
+
+        public bool IsReadOnly => false;
 
         public override object Evaluate(TemplateContext context)
         {
@@ -82,29 +129,6 @@ namespace Scriban.Syntax
         {
             return visitor.Visit(this);
         }
-    
-        /// <summary>
-        /// Removes a node at the specified index.
-        /// </summary>
-        /// <param name="index">Index of the node to remove</param>
-        public void RemoveChildrenAt(int index)
-        {
-            var node = _children[index];
-            _children.RemoveAt(index);
-            node.Parent = null;
-        }
-
-        /// <summary>
-        /// Removes the specified node instance.
-        /// </summary>
-        /// <param name="node">Node instance to remove</param>
-        public void RemoveChildren(TScriptNode node)
-        {
-            if (node == null) throw new ArgumentNullException(nameof(node));
-            if (node.Parent != this) throw new InvalidOperationException("The node is not part of this list");
-            _children.Remove(node);
-            node.Parent = null;
-        }
 
         /// <summary>
         /// Gets the default enumerator.
@@ -126,7 +150,7 @@ namespace Scriban.Syntax
         }
 
         /// <summary>
-        /// Enumerator of a <see cref="SyntaxList{TScriptNode}"/>
+        /// Enumerator of a <see cref="ScriptList{TScriptNode}"/>
         /// </summary>
         public struct Enumerator : IEnumerator<TScriptNode>
         {
@@ -169,6 +193,45 @@ namespace Scriban.Syntax
             public void Dispose()
             {
             }
+        }
+
+        public int IndexOf(TScriptNode item)
+        {
+            return _children.IndexOf(item);
+        }
+
+        public void Insert(int index, TScriptNode item)
+        {
+            AssertNoParent(item);
+            _children.Insert(index, item);
+            if (item != null)
+            {
+                item.Parent = this;
+            }
+        }
+
+        public void RemoveAt(int index)
+        {
+            var previous = _children[index];
+            _children.RemoveAt(index);
+            if (previous != null) previous.Parent = null;
+        }
+
+        public TScriptNode this[int index]
+        {
+            get => (TScriptNode)_children[index];
+            set
+            {
+                AssertNoParent(value);
+                var previous = _children[index];
+                _children[index] = value;
+                if (previous != null) previous.Parent = null;
+            }
+        }
+
+        private void AssertNoParent(ScriptNode node)
+        {
+            if (node != null && node.Parent != null) throw new ArgumentException("Cannot add this node which is already attached to another list instance");
         }
     }
 }
