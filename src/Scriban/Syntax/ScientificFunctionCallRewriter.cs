@@ -140,12 +140,14 @@ namespace Scriban.Syntax
                     }
                     else
                     {
-                        if (PrecedenceOfMultiply <= precedence)
+                        int precedenceOfImplicitMultiply = PrecedenceOfMultiply + 1;
+
+                        if (precedenceOfImplicitMultiply <= precedence)
                         {
                             break;
                         }
                         // Implicit  the binary argument
-                        var rightValue = Rewrite(context, PrecedenceOfMultiply);
+                        var rightValue = Rewrite(context, precedenceOfImplicitMultiply);
 
                         if (rightValue is ScriptLiteral)
                         {
