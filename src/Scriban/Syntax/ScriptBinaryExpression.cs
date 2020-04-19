@@ -481,8 +481,7 @@ namespace Scriban.Syntax
 
             var leftType = leftValue.GetType();
             var rightType = rightValue.GetType();
-
-
+            
             // The order matters: decimal, double, float, long, int
             if (leftType == typeof(decimal))
             {
@@ -657,13 +656,13 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.DivideRound:
                     return left / right;
 
-                case ScriptBinaryOperator.Power:
-                    return BigInteger.ModPow(left, right, MaxBigInteger);
-
                 case ScriptBinaryOperator.ShiftLeft:
                     return (BigInteger)left << (int)right;
                 case ScriptBinaryOperator.ShiftRight:
                     return (BigInteger)left >> (int)right;
+
+                case ScriptBinaryOperator.Power:
+                    return BigInteger.ModPow(left, right, MaxBigInteger);
 
                 case ScriptBinaryOperator.BinaryOr:
                     return left | right;
@@ -717,13 +716,14 @@ namespace Scriban.Syntax
                     return (double)left / (double)right;
                 case ScriptBinaryOperator.DivideRound:
                     return left / right;
-                case ScriptBinaryOperator.Power:
-                    return BigInteger.ModPow(left, right, MaxBigInteger);
 
                 case ScriptBinaryOperator.ShiftLeft:
                     return left << (int)right;
                 case ScriptBinaryOperator.ShiftRight:
                     return left >> (int)right;
+
+                case ScriptBinaryOperator.Power:
+                    return BigInteger.ModPow(left, right, MaxBigInteger);
 
                 case ScriptBinaryOperator.BinaryOr:
                     return left | right;
@@ -764,6 +764,8 @@ namespace Scriban.Syntax
                     return left * right;
                 case ScriptBinaryOperator.Divide:
                     return left / right;
+                case ScriptBinaryOperator.DivideRound:
+                    return Math.Round(left / right);
 
                 case ScriptBinaryOperator.ShiftLeft:
                     return left * Math.Pow(2, right);
@@ -771,8 +773,6 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.ShiftRight:
                     return left / Math.Pow(2, right);
 
-                case ScriptBinaryOperator.DivideRound:
-                    return Math.Round(left / right);
                 case ScriptBinaryOperator.Power:
                     return Math.Pow(left, right);
                 
