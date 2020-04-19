@@ -47,11 +47,5 @@ namespace Scriban.Syntax
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
 
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            yield return Target;
-            yield return Body;
-        }
     }
 }

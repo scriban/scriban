@@ -37,11 +37,6 @@ namespace Scriban.Syntax
             return visitor.Visit(this);
         }
 
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            if (OperatorToken != null) yield return OperatorToken;
-        }
-
         public override string ToString()
         {
             return OperatorToken?.ToString() ?? Operator.ToText();

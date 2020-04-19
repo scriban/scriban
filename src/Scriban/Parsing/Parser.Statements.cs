@@ -648,11 +648,6 @@ namespace Scriban.Parsing
             {
                 throw new NotSupportedException();
             }
-
-            protected override IEnumerable<ScriptNode> GetChildren()
-            {
-                throw new NotSupportedException();
-            }
         }
     }
 }

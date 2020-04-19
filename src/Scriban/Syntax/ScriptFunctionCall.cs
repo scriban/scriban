@@ -137,17 +137,6 @@ namespace Scriban.Syntax
 
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
 
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            yield return Target;
-            if (OpenParent != null) yield return OpenParent;
-            foreach (var argument in Arguments)
-            {
-                yield return argument;
-            }
-            if (CloseParen != null) yield return CloseParen;
-        }
-
         public static bool IsFunction(object target)
         {
             return target is IScriptCustomFunction;

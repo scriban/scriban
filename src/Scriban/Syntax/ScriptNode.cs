@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
+using Scriban.Helpers;
 using Scriban.Parsing;
 
 namespace Scriban.Syntax
@@ -27,10 +28,47 @@ namespace Scriban.Syntax
         public ScriptTrivias Trivias { get; set; }
 
         /// <summary>
+        /// Gets the parent of this node.
+        /// </summary>
+        public ScriptNode Parent { get; internal set; }
+
+        /// <summary>
         /// Evaluates this instance with the specified context.
         /// </summary>
         /// <param name="context">The template context.</param>
         public abstract object Evaluate(TemplateContext context);
+
+
+
+        /// <summary>
+        /// Gets a children at the specified index.
+        /// </summary>
+        /// <param name="index">Index of the children</param>
+        /// <returns>A children at the specified index</returns>
+        public ScriptNode GetChildren(int index)
+        {
+            if (index < 0) throw ThrowHelper.GetIndexNegativeArgumentOutOfRangeException();
+            if (index > ChildrenCount) throw ThrowHelper.GetIndexArgumentOutOfRangeException(ChildrenCount);
+            return GetChildrenImpl(index);
+        }
+
+        /// <summary>
+        /// Gets a children at the specified index.
+        /// </summary>
+        /// <param name="index">Index of the children</param>
+        /// <returns>A children at the specified index</returns>
+        /// <remarks>The index is safe to use</remarks>
+#if !SCRIBAN_NO_CHILDREN
+        //        protected abstract ScriptNode GetChildrenImpl(int index);
+#else
+        public abstract int ChildrenCount { get; }
+
+        protected abstract ScriptNode GetChildrenImpl(int index);
+#endif
+        public virtual int ChildrenCount => 0;
+
+        protected virtual ScriptNode GetChildrenImpl(int index) => null;
+
 
 #if !SCRIBAN_NO_ASYNC
         public virtual ValueTask<object> EvaluateAsync(TemplateContext context)
@@ -50,9 +88,37 @@ namespace Scriban.Syntax
 
         public abstract TResult Accept<TResult>(ScriptVisitor<TResult> visitor);
 
-        public IEnumerable<ScriptNode> Children { get; }
+        public IEnumerable<ScriptNode> Children
+        {
+            get
+            {
+                var count = ChildrenCount;
+                for (int i = 0; i < count; i++)
+                {
+                    yield return GetChildrenImpl(i);
+                }
+            }
+        }
 
-        protected abstract IEnumerable<ScriptNode> GetChildren();
+        /// <summary>
+        /// Helper method to deparent/parent a node to this instance.
+        /// </summary>
+        /// <typeparam name="TSyntaxNode">Type of the node</typeparam>
+        /// <param name="set">The previous child node parented to this instance</param>
+        /// <param name="node">The new child node to parent to this instance</param>
+        protected void ParentToThis<TSyntaxNode>(ref TSyntaxNode set, TSyntaxNode node) where TSyntaxNode : ScriptNode
+        {
+            if (node?.Parent != null) throw ThrowHelper.GetExpectingNoParentException();
+            if (set != null)
+            {
+                set.Parent = null;
+            }
+            if (node != null)
+            {
+                node.Parent = this;
+            }
+            set = node;
+        }
     }
 
     public static class ScriptNodeExtensions

@@ -120,22 +120,6 @@ namespace Scriban.Syntax
 
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
 
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            yield return Name;
-            if (OpenParen != null) yield return OpenParen;
-            if (Parameters != null)
-            {
-                foreach (var parameter in Parameters)
-                {
-                    yield return parameter;
-                }
-            }
-            if (CloseParen != null) yield return CloseParen;
-            if (EqualToken != null) yield return EqualToken;
-            yield return Body;
-        }
-
         public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             if (HasParameters)

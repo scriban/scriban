@@ -99,12 +99,6 @@ namespace Scriban.Syntax
 
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
 
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            yield return Left;
-            yield return Right;
-        }
-
         public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {
             if (op == ScriptBinaryOperator.EmptyCoalescing)

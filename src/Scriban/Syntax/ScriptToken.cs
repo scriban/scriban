@@ -53,11 +53,6 @@ namespace Scriban.Syntax
             return visitor.Visit(this);
         }
 
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            yield break;
-        }
-
         public override string ToString()
         {
             return Value;

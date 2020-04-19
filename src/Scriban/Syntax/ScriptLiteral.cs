@@ -149,11 +149,6 @@ namespace Scriban.Syntax
 
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
 
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            return Enumerable.Empty<ScriptNode>();
-        }
-
         private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, string input)
         {
             char quote;

@@ -52,12 +52,6 @@ namespace Scriban.Syntax
 
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
 
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            yield return Target;
-            yield return Index;
-        }
-
         public object GetValue(TemplateContext context)
         {
             return GetOrSetValue(context, null, false);

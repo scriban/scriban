@@ -45,15 +45,5 @@ namespace Scriban.Syntax
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
 
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-#if NET35
-            foreach (var value in Values)
-                yield return value;
-#else
-            return Values;
-#endif
-        }
     }
 }

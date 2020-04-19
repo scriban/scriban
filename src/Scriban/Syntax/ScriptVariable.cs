@@ -109,11 +109,6 @@ namespace Scriban.Syntax
             return Scope == ScriptVariableScope.Local ? $"${Name}" : Name;
         }
 
-        protected override IEnumerable<ScriptNode> GetChildren()
-        {
-            return Enumerable.Empty<ScriptNode>();
-        }
-
         public static bool operator ==(ScriptVariable left, ScriptVariable right)
         {
             return Equals(left, right);
