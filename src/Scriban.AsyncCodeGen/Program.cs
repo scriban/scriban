@@ -64,7 +64,7 @@ namespace Scriban.AsyncCodeGen
                     else
                     {
                         var methodModel = model.GetDeclaredSymbol(methodDeclaration);
-                        if (!methodModel.IsStatic && methodModel.Name == "Evaluate" && methodModel.Parameters.Length == 1 && methodModel.Parameters[0].Type.Name == "TemplateContext" && InheritFrom(methodModel.ReceiverType, "Syntax", "ScriptNode"))
+                        if (!methodModel.IsStatic && (methodModel.Name == "Evaluate" || methodModel.Name == "EvaluateImpl") && methodModel.Parameters.Length == 1 && methodModel.Parameters[0].Type.Name == "TemplateContext" && InheritFrom(methodModel.ReceiverType, "Syntax", "ScriptNode"))
                         {
                             while (methodModel != null)
                             {
