@@ -582,10 +582,17 @@ namespace Scriban.Syntax
         public override ScriptNode Visit(ScriptFunction node)
         {
             var newName = (ScriptVariable)Visit(node.Name);
+            var newOpenParent = (ScriptToken) Visit(node.OpenParen);
+            var newParameters = VisitAll(node.Parameters);
+            var newCloseParent = (ScriptToken)Visit(node.CloseParen);
+            var newEqualToken = (ScriptToken)Visit(node.EqualToken);
             var newBody = (ScriptStatement)Visit(node.Body);
 
             if (newName == node.Name &&
-                newBody == node.Body)
+                newOpenParent == node.OpenParen &&
+                newParameters == node.Parameters &&
+                newCloseParent == node.CloseParen &&
+                newEqualToken == node.EqualToken)
             {
                 return node;
             }
@@ -593,6 +600,10 @@ namespace Scriban.Syntax
             return Normalize(new ScriptFunction
             {
                 Name = newName,
+                OpenParen = newOpenParent,
+                Parameters = newParameters,
+                CloseParen = newCloseParent,
+                EqualToken = newEqualToken,
                 Body = newBody
             }, node);
         }

@@ -29,6 +29,36 @@ namespace Scriban.Syntax
         public ScriptToken CloseParen { get; set; }
 
         public bool ExplicitCall { get; set; }
+
+        public bool TryGetFunctionDeclaration(out ScriptFunction function)
+        {
+            function = null;
+            if (!ExplicitCall) return false;
+            if (!(Target is ScriptVariableGlobal name)) return false;
+            if (OpenParent == null || CloseParen == null) return false;
+
+            foreach(var arg in Arguments)
+            {
+                if (!(arg is ScriptVariableGlobal)) return false;
+            }
+
+            function = new ScriptFunction
+            {
+                Name = name,
+                OpenParen = OpenParent,
+                Parameters = new List<ScriptVariableGlobal>(),
+                CloseParen = CloseParen,
+                Span = Span
+            };
+
+            foreach (var arg in Arguments)
+            {
+                var parameter = (ScriptVariableGlobal) arg;
+                function.Parameters.Add(parameter);
+            }
+
+            return true;
+        }
         
         public void AddArgument(ScriptExpression argument)
         {
@@ -228,7 +258,8 @@ namespace Scriban.Syntax
             }
 
             object result = null;
-            context.EnterFunction(callerContext);
+            var needLocal = !(externFunction is ScriptFunction func && func.HasParameters);
+            context.EnterFunction(callerContext, needLocal);
             try
             {
                 try
@@ -257,7 +288,7 @@ namespace Scriban.Syntax
             }
             finally
             {
-                context.ExitFunction();
+                context.ExitFunction(needLocal);
             }
 
             // Restore the flow state to none

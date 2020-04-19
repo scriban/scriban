@@ -784,18 +784,20 @@ namespace Scriban
         /// Called when entering a function.
         /// </summary>
         /// <param name="caller"></param>
-        internal void EnterFunction(ScriptNode caller)
+        /// <param name="pushLocal"><c>true</c> to push a local scope.</param>
+        internal void EnterFunction(ScriptNode caller, bool pushLocal)
         {
             EnterRecursive(caller);
-            PushVariableScope(ScriptVariableScope.Local);
+            // pushLocal might be false in case of a function with parameters which is going to push a global scope anyway.
+            if (pushLocal) PushVariableScope(ScriptVariableScope.Local);
         }
 
         /// <summary>
         /// Called when exiting a function.
         /// </summary>
-        internal void ExitFunction()
+        internal void ExitFunction(bool popLocal)
         {
-            PopVariableScope(ScriptVariableScope.Local);
+            if (popLocal) PopVariableScope(ScriptVariableScope.Local);
             _callDepth--;
         }
 
@@ -806,14 +808,19 @@ namespace Scriban
         internal void PushVariableScope(ScriptVariableScope scope)
         {
             var store = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
-            var tags = _availableTags.Count > 0 ? _availableTags.Pop() : new Dictionary<object, object>();
             if (scope == ScriptVariableScope.Local)
             {
+                var tags = _availableTags.Count > 0 ? _availableTags.Pop() : new Dictionary<object, object>();
                 _localStores.Push(store);
                 _localTagsStack.Push(tags);
             }
+            else if (scope == ScriptVariableScope.Global)
+            {
+                PushGlobal(store);
+            }
             else
             {
+                var tags = _availableTags.Count > 0 ? _availableTags.Pop() : new Dictionary<object, object>();
                 _loopStores.Push(store);
                 _loopTagsStack.Push(tags);
             }
@@ -825,20 +832,30 @@ namespace Scriban
         /// <param name="scope"></param>
         internal void PopVariableScope(ScriptVariableScope scope)
         {
-            Dictionary<object, object> tags;
+            Dictionary<object, object> tags = null;
             if (scope == ScriptVariableScope.Local)
             {
                 PopVariableScope(ref _localStores);
                 tags = _localTagsStack.Pop();
+            }
+            else if (scope == ScriptVariableScope.Global)
+            {
+                var global = (ScriptObject)PopGlobal();
+                global.Clear();
+                _availableStores.Push(global);
             }
             else
             {
                 PopVariableScope(ref _loopStores);
                 tags = _loopTagsStack.Pop();
             }
-            // Make sure that tags are clear
-            tags.Clear();
-            _availableTags.Push(tags);
+
+            if (tags != null)
+            {
+                // Make sure that tags are clear
+                tags.Clear();
+                _availableTags.Push(tags);
+            }
         }
 
         /// <summary>

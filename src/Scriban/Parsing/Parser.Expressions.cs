@@ -14,7 +14,7 @@ namespace Scriban.Parsing
     {
         private int _allowNewLineLevel = 0;
         private int _expressionLevel = 0;
-
+        
         public int ExpressionLevel => _expressionLevel;
 
         private static readonly int PrecedenceOfMultiply = GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator.Multiply);
@@ -250,22 +250,38 @@ namespace Scriban.Parsing
 
                     if (Current.Type == TokenType.Equal)
                     {
-                        var assignExpression = Open<ScriptAssignExpression>();
-
-                        if (leftOperand != null && !(leftOperand is IScriptVariablePath) ||  functionCall != null || _expressionLevel > 1 || !allowAssignment)
+                        if (leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out ScriptFunction declaration))
                         {
-                            // unit test: 101-assign-complex-error1.txt
-                            LogError(assignExpression, $"Expression is only allowed for a top level assignment");
+                            if (_expressionLevel > 1 || !allowAssignment)
+                            {
+                                LogError(leftOperand, $"Creating a function is only allowed for a top level assignment");
+                            }
+                            
+                            declaration.EqualToken = ParseToken(); // eat equal token
+                            declaration.Body = ParseExpressionStatement();
+                            declaration.Span.End = declaration.Body.Span.End;
+                            leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
+                        }
+                        else
+                        {
+                            var assignExpression = Open<ScriptAssignExpression>();
+
+                            if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
+                            {
+                                // unit test: 101-assign-complex-error1.txt
+                                LogError(assignExpression, $"Expression is only allowed for a top level assignment");
+                            }
+
+                            assignExpression.EqualToken = ParseToken(); // eat equal token
+
+                            assignExpression.Target = TransformKeyword(leftOperand);
+
+                            // unit test: 105-assign-error3.txt
+                            assignExpression.Value = ExpectAndParseExpression(assignExpression, ref hasAnonymousFunction, parentExpression);
+
+                            leftOperand = Close(assignExpression);
                         }
 
-                        assignExpression.EqualToken = ParseToken(); // eat equal token
-
-                        assignExpression.Target = TransformKeyword(leftOperand);
-
-                        // unit test: 105-assign-error3.txt
-                        assignExpression.Value = ExpectAndParseExpression(assignExpression, ref hasAnonymousFunction, parentExpression);
-
-                        leftOperand = Close(assignExpression);
                         break;
                     }
 

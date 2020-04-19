@@ -1200,7 +1200,8 @@ namespace Scriban.Syntax
             }
 
             object result = null;
-            context.EnterFunction(callerContext);
+            var needLocal = !(externFunction is ScriptFunction func && func.HasParameters);
+            context.EnterFunction(callerContext, needLocal);
             try
             {
                 try
@@ -1230,7 +1231,7 @@ namespace Scriban.Syntax
             }
             finally
             {
-                context.ExitFunction();
+                context.ExitFunction(needLocal);
             }
 
             // Restore the flow state to none

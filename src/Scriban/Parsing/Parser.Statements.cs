@@ -342,11 +342,55 @@ namespace Scriban.Parsing
             return Close(elseStatement);
         }
 
-        private ScriptExpressionStatement ParseExpressionStatement()
+        private ScriptStatement ParseExpressionStatement()
         {
             var expressionStatement = Open<ScriptExpressionStatement>();
             bool hasAnonymous;
-            expressionStatement.Expression = TransformKeyword(ExpectAndParseExpressionAndAnonymous(expressionStatement, out hasAnonymous));
+
+            var expression = TransformKeyword(ExpectAndParseExpressionAndAnonymous(expressionStatement, out hasAnonymous));
+
+            // Special case, if the expression return should be converted back to a statement
+            if (expression is ScriptExpressionAsStatement expressionAsStatement)
+            {
+                var decl = expressionAsStatement.Statement;
+
+                // Copy previous trivias
+                if (expressionStatement.Trivias != null)
+                {
+                    if (decl.Trivias == null)
+                    {
+                        decl.Trivias = expressionStatement.Trivias;
+                    }
+                    else
+                    {
+                        for(int i = 0; i < expressionStatement.Trivias.Before.Count; i++)
+                        {
+                            decl.Trivias.Before.Insert(i, expressionStatement.Trivias.Before[i]);
+                        }
+                    }
+                }
+
+                // Copy after trivias
+                if (expression.Trivias != null)
+                {
+                    if (decl.Trivias == null)
+                    {
+                        decl.Trivias = expression.Trivias;
+                    }
+                    else
+                    {
+                        for (int i = 0; i < expression.Trivias.After.Count; i++)
+                        {
+                            decl.Trivias.Before.Insert(i, expression.Trivias.After[i]);
+                        }
+                    }
+                }
+
+                return decl;
+            }
+
+
+            expressionStatement.Expression = expression;
 
             // In case of an anonymous, there was already an ExpectEndOfStatement issued for the function
             // so we don't have to verify this here again
@@ -571,6 +615,44 @@ namespace Scriban.Parsing
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Used internally to transform an expression into a statement
+        /// </summary>
+        private partial class ScriptExpressionAsStatement : ScriptExpression
+        {
+            public ScriptExpressionAsStatement(ScriptStatement statement)
+            {
+                Statement = statement;
+            }
+
+            public ScriptStatement Statement { get; }
+
+            public override object Evaluate(TemplateContext context)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override void Write(TemplateRewriterContext context)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override void Accept(ScriptVisitor visitor)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor)
+            {
+                throw new NotSupportedException();
+            }
+
+            protected override IEnumerable<ScriptNode> GetChildren()
+            {
+                throw new NotSupportedException();
+            }
         }
     }
 }

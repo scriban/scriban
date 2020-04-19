@@ -170,7 +170,7 @@ namespace Scriban.Parsing
                         // Try to parse an expression
                         var expressionStatement = ParseExpressionStatement();
                         // If we don't have an assign expression, this is not a valid assign
-                        if (!(expressionStatement.Expression is ScriptAssignExpression))
+                        if (!(expressionStatement is ScriptExpressionStatement exprStatementFinal && exprStatementFinal.Expression is ScriptAssignExpression))
                         {
                             LogError(token, "Expecting an assign expression: <variable> = <expression>");
                         }
