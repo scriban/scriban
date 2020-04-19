@@ -13,33 +13,15 @@ namespace Scriban.Syntax
         /// <summary>
         /// The empty coalescing operator ??
         /// </summary>
-        EmptyCoalescing, 
+        EmptyCoalescing,
 
-        Add,
+        Or,
 
-        Substract,
-
-        Divide,
-
-        DivideRound,
-
-        Multiply,
-
-        Power,
-
-        Modulus,
-
-        BinaryAnd,
+        And,
 
         BinaryOr,
 
-        ShiftLeft,
-
-        ShiftRight,
-        
-        RangeInclude,
-
-        RangeExclude,
+        BinaryAnd,
 
         CompareEqual,
 
@@ -53,17 +35,28 @@ namespace Scriban.Syntax
 
         CompareGreater,
 
-        And,
-
-        Or,
-
-        Custom,
-
         LiquidContains,
         LiquidStartsWith,
         LiquidEndsWith,
         LiquidHasKey,
-        LiquidHasValue
+        LiquidHasValue,
+
+        Add,
+        Substract,
+
+        Multiply,
+        Divide,
+        DivideRound,
+        Modulus,
+        ShiftLeft,
+        ShiftRight,
+
+        Power,
+        
+        RangeInclude,
+        RangeExclude,
+
+        Custom,
     }
 
     public static class ScriptBinaryOperatorExtensions
