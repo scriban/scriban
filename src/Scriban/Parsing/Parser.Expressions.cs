@@ -475,7 +475,7 @@ namespace Scriban.Parsing
                             if (_isScientific)
                             {
                                 // Regular function call target(arg0, arg1, arg3, arg4...)
-                                if (Current.Type == TokenType.OpenParent)
+                                if (Current.Type == TokenType.OpenParent && !IsPreviousCharWhitespace())
                                 {
                                     // This is an explicit call
                                     functionCall.ExplicitCall = true;
@@ -549,6 +549,7 @@ namespace Scriban.Parsing
                         {
                             functionCall.Arguments.Add(leftOperand);
                             leftOperand = functionCall;
+                            functionCall = null;
                         }
 
                         var pipeCall = Open<ScriptPipeCall>();
