@@ -29,9 +29,11 @@
   <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
     <Reference Include="System.Web" />
   </ItemGroup>
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
+    <PackageReference Include="jnm2.ReferenceAssemblies.net35" Version="1.0.1" PrivateAssets="All" />
+  </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net35' OR '$(TargetFramework)' == 'net40' OR '$(TargetFramework)' == 'net45'">
-    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" />
-    <PackageReference Include="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.0" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' != 'net35' AND '$(TargetFramework)' != 'net40'">
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
