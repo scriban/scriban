@@ -273,7 +273,7 @@ namespace Scriban.Parsing
                                 LogError(assignExpression, $"Expression is only allowed for a top level assignment");
                             }
 
-                            assignExpression.EqualToken = ParseToken(); // eat equal token
+                            ExpectAndParseTokenTo(assignExpression.EqualToken, TokenType.Equal);
 
                             assignExpression.Target = TransformKeyword(leftOperand);
 

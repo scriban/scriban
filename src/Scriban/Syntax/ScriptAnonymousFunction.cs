@@ -7,8 +7,8 @@ namespace Scriban.Syntax
 {
     public partial class ScriptAnonymousFunction : ScriptExpression
     {
-        private ScriptFunction _function;
         private ScriptToken _doToken;
+        private ScriptFunction _function;
         
         public ScriptAnonymousFunction()
         {

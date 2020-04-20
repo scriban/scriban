@@ -14,6 +14,11 @@ namespace Scriban.Syntax
         private ScriptToken _equalToken;
         private ScriptExpression _value;
 
+        public ScriptAssignExpression()
+        {
+            EqualToken = new ScriptToken("=");
+        }
+
         public ScriptExpression Target
         {
             get => _target;
@@ -47,8 +52,7 @@ namespace Scriban.Syntax
         public override void Write(TemplateRewriterContext context)
         {
             context.Write(Target);
-            if (EqualToken == null) context.Write("=");
-            else context.Write(EqualToken);
+            context.Write(EqualToken);
             context.Write(Value);
         }
 
