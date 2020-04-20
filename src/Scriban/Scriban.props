@@ -28,7 +28,6 @@
   </PropertyGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
     <Reference Include="System.Web" />
-    <PackageReference Include="jnm2.ReferenceAssemblies.net35" Version="1.0.1" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net35'">
     <PackageReference Include="jnm2.ReferenceAssemblies.net35" Version="1.0.1" PrivateAssets="All" />
