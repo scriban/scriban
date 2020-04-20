@@ -80,6 +80,7 @@ namespace Scriban.Syntax
                     {
                         Left = leftValue,
                         Operator = bin.Operator,
+                        OperatorToken = new ScriptToken(bin.Operator.ToText()),
                         Right = rightValue,
                     };
                     continue;
@@ -114,7 +115,7 @@ namespace Scriban.Syntax
                         {
                             if (PrecedenceTopLevel == precedence || leftValue == null)
                             {
-                                var functionCall = new ScriptFunctionCall { Target = nextExpression, ExplicitCall = true };
+                                var functionCall = new ScriptFunctionCall { Target = (ScriptExpression)nextExpression.Clone(), ExplicitCall = true };
                                 _index++;
 
                                 var arg = Rewrite(context, 0);
@@ -131,6 +132,7 @@ namespace Scriban.Syntax
                                     {
                                         Left = leftValue,
                                         Operator = ScriptBinaryOperator.Multiply,
+                                        OperatorToken = new ScriptToken("*"),
                                         Right = functionCall,
                                     };
                                 }
@@ -147,7 +149,7 @@ namespace Scriban.Syntax
                 {
                     if (leftValue == null)
                     {
-                        leftValue = nextExpression;
+                        leftValue = (ScriptExpression)nextExpression.Clone();
                         _index++;
                     }
                     else
@@ -170,6 +172,7 @@ namespace Scriban.Syntax
                         {
                             Left = leftValue,
                             Operator = ScriptBinaryOperator.Multiply,
+                            OperatorToken = new ScriptToken("*"),
                             Right = rightValue,
                         };
                     }

@@ -222,8 +222,9 @@ namespace Scriban.Syntax
             get => (TScriptNode)_children[index];
             set
             {
-                AssertNoParent(value);
                 var previous = _children[index];
+                if (previous == value) return;
+                AssertNoParent(value);
                 _children[index] = value;
                 if (previous != null) previous.Parent = null;
             }

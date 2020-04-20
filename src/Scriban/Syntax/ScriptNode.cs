@@ -118,6 +118,7 @@ namespace Scriban.Syntax
         /// <param name="node">The new child node to parent to this instance</param>
         protected void ParentToThis<TSyntaxNode>(ref TSyntaxNode set, TSyntaxNode node) where TSyntaxNode : ScriptNode
         {
+            if (node == set) return;
             if (node?.Parent != null) throw ThrowHelper.GetExpectingNoParentException();
             if (set != null)
             {

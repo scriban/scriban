@@ -65,16 +65,16 @@ namespace Scriban.Syntax
 
             function = new ScriptFunction
             {
-                Name = name,
-                OpenParen = OpenParent,
+                Name = (ScriptVariable)name.Clone(),
+                OpenParen = (ScriptToken)OpenParent.Clone(),
                 Parameters = new ScriptList<ScriptVariable>(),
-                CloseParen = CloseParen,
+                CloseParen = (ScriptToken)CloseParen.Clone(),
                 Span = Span
             };
 
             foreach (var arg in Arguments)
             {
-                var parameter = (ScriptVariableGlobal) arg;
+                var parameter = (ScriptVariableGlobal) arg.Clone();
                 function.Parameters.Add(parameter);
             }
 

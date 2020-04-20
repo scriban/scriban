@@ -68,11 +68,13 @@ namespace Scriban.Syntax
             {
                 if (binaryExpression.Left is ScriptBinaryExpression leftBin && HasSimilarPrecedenceThanMultiply(leftBin.Operator))
                 {
+                    binaryExpression.Left = null;
                     binaryExpression.Left = new ScriptNestedExpression(leftBin);
                 }
 
                 if (binaryExpression.Right is ScriptBinaryExpression rightBin && HasSimilarPrecedenceThanMultiply(rightBin.Operator))
                 {
+                    binaryExpression.Right = null;
                     binaryExpression.Right = new ScriptNestedExpression(rightBin);
                 }
             }
@@ -132,6 +134,7 @@ namespace Scriban.Syntax
             while (expr is ScriptNestedExpression nested)
             {
                 expr = nested.Expression;
+                nested.Expression = null;
             }
 
             return expr;
