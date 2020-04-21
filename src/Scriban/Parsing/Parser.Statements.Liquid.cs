@@ -147,8 +147,9 @@ namespace Scriban.Parsing
                     statement = ParseLiquidCycleStatement();
                     break;
                 case "break":
-                    statement = Open<ScriptBreakStatement>();
-                    NextToken();
+                    var breakStatement = Open<ScriptBreakStatement>();
+                    statement = breakStatement;
+                    ExpectAndParseKeywordTo(breakStatement.BreakKeyword);
                     ExpectEndOfStatement();
                     Close(statement);
                     break;

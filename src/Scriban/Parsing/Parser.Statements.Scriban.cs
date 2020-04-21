@@ -141,8 +141,9 @@ namespace Scriban.Parsing
                     break;
                 case "break":
                     CheckNotInCase(parent, startToken);
-                    statement = Open<ScriptBreakStatement>();
-                    NextToken();
+                    var breakStatement = Open<ScriptBreakStatement>();
+                    statement = breakStatement;
+                    ExpectAndParseKeywordTo(breakStatement.BreakKeyword); // Parse break
                     ExpectEndOfStatement();
                     Close(statement);
 

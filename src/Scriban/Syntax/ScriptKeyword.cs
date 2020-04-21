@@ -12,7 +12,8 @@ namespace Scriban.Syntax
         public static ScriptKeyword Func() => new ScriptKeyword("func");
 
         public static ScriptKeyword Do() => new ScriptKeyword("do");
-        
+
+        public static ScriptKeyword Break() => new ScriptKeyword("break");
 
         public ScriptKeyword()
         {
