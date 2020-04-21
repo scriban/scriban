@@ -42,7 +42,9 @@ jobs:
         path-to-lcov: src/${{env.PROJECT_NAME}}.Tests/coverage.info
 
     - name: Pack
-      run: dotnet pack src -c Release
+      run:
+        - dotnet pack src -c Release
+        - dotnet pack src/${{env.PROJECT_NAME}}.Signed -c Release
 
     - name: Publish
       if: github.event_name == 'push'
