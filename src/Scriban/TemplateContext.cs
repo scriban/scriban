@@ -925,7 +925,7 @@ namespace Scriban
             {
                 var currentLoopStatement = _loops.Peek();
 
-                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{LoopLimit}` for statement: {currentLoopStatement}"); // unit test: 215-for-statement-error1.txt
+                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{LoopLimit}` for loop statement."); // unit test: 215-for-statement-error1.txt
             }
             return OnStepLoop(loop);
         }
@@ -1076,12 +1076,12 @@ namespace Scriban
                 }
                 else
                 {
-                    throw new ScriptRuntimeException(targetExpression.Span, $"Unsupported expression for target for assignment: {targetExpression} = ..."); // unit test: 105-assign-error1.txt
+                    throw new ScriptRuntimeException(targetExpression.Span, $"Unsupported target expression for assignment."); // unit test: 105-assign-error1.txt
                 }
             }
             catch (Exception readonlyException) when(_getOrSetValueLevel == 1 && !(readonlyException is ScriptRuntimeException))
             {
-                throw new ScriptRuntimeException(targetExpression.Span, $"Unexpected exception while accessing `{targetExpression}`: {readonlyException.Message}", readonlyException);
+                throw new ScriptRuntimeException(targetExpression.Span, $"Unexpected exception while accessing target expression: {readonlyException.Message}", readonlyException);
             }
 
             // If the variable being returned is a function, we need to evaluate it

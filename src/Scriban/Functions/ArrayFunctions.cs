@@ -16,7 +16,7 @@ namespace Scriban.Functions
     /// <summary>
     /// Array functions available through the object 'array' in scriban.
     /// </summary>
-    public class ArrayFunctions : ScriptObject
+    public partial class ArrayFunctions : ScriptObject
     {
         /// <summary>
         /// Adds a value to the input list.

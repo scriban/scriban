@@ -14,6 +14,7 @@ namespace Scriban.Syntax
     public partial class ScriptArgumentBinary : ScriptExpression
     {
         private ScriptToken _operatorToken;
+
         public ScriptBinaryOperator Operator { get; set; }
 
         public ScriptToken OperatorToken
@@ -29,12 +30,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            
-        }
-
-        public override string ToString()
-        {
-            return OperatorToken?.ToString() ?? Operator.ToText();
+            context.Write(OperatorToken?.ToString() ?? Operator.ToText());
         }
     }
 }

@@ -65,7 +65,7 @@ namespace Scriban.Syntax
 
             function = new ScriptFunction
             {
-                Name = (ScriptVariable)name.Clone(),
+                NameOrDoToken = (ScriptVariable)name.Clone(),
                 OpenParen = (ScriptToken)OpenParent.Clone(),
                 Parameters = new ScriptList<ScriptVariable>(),
                 CloseParen = (ScriptToken)CloseParen.Clone(),
@@ -146,12 +146,6 @@ namespace Scriban.Syntax
         public override bool CanHaveLeadingTrivia()
         {
             return false;
-        }
-
-        public override string ToString()
-        {
-            var args = StringHelper.Join(" ", Arguments);
-            return $"{Target} {args}";
         }
         public static bool IsFunction(object target)
         {

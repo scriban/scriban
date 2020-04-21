@@ -57,10 +57,5 @@ namespace Scriban.Syntax
                 context.WriteExitCode(EscapeCount);
             }
         }
-
-        public override string ToString()
-        {
-            return Text?.Substring(SliceIndex, SliceLength) ?? string.Empty;
-        }
     }
 }

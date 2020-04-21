@@ -53,10 +53,5 @@ namespace Scriban.Syntax
             context.Write(Body);
             context.ExpectEnd();
         }
-
-        public override string ToString()
-        {
-            return $"with {Name} <...> end";
-        }
     }
 }

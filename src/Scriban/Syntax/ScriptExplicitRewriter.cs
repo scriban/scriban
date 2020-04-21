@@ -129,6 +129,19 @@ namespace Scriban.Syntax
             return functionCall;
         }
 
+        public override ScriptNode Visit(ScriptFunction node)
+        {
+            var newFunction = (ScriptFunction) base.Visit(node);
+
+            if (newFunction.EqualToken != null)
+            {
+                newFunction.EqualToken.AddSpaceBefore();
+                newFunction.EqualToken.AddSpaceAfter();
+            }
+
+            return newFunction;
+        }
+
         private static ScriptExpression DeNestExpression(ScriptExpression expr)
         {
             while (expr is ScriptNestedExpression nested)

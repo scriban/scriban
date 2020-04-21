@@ -53,11 +53,6 @@ namespace Scriban.Syntax
                 context.Write("]");
             }
         }
-
-        public override string ToString()
-        {
-            return $"{Target}[{Index}]";
-        }
         public object GetValue(TemplateContext context)
         {
             return GetOrSetValue(context, null, false);

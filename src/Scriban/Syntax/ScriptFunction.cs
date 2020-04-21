@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. 
 // See license.txt file in the project root for full license information.
 
+using System;
 using System.Threading.Tasks;
 using Scriban.Runtime;
 using System.Collections.Generic;
@@ -13,17 +14,25 @@ namespace Scriban.Syntax
     [ScriptSyntax("function statement", "func <variable> ... end")]
     public partial class ScriptFunction : ScriptStatement, IScriptCustomFunction
     {
-        private ScriptVariable _name;
+        private ScriptNode _nameOrDoToken;
         private ScriptToken _openParen;
         private ScriptList<ScriptVariable> _parameters;
         private ScriptToken _closeParen;
         private ScriptToken _equalToken;
         private ScriptStatement _body;
 
-        public ScriptVariable Name
+        public ScriptNode NameOrDoToken
         {
-            get => _name;
-            set => ParentToThis(ref _name, value);
+            get => _nameOrDoToken;
+            set
+            {
+                if (value != null && (!(value is ScriptVariable || (value is ScriptToken token && token.Value == "do"))))
+                {
+                    throw new ArgumentException($"Must be a {nameof(ScriptVariable)} or `do` {nameof(ScriptToken)}");
+                }
+
+                ParentToThis(ref _nameOrDoToken, value);
+            }
         }
 
         public ScriptToken OpenParen
@@ -56,87 +65,53 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _body, value);
         }
 
-        public bool IsAnonymous { get; set; }
+        public bool IsAnonymous => !(NameOrDoToken is ScriptVariable);
 
         public bool HasParameters => Parameters != null;
 
         public override object Evaluate(TemplateContext context)
         {
-            if (Name != null)
+            if (NameOrDoToken is ScriptVariable variable)
             {
-                context.SetValue(Name, this);
+                context.SetValue(variable, this);
             }
             return null;
         }
 
         public override bool CanHaveLeadingTrivia()
         {
-            return Name != null;
-        }
-
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            if (HasParameters && !(Body is ScriptBlockStatement))
-            {
-                builder.Append(Name);
-                builder.Append("(");
-                for (var i = 0; i < Parameters.Count; i++)
-                {
-                    var param = Parameters[i];
-                    if (i > 0) builder.Append(", ");
-                    builder.Append(param.Name);
-                }
-                builder.Append(") = ...");
-            }
-            else
-            {
-                builder.Append("func ");
-                builder.Append(Name);
-
-                if (HasParameters)
-                {
-                    builder.Append("(");
-                    for (var i = 0; i < Parameters.Count; i++)
-                    {
-                        var param = Parameters[i];
-                        if (i > 0) builder.Append(", ");
-                        builder.Append(param.Name);
-                    }
-                    builder.Append(")");
-                }
-
-                builder.Append(" ... end");
-            }
-
-            return builder.ToString();
+            return NameOrDoToken != null;
         }
 
         public override void Write(TemplateRewriterContext context)
         {
-            if (!IsAnonymous)
+            if (!IsAnonymous && Body is ScriptBlockStatement)
             {
-                if (Body is ScriptBlockStatement)
-                {
-                    context.Write("func").ExpectSpace();
-                }
-                context.Write(Name);
+                context.Write("func").ExpectSpace();
+            }
+            context.Write(NameOrDoToken);
 
-                if (OpenParen != null) context.Write(OpenParen);
-                if (HasParameters)
+            if (OpenParen != null) context.Write(OpenParen);
+            if (HasParameters)
+            {
+                if (OpenParen != null)
+                {
+                    context.WriteListWithCommas(Parameters);
+                }
+                else
                 {
                     for (var i = 0; i < Parameters.Count; i++)
                     {
                         var param = Parameters[i];
-                        if (OpenParen == null || i > 0)
+                        if (i > 0)
                         {
                             context.ExpectSpace();
                         }
                         context.Write(param);
                     }
                 }
-                if (CloseParen != null) context.Write(CloseParen);
             }
+            if (CloseParen != null) context.Write(CloseParen);
 
             if (Body is ScriptBlockStatement)
             {

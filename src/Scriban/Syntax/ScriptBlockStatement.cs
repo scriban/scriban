@@ -73,10 +73,5 @@ namespace Scriban.Syntax
         {
             return false;
         }
-
-        public override string ToString()
-        {
-            return $"<statements[{Statements.Count}]>";
-        }
     }
 }

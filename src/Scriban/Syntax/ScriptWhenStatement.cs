@@ -65,22 +65,5 @@ namespace Scriban.Syntax
             context.Write(Body);
             context.Write(Next);
         }
-
-        public override string ToString()
-        {
-            var builder = new StringBuilder();
-            builder.Append("when ");
-            for (var i = 0; i < Values.Count; i++)
-            {
-                var value = Values[i];
-                if (i > 0)
-                {
-                    builder.Append(", ");
-                }
-                builder.Append(value);
-            }
-
-            return builder.ToString();
-        }
     }
 }

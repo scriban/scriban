@@ -35,7 +35,7 @@ namespace Scriban.Functions
     /// A `timespan` and also the added to a `datetime` object.
     /// </summary>
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
-    public class DateTimeFunctions : ScriptObject, IScriptCustomFunction
+    public partial class DateTimeFunctions : ScriptObject, IScriptCustomFunction
     {
         private const string FormatKey = "format";
 

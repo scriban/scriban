@@ -181,10 +181,5 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(argument.Span, $"Unsupported argument `{argument.Name}` for statement: `{this}`");
         }
 #endif
-
-        public override string ToString()
-        {
-            return $"for {Variable} in {Iterator} ... end";
-        }
     }
 }

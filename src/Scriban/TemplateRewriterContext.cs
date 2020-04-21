@@ -129,6 +129,7 @@ namespace Scriban
                 if (i + 1 < list.Count && !value.HasTrivia(ScriptTriviaType.Comma, false))
                 {
                     Write(",");
+                    ExpectSpace();
                 }
             }
             return this;

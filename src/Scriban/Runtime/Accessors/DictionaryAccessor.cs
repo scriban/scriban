@@ -10,7 +10,7 @@ using Scriban.Parsing;
 
 namespace Scriban.Runtime.Accessors
 {
-    public sealed class DictionaryAccessor : IObjectAccessor
+    public sealed partial class DictionaryAccessor : IObjectAccessor
     {
         public static readonly DictionaryAccessor Default = new DictionaryAccessor();
 

@@ -110,10 +110,5 @@ namespace Scriban.Syntax
 
             return targetObject;
         }
-
-        public override string ToString()
-        {
-            return $"{Target}.{Member}";
-        }
     }
 }

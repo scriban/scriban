@@ -1,1 +1,1 @@
-text(5,1) : error : Exceeding number of iteration limit `1000` for statement: for x in 1 .. 1000000 ... end
+text(5,1) : error : Exceeding number of iteration limit `1000` for loop statement.

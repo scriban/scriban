@@ -292,7 +292,7 @@ Tax: {{ 7 | match_tax }}";
             });
             var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
             var result = exception.ToString();
-            Assert.True(result.Contains("a.b.c"), $"The exception string `{result}` does not contain a.b.c");
+            Assert.True(result.Contains("The object is readonly"), $"The exception string `{result}` does not contain \"The object is readonly\"");
         }
 
         [Test]

@@ -47,10 +47,5 @@ namespace Scriban.Syntax
             context.Write(Body);
             context.ExpectEnd();
         }
-
-        public override string ToString()
-        {
-            return $"case {Value}";
-        }
     }
 }

@@ -55,10 +55,5 @@ namespace Scriban.Syntax
             context.Write(EqualToken);
             context.Write(Value);
         }
-
-        public override string ToString()
-        {
-            return $"{Target} = {Value}";
-        }
     }
 }

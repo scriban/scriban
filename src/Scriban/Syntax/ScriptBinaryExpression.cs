@@ -97,11 +97,6 @@ namespace Scriban.Syntax
             context.Write(Right);
         }
 
-        public override string ToString()
-        {
-            return $"{Left} {OperatorAsText} {Right}";
-        }
-
         public override bool CanHaveLeadingTrivia()
         {
             return false;

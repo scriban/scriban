@@ -136,9 +136,15 @@ namespace Scriban.AsyncCodeGen
                 {
                     var callingMethodSymbol = (IMethodSymbol)referencer.CallingSymbol;
 
+                    if (callingMethodSymbol.MethodKind == MethodKind.StaticConstructor || callingMethodSymbol.MethodKind == MethodKind.Constructor)
+                    {
+                        continue;
+                    }
+                    
                     // Skip methods over than Evaluate for ScriptNode
                     // Skip also entirely any methods related to ScriptVisitor
-                    if ((callingMethodSymbol.OverriddenMethod != null && callingMethodSymbol.OverriddenMethod.ContainingType.Name == "ScriptNode" && callingMethodSymbol.Name != "Evaluate") ||
+                    if (callingMethodSymbol.Name == "ToString" ||
+                            (callingMethodSymbol.OverriddenMethod != null && callingMethodSymbol.OverriddenMethod.ContainingType.Name == "ScriptNode" && callingMethodSymbol.Name != "Evaluate") ||
                         InheritFrom(callingMethodSymbol.ContainingType, "Syntax", "ScriptVisitor"))
                     {
                         continue;
@@ -153,16 +159,10 @@ namespace Scriban.AsyncCodeGen
                         methods.Push(methodOverride.OverriddenMethod);
                         methodOverride = methodOverride.OverriddenMethod;
                     }
-
-                    if (callingMethodSymbol.MethodKind == MethodKind.StaticConstructor)
-                    {
-                        continue;
-                    }
-
+                    
                     var callingSyntax = referencer.CallingSymbol.DeclaringSyntaxReferences[0].GetSyntax();
                     var callingMethod = (MethodDeclarationSyntax)callingSyntax;
-
-
+                    
                     foreach (var invokeLocation in referencer.Locations)
                     {
                         var invoke = callingMethod.FindNode(invokeLocation.SourceSpan);
@@ -270,14 +270,16 @@ using System.Numerics;
                     {
                         var rootSyntax = typeDecl.SyntaxTree.GetRoot();
                         var originalDoc = solution.GetDocument(rootSyntax.SyntaxTree);
+                        if (originalDoc != null)
+                        {
+                            var previousDecl = typeDecl;
+                            typeDecl = typeDecl.WithModifiers(typeDecl.Modifiers.Add(Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(Space)));
 
-                        var previousDecl = typeDecl;
-                        typeDecl = typeDecl.WithModifiers(typeDecl.Modifiers.Add(Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(Space)));
+                            rootSyntax = rootSyntax.ReplaceNode(previousDecl, typeDecl);
 
-                        rootSyntax = rootSyntax.ReplaceNode(previousDecl, typeDecl);
-
-                        originalDoc = originalDoc.WithSyntaxRoot(rootSyntax);
-                        solution = originalDoc.Project.Solution;
+                            originalDoc = originalDoc.WithSyntaxRoot(rootSyntax);
+                            solution = originalDoc.Project.Solution;
+                        }
                     }
 
                     typeDecl = typeDecl.RemoveNodes(typeDecl.ChildNodes().ToList(), SyntaxRemoveOptions.KeepNoTrivia);
@@ -495,16 +497,13 @@ using System.Numerics;
                     IdentifierName("Syntax")));
 
             var allScriptNodeTypes = await SymbolFinder.FindDerivedClassesAsync(_scriptNodeType, solution, new[] {project}.ToImmutableHashSet());
-            var listOfScriptNodes = new List<INamedTypeSymbol>(allScriptNodeTypes);
-
+            var listOfScriptNodes = allScriptNodeTypes.OrderBy(x => x.Name).ToList();
             listOfScriptNodes = listOfScriptNodes.Where(x => (x.DeclaredAccessibility & Accessibility.Public) != 0 && !x.IsAbstract && x.Name != "ScriptList").ToList();
 
             foreach (var scriptNodeDerivedType in listOfScriptNodes)
             {
                 var typeDecl = GenerateChildrenCountAndGetChildrenImplMethods(scriptNodeDerivedType);
                 scriptSyntaxNs = scriptSyntaxNs.AddMembers(typeDecl);
-
-                solution = ModifyProperties(scriptNodeDerivedType, solution);
             }
 
             // Generate visitors and rewriters
@@ -553,7 +552,7 @@ using System.Numerics;
 
         private static bool IsScriptNode(ITypeSymbol typeSymbol)
         {
-            return typeSymbol.InheritsFrom(_scriptNodeType);
+            return ReferenceEquals(typeSymbol, _scriptNodeType) || typeSymbol.InheritsFrom(_scriptNodeType);
         }
 
         private static bool IsScriptList(ITypeSymbol typeSymbol)

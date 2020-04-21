@@ -9,6 +9,7 @@ using System.IO;
 using System.Threading.Tasks;
 using Scriban.Helpers;
 using Scriban.Parsing;
+using Scriban.Runtime;
 
 namespace Scriban.Syntax
 {
@@ -129,6 +130,15 @@ namespace Scriban.Syntax
                 node.Parent = this;
             }
             set = node;
+        }
+
+
+        public sealed override string ToString()
+        {
+            var strOutput = new StringBuilderOutput();
+            var template = new TemplateRewriterContext(strOutput , new TemplateRewriterOptions() { Mode = ScriptMode.ScriptOnly });
+            template.Write(this);
+            return strOutput.ToString();
         }
     }
 

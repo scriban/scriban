@@ -56,10 +56,5 @@ namespace Scriban.Syntax
             context.WriteListWithCommas(Values);
             context.Write(CloseBracketToken);
         }
-
-        public override string ToString()
-        {
-            return $"[{StringHelper.Join(", ", Values)}]";
-        }
     }
 }

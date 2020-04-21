@@ -35,10 +35,5 @@ namespace Scriban.Syntax
             context.Write(Expression);
             context.ExpectEos();
         }
-
-        public override string ToString()
-        {
-            return Expression?.ToString();
-        }
     }
 }

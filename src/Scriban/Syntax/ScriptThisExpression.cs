@@ -36,10 +36,5 @@ namespace Scriban.Syntax
         {
             return "this";
         }
-
-        public override string ToString()
-        {
-            return $"this";
-        }
     }
 }

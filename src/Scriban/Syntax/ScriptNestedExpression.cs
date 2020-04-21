@@ -47,11 +47,6 @@ namespace Scriban.Syntax
             context.Write(Expression);
             context.Write(")");
         }
-
-        public override string ToString()
-        {
-            return $"({Expression})";
-        }
         public object GetValue(TemplateContext context)
         {
             return context.Evaluate(Expression);

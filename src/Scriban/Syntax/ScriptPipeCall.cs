@@ -94,10 +94,5 @@ namespace Scriban.Syntax
             context.Write(PipeToken);
             context.Write(To);
         }
-
-        public override string ToString()
-        {
-            return $"{From} {PipeToken} {To}";
-        }
     }
 }

@@ -7,20 +7,12 @@ namespace Scriban.Syntax
 {
     public partial class ScriptAnonymousFunction : ScriptExpression
     {
-        private ScriptToken _doToken;
         private ScriptFunction _function;
         
         public ScriptAnonymousFunction()
         {
-            DoToken = new ScriptToken("do");
         }
-        
-        public ScriptToken DoToken
-        {
-            get => _doToken;
-            set => ParentToThis(ref _doToken, value);
-        }
-        
+       
         public ScriptFunction Function
         {
             get => _function;
@@ -34,7 +26,6 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write(DoToken).ExpectSpace();
             context.Write(Function);
         }
     }

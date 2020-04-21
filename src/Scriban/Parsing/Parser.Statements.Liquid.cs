@@ -149,13 +149,13 @@ namespace Scriban.Parsing
                 case "break":
                     statement = Open<ScriptBreakStatement>();
                     NextToken();
-                    ExpectEndOfStatement(statement);
+                    ExpectEndOfStatement();
                     Close(statement);
                     break;
                 case "continue":
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
-                    ExpectEndOfStatement(statement);
+                    ExpectEndOfStatement();
                     Close(statement);
                     break;
                 case "assign":
@@ -217,7 +217,7 @@ namespace Scriban.Parsing
                 }
                 else
                 {
-                    ExpectEndOfStatement(startStatement);
+                    ExpectEndOfStatement();
                     if (_isKeepTrivia)
                     {
                         FlushTrivias(startStatement, false);
@@ -290,7 +290,7 @@ namespace Scriban.Parsing
 
             Close(functionCall);
 
-            ExpectEndOfStatement(statement);
+            ExpectEndOfStatement();
             return Close(statement);
         }
 
@@ -347,7 +347,7 @@ namespace Scriban.Parsing
             binaryExpression.Left = ExpectAndParseVariable(incdecStatement);
             binaryExpression.Right = new ScriptLiteral() {Span = binaryExpression.Span, Value = 1};
             binaryExpression.Operator = isDec ? ScriptBinaryOperator.Substract : ScriptBinaryOperator.Add;
-            ExpectEndOfStatement(incdecStatement);
+            ExpectEndOfStatement();
 
             incdecStatement.Expression = binaryExpression;
 
@@ -475,7 +475,7 @@ namespace Scriban.Parsing
                     }
                 }
 
-                ExpectEndOfStatement(includeStatement);
+                ExpectEndOfStatement();
 
                 // If we only have an include for, return it directly
                 if (forStatement != null)
@@ -495,7 +495,7 @@ namespace Scriban.Parsing
                 }
             }
 
-            ExpectEndOfStatement(includeStatement);
+            ExpectEndOfStatement();
             return Close(includeStatement);
         }
    }

@@ -42,10 +42,5 @@ namespace Scriban.Syntax
         {
             context.Write(Value);
         }
-
-        public override string ToString()
-        {
-            return Value;
-        }
     }
 }

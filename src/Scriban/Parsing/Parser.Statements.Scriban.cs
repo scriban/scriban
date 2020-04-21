@@ -32,7 +32,7 @@ namespace Scriban.Parsing
                     NextToken();
 
                     var matchingStatement = FindFirstStatementExpectingEnd();
-                    ExpectEndOfStatement(matchingStatement);
+                    ExpectEndOfStatement();
                     if (_isKeepTrivia)
                     {
                         FlushTrivias(matchingStatement, false);
@@ -143,7 +143,7 @@ namespace Scriban.Parsing
                     CheckNotInCase(parent, startToken);
                     statement = Open<ScriptBreakStatement>();
                     NextToken();
-                    ExpectEndOfStatement(statement);
+                    ExpectEndOfStatement();
                     Close(statement);
 
                     // This has to be done at execution time, because of the wrap statement
@@ -156,7 +156,7 @@ namespace Scriban.Parsing
                     CheckNotInCase(parent, startToken);
                     statement = Open<ScriptContinueStatement>();
                     NextToken();
-                    ExpectEndOfStatement(statement);
+                    ExpectEndOfStatement();
                     Close(statement);
 
                     // This has to be done at execution time, because of the wrap statement
@@ -190,72 +190,76 @@ namespace Scriban.Parsing
             var scriptFunction = Open<ScriptFunction>();
             if (!isAnonymous)
             {
-                NextToken(); // skip func or do
+                NextToken(); // skip func
             }
 
-            scriptFunction.IsAnonymous = isAnonymous;
-
-            if (!isAnonymous)
+            if (isAnonymous)
             {
-                scriptFunction.Name = ExpectAndParseVariable(scriptFunction);
+                var doToken = new ScriptToken("do");
+                ExpectAndParseTokenTo(doToken, "do");
+                scriptFunction.NameOrDoToken = doToken;
+            }
+            else
+            {
+                scriptFunction.NameOrDoToken = ExpectAndParseVariable(scriptFunction);
+            }
 
-                // If we have parenthesis, this is a function with explicit parameters
-                if (Current.Type == TokenType.OpenParent)
+            // If we have parenthesis, this is a function with explicit parameters
+            if (Current.Type == TokenType.OpenParent)
+            {
+                scriptFunction.OpenParen = ParseToken();
+                scriptFunction.Parameters = new ScriptList<ScriptVariable>();
+
+                bool isFirst = true;
+                while (true)
                 {
-                    scriptFunction.OpenParen = ParseToken();
-                    scriptFunction.Parameters = new ScriptList<ScriptVariable>();
-
-                    bool isFirst = true;
-                    while (true)
+                    // Parse any required comma (before each new non-first argument)
+                    // Or closing parent (and we exit the loop)
+                    if (Current.Type == TokenType.CloseParent)
                     {
-                        // Parse any required comma (before each new non-first argument)
-                        // Or closing parent (and we exit the loop)
-                        if (Current.Type == TokenType.CloseParent)
-                        {
-                            scriptFunction.CloseParen = ParseToken();
-                            break;
-                        }
+                        scriptFunction.CloseParen = ParseToken();
+                        break;
+                    }
 
-                        if (!isFirst)
+                    if (!isFirst)
+                    {
+                        if (Current.Type == TokenType.Comma)
                         {
-                            if (Current.Type == TokenType.Comma)
-                            {
-                                PushTokenToTrivia();
-                                NextToken();
-                            }
-                            else
-                            {
-                                LogError(Current, "Expecting a comma to separate arguments in a function call.");
-                            }
-                        }
-                        isFirst = false;
-
-                        // Else we expect an expression
-                        if (IsStartOfExpression())
-                        {
-                            var arg = ExpectAndParseVariable(scriptFunction);
-                            if (!(arg is ScriptVariableGlobal))
-                            {
-                                LogError(arg.Span, "Expecting only a simple name parameter for a function");
-                            }
-                            scriptFunction.Parameters.Add(arg);
-                            scriptFunction.Span.End = arg.Span.End;
+                            PushTokenToTrivia();
+                            NextToken();
                         }
                         else
                         {
-                            LogError(Current, "Expecting an expression for argument function calls instead of this token.");
-                            break;
+                            LogError(Current, "Expecting a comma to separate arguments in a function call.");
                         }
                     }
+                    isFirst = false;
 
-                    if (scriptFunction.CloseParen == null)
+                    // Else we expect an expression
+                    if (IsStartOfExpression())
                     {
-                        LogError(Current, "Expecting a closing parenthesis for a function call.");
+                        var arg = ExpectAndParseVariable(scriptFunction);
+                        if (!(arg is ScriptVariableGlobal))
+                        {
+                            LogError(arg.Span, "Expecting only a simple name parameter for a function");
+                        }
+                        scriptFunction.Parameters.Add(arg);
+                        scriptFunction.Span.End = arg.Span.End;
                     }
+                    else
+                    {
+                        LogError(Current, "Expecting an expression for argument function calls instead of this token.");
+                        break;
+                    }
+                }
+
+                if (scriptFunction.CloseParen == null)
+                {
+                    LogError(Current, "Expecting a closing parenthesis for a function call.");
                 }
             }
 
-            ExpectEndOfStatement(scriptFunction);
+            ExpectEndOfStatement();
             scriptFunction.Body = ParseBlockStatement(scriptFunction);
 
             return Close(scriptFunction);
@@ -267,7 +271,7 @@ namespace Scriban.Parsing
             NextToken(); // skip import
 
             importStatement.Expression = ExpectAndParseExpression(importStatement);
-            ExpectEndOfStatement(importStatement);
+            ExpectEndOfStatement();
 
             return Close(importStatement);
         }
@@ -278,7 +282,7 @@ namespace Scriban.Parsing
             NextToken(); // Skip readonly keyword
 
             readOnlyStatement.Variable = ExpectAndParseVariable(readOnlyStatement);
-            ExpectEndOfStatement(readOnlyStatement);
+            ExpectEndOfStatement();
 
             return Close(readOnlyStatement);
         }
@@ -292,7 +296,7 @@ namespace Scriban.Parsing
             {
                 ret.Expression = ParseExpression(ret);
             }
-            ExpectEndOfStatement(ret);
+            ExpectEndOfStatement();
 
             return Close(ret);
         }
@@ -306,7 +310,7 @@ namespace Scriban.Parsing
             // unit test: 220-while-error1.txt
             whileStatement.Condition = ExpectAndParseExpression(whileStatement, allowAssignment: false);
 
-            if (ExpectEndOfStatement(whileStatement))
+            if (ExpectEndOfStatement())
             {
                 FlushTrivias(whileStatement.Condition, false);
                 whileStatement.Body = ParseBlockStatement(whileStatement);
@@ -321,7 +325,7 @@ namespace Scriban.Parsing
             NextToken();
             withStatement.Name = ExpectAndParseExpression(withStatement);
 
-            if (ExpectEndOfStatement(withStatement))
+            if (ExpectEndOfStatement())
             {
                 withStatement.Body = ParseBlockStatement(withStatement);
             }
@@ -335,7 +339,7 @@ namespace Scriban.Parsing
 
             wrapStatement.Target = ExpectAndParseExpression(wrapStatement);
 
-            if (ExpectEndOfStatement(wrapStatement))
+            if (ExpectEndOfStatement())
             {
                 FlushTrivias(wrapStatement.Target, false);
                 wrapStatement.Body = ParseBlockStatement(wrapStatement);

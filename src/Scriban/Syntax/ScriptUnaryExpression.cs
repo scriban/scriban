@@ -125,10 +125,5 @@ namespace Scriban.Syntax
             }
             context.Write(Right);
         }
-
-        public override string ToString()
-        {
-            return $"{OperatorAsText}{Right}";
-        }
     }
 }

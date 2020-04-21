@@ -287,7 +287,7 @@ namespace Scriban.Parsing
 
             // unit test: 231-capture-error1.txt
             captureStatement.Target = ExpectAndParseExpression(captureStatement);
-            ExpectEndOfStatement(captureStatement);
+            ExpectEndOfStatement();
             captureStatement.Body = ParseBlockStatement(captureStatement);
 
             return Close(captureStatement);
@@ -300,7 +300,7 @@ namespace Scriban.Parsing
 
             caseStatement.Value = ExpectAndParseExpression(caseStatement, allowAssignment: false);
 
-            if (ExpectEndOfStatement(caseStatement))
+            if (ExpectEndOfStatement())
             {
                 FlushTrivias(caseStatement.Value, false);
                 caseStatement.Body = ParseBlockStatement(caseStatement);
@@ -335,7 +335,7 @@ namespace Scriban.Parsing
             NextToken(); // skip else
 
             // unit test: 201-if-else-error4.txt
-            if (ExpectEndOfStatement(elseStatement))
+            if (ExpectEndOfStatement())
             {
                 elseStatement.Body = ParseBlockStatement(elseStatement);
             }
@@ -396,7 +396,7 @@ namespace Scriban.Parsing
             // so we don't have to verify this here again
             if (!hasAnonymous)
             {
-                ExpectEndOfStatement(expressionStatement);
+                ExpectEndOfStatement();
             }
             return Close(expressionStatement);
         }
@@ -439,7 +439,7 @@ namespace Scriban.Parsing
                 // unit test: 211-for-error3.txt
                 forStatement.Iterator = ExpectAndParseExpression(forStatement);
 
-                if (ExpectEndOfStatement(forStatement))
+                if (ExpectEndOfStatement())
                 {
                     FlushTrivias(forStatement.IteratorOrLastParameter, false);
                     forStatement.Body = ParseBlockStatement(forStatement);
@@ -459,7 +459,7 @@ namespace Scriban.Parsing
 
             condition.Condition = ExpectAndParseExpression(condition, allowAssignment: false);
 
-            if (ExpectEndOfStatement(condition))
+            if (ExpectEndOfStatement())
             {
                 FlushTrivias(condition.Condition, false);
                 condition.Then = ParseBlockStatement(condition);
@@ -535,7 +535,7 @@ namespace Scriban.Parsing
                 LogError(Current, "When is expecting at least one value.");
             }
 
-            if (ExpectEndOfStatement(whenStatement))
+            if (ExpectEndOfStatement())
             {
                 if (_isKeepTrivia && whenStatement.Values.Count > 0)
                 {
@@ -576,7 +576,7 @@ namespace Scriban.Parsing
             return null;
         }
 
-        private bool ExpectEndOfStatement(ScriptStatement statement)
+        private bool ExpectEndOfStatement()
         {
             if (_isLiquid)
             {

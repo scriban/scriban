@@ -77,7 +77,7 @@ namespace Scriban.Syntax
 
         public string GetFirstPath()
         {
-            return ToString();
+            return Scope == ScriptVariableScope.Local ? $"${Name}" : Name;
         }
 
         public virtual bool Equals(ScriptVariable other)
@@ -97,11 +97,6 @@ namespace Scriban.Syntax
         public override int GetHashCode()
         {
             return _hashCode;
-        }
-
-        public override string ToString()
-        {
-            return Scope == ScriptVariableScope.Local ? $"${Name}" : Name;
         }
 
         public static bool operator ==(ScriptVariable left, ScriptVariable right)
@@ -131,7 +126,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write(ToString());
+            context.Write(Scope == ScriptVariableScope.Local ? $"${Name}" : Name);
         }
     }
 
@@ -167,7 +162,7 @@ namespace Scriban.Syntax
             if (context.IsInWhileLoop)
             {
                 // TODO: Not efficient
-                context.Write(ToString().Replace("for", "while"));
+                context.Write(Name == "for" ? "while" : Name);
             }
             else
             {

@@ -16,7 +16,7 @@ namespace Scriban.Runtime
     /// Base runtime object used to store properties.
     /// </summary>
     /// <seealso cref="System.Collections.IEnumerable" />
-    public class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject, IDictionary
+    public partial class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject, IDictionary
     {
         internal Dictionary<string, InternalValue> Store { get; private set; }
 

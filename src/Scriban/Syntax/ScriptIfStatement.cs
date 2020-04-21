@@ -78,10 +78,5 @@ namespace Scriban.Syntax
                 context.ExpectEnd();
             }
         }
-
-        public override string ToString()
-        {
-            return $"if {Condition}";
-        }
     }
 }

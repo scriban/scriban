@@ -60,9 +60,5 @@ namespace Scriban.Syntax
             }
             context.Write("}");
         }
-        public override string ToString()
-        {
-            return "{...}";
-        }
     }
 }
