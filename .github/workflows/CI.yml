@@ -42,13 +42,13 @@ jobs:
         path-to-lcov: src/${{env.PROJECT_NAME}}.Tests/coverage.info
 
     - name: Pack
-      run:
-        - dotnet pack src -c Release
-        - dotnet pack src/${{env.PROJECT_NAME}}.Signed -c Release
+      run: |
+          dotnet pack src -c Release
+          dotnet pack src/${{env.PROJECT_NAME}}.Signed -c Release
 
     - name: Publish
       if: github.event_name == 'push'
-      run: |      
+      run: |
           if ( "${{github.ref}}" -match "^refs/tags/[0-9]+\.[0-9]+\.[0-9]+$" ) {
               dotnet nuget push src\${{env.PROJECT_NAME}}\bin\Release\*.nupkg -s nuget.org -k ${{secrets.NUGET_TOKEN}}
               dotnet nuget push src\${{env.PROJECT_NAME}}.Signed\bin\Release\*.nupkg -s nuget.org -k ${{secrets.NUGET_TOKEN}}
