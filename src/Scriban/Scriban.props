@@ -13,7 +13,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>https://github.com/lunet-io/scriban/blob/master/changelog.md</PackageReleaseNotes>
-    <PackageIconUrl>https://raw.githubusercontent.com/lunet-io/scriban/master/img/scriban.png</PackageIconUrl>
+    <PackageIcon>scriban.png</PackageIcon>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
@@ -24,6 +24,7 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="../../img/scriban.png" Pack="true" PackagePath="" />
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.1" />
     <!--Add support for sourcelink-->
