@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -26,7 +26,7 @@ namespace Scriban.Syntax
         {
             return ScriptVariable.TablerowObject;
         }
-        
+
         protected override void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)
         {
             _columnsCount = 1;
@@ -78,24 +78,6 @@ namespace Scriban.Syntax
             return result;
         }
 
-        public override void Write(TemplateRewriterContext context)
-        {
-            context.Write("tablerow").ExpectSpace();
-            context.Write(Variable).ExpectSpace();
-            context.Write("in").ExpectSpace();
-            context.Write(Iterator);
-            if (NamedArguments != null)
-            {
-                foreach (var arg in NamedArguments)
-                {
-                    context.ExpectSpace();
-                    context.Write(arg);
-                }
-            }
-            context.ExpectEos();
-            context.Write(Body);
-            context.ExpectEnd();
-        }
         protected override LoopState CreateLoopState()
         {
             return new TableRowLoopState();

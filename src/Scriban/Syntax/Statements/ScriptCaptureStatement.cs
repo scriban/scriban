@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using Scriban.Runtime;
 using System.Collections.Generic;
@@ -11,6 +11,18 @@ namespace Scriban.Syntax
     {
         private ScriptExpression _target;
         private ScriptBlockStatement _body;
+        private ScriptKeyword _captureKeyword;
+
+        public ScriptCaptureStatement()
+        {
+            CaptureKeyword = ScriptKeyword.Capture();
+        }
+
+        public ScriptKeyword CaptureKeyword
+        {
+            get => _captureKeyword;
+            set => ParentToThis(ref _captureKeyword, value);
+        }
 
         public ScriptExpression Target
         {
@@ -42,7 +54,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("capture").ExpectSpace();
+            context.Write(CaptureKeyword).ExpectSpace();
             context.Write(Target);
             context.ExpectEos();
             context.Write(Body);

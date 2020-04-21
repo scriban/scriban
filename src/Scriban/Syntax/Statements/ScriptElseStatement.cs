@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
 
@@ -8,8 +8,20 @@ namespace Scriban.Syntax
     [ScriptSyntax("else statement", "else | else if <expression> ... end|else|else if")]
     public partial class ScriptElseStatement : ScriptConditionStatement
     {
+        private ScriptKeyword _elseKeyword;
         private ScriptBlockStatement _body;
         private ScriptConditionStatement _else;
+
+        public ScriptElseStatement()
+        {
+            ElseKeyword = ScriptKeyword.Else();
+        }
+
+        public ScriptKeyword ElseKeyword
+        {
+            get => _elseKeyword;
+            set => ParentToThis(ref  _elseKeyword, value);
+        }
 
         public ScriptBlockStatement Body
         {
@@ -31,7 +43,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("else").ExpectEos();
+            context.Write(ElseKeyword).ExpectEos();
             context.Write(Body);
             context.Write(Else);
         }

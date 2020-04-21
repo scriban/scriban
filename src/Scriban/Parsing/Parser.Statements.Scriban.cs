@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -155,8 +155,9 @@ namespace Scriban.Parsing
                     break;
                 case "continue":
                     CheckNotInCase(parent, startToken);
-                    statement = Open<ScriptContinueStatement>();
-                    NextToken();
+                    var continueStatement =  Open<ScriptContinueStatement>();
+                    statement = continueStatement;
+                    ExpectAndParseKeywordTo(continueStatement.ContinueKeyword); // Parse continue keyword
                     ExpectEndOfStatement();
                     Close(statement);
 
@@ -350,7 +351,7 @@ namespace Scriban.Parsing
         private void FixRawStatementAfterFrontMatter(ScriptPage page)
         {
             // In case of parsing a front matter, we don't want to include any \r\n after the end of the front-matter
-            // So we manipulate back the syntax tree for the expected raw statement (if any), otherwise we can early 
+            // So we manipulate back the syntax tree for the expected raw statement (if any), otherwise we can early
             // exit.
             var rawStatement = page.Body.Statements.FirstOrDefault() as ScriptRawStatement;
             if (rawStatement == null)

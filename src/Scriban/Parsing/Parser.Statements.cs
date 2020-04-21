@@ -283,8 +283,7 @@ namespace Scriban.Parsing
         private ScriptCaptureStatement ParseCaptureStatement()
         {
             var captureStatement = Open<ScriptCaptureStatement>();
-            NextToken(); // Skip capture keyword
-
+            ExpectAndParseKeywordTo(captureStatement.CaptureKeyword); // Parse capture keyword
             // unit test: 231-capture-error1.txt
             captureStatement.Target = ExpectAndParseExpression(captureStatement);
             ExpectEndOfStatement();
@@ -296,8 +295,7 @@ namespace Scriban.Parsing
         private ScriptCaseStatement ParseCaseStatement()
         {
             var caseStatement = Open<ScriptCaseStatement>();
-            NextToken(); // skip case
-
+            ExpectAndParseKeywordTo(caseStatement.CaseKeyword); // Parse case keyword
             caseStatement.Value = ExpectAndParseExpression(caseStatement, allowAssignment: false);
 
             if (ExpectEndOfStatement())
@@ -332,7 +330,7 @@ namespace Scriban.Parsing
             }
 
             var elseStatement = Open<ScriptElseStatement>();
-            NextToken(); // skip else
+            ExpectAndParseKeywordTo(elseStatement.ElseKeyword); // Parse else statement
 
             // unit test: 201-if-else-error4.txt
             if (ExpectEndOfStatement())
@@ -404,7 +402,7 @@ namespace Scriban.Parsing
         private T ParseForStatement<T>() where T : ScriptForStatement, new()
         {
             var forStatement = Open<T>();
-            NextToken(); // skip for
+            ExpectAndParseKeywordTo(forStatement.ForOrTableRowKeyword); // Parse for or tablerow keyword
 
             // unit test: 211-for-error1.txt
             forStatement.Variable = ExpectAndParseExpression(forStatement, mode: ParseExpressionMode.BasicExpression);
@@ -433,7 +431,7 @@ namespace Scriban.Parsing
                 }
                 else
                 {
-                    NextToken(); // skip in
+                    ExpectAndParseKeywordTo(forStatement.InKeyword); // Parse in keyword
                 }
 
                 // unit test: 211-for-error3.txt
@@ -501,7 +499,7 @@ namespace Scriban.Parsing
             // Update the index of the slice/length
             scriptStatement.SliceIndex = spanStart.Offset;
             scriptStatement.SliceLength = spanEnd.Offset - spanStart.Offset + 1;
-            
+
             return scriptStatement;
         }
 

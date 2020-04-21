@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -154,8 +154,9 @@ namespace Scriban.Parsing
                     Close(statement);
                     break;
                 case "continue":
-                    statement = Open<ScriptContinueStatement>();
-                    NextToken();
+                    var continueStatement =  Open<ScriptContinueStatement>();
+                    statement = continueStatement;
+                    ExpectAndParseKeywordTo(continueStatement.ContinueKeyword); // Parse continue keyword
                     ExpectEndOfStatement();
                     Close(statement);
                     break;
@@ -241,7 +242,7 @@ namespace Scriban.Parsing
 
             ScriptArrayInitializerExpression arrayInit = null;
 
-            // Parse cycle without group: cycle "a", "b", "c" => transform to scriban: array.cycle ["a", "b", "c"] 
+            // Parse cycle without group: cycle "a", "b", "c" => transform to scriban: array.cycle ["a", "b", "c"]
             // Parse cycle with group: cycle "group1": "a", "b", "c" => transform to scriban: array.cycle ["a", "b", "c"] "group1"
 
             bool isFirst = true;
@@ -306,7 +307,7 @@ namespace Scriban.Parsing
             // NOTE: We were previously performing the following checks
             // but as liquid doesn't have a strict syntax, we are instead not enforcing anykind of rules
             // so that the parser can still read custom liquid tags/object expressions, assuming that
-            // they are not using fancy argument syntaxes (which are unfortunately allowed in liquid)  
+            // they are not using fancy argument syntaxes (which are unfortunately allowed in liquid)
 
             //var functionCall = expressionStatement.Expression as ScriptFunctionCall;
             //// Otherwise it is an expression statement

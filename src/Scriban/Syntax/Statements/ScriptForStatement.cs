@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -16,14 +16,34 @@ namespace Scriban.Syntax
     [ScriptSyntax("for statement", "for <variable> in <expression> ... end")]
     public partial class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
     {
+        private ScriptKeyword _forOrTableRowKeyword;
         private ScriptExpression _variable;
+        private ScriptKeyword _inKeyword;
         private ScriptExpression _iterator;
         private ScriptList<ScriptNamedArgument> _namedArguments;
+
+        public ScriptForStatement()
+        {
+            ForOrTableRowKeyword = this is ScriptTableRowStatement ?  ScriptKeyword.TableRow() : ScriptKeyword.For();
+            InKeyword = ScriptKeyword.In();
+        }
+
+        public ScriptKeyword ForOrTableRowKeyword
+        {
+            get => _forOrTableRowKeyword;
+            set => ParentToThis(ref _forOrTableRowKeyword, value);
+        }
 
         public ScriptExpression Variable
         {
             get => _variable;
             set => ParentToThis(ref _variable, value);
+        }
+
+        public ScriptKeyword InKeyword
+        {
+            get => _inKeyword;
+            set => ParentToThis(ref _inKeyword, value);
         }
 
         public ScriptExpression Iterator
@@ -149,13 +169,13 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("for").ExpectSpace();
+            context.Write(ForOrTableRowKeyword).ExpectSpace();
             context.Write(Variable).ExpectSpace();
             if (!context.PreviousHasSpace)
             {
                 context.Write(" ");
             }
-            context.Write("in").ExpectSpace();
+            context.Write(InKeyword).ExpectSpace();
             context.Write(Iterator);
             if (NamedArguments != null)
             {
