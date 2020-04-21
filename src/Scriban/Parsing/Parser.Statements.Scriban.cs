@@ -190,14 +190,12 @@ namespace Scriban.Parsing
             var scriptFunction = Open<ScriptFunction>();
             if (!isAnonymous)
             {
-                NextToken(); // skip func
+                scriptFunction.FuncToken = ExpectAndParseKeywordTo(ScriptKeyword.Func());
             }
 
             if (isAnonymous)
             {
-                var doToken = new ScriptToken("do");
-                ExpectAndParseTokenTo(doToken, "do");
-                scriptFunction.NameOrDoToken = doToken;
+                scriptFunction.NameOrDoToken = ExpectAndParseKeywordTo(ScriptKeyword.Do());
             }
             else
             {

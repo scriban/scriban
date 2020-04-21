@@ -16,7 +16,7 @@ namespace Scriban.Syntax
 
         public ScriptAssignExpression()
         {
-            EqualToken = new ScriptToken("=");
+            EqualToken = ScriptToken.Equal();
         }
 
         public ScriptExpression Target

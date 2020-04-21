@@ -14,6 +14,7 @@ namespace Scriban.Syntax
     [ScriptSyntax("function statement", "func <variable> ... end")]
     public partial class ScriptFunction : ScriptStatement, IScriptCustomFunction
     {
+        private ScriptKeyword _funcToken;
         private ScriptNode _nameOrDoToken;
         private ScriptToken _openParen;
         private ScriptList<ScriptVariable> _parameters;
@@ -21,14 +22,20 @@ namespace Scriban.Syntax
         private ScriptToken _equalToken;
         private ScriptStatement _body;
 
+        public ScriptKeyword FuncToken
+        {
+            get => _funcToken;
+            set => ParentToThis(ref _funcToken, value);
+        }
+
         public ScriptNode NameOrDoToken
         {
             get => _nameOrDoToken;
             set
             {
-                if (value != null && (!(value is ScriptVariable || (value is ScriptToken token && token.Value == "do"))))
+                if (value != null && (!(value is ScriptVariable || (value is ScriptKeyword token && token.Value == "do"))))
                 {
-                    throw new ArgumentException($"Must be a {nameof(ScriptVariable)} or `do` {nameof(ScriptToken)}");
+                    throw new ArgumentException($"Must be a {nameof(ScriptVariable)} or `do` {nameof(ScriptKeyword)}");
                 }
 
                 ParentToThis(ref _nameOrDoToken, value);
@@ -87,7 +94,7 @@ namespace Scriban.Syntax
         {
             if (!IsAnonymous && Body is ScriptBlockStatement)
             {
-                context.Write("func").ExpectSpace();
+                context.Write(FuncToken).ExpectSpace();
             }
             context.Write(NameOrDoToken);
 

@@ -9,18 +9,24 @@ namespace Scriban.Syntax
     /// <summary>
     /// A verbatim node (use for custom parsing).
     /// </summary>
-    public partial class ScriptToken : ScriptNode
+    public partial class ScriptToken : ScriptVerbatim
     {
         public static ScriptToken Equal() => new ScriptToken("=");
 
         public static ScriptToken Pipe() => new ScriptToken("|");
+
+        public static ScriptToken Star() => new ScriptToken("*");
 
         public static ScriptToken PipeGreater() => new ScriptToken("|>");
 
         public static ScriptToken OpenParen() => new ScriptToken("(");
 
         public static ScriptToken CloseParen() => new ScriptToken(")");
-        
+
+        public static ScriptToken OpenBracket() => new ScriptToken("[");
+
+        public static ScriptToken CloseBracket() => new ScriptToken("]");
+
         public ScriptToken()
         {
         }
@@ -28,19 +34,6 @@ namespace Scriban.Syntax
         public ScriptToken(string value)
         {
             Value = value;
-        }
-
-        public string Value { get; set; }
-
-        public override object Evaluate(TemplateContext context)
-        {
-            // Nothing to evaluate
-            return null;
-        }
-
-        public override void Write(TemplateRewriterContext context)
-        {
-            context.Write(Value);
         }
     }
 }

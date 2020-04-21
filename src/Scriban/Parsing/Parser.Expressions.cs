@@ -807,15 +807,19 @@ namespace Scriban.Parsing
             Close(verbatim);
         }
 
-        private void ExpectAndParseTokenTo(ScriptToken existingToken, string expectedTokenText)
+        private ScriptKeyword ExpectAndParseKeywordTo(ScriptKeyword existingKeyword)
         {
-            var verbatim = Open(existingToken);
-            if (expectedTokenText != null && !MatchText(Current, expectedTokenText))
+            if (existingKeyword == null) throw new ArgumentNullException(nameof(existingKeyword));
+            if (existingKeyword.Value == null) throw new InvalidOperationException($"{nameof(ScriptKeyword)}.{nameof(ScriptKeyword.Value)} cannot be null");
+
+            var verbatim = Open(existingKeyword);
+            if (!MatchText(Current, existingKeyword.Value))
             {
-                LogError(CurrentSpan, $"Unexpected token found `{GetAsText(Current)}` while expecting `{expectedTokenText}`.");
+                LogError(CurrentSpan, $"Unexpected keyword found `{GetAsText(Current)}` while expecting `{existingKeyword.Value}`.");
             }
             NextToken();
             Close(verbatim);
+            return existingKeyword;
         }
 
         private ScriptExpression ParseUnaryExpression(ref bool hasAnonymousFunction)

@@ -132,7 +132,7 @@ namespace Scriban.Syntax
                                     {
                                         Left = leftValue,
                                         Operator = ScriptBinaryOperator.Multiply,
-                                        OperatorToken = new ScriptToken("*"),
+                                        OperatorToken = ScriptToken.Star(),
                                         Right = functionCall,
                                     };
                                 }
@@ -172,7 +172,7 @@ namespace Scriban.Syntax
                         {
                             Left = leftValue,
                             Operator = ScriptBinaryOperator.Multiply,
-                            OperatorToken = new ScriptToken("*"),
+                            OperatorToken = ScriptToken.Star(),
                             Right = rightValue,
                         };
                     }

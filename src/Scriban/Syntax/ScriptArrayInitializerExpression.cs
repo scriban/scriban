@@ -16,9 +16,9 @@ namespace Scriban.Syntax
 
         public ScriptArrayInitializerExpression()
         {
-            OpenBracketToken = new ScriptToken("[");
+            OpenBracketToken = ScriptToken.OpenBracket();
             Values = new ScriptList<ScriptExpression>();
-            CloseBracketToken = new ScriptToken("]");
+            CloseBracketToken = ScriptToken.CloseBracket();
         }
 
         public ScriptToken OpenBracketToken
