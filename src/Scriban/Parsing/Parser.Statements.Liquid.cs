@@ -97,7 +97,7 @@ namespace Scriban.Parsing
                     break;
 
                 case "if":
-                    statement = ParseIfStatement(false, false);
+                    statement = ParseIfStatement(false);
                     break;
 
                 case "ifchanged":
@@ -106,7 +106,7 @@ namespace Scriban.Parsing
 
                 case "unless":
                     CheckNotInCase(parent, startToken);
-                    statement = ParseIfStatement(true, false);
+                    statement = ParseIfStatement(true);
                     break;
 
                 case "else":
@@ -332,6 +332,7 @@ namespace Scriban.Parsing
         private ScriptStatement ParseLiquidIfChanged()
         {
             var statement = Open<ScriptIfStatement>();
+            statement.IfKeyword.Span = CurrentSpan;
             NextToken(); // skip ifchanged token
             statement.Condition = new ScriptMemberExpression() { Target = ScriptVariable.Create(ScriptVariable.ForObject.Name, ScriptVariableScope.Loop), Member = ScriptVariable.Create("changed", ScriptVariableScope.Global) };
             statement.Then = ParseBlockStatement(statement);

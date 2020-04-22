@@ -44,7 +44,7 @@ namespace Scriban.Parsing
                     break;
                 case "if":
                     CheckNotInCase(parent, startToken);
-                    statement = ParseIfStatement(false, false);
+                    statement = ParseIfStatement(false, null);
                     break;
                 case "case":
                     CheckNotInCase(parent, startToken);
@@ -190,17 +190,13 @@ namespace Scriban.Parsing
         private ScriptFunction ParseFunctionStatement(bool isAnonymous)
         {
             var scriptFunction = Open<ScriptFunction>();
-            if (!isAnonymous)
-            {
-                scriptFunction.FuncToken = ExpectAndParseKeywordTo(ScriptKeyword.Func());
-            }
-
             if (isAnonymous)
             {
                 scriptFunction.NameOrDoToken = ExpectAndParseKeywordTo(ScriptKeyword.Do());
             }
             else
             {
+                scriptFunction.FuncToken = ExpectAndParseKeywordTo(ScriptKeyword.Func());
                 scriptFunction.NameOrDoToken = ExpectAndParseVariable(scriptFunction);
             }
 
@@ -268,7 +264,7 @@ namespace Scriban.Parsing
         private ScriptImportStatement ParseImportStatement()
         {
             var importStatement = Open<ScriptImportStatement>();
-            NextToken(); // skip import
+            ExpectAndParseKeywordTo(importStatement.ImportKeyword); // Parse import keyword
 
             importStatement.Expression = ExpectAndParseExpression(importStatement);
             ExpectEndOfStatement();

@@ -312,21 +312,16 @@ namespace Scriban.Parsing
             // Case of elsif
             if (_isLiquid && isElseIf)
             {
-                return ParseIfStatement(false, true);
+                return ParseIfStatement(false, ScriptKeyword.Else());
             }
 
             // unit test: 200-if-else-statement.txt
             var nextToken = PeekToken();
             if (!_isLiquid && nextToken.Type == TokenType.Identifier && GetAsText(nextToken) == "if")
             {
-                NextToken();
-
-                if (_isKeepTrivia)
-                {
-                    // We don't store the trivias here
-                    _trivias.Clear();
-                }
-                return ParseIfStatement(false, true);
+                var elseKeyword = ScriptKeyword.Else();
+                ExpectAndParseKeywordTo(elseKeyword);
+                return ParseIfStatement(false, elseKeyword);
             }
 
             var elseStatement = Open<ScriptElseStatement>();
@@ -447,23 +442,62 @@ namespace Scriban.Parsing
             return Close(forStatement);
         }
 
-        private ScriptIfStatement ParseIfStatement(bool invert, bool isElseIf)
+        private ScriptIfStatement ParseIfStatement(bool invert, ScriptKeyword elseKeyword = null)
         {
             // unit test: 200-if-else-statement.txt
-            var condition = Open<ScriptIfStatement>();
-            condition.IsElseIf = isElseIf;
-            condition.InvertCondition = invert;
-            NextToken(); // skip if
+            var ifStatement = Open<ScriptIfStatement>();
+            ifStatement.ElseKeyword = elseKeyword;
 
-            condition.Condition = ExpectAndParseExpression(condition, allowAssignment: false);
+            if (_isLiquid && elseKeyword != null)
+            {
+                // Parse elseif
+                Open(ifStatement.IfKeyword);
+                NextToken();
+                Close(ifStatement.IfKeyword);
+            }
+            else
+            {
+                if (_isLiquid && invert) // we have an unless
+                {
+                    Open(ifStatement.IfKeyword); // still transfer trivias to IfKeyword
+                    NextToken();
+                    Close(ifStatement.IfKeyword);
+                }
+                else
+                {
+                    ExpectAndParseKeywordTo(ifStatement.IfKeyword); // Parse if keyword
+                }
+            }
+
+            var condition =  ExpectAndParseExpression(ifStatement, allowAssignment: false);
+
+            // Transform a `if condition` to `if !(condition)`
+            if (invert)
+            {
+                var invertCondition = new ScriptUnaryExpression()
+                {
+                    Operator =  ScriptUnaryOperator.Not,
+                    OperatorToken = ScriptToken.Not(),
+                    Right = new ScriptNestedExpression()
+                    {
+                        Expression = condition
+                    }
+                };
+                // remove trivias from inner condition and transfer them to
+                invertCondition.Trivias = condition.Trivias;
+                condition.Trivias = null;
+                condition = invertCondition;
+            }
+
+            ifStatement.Condition = condition;
 
             if (ExpectEndOfStatement())
             {
-                FlushTrivias(condition.Condition, false);
-                condition.Then = ParseBlockStatement(condition);
+                FlushTrivias(ifStatement.Condition, false);
+                ifStatement.Then = ParseBlockStatement(ifStatement);
             }
 
-            return Close(condition);
+            return Close(ifStatement);
         }
 
         private ScriptRawStatement ParseRawStatement()

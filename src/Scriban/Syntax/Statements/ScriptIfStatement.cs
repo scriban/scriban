@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -12,6 +12,28 @@ namespace Scriban.Syntax
         private ScriptExpression _condition;
         private ScriptBlockStatement _then;
         private ScriptConditionStatement _else;
+        private ScriptKeyword _ifKeyword;
+        private ScriptKeyword _elseKeyword;
+
+        public ScriptIfStatement()
+        {
+            IfKeyword = ScriptKeyword.If();
+        }
+
+        /// <summary>
+        /// Only valid for `else if`
+        /// </summary>
+        public ScriptKeyword ElseKeyword
+        {
+            get => _elseKeyword;
+            set => ParentToThis(ref _elseKeyword, value);
+        }
+
+        public ScriptKeyword IfKeyword
+        {
+            get => _ifKeyword;
+            set => ParentToThis(ref _ifKeyword, value);
+        }
 
         /// <summary>
         /// Get or sets the condition of this if statement.
@@ -21,11 +43,6 @@ namespace Scriban.Syntax
             get => _condition;
             set => ParentToThis(ref _condition, value);
         }
-
-        /// <summary>
-        /// Gets or sets a boolean indicating that the result of the condition is inverted
-        /// </summary>
-        public bool InvertCondition { get; set; }
 
         public ScriptBlockStatement Then
         {
@@ -38,16 +55,12 @@ namespace Scriban.Syntax
             get => _else;
             set => ParentToThis(ref _else, value);
         }
-        
-        public bool IsElseIf { get; set; }
+
+        public bool IsElseIf => ElseKeyword != null;
 
         public override object Evaluate(TemplateContext context)
         {
             var conditionValue = context.ToBool(Condition.Span, context.Evaluate(Condition));
-            if (InvertCondition)
-            {
-                conditionValue = !conditionValue;
-            }
             return conditionValue ? context.Evaluate(Then) : context.Evaluate(Else);
         }
 
@@ -55,24 +68,13 @@ namespace Scriban.Syntax
         {
             if (IsElseIf)
             {
-                context.Write("else ");
+                context.Write(ElseKeyword).ExpectSpace();
             }
-            context.Write("if").ExpectSpace();
-            if (InvertCondition)
-            {
-                context.Write("!(");
-            }
+            context.Write(IfKeyword).ExpectSpace();
             context.Write(Condition);
-            if (InvertCondition)
-            {
-                context.Write(")");
-            }
             context.ExpectEos();
-
             context.Write(Then);
-
             context.Write(Else);
-
             if (!IsElseIf)
             {
                 context.ExpectEnd();

@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using Scriban.Runtime;
@@ -10,7 +10,19 @@ namespace Scriban.Syntax
     [ScriptSyntax("import statement", "import <expression>")]
     public partial class ScriptImportStatement : ScriptStatement
     {
+        private ScriptKeyword _importKeyword;
         private ScriptExpression _expression;
+
+        public ScriptImportStatement()
+        {
+            ImportKeyword = ScriptKeyword.Import();
+        }
+
+        public ScriptKeyword ImportKeyword
+        {
+            get => _importKeyword;
+            set => ParentToThis(ref  _importKeyword, value);
+        }
 
         public ScriptExpression Expression
         {
@@ -37,7 +49,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("import").ExpectSpace();
+            context.Write(ImportKeyword).ExpectSpace();
             context.Write(Expression);
             context.ExpectEos();
         }

@@ -27,6 +27,8 @@ namespace Scriban.Syntax
 
         public static ScriptToken CloseBracket() => new ScriptToken("]");
 
+        public static ScriptToken Not() => new ScriptToken("!");
+
         public ScriptToken()
         {
         }
