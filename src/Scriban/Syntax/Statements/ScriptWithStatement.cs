@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
 using Scriban.Runtime;
@@ -9,8 +9,20 @@ namespace Scriban.Syntax
     [ScriptSyntax("with statement", "with <variable> ... end")]
     public partial class ScriptWithStatement : ScriptStatement
     {
+        private ScriptKeyword _withKeyword;
         private ScriptExpression _name;
         private ScriptBlockStatement _body;
+
+        public ScriptWithStatement()
+        {
+            WithKeyword = ScriptKeyword.With();
+        }
+
+        public ScriptKeyword WithKeyword
+        {
+            get => _withKeyword;
+            set => ParentToThis(ref _withKeyword, value);
+        }
 
         public ScriptExpression Name
         {
@@ -47,7 +59,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("with").ExpectSpace();
+            context.Write(WithKeyword).ExpectSpace();
             context.Write(Name);
             context.ExpectEos();
             context.Write(Body);

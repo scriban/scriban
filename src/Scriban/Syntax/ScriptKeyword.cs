@@ -31,7 +31,7 @@ namespace Scriban.Syntax
 
         public static ScriptKeyword Import() => new ScriptKeyword("import");
 
-        public static ScriptKeyword Readonly() => new ScriptKeyword("readonly");
+        public static ScriptKeyword ReadOnly() => new ScriptKeyword("readonly");
 
         public static ScriptKeyword Ret() => new ScriptKeyword("ret");
 

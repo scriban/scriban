@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
 
@@ -8,7 +8,19 @@ namespace Scriban.Syntax
     [ScriptSyntax("while statement", "while <expression> ... end")]
     public partial class ScriptWhileStatement : ScriptLoopStatementBase
     {
+        private ScriptKeyword _whileKeyword;
         private ScriptExpression _condition;
+
+        public ScriptWhileStatement()
+        {
+            WhileKeyword = ScriptKeyword.While();
+        }
+
+        public ScriptKeyword WhileKeyword
+        {
+            get => _whileKeyword;
+            set => ParentToThis(ref _whileKeyword, value);
+        }
 
         public ScriptExpression Condition
         {
@@ -41,7 +53,7 @@ namespace Scriban.Syntax
                 loopState.Index = index++;
                 loopState.LocalIndex = index;
                 loopState.IsLast = false;
-                
+
                 result = LoopItem(context, loopState);
 
                 if (!ContinueLoop(context))
@@ -55,7 +67,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("while").ExpectSpace();
+            context.Write(WhileKeyword).ExpectSpace();
             context.Write(Condition);
             context.ExpectEos();
             context.Write(Body);

@@ -540,7 +540,7 @@ namespace Scriban.Parsing
         private ScriptWhenStatement ParseWhenStatement()
         {
             var whenStatement = Open<ScriptWhenStatement>();
-            NextToken(); // skip when
+            ExpectAndParseKeywordTo(whenStatement.WhenKeyword); // Parse when keyword
 
             // Parse the when values
             // - a, b, c

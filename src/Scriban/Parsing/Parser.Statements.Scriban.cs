@@ -275,7 +275,7 @@ namespace Scriban.Parsing
         private ScriptReadOnlyStatement ParseReadOnlyStatement()
         {
             var readOnlyStatement = Open<ScriptReadOnlyStatement>();
-            NextToken(); // Skip readonly keyword
+            ExpectAndParseKeywordTo(readOnlyStatement.ReadOnlyKeyword); // Parse readonly keyword
 
             readOnlyStatement.Variable = ExpectAndParseVariable(readOnlyStatement);
             ExpectEndOfStatement();
@@ -286,7 +286,7 @@ namespace Scriban.Parsing
         private ScriptReturnStatement ParseReturnStatement()
         {
             var ret = Open<ScriptReturnStatement>();
-            NextToken(); // skip ret
+            ExpectAndParseKeywordTo(ret.RetKeyword); // Parse ret keyword
 
             if (IsStartOfExpression())
             {
@@ -300,7 +300,7 @@ namespace Scriban.Parsing
         private ScriptWhileStatement ParseWhileStatement()
         {
             var whileStatement = Open<ScriptWhileStatement>();
-            NextToken(); // Skip while
+            ExpectAndParseKeywordTo(whileStatement.WhileKeyword); // Parse while keyword
 
             // Parse the condition
             // unit test: 220-while-error1.txt
@@ -318,7 +318,7 @@ namespace Scriban.Parsing
         private ScriptWithStatement ParseWithStatement()
         {
             var withStatement = Open<ScriptWithStatement>();
-            NextToken();
+            ExpectAndParseKeywordTo(withStatement.WithKeyword); // // Parse with keyword
             withStatement.Name = ExpectAndParseExpression(withStatement);
 
             if (ExpectEndOfStatement())
@@ -331,7 +331,7 @@ namespace Scriban.Parsing
         private ScriptWrapStatement ParseWrapStatement()
         {
             var wrapStatement = Open<ScriptWrapStatement>();
-            NextToken(); // skip wrap
+            ExpectAndParseKeywordTo(wrapStatement.WrapKeyword); // Parse wrap keyword
 
             wrapStatement.Target = ExpectAndParseExpression(wrapStatement);
 

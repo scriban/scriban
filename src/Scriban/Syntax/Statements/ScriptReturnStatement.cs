@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -10,6 +10,18 @@ namespace Scriban.Syntax
     public partial class ScriptReturnStatement : ScriptStatement
     {
         private ScriptExpression _expression;
+        private ScriptKeyword _retKeyword;
+
+        public ScriptReturnStatement()
+        {
+            RetKeyword = ScriptKeyword.Ret();
+        }
+
+        public ScriptKeyword RetKeyword
+        {
+            get => _retKeyword;
+            set => ParentToThis(ref _retKeyword, value);
+        }
 
         public ScriptExpression Expression
         {
@@ -26,7 +38,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("ret").ExpectSpace();
+            context.Write(RetKeyword).ExpectSpace();
             context.Write(Expression);
             context.ExpectEos();
         }

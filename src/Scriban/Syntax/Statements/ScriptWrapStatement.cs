@@ -10,8 +10,20 @@ namespace Scriban.Syntax
     [ScriptSyntax("wrap statement", "wrap <function_call> ... end")]
     public partial class ScriptWrapStatement : ScriptStatement
     {
+        private ScriptKeyword _wrapKeyword;
         private ScriptExpression _target;
         private ScriptBlockStatement _body;
+
+        public ScriptWrapStatement()
+        {
+            WrapKeyword = ScriptKeyword.Wrap();
+        }
+
+        public ScriptKeyword WrapKeyword
+        {
+            get => _wrapKeyword;
+            set => ParentToThis(ref _wrapKeyword, value);
+        }
 
         public ScriptExpression Target
         {
@@ -48,7 +60,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("wrap").ExpectSpace();
+            context.Write(WrapKeyword).ExpectSpace();
             context.Write(Target);
             context.ExpectEos();
             context.Write(Body);

@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -11,13 +11,21 @@ namespace Scriban.Syntax
     [ScriptSyntax("when statement", "when <expression> ... end|when|else")]
     public partial class ScriptWhenStatement : ScriptConditionStatement
     {
+        private ScriptKeyword _whenKeyword;
         private ScriptList<ScriptExpression> _values;
         private ScriptBlockStatement _body;
         private ScriptConditionStatement _next;
 
         public ScriptWhenStatement()
         {
+            WhenKeyword = ScriptKeyword.When();
             Values = new ScriptList<ScriptExpression>();
+        }
+
+        public ScriptKeyword WhenKeyword
+        {
+            get => _whenKeyword;
+            set => ParentToThis(ref _whenKeyword, value);
         }
 
         /// <summary>
@@ -59,7 +67,7 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            context.Write("when").ExpectSpace();
+            context.Write(WhenKeyword).ExpectSpace();
             context.WriteListWithCommas(Values);
             context.ExpectEos();
             context.Write(Body);
