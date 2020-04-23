@@ -57,11 +57,20 @@ namespace Scriban.Tests
 
             var template = parser(templateSource, inputName, default, default);
             if (template.HasErrors || template.Page == null)
-                Assert.Ignore("Template didn't parse correctly");
+            {
+                if (inputName.Contains("error"))
+                {
+                    Assert.Ignore("Template has errors and didn't parse correctly. This is expected for an `error` test.");
+                }
+                else
+                {
+                    Assert.Fail("Template has errors and didn't parse correctly. This is not expected.");
+                }
+            }
 
             return template;
         }
-        
+
         private class TestCloneScriptRewriter : ScriptRewriter
         {
         }
