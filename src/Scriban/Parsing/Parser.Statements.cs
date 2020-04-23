@@ -5,6 +5,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.SymbolStore;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Scriban.Helpers;
@@ -106,57 +107,13 @@ namespace Scriban.Parsing
 
                 case TokenType.CodeEnter:
                 case TokenType.LiquidTagEnter:
-                    if (_inCodeSection)
-                    {
-                        LogError("Unexpected token while already in a code block");
-                    }
-                    _isLiquidTagSection = Current.Type == TokenType.LiquidTagEnter;
-                    _inCodeSection = true;
-
-                    // If we have any pending trivias before processing this code enter and we want to keep trivia
-                    // we need to generate a RawStatement to store these trivias
-                    if (_isKeepTrivia && (_trivias.Count > 0 || Previous.Type == TokenType.CodeEnter))
-                    {
-                        var rawStatement = Open<ScriptRawStatement>();
-                        Close(rawStatement);
-                        if (_trivias.Count > 0)
-                        {
-                            rawStatement.Trivias.After.AddRange(rawStatement.Trivias.Before);
-                            rawStatement.Trivias.Before.Clear();
-                            var firstTriviaSpan = rawStatement.Trivias.After[0].Span;
-                            var lastTriviaSpan = rawStatement.Trivias.After[rawStatement.Trivias.After.Count - 1].Span;
-                            rawStatement.Span = new SourceSpan(firstTriviaSpan.FileName, firstTriviaSpan.Start, lastTriviaSpan.End);
-                        }
-                        else
-                        {
-                            // Else Add an empty trivia
-                            rawStatement.AddTrivia(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Empty, null), false);
-                        }
-                        statement = rawStatement;
-                    }
-
-                    NextToken();
-
-                    if (Current.Type == TokenType.CodeExit)
-                    {
-                        var nopStatement = Open<ScriptNopStatement>();
-                        Close(nopStatement);
-                        if (statement == null)
-                        {
-                            statement = nopStatement;
-                        }
-                        else
-                        {
-                            _pendingStatements.Enqueue(nopStatement);
-                        }
-                    }
-
-                    // If we have a ScriptRawStatement previously defined, we need to break out of the loop to record it
-                    if (statement == null)
-                    {
-                        goto continueParsing;
-                    }
+                case TokenType.CodeExit:
+                case TokenType.LiquidTagExit:
+                case TokenType.EscapeEnter:
+                case TokenType.EscapeExit:
+                    statement = ParseEscapeStatement();
                     break;
+
                 case TokenType.FrontMatterMarker:
                     if (_inFrontMatter)
                     {
@@ -181,55 +138,6 @@ namespace Scriban.Parsing
                     {
                         LogError($"Unexpected frontmatter marker `{_lexer.Options.FrontMatterMarker}` while not inside a frontmatter");
                         NextToken();
-                    }
-                    break;
-
-                case TokenType.CodeExit:
-                case TokenType.LiquidTagExit:
-                    if (!_inCodeSection)
-                    {
-                        LogError("Unexpected code block exit '}}' while no code block enter '{{' has been found");
-                    }
-                    else if (CurrentParsingMode == ScriptMode.ScriptOnly)
-                    {
-                        LogError("Unexpected code clock exit '}}' while parsing in script only mode. '}}' is not allowed.");
-                    }
-
-                    _isLiquidTagSection = false;
-                    _inCodeSection = false;
-
-                    // We clear any trivia that might not have been takend by a node
-                    // so that they don't end up after this token
-                    if (_isKeepTrivia)
-                    {
-                        _trivias.Clear();
-                    }
-
-                    NextToken();
-
-                    // If next token is directly a code enter or an eof but we want to keep trivia
-                    // and with have trivias
-                    // we need to generate a RawStatement to store these trivias
-                    if (_isKeepTrivia && (Current.Type == TokenType.CodeEnter || Current.Type == TokenType.Eof))
-                    {
-                        var rawStatement = Open<ScriptRawStatement>();
-                        Close(rawStatement);
-                        if (_trivias.Count > 0)
-                        {
-                            var firstTriviaSpan = rawStatement.Trivias.Before[0].Span;
-                            var lastTriviaSpan = rawStatement.Trivias.Before[rawStatement.Trivias.Before.Count - 1].Span;
-                            rawStatement.Span = new SourceSpan(firstTriviaSpan.FileName, firstTriviaSpan.Start, lastTriviaSpan.End);
-                        }
-                        else
-                        {
-                            // Else Add an empty trivia
-                            rawStatement.AddTrivia(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Empty, null), false);
-                        }
-                        statement = rawStatement;
-                    }
-                    else
-                    {
-                        goto continueParsing;
                     }
                     break;
 
@@ -290,6 +198,67 @@ namespace Scriban.Parsing
             captureStatement.Body = ParseBlockStatement(captureStatement);
 
             return Close(captureStatement);
+        }
+
+        private ScriptEscapeStatement ParseEscapeStatement()
+        {
+            bool isCodeEnter = Current.Type == TokenType.CodeEnter || Current.Type == TokenType.LiquidTagEnter;
+            bool isEscape = Current.Type == TokenType.EscapeEnter || Current.Type == TokenType.EscapeExit;
+            bool isEnter = isCodeEnter || Current.Type == TokenType.EscapeEnter;
+            bool isLiquid = Current.Type == TokenType.LiquidTagEnter || Current.Type == TokenType.LiquidTagExit;
+            Debug.Assert(isEnter || Current.Type == TokenType.CodeExit || Current.Type == TokenType.LiquidTagExit || isEscape);
+
+            // Log errors depending on if we are already in a code section or not
+            if (isCodeEnter)
+            {
+                if (_inCodeSection)
+                {
+                    LogError("Unexpected token while already in a code block");
+                }
+            }
+            else if (!isEscape)
+            {
+                if (!_inCodeSection)
+                {
+                    LogError("Unexpected code block exit '}}' while no code block enter '{{' has been found");
+                }
+                else if (CurrentParsingMode == ScriptMode.ScriptOnly)
+                {
+                    LogError("Unexpected code clock exit '}}' while parsing in script only mode. '}}' is not allowed.");
+                }
+            }
+
+            _isLiquidTagSection = isCodeEnter && isLiquid;
+            _inCodeSection = isCodeEnter;
+
+            var scriptEscapeStatement = Open<ScriptEscapeStatement>();
+            scriptEscapeStatement.IsEntering = isEnter;
+
+            var tokenText = GetAsText(Current);
+            var whitespaceChar = tokenText[isEnter ? tokenText.Length - 1 : 0];
+            scriptEscapeStatement.WhitespaceMode = whitespaceChar switch
+            {
+                '-' => ScriptWhitespaceMode.Greedy,
+                '~' => ScriptWhitespaceMode.NonGreedy,
+                _ => ScriptWhitespaceMode.None,
+            };
+
+            if (isEscape)
+            {
+                if (_isLiquid)
+                {
+                    scriptEscapeStatement.EscapeCount = 6;
+                }
+                else
+                {
+                    int escapeCount = tokenText.Length - 2; // minus opening and closing {%{
+                    if (whitespaceChar != (isEnter ? '{' : '}')) escapeCount--;
+                    scriptEscapeStatement.EscapeCount = escapeCount;
+                }
+            }
+            NextToken(); // Skip enter/exit token
+
+            return Close(scriptEscapeStatement);
         }
 
         private ScriptCaseStatement ParseCaseStatement()
@@ -502,25 +471,15 @@ namespace Scriban.Parsing
 
         private ScriptRawStatement ParseRawStatement()
         {
+            bool isEscape = Current.Type == TokenType.Escape;
+
             var scriptStatement = Open<ScriptRawStatement>();
+
+            scriptStatement.IsEscape = isEscape;
 
             // We keep span End here to update it with the raw span
             var spanStart = Current.Start;
             var spanEnd = Current.End;
-
-            // If we have an escape, we can fetch the escape count
-            if (Current.Type == TokenType.Escape)
-            {
-                NextToken(); // Skip escape
-                if (Current.Type < TokenType.EscapeCount1 && Current.Type > TokenType.EscapeCount9)
-                {
-                    LogError(Current, $"Unexpected token `{GetAsText(Current)}` found. Expecting EscapeCount1-9.");
-                }
-                else
-                {
-                    scriptStatement.EscapeCount = (Current.Type - TokenType.EscapeCount1) + 1;
-                }
-            }
 
             scriptStatement.Text = _lexer.Text;
 
@@ -631,6 +590,18 @@ namespace Scriban.Parsing
             return false;
         }
 
+        private ScriptStatement FindFirstStatementExpectingEnd()
+        {
+            foreach (var scriptNode in Blocks)
+            {
+                if (ExpectStatementEnd(scriptNode))
+                {
+                    return (ScriptStatement)scriptNode;
+                }
+            }
+            return null;
+        }
+
         private static bool ExpectStatementEnd(ScriptNode scriptNode)
         {
             return (scriptNode is ScriptIfStatement && !((ScriptIfStatement)scriptNode).IsElseIf)
@@ -642,18 +613,6 @@ namespace Scriban.Parsing
                    || scriptNode is ScriptCaseStatement
                    || scriptNode is ScriptFunction
                    || scriptNode is ScriptAnonymousFunction;
-        }
-
-        private ScriptStatement FindFirstStatementExpectingEnd()
-        {
-            foreach (var scriptNode in Blocks)
-            {
-                if (ExpectStatementEnd(scriptNode))
-                {
-                    return (ScriptStatement)scriptNode;
-                }
-            }
-            return null;
         }
 
         /// <summary>

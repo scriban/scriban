@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 namespace Scriban.Syntax
@@ -13,7 +13,7 @@ namespace Scriban.Syntax
 
         public int SliceLength { get; set; }
 
-        public int EscapeCount { get; set; }
+        public bool IsEscape { get; set; }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -36,25 +36,9 @@ namespace Scriban.Syntax
 
         public override void Write(TemplateRewriterContext context)
         {
-            if (Text == null)
-            {
-                return;
-            }
-
-            if (EscapeCount > 0)
-            {
-                context.WriteEnterCode(EscapeCount);
-            }
-
-            // TODO: handle escape
-            if (SliceLength > 0)
+            if (Text != null && SliceLength > 0)
             {
                 context.Write(Text.Substring(SliceIndex, SliceLength));
-            }
-
-            if (EscapeCount > 0)
-            {
-                context.WriteExitCode(EscapeCount);
             }
         }
     }

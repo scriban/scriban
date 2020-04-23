@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -87,7 +87,7 @@ namespace Scriban.Parsing
         public string Text { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public string SourcePath { get; private set; }
 
@@ -146,18 +146,13 @@ namespace Scriban.Parsing
 
                 if (Options.Mode != ScriptMode.ScriptOnly)
                 {
-                    bool hasEnter = false;
                     if (_blockType == BlockType.Raw)
                     {
                         TokenType whiteSpaceMode;
                         if (IsCodeEnterOrEscape(out whiteSpaceMode))
                         {
                             ReadCodeEnterOrEscape();
-                            hasEnter = true;
-                            if (_blockType == BlockType.Code || _blockType == BlockType.Raw)
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                         else if (_isExpectingFrontMatter && TryParseFrontMatterMarker())
                         {
@@ -168,7 +163,7 @@ namespace Scriban.Parsing
                         // Else we have a BlockType.EscapeRaw, so we need to parse the raw block
                     }
 
-                    if (!hasEnter && _blockType != BlockType.Raw && IsCodeExit())
+                    if (_blockType != BlockType.Raw && IsCodeExit())
                     {
                         var wasInBlock = _blockType == BlockType.Code;
                         ReadCodeExitOrEscape();
@@ -337,7 +332,7 @@ namespace Scriban.Parsing
             {
                 _isLiquidTagBlock = true;
             }
-            NextChar(); // Skip {
+            NextChar(); // Skip { or %
 
             if (c == _stripWhiteSpaceFullSpecialChar || (!_isLiquid && c == _stripWhiteSpaceRestrictedSpecialChar))
             {
@@ -348,6 +343,7 @@ namespace Scriban.Parsing
             if (_escapeRawCharCount > 0)
             {
                 _blockType = BlockType.Escape;
+                _token = new Token(TokenType.EscapeEnter, start, end);
             }
             else
             {
@@ -374,6 +370,7 @@ namespace Scriban.Parsing
                 PeekSkipSpaces(ref offset);
                 if (TryMatchPeek("%}", offset, out offset))
                 {
+                    codeEnterEnd = new TextPosition(start.Offset + offset - 1, start.Line, start.Column + offset - 1);
                     start = new TextPosition(start.Offset + offset, start.Line, start.Column + offset);
                     // Reinitialize the position to the prior character
                     _position = new TextPosition(start.Offset - 1, start.Line, start.Column - 1);
@@ -382,6 +379,7 @@ namespace Scriban.Parsing
                     {
                         var end = _position;
                         NextChar();
+                        var codeExitStart = _position;
                         if (c == '{')
                         {
                             NextChar();
@@ -397,7 +395,6 @@ namespace Scriban.Parsing
                                 if (TryMatch(isComment ? "endcomment" : "endraw"))
                                 {
                                     SkipSpaces();
-                                    var codeExitStart = _position;
                                     if (c == '-')
                                     {
                                         NextChar();
@@ -412,15 +409,17 @@ namespace Scriban.Parsing
                                             _blockType = BlockType.Raw;
                                             if (isComment)
                                             {
-                                                // Convert a liquit comment into a Scriban multi-line {{ ## comment ## }}
+                                                // Convert a liquid comment into a Scriban multi-line {{ ## comment ## }}
                                                 _token = new Token(TokenType.CodeEnter, codeEnterStart, codeEnterEnd);
                                                 _pendingTokens.Enqueue(new Token(TokenType.CommentMulti, start, end));
                                                 _pendingTokens.Enqueue(new Token(TokenType.CodeExit, codeExitStart, codeExitEnd));
                                             }
                                             else
                                             {
-                                                _token = new Token(TokenType.Escape, start, end);
-                                                _pendingTokens.Enqueue(new Token(TokenType.EscapeCount1, end, end));
+                                                // Convert a liquid comment into a Scriban multi-line {{ ## comment ## }}
+                                                _token = new Token(TokenType.EscapeEnter, codeEnterStart, codeEnterEnd);
+                                                _pendingTokens.Enqueue(new Token(TokenType.Escape, start, end));
+                                                _pendingTokens.Enqueue(new Token(TokenType.EscapeExit, codeExitStart, codeExitEnd));
                                             }
 
                                             _isLiquidTagBlock = false;
@@ -558,7 +557,7 @@ namespace Scriban.Parsing
             if (_escapeRawCharCount > 0)
             {
                 // We limit the escape count to 9 levels (only for roundtrip mode)
-                _pendingTokens.Enqueue(new Token((TokenType)(TokenType.EscapeCount1 + Math.Min(_escapeRawCharCount - 1, 8)), start, end));
+                _pendingTokens.Enqueue(new Token(TokenType.EscapeExit, start, end));
                 _escapeRawCharCount = 0;
             }
             else
@@ -1015,7 +1014,7 @@ namespace Scriban.Parsing
 
             return false;
         }
-        
+
         private bool ReadCodeLiquid()
         {
             bool hasTokens = true;

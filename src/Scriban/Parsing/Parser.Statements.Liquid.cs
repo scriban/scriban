@@ -203,27 +203,16 @@ namespace Scriban.Parsing
 
             if (pendingStart != null)
             {
-                if (_isKeepTrivia)
-                {
-                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.End));
-                }
-
+                var endStatement = Open<ScriptEndStatement>();
                 NextToken();
+                statement =  Close(endStatement);
 
                 hasEnd = true;
-                nextStatement = false;
+                nextStatement = true;
 
                 if (startStatement == null)
                 {
                     LogError(startToken, $"Unable to find a pending {pendingStart} for this `{identifier}`");
-                }
-                else
-                {
-                    ExpectEndOfStatement();
-                    if (_isKeepTrivia)
-                    {
-                        FlushTrivias(startStatement, false);
-                    }
                 }
             }
         }
@@ -432,6 +421,7 @@ namespace Scriban.Parsing
 
                     forStatement.Body = new ScriptBlockStatement() {Span = include.Span};
                     forStatement.Body.Statements.Add(includeStatement);
+                    forStatement.Body.Statements.Add(new ScriptEndStatement());
                     Close(forStatement);
                 }
 

@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -124,7 +124,6 @@ namespace Scriban.Syntax
             {
                 context.ExpectEos();
                 context.Write(Body);
-                context.ExpectEnd();
             }
             else
             {
@@ -151,7 +150,7 @@ namespace Scriban.Syntax
                         context.SetValue(arg, arguments[i]);
                     }
                 }
-                
+
                 // Set the block delegate
                 if (blockStatement != null)
                 {

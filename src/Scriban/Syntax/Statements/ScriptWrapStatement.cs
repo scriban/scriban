@@ -64,7 +64,6 @@ namespace Scriban.Syntax
             context.Write(Target);
             context.ExpectEos();
             context.Write(Body);
-            context.ExpectEnd();
         }
     }
 }

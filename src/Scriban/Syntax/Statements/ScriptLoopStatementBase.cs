@@ -24,7 +24,7 @@ namespace Scriban.Syntax
             get => _body;
             set => ParentToThis(ref _body, value);
         }
-        
+
         protected virtual void BeforeLoop(TemplateContext context)
         {
         }

@@ -34,31 +34,107 @@ namespace Scriban.Tests
         [Test]
         public void ParseLiquidComment()
         {
-            var innerString = "This is a comment";
-            var text = "{% comment %}" + innerString + "{% endcomment %}";
-            CheckLiquidRawOrComment(true, text, innerString);
+            string text;
+            //      0         1         2         3         4
+            //      0123456789012345678901234567890123456789012345
+            text = "{% comment %}This is a comment{% endcomment %}";
+            var tokens = ParseTokens(text, isLiquid: true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(12, 0, 12)),
+                new Token(TokenType.CommentMulti, new TextPosition(13, 0, 13), new TextPosition(29, 0, 29)),
+                new Token(TokenType.CodeExit, new TextPosition(30, 0, 30), new TextPosition(45, 0, 45)),
+                Token.Eof
+            }, tokens);
 
-            text = "{%comment%}" + innerString + "{%endcomment%}";
-            CheckLiquidRawOrComment(true, text, innerString);
-            text = "{%    comment%}" + innerString + "{%   endcomment%}";
-            CheckLiquidRawOrComment(true, text, innerString);
-            text = "{%comment   %}" + innerString + "{%endcomment   %}";
-            CheckLiquidRawOrComment(true, text, innerString);
+            //      0         1         2         3         4
+            //      0123456789012345678901234567890123456789012345
+            text = "{%comment%}This is a comment{%endcomment%}";
+            tokens = ParseTokens(text, isLiquid: true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(10, 0, 10)),
+                new Token(TokenType.CommentMulti, new TextPosition(11, 0, 11), new TextPosition(27, 0, 27)),
+                new Token(TokenType.CodeExit, new TextPosition(28, 0, 28), new TextPosition(41, 0, 41)),
+                Token.Eof
+            }, tokens);
+
+            //      0         1         2         3         4
+            //      0123456789012345678901234567890123456789012345678
+            text = "{%    comment%}This is a comment{%   endcomment%}";
+            tokens = ParseTokens(text, isLiquid: true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(14, 0, 14)),
+                new Token(TokenType.CommentMulti, new TextPosition(15, 0, 15), new TextPosition(31, 0, 31)),
+                new Token(TokenType.CodeExit, new TextPosition(32, 0, 32), new TextPosition(48, 0, 48)),
+                Token.Eof
+            }, tokens);
+
+            //      0         1         2         3         4
+            //      0123456789012345678901234567890123456789012345678
+            text = "{%comment   %}This is a comment{%endcomment   %}";
+            tokens = ParseTokens(text, isLiquid: true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(13, 0, 13)),
+                new Token(TokenType.CommentMulti, new TextPosition(14, 0, 14), new TextPosition(30, 0, 30)),
+                new Token(TokenType.CodeExit, new TextPosition(31, 0, 31), new TextPosition(47, 0, 47)),
+                Token.Eof
+            }, tokens);
         }
 
         [Test]
         public void ParseLiquidRaw()
         {
-            var innerString = "This is a raw";
-            var text = "{% raw %}" + innerString + "{% endraw %}";
-            CheckLiquidRawOrComment(false, text, innerString);
+            string text;
+            //      0         1         2         3         4
+            //      0123456789012345678901234567890123456789012345
+            text = "{% raw %}This is a raw{% endraw %}";
+            var tokens = ParseTokens(text, isLiquid: true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(8, 0, 8)),
+                new Token(TokenType.Escape, new TextPosition(9, 0, 9), new TextPosition(21, 0, 21)),
+                new Token(TokenType.EscapeExit, new TextPosition(22, 0, 22), new TextPosition(33, 0, 33)),
+                Token.Eof
+            }, tokens);
 
-            text = "{%raw%}" + innerString + "{%endraw%}";
-            CheckLiquidRawOrComment(false, text, innerString);
-            text = "{%    raw%}" + innerString + "{%   endraw%}";
-            CheckLiquidRawOrComment(false, text, innerString);
-            text = "{%raw   %}" + innerString + "{%endraw   %}";
-            CheckLiquidRawOrComment(false, text, innerString);
+            //      0         1         2         3         4
+            //      0123456789012345678901234567890123456789012345
+            text = "{%raw%}This is a raw{%endraw%}";
+            tokens = ParseTokens(text, isLiquid: true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(6, 0, 6)),
+                new Token(TokenType.Escape, new TextPosition(7, 0, 7), new TextPosition(19, 0, 19)),
+                new Token(TokenType.EscapeExit, new TextPosition(20, 0, 20), new TextPosition(29, 0, 29)),
+                Token.Eof
+            }, tokens);
+
+            //      0         1         2         3         4
+            //      0123456789012345678901234567890123456789012345678
+            text = "{%    raw%}This is a raw{%   endraw%}";
+            tokens = ParseTokens(text, isLiquid: true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(10, 0, 10)),
+                new Token(TokenType.Escape, new TextPosition(11, 0, 11), new TextPosition(23, 0, 23)),
+                new Token(TokenType.EscapeExit, new TextPosition(24, 0, 24), new TextPosition(36, 0, 36)),
+                Token.Eof
+            }, tokens);
+
+            //      0         1         2         3         4
+            //      0123456789012345678901234567890123456789012345678
+            text = "{%raw   %}This is a raw{%endraw   %}";
+            tokens = ParseTokens(text, isLiquid: true);
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(9, 0, 9)),
+                new Token(TokenType.Escape, new TextPosition(10, 0, 10), new TextPosition(22, 0, 22)),
+                new Token(TokenType.EscapeExit, new TextPosition(23, 0, 23), new TextPosition(35, 0, 35)),
+                Token.Eof
+            }, tokens);
         }
 
         private void CheckLiquidRawOrComment(bool isComment, string text, string inner, bool withLeft = false, bool withRight = false)
@@ -94,7 +170,7 @@ namespace Scriban.Tests
             }
             else
             {
-                expectedTokens.Add(new Token(TokenType.EscapeCount1, new TextPosition(startInner, 0, startInner), new TextPosition(endInner, 0, endInner)));
+                expectedTokens.Add(new Token(TokenType.EscapeExit, new TextPosition(startInner, 0, startInner), new TextPosition(endInner, 0, endInner)));
             }
             expectedTokens.Add(Token.Eof);
 
@@ -104,7 +180,7 @@ namespace Scriban.Tests
                 if (tokensIt.MoveNext())
                 {
                     var token = tokensIt.Current;
-                    if (expectedToken.Type == TokenType.EscapeCount1)
+                    if (expectedToken.Type == TokenType.EscapeExit)
                     {
                         Assert.AreEqual(expectedToken.Type, token.Type);
                     }
@@ -251,8 +327,8 @@ namespace Scriban.Tests
                 Assert.AreEqual(new List<Token>()
                 {
                     // Empty escape
-                    new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(2, 0, 2)),
-                    new Token(TokenType.EscapeCount1, new TextPosition(3, 0, 3), new TextPosition(5, 0, 5)),
+                    new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(2, 0, 2)),
+                    new Token(TokenType.EscapeExit, new TextPosition(3, 0, 3), new TextPosition(5, 0, 5)),
                     Token.Eof,
                 }, tokens);
             }
@@ -262,8 +338,9 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
+                    new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(2, 0, 2)),
                     new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
-                    new Token(TokenType.EscapeCount1, new TextPosition(4, 0, 4), new TextPosition(6, 0, 6)),
+                    new Token(TokenType.EscapeExit, new TextPosition(4, 0, 4), new TextPosition(6, 0, 6)),
                     Token.Eof,
                 }, tokens);
             }
@@ -273,8 +350,9 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
+                    new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(2, 0, 2)),
                     new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(6, 0, 6)),
-                    new Token(TokenType.EscapeCount1, new TextPosition(7, 0, 7), new TextPosition(9, 0, 9)),
+                    new Token(TokenType.EscapeExit, new TextPosition(7, 0, 7), new TextPosition(9, 0, 9)),
                     Token.Eof,
                 }, tokens);
             }
@@ -283,8 +361,9 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
+                    new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(3, 0, 3)),
                     new Token(TokenType.Escape, new TextPosition(4, 0, 4), new TextPosition(6, 0, 6)),
-                    new Token(TokenType.EscapeCount2, new TextPosition(7, 0, 7), new TextPosition(10, 0, 10)),
+                    new Token(TokenType.EscapeExit, new TextPosition(7, 0, 7), new TextPosition(10, 0, 10)),
                     Token.Eof,
                 }, tokens);
             }
@@ -300,8 +379,9 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
+                    new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(2, 0, 2)),
                     new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
-                    new Token(TokenType.EscapeCount1, new TextPosition(4, 0, 4), new TextPosition(6, 0, 6)),
+                    new Token(TokenType.EscapeExit, new TextPosition(4, 0, 4), new TextPosition(6, 0, 6)),
                     new Token(TokenType.Raw, new TextPosition(7, 0, 7), new TextPosition(7, 0, 7)),
                     new Token(TokenType.Whitespace, new TextPosition(8, 1, 0), new TextPosition(11, 1, 3)),
                     new Token(TokenType.CodeEnter, new TextPosition(12, 1, 4), new TextPosition(14, 1, 6)),
@@ -388,8 +468,9 @@ namespace Scriban.Tests
                 Assert.AreEqual(new List<Token>()
                 {
                     new Token(TokenType.Whitespace, new TextPosition(0, 0, 0), new TextPosition(0, 0, 0)),
+                    new Token(TokenType.EscapeEnter, new TextPosition(1, 0, 1), new TextPosition(4, 0, 4)),
                     new Token(TokenType.Escape, new TextPosition(5, 0, 5), new TextPosition(5, 0, 5)),
-                    new Token(TokenType.EscapeCount1, new TextPosition(6, 0, 6), new TextPosition(8, 0, 8)),
+                    new Token(TokenType.EscapeExit, new TextPosition(6, 0, 6), new TextPosition(8, 0, 8)),
                     Token.Eof,
                 }, tokens);
             }
@@ -399,8 +480,9 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
+                    new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(2, 0, 2)),
                     new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
-                    new Token(TokenType.EscapeCount1, new TextPosition(4, 0, 4), new TextPosition(7, 0, 7)),
+                    new Token(TokenType.EscapeExit, new TextPosition(4, 0, 4), new TextPosition(7, 0, 7)),
                     new Token(TokenType.Whitespace, new TextPosition(8, 0, 8), new TextPosition(9, 0, 9)),
                     new Token(TokenType.Raw, new TextPosition(10, 1, 0), new TextPosition(24, 2, 6)),
                     Token.Eof,
@@ -412,8 +494,9 @@ namespace Scriban.Tests
                 var tokens = ParseTokens(text);
                 Assert.AreEqual(new List<Token>()
                 {
+                    new Token(TokenType.EscapeEnter, new TextPosition(0, 0, 0), new TextPosition(2, 0, 2)),
                     new Token(TokenType.Escape, new TextPosition(3, 0, 3), new TextPosition(3, 0, 3)),
-                    new Token(TokenType.EscapeCount1, new TextPosition(4, 0, 4), new TextPosition(7, 0, 7)),
+                    new Token(TokenType.EscapeExit, new TextPosition(4, 0, 4), new TextPosition(7, 0, 7)),
                     new Token(TokenType.WhitespaceFull, new TextPosition(8, 0, 8), new TextPosition(24, 2, 6)),
                     Token.Eof,
                 }, tokens);
@@ -597,13 +680,13 @@ namespace Scriban.Tests
         [Test]
         public void ParseCommentMultiLine()
         {
-            var text = @"{{## This a multiline 
-comment on a 
-single line 
+            var text = @"{{## This a multiline
+comment on a
+single line
 ##}}";
-            VerifyCodeBlock(text, 
+            VerifyCodeBlock(text,
                 new Token(TokenType.CommentMulti, new TextPosition(2, 0, 2), new TextPosition(text.Length - 3, 3, 1)),
-                // Handle eplicit code exit matching when we have multiline 
+                // Handle eplicit code exit matching when we have multiline
                 new Token(TokenType.CodeExit, new TextPosition(text.Length-2, 3, 2), new TextPosition(text.Length-1, 3, 3))
                 );
         }
@@ -690,7 +773,7 @@ single line
         public void ParseTestNewLine()
         {
             {
-                //          0       
+                //          0
                 //          01234 567
                 var text = "{{ a\r }}";
                 var tokens = ParseTokens(text);
@@ -704,7 +787,7 @@ single line
                 }, tokens);
             }
             {
-                //          0       
+                //          0
                 //          01234 567
                 var text = "{{ a\n }}";
                 var tokens = ParseTokens(text);
@@ -718,7 +801,7 @@ single line
                 }, tokens);
             }
             {
-                //          0       
+                //          0
                 //          01234 5 678
                 var text = "{{ a\r\n }}";
                 var tokens = ParseTokens(text);
@@ -768,12 +851,12 @@ single line
         [Test]
         public void ParseStringMultiLine()
         {
-            var text = @"{{""This a string on 
+            var text = @"{{""This a string on
 a single line
 ""}}";
-            VerifyCodeBlock(text, 
+            VerifyCodeBlock(text,
                 new Token(TokenType.String, new TextPosition(2, 0, 2), new TextPosition(text.Length - 3, 2, 0)),
-                // Handle eplicit code exit matching when we have multiline 
+                // Handle eplicit code exit matching when we have multiline
                 new Token(TokenType.CodeExit, new TextPosition(text.Length - 2, 2, 1), new TextPosition(text.Length - 1, 2, 2))
                 );
         }

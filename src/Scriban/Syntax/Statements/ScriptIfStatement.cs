@@ -75,10 +75,6 @@ namespace Scriban.Syntax
             context.ExpectEos();
             context.Write(Then);
             context.Write(Else);
-            if (!IsElseIf)
-            {
-                context.ExpectEnd();
-            }
         }
     }
 }

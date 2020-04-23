@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -17,18 +17,14 @@ namespace Scriban
     public class TemplateRewriterContext
     {
         private readonly IScriptOutput _output;
+        private readonly bool _isScriptOnly;
         private bool _isInCode;
         private bool _expectSpace;
-        private bool _expectEnd;
         private bool _expectEndOfStatement;
         // Gets a boolean indicating whether the last character written has a whitespace.
         private bool _previousHasSpace;
-        private ScriptTriviaType _nextLStrip;
-        private ScriptTriviaType _nextRStrip;
         private bool _hasEndOfStatement;
         private FastStack<bool> _isWhileLoop;
-        private ScriptRawStatement _previousRawStatement;
-        private bool _isScriptOnly;
 
         public TemplateRewriterContext(IScriptOutput output, TemplateRewriterOptions options = default(TemplateRewriterOptions))
         {
@@ -41,7 +37,7 @@ namespace Scriban
 
             _isScriptOnly = options.Mode == ScriptMode.ScriptOnly;
             _isInCode = _isScriptOnly;
-            _output = output;          
+            _output = output;
         }
 
         /// <summary>
@@ -75,11 +71,6 @@ namespace Scriban
                     {
                         _isWhileLoop.Pop();
                     }
-
-                    if (!IsBlockOrPage(node))
-                    {
-                        _previousRawStatement = node as ScriptRawStatement;
-                    }
                 }
             }
             return this;
@@ -104,13 +95,6 @@ namespace Scriban
         public TemplateRewriterContext ExpectSpace()
         {
             _expectSpace = true;
-            return this;
-        }
-
-        public TemplateRewriterContext ExpectEnd()
-        {
-            _expectEnd = true;
-            ExpectEos();
             return this;
         }
 
@@ -143,26 +127,15 @@ namespace Scriban
                 Write("%");
             }
             Write("{");
-            if (_nextLStrip != ScriptTriviaType.Empty)
-            {
-                Write(_nextLStrip == ScriptTriviaType.Whitespace ? "~" : "-");
-                _nextLStrip = ScriptTriviaType.Empty;
-            }
             _expectEndOfStatement = false;
-            _expectEnd = false;
             _expectSpace = false;
-            _hasEndOfStatement = false;
+            _hasEndOfStatement = true;
             _isInCode = true;
             return this;
         }
 
         public TemplateRewriterContext WriteExitCode(int escape = 0)
         {
-            if (_nextRStrip != ScriptTriviaType.Empty)
-            {
-                Write(_nextRStrip == ScriptTriviaType.Whitespace ? "~" : "-");
-                _nextRStrip = ScriptTriviaType.Empty;
-            }
             Write("}");
             for (int i = 0; i < escape; i++)
             {
@@ -171,7 +144,6 @@ namespace Scriban
             Write("}");
 
             _expectEndOfStatement = false;
-            _expectEnd = false;
             _expectSpace = false;
             _hasEndOfStatement = false;
             _isInCode = false;
@@ -180,30 +152,15 @@ namespace Scriban
 
         private void WriteBegin(ScriptNode node)
         {
-            var rawStatement = node as ScriptRawStatement;
-            if (!IsBlockOrPage(node))
-            {
-                if (_isInCode)
-                {
-                    if (rawStatement != null)
-                    {
-                        _nextRStrip = GetWhitespaceModeFromTrivia(rawStatement, true);
-                        WriteExitCode();
-                    }
-                }
-                else if (rawStatement == null)
-                {
-                    if (_previousRawStatement != null)
-                    {
-                        _nextLStrip = GetWhitespaceModeFromTrivia(_previousRawStatement, false);
-                    }
-                    WriteEnterCode();
-                }
-            }
-
             WriteTrivias(node, true);
 
             HandleEos(node);
+
+            if (_hasEndOfStatement)
+            {
+                _hasEndOfStatement = false;
+                _expectEndOfStatement = false;
+            }
 
             // Add a space if this is required and no trivia are providing it
             if (node.CanHaveLeadingTrivia())
@@ -218,45 +175,7 @@ namespace Scriban
 
         private void WriteEnd(ScriptNode node)
         {
-            if (_expectEnd)
-            {
-                HandleEos(node);
-
-                var triviasHasEnd = node.HasTrivia(ScriptTriviaType.End, false);
-
-                if (_previousRawStatement != null)
-                {
-                    _nextLStrip = GetWhitespaceModeFromTrivia(_previousRawStatement, false);
-                }
-
-                if (!_isInCode)
-                {
-                    WriteEnterCode();
-                }
-
-                if (triviasHasEnd)
-                {
-                    WriteTrivias(node, false);
-                }
-                else
-                {
-                    Write(_isInCode ? "end" : " end ");
-                }
-
-                if (!_isInCode)
-                {
-                    WriteExitCode();
-                }
-                else
-                {
-                    _expectEndOfStatement = true;
-                }
-                _expectEnd = false;
-            }
-            else
-            {
-                WriteTrivias(node, false);
-            }
+            WriteTrivias(node, false);
 
             if (node is ScriptPage)
             {
@@ -273,12 +192,12 @@ namespace Scriban
             {
                 if (!_hasEndOfStatement)
                 {
-                    if (!(node is ScriptRawStatement))
+                    if (!(node is ScriptEscapeStatement))
                     {
                         Write("; ");
                     }
                 }
-                _expectEndOfStatement = false;
+                _expectEndOfStatement = false; // We expect always a end of statement before and after
                 _hasEndOfStatement = false;
             }
         }
@@ -295,11 +214,7 @@ namespace Scriban
                 foreach (var trivia in (before ? node.Trivias.Before : node.Trivias.After))
                 {
                     trivia.Write(this);
-                    if (trivia.Type == ScriptTriviaType.End)
-                    {
-                        _hasEndOfStatement = false;
-                    }
-                    else if (trivia.Type == ScriptTriviaType.NewLine || trivia.Type == ScriptTriviaType.SemiColon)
+                    if (trivia.Type == ScriptTriviaType.NewLine || trivia.Type == ScriptTriviaType.SemiColon)
                     {
                         _hasEndOfStatement = true;
                         // If expect a space and we have a NewLine or SemiColon, we can safely discard the required space
@@ -310,41 +225,6 @@ namespace Scriban
                     }
                 }
             }
-        }
-
-        private ScriptTriviaType GetWhitespaceModeFromTrivia(ScriptNode node, bool before)
-        {
-            if (node.Trivias == null)
-            {
-                return ScriptTriviaType.Empty;
-            }
-
-            if (before)
-            {
-                var trivias = node.Trivias.Before;
-                for (int i = trivias.Count - 1; i >= 0; i--)
-                {
-                    var type = trivias[i].Type;
-                    if (type == ScriptTriviaType.WhitespaceFull || type == ScriptTriviaType.Whitespace)
-                    {
-                        return type;
-                    }
-                }
-            }
-            else
-            {
-                var trivias = node.Trivias.After;
-                for (int i = 0; i < trivias.Count; i++)
-                {
-                    var type = trivias[i].Type;
-                    if (type == ScriptTriviaType.WhitespaceFull || type == ScriptTriviaType.Whitespace)
-                    {
-                        return type;
-                    }
-                }
-            }
-
-            return ScriptTriviaType.Empty;
         }
     }
 }

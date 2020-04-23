@@ -57,7 +57,6 @@ namespace Scriban.Syntax
             context.Write(CaseKeyword).ExpectSpace();
             context.Write(Value).ExpectEos();
             context.Write(Body);
-            context.ExpectEnd();
         }
     }
 }

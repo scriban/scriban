@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -40,7 +40,7 @@ namespace Scriban.Syntax
         public abstract object Evaluate(TemplateContext context);
 
         public virtual int ChildrenCount => 0;
-        
+
         /// <summary>
         /// Clones this node including its trivias.
         /// </summary>
@@ -167,7 +167,7 @@ namespace Scriban.Syntax
             node.AddTrivia(ScriptTrivia.Space, false);
             return node;
         }
-        
+
         public static void AddTrivia(this ScriptNode node, ScriptTrivia trivia, bool before)
         {
             var trivias = node.Trivias;
@@ -299,8 +299,6 @@ namespace Scriban.Syntax
             {
                 case ScriptTriviaType.Empty:
                     return string.Empty;
-                case ScriptTriviaType.End:
-                    return "end";
                 case ScriptTriviaType.Comma:
                     return ",";
                 case ScriptTriviaType.SemiColon:
@@ -328,7 +326,5 @@ namespace Scriban.Syntax
         NewLine,
 
         SemiColon,
-
-        End,
     }
 }

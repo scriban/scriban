@@ -71,7 +71,6 @@ namespace Scriban.Syntax
             context.Write(Condition);
             context.ExpectEos();
             context.Write(Body);
-            context.ExpectEnd();
         }
     }
 }

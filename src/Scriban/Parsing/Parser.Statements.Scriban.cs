@@ -23,20 +23,7 @@ namespace Scriban.Parsing
             {
                 case "end":
                     hasEnd = true;
-                    nextStatement = false;
-
-                    if (_isKeepTrivia)
-                    {
-                        _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.End, _lexer.Text));
-                    }
-                    NextToken();
-
-                    var matchingStatement = FindFirstStatementExpectingEnd();
-                    ExpectEndOfStatement();
-                    if (_isKeepTrivia)
-                    {
-                        FlushTrivias(matchingStatement, false);
-                    }
+                    statement = ParseEndStatement();
                     break;
                 case "wrap":
                     CheckNotInCase(parent, startToken);
@@ -185,6 +172,13 @@ namespace Scriban.Parsing
                     statement = ParseExpressionStatement();
                     break;
             }
+        }
+
+        private ScriptEndStatement ParseEndStatement()
+        {
+            var endStatement = Open<ScriptEndStatement>();
+            ExpectAndParseKeywordTo(endStatement.EndKeyword);
+            return Close(endStatement);
         }
 
         private ScriptFunction ParseFunctionStatement(bool isAnonymous)

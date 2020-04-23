@@ -23,6 +23,8 @@ namespace Scriban.Syntax
 
         public static ScriptKeyword Else() => new ScriptKeyword("else");
 
+        public static ScriptKeyword End() => new ScriptKeyword("end");
+
         public static ScriptKeyword If() => new ScriptKeyword("if");
 
         public static ScriptKeyword In() => new ScriptKeyword("in");

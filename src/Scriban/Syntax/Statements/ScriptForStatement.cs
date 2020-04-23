@@ -187,7 +187,6 @@ namespace Scriban.Syntax
             }
             context.ExpectEos();
             context.Write(Body);
-            context.ExpectEnd();
         }
 
         protected virtual void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)

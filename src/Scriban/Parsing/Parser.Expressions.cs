@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -15,11 +15,11 @@ namespace Scriban.Parsing
     {
         private int _allowNewLineLevel = 0;
         private int _expressionLevel = 0;
-        
+
         public int ExpressionLevel => _expressionLevel;
 
         private static readonly int PrecedenceOfMultiply = GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator.Multiply);
-        
+
         private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             bool hasAnonymousFunction = false;
@@ -71,7 +71,7 @@ namespace Scriban.Parsing
             {
                 precedence = GetDefaultBinaryOperatorPrecedence(binaryOperator);
             }
-            
+
             return binaryOperator != ScriptBinaryOperator.None;
         }
 
@@ -90,7 +90,7 @@ namespace Scriban.Parsing
 
                 // Allow custom parsing for a first pre-expression
                 ScriptExpression leftOperand = null;
-                
+
                 switch (Current.Type)
                 {
                     case TokenType.Identifier:
@@ -257,7 +257,7 @@ namespace Scriban.Parsing
                             {
                                 LogError(leftOperand, $"Creating a function is only allowed for a top level assignment");
                             }
-                            
+
                             declaration.EqualToken = ParseToken(); // eat equal token
                             declaration.Body = ParseExpressionStatement();
                             declaration.Span.End = declaration.Body.Span.End;
@@ -366,7 +366,7 @@ namespace Scriban.Parsing
                         var binaryExpression = Open<ScriptBinaryExpression>();
                         binaryExpression.Left = leftOperand;
                         binaryExpression.Operator = binaryOperatorType;
-                        
+
                         // Parse the operator
                         binaryExpression.OperatorToken = ParseToken();
 
@@ -375,7 +375,7 @@ namespace Scriban.Parsing
                         {
                             binaryExpression.OperatorToken.Value = binaryOperatorType.ToText();
                         }
-                        
+
                         // unit test: 110-binary-simple-error1.txt
                         binaryExpression.Right = ExpectAndParseExpression(binaryExpression, ref hasAnonymousFunction,
                             functionCall ?? parentExpression, newPrecedence,
@@ -461,7 +461,7 @@ namespace Scriban.Parsing
                             // We don't allow anything after named parameters
                             break;
                         }
-                    
+
 
                         if (functionCall == null)
                         {
@@ -554,7 +554,7 @@ namespace Scriban.Parsing
                         }
                         goto parseExpression;
                     }
-                    
+
                     if (precedence > 0)
                     {
                         break;
