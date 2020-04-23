@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
-    public static class ScriptParameterContainerExtensions
+    public static partial class ScriptParameterContainerExtensions
     {
         public static void AddParameter(this IScriptNamedArgumentContainer container, ScriptNamedArgument argument)
         {

@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Text;
@@ -36,10 +36,9 @@ namespace Scriban.Runtime
         /// </summary>
         public StringBuilder Builder { get; }
 
-        public IScriptOutput Write(string text, int offset, int count)
+        public void Write(string text, int offset, int count)
         {
             Builder.Append(text, offset, count);
-            return this;
         }
 
         /// <summary>
@@ -58,10 +57,10 @@ namespace Scriban.Runtime
 
 
 #if !SCRIBAN_NO_ASYNC
-        public ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
+        public ValueTask WriteAsync(string text, int offset, int count, CancellationToken cancellationToken)
         {
             Builder.Append(text, offset, count);
-            return new ValueTask<IScriptOutput>(this);
+            return default;
         }
 #endif
         public override string ToString()

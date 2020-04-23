@@ -14,7 +14,7 @@ namespace Scriban
     /// <summary>
     /// Rewriter context used to write an AST/<see cref="ScriptNode"/> tree back to a text.
     /// </summary>
-    public class ScriptPrinter
+    public partial class ScriptPrinter
     {
         private readonly IScriptOutput _output;
         private readonly bool _isScriptOnly;

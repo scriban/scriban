@@ -243,7 +243,7 @@ namespace Scriban.Syntax
         public List<ScriptTrivia> After { get; }
     }
 
-    public readonly struct ScriptTrivia
+    public readonly partial struct ScriptTrivia
     {
         public static readonly ScriptTrivia Space = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.Whitespace, " ");
 
