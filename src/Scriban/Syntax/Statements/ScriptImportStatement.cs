@@ -47,11 +47,11 @@ namespace Scriban.Syntax
             return null;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(ImportKeyword).ExpectSpace();
-            context.Write(Expression);
-            context.ExpectEos();
+            printer.Write(ImportKeyword).ExpectSpace();
+            printer.Write(Expression);
+            printer.ExpectEos();
         }
     }
 }

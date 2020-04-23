@@ -42,9 +42,9 @@ namespace Scriban.Syntax
             return context.Evaluate(Body);
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Body);
+            printer.Write(Body);
         }
     }
 }

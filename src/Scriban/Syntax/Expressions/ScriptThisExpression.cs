@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
 using System.Linq;
@@ -17,9 +17,9 @@ namespace Scriban.Syntax
             return context.GetValue(this);
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write("this");
+            printer.Write("this");
         }
 
         public object GetValue(TemplateContext context)

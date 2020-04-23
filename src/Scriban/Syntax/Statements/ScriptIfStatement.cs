@@ -64,17 +64,17 @@ namespace Scriban.Syntax
             return conditionValue ? context.Evaluate(Then) : context.Evaluate(Else);
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             if (IsElseIf)
             {
-                context.Write(ElseKeyword).ExpectSpace();
+                printer.Write(ElseKeyword).ExpectSpace();
             }
-            context.Write(IfKeyword).ExpectSpace();
-            context.Write(Condition);
-            context.ExpectEos();
-            context.Write(Then);
-            context.Write(Else);
+            printer.Write(IfKeyword).ExpectSpace();
+            printer.Write(Condition);
+            printer.ExpectEos();
+            printer.Write(Then);
+            printer.Write(Else);
         }
     }
 }

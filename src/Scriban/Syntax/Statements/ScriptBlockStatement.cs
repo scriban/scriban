@@ -65,11 +65,11 @@ namespace Scriban.Syntax
             return result;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             foreach (var scriptStatement in Statements)
             {
-                context.Write(scriptStatement);
+                printer.Write(scriptStatement);
             }
         }
 

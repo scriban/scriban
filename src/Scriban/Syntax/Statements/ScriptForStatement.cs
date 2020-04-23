@@ -167,26 +167,26 @@ namespace Scriban.Syntax
             return null;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(ForOrTableRowKeyword).ExpectSpace();
-            context.Write(Variable).ExpectSpace();
-            if (!context.PreviousHasSpace)
+            printer.Write(ForOrTableRowKeyword).ExpectSpace();
+            printer.Write(Variable).ExpectSpace();
+            if (!printer.PreviousHasSpace)
             {
-                context.Write(" ");
+                printer.Write(" ");
             }
-            context.Write(InKeyword).ExpectSpace();
-            context.Write(Iterator);
+            printer.Write(InKeyword).ExpectSpace();
+            printer.Write(Iterator);
             if (NamedArguments != null)
             {
                 foreach (var arg in NamedArguments)
                 {
-                    context.ExpectSpace();
-                    context.Write(arg);
+                    printer.ExpectSpace();
+                    printer.Write(arg);
                 }
             }
-            context.ExpectEos();
-            context.Write(Body);
+            printer.ExpectEos();
+            printer.Write(Body);
         }
 
         protected virtual void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)

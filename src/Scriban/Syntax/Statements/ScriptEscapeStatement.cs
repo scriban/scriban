@@ -27,56 +27,35 @@ namespace Scriban.Syntax
             return null;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             if (IsEntering)
             {
-                context.WriteEnterCode(EscapeCount);
-                WriteWhitespaceMode(context);
+                printer.WriteEnterCode(EscapeCount);
+                WriteWhitespaceMode(printer);
             }
             else
             {
-                WriteWhitespaceMode(context);
-                context.WriteExitCode(EscapeCount);
+                WriteWhitespaceMode(printer);
+                printer.WriteExitCode(EscapeCount);
             }
         }
 
-        private void WriteWhitespaceMode(TemplateRewriterContext context)
+        private void WriteWhitespaceMode(ScriptPrinter printer)
         {
             switch (WhitespaceMode)
             {
                 case ScriptWhitespaceMode.None:
                     break;
                 case ScriptWhitespaceMode.Greedy:
-                    context.Write("-");
+                    printer.Write("-");
                     break;
                 case ScriptWhitespaceMode.NonGreedy:
-                    context.Write("~");
+                    printer.Write("~");
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
-    }
-
-    public enum ScriptWhitespaceMode
-    {
-        /// <summary>
-        /// No change in whitespace
-        /// </summary>
-        None,
-
-        /// <summary>
-        /// The greedy mode using the character - (e.g {{- or -}}), removes any whitespace, including newlines
-        /// </summary>
-        Greedy,
-
-        /// <summary>
-        /// he non greedy mode using the character ~.
-        ///
-        /// - Using a {{~ will remove any whitespace before but will stop on the first newline without including it
-        /// - Using a ~}} will remove any whitespace after including the first newline but will stop after
-        /// </summary>
-        NonGreedy,
     }
 }

@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections;
@@ -88,11 +88,11 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(From);
-            context.Write(PipeToken);
-            context.Write(To);
+            printer.Write(From);
+            printer.Write(PipeToken);
+            printer.Write(To);
         }
     }
 }

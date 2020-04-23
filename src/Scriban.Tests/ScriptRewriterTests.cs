@@ -42,7 +42,7 @@ namespace Scriban.Tests
         private string ToText(ScriptNode node)
         {
             var output = new StringBuilder();
-            var context = new TemplateRewriterContext(new StringBuilderOutput(output));
+            var context = new ScriptPrinter(new StringBuilderOutput(output));
             context.Write(node);
             return output.ToString();
         }

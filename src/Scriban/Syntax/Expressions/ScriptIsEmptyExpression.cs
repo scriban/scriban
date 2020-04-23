@@ -23,10 +23,10 @@ namespace Scriban.Syntax
             return context.GetValue(this);
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Target);
-            context.Write(".empty?");
+            printer.Write(Target);
+            printer.Write(".empty?");
         }
 
         public override bool CanHaveLeadingTrivia()

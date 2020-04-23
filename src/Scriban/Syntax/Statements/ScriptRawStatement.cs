@@ -34,11 +34,11 @@ namespace Scriban.Syntax
             return null;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             if (Text != null && SliceLength > 0)
             {
-                context.Write(Text.Substring(SliceIndex, SliceLength));
+                printer.Write(Text.Substring(SliceIndex, SliceLength));
             }
         }
     }

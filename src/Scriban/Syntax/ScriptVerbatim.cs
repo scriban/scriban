@@ -24,9 +24,9 @@ namespace Scriban.Syntax
             return null;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Value);
+            printer.Write(Value);
         }
     }
 }

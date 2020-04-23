@@ -49,11 +49,11 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Target);
-            context.Write(EqualToken);
-            context.Write(Value);
+            printer.Write(Target);
+            printer.Write(EqualToken);
+            printer.Write(Value);
         }
     }
 }

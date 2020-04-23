@@ -115,7 +115,7 @@ namespace Scriban.Syntax
             return _children[index];
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             throw new NotImplementedException();
         }

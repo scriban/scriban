@@ -73,70 +73,70 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             if (Value == null)
             {
-                context.Write("null");
+                printer.Write("null");
                 return;
             }
 
             var type = Value.GetType();
             if (type == typeof(string))
             {
-                context.Write(ToLiteral(StringQuoteType, (string) Value));
+                printer.Write(ToLiteral(StringQuoteType, (string) Value));
             }
             else if (type == typeof(bool))
             {
-                context.Write(((bool) Value) ? "true" : "false");
+                printer.Write(((bool) Value) ? "true" : "false");
             }
             else if (type == typeof(int))
             {
-                context.Write(((int) Value).ToString(CultureInfo.InvariantCulture));
+                printer.Write(((int) Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (type == typeof(double))
             {
-                context.Write(AppendDecimalPoint(((double)Value).ToString("R", CultureInfo.InvariantCulture), true)); 
+                printer.Write(AppendDecimalPoint(((double)Value).ToString("R", CultureInfo.InvariantCulture), true)); 
             }
             else if (type == typeof(float))
             {
-                context.Write(AppendDecimalPoint(((float)Value).ToString("R", CultureInfo.InvariantCulture), true));
+                printer.Write(AppendDecimalPoint(((float)Value).ToString("R", CultureInfo.InvariantCulture), true));
             }
             else if (type == typeof(byte))
             {
-                context.Write(((byte) Value).ToString(CultureInfo.InvariantCulture));
+                printer.Write(((byte) Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (type == typeof(sbyte))
             {
-                context.Write(((sbyte) Value).ToString(CultureInfo.InvariantCulture));
+                printer.Write(((sbyte) Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (type == typeof(short))
             {
-                context.Write(((short) Value).ToString(CultureInfo.InvariantCulture));
+                printer.Write(((short) Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (type == typeof(ushort))
             {
-                context.Write(((ushort) Value).ToString(CultureInfo.InvariantCulture));
+                printer.Write(((ushort) Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (type == typeof(uint))
             {
-                context.Write(((uint) Value).ToString(CultureInfo.InvariantCulture));
+                printer.Write(((uint) Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (type == typeof(long))
             {
-                context.Write(((long) Value).ToString(CultureInfo.InvariantCulture));
+                printer.Write(((long) Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (type == typeof(ulong))
             {
-                context.Write(((uint) Value).ToString(CultureInfo.InvariantCulture));
+                printer.Write(((uint) Value).ToString(CultureInfo.InvariantCulture));
             }
             else if (type == typeof(char))
             {
-                context.Write(ToLiteral(ScriptLiteralStringQuoteType.SimpleQuote, Value.ToString()));
+                printer.Write(ToLiteral(ScriptLiteralStringQuoteType.SimpleQuote, Value.ToString()));
             }
             else
             {
-                context.Write(Value.ToString());
+                printer.Write(Value.ToString());
             }
         }
 

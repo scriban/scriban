@@ -14,7 +14,7 @@ namespace Scriban
     /// <summary>
     /// Rewriter context used to write an AST/<see cref="ScriptNode"/> tree back to a text.
     /// </summary>
-    public class TemplateRewriterContext
+    public class ScriptPrinter
     {
         private readonly IScriptOutput _output;
         private readonly bool _isScriptOnly;
@@ -26,7 +26,7 @@ namespace Scriban
         private bool _hasEndOfStatement;
         private FastStack<bool> _isWhileLoop;
 
-        public TemplateRewriterContext(IScriptOutput output, TemplateRewriterOptions options = default(TemplateRewriterOptions))
+        public ScriptPrinter(IScriptOutput output, ScriptPrinterOptions options = default(ScriptPrinterOptions))
         {
             _isWhileLoop = new FastStack<bool>(4);
             Options = options;
@@ -43,13 +43,13 @@ namespace Scriban
         /// <summary>
         /// Gets the options for rendering
         /// </summary>
-        public readonly TemplateRewriterOptions Options;
+        public readonly ScriptPrinterOptions Options;
 
         public bool PreviousHasSpace => _previousHasSpace;
 
         public bool IsInWhileLoop => _isWhileLoop.Count > 0 && _isWhileLoop.Peek();
 
-        public TemplateRewriterContext Write(ScriptNode node)
+        public ScriptPrinter Write(ScriptNode node)
         {
             if (node != null)
             {
@@ -62,7 +62,7 @@ namespace Scriban
                 try
                 {
                     WriteBegin(node);
-                    node.Write(this);
+                    node.PrintTo(this);
                     WriteEnd(node);
                 }
                 finally
@@ -76,14 +76,14 @@ namespace Scriban
             return this;
         }
 
-        public TemplateRewriterContext Write(string text)
+        public ScriptPrinter Write(string text)
         {
             _previousHasSpace = text.Length > 0 && char.IsWhiteSpace(text[text.Length - 1]);
             _output.Write(text);
             return this;
         }
 
-        public TemplateRewriterContext ExpectEos()
+        public ScriptPrinter ExpectEos()
         {
             if (!_hasEndOfStatement)
             {
@@ -92,13 +92,13 @@ namespace Scriban
             return this;
         }
 
-        public TemplateRewriterContext ExpectSpace()
+        public ScriptPrinter ExpectSpace()
         {
             _expectSpace = true;
             return this;
         }
 
-        public TemplateRewriterContext WriteListWithCommas<T>(IList<T> list) where T : ScriptNode
+        public ScriptPrinter WriteListWithCommas<T>(IList<T> list) where T : ScriptNode
         {
             if (list == null)
             {
@@ -119,7 +119,7 @@ namespace Scriban
             return this;
         }
 
-        public TemplateRewriterContext WriteEnterCode(int escape = 0)
+        public ScriptPrinter WriteEnterCode(int escape = 0)
         {
             Write("{");
             for (int i = 0; i < escape; i++)
@@ -134,7 +134,7 @@ namespace Scriban
             return this;
         }
 
-        public TemplateRewriterContext WriteExitCode(int escape = 0)
+        public ScriptPrinter WriteExitCode(int escape = 0)
         {
             Write("}");
             for (int i = 0; i < escape; i++)

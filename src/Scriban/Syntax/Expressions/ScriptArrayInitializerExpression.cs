@@ -50,11 +50,11 @@ namespace Scriban.Syntax
             return scriptArray;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(OpenBracketToken);
-            context.WriteListWithCommas(Values);
-            context.Write(CloseBracketToken);
+            printer.Write(OpenBracketToken);
+            printer.WriteListWithCommas(Values);
+            printer.Write(CloseBracketToken);
         }
     }
 }

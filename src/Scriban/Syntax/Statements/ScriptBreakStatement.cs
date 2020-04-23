@@ -42,9 +42,9 @@ namespace Scriban.Syntax
             return null;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(BreakKeyword).ExpectEos();
+            printer.Write(BreakKeyword).ExpectEos();
         }
     }
 }

@@ -32,11 +32,11 @@ namespace Scriban.Syntax
             return context.GetValue(this);
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Target);
-            context.Write(".");
-            context.Write(Member);
+            printer.Write(Target);
+            printer.Write(".");
+            printer.Write(Member);
         }
 
         public override bool CanHaveLeadingTrivia()

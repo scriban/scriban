@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -39,14 +39,14 @@ namespace Scriban.Syntax
             {
                 return context.Evaluate(Right, true);
             }
-            
+
             var value = context.Evaluate(Right);
 
             if (value is IScriptCustomUnaryOperation customUnary)
             {
                 return customUnary.Evaluate(context, Right.Span, Operator, value);
             }
-            
+
             switch (Operator)
             {
                 case ScriptUnaryOperator.Not:
@@ -113,17 +113,17 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(Span, $"Operator `{OperatorAsText}` is not supported");
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             if (OperatorToken != null)
             {
-                context.Write(OperatorToken);
+                printer.Write(OperatorToken);
             }
             else
             {
-                context.Write(Operator.ToText());
+                printer.Write(Operator.ToText());
             }
-            context.Write(Right);
+            printer.Write(Right);
         }
     }
 }

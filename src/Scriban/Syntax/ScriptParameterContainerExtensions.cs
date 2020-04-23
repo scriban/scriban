@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
 
@@ -16,7 +16,7 @@ namespace Scriban.Syntax
             container.NamedArguments.Add(argument);
         }
 
-        public static void Write(this TemplateRewriterContext context, List<ScriptNamedArgument> parameters)
+        public static void Write(this ScriptPrinter printer, List<ScriptNamedArgument> parameters)
         {
             if (parameters == null)
             {
@@ -25,8 +25,8 @@ namespace Scriban.Syntax
             for (var i = 0; i < parameters.Count; i++)
             {
                 var option = parameters[i];
-                context.ExpectSpace();
-                context.Write(option);
+                printer.ExpectSpace();
+                printer.Write(option);
             }
         }
     }

@@ -30,10 +30,10 @@ namespace Scriban.Syntax
             return result;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Expression);
-            context.ExpectEos();
+            printer.Write(Expression);
+            printer.ExpectEos();
         }
     }
 }

@@ -41,11 +41,11 @@ namespace Scriban.Syntax
             }
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write("(");
-            context.Write(Expression);
-            context.Write(")");
+            printer.Write("(");
+            printer.Write(Expression);
+            printer.Write(")");
         }
         public object GetValue(TemplateContext context)
         {

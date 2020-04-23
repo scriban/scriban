@@ -38,19 +38,19 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Target);
+            printer.Write(Target);
             var isSpecialArgumentsArray = Equals(Target, ScriptVariable.Arguments) && Index is ScriptLiteral &&
                                           ((ScriptLiteral) Index).IsPositiveInteger();
             if (!isSpecialArgumentsArray)
             {
-                context.Write("[");
+                printer.Write("[");
             }
-            context.Write(Index);
+            printer.Write(Index);
             if (!isSpecialArgumentsArray)
             {
-                context.Write("]");
+                printer.Write("]");
             }
         }
         public object GetValue(TemplateContext context)

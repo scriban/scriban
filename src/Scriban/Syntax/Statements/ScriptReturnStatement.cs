@@ -36,11 +36,11 @@ namespace Scriban.Syntax
             return result;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(RetKeyword).ExpectSpace();
-            context.Write(Expression);
-            context.ExpectEos();
+            printer.Write(RetKeyword).ExpectSpace();
+            printer.Write(Expression);
+            printer.ExpectEos();
         }
     }
 }

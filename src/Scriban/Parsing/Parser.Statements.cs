@@ -632,7 +632,7 @@ namespace Scriban.Parsing
                 throw new NotSupportedException();
             }
 
-            public override void Write(TemplateRewriterContext context)
+            public override void PrintTo(ScriptPrinter printer)
             {
                 throw new NotSupportedException();
             }

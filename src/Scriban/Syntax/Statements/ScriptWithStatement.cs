@@ -57,12 +57,12 @@ namespace Scriban.Syntax
             }
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(WithKeyword).ExpectSpace();
-            context.Write(Name);
-            context.ExpectEos();
-            context.Write(Body);
+            printer.Write(WithKeyword).ExpectSpace();
+            printer.Write(Name);
+            printer.ExpectEos();
+            printer.Write(Body);
         }
     }
 }

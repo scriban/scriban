@@ -28,9 +28,9 @@ namespace Scriban.Syntax
             throw new NotImplementedException();
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(OperatorToken?.ToString() ?? Operator.ToText());
+            printer.Write(OperatorToken?.ToString() ?? Operator.ToText());
         }
     }
 }

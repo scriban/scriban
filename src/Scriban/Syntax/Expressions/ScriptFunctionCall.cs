@@ -126,21 +126,21 @@ namespace Scriban.Syntax
             return Call(context, Target, targetFunction, context.AllowPipeArguments, Arguments);
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Target);
-            if (OpenParent != null) context.Write(OpenParent);
+            printer.Write(Target);
+            if (OpenParent != null) printer.Write(OpenParent);
             for (var i = 0; i < Arguments.Count; i++)
             {
                 var scriptExpression = Arguments[i];
                 if (OpenParent == null || i > 0)
                 {
-                    context.ExpectSpace();
+                    printer.ExpectSpace();
                 }
-                context.Write(scriptExpression);
+                printer.Write(scriptExpression);
             }
 
-            if (CloseParen != null) context.Write(CloseParen);
+            if (CloseParen != null) printer.Write(CloseParen);
         }
 
         public override bool CanHaveLeadingTrivia()

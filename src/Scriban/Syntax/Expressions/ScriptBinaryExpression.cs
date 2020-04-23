@@ -72,29 +72,29 @@ namespace Scriban.Syntax
             }
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Left);
+            printer.Write(Left);
             // Because a-b is a variable name, we need to transform binary op a-b to a - b
-            if (Operator == ScriptBinaryOperator.Substract && !context.PreviousHasSpace)
+            if (Operator == ScriptBinaryOperator.Substract && !printer.PreviousHasSpace)
             {
-                context.Write(" ");
+                printer.Write(" ");
             }
 
             if (OperatorToken != null)
             {
-                context.Write(OperatorToken);
+                printer.Write(OperatorToken);
             }
             else
             {
-                context.Write(Operator.ToText());
+                printer.Write(Operator.ToText());
             }
 
             if (Operator == ScriptBinaryOperator.Substract)
             {
-                context.ExpectSpace();
+                printer.ExpectSpace();
             }
-            context.Write(Right);
+            printer.Write(Right);
         }
 
         public override bool CanHaveLeadingTrivia()

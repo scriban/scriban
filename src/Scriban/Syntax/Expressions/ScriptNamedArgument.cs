@@ -38,18 +38,18 @@ namespace Scriban.Syntax
             return true;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             if (Name == null)
             {
                 return;
             }
-            context.Write(Name);
+            printer.Write(Name);
 
             if (Value != null)
             {
-                context.Write(":");
-                context.Write(Value);
+                printer.Write(":");
+                printer.Write(Value);
             }
         }
     }

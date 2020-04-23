@@ -90,20 +90,20 @@ namespace Scriban.Syntax
             return NameOrDoToken != null;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
             if (!IsAnonymous && Body is ScriptBlockStatement)
             {
-                context.Write(FuncToken).ExpectSpace();
+                printer.Write(FuncToken).ExpectSpace();
             }
-            context.Write(NameOrDoToken);
+            printer.Write(NameOrDoToken);
 
-            if (OpenParen != null) context.Write(OpenParen);
+            if (OpenParen != null) printer.Write(OpenParen);
             if (HasParameters)
             {
                 if (OpenParen != null)
                 {
-                    context.WriteListWithCommas(Parameters);
+                    printer.WriteListWithCommas(Parameters);
                 }
                 else
                 {
@@ -112,23 +112,23 @@ namespace Scriban.Syntax
                         var param = Parameters[i];
                         if (i > 0)
                         {
-                            context.ExpectSpace();
+                            printer.ExpectSpace();
                         }
-                        context.Write(param);
+                        printer.Write(param);
                     }
                 }
             }
-            if (CloseParen != null) context.Write(CloseParen);
+            if (CloseParen != null) printer.Write(CloseParen);
 
             if (Body is ScriptBlockStatement)
             {
-                context.ExpectEos();
-                context.Write(Body);
+                printer.ExpectEos();
+                printer.Write(Body);
             }
             else
             {
-                context.Write(EqualToken);
-                context.Write(Body);
+                printer.Write(EqualToken);
+                printer.Write(Body);
             }
         }
         public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)

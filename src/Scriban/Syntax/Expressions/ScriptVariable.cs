@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -124,9 +124,9 @@ namespace Scriban.Syntax
             context.SetValue(this, valueToSet);
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Scope == ScriptVariableScope.Local ? $"${Name}" : Name);
+            printer.Write(Scope == ScriptVariableScope.Local ? $"${Name}" : Name);
         }
     }
 
@@ -157,16 +157,16 @@ namespace Scriban.Syntax
         {
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            if (context.IsInWhileLoop)
+            if (printer.IsInWhileLoop)
             {
                 // TODO: Not efficient
-                context.Write(Name == "for" ? "while" : Name);
+                printer.Write(Name == "for" ? "while" : Name);
             }
             else
             {
-                base.Write(context);
+                base.PrintTo(printer);
             }
         }
     }

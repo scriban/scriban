@@ -65,13 +65,13 @@ namespace Scriban.Syntax
             return context.Evaluate(Next);
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(WhenKeyword).ExpectSpace();
-            context.WriteListWithCommas(Values);
-            context.ExpectEos();
-            context.Write(Body);
-            context.Write(Next);
+            printer.Write(WhenKeyword).ExpectSpace();
+            printer.WriteListWithCommas(Values);
+            printer.ExpectEos();
+            printer.Write(Body);
+            printer.Write(Next);
         }
     }
 }

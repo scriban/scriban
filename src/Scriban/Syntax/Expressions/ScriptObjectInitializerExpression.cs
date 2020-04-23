@@ -42,23 +42,23 @@ namespace Scriban.Syntax
             return obj;
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write("{");
+            printer.Write("{");
             bool isAfterFirst = false;
             foreach(var member in Members)
             {
                 if (isAfterFirst)
                 {
-                    context.Write(",");
+                    printer.Write(",");
                 }
 
-                context.Write(member);
+                printer.Write(member);
 
                 // If the value didn't have any Comma Trivia, we can emit it
                 isAfterFirst = !member.Value.HasTrivia(ScriptTriviaType.Comma, false);
             }
-            context.Write("}");
+            printer.Write("}");
         }
     }
 }

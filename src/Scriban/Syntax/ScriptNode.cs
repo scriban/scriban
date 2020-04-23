@@ -93,7 +93,7 @@ namespace Scriban.Syntax
             return true;
         }
 
-        public abstract void Write(TemplateRewriterContext context);
+        public abstract void PrintTo(ScriptPrinter printer);
 
         public virtual void Accept(ScriptVisitor visitor) => throw new NotImplementedException($"This method must be implemented by the type {this.GetType()}");
 
@@ -136,8 +136,8 @@ namespace Scriban.Syntax
         public sealed override string ToString()
         {
             var strOutput = new StringBuilderOutput();
-            var template = new TemplateRewriterContext(strOutput , new TemplateRewriterOptions() { Mode = ScriptMode.ScriptOnly });
-            template.Write(this);
+            var printer = new ScriptPrinter(strOutput , new ScriptPrinterOptions() { Mode = ScriptMode.ScriptOnly });
+            printer.Write(this);
             return strOutput.ToString();
         }
     }
@@ -271,7 +271,7 @@ namespace Scriban.Syntax
 
         public readonly string Text;
 
-        public void Write(TemplateRewriterContext context)
+        public void Write(ScriptPrinter printer)
         {
             var rawText = ToString();
 
@@ -282,14 +282,14 @@ namespace Scriban.Syntax
                 rawText = rawText.Replace("#", "\\#");
                 // Escape any }}
                 rawText = rawText.Replace("}", "\\}");
-                context.Write("## ");
+                printer.Write("## ");
             }
 
-            context.Write(rawText);
+            printer.Write(rawText);
 
             if (isRawComment)
             {
-                context.Write(" ##");
+                printer.Write(" ##");
             }
         }
 
