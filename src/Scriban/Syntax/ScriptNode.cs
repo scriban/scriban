@@ -127,7 +127,7 @@ namespace Scriban.Syntax
 
         public sealed override string ToString()
         {
-            var strOutput = StringBuilderOutput.GetThreadInstance();
+            var strOutput = new StringBuilderOutput();
             var printer = new ScriptPrinter(strOutput , new ScriptPrinterOptions() { Mode = ScriptMode.ScriptOnly });
             printer.Write(this);
             var result = strOutput.ToString();
