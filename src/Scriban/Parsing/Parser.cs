@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -35,6 +35,7 @@ namespace Scriban.Parsing
         private readonly bool _isKeepTrivia;
         private readonly List<ScriptTrivia> _trivias;
         private readonly Queue<ScriptStatement> _pendingStatements;
+        private IScriptTerminal _lastTerminalWithTrivias;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -127,6 +128,12 @@ namespace Scriban.Parsing
 
             page.Body = ParseBlockStatement(null);
 
+            // Flush any pending trivias
+            if (_isKeepTrivia && _lastTerminalWithTrivias != null)
+            {
+                FlushTriviasToLastTerminal();
+            }
+
             if (page.FrontMatter != null)
             {
                 FixRawStatementAfterFrontMatter(page);
@@ -149,36 +156,49 @@ namespace Scriban.Parsing
             {
                 if (Current.Type == TokenType.NewLine)
                 {
-                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.NewLine, _lexer.Text));
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.NewLine, CurrentStringSlice));
                 }
                 else if (Current.Type == TokenType.SemiColon)
                 {
-                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.SemiColon, _lexer.Text));
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.SemiColon, CurrentStringSlice));
                 }
-                else if (_isScientific && Current.Type == TokenType.Comma)
+                else if (Current.Type == TokenType.Comma)
                 {
-                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Comma, _lexer.Text));
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Comma, CurrentStringSlice));
                 }
             }
+        }
+
+        private ScriptStringSlice CurrentStringSlice => GetAsStringSlice(Current);
+
+        private ScriptStringSlice GetAsStringSlice(Token token)
+        {
+            return new ScriptStringSlice(_lexer.Text,  token.Start.Offset,  token.End.Offset -  token.Start.Offset + 1);
         }
 
         private T Open<T>(T element) where T : ScriptNode
         {
             element.Span = new SourceSpan() { FileName = _lexer.SourcePath, Start = Current.Start };
-            FlushTrivias(element, true);
+            if (_isKeepTrivia && element is IScriptTerminal terminal)
+            {
+                FlushTrivias(terminal, true);
+            }
             return element;
         }
 
         private T Open<T>() where T : ScriptNode, new()
         {
             var element = new T() { Span = {FileName = _lexer.SourcePath, Start = Current.Start}};
-            FlushTrivias(element, true);
+            if (_isKeepTrivia && element is IScriptTerminal terminal)
+            {
+                FlushTrivias(terminal, true);
+            }
             return element;
         }
 
-        private void FlushTrivias(ScriptNode element, bool isBefore)
+        private void FlushTrivias(IScriptTerminal element, bool isBefore)
         {
-            if (_isKeepTrivia && _trivias.Count > 0 && !(element is ScriptBlockStatement))
+            if (_isKeepTrivia && _trivias.Count > 0)
             {
                 element.AddTrivias(_trivias, isBefore);
                 _trivias.Clear();
@@ -188,8 +208,20 @@ namespace Scriban.Parsing
         private T Close<T>(T node) where T : ScriptNode
         {
             node.Span.End = Previous.End;
-            FlushTrivias(node, false);
+            if (_isKeepTrivia && node is IScriptTerminal terminal)
+            {
+                _lastTerminalWithTrivias = terminal;
+                FlushTrivias(terminal, false);
+            }
             return node;
+        }
+
+        private void FlushTriviasToLastTerminal()
+        {
+            if (_isKeepTrivia && _lastTerminalWithTrivias != null)
+            {
+                FlushTrivias(_lastTerminalWithTrivias, false);
+            }
         }
 
         private string GetAsText(Token localToken)
@@ -230,7 +262,7 @@ namespace Scriban.Parsing
                 {
                     return;
                 }
-                
+
             }
 
             // Skip Comments
@@ -280,7 +312,7 @@ namespace Scriban.Parsing
                     throw new InvalidOperationException($"Token type `{token.Type}` not supported by trivia");
             }
 
-            var trivia = new ScriptTrivia(GetSpanForToken(token), type,  _lexer.Text);
+            var trivia = new ScriptTrivia(GetSpanForToken(token), type,  GetAsStringSlice(token));
             _trivias.Add(trivia);
         }
 
@@ -308,6 +340,14 @@ namespace Scriban.Parsing
             }
 
             return Token.Eof;
+        }
+
+        private ScriptIdentifier ParseIdentifier()
+        {
+            var identifier = Open<ScriptIdentifier>();
+            identifier.Value = GetAsText(Current);
+            NextToken();
+            return Close(identifier);
         }
 
         private bool IsHidden(TokenType tokenType)

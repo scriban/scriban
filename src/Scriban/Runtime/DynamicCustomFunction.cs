@@ -116,7 +116,7 @@ namespace Scriban.Runtime
             for (int j = 0; j < Parameters.Length; j++)
             {
                 var arg = Parameters[j];
-                if (arg.Name == namedArg.Name)
+                if (arg.Name == namedArg.Name.Value)
                 {
                     return new ArgumentValue(j, arg.ParameterType, context.Evaluate(namedArg));
                 }

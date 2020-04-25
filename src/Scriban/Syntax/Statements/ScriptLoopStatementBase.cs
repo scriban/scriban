@@ -17,14 +17,6 @@ namespace Scriban.Syntax
     /// </summary>
     public abstract partial class ScriptLoopStatementBase : ScriptStatement
     {
-        private ScriptBlockStatement _body;
-
-        public ScriptBlockStatement Body
-        {
-            get => _body;
-            set => ParentToThis(ref _body, value);
-        }
-
         protected virtual void BeforeLoop(TemplateContext context)
         {
         }

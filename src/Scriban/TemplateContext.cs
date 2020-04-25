@@ -216,7 +216,7 @@ namespace Scriban
         public IScriptOutput Output => _output;
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public bool UseScientific { get; set; }
 
@@ -630,6 +630,16 @@ namespace Scriban
         public TemplateContext WriteLine()
         {
             Output.Write(NewLine);
+            return this;
+        }
+
+        /// <summary>
+        /// Writes the text to the current <see cref="Output"/>
+        /// </summary>
+        /// <param name="slice">The text.</param>
+        public TemplateContext Write(ScriptStringSlice slice)
+        {
+            Write(slice.FullText, slice.Index, slice.Length);
             return this;
         }
 

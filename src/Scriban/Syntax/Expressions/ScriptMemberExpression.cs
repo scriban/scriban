@@ -13,12 +13,24 @@ namespace Scriban.Syntax
     public partial class ScriptMemberExpression : ScriptExpression, IScriptVariablePath
     {
         private ScriptExpression _target;
+        private ScriptToken _dotToken;
         private ScriptVariable _member;
+
+        public ScriptMemberExpression()
+        {
+            DotToken = ScriptToken.Dot();
+        }
 
         public ScriptExpression Target
         {
             get => _target;
             set => ParentToThis(ref _target, value);
+        }
+
+        public ScriptToken DotToken
+        {
+            get => _dotToken;
+            set => ParentToThis(ref _dotToken, value);
         }
 
         public ScriptVariable Member
@@ -35,7 +47,7 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(Target);
-            printer.Write(".");
+            printer.Write(DotToken);
             printer.Write(Member);
         }
 
@@ -44,7 +56,7 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public object GetValue(TemplateContext context)
+        public virtual object GetValue(TemplateContext context)
         {
             var targetObject = GetTargetObject(context, false);
             // In case TemplateContext.EnableRelaxedMemberAccess
@@ -65,7 +77,7 @@ namespace Scriban.Syntax
             return value;
         }
 
-        public void SetValue(TemplateContext context, object valueToSet)
+        public virtual void SetValue(TemplateContext context, object valueToSet)
         {
             var targetObject = GetTargetObject(context, true);
             var accessor = context.GetMemberAccessor(targetObject);
@@ -78,7 +90,7 @@ namespace Scriban.Syntax
             }
         }
 
-        public string GetFirstPath()
+        public virtual string GetFirstPath()
         {
             return (Target as IScriptVariablePath)?.GetFirstPath();
         }

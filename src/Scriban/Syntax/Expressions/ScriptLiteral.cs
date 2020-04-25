@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -11,7 +11,7 @@ using System.Text;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("literal", "<value>")]
-    public partial class ScriptLiteral : ScriptExpression
+    public partial class ScriptLiteral : ScriptExpression, IScriptTerminal
     {
         public ScriptLiteral()
         {
@@ -21,6 +21,8 @@ namespace Scriban.Syntax
         {
             Value = value;
         }
+
+        public ScriptTrivias Trivias { get; set; }
 
         public object Value { get; set; }
 
@@ -96,7 +98,7 @@ namespace Scriban.Syntax
             }
             else if (type == typeof(double))
             {
-                printer.Write(AppendDecimalPoint(((double)Value).ToString("R", CultureInfo.InvariantCulture), true)); 
+                printer.Write(AppendDecimalPoint(((double)Value).ToString("R", CultureInfo.InvariantCulture), true));
             }
             else if (type == typeof(float))
             {
@@ -166,7 +168,7 @@ namespace Scriban.Syntax
                 literal.Append(input.Replace("`", "``"));
             }
             else
-            { 
+            {
                 foreach (var c in input)
                 {
                     switch (c)

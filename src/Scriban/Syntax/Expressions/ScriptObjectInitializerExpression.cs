@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -11,17 +11,33 @@ namespace Scriban.Syntax
     [ScriptSyntax("object initializer expression", "{ member1: <expression>, member2: ... }")]
     public partial class ScriptObjectInitializerExpression : ScriptExpression
     {
+        private ScriptToken _openBrace;
         private ScriptList<ScriptObjectMember> _members;
+        private ScriptToken _closeBrace;
 
         public ScriptObjectInitializerExpression()
         {
+            OpenBrace = ScriptToken.OpenBrace();
             Members = new ScriptList<ScriptObjectMember>();
+            CloseBrace = ScriptToken.CloseBrace();
+        }
+
+        public ScriptToken OpenBrace
+        {
+            get => _openBrace;
+            set => ParentToThis(ref _openBrace, value);
         }
 
         public ScriptList<ScriptObjectMember> Members
         {
             get => _members;
             set => ParentToThis(ref _members, value);
+        }
+
+        public ScriptToken CloseBrace
+        {
+            get => _closeBrace;
+            set => ParentToThis(ref _closeBrace, value);
         }
 
         public override object Evaluate(TemplateContext context)
@@ -44,21 +60,9 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write("{");
-            bool isAfterFirst = false;
-            foreach(var member in Members)
-            {
-                if (isAfterFirst)
-                {
-                    printer.Write(",");
-                }
-
-                printer.Write(member);
-
-                // If the value didn't have any Comma Trivia, we can emit it
-                isAfterFirst = !member.Value.HasTrivia(ScriptTriviaType.Comma, false);
-            }
-            printer.Write("}");
+            printer.Write(OpenBrace);
+            printer.WriteListWithCommas(Members);
+            printer.Write(CloseBrace);
         }
     }
 }

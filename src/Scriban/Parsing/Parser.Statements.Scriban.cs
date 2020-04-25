@@ -178,6 +178,7 @@ namespace Scriban.Parsing
         {
             var endStatement = Open<ScriptEndStatement>();
             ExpectAndParseKeywordTo(endStatement.EndKeyword);
+            ExpectEndOfStatement();
             return Close(endStatement);
         }
 
@@ -195,7 +196,7 @@ namespace Scriban.Parsing
             }
 
             // If we have parenthesis, this is a function with explicit parameters
-            if (Current.Type == TokenType.OpenParent)
+            if (Current.Type == TokenType.OpenParen)
             {
                 scriptFunction.OpenParen = ParseToken();
                 scriptFunction.Parameters = new ScriptList<ScriptVariable>();
@@ -205,7 +206,7 @@ namespace Scriban.Parsing
                 {
                     // Parse any required comma (before each new non-first argument)
                     // Or closing parent (and we exit the loop)
-                    if (Current.Type == TokenType.CloseParent)
+                    if (Current.Type == TokenType.CloseParen)
                     {
                         scriptFunction.CloseParen = ParseToken();
                         break;
@@ -302,7 +303,6 @@ namespace Scriban.Parsing
 
             if (ExpectEndOfStatement())
             {
-                FlushTrivias(whileStatement.Condition, false);
                 whileStatement.Body = ParseBlockStatement(whileStatement);
             }
 
@@ -331,7 +331,6 @@ namespace Scriban.Parsing
 
             if (ExpectEndOfStatement())
             {
-                FlushTrivias(wrapStatement.Target, false);
                 wrapStatement.Body = ParseBlockStatement(wrapStatement);
             }
 
@@ -348,31 +347,7 @@ namespace Scriban.Parsing
             {
                 return;
             }
-
-            var startOffset = rawStatement.Span.Start.Offset;
-            var endOffset = rawStatement.Span.End.Offset;
-            for (int i = startOffset; i <= endOffset; i++)
-            {
-                var c = rawStatement.Text[i];
-                if (c == ' ' || c == '\t')
-                {
-                    continue;
-                }
-                if (c == '\r')
-                {
-                    if (i + 1 <= endOffset && rawStatement.Text[i + 1] == '\n')
-                    {
-                        rawStatement.Span.Start = new TextPosition(i + 2, rawStatement.Span.Start.Line + 1, 0);
-                    }
-                    break;
-                }
-
-                if (c == '\n')
-                {
-                    rawStatement.Span.Start = new TextPosition(i + 1, rawStatement.Span.Start.Line + 1, 0);
-                }
-                break;
-            }
+            rawStatement.Text = rawStatement.Text.TrimStart();
         }
 
         private static bool IsScribanKeyword(string text)

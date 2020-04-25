@@ -125,5 +125,25 @@ namespace Scriban.Syntax
             }
             printer.Write(Right);
         }
+
+
+        public static ScriptUnaryExpression Wrap(ScriptUnaryOperator unaryOperator, ScriptToken unaryToken, ScriptExpression expression, bool transferTrivia)
+        {
+            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            var unary = new ScriptUnaryExpression()
+            {
+                Span = expression.Span,
+                Operator = unaryOperator,
+                OperatorToken = unaryToken,
+                Right = expression,
+            };
+
+            if (!transferTrivia) return unary;
+
+            var firstTerminal = expression.FindFirstTerminal();
+            firstTerminal?.MoveLeadingTriviasTo(unary.OperatorToken);
+
+            return unary;
+        }
     }
 }

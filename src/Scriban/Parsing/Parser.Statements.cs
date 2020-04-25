@@ -269,7 +269,6 @@ namespace Scriban.Parsing
 
             if (ExpectEndOfStatement())
             {
-                FlushTrivias(caseStatement.Value, false);
                 caseStatement.Body = ParseBlockStatement(caseStatement);
             }
 
@@ -314,44 +313,8 @@ namespace Scriban.Parsing
             // Special case, if the expression return should be converted back to a statement
             if (expression is ScriptExpressionAsStatement expressionAsStatement)
             {
-                var decl = expressionAsStatement.Statement;
-
-                // Copy previous trivias
-                if (expressionStatement.Trivias != null)
-                {
-                    if (decl.Trivias == null)
-                    {
-                        decl.Trivias = expressionStatement.Trivias;
-                    }
-                    else
-                    {
-                        for(int i = 0; i < expressionStatement.Trivias.Before.Count; i++)
-                        {
-                            decl.Trivias.Before.Insert(i, expressionStatement.Trivias.Before[i]);
-                        }
-                    }
-                }
-
-                // Copy after trivias
-                if (expression.Trivias != null)
-                {
-                    if (decl.Trivias == null)
-                    {
-                        decl.Trivias = expression.Trivias;
-                    }
-                    else
-                    {
-                        for (int i = 0; i < expression.Trivias.After.Count; i++)
-                        {
-                            decl.Trivias.Before.Insert(i, expression.Trivias.After[i]);
-                        }
-                    }
-                }
-
-                return decl;
+                return expressionAsStatement.Statement;
             }
-
-
             expressionStatement.Expression = expression;
 
             // In case of an anonymous, there was already an ExpectEndOfStatement issued for the function
@@ -403,7 +366,6 @@ namespace Scriban.Parsing
 
                 if (ExpectEndOfStatement())
                 {
-                    FlushTrivias(forStatement.IteratorOrLastParameter, false);
                     forStatement.Body = ParseBlockStatement(forStatement);
                 }
             }
@@ -443,18 +405,7 @@ namespace Scriban.Parsing
             // Transform a `if condition` to `if !(condition)`
             if (invert)
             {
-                var invertCondition = new ScriptUnaryExpression()
-                {
-                    Operator =  ScriptUnaryOperator.Not,
-                    OperatorToken = ScriptToken.Not(),
-                    Right = new ScriptNestedExpression()
-                    {
-                        Expression = condition
-                    }
-                };
-                // remove trivias from inner condition and transfer them to
-                invertCondition.Trivias = condition.Trivias;
-                condition.Trivias = null;
+                var invertCondition = ScriptUnaryExpression.Wrap(ScriptUnaryOperator.Not, ScriptToken.Exclamation(), ScriptNestedExpression.Wrap(condition, _isKeepTrivia), _isKeepTrivia);
                 condition = invertCondition;
             }
 
@@ -462,7 +413,6 @@ namespace Scriban.Parsing
 
             if (ExpectEndOfStatement())
             {
-                FlushTrivias(ifStatement.Condition, false);
                 ifStatement.Then = ParseBlockStatement(ifStatement);
             }
 
@@ -481,7 +431,6 @@ namespace Scriban.Parsing
             var spanStart = Current.Start;
             var spanEnd = Current.End;
 
-            scriptStatement.Text = _lexer.Text;
 
             NextToken(); // Skip raw or escape count
             Close(scriptStatement);
@@ -490,8 +439,7 @@ namespace Scriban.Parsing
             scriptStatement.Span.End = spanEnd;
 
             // Update the index of the slice/length
-            scriptStatement.SliceIndex = spanStart.Offset;
-            scriptStatement.SliceLength = spanEnd.Offset - spanStart.Offset + 1;
+            scriptStatement.Text = new ScriptStringSlice(_lexer.Text, spanStart.Offset, spanEnd.Offset - spanStart.Offset + 1);
 
             return scriptStatement;
         }
@@ -515,7 +463,7 @@ namespace Scriban.Parsing
                 var variableOrLiteral = ParseVariableOrLiteral();
                 whenStatement.Values.Add(variableOrLiteral);
 
-                if (Current.Type == TokenType.Comma || (!_isLiquid && Current.Type == TokenType.DoublePipe) || (_isLiquid && GetAsText(Current) == "or"))
+                if (Current.Type == TokenType.Comma || (!_isLiquid && Current.Type == TokenType.DoubleVerticalBar) || (_isLiquid && GetAsText(Current) == "or"))
                 {
                     NextToken();
                 }
@@ -528,10 +476,6 @@ namespace Scriban.Parsing
 
             if (ExpectEndOfStatement())
             {
-                if (_isKeepTrivia && whenStatement.Values.Count > 0)
-                {
-                    FlushTrivias(whenStatement.Values[whenStatement.Values.Count - 1], false);
-                }
                 whenStatement.Body = ParseBlockStatement(whenStatement);
             }
 
@@ -581,6 +525,7 @@ namespace Scriban.Parsing
                 if (Current.Type == TokenType.NewLine || Current.Type == TokenType.SemiColon)
                 {
                     PushTokenToTrivia();
+                    FlushTriviasToLastTerminal();
                     NextToken();
                 }
                 return true;

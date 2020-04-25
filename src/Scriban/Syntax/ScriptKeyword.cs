@@ -9,6 +9,8 @@ namespace Scriban.Syntax
     /// </summary>
     public partial class ScriptKeyword : ScriptVerbatim
     {
+        public static ScriptKeyword This() => new ScriptKeyword("this");
+
         public static ScriptKeyword Func() => new ScriptKeyword("func");
 
         public static ScriptKeyword Do() => new ScriptKeyword("do");

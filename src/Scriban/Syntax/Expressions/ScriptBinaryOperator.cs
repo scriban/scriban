@@ -1,8 +1,9 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
+using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
@@ -52,7 +53,7 @@ namespace Scriban.Syntax
         ShiftRight,
 
         Power,
-        
+
         RangeInclude,
         RangeExclude,
 
@@ -63,8 +64,62 @@ namespace Scriban.Syntax
     {
         public static ScriptToken ToToken(this ScriptBinaryOperator op)
         {
-            return new ScriptToken(op.ToText());
+            return new ScriptToken(op.ToTokenType());
         }
+
+      public static TokenType ToTokenType(this ScriptBinaryOperator op)
+        {
+            switch (op)
+            {
+                case ScriptBinaryOperator.Add:
+                    return TokenType.Plus;
+                case ScriptBinaryOperator.Substract:
+                    return TokenType.Minus;
+                case ScriptBinaryOperator.Divide:
+                    return TokenType.Divide;
+                case ScriptBinaryOperator.DivideRound:
+                    return TokenType.DoubleDivide;
+                case ScriptBinaryOperator.Multiply:
+                    return TokenType.Asterisk;
+                case ScriptBinaryOperator.Modulus:
+                    return TokenType.Percent;
+                case ScriptBinaryOperator.RangeInclude:
+                    return TokenType.DoubleDot;
+                case ScriptBinaryOperator.RangeExclude:
+                    return TokenType.DoubleDotLess;
+                case ScriptBinaryOperator.CompareEqual:
+                    return TokenType.DoubleEqual;
+                case ScriptBinaryOperator.CompareNotEqual:
+                    return TokenType.ExclamationEqual;
+                case ScriptBinaryOperator.CompareLessOrEqual:
+                    return TokenType.LessEqual;
+                case ScriptBinaryOperator.CompareGreaterOrEqual:
+                    return TokenType.GreaterEqual;
+                case ScriptBinaryOperator.CompareLess:
+                    return TokenType.Less;
+                case ScriptBinaryOperator.CompareGreater:
+                    return TokenType.Greater;
+                case ScriptBinaryOperator.And:
+                    return TokenType.DoubleAmp;
+                case ScriptBinaryOperator.Or:
+                    return TokenType.DoubleVerticalBar;
+                case ScriptBinaryOperator.EmptyCoalescing:
+                    return TokenType.DoubleQuestion;
+                case ScriptBinaryOperator.ShiftLeft:
+                    return TokenType.DoubleLessThan;
+                case ScriptBinaryOperator.ShiftRight:
+                    return TokenType.DoubleGreaterThan;
+                case ScriptBinaryOperator.Power:
+                    return TokenType.Caret;
+                case ScriptBinaryOperator.BinaryAnd:
+                    return TokenType.Amp;
+                case ScriptBinaryOperator.BinaryOr:
+                    return TokenType.VerticalBar;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(op));
+            }
+        }
+
 
         public static string ToText(this ScriptBinaryOperator op)
         {

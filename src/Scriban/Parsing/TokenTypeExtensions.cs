@@ -1,40 +1,64 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using Scriban.Helpers;
 
 namespace Scriban.Parsing
 {
     public static class TokenTypeExtensions
     {
-        private static readonly Dictionary<TokenType, string> TokenTexts = new Dictionary<TokenType, string>();
-
-        static TokenTypeExtensions()
-        {
-            foreach (var field in typeof(TokenType).GetTypeInfo().GetDeclaredFields().Where(field => field.IsPublic && field.IsStatic))
-            {
-                var tokenText = field.GetCustomAttribute<TokenTextAttribute>();
-                if (tokenText != null)
-                {
-                    var type = (TokenType) field.GetValue(null);
-                    TokenTexts.Add(type, tokenText.Text);
-                }
-            }
-        }
-
         public static bool HasText(this TokenType type)
         {
-            return TokenTexts.ContainsKey(type);
+            return ToText(type) != null;
         }
 
         public static string ToText(this TokenType type)
         {
-            string value;
-            TokenTexts.TryGetValue(type, out value);
-            return value;
+            return type switch
+            {
+                TokenType.CodeEnter => "{{",
+                TokenType.LiquidTagEnter => "{%",
+                TokenType.CodeExit => "}}",
+                TokenType.LiquidTagExit => "%}",
+                TokenType.SemiColon => ";",
+                TokenType.Arroba => "@",
+                TokenType.Caret => "^",
+                TokenType.DoubleCaret => "^^",
+                TokenType.Colon => ":",
+                TokenType.Equal => "=",
+                TokenType.VerticalBar => "|",
+                TokenType.PipeGreater => "|>",
+                TokenType.Exclamation => "!",
+                TokenType.DoubleAmp => "&&",
+                TokenType.DoubleVerticalBar => "||",
+                TokenType.Amp => "&",
+                TokenType.Question => "?",
+                TokenType.DoubleQuestion => "??",
+                TokenType.DoubleEqual => "==",
+                TokenType.ExclamationEqual => "!=",
+                TokenType.Less => "<",
+                TokenType.Greater => ">",
+                TokenType.LessEqual => "<=",
+                TokenType.GreaterEqual => ">=",
+                TokenType.Divide => "/",
+                TokenType.DoubleDivide => "//",
+                TokenType.Asterisk => "*",
+                TokenType.Plus => "+",
+                TokenType.Minus => "-",
+                TokenType.Percent => "%",
+                TokenType.DoubleLessThan => "<<",
+                TokenType.DoubleGreaterThan => ">>",
+                TokenType.Comma => ",",
+                TokenType.Dot => ".",
+                TokenType.DoubleDot => "..",
+                TokenType.DoubleDotLess => "..<",
+                TokenType.OpenParen => "(",
+                TokenType.CloseParen => ")",
+                TokenType.OpenBrace => "{",
+                TokenType.CloseBrace => "}",
+                TokenType.OpenBracket => "[",
+                TokenType.CloseBracket => "]",
+                _ => null
+            };
         }
     }
 }

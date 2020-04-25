@@ -7,11 +7,7 @@ namespace Scriban.Syntax
     [ScriptSyntax("raw statement", "<raw_text>")]
     public partial class ScriptRawStatement : ScriptStatement
     {
-        public string Text { get; set; }
-
-        public int SliceIndex { get; set; }
-
-        public int SliceLength { get; set; }
+        public ScriptStringSlice Text { get; set; }
 
         public bool IsEscape { get; set; }
 
@@ -19,16 +15,16 @@ namespace Scriban.Syntax
         {
             if (Text == null) return null;
 
-            if (SliceLength > 0)
+            if (Text.Length > 0)
             {
                 // If we are in the context of output, output directly to TemplateContext.Output
                 if (context.EnableOutput)
                 {
-                    context.Write(Text, SliceIndex, SliceLength);
+                    context.Write(Text);
                 }
                 else
                 {
-                    return Text.Substring(SliceIndex, SliceLength);
+                    return Text.ToString();
                 }
             }
             return null;
@@ -36,9 +32,9 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            if (Text != null && SliceLength > 0)
+            if (Text != null && Text.Length > 0)
             {
-                printer.Write(Text.Substring(SliceIndex, SliceLength));
+                printer.Write(Text);
             }
         }
     }

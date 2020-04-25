@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -23,6 +23,8 @@ namespace Scriban.Syntax
         public int Count => ChildrenCount;
 
         public sealed override int ChildrenCount => _children.Count;
+
+        public ScriptNode this[int index] => _children[index];
 
         protected override ScriptNode GetChildrenImpl(int index)
         {
@@ -217,7 +219,7 @@ namespace Scriban.Syntax
             if (previous != null) previous.Parent = null;
         }
 
-        public TScriptNode this[int index]
+        public new TScriptNode this[int index]
         {
             get => (TScriptNode)_children[index];
             set

@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -140,7 +140,7 @@ namespace Scriban.Parsing
             NextToken(); // Skip the literal
             return Close(literal);
         }
-        
+
         private ScriptLiteral ParseHexaInteger()
         {
             var literal = Open<ScriptLiteral>();
@@ -356,7 +356,7 @@ namespace Scriban.Parsing
             var text = GetAsText(currentToken);
 
             // Return ScriptLiteral for null, true, false
-            // Return ScriptAnonymousFunction 
+            // Return ScriptAnonymousFunction
             switch (text)
             {
                 case "null":
@@ -382,7 +382,7 @@ namespace Scriban.Parsing
                     if (!_isLiquid)
                     {
                         var thisExp = Open<ScriptThisExpression>();
-                        NextToken();
+                        ExpectAndParseKeywordTo(thisExp.ThisKeyword);
                         return Close(thisExp);
                     }
                     break;
@@ -408,25 +408,30 @@ namespace Scriban.Parsing
                 int index;
                 if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
                 {
+                    var target = new ScriptVariableLocal(ScriptVariable.Arguments.Name)
+                    {
+                        Span = currentSpan
+                    };
+                    var indexLiteral = new ScriptLiteral() {Span = currentSpan, Value = index};
+
                     var indexerExpression = new ScriptIndexerExpression
                     {
                         Span = currentSpan,
-
-                        Target = new ScriptVariableLocal(ScriptVariable.Arguments.Name)
-                        {
-                            Span = currentSpan
-                        },
-
-                        Index = new ScriptLiteral() {Span = currentSpan, Value = index}
+                        Target = target,
+                        Index = indexLiteral
                     };
 
                     if (_isKeepTrivia)
                     {
                         if (triviasBefore != null)
                         {
-                            indexerExpression.Target.AddTrivias(triviasBefore, true);
+                            target.AddTrivias(triviasBefore, true);
                         }
-                        FlushTrivias(indexerExpression.Index, false);
+
+                        // Special case, we add the trivias to the index as the [] brackets
+                        // won't be output-ed
+                        FlushTrivias(indexLiteral, false);
+                        _lastTerminalWithTrivias = indexLiteral;
                     }
 
                     return indexerExpression;
@@ -527,12 +532,13 @@ namespace Scriban.Parsing
             // If this is the case, we need to translate it to `this["this"]` instead
             if (_isLiquid && text.IndexOf('-') >= 0)
             {
+                var target = new ScriptThisExpression()
+                {
+                    Span = result.Span
+                };
                 var newExp = new ScriptIndexerExpression
                 {
-                    Target = new ScriptThisExpression()
-                    {
-                        Span = result.Span
-                    },
+                    Target = target,
                     Index = new ScriptLiteral(text)
                     {
                         Span = result.Span
@@ -545,10 +551,12 @@ namespace Scriban.Parsing
                 {
                     if (triviasBefore != null)
                     {
-                        newExp.Target.AddTrivias(triviasBefore, true);
+                        target.ThisKeyword.AddTrivias(triviasBefore, true);
                     }
-                    FlushTrivias(newExp, false);
+                    FlushTrivias(newExp.CloseBracket, false);
+                    _lastTerminalWithTrivias = newExp.CloseBracket;
                 }
+
                 // Return the expression
                 return newExp;
             }
@@ -561,7 +569,10 @@ namespace Scriban.Parsing
                     result.AddTrivias(triviasBefore, true);
                 }
                 FlushTrivias(result, false);
+
+                _lastTerminalWithTrivias = result;
             }
+
             return result;
         }
 

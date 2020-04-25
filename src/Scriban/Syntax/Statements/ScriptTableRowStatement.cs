@@ -30,7 +30,7 @@ namespace Scriban.Syntax
         protected override void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)
         {
             _columnsCount = 1;
-            if (argument.Name == "cols")
+            if (argument.Name?.Value == "cols")
             {
                 _columnsCount = context.ToInt(argument.Value.Span, context.Evaluate(argument.Value));
                 if (_columnsCount <= 0)

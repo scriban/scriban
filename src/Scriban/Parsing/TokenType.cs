@@ -12,16 +12,16 @@ namespace Scriban.Parsing
 
         FrontMatterMarker,
 
-        [TokenText("{{")]
+        /// <summary>Token "{{"</summary>
         CodeEnter,
 
-        [TokenText("{%")]
+        /// <summary>Token "{%"</summary>
         LiquidTagEnter,
 
-        [TokenText("}}")]
+        /// <summary>Token "}}"</summary>
         CodeExit,
 
-        [TokenText("%}")]
+        /// <summary>Token "%}"</summary>
         LiquidTagExit,
 
         Raw,
@@ -85,115 +85,118 @@ namespace Scriban.Parsing
         /// </summary>
         VerbatimString,
 
-        [TokenText(";")]
+        /// <summary>Token ";"</summary>
         SemiColon,
 
-        [TokenText("@")]
+        /// <summary>Token "@"</summary>
         Arroba,
 
-        [TokenText("^")]
+        /// <summary>Token "^"</summary>
         Caret,
 
-        [TokenText("^^")]
+        /// <summary>Token "^^"</summary>
         DoubleCaret,
 
-        [TokenText(":")]
+        /// <summary>Token ":"</summary>
         Colon,
 
-        [TokenText("=")]
+        /// <summary>Token "="</summary>
         Equal,
 
-        [TokenText("|")]
-        Pipe,  // |
+        /// <summary>Token "|"</summary>
+        VerticalBar, // |
 
-        [TokenText("|>")]
-        PipeGreater,  // |>
+        /// <summary>Token "|>"</summary>
+        PipeGreater, // |>
 
-        [TokenText("!")]
+        /// <summary>Token "!"</summary>
         Exclamation, // !
 
-        [TokenText("&&")]
+        /// <summary>Token "&amp;&amp;"</summary>
         DoubleAmp, // &&
 
-        [TokenText("||")]
-        DoublePipe,  // ||
+        /// <summary>Token "||"</summary>
+        DoubleVerticalBar, // ||
 
-        [TokenText("&")]
+        /// <summary>Token "&amp;"</summary>
         Amp, // &
 
-        [TokenText("?")]
+        /// <summary>Token "?"</summary>
         Question,
 
-        [TokenText("??")]
+        /// <summary>Token "??"</summary>
         DoubleQuestion,
 
-        [TokenText("==")]
-        CompareEqual,
+        /// <summary>Token "=="</summary>
+        DoubleEqual,
 
-        [TokenText("!=")]
-        CompareNotEqual,
+        /// <summary>Token "!="</summary>
+        ExclamationEqual,
 
-        [TokenText("<")]
-        CompareLess,
+        /// <summary>Token "&lt;"</summary>
+        Less,
 
-        [TokenText(">")]
-        CompareGreater,
+        /// <summary>Token ">"</summary>
+        Greater,
 
-        [TokenText("<=")]
-        CompareLessOrEqual,
+        /// <summary>Token "&lt;="</summary>
+        LessEqual,
 
-        [TokenText(">=")]
-        CompareGreaterOrEqual,
+        /// <summary>Token ">="</summary>
+        GreaterEqual,
 
-        [TokenText("/")]
+        /// <summary>Token "/"</summary>
         Divide,
 
-        [TokenText("//")]
+        /// <summary>Token "//"</summary>
         DoubleDivide,
 
-        [TokenText("*")]
-        Multiply,
+        /// <summary>Token "*"</summary>
+        Asterisk,
 
-        [TokenText("+")]
+        /// <summary>Token "+"</summary>
         Plus,
 
-        [TokenText("-")]
+        /// <summary>Token "-"</summary>
         Minus,
 
-        [TokenText("%")]
-        Modulus,
+        /// <summary>Token "%"</summary>
+        Percent,
 
-        [TokenText("<<")]
-        DoubleLess,
+        /// <summary>Token "&lt;&lt;"</summary>
+        DoubleLessThan,
 
-        [TokenText(">>")]
-        DoubleGreater,
+        /// <summary>Token ">>"</summary>
+        DoubleGreaterThan,
 
-        [TokenText(",")]
+        /// <summary>Token ","</summary>
         Comma,
 
-        [TokenText(".")]
+        /// <summary>Token "."</summary>
         Dot,
 
-        [TokenText("..")]
+        /// <summary>Token ".."</summary>
         DoubleDot,
 
-        [TokenText("..<")]
+        /// <summary>Token "..&lt;"</summary>
         DoubleDotLess,
 
-        [TokenText("(")]
-        OpenParent,
-        [TokenText(")")]
-        CloseParent,
+        /// <summary>Token "("</summary>
+        OpenParen,
 
-        [TokenText("{")]
+        /// <summary>Token ")"</summary>
+        CloseParen,
+
+        /// <summary>Token "{"</summary>
         OpenBrace,
-        [TokenText("}")]
+
+        /// <summary>Token "}"</summary>
         CloseBrace,
 
-        [TokenText("[")]
+        /// <summary>Token "["</summary>
         OpenBracket,
-        [TokenText("]")]
+
+        /// <summary>Token "]"</summary>
         CloseBracket,
 
         /// <summary>

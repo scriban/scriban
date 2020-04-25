@@ -10,6 +10,7 @@ namespace Scriban.Syntax
     {
         private ScriptKeyword _whileKeyword;
         private ScriptExpression _condition;
+        private ScriptBlockStatement _body;
 
         public ScriptWhileStatement()
         {
@@ -26,6 +27,12 @@ namespace Scriban.Syntax
         {
             get => _condition;
             set => ParentToThis(ref _condition, value);
+        }
+
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
         }
 
         protected override object LoopItem(TemplateContext context, LoopState state)

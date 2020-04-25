@@ -741,7 +741,7 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.Caret, start, start);
                     break;
                 case '*':
-                    _token = new Token(TokenType.Multiply, start, start);
+                    _token = new Token(TokenType.Asterisk, start, start);
                     NextChar();
                     break;
                 case '/':
@@ -763,7 +763,7 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '%':
-                    _token = new Token(TokenType.Modulus, start, start);
+                    _token = new Token(TokenType.Percent, start, start);
                     NextChar();
                     break;
                 case ',':
@@ -797,7 +797,7 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '|')
                     {
-                        _token = new Token(TokenType.DoublePipe, start, _position);
+                        _token = new Token(TokenType.DoubleVerticalBar, start, _position);
                         NextChar();
                         break;
                     }
@@ -808,7 +808,7 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    _token = new Token(TokenType.Pipe, start, start);
+                    _token = new Token(TokenType.VerticalBar, start, start);
                     break;
                 case '.':
                     NextChar();
@@ -833,7 +833,7 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareNotEqual, start, _position);
+                        _token = new Token(TokenType.ExclamationEqual, start, _position);
                         NextChar();
                         break;
                     }
@@ -844,7 +844,7 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareEqual, start, _position);
+                        _token = new Token(TokenType.DoubleEqual, start, _position);
                         NextChar();
                         break;
                     }
@@ -854,40 +854,40 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareLessOrEqual, start, _position);
+                        _token = new Token(TokenType.LessEqual, start, _position);
                         NextChar();
                         break;
                     }
                     if (c == '<')
                     {
-                        _token = new Token(TokenType.DoubleLess, start, _position);
+                        _token = new Token(TokenType.DoubleLessThan, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.CompareLess, start, start);
+                    _token = new Token(TokenType.Less, start, start);
                     break;
                 case '>':
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareGreaterOrEqual, start, _position);
+                        _token = new Token(TokenType.GreaterEqual, start, _position);
                         NextChar();
                         break;
                     }
                     if (c == '>')
                     {
-                        _token = new Token(TokenType.DoubleGreater, start, _position);
+                        _token = new Token(TokenType.DoubleGreaterThan, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.CompareGreater, start, start);
+                    _token = new Token(TokenType.Greater, start, start);
                     break;
                 case '(':
-                    _token = new Token(TokenType.OpenParent, _position, _position);
+                    _token = new Token(TokenType.OpenParen, _position, _position);
                     NextChar();
                     break;
                 case ')':
-                    _token = new Token(TokenType.CloseParent, _position, _position);
+                    _token = new Token(TokenType.CloseParen, _position, _position);
                     NextChar();
                     break;
                 case '[':
@@ -1030,7 +1030,7 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '|':
-                    _token = new Token(TokenType.Pipe, start, start);
+                    _token = new Token(TokenType.VerticalBar, start, start);
                     NextChar();
                     break;
                 case '?':
@@ -1053,7 +1053,7 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareNotEqual, start, _position);
+                        _token = new Token(TokenType.ExclamationEqual, start, _position);
                         NextChar();
                         break;
                     }
@@ -1064,7 +1064,7 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareEqual, start, _position);
+                        _token = new Token(TokenType.DoubleEqual, start, _position);
                         NextChar();
                         break;
                     }
@@ -1074,28 +1074,28 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareLessOrEqual, start, _position);
+                        _token = new Token(TokenType.LessEqual, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.CompareLess, start, start);
+                    _token = new Token(TokenType.Less, start, start);
                     break;
                 case '>':
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareGreaterOrEqual, start, _position);
+                        _token = new Token(TokenType.GreaterEqual, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.CompareGreater, start, start);
+                    _token = new Token(TokenType.Greater, start, start);
                     break;
                 case '(':
-                    _token = new Token(TokenType.OpenParent, _position, _position);
+                    _token = new Token(TokenType.OpenParen, _position, _position);
                     NextChar();
                     break;
                 case ')':
-                    _token = new Token(TokenType.CloseParent, _position, _position);
+                    _token = new Token(TokenType.CloseParen, _position, _position);
                     NextChar();
                     break;
                 case '[':

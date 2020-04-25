@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections;
@@ -14,7 +14,15 @@ namespace Scriban.Syntax
     public partial class ScriptIndexerExpression : ScriptExpression, IScriptVariablePath
     {
         private ScriptExpression _target;
+        private ScriptToken _openBracket;
         private ScriptExpression _index;
+        private ScriptToken _closeBracket;
+
+        public ScriptIndexerExpression()
+        {
+            OpenBracket = ScriptToken.OpenBracket();
+            CloseBracket = ScriptToken.CloseBracket();
+        }
 
         public ScriptExpression Target
         {
@@ -22,10 +30,22 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _target, value);
         }
 
+        public ScriptToken OpenBracket
+        {
+            get => _openBracket;
+            set => ParentToThis(ref _openBracket, value);
+        }
+
         public ScriptExpression Index
         {
             get => _index;
             set => ParentToThis(ref _index, value);
+        }
+
+        public ScriptToken CloseBracket
+        {
+            get => _closeBracket;
+            set => ParentToThis(ref _closeBracket, value);
         }
 
         public override object Evaluate(TemplateContext context)
@@ -45,12 +65,12 @@ namespace Scriban.Syntax
                                           ((ScriptLiteral) Index).IsPositiveInteger();
             if (!isSpecialArgumentsArray)
             {
-                printer.Write("[");
+                printer.Write(OpenBracket);
             }
             printer.Write(Index);
             if (!isSpecialArgumentsArray)
             {
-                printer.Write("]");
+                printer.Write(CloseBracket);
             }
         }
         public object GetValue(TemplateContext context)

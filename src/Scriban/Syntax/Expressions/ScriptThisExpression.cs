@@ -12,6 +12,19 @@ namespace Scriban.Syntax
     [ScriptSyntax("this expression", "this")]
     public partial class ScriptThisExpression : ScriptExpression, IScriptVariablePath
     {
+        private ScriptKeyword _thisKeyword;
+
+        public ScriptThisExpression()
+        {
+            ThisKeyword = ScriptKeyword.This();
+        }
+
+        public ScriptKeyword ThisKeyword
+        {
+            get => _thisKeyword;
+            set => ParentToThis(ref _thisKeyword, value);
+        }
+
         public override object Evaluate(TemplateContext context)
         {
             return context.GetValue(this);
@@ -19,7 +32,7 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write("this");
+            printer.Write(ThisKeyword);
         }
 
         public object GetValue(TemplateContext context)

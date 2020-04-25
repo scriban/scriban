@@ -158,6 +158,7 @@ namespace Scriban.Parsing
                     statement = continueStatement;
                     ExpectAndParseKeywordTo(continueStatement.ContinueKeyword); // Parse continue keyword
                     ExpectEndOfStatement();
+                    FlushTriviasToLastTerminal();
                     Close(statement);
                     break;
                 case "assign":
@@ -241,9 +242,12 @@ namespace Scriban.Parsing
 
                 if (isFirst && Current.Type == TokenType.Colon)
                 {
-                    NextToken(); // Skip :
                     var namedArg = Open<ScriptNamedArgument>();
-                    namedArg.Name = "group";
+                    namedArg.Name = new ScriptIdentifier("group");
+
+                    namedArg.ColonToken = ScriptToken.Colon();
+                    ExpectAndParseTokenTo(namedArg.ColonToken, TokenType.Colon); // Parse :
+
                     namedArg.Value = value;
                     Close(namedArg);
                     namedArg.Span = value.Span;

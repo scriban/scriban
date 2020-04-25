@@ -8,15 +8,11 @@ namespace Scriban.Syntax
     {
         private ScriptExpression _name;
         private ScriptExpression _value;
+        private ScriptToken _colonToken;
 
         public ScriptObjectMember()
         {
-        }
-
-        public ScriptObjectMember(ScriptExpression name, ScriptExpression value)
-        {
-            Name = name;
-            Value = value;
+            ColonToken = ScriptToken.Colon();
         }
 
         public ScriptExpression Name
@@ -25,13 +21,17 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _name, value);
         }
 
+        public ScriptToken ColonToken
+        {
+            get => _colonToken;
+            set => ParentToThis(ref _colonToken, value);
+        }
 
         public ScriptExpression Value
         {
             get => _value;
             set => ParentToThis(ref _value, value);
         }
-
 
         public override object Evaluate(TemplateContext context)
         {
@@ -46,7 +46,7 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(Name);
-            printer.Write(":");
+            printer.Write(ColonToken);
             printer.Write(Value);
         }
     }

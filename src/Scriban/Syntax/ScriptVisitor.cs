@@ -15,6 +15,17 @@ namespace Scriban.Syntax
             node.Accept(this);
         }
 
+        public virtual void Visit(ScriptList list)
+        {
+            if (list == null) return;
+            var count = list.ChildrenCount;
+            for (int i = 0; i < count; i++)
+            {
+                var child = list[i];
+                Visit(child);
+            }
+        }
+
         protected virtual void DefaultVisit(ScriptNode node)
         {
             if (node == null)

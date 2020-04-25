@@ -7,11 +7,13 @@ using System;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("{{ or }}", "{{ or }}")]
-    public partial class ScriptEscapeStatement : ScriptStatement
+    public partial class ScriptEscapeStatement : ScriptStatement, IScriptTerminal
     {
         public ScriptEscapeStatement()
         {
         }
+
+        public ScriptTrivias Trivias { get; set; }
 
         public ScriptWhitespaceMode WhitespaceMode { get; set; }
 
@@ -57,5 +59,6 @@ namespace Scriban.Syntax
                     throw new ArgumentOutOfRangeException();
             }
         }
+
     }
 }

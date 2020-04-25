@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -66,7 +66,7 @@ namespace Scriban.Syntax
         {
             get
             {
-                var messagesAsText = StringHelper.Join("\n", ParserMessages);
+                var messagesAsText = string.Join("\n", ParserMessages);
                 return $"{base.Message} Parser messages:\n {messagesAsText}";
             }
         }

@@ -24,6 +24,7 @@ namespace Scriban
         // Gets a boolean indicating whether the last character written has a whitespace.
         private bool _previousHasSpace;
         private bool _hasEndOfStatement;
+        private bool _hasComma;
         private FastStack<bool> _isWhileLoop;
 
         public ScriptPrinter(IScriptOutput output, ScriptPrinterOptions options = default(ScriptPrinterOptions))
@@ -62,6 +63,10 @@ namespace Scriban
                 try
                 {
                     WriteBegin(node);
+
+                    // Reset comma before node
+                    if (node is IScriptTerminal) _hasComma = false;
+
                     node.PrintTo(this);
                     WriteEnd(node);
                 }
@@ -80,6 +85,13 @@ namespace Scriban
         {
             _previousHasSpace = text.Length > 0 && char.IsWhiteSpace(text[text.Length - 1]);
             _output.Write(text);
+            return this;
+        }
+
+        public ScriptPrinter Write(ScriptStringSlice slice)
+        {
+            _previousHasSpace = slice.Length > 0 && char.IsWhiteSpace(slice[slice.Length - 1]);
+            _output.Write(slice);
             return this;
         }
 
@@ -110,7 +122,7 @@ namespace Scriban
                 Write(value);
 
                 // If the value didn't have any Comma Trivia, we can emit it
-                if (i + 1 < list.Count && !value.HasTrivia(ScriptTriviaType.Comma, false))
+                if (i + 1 < list.Count && !_hasComma)
                 {
                     Write(",");
                     ExpectSpace();
@@ -199,6 +211,7 @@ namespace Scriban
                 }
                 _expectEndOfStatement = false; // We expect always a end of statement before and after
                 _hasEndOfStatement = false;
+                _hasComma = false;
             }
         }
 
@@ -209,19 +222,30 @@ namespace Scriban
 
         private void WriteTrivias(ScriptNode node, bool before)
         {
-            if (node.Trivias != null)
+            if (!(node is IScriptTerminal terminal)) return;
+            var trivias = terminal.Trivias;
+            if (trivias != null)
             {
-                foreach (var trivia in (before ? node.Trivias.Before : node.Trivias.After))
+                foreach (var trivia in (before ? trivias.Before : trivias.After))
                 {
                     trivia.Write(this);
                     if (trivia.Type == ScriptTriviaType.NewLine || trivia.Type == ScriptTriviaType.SemiColon)
                     {
                         _hasEndOfStatement = true;
+                        if (trivia.Type == ScriptTriviaType.SemiColon)
+                        {
+                            _hasComma = false;
+                        }
                         // If expect a space and we have a NewLine or SemiColon, we can safely discard the required space
                         if (_expectSpace)
                         {
                             _expectSpace = false;
                         }
+                    }
+
+                    if (trivia.Type == ScriptTriviaType.Comma)
+                    {
+                        _hasComma = true;
                     }
                 }
             }

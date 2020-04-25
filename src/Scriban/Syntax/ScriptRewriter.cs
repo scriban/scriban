@@ -15,17 +15,17 @@ namespace Scriban.Syntax
         {
             CopyTrivias = true;
         }
-        
+
         public bool CopyTrivias { get; set; }
-        
+
         public override ScriptNode Visit(ScriptNode node)
         {
             if (node == null) return null;
             var newNode = node.Accept(this);
-
-            if (CopyTrivias && !ReferenceEquals(node, newNode))
+            newNode.Span = node.Span;
+            if (CopyTrivias && !ReferenceEquals(node, newNode) && node is IScriptTerminal nodeTerminal && newNode is IScriptTerminal newNodeTerminal)
             {
-                return newNode.WithTriviaAndSpanFrom(node);
+                newNodeTerminal.Trivias = nodeTerminal.Trivias;
             }
 
             return newNode;

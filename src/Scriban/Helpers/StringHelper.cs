@@ -1,27 +1,24 @@
 ﻿// Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
-using System.Collections;
-using System.Text;
+
+using System;
 
 namespace Scriban.Helpers
 {
-    internal class StringHelper
+    internal static class StringExtensions
     {
-        public static string Join(string separator, IEnumerable items)
+        public static string TrimEndKeepNewLine(this string text)
         {
-            var builder = new StringBuilder();
-            bool isFirst = true;
-            foreach (var item in items)
+            for (int i = text.Length - 1; i >= 0; i--)
             {
-                if (!isFirst)
+                var c = text[i];
+                if (!char.IsWhiteSpace(c) || c == '\n')
                 {
-                    builder.Append(separator);
+                    return text.Substring(0, i + 1);
                 }
-                builder.Append(item);
-                isFirst = false;
             }
-            return builder.ToString();
+            return text;
         }
     }
 }

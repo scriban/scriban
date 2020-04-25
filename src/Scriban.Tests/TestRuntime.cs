@@ -152,7 +152,7 @@ end
             const int MinDelay = 100;
             context.CurrentGlobal.Import("wait_and_see", new Func<Task<string>>(async () =>
             {
-                await Task.Delay(MinDelay);
+                await Task.Delay(MinDelay + 10);
                 return "yes";
             }));
             var clock = Stopwatch.StartNew();

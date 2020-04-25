@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -30,7 +30,7 @@ namespace Scriban
         public string SourceFilePath { get; }
 
         /// <summary>
-        /// Gets the resulting compiled <see cref="ScriptPage"/>. May be null if this template <see cref="HasErrors"/> 
+        /// Gets the resulting compiled <see cref="ScriptPage"/>. May be null if this template <see cref="HasErrors"/>
         /// </summary>
         public ScriptPage Page { get; private set; }
 
@@ -132,7 +132,7 @@ namespace Scriban
             finally
             {
                 context.EnableOutput = previousOutput;
-            }        
+            }
         }
 
         /// <summary>
@@ -162,7 +162,7 @@ namespace Scriban
             context.PopGlobal();
             return result;
         }
-        
+
         /// <summary>
         /// Renders this template using the specified context. See remarks.
         /// </summary>
@@ -232,7 +232,7 @@ namespace Scriban
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
             CheckErrors();
-            
+
             // Make sure that we are using the same parserOptions
             if (SourceFilePath != null)
             {
@@ -262,7 +262,7 @@ namespace Scriban
 
         private void CheckErrors()
         {
-            if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Template.HasError> and <Template.Messages> before evaluating a template. Messages:\n" + StringHelper.Join("\n", Messages));
+            if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Template.HasError> and <Template.Messages> before evaluating a template. Messages:\n" + string.Join("\n", Messages));
         }
 
         private void ParseInternal(string text, string sourceFilePath)

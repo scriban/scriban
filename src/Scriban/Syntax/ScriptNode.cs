@@ -4,8 +4,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using System.Threading.Tasks;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -22,11 +20,6 @@ namespace Scriban.Syntax
         /// The source span of this node.
         /// </summary>
         public SourceSpan Span;
-
-        /// <summary>
-        /// Trivias, null if <see cref="LexerOptions.KeepTrivia"/> was false.
-        /// </summary>
-        public ScriptTrivias Trivias { get; set; }
 
         /// <summary>
         /// Gets the parent of this node.
@@ -132,199 +125,14 @@ namespace Scriban.Syntax
             set = node;
         }
 
-
         public sealed override string ToString()
         {
-            var strOutput = new StringBuilderOutput();
+            var strOutput = StringBuilderOutput.GetThreadInstance();
             var printer = new ScriptPrinter(strOutput , new ScriptPrinterOptions() { Mode = ScriptMode.ScriptOnly });
             printer.Write(this);
-            return strOutput.ToString();
+            var result = strOutput.ToString();
+            strOutput.Builder.Length = 0;
+            return result;
         }
-    }
-
-    public static class ScriptNodeExtensions
-    {
-        public static ScriptNode AddSpaceBefore(this ScriptNode node)
-        {
-            node.AddTrivia(ScriptTrivia.Space, true);
-            return node;
-        }
-
-        public static ScriptNode AddComma(this ScriptNode node)
-        {
-            node.AddTrivia(ScriptTrivia.Comma, true);
-            return node;
-        }
-
-        public static ScriptNode AddSemiColon(this ScriptNode node)
-        {
-            node.AddTrivia(ScriptTrivia.SemiColon, true);
-            return node;
-        }
-
-        public static ScriptNode AddSpaceAfter(this ScriptNode node)
-        {
-            node.AddTrivia(ScriptTrivia.Space, false);
-            return node;
-        }
-
-        public static void AddTrivia(this ScriptNode node, ScriptTrivia trivia, bool before)
-        {
-            var trivias = node.Trivias;
-            if (trivias == null)
-            {
-                node.Trivias = trivias = new ScriptTrivias();
-            }
-
-            (before ? trivias.Before : trivias.After).Add(trivia);
-        }
-
-        public static void AddTrivias<T>(this ScriptNode node, T trivias, bool before) where T : IEnumerable<ScriptTrivia>
-        {
-            foreach (var trivia in trivias)
-            {
-                node.AddTrivia(trivia, before);
-            }
-        }
-
-        public static bool HasTrivia(this ScriptNode node, ScriptTriviaType triviaType, bool before)
-        {
-            if (node.Trivias == null)
-            {
-                return false;
-            }
-
-            foreach (var trivia in (before ? node.Trivias.Before : node.Trivias.After))
-            {
-                if (trivia.Type == triviaType)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static bool HasTriviaEndOfStatement(this ScriptNode node, bool before)
-        {
-            if (node.Trivias == null)
-            {
-                return false;
-            }
-
-            foreach (var trivia in (before ? node.Trivias.Before : node.Trivias.After))
-            {
-                if (trivia.Type == ScriptTriviaType.NewLine || trivia.Type == ScriptTriviaType.SemiColon)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        public static TNode WithTriviaAndSpanFrom<TNode>(this TNode node, ScriptNode sourceNode)
-            where TNode : ScriptNode
-        {
-            node.Trivias = sourceNode?.Trivias;
-            node.Span = sourceNode?.Span ?? default;
-            return node;
-        }
-    }
-
-    public class ScriptTrivias
-    {
-        public ScriptTrivias()
-        {
-            Before = new List<ScriptTrivia>();
-            After = new List<ScriptTrivia>();
-        }
-
-        public List<ScriptTrivia> Before { get; }
-
-        public List<ScriptTrivia> After { get; }
-    }
-
-    public readonly partial struct ScriptTrivia
-    {
-        public static readonly ScriptTrivia Space = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.Whitespace, " ");
-
-        public static readonly ScriptTrivia Comma = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.Comma, ",");
-
-        public static readonly ScriptTrivia SemiColon = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.SemiColon, ";");
-
-        public ScriptTrivia(SourceSpan span, ScriptTriviaType type)
-        {
-            Span = span;
-            Type = type;
-            Text = null;
-        }
-
-        public ScriptTrivia(SourceSpan span, ScriptTriviaType type, string text)
-        {
-            Span = span;
-            Type = type;
-            Text = text;
-        }
-
-        public readonly SourceSpan Span;
-
-        public readonly ScriptTriviaType Type;
-
-        public readonly string Text;
-
-        public void Write(ScriptPrinter printer)
-        {
-            var rawText = ToString();
-
-            bool isRawComment = Type == ScriptTriviaType.CommentMulti && !rawText.StartsWith("##");
-            if (isRawComment)
-            {
-                // Escape any # by \#
-                rawText = rawText.Replace("#", "\\#");
-                // Escape any }}
-                rawText = rawText.Replace("}", "\\}");
-                printer.Write("## ");
-            }
-
-            printer.Write(rawText);
-
-            if (isRawComment)
-            {
-                printer.Write(" ##");
-            }
-        }
-
-        public override string ToString()
-        {
-            switch (Type)
-            {
-                case ScriptTriviaType.Empty:
-                    return string.Empty;
-                case ScriptTriviaType.Comma:
-                    return ",";
-                case ScriptTriviaType.SemiColon:
-                    return ";";
-            }
-            var length = Span.End.Offset - Span.Start.Offset + 1;
-            return Text?.Substring(Span.Start.Offset, length);
-        }
-    }
-
-    public enum ScriptTriviaType
-    {
-        Empty = 0,
-
-        Whitespace,
-
-        WhitespaceFull,
-
-        Comment,
-
-        Comma,
-
-        CommentMulti,
-
-        NewLine,
-
-        SemiColon,
     }
 }

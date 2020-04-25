@@ -906,6 +906,7 @@ using System.Numerics;
             foreach (var type in types)
             {
                 var localProperties = type.GetMembers().OfType<IPropertySymbol>().Where(prop =>
+                    prop.Name != "Trivias" &&
                     !prop.IsReadOnly &&
                     (IsScriptNode(prop.Type)
                     || includeNonScriptNode)

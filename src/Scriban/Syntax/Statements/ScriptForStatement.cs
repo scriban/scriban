@@ -21,6 +21,7 @@ namespace Scriban.Syntax
         private ScriptKeyword _inKeyword;
         private ScriptExpression _iterator;
         private ScriptList<ScriptNamedArgument> _namedArguments;
+        private ScriptBlockStatement _body;
 
         public ScriptForStatement()
         {
@@ -56,6 +57,12 @@ namespace Scriban.Syntax
         {
             get => _namedArguments;
             set => ParentToThis(ref _namedArguments, value);
+        }
+
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
         }
 
         internal ScriptNode IteratorOrLastParameter => NamedArguments != null && NamedArguments.Count > 0
@@ -97,7 +104,7 @@ namespace Scriban.Syntax
                 {
                     foreach (var option in NamedArguments)
                     {
-                        switch (option.Name)
+                        switch (option.Name.Value)
                         {
                             case "offset":
                                 startIndex = context.ToInt(option.Value.Span, context.Evaluate(option.Value));

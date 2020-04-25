@@ -4,7 +4,7 @@
 
 namespace Scriban.Syntax
 {
-    public abstract class ScriptVerbatim : ScriptNode
+    public abstract class ScriptVerbatim : ScriptNode, IScriptTerminal
     {
         protected ScriptVerbatim()
         {
@@ -15,6 +15,8 @@ namespace Scriban.Syntax
             Value = value;
         }
 
+
+        public ScriptTrivias Trivias { get; set; }
 
         public string Value { get; set; }
 
@@ -28,5 +30,6 @@ namespace Scriban.Syntax
         {
             printer.Write(Value);
         }
+
     }
 }

@@ -49,7 +49,7 @@ namespace Scriban.Syntax
                     {
                         throw new ScriptRuntimeException(nextExpression.Span, precedence == 0 ? "This operator cannot be after a function call." : "This operator cannot be applied here.");
                     }
-                    
+
                     // Power has higher precedence than */%
                     var newPrecedence = Parser.GetDefaultBinaryOperatorPrecedence(bin.Operator);
 
@@ -80,7 +80,7 @@ namespace Scriban.Syntax
                     {
                         Left = leftValue,
                         Operator = bin.Operator,
-                        OperatorToken = new ScriptToken(bin.Operator.ToText()),
+                        OperatorToken = bin.Operator.ToToken(),
                         Right = rightValue,
                     };
                     continue;
@@ -102,7 +102,7 @@ namespace Scriban.Syntax
                         context.StrictVariables = restoreStrictVariables;
                     }
 
-                    // If one argument is a function, the remaining arguments 
+                    // If one argument is a function, the remaining arguments
                     if (result is IScriptCustomFunction function)
                     {
                         var maxArg = function.RequiredParameterCount;
