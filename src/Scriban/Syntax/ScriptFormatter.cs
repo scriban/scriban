@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using Scriban.Helpers;
 using Scriban.Parsing;
+using Scriban.Runtime;
 
 namespace Scriban.Syntax
 {
@@ -182,7 +183,41 @@ namespace Scriban.Syntax
 
         public override ScriptNode Visit(ScriptFunction node)
         {
-            var newFunction = (ScriptFunction) base.Visit(node);
+            ScriptFunction newFunction;
+            if (_context != null)
+            {
+                if (node.HasParameters)
+                {
+                    _context.PushVariableScope(ScriptVariableScope.Global);
+                }
+
+                try
+                {
+                    _context.SetValue(ScriptVariable.Arguments, string.Empty, true);
+
+                    if (node.HasParameters)
+                    {
+                        for (var i = 0; i < node.Parameters.Count; i++)
+                        {
+                            var arg = node.Parameters[i];
+                            _context.SetValue(arg, string.Empty);
+                        }
+                    }
+
+                    newFunction = (ScriptFunction) base.Visit(node);
+                }
+                finally
+                {
+                    if (node.HasParameters)
+                    {
+                        _context.PopVariableScope(ScriptVariableScope.Global);
+                    }
+                }
+            }
+            else
+            {
+                newFunction = (ScriptFunction) base.Visit(node);
+            }
 
             if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators) &&  newFunction.EqualToken != null)
             {
