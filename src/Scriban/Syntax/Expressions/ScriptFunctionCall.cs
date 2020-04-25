@@ -139,11 +139,7 @@ namespace Scriban.Syntax
                 for (var i = 0; i < Arguments.Count; i++)
                 {
                     var scriptExpression = Arguments[i];
-                    if (i > 0)
-                    {
-                        printer.ExpectSpace();
-                    }
-
+                    printer.ExpectSpace();
                     printer.Write(scriptExpression);
                 }
             }
@@ -266,7 +262,7 @@ namespace Scriban.Syntax
 
             if (argumentValues.Count < externFunction.RequiredParameterCount)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of ({argumentValues.Count}) arguments for function. Expecting at least {externFunction.RequiredParameterCount} arguments.");
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{externFunction.RequiredParameterCount}` arguments");
             }
 
             object result = null;

@@ -72,6 +72,7 @@ namespace Scriban.Runtime
                 }
             }
 
+            _expectedNumberOfParameters = Parameters.Length;
             if (!_hasObjectParams)
             {
                 for (int i = 0; i < Parameters.Length; i++)
@@ -82,8 +83,11 @@ namespace Scriban.Runtime
                     }
                 }
             }
+            else
+            {
+                _expectedNumberOfParameters--;
+            }
 
-            _expectedNumberOfParameters = Parameters.Length;
             if (_hasTemplateContext)
             {
                 _expectedNumberOfParameters--;

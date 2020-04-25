@@ -35,12 +35,12 @@ namespace Scriban.Tests
             [Test]
             public void TestSliceError()
             {
-                TestParser.AssertTemplate("text(1,4) : error : Invalid number of arguments `0` passed to `string.slice` while expecting at least `2` arguments", "{{ string.slice }}");
+                TestParser.AssertTemplate("text(1,4) : error : Invalid number of arguments `0` passed to `string.slice` while expecting `2` arguments", "{{ string.slice }}");
             }
             [Test]
             public void TestSliceAtError()
             {
-                TestParser.AssertTemplate("text(1,4) : error : Invalid number of arguments `0` passed to `string.slice1` while expecting at least `2` arguments", "{{ string.slice1 }}");
+                TestParser.AssertTemplate("text(1,4) : error : Invalid number of arguments `0` passed to `string.slice1` while expecting `2` arguments", "{{ string.slice1 }}");
             }
         }
     }

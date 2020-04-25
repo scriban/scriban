@@ -36,9 +36,9 @@ namespace Scriban.Runtime
                 {
                     if (arguments.Count > 0)
                     {
-                        throw new ScriptArgumentException(arguments.Count - 1, $"Invalid number of arguments `{arguments.Count}` passed in `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
+                        throw new ScriptArgumentException(arguments.Count - 1, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
                     }
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed in `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
                 }
             }
 

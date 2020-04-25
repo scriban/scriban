@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -28,7 +28,7 @@ namespace Scriban.Tests
             var template = Template.Parse("Test with a include {{ include }}");
             var context = new TemplateContext();
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
-            var expectedString = "Expecting at least the name of the template to include for the <include> function";
+            var expectedString = "Invalid number of arguments";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
         }
 
@@ -69,7 +69,7 @@ namespace Scriban.Tests
         {
             TestParser.AssertTemplate("product: Orange", "{{ include 'product' }}");
         }
-        
+
         [Test]
         public void TestNested()
         {
@@ -99,7 +99,7 @@ namespace Scriban.Tests
         {
             TestParser.AssertTemplate("for_product: Orange for_product: Banana for_product: Apple for_product: Computer for_product: Mobile Phone for_product: Table for_product: Sofa ", "{% include 'for_product' for products %}", true);
         }
-        
+
         [Test]
         public void TestLiquidArguments()
         {
