@@ -2,9 +2,6 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-
 namespace Scriban.Syntax
 {
     /// <summary>
@@ -25,12 +22,19 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            throw new NotImplementedException();
+            return null;
         }
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(OperatorToken?.ToString() ?? Operator.ToText());
+            if (OperatorToken != null)
+            {
+                printer.Write(OperatorToken);
+            }
+            else
+            {
+                printer.Write(Operator.ToText());
+            }
         }
     }
 }

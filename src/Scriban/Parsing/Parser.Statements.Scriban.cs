@@ -218,6 +218,7 @@ namespace Scriban.Parsing
                         {
                             PushTokenToTrivia();
                             NextToken();
+                            FlushTriviasToLastTerminal();
                         }
                         else
                         {

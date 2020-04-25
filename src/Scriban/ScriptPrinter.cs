@@ -119,14 +119,13 @@ namespace Scriban
             for(int i = 0; i < list.Count; i++)
             {
                 var value = list[i];
-                Write(value);
-
                 // If the value didn't have any Comma Trivia, we can emit it
-                if (i + 1 < list.Count && !_hasComma)
+                if (i > 0 && !_hasComma)
                 {
                     Write(",");
-                    ExpectSpace();
+                    _hasComma = true;
                 }
+                Write(value);
             }
             return this;
         }

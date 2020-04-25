@@ -156,26 +156,28 @@ namespace Scriban.Syntax
             }
 
             // Make sure that arguments are separated by a proper comma and space
-            ScriptExpression previousArgument;
             for (int i = 0; i < functionCall.Arguments.Count; i++)
             {
                 var arg = functionCall.Arguments[i];
 
                 // No need to nest expression for arguments
-                functionCall.Arguments[i] = DeNestExpression(functionCall.Arguments[i]);
+                arg = DeNestExpression(arg);
 
-                if (i > 0)
+                if (i + 1 < functionCall.Arguments.Count)
                 {
-                    var lastToken = (IScriptTerminal)functionCall.Arguments[i].FindLastTerminal();
+                    var lastToken = (IScriptTerminal)arg.FindLastTerminal();
                     if (_isScientific)
                     {
                         lastToken.AddCommaAfter();
                     }
 
-                    lastToken.AddSpaceAfter();
+                    if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators))
+                    {
+                        lastToken.AddSpaceAfter();
+                    }
                 }
 
-                previousArgument = functionCall.Arguments[i];
+                functionCall.Arguments[i] = arg;
             }
 
             return functionCall;

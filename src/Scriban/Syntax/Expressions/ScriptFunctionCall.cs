@@ -129,15 +129,23 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(Target);
-            if (OpenParent != null) printer.Write(OpenParent);
-            for (var i = 0; i < Arguments.Count; i++)
+            if (OpenParent != null)
             {
-                var scriptExpression = Arguments[i];
-                if (OpenParent == null || i > 0)
+                printer.Write(OpenParent);
+                printer.WriteListWithCommas(Arguments);
+            }
+            else
+            {
+                for (var i = 0; i < Arguments.Count; i++)
                 {
-                    printer.ExpectSpace();
+                    var scriptExpression = Arguments[i];
+                    if (i > 0)
+                    {
+                        printer.ExpectSpace();
+                    }
+
+                    printer.Write(scriptExpression);
                 }
-                printer.Write(scriptExpression);
             }
 
             if (CloseParen != null) printer.Write(CloseParen);
@@ -254,6 +262,11 @@ namespace Scriban.Syntax
 
                     argumentValues.Add(value);
                 }
+            }
+
+            if (argumentValues.Count < externFunction.RequiredParameterCount)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of ({argumentValues.Count}) arguments for function. Expecting at least {externFunction.RequiredParameterCount} arguments.");
             }
 
             object result = null;
