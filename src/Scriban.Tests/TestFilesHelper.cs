@@ -42,9 +42,9 @@ namespace Scriban.Tests
                     .OrderBy(f => f))
             {
                 var caseData = new TestCaseData(file);
-                var category = Path.GetDirectoryName(file);
-                caseData.TestName = category + "/" + Path.GetFileNameWithoutExtension(file);
-                caseData.SetCategory(category);
+                //var category = Path.GetDirectoryName(file);
+                //caseData.TestName = category + "/" + Path.GetFileNameWithoutExtension(file);
+                //caseData.SetCategory(category);
                 yield return caseData;
             }
         }

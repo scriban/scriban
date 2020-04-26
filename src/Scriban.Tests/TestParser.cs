@@ -323,43 +323,43 @@ end
             Console.WriteLine(result);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "000-basic" }, Category= "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "000-basic" })]
         public static void A000_basic(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "010-literals" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "010-literals" })]
         public static void A010_literals(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "100-expressions" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "100-expressions" })]
         public static void A100_expressions(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "200-statements" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "200-statements" })]
         public static void A200_statements(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "300-functions" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "300-functions" })]
         public static void A300_functions(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "400-builtins" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "400-builtins" })]
         public static void A400_builtins(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "500-liquid" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "500-liquid" })]
         public static void A500_liquid(string inputName)
         {
             TestFile(inputName);
@@ -574,7 +574,7 @@ end
                                 scriptObj.Import(typeof(SpecialFunctionProvider));
                                 model = scriptObj;
                             }
-                            
+
                             // Render sync
                             {
                                 var context = NewTemplateContext(isLiquid);
