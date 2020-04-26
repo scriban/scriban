@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -12,11 +12,11 @@ using Scriban.Syntax;
 namespace Scriban.Functions
 {
     /// <summary>
-    /// A datetime object represents an instant in time, expressed as a date and time of day. 
-    /// 
+    /// A datetime object represents an instant in time, expressed as a date and time of day.
+    ///
     /// | Name             | Description
     /// |--------------    |-----------------
-    /// | `.year`          | Gets the year of a date object 
+    /// | `.year`          | Gets the year of a date object
     /// | `.month`         | Gets the month of a date object
     /// | `.day`           | Gets the day in the month of a date object
     /// | `.day_of_year`   | Gets the day within the year
@@ -24,14 +24,14 @@ namespace Scriban.Functions
     /// | `.minute`        | Gets the minute of the date object
     /// | `.second`        | Gets the second of the date object
     /// | `.millisecond`   | Gets the millisecond of the date object
-    /// 
+    ///
     /// [:top:](#builtins)
     /// #### Binary operations
-    /// 
+    ///
     /// The substract operation `date1 - date2`: Substract `date2` from `date1` and return a timespan internal object (see timespan object below).
-    /// 
+    ///
     /// Other comparison operators(`==`, `!=`, `&lt;=`, `&gt;=`, `&lt;`, `&gt;`) are also working with date objects.
-    /// 
+    ///
     /// A `timespan` and also the added to a `datetime` object.
     /// </summary>
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
@@ -124,7 +124,7 @@ namespace Scriban.Functions
         public static DateTime Now() => DateTime.Now;
 
         /// <summary>
-        /// Adds the specified number of days to the input date. 
+        /// Adds the specified number of days to the input date.
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="days">The days.</param>
@@ -143,7 +143,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Adds the specified number of months to the input date. 
+        /// Adds the specified number of months to the input date.
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="months">The months.</param>
@@ -162,7 +162,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Adds the specified number of years to the input date. 
+        /// Adds the specified number of years to the input date.
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="years">The years.</param>
@@ -181,7 +181,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Adds the specified number of hours to the input date. 
+        /// Adds the specified number of hours to the input date.
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="hours">The hours.</param>
@@ -192,7 +192,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Adds the specified number of minutes to the input date. 
+        /// Adds the specified number of minutes to the input date.
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="minutes">The minutes.</param>
@@ -203,7 +203,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Adds the specified number of seconds to the input date. 
+        /// Adds the specified number of seconds to the input date.
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="seconds">The seconds.</param>
@@ -214,7 +214,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Adds the specified number of milliseconds to the input date. 
+        /// Adds the specified number of milliseconds to the input date.
         /// </summary>
         /// <param name="date">The date.</param>
         /// <param name="millis">The milliseconds.</param>
@@ -225,7 +225,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Parses the specified input string to a date object. 
+        /// Parses the specified input string to a date object.
         /// </summary>
         /// <param name="context">The template context.</param>
         /// <param name="text">A text representing a date.</param>
@@ -262,21 +262,21 @@ namespace Scriban.Functions
 
         /// <summary>
         /// Converts a datetime object to a textual representation using the specified format string.
-        /// 
+        ///
         /// By default, if you are using a date, it will use the format specified by `date.format` which defaults to `date.default_format` (readonly) which default to `%d %b %Y`
-        /// 
+        ///
         /// You can override the format used for formatting all dates by assigning the a new format: `date.format = '%a %b %e %T %Y';`
-        /// 
+        ///
         /// You can recover the default format by using `date.format = date.default_format;`
-        /// 
+        ///
         /// By default, the to_string format is using the **current culture**, but you can switch to an invariant culture by using the modifier `%g`
-        /// 
+        ///
         /// For example, using `%g %d %b %Y` will output the date using an invariant culture.
-        /// 
+        ///
         /// If you are using `%g` alone, it will output the date with `date.format` using an invariant culture.
-        /// 
+        ///
         /// Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the following table explains the format modifiers:
-        /// 
+        ///
         /// | Format | Result            | Description
         /// |--------|-------------------|--------------------------------------------
         /// | `"%a"` |  `"Thu"`          | Name of week day in short form of the
@@ -320,7 +320,7 @@ namespace Scriban.Functions
         /// | `"%Y"` |  `"2013"`         | Year of the time
         /// | `"%Z"` |  `"IST"`          | Gives Time Zone of the time
         /// | `"%%"` |  `"%"`            | Output the character `%`
-        /// 
+        ///
         /// Note that the format is using a good part of the ruby format ([source](http://apidock.com/ruby/DateTime/strftime))
         /// ```scriban-html
         /// {{ date.parse '2016/01/05' | date.to_string `%d %b %Y` }}
