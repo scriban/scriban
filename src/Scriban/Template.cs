@@ -3,8 +3,6 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
-using System.IO;
-using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -20,7 +18,7 @@ namespace Scriban
         {
             ParserOptions = parserOptions ?? new ParserOptions();
             LexerOptions = lexerOptions ?? new LexerOptions();
-            Messages = new List<LogMessage>();
+            Messages = new LogMessageBag();
             this.SourceFilePath = sourceFilePath;
         }
 
@@ -42,7 +40,7 @@ namespace Scriban
         /// <summary>
         /// Gets the lexer and parsing messages.
         /// </summary>
-        public List<LogMessage> Messages { get; private set; }
+        public LogMessageBag Messages { get; }
 
         /// <summary>
         /// The parser options used by this Template
@@ -271,7 +269,6 @@ namespace Scriban
             if (string.IsNullOrEmpty(text))
             {
                 HasErrors = false;
-                Messages = new List<LogMessage>();
                 Page = new ScriptPage() {Span = new SourceSpan(sourceFilePath, new TextPosition(), TextPosition.Eof) };
                 return;
             }
@@ -282,7 +279,7 @@ namespace Scriban
             Page = parser.Run();
 
             HasErrors = parser.HasErrors;
-            Messages = parser.Messages;
+            Messages.AddRange(parser.Messages);
         }
     }
 }

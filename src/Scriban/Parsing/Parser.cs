@@ -49,7 +49,7 @@ namespace Scriban.Parsing
             _isLiquid = _lexer.Options.Lang == ScriptLang.Liquid;
             _isScientific = _lexer.Options.Lang == ScriptLang.Scientific;
             _tokensPreview = new List<Token>(4);
-            Messages = new List<LogMessage>();
+            Messages = new LogMessageBag();
             _trivias = new List<ScriptTrivia>();
 
             Options = options ?? new ParserOptions();
@@ -67,7 +67,7 @@ namespace Scriban.Parsing
 
         public readonly ParserOptions Options;
 
-        public List<LogMessage> Messages { get; private set; }
+        public LogMessageBag Messages { get; private set; }
 
         public bool HasErrors { get; private set; }
 
@@ -83,7 +83,7 @@ namespace Scriban.Parsing
 
         public ScriptPage Run()
         {
-            Messages = new List<LogMessage>();
+            Messages = new LogMessageBag();
             HasErrors = false;
             _blockLevel = 0;
             _isExpressionDepthLimitReached = false;

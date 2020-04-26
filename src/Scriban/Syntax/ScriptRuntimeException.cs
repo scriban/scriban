@@ -50,24 +50,23 @@ namespace Scriban.Syntax
 
     public class ScriptParserRuntimeException : ScriptRuntimeException
     {
-        public ScriptParserRuntimeException(SourceSpan span, string message, List<LogMessage> parserMessages) : this(span, message, parserMessages, null)
+        public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages) : this(span, message, parserMessages, null)
         {
         }
 
-        public ScriptParserRuntimeException(SourceSpan span, string message, List<LogMessage> parserMessages, Exception innerException) : base(span, message, innerException)
+        public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages, Exception innerException) : base(span, message, innerException)
         {
             if (parserMessages == null) throw new ArgumentNullException(nameof(parserMessages));
             ParserMessages = parserMessages;
         }
 
-        public List<LogMessage> ParserMessages { get; }
+        public LogMessageBag ParserMessages { get; }
 
         public override string Message
         {
             get
             {
-                var messagesAsText = string.Join("\n", ParserMessages);
-                return $"{base.Message} Parser messages:\n {messagesAsText}";
+                return $"{base.Message} Parser messages:\n {ParserMessages}";
             }
         }
 

@@ -64,6 +64,7 @@ namespace Scriban.Tests
                 }
                 else
                 {
+                    Console.WriteLine(template.Messages);
                     Assert.Fail("Template has errors and didn't parse correctly. This is not expected.");
                 }
             }
