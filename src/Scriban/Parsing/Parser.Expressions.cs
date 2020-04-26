@@ -97,10 +97,14 @@ namespace Scriban.Parsing
             int expressionCount = 0;
             _expressionLevel++;
             var expressionDepthBeforeEntering = _expressionDepth;
+
+            var enteringPrecedence = precedence;
+
             EnterExpression();
             try
             {
                 ScriptFunctionCall functionCall = null;
+
                 parseExpression:
                 expressionCount++;
 
@@ -365,11 +369,21 @@ namespace Scriban.Parsing
                                 }
                                 else
                                 {
+                                    if (enteringPrecedence == 0)
+                                    {
+                                        precedence = enteringPrecedence;
+                                        continue;
+                                    }
                                     break;
                                 }
                             }
                             else
                             {
+                                if (enteringPrecedence == 0)
+                                {
+                                    precedence = enteringPrecedence;
+                                    continue;
+                                }
                                 break;
                             }
                         }
@@ -607,7 +621,7 @@ namespace Scriban.Parsing
                         goto parseExpression;
                     }
 
-                    if (precedence > 0)
+                    if (enteringPrecedence > 0)
                     {
                         break;
                     }

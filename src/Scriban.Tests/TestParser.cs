@@ -56,6 +56,42 @@ namespace Scriban.Tests
             Assert.True(template.HasErrors);
         }
 
+        [TestCase("-5|>math.abs", 5, "-5 |> math.abs")]
+        [TestCase("-5*2|>math.abs", 10, "-5 * 2 |> math.abs")]
+        [TestCase("2x", 2, "2 * x")]
+        [TestCase("10x/2", 5.0, "(10 * x) / 2")]
+        [TestCase("10x y + y", 22, "10 * x * y + y")]
+        [TestCase("10x * y + 3y + 1 + 2", 29, "10 * x * y + 3 * y + 1 + 2")]
+        [TestCase("2 y math.abs z * 5 // 2 + 1 + z", 91, "2 * y * math.abs((z * 5) // 2) + 1 + z")] // 2 * 2 * abs(-10) * 5 / 2 + 1 + (-10) = 91
+        [TestCase("2 y math.abs z * 5 // 2 + 1 * 3 + z + 17", 110, "2 * y * math.abs((z * 5) // 2) + 1 * 3 + z + 17")] // 2 * 2 * abs(-10) * 5 / 2 + 3 + (-10) + 17 = 110
+        [TestCase("2^3^4", 4096, "(2 ^ 3) ^ 4")]
+        [TestCase("3y^2 + 3x", 15, "3 * (y ^ 2) + 3 * x")]
+        [TestCase("1 + 2 + 3x + 4y + z", 4, "1 + 2 + 3 * x + 4 * y + z")]
+        [TestCase("y^5 * 2 + 1", 65, "(y ^ 5) * 2 + 1")]
+        [TestCase("y^5 // 2 + 1", 17, "((y ^ 5) // 2) + 1")]
+        [TestCase("f(x)= x*2 +1* 50; f(10* 2)", 90, "f(x) = x * 2 + 1 * 50; f(10 * 2)")]
+        [TestCase("f(x)= x*2 +1* 50; 10* 2|>f", 90, "f(x) = x * 2 + 1 * 50; 10 * 2 |> f")]
+        public void TestScientific(string script, object value, string scriptReformat)
+        {
+            var template = Template.Parse(script, lexerOptions: new LexerOptions() {Mode = ScriptMode.ScriptOnly, Lang = ScriptLang.Scientific});
+            Assert.False(template.HasErrors, $"Template has errors: {template.Messages}");
+
+            var context = new TemplateContext();
+            context.CurrentGlobal.SetValue("x", 1, false);
+            context.CurrentGlobal.SetValue("y", 2, false);
+            context.CurrentGlobal.SetValue("z", -10, false);
+
+            var result = template.Evaluate(context);
+            Assert.AreEqual(result, value);
+
+            var resultAsync = template.EvaluateAsync(context).Result;
+            Assert.AreEqual(resultAsync, value, "Invalid async result");
+
+            var reformat = template.Page.Format(new ScriptFormatterOptions(context, ScriptLang.Scientific, ScriptFormatterFlags.ExplicitClean));
+            var exprAsString = reformat.ToString();
+            Assert.AreEqual(scriptReformat, exprAsString, "Format string don't match");
+        }
+
         [Test]
         public void RoundtripFunction()
         {

@@ -38,5 +38,15 @@ namespace Scriban.Syntax
         /// Minimize parenthesis nesting (e.g ((1*5) + 2) => (1*5) + 2)
         /// </summary>
         MinimizeParenthesisNesting = 1 << 4,
+
+        /// <summary>
+        /// Add spaces for binary, compress spaces and minimize parenthesis nesting.
+        /// </summary>
+        Clean = AddSpaceBetweenOperators | CompressSpaces | MinimizeParenthesisNesting,
+
+        /// <summary>
+        /// Clean mode + add explicit parenthesis to disambiguate operators/function calls.
+        /// </summary>
+        ExplicitClean = ExplicitParenthesis | Clean,
     }
 }

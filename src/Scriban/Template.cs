@@ -124,6 +124,7 @@ namespace Scriban
             var previousOutput = context.EnableOutput;
             try
             {
+                context.UseScientific = LexerOptions.Lang == ScriptLang.Scientific;
                 context.EnableOutput = false;
                 return EvaluateAndRender(context, false);
             }
@@ -153,7 +154,8 @@ namespace Scriban
             {
                 EnableOutput = false,
                 MemberRenamer = memberRenamer,
-                MemberFilter = memberFilter
+                MemberFilter = memberFilter,
+                UseScientific = LexerOptions.Lang == ScriptLang.Scientific,
             };
             context.PushGlobal(scriptObject);
             var result = Evaluate(context);
@@ -239,6 +241,7 @@ namespace Scriban
 
             try
             {
+                context.UseScientific = LexerOptions.Lang == ScriptLang.Scientific;
                 var result = context.Evaluate(Page);
                 if (render)
                 {

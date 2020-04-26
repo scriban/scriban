@@ -21,3 +21,7 @@ func zzz
 end
 zzz ["ok"]   # Because there is a space before an [, the parser should transform this to a function call
 }}
+
+Indexer accessors:
+x = []; x[0] = 1; x[3] = 5; x; => {{ x = []; x[0] = 1; x[3] = 5; x; }}
+x = []; x[0] = 1; x[-1] = 6; x; => {{ x = []; x[0] = 1; x[-1] = 6; x; }}

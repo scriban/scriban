@@ -1,0 +1,6 @@
+func f(); ret 5; end; f(); => 5
+func f(x); ret x + 2; end; f(10); => 12
+func f(x, y); ret x + 2 * y + 1; end; f(10, 20); => 51
+f() = 5; f(); => 5
+f(x) =  x + 2; f(10); => 12
+f(x, y) = x + 2 * y + 1; f(10, 20); => 51
