@@ -67,11 +67,25 @@ namespace Scriban.Runtime
         {
             ParameterType = parameterType;
             Name = name;
+            HasDefaultValue = false;
+            DefaultValue = null;
+        }
+
+        public ScriptParameterInfo(Type parameterType, string name, object defaultValue)
+        {
+            ParameterType = parameterType;
+            Name = name;
+            HasDefaultValue = true;
+            DefaultValue = defaultValue;
         }
 
         public readonly Type ParameterType;
 
         public readonly string Name;
+
+        public readonly bool HasDefaultValue;
+
+        public readonly object DefaultValue;
 
         public bool Equals(ScriptParameterInfo other)
         {

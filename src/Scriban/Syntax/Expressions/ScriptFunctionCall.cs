@@ -200,64 +200,7 @@ namespace Scriban.Syntax
             // Process direct arguments
             if (arguments != null)
             {
-                for (var argIndex = 0; argIndex < arguments.Count; argIndex++)
-                {
-                    var argument = arguments[argIndex];
-                    object value;
-
-                    // Handle named arguments
-                    var namedArg = argument as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
-                        if (scriptFunction != null)
-                        {
-                            // We can't add an argument that is "size" for array
-                            if (argumentValues.CanWrite(namedArg.Name.Value))
-                            {
-                                argumentValues.SetValue(context, callerContext.Span, namedArg.Name.Value, context.Evaluate(namedArg), false);
-                                continue;
-                            }
-
-                            // Otherwise pass as a regular argument
-                            value = context.Evaluate(namedArg);
-                        }
-                        else
-                        {
-                            // Named argument are passed as is to the IScriptCustomFunction
-                            value = argument;
-                        }
-                    }
-                    else
-                    {
-                        if (function.IsParameterType<ScriptExpression>(argIndex))
-                        {
-                            value = argument;
-                        }
-                        else
-                        {
-                            value = context.Evaluate(argument);
-                        }
-                    }
-
-                    // Handle parameters expansion for a function call when the operator ^ is used
-                    var unaryExpression = argument as ScriptUnaryExpression;
-                    if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
-                    {
-                        var valueEnumerator = value as IEnumerable;
-                        if (valueEnumerator != null)
-                        {
-                            foreach (var subValue in valueEnumerator)
-                            {
-                                argumentValues.Add(subValue);
-                            }
-
-                            continue;
-                        }
-                    }
-
-                    argumentValues.Add(value);
-                }
+                ProcessArguments(context, callerContext, arguments, function, scriptFunction, argumentValues);
             }
 
             var hasVariableParams = function.HasVariableParams;
@@ -316,6 +259,113 @@ namespace Scriban.Syntax
             // Restore the flow state to none
             context.FlowState = ScriptFlowState.None;
             return result;
+        }
+
+        private static void ProcessArguments(TemplateContext context, ScriptNode callerContext, IList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
+        {
+            bool hasNamedArgument = false;
+            for (var argIndex = 0; argIndex < arguments.Count; argIndex++)
+            {
+                var argument = arguments[argIndex];
+
+                int index = argumentValues.Count;
+                object value;
+
+                // Handle named arguments
+                var namedArg = argument as ScriptNamedArgument;
+                if (namedArg != null)
+                {
+                    hasNamedArgument = true;
+                    var argName = namedArg.Name?.Name;
+                    if (argName == null)
+                    {
+                        throw new ScriptRuntimeException(argument.Span, "Invalid null argument name");
+                    }
+
+                    index = GetParameterIndexByName(function, argName);
+                    // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
+                    if (scriptFunction != null)
+                    {
+                        if (function.HasVariableParams)
+                        {
+                            if (index >= 0)
+                            {
+                            }
+                            // We can't add an argument that is "size" for array
+                            else if (argumentValues.CanWrite(argName))
+                            {
+                                argumentValues.SetValue(context, callerContext.Span, argName, context.Evaluate(namedArg), false);
+                                continue;
+                            }
+                            else
+                            {
+                                throw new ScriptRuntimeException(argument.Span, $"Cannot pass argument {argName} to function. This name is not supported by this function.");
+                            }
+                        }
+                    }
+
+                    if (index < 0)
+                    {
+                        index = argumentValues.Count;
+                    }
+                }
+                else if (hasNamedArgument)
+                {
+                    throw new ScriptRuntimeException(argument.Span, "Cannot pass this argument after a named argument");
+                }
+
+                if (function.IsParameterType<ScriptExpression>(index))
+                {
+                    value = argument;
+                }
+                else
+                {
+                    value = context.Evaluate(argument);
+                }
+
+                // Handle parameters expansion for a function call when the operator ^ is used
+                var unaryExpression = argument as ScriptUnaryExpression;
+                if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
+                {
+                    var valueEnumerator = value as IEnumerable;
+                    if (valueEnumerator != null)
+                    {
+                        foreach (var subValue in valueEnumerator)
+                        {
+                            argumentValues.Add(subValue);
+                        }
+
+                        return;
+                    }
+                }
+
+
+                if (index == argumentValues.Count)
+                {
+                    argumentValues.Add(value);
+                    continue;
+                }
+
+                // NamedArguments can index further, so we need to fill any intermediate argument values
+                // with their default values.
+                if (index > argumentValues.Count)
+                {
+                    for (int i = argumentValues.Count; i < index; i++)
+                    {
+                        var parameterInfo = function.GetParameterInfo(i);
+                        if (parameterInfo.HasDefaultValue)
+                        {
+                            argumentValues[i] = parameterInfo.DefaultValue;
+                        }
+                        else
+                        {
+                            argumentValues[i] = null;
+                        }
+                    }
+                }
+
+                argumentValues[index] = value;
+            }
         }
 
         private static int GetParameterIndexByName(IScriptFunctionInfo functionInfo, string name)

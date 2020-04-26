@@ -3,11 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System;
-using System.Threading.Tasks;
 using Scriban.Runtime;
-using System.Collections.Generic;
-using System.Text;
-
 
 namespace Scriban.Syntax
 {
@@ -170,7 +166,7 @@ namespace Scriban.Syntax
 
         public int RequiredParameterCount => Parameters?.Count ?? 0;
 
-        public int ParameterCount => Parameters?.Count ?? int.MaxValue;
+        public int ParameterCount => Parameters?.Count ?? 1;
 
         public bool HasVariableParams => Parameters == null;
 

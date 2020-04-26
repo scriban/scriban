@@ -125,7 +125,7 @@ namespace Scriban.Runtime
             for (int j = 0; j < Parameters.Length; j++)
             {
                 var arg = Parameters[j];
-                if (arg.Name == namedArg.Name.Value)
+                if (arg.Name == namedArg.Name.Name)
                 {
                     return new ArgumentValue(j, arg.ParameterType, context.Evaluate(namedArg));
                 }
@@ -147,15 +147,28 @@ namespace Scriban.Runtime
 
             var readIndex = _firstIndexOfUserParameters + index;
 
+            Type parameterType = null;
+
             if (_hasObjectParams)
             {
                 readIndex = readIndex >= Parameters.Length ? Parameters.Length - 1 : readIndex;
+                parameterType = _paramsElementType;
             }
             else if (readIndex >= Parameters.Length)
             {
                 throw new ArgumentOutOfRangeException(nameof(readIndex), $"Argument index must be < {ParameterCount}");
             }
-            return new ScriptParameterInfo(Parameters[readIndex].ParameterType, Parameters[readIndex].Name);
+
+            var parameterInfo = Parameters[readIndex];
+
+            if (parameterType == null)
+            {
+                parameterType = parameterInfo.ParameterType;
+            }
+
+            return parameterInfo.HasDefaultValue
+                ? new ScriptParameterInfo(parameterType, parameterInfo.Name, parameterInfo.DefaultValue)
+                : new ScriptParameterInfo(parameterType, parameterInfo.Name);
         }
 
 #if !SCRIBAN_NO_ASYNC

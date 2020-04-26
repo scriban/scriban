@@ -75,6 +75,22 @@ namespace Scriban.Parsing
             return binaryOperator != ScriptBinaryOperator.None;
         }
 
+        private ScriptExpression ParseExpressionAsVariableOrStringOrExpression(ScriptNode parentNode)
+        {
+            switch (Current.Type)
+            {
+                case TokenType.Identifier:
+                case TokenType.IdentifierSpecial:
+                    return ParseVariable();
+                case TokenType.String:
+                    return ParseString();
+                case TokenType.VerbatimString:
+                    return ParseVerbatimString();
+                default:
+                    return ParseExpression(parentNode);
+            }
+        }
+
         private ScriptExpression ParseExpression(ScriptNode parentNode, ref bool hasAnonymousFunction, ScriptExpression parentExpression = null, int precedence = 0,
             ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
@@ -262,6 +278,24 @@ namespace Scriban.Parsing
                         break;
                     }
 
+                    // Named argument
+                    if (Current.Type == TokenType.Colon)
+                    {
+                        if (!(leftOperand is ScriptVariable))
+                        {
+                            LogError(leftOperand.Span, $"Expecting a simple global or local variable before `:` in order to create a named argument");
+                            break;
+                        }
+
+                        var namedArgument = Open<ScriptNamedArgument>();
+                        namedArgument.Name = (ScriptVariable) leftOperand;
+                        namedArgument.ColonToken = ParseToken();
+                        namedArgument.Value = ExpectAndParseExpression(parentNode);
+                        Close(namedArgument);
+                        leftOperand = namedArgument;
+                        break;
+                    }
+
                     if (Current.Type == TokenType.Equal)
                     {
                         if (leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out ScriptFunction declaration))
@@ -436,7 +470,14 @@ namespace Scriban.Parsing
                                 var parameter = Open<ScriptNamedArgument>();
 
                                 // Parse the name
-                                parameter.Name = ParseIdentifier();
+                                var variable = ParseVariable();
+                                if (!(variable is ScriptVariable))
+                                {
+                                    LogError(variable.Span, $"Invalid identifier passed as a named argument. Expecting a simple variable name");
+                                    break;
+                                }
+
+                                parameter.Name = (ScriptVariable)variable;
 
                                 if (paramContainer != null)
                                 {
@@ -502,64 +543,61 @@ namespace Scriban.Parsing
 
                             functionCall.Span.Start = leftOperand.Span.Start;
 
-                            if (_isScientific)
+                            // Regular function call target(arg0, arg1, arg3, arg4...)
+                            if (Current.Type == TokenType.OpenParen && !IsPreviousCharWhitespace())
                             {
-                                // Regular function call target(arg0, arg1, arg3, arg4...)
-                                if (Current.Type == TokenType.OpenParen && !IsPreviousCharWhitespace())
+                                // This is an explicit call
+                                functionCall.ExplicitCall = true;
+                                functionCall.OpenParent = ParseToken();
+
+                                bool isFirst = true;
+                                while (true)
                                 {
-                                    // This is an explicit call
-                                    functionCall.ExplicitCall = true;
-                                    functionCall.OpenParent = ParseToken();
-
-                                    bool isFirst = true;
-                                    while (true)
+                                    // Parse any required comma (before each new non-first argument)
+                                    // Or closing parent (and we exit the loop)
+                                    if (Current.Type == TokenType.CloseParen)
                                     {
-                                        // Parse any required comma (before each new non-first argument)
-                                        // Or closing parent (and we exit the loop)
-                                        if (Current.Type == TokenType.CloseParen)
-                                        {
-                                            functionCall.CloseParen = ParseToken();
-                                            break;
-                                        }
+                                        functionCall.CloseParen = ParseToken();
+                                        break;
+                                    }
 
-                                        if (!isFirst)
+                                    if (!isFirst)
+                                    {
+                                        if (Current.Type == TokenType.Comma)
                                         {
-                                            if (Current.Type == TokenType.Comma)
-                                            {
-                                                PushTokenToTrivia();
-                                                NextToken();
-                                                FlushTriviasToLastTerminal();
-                                            }
-                                            else
-                                            {
-                                                LogError(Current, "Expecting a comma to separate arguments in a function call.");
-                                            }
-                                        }
-                                        isFirst = false;
-
-                                        // Else we expect an expression
-                                        if (IsStartOfExpression())
-                                        {
-                                            var arg = ParseExpression(functionCall);
-                                            functionCall.Arguments.Add(arg);
-                                            functionCall.Span.End = arg.Span.End;
+                                            PushTokenToTrivia();
+                                            NextToken();
+                                            FlushTriviasToLastTerminal();
                                         }
                                         else
                                         {
-                                            LogError(Current, "Expecting an expression for argument function calls instead of this token.");
-                                            break;
+                                            LogError(Current, "Expecting a comma to separate arguments in a function call.");
                                         }
                                     }
+                                    isFirst = false;
 
-                                    if (functionCall.CloseParen == null)
+                                    // Else we expect an expression
+                                    if (IsStartOfExpression())
                                     {
-                                        LogError(Current, "Expecting a closing parenthesis for a function call.");
+                                        var arg = ParseExpression(functionCall);
+                                        functionCall.Arguments.Add(arg);
+                                        functionCall.Span.End = arg.Span.End;
                                     }
-
-                                    leftOperand = functionCall;
-                                    functionCall = null;
-                                    continue;
+                                    else
+                                    {
+                                        LogError(Current, "Expecting an expression for argument function calls instead of this token.");
+                                        break;
+                                    }
                                 }
+
+                                if (functionCall.CloseParen == null)
+                                {
+                                    LogError(Current, "Expecting a closing parenthesis for a function call.");
+                                }
+
+                                leftOperand = functionCall;
+                                functionCall = null;
+                                continue;
                             }
                         }
                         else
@@ -703,7 +741,7 @@ namespace Scriban.Parsing
 
                     var objectMember = Open<ScriptObjectMember>();
 
-                    var variableOrLiteral = ParseExpression(scriptObject);
+                    var variableOrLiteral = ParseExpressionAsVariableOrStringOrExpression(scriptObject);
                     var variable = variableOrLiteral as ScriptVariable;
                     var literal = variableOrLiteral as ScriptLiteral;
 

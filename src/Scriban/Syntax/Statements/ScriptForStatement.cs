@@ -104,7 +104,7 @@ namespace Scriban.Syntax
                 {
                     foreach (var option in NamedArguments)
                     {
-                        switch (option.Name.Value)
+                        switch (option.Name.Name)
                         {
                             case "offset":
                                 startIndex = context.ToInt(option.Value.Span, context.Evaluate(option.Value));

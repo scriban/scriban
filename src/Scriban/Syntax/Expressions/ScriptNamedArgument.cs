@@ -7,7 +7,7 @@ namespace Scriban.Syntax
 {
     public partial class ScriptNamedArgument : ScriptExpression
     {
-        private ScriptIdentifier _name;
+        private ScriptVariable _name;
         private ScriptToken _colonToken;
         private ScriptExpression _value;
 
@@ -15,7 +15,7 @@ namespace Scriban.Syntax
         {
         }
 
-        public ScriptIdentifier Name
+        public ScriptVariable Name
         {
             get => _name;
             set => ParentToThis(ref _name, value);

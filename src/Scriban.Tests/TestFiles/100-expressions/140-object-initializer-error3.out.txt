@@ -1,2 +1,2 @@
 text(3,2) : error : Unexpected token `$test` while parsing object initializer. Expecting a simple identifier for the member name.
-text(3,7) : error : Invalid token found `:`. Expecting <EOL>/end of line.
+text(3,10) : error : Invalid token found `}`. Expecting <EOL>/end of line.

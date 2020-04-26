@@ -243,7 +243,7 @@ namespace Scriban.Parsing
                 if (isFirst && Current.Type == TokenType.Colon)
                 {
                     var namedArg = Open<ScriptNamedArgument>();
-                    namedArg.Name = new ScriptIdentifier("group");
+                    namedArg.Name = new ScriptVariableGlobal("group");
 
                     namedArg.ColonToken = ScriptToken.Colon();
                     ExpectAndParseTokenTo(namedArg.ColonToken, TokenType.Colon); // Parse :
