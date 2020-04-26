@@ -31,13 +31,14 @@ namespace Scriban.Runtime
         protected readonly bool IsAwaitable;
 #endif
         protected readonly bool _hasObjectParams;
-        protected readonly int _lastParamsIndex;
+        protected readonly int _paramsIndex;
         protected readonly bool _hasTemplateContext;
         protected readonly bool _hasSpan;
         protected readonly int _optionalParameterCount;
         protected readonly Type _paramsElementType;
         protected readonly int _expectedNumberOfParameters;
         protected readonly int _minimumRequiredParameters;
+        protected readonly int _firstIndexOfUserParameters;
 
         protected DynamicCustomFunction(MethodInfo method)
         {
@@ -47,7 +48,7 @@ namespace Scriban.Runtime
             IsAwaitable = method.ReturnType.GetTypeInfo().GetDeclaredMethod(nameof(Task.GetAwaiter)) != null;
 #endif
 
-            _lastParamsIndex = Parameters.Length - 1;
+            _paramsIndex = -1;
             if (Parameters.Length > 0)
             {
                 // Check if we have TemplateContext+SourceSpan as first parameters
@@ -60,19 +61,22 @@ namespace Scriban.Runtime
                     }
                 }
 
-                var lastParam = Parameters[_lastParamsIndex];
+                var lastParam = Parameters[Parameters.Length - 1];
                 if (lastParam.ParameterType.IsArray)
                 {
                     foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
                     {
                         _hasObjectParams = true;
                         _paramsElementType = lastParam.ParameterType.GetElementType();
+                        _paramsIndex = Parameters.Length - 1;
                         break;
                     }
                 }
             }
 
             _expectedNumberOfParameters = Parameters.Length;
+            _firstIndexOfUserParameters = 0;
+
             if (!_hasObjectParams)
             {
                 for (int i = 0; i < Parameters.Length; i++)
@@ -90,13 +94,14 @@ namespace Scriban.Runtime
 
             if (_hasTemplateContext)
             {
-                _expectedNumberOfParameters--;
+                _firstIndexOfUserParameters++;
                 if (_hasSpan)
                 {
-                    _expectedNumberOfParameters--;
+                    _firstIndexOfUserParameters++;
                 }
             }
 
+            _expectedNumberOfParameters -= _firstIndexOfUserParameters;
             _minimumRequiredParameters = _expectedNumberOfParameters - _optionalParameterCount;
         }
 
@@ -132,24 +137,25 @@ namespace Scriban.Runtime
 
         public int RequiredParameterCount => _minimumRequiredParameters;
 
-        public bool IsExpressionParameter(int index)
-        {
-            if (index >= 0 && index < Parameters.Length)
-            {
-                return typeof(ScriptExpression).GetTypeInfo().IsAssignableFrom(Parameters[index].ParameterType.GetTypeInfo());
-            }
-            return false;
-        }
+        public int ParameterCount => _expectedNumberOfParameters;
 
-        public int GetParameterIndex(string name)
-        {
-            for (var i = 0; i < Parameters.Length; i++)
-            {
-                var param = Parameters[i];
-                if (param.Name == name) return i;
-            }
+        public bool HasVariableParams => _hasObjectParams;
 
-            return -1;
+        public ScriptParameterInfo GetParameterInfo(int index)
+        {
+            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Argument index must be >= 0");
+
+            var readIndex = _firstIndexOfUserParameters + index;
+
+            if (_hasObjectParams)
+            {
+                readIndex = readIndex >= Parameters.Length ? Parameters.Length - 1 : readIndex;
+            }
+            else if (readIndex >= Parameters.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(readIndex), $"Argument index must be < {ParameterCount}");
+            }
+            return new ScriptParameterInfo(Parameters[readIndex].ParameterType, Parameters[readIndex].Name);
         }
 
 #if !SCRIBAN_NO_ASYNC
@@ -176,7 +182,6 @@ namespace Scriban.Runtime
             return new GenericFunctionWrapper(target, method);
         }
 
-
         protected struct ArgumentValue
         {
             public ArgumentValue(int index, Type type, object value)
@@ -192,8 +197,6 @@ namespace Scriban.Runtime
 
             public readonly object Value;
         }
-
-
 
         private class MethodComparer : IEqualityComparer<MethodInfo>
         {

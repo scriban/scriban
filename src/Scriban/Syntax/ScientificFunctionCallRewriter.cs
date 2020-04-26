@@ -111,7 +111,7 @@ namespace Scriban.Syntax
                             throw new ScriptRuntimeException(nextExpression.Span, $"Cannot use a function with more than 1 argument ({maxArg}) in a sequence of implicit multiplications.");
                         }
 
-                        if (maxArg == 1 || function.IsExpressionParameter(0))
+                        if (maxArg == 1 || function.IsParameterType<ScriptExpression>(0))
                         {
                             if (PrecedenceTopLevel == precedence || leftValue == null)
                             {

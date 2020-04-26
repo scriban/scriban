@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -123,14 +123,18 @@ namespace Scriban.Functions
 
         public int RequiredParameterCount => 1;
 
-        public bool IsExpressionParameter(int index)
+        public int ParameterCount => 1;
+
+        public bool HasVariableParams => true;
+
+        public ScriptParameterInfo GetParameterInfo(int index)
         {
-            return false;
+            return new ScriptParameterInfo(typeof(string), "template_name");
         }
 
-        public int GetParameterIndex(string name)
+        public int GetParameterIndexByName(string name)
         {
-            return -1;
+            throw new NotImplementedException();
         }
     }
 }

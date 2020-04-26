@@ -163,10 +163,10 @@ namespace Scriban.Syntax
             {
                 throw new ScriptRuntimeException(callerContext.Span, $"The target function `{callerContext}` is null");
             }
-            var function = functionObject as ScriptFunction;
-            var externFunction = functionObject as IScriptCustomFunction;
+            var scriptFunction = functionObject as ScriptFunction;
+            var function = functionObject as IScriptCustomFunction;
 
-            if (externFunction == null)
+            if (function == null)
             {
                 throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{callerContext}` ({functionObject?.GetType().ScriptFriendlyName()})");
             }
@@ -210,7 +210,7 @@ namespace Scriban.Syntax
                     if (namedArg != null)
                     {
                         // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
-                        if (function != null)
+                        if (scriptFunction != null)
                         {
                             // We can't add an argument that is "size" for array
                             if (argumentValues.CanWrite(namedArg.Name.Value))
@@ -230,7 +230,7 @@ namespace Scriban.Syntax
                     }
                     else
                     {
-                        if (externFunction.IsExpressionParameter(argIndex))
+                        if (function.IsParameterType<ScriptExpression>(argIndex))
                         {
                             value = argument;
                         }
@@ -260,23 +260,37 @@ namespace Scriban.Syntax
                 }
             }
 
-            if (argumentValues.Count < externFunction.RequiredParameterCount)
+            var hasVariableParams = function.HasVariableParams;
+            var requiredParameterCount = function.RequiredParameterCount;
+            var parameterCount = function.ParameterCount;
+
+            if (argumentValues.Count < requiredParameterCount)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{externFunction.RequiredParameterCount}` arguments");
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
+            }
+
+            if (!hasVariableParams && argumentValues.Count > parameterCount)
+            {
+                if (argumentValues.Count > 0 && arguments != null && argumentValues.Count <= arguments.Count)
+                {
+                    throw new ScriptRuntimeException(arguments[argumentValues.Count - 1].Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
+                }
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
             }
 
             object result = null;
-            var needLocal = !(externFunction is ScriptFunction func && func.HasParameters);
+            var needLocal = !(function is ScriptFunction func && func.HasParameters);
             context.EnterFunction(callerContext, needLocal);
             try
             {
                 try
                 {
-                    result = externFunction.Invoke(context, callerContext, argumentValues, blockDelegate);
+                    result = function.Invoke(context, callerContext, argumentValues, blockDelegate);
                 }
                 catch (ArgumentException ex)
                 {
-                    var index = externFunction.GetParameterIndex(ex.ParamName);
+                    // Slow path to detect the argument index from the name if we can
+                    var index = GetParameterIndexByName(function, ex.ParamName);
                     if (index >= 0 && arguments != null && index < arguments.Count)
                     {
                         throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
@@ -302,6 +316,18 @@ namespace Scriban.Syntax
             // Restore the flow state to none
             context.FlowState = ScriptFlowState.None;
             return result;
+        }
+
+        private static int GetParameterIndexByName(IScriptFunctionInfo functionInfo, string name)
+        {
+            var paramCount = functionInfo.ParameterCount;
+            for (var i = 0; i < paramCount; i++)
+            {
+                var p = functionInfo.GetParameterInfo(i);
+                if (p.Name == name) return i;
+            }
+
+            return -1;
         }
     }
 }

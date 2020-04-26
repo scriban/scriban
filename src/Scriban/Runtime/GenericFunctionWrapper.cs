@@ -25,29 +25,12 @@ namespace Scriban.Runtime
 
         public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            // Check parameters
-            if ((_hasObjectParams && arguments.Count < _minimumRequiredParameters - 1) || (!_hasObjectParams && (arguments.Count < _minimumRequiredParameters || arguments.Count > _expectedNumberOfParameters)))
-            {
-                if (_minimumRequiredParameters != _expectedNumberOfParameters)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{_minimumRequiredParameters}` arguments");
-                }
-                else
-                {
-                    if (arguments.Count > 0)
-                    {
-                        throw new ScriptArgumentException(arguments.Count - 1, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
-                    }
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
-                }
-            }
-
             // Convert arguments
             object[] paramArguments = null;
             var argMask = 0;
             if (_hasObjectParams)
             {
-                var objectParamsCount = arguments.Count - _lastParamsIndex;
+                var objectParamsCount = arguments.Count - _paramsIndex;
                 if (_hasTemplateContext)
                 {
                     objectParamsCount++;
@@ -57,8 +40,8 @@ namespace Scriban.Runtime
                     }
                 }
                 paramArguments = new object[objectParamsCount];
-                _arguments[_lastParamsIndex] = paramArguments;
-                argMask |= 1 << _lastParamsIndex;
+                _arguments[_paramsIndex] = paramArguments;
+                argMask |= 1 << _paramsIndex;
             }
 
             // Copy TemplateContext/SourceSpan parameters
@@ -103,7 +86,7 @@ namespace Scriban.Runtime
                         arg = namedArgValue.Value;
                         argIndex = namedArgValue.Index;
                         argType = namedArgValue.Type;
-                        if (_hasObjectParams && argIndex == _lastParamsIndex)
+                        if (_hasObjectParams && argIndex == _paramsIndex)
                         {
                             argType = _paramsElementType;
                             argIndex = argIndex + paramsIndex;
@@ -113,7 +96,7 @@ namespace Scriban.Runtime
                     else
                     {
                         argIndex = argOrderedIndex;
-                        if (_hasObjectParams && argIndex == _lastParamsIndex)
+                        if (_hasObjectParams && argIndex == _paramsIndex)
                         {
                             argType = _paramsElementType;
                             argIndex = argIndex + paramsIndex;
@@ -127,9 +110,9 @@ namespace Scriban.Runtime
                     }
 
                     var argValue = context.ToObject(callerContext.Span, arg, argType);
-                    if (paramArguments != null && argIndex >= _lastParamsIndex)
+                    if (paramArguments != null && argIndex >= _paramsIndex)
                     {
-                        paramArguments[argIndex - _lastParamsIndex] = argValue;
+                        paramArguments[argIndex - _paramsIndex] = argValue;
                     }
                     else
                     {

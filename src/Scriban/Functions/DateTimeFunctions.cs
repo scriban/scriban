@@ -35,7 +35,7 @@ namespace Scriban.Functions
     /// A `timespan` and also the added to a `datetime` object.
     /// </summary>
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
-    public partial class DateTimeFunctions : ScriptObject, IScriptCustomFunction
+    public partial class DateTimeFunctions : ScriptObject, IScriptCustomFunction, IScriptFunctionInfo
     {
         private const string FormatKey = "format";
 
@@ -401,14 +401,15 @@ namespace Scriban.Functions
 
         public int RequiredParameterCount => 0;
 
-        public bool IsExpressionParameter(int index)
-        {
-            return false;
-        }
+        public int ParameterCount => 1;
 
-        public int GetParameterIndex(string name)
+        public bool HasVariableParams => false;
+
+        private const string Parameter1Name = "text";
+
+        public ScriptParameterInfo GetParameterInfo(int index)
         {
-            return name == "text" ? 0 : -1;
+            return new ScriptParameterInfo(typeof(object), Parameter1Name);
         }
 
 #if !SCRIBAN_NO_ASYNC

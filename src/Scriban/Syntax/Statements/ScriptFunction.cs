@@ -170,18 +170,14 @@ namespace Scriban.Syntax
 
         public int RequiredParameterCount => Parameters?.Count ?? 0;
 
-        public bool IsExpressionParameter(int index) => false;
+        public int ParameterCount => Parameters?.Count ?? int.MaxValue;
 
-        public int GetParameterIndex(string name)
+        public bool HasVariableParams => Parameters == null;
+
+        public ScriptParameterInfo GetParameterInfo(int index)
         {
-            if (Parameters == null) return -1;
-            for (var i = 0; i < Parameters.Count; i++)
-            {
-                var p = Parameters[i];
-                if (p.Name == name) return i;
-            }
-
-            return -1;
+            if (Parameters == null) return new ScriptParameterInfo(typeof(object), string.Empty);
+            return new ScriptParameterInfo(typeof(object), Parameters[index].Name);
         }
     }
 }
