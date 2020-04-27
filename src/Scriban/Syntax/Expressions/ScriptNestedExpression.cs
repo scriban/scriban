@@ -74,7 +74,10 @@ namespace Scriban.Syntax
             }
             finally
             {
-                context.PopPipeArguments();
+                if (context.CurrentPipeArguments != null)
+                {
+                    context.PopPipeArguments();
+                }
             }
         }
 

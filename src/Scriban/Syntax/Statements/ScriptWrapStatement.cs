@@ -51,7 +51,7 @@ namespace Scriban.Syntax
                 }
 
                 context.BlockDelegates.Push(Body);
-                return ScriptFunctionCall.Call(context, this, parameterLessFunction, false);
+                return ScriptFunctionCall.Call(context, this, parameterLessFunction, false, null);
             }
 
             context.BlockDelegates.Push(Body);

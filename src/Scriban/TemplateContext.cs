@@ -275,7 +275,7 @@ namespace Scriban
         /// <summary>
         /// Store the current stack of pipe arguments used by <see cref="ScriptPipeCall"/> and <see cref="ScriptFunctionCall"/>
         /// </summary>
-        internal ScriptPipeArguments PipeArguments => _currentPipeArguments;
+        internal ScriptPipeArguments CurrentPipeArguments => _currentPipeArguments;
 
         /// <summary>
         /// Gets or sets the internal state of control flow.
@@ -336,9 +336,17 @@ namespace Scriban
 
         internal void PushPipeArguments()
         {
-            var pipeArguments = _availablePipeArguments.Count > 0 ? _availablePipeArguments.Pop() : new ScriptPipeArguments(4);
-            _pipeArguments.Push(pipeArguments);
-            _currentPipeArguments = pipeArguments;
+            var arguments = _availablePipeArguments.Count > 0 ? _availablePipeArguments.Pop() : new ScriptPipeArguments(1);
+            _pipeArguments.Push(arguments);
+            _currentPipeArguments = arguments;
+        }
+
+        internal void ClearPipeArguments()
+        {
+            while (_pipeArguments.Count > 0)
+            {
+                PopPipeArguments();
+            }
         }
 
         internal void PopPipeArguments()
@@ -348,11 +356,10 @@ namespace Scriban
                 throw new InvalidOperationException("Cannot PopPipeArguments more than PushPipeArguments");
             }
 
-            var pipeArguments = _pipeArguments.Pop();
-            // Might be not null in case of an exception
-            pipeArguments.Clear();
-            _availablePipeArguments.Push(pipeArguments);
+            var pipeFrom = _pipeArguments.Pop();
+            pipeFrom.Clear();
             _currentPipeArguments = _pipeArguments.Count > 0 ? _pipeArguments.Peek() : null;
+            _availablePipeArguments.Push(pipeFrom);
         }
 
         /// <summary>
@@ -1100,7 +1107,7 @@ namespace Scriban
             if (allowFunctionCall && ScriptFunctionCall.IsFunction(value))
             {
                 // Allow to pipe arguments only for top level returned function
-                value = ScriptFunctionCall.Call(this, targetExpression, value, _getOrSetValueLevel == 1);
+                value = ScriptFunctionCall.Call(this, targetExpression, value, _getOrSetValueLevel == 1, null);
             }
 
             return value;

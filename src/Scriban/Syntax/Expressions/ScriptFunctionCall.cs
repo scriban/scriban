@@ -5,8 +5,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 using Scriban.Helpers;
 using Scriban.Runtime;
 
@@ -123,7 +121,7 @@ namespace Scriban.Syntax
                 throw new ScriptRuntimeException(Target.Span, $"The function `{Target}` was not found");
             }
 
-            return Call(context, Target, targetFunction, context.AllowPipeArguments, Arguments);
+            return Call(context, this, targetFunction, context.AllowPipeArguments, Arguments);
         }
 
         public override void PrintTo(ScriptPrinter printer)
@@ -156,7 +154,7 @@ namespace Scriban.Syntax
             return target is IScriptCustomFunction;
         }
 
-        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, IList<ScriptExpression> arguments = null)
+        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, IReadOnlyList<ScriptExpression> arguments)
         {
             if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (functionObject == null)
@@ -168,7 +166,7 @@ namespace Scriban.Syntax
 
             if (function == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{callerContext}` ({functionObject?.GetType().ScriptFriendlyName()})");
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({functionObject?.GetType().ScriptFriendlyName()})");
             }
 
             ScriptBlockStatement blockDelegate = null;
@@ -182,15 +180,18 @@ namespace Scriban.Syntax
             ScriptArray argumentValues;
 
             // Handle pipe arguments here
-            if (processPipeArguments && context.PipeArguments != null && context.PipeArguments.Count > 0)
+            if (processPipeArguments && context.CurrentPipeArguments != null && context.CurrentPipeArguments.Count > 0)
             {
-                var args = context.PipeArguments;
-                argumentValues = new ScriptArray(args.Count);
-                for (int i = 0; i < args.Count; i++)
+                var allArguments = new List<ScriptExpression>();
+                var pipeFrom = context.CurrentPipeArguments.Pop();
+                argumentValues = new ScriptArray(Math.Max(function.RequiredParameterCount, 1 + (arguments?.Count ?? 0)));
+                allArguments.Add(pipeFrom);
+
+                if (arguments != null)
                 {
-                    argumentValues.Add(args[i]);
+                    allArguments.AddRange(arguments);
                 }
-                args.Clear();
+                arguments = allArguments;
             }
             else
             {
@@ -261,7 +262,7 @@ namespace Scriban.Syntax
             return result;
         }
 
-        private static void ProcessArguments(TemplateContext context, ScriptNode callerContext, IList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
+        private static void ProcessArguments(TemplateContext context, ScriptNode callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
         {
             bool hasNamedArgument = false;
             for (var argIndex = 0; argIndex < arguments.Count; argIndex++)
@@ -324,8 +325,7 @@ namespace Scriban.Syntax
                 }
 
                 // Handle parameters expansion for a function call when the operator ^ is used
-                var unaryExpression = argument as ScriptUnaryExpression;
-                if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
+                if (argument is ScriptUnaryExpression unaryExpression && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand && !(value is ScriptExpression))
                 {
                     var valueEnumerator = value as IEnumerable;
                     if (valueEnumerator != null)
@@ -334,11 +334,9 @@ namespace Scriban.Syntax
                         {
                             argumentValues.Add(subValue);
                         }
-
-                        return;
+                        continue;
                     }
                 }
-
 
                 if (index == argumentValues.Count)
                 {

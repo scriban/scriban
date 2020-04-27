@@ -1,10 +1,11 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using Scriban.Parsing;
+using Scriban.Syntax;
 
 namespace Scriban.Runtime
 {
@@ -355,7 +356,7 @@ namespace Scriban.Runtime
         }
     }
 
-    internal class ScriptPipeArguments : ScriptArray
+    internal class ScriptPipeArguments : Stack<ScriptExpression>
     {
         public ScriptPipeArguments()
         {

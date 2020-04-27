@@ -36,50 +36,38 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            // We don't evaluate the From but we let the pipe evaluate it later
-            var leftResult = context.Evaluate(From);
-
-            // Push a new pipe arguments
-            context.PushPipeArguments();
+            bool newPipe = context.CurrentPipeArguments == null;
             try
             {
-                // Support for Parameters expansion
-                var unaryExpression = From as ScriptUnaryExpression;
-                if (unaryExpression != null && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand)
-                {
-                    // TODO: Pipe calls will not work correctly in case of (a | b) | ( c | d)
-                    var valueEnumerator = leftResult as IEnumerable;
-                    if (valueEnumerator != null)
-                    {
-                        var pipeArguments = context.PipeArguments;
-                        foreach (var subValue in valueEnumerator)
-                        {
-                            pipeArguments.Add(subValue);
-                        }
-                    }
-                    else
-                    {
-                        context.PipeArguments.Add(leftResult);
-                    }
-                }
-                else
-                {
-                    context.PipeArguments.Add(leftResult);
-                }
+                // Push a new pipe arguments
+                if (newPipe) context.PushPipeArguments();
+
+                context.CurrentPipeArguments.Push(From);
 
                 var result = context.Evaluate(To);
 
                 // If we have still remaining arguments, it is likely that the destination expression is not a function
                 // so pipe arguments were not picked up and this is an error
-                if (context.PipeArguments.Count > 0)
+                if (context.CurrentPipeArguments.Count > 0 && context.CurrentPipeArguments.Peek() == From)
                 {
                     throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
                 }
+
                 return result;
+            }
+            catch
+            {
+                // If we have an exception clear all the pipe froms
+                newPipe = false; // Don't try to clear the pipe
+                context.ClearPipeArguments();
+                throw;
             }
             finally
             {
-                context.PopPipeArguments();
+                if (newPipe)
+                {
+                    context.PopPipeArguments();
+                }
             }
         }
 
