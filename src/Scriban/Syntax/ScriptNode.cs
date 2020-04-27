@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -32,6 +33,7 @@ namespace Scriban.Syntax
         /// <param name="context">The template context.</param>
         public abstract object Evaluate(TemplateContext context);
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public virtual int ChildrenCount => 0;
 
         /// <summary>
@@ -92,6 +94,7 @@ namespace Scriban.Syntax
 
         public virtual TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => throw new NotImplementedException($"This method must be implemented by the type {this.GetType()}");
 
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public IEnumerable<ScriptNode> Children
         {
             get

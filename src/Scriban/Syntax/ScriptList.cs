@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Scriban.Helpers;
 
 namespace Scriban.Syntax
@@ -11,6 +12,8 @@ namespace Scriban.Syntax
     /// <summary>
     /// Abstract list of <see cref="ScriptNode"/>
     /// </summary>
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(ScriptListDebug))]
     public abstract class ScriptList : ScriptNode
     {
         protected readonly List<ScriptNode> _children;
@@ -30,13 +33,26 @@ namespace Scriban.Syntax
         {
             return _children[index];
         }
+
+        private sealed class ScriptListDebug
+        {
+            private readonly List<ScriptNode> _children;
+
+            public ScriptListDebug(ScriptList list)
+            {
+                _children = list._children;
+            }
+
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            public ScriptNode[] Items => _children.ToArray();
+        }
     }
 
     /// <summary>
     /// Abstract list of <see cref="ScriptNode"/>
     /// </summary>
     /// <typeparam name="TScriptNode">Type of the node</typeparam>
-    public sealed class ScriptList<TScriptNode> : ScriptList, IList<TScriptNode> where TScriptNode : ScriptNode
+    public sealed class ScriptList<TScriptNode> : ScriptList, IList<TScriptNode>, IReadOnlyList<TScriptNode> where TScriptNode : ScriptNode
     {
         /// <summary>
         /// Creates an instance of <see cref="ScriptList{TScriptNode}"/>
