@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Globalization;
 using System.Numerics;
 using System.Text;
@@ -56,12 +57,11 @@ namespace Scriban.Parsing
             var literal = Open<ScriptLiteral>();
 
             var text = GetAsText(Current);
-            bool isFloat = text.EndsWith("f", StringComparison.OrdinalIgnoreCase);
-            if (isFloat) text = text.TrimEnd('f', 'F');
-            if (isFloat)
+            var c = text[text.Length - 1];
+            if (c == 'f' || c == 'F')
             {
                 float floatResult;
-                if (float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+                if (float.TryParse(text.Substring(0, text.Length - 1), NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
                 {
                     literal.Value = floatResult;
                 }
@@ -72,14 +72,15 @@ namespace Scriban.Parsing
             }
             else
             {
-                if (Options.ParseFloatAsDecimal && decimal.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var decimalResult))
+                var explicitDecimal = c == 'm' || c == 'M';
+                if ((Options.ParseFloatAsDecimal || explicitDecimal) && decimal.TryParse(explicitDecimal ? text.Substring(0, text.Length - 1) : text, NumberStyles.Float, CultureInfo.InvariantCulture, out var decimalResult))
                 {
                     literal.Value = decimalResult;
                 }
                 else
                 {
                     double floatResult;
-                    if (double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+                    if (double.TryParse(c == 'd' || c == 'D' ? text.Substring(0, text.Length-1) : text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
                     {
                         literal.Value = floatResult;
                     }

@@ -103,6 +103,12 @@ namespace Scriban.Syntax
             else if (type == typeof(float))
             {
                 printer.Write(AppendDecimalPoint(((float)Value).ToString("R", CultureInfo.InvariantCulture), true));
+                printer.Write("f");
+            }
+            else if (type == typeof(decimal))
+            {
+                printer.Write(AppendDecimalPoint(((decimal)Value).ToString(CultureInfo.InvariantCulture), true));
+                printer.Write("m");
             }
             else if (type == typeof(byte))
             {

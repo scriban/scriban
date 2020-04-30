@@ -1305,7 +1305,7 @@ namespace Scriban.Parsing
                 }
             }
 
-            if (c == 'f' || c == 'F')
+            if (c == 'f' || c == 'F' || c == 'd' || c == 'D' || c == 'm' || c == 'M')
             {
                 isFloat = true;
                 end = _position;

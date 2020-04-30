@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -78,7 +78,7 @@ namespace Scriban.Syntax
             // Because a-b is a variable name, we need to transform binary op a-b to a - b
             if (Operator == ScriptBinaryOperator.Substract && !printer.PreviousHasSpace)
             {
-                printer.Write(" ");
+                printer.ExpectSpace();
             }
 
             if (OperatorToken != null)
@@ -107,7 +107,7 @@ namespace Scriban.Syntax
             {
                 return leftValue ?? rightValue;
             }
-            
+
             switch (op)
             {
                 case ScriptBinaryOperator.ShiftLeft:
@@ -477,7 +477,7 @@ namespace Scriban.Syntax
 
             var leftType = leftValue.GetType();
             var rightType = rightValue.GetType();
-            
+
             // The order matters: decimal, double, float, long, int
             if (leftType == typeof(decimal))
             {
@@ -603,7 +603,7 @@ namespace Scriban.Syntax
         private static object FitToBestInteger(object value)
         {
             if (value is int) return value;
-            
+
             if (value is long longValue)
             {
                 return FitToBestInteger(longValue);
@@ -775,7 +775,7 @@ namespace Scriban.Syntax
 
                 case ScriptBinaryOperator.Power:
                     return Math.Pow(left, right);
-                
+
                 case ScriptBinaryOperator.Modulus:
                     return left % right;
                 case ScriptBinaryOperator.CompareEqual:
@@ -814,6 +814,9 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.ShiftRight:
                     return left / (decimal) Math.Pow(2, (double) right);
 
+                case ScriptBinaryOperator.Power:
+                    return (decimal)Math.Pow((double)left, (double)right);
+
                 case ScriptBinaryOperator.Modulus:
                     return left % right;
                 case ScriptBinaryOperator.CompareEqual:
@@ -845,7 +848,7 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Divide:
                     return (float)left / right;
                 case ScriptBinaryOperator.DivideRound:
-                    return (double)(int)(left / right);
+                    return (float)(int)(left / right);
 #if NETSTANDARD2_1
                 case ScriptBinaryOperator.Power:
                     return MathF.Pow(left, right);
