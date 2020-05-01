@@ -129,7 +129,8 @@ namespace Scriban.Functions
 
         public ScriptParameterInfo GetParameterInfo(int index)
         {
-            return new ScriptParameterInfo(typeof(string), "template_name");
+            if (index == 0) return new ScriptParameterInfo(typeof(string), "template_name");
+            return new ScriptParameterInfo(typeof(object), "value");
         }
 
         public int GetParameterIndexByName(string name)

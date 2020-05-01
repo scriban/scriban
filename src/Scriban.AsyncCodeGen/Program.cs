@@ -389,20 +389,6 @@ using System.Numerics;
                             ));
                         }
 
-                        // Handle special case of GenericFunctionWrapper.Invoke
-                        if (callingClass.TypeSymbol.Name == "GenericFunctionWrapper" && methodModel.Name == "Invoke")
-                        {
-                            var returnStatement = method.DescendantNodes(node => true).OfType<ReturnStatementSyntax>().First();
-
-                            // transform:
-                            //     return result;
-                            // into:
-                            //     return result is Task<object> ? await ((Task<object>)result).ConfigureAwait(false)
-
-                            var newReturnStatement = ParseStatement("return IsAwaitable ? await ConfigureAwait(result) : result ;").WithLeadingTrivia(returnStatement.GetLeadingTrivia());
-                            method = method.ReplaceNode(returnStatement, newReturnStatement);
-                        }
-
                         TypeSyntax asyncReturnType;
                         if (methodModel.ReturnsVoid)
                         {

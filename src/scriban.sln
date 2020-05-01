@@ -24,7 +24,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.Benchmarks", "Scrib
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "liquid2scriban", "liquid2scriban\liquid2scriban.csproj", "{4AE5CDC4-4D74-4FDC-988B-4B783F61C56F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.CodeGen", "Scriban.CodeGen\Scriban.CodeGen.csproj", "{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.DelegateCodeGen", "Scriban.DelegateCodeGen\Scriban.DelegateCodeGen.csproj", "{3D8B1A36-1647-4BE0-AB69-D0C19803A1D1}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.DocGen", "Scriban.DocGen\Scriban.DocGen.csproj", "{D3478C01-63D6-4BAB-8A9E-3A9D5A98C80C}"
 EndProject

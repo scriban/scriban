@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 02/09/2019 14:39:16 by Scriban.CodeGen
+// This file was automatically generated - 05/01/2020 10:28:59 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -80,50 +80,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                var arg1 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = arg;
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
+                var arg1 = arguments[1];
 
                 return _delegate(arg0, arg1);
             }
@@ -145,45 +103,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = arguments[0];
 
                 return _delegate(arg0);
             }
@@ -205,50 +125,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -270,36 +148,6 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 0)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `0` arguments");
-                }
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                }
-
-                if (argMask != (1 << 0) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `0` arguments");
-                }
 
                 return _delegate();
             }
@@ -321,50 +169,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(DateTime);
-                var arg1 = default(double);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (DateTime)context.ToObject(callerContext.Span, arg, typeof(DateTime));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = (double)context.ToObject(callerContext.Span, arg, typeof(double));
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = (DateTime)context.ToObject(callerContext.Span, arguments[0], typeof(DateTime));
+                var arg1 = (double)context.ToObject(callerContext.Span, arguments[1], typeof(double));
 
                 return _delegate(arg0, arg1);
             }
@@ -386,50 +192,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(DateTime);
-                var arg1 = default(int);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (DateTime)context.ToObject(callerContext.Span, arg, typeof(DateTime));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = (DateTime)context.ToObject(callerContext.Span, arguments[0], typeof(DateTime));
+                var arg1 = context.ToInt(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -451,45 +215,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(double);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (double)context.ToObject(callerContext.Span, arg, typeof(double));
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = (double)context.ToObject(callerContext.Span, arguments[0], typeof(double));
 
                 return _delegate(arg0);
             }
@@ -503,59 +229,16 @@ namespace Scriban.Runtime
             private delegate double InternalDelegate(double arg0, int arg1);
 
             private readonly InternalDelegate _delegate;
-            private readonly int defaultArg1;
 
             public Functiondouble_double_int___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-                defaultArg1 = (int)Parameters[1].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count < 1 || arguments.Count > 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `1` arguments");
-                }
-                var arg0 = default(double);
-                var arg1 = defaultArg1;
-                int argMask = 2;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (double)context.ToObject(callerContext.Span, arg, typeof(double));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `1` arguments");
-                }
+                var arg0 = (double)context.ToObject(callerContext.Span, arguments[0], typeof(double));
+                var arg1 = context.ToInt(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -577,45 +260,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
 
                 return _delegate(arg0);
             }
@@ -637,50 +282,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                var arg1 = default(IEnumerable);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
+                var arg1 = (IEnumerable)context.ToObject(callerContext.Span, arguments[1], typeof(IEnumerable));
 
                 return _delegate(arg0, arg1);
             }
@@ -702,50 +305,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -759,59 +320,16 @@ namespace Scriban.Runtime
             private delegate IEnumerable InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, string arg3);
 
             private readonly InternalDelegate _delegate;
-            private readonly string defaultArg1;
 
             public FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-                defaultArg1 = (string)Parameters[3].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count < 1 || arguments.Count > 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `1` arguments");
-                }
-                var arg0 = default(object);
-                var arg1 = defaultArg1;
-                int argMask = 2;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `1` arguments");
-                }
+                var arg0 = arguments[0];
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -833,50 +351,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(object);
-                var arg1 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = arguments[0];
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -898,50 +374,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(IList);
-                var arg1 = default(int);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToList(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = context.ToList(callerContext.Span, arguments[0]);
+                var arg1 = context.ToInt(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -963,55 +397,9 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `3` arguments");
-                }
-                var arg0 = default(IList);
-                var arg1 = default(int);
-                var arg2 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToList(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-                        case 2:
-                            arg2 = arg;
-                            argMask |= (1 << 2);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 3) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `3` arguments");
-                }
+                var arg0 = context.ToList(callerContext.Span, arguments[0]);
+                var arg1 = context.ToInt(callerContext.Span, arguments[1]);
+                var arg2 = arguments[2];
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -1033,50 +421,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(IList);
-                var arg1 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToList(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = arg;
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = context.ToList(callerContext.Span, arguments[0]);
+                var arg1 = arguments[1];
 
                 return _delegate(arg0, arg1);
             }
@@ -1098,45 +444,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
 
                 return _delegate(arg0);
             }
@@ -1158,45 +466,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
 
                 return _delegate(arg0);
             }
@@ -1218,45 +488,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = arguments[0];
 
                 return _delegate(context, callerContext.Span, arg0);
             }
@@ -1278,45 +510,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
 
                 return _delegate(arg0);
             }
@@ -1338,50 +532,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(object);
-                var arg1 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = arg;
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = arguments[0];
+                var arg1 = arguments[1];
 
                 return _delegate(arg0, arg1);
             }
@@ -1403,50 +555,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(double);
-                var arg1 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (double)context.ToObject(callerContext.Span, arg, typeof(double));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = arg;
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = (double)context.ToObject(callerContext.Span, arguments[0], typeof(double));
+                var arg1 = arguments[1];
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -1460,59 +570,16 @@ namespace Scriban.Runtime
             private delegate object InternalDelegate(TemplateContext arg0, SourceSpan arg1, IList arg2, object arg3);
 
             private readonly InternalDelegate _delegate;
-            private readonly object defaultArg1;
 
             public Functionobject_TemplateContext_SourceSpan_IList_object___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-                defaultArg1 = (object)Parameters[3].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count < 1 || arguments.Count > 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `1` arguments");
-                }
-                var arg0 = default(IList);
-                var arg1 = defaultArg1;
-                int argMask = 2;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToList(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = arg;
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `1` arguments");
-                }
+                var arg0 = context.ToList(callerContext.Span, arguments[0]);
+                var arg1 = arguments[1];
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -1534,45 +601,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = arguments[0];
 
                 return _delegate(context, callerContext.Span, arg0);
             }
@@ -1594,50 +623,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(object);
-                var arg1 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = arg;
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = arguments[0];
+                var arg1 = arguments[1];
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -1659,45 +646,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 1;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
 
                 return _delegate(context, arg0);
             }
@@ -1719,45 +668,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
 
                 return _delegate(arg0);
             }
@@ -1779,50 +690,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                var arg1 = default(int);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
+                var arg1 = context.ToInt(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -1836,64 +705,17 @@ namespace Scriban.Runtime
             private delegate ScriptArray InternalDelegate(TemplateContext arg0, string arg1, string arg2, string arg3);
 
             private readonly InternalDelegate _delegate;
-            private readonly string defaultArg2;
 
             public FunctionScriptArray_TemplateContext_string_string_string___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-                defaultArg2 = (string)Parameters[3].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count < 2 || arguments.Count > 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(string);
-                var arg2 = defaultArg2;
-                int argMask = 4;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 1;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-                        case 2:
-                            arg2 = context.ToString(callerContext.Span, arg);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 3) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg2 = context.ToString(callerContext.Span, arguments[2]);
 
                 return _delegate(context, arg0, arg1, arg2);
             }
@@ -1915,55 +737,9 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `3` arguments");
-                }
-                var arg0 = default(int);
-                var arg1 = default(string);
-                var arg2 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-                        case 2:
-                            arg2 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 2);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 3) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `3` arguments");
-                }
+                var arg0 = context.ToInt(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg2 = context.ToString(callerContext.Span, arguments[2]);
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -1985,45 +761,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(object);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = arguments[0];
 
                 return _delegate(arg0);
             }
@@ -2045,45 +783,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
 
                 return _delegate(arg0);
             }
@@ -2105,50 +805,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(int);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToInt(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -2162,64 +820,17 @@ namespace Scriban.Runtime
             private delegate string InternalDelegate(string arg0, int arg1, int arg2);
 
             private readonly InternalDelegate _delegate;
-            private readonly int defaultArg2;
 
             public Functionstring_string_int_int___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-                defaultArg2 = (int)Parameters[2].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count < 2 || arguments.Count > 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(int);
-                var arg2 = defaultArg2;
-                int argMask = 4;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-                        case 2:
-                            arg2 = context.ToInt(callerContext.Span, arg);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 3) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToInt(callerContext.Span, arguments[1]);
+                var arg2 = context.ToInt(callerContext.Span, arguments[2]);
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -2233,64 +844,17 @@ namespace Scriban.Runtime
             private delegate string InternalDelegate(string arg0, int arg1, string arg2);
 
             private readonly InternalDelegate _delegate;
-            private readonly string defaultArg2;
 
             public Functionstring_string_int_string___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-                defaultArg2 = (string)Parameters[2].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count < 2 || arguments.Count > 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(int);
-                var arg2 = defaultArg2;
-                int argMask = 4;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToInt(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-                        case 2:
-                            arg2 = context.ToString(callerContext.Span, arg);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 3) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToInt(callerContext.Span, arguments[1]);
+                var arg2 = context.ToString(callerContext.Span, arguments[2]);
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -2312,50 +876,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -2377,55 +899,9 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `3` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(string);
-                var arg2 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-                        case 2:
-                            arg2 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 2);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 3) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `3` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg2 = context.ToString(callerContext.Span, arguments[2]);
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -2447,50 +923,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 2)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
-                var arg0 = default(IEnumerable);
-                var arg1 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (IEnumerable)context.ToObject(callerContext.Span, arg, typeof(IEnumerable));
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 2) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `2` arguments");
-                }
+                var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -2504,64 +938,17 @@ namespace Scriban.Runtime
             private delegate string InternalDelegate(TemplateContext arg0, SourceSpan arg1, object arg2, string arg3, string arg4);
 
             private readonly InternalDelegate _delegate;
-            private readonly string defaultArg2;
 
             public Functionstring_TemplateContext_SourceSpan_object_string_string___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-                defaultArg2 = (string)Parameters[4].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count < 2 || arguments.Count > 3)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
-                }
-                var arg0 = default(object);
-                var arg1 = default(string);
-                var arg2 = defaultArg2;
-                int argMask = 4;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 2;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = arg;
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-                        case 2:
-                            arg2 = context.ToString(callerContext.Span, arg);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 3) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `2` arguments");
-                }
+                var arg0 = arguments[0];
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg2 = context.ToString(callerContext.Span, arguments[2]);
 
                 return _delegate(context, callerContext.Span, arg0, arg1, arg2);
             }
@@ -2583,45 +970,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 1;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
 
                 return _delegate(context, arg0);
             }
@@ -2635,69 +984,18 @@ namespace Scriban.Runtime
             private delegate string InternalDelegate(TemplateContext arg0, string arg1, string arg2, string arg3, string arg4);
 
             private readonly InternalDelegate _delegate;
-            private readonly string defaultArg3;
 
             public Functionstring_TemplateContext_string_string_string_string___Opt(MethodInfo method) : base(method)
             {
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
-                defaultArg3 = (string)Parameters[4].DefaultValue;
             }
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count < 3 || arguments.Count > 4)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `3` arguments");
-                }
-                var arg0 = default(string);
-                var arg1 = default(string);
-                var arg2 = default(string);
-                var arg3 = defaultArg3;
-                int argMask = 8;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 1;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-                        case 1:
-                            arg1 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 1);
-                            break;
-                        case 2:
-                            arg2 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 2);
-                            break;
-                        case 3:
-                            arg3 = context.ToString(callerContext.Span, arg);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 4) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `3` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg2 = context.ToString(callerContext.Span, arguments[2]);
+                var arg3 = context.ToString(callerContext.Span, arguments[3]);
 
                 return _delegate(context, arg0, arg1, arg2, arg3);
             }
@@ -2719,45 +1017,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(double);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = (double)context.ToObject(callerContext.Span, arg, typeof(double));
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = (double)context.ToObject(callerContext.Span, arguments[0], typeof(double));
 
                 return _delegate(arg0);
             }
@@ -2779,45 +1039,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                if (arguments.Count != 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
-                var arg0 = default(string);
-                int argMask = 0;
-
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - 0;
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }
-
-                    switch (argIndex)
-                    {
-                        case 0:
-                            arg0 = context.ToString(callerContext.Span, arg);
-                            argMask |= (1 << 0);
-                            break;
-
-                    }
-                }
-
-                if (argMask != (1 << 1) - 1)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `1` arguments");
-                }
+                var arg0 = context.ToString(callerContext.Span, arguments[0]);
 
                 return _delegate(arg0);
             }

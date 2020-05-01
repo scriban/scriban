@@ -166,7 +166,7 @@ namespace Scriban.Syntax
 
         public int RequiredParameterCount => Parameters?.Count ?? 0;
 
-        public int ParameterCount => Parameters?.Count ?? 1;
+        public int ParameterCount => Parameters?.Count ?? 0;
 
         public bool HasVariableParams => Parameters == null;
 

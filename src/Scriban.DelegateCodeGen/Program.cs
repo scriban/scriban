@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using Mono.Cecil;
 
-namespace Scriban.CodeGen
+namespace Scriban.DelegateCodeGen
 {
     /// <summary>
     /// Program generating pre-compiled custom delegates for all builtin functions
@@ -39,7 +39,7 @@ namespace Scriban.CodeGen
 
             _writer = new StreamWriter(@"..\..\..\..\Scriban\Runtime\CustomFunction.Generated.cs");
             _writer.WriteLine("// ----------------------------------------------------------------------------------");
-            _writer.WriteLine($"// This file was automatically generated - {DateTime.Now.ToString(CultureInfo.InvariantCulture.DateTimeFormat)} by Scriban.CodeGen");
+            _writer.WriteLine($"// This file was automatically generated - {DateTime.Now.ToString(CultureInfo.InvariantCulture.DateTimeFormat)} by Scriban.DelegateCodeGen");
             _writer.WriteLine("// DOT NOT EDIT THIS FILE MANUALLY");
             _writer.WriteLine("// ----------------------------------------------------------------------------------");
 
@@ -91,12 +91,8 @@ namespace Scriban.Runtime
             var name = "Function" + GetSignature(method, SignatureMode.Name);
             var delegateSignature = GetSignature(method, SignatureMode.Delegate);
 
-            var arguments = new StringBuilder();
-            var caseArguments = "";
             var caseArgumentsBuilder = new StringBuilder();
             var delegateCallArgs = new StringBuilder();
-            var defaultParamDeclaration = new StringBuilder();
-            var defaultParamConstructors = new StringBuilder();
 
             int argumentCount = 0;
             int argOffset = 0;
@@ -111,9 +107,6 @@ namespace Scriban.Runtime
                 }
                 argumentCount++;
             }
-            int minimunArg = argumentCount;
-
-            string argCheckMask = $"argMask != (1 << {argumentCount}) - 1";
 
             int argIndex = 0;
             for (var paramIndex = 0; paramIndex < method.Parameters.Count; paramIndex++)
@@ -137,31 +130,15 @@ namespace Scriban.Runtime
                     continue;
                 }
 
-                arguments.Append($"                var arg{argIndex} = ");
-                caseArgumentsBuilder.AppendLine($"                        case {argIndex}:");
-                caseArgumentsBuilder.Append($"                            arg{argIndex} = ");
-
-                if (arg.IsOptional)
-                {
-                    if (argIndex < minimunArg)
-                    {
-                        minimunArg = argIndex;
-                    }
-                    arguments.Append($"defaultArg{argIndex}");
-                }
-                else
-                {
-                    arguments.Append($"default({PrettyType(type)})");
-                }
-                arguments.AppendLine(";");
+                caseArgumentsBuilder.Append($"                var arg{argIndex} = ");
 
                 if (type.MetadataType == MetadataType.String)
                 {
-                    caseArgumentsBuilder.Append($"context.ToString(callerContext.Span, arg)");
+                    caseArgumentsBuilder.Append($"context.ToString(callerContext.Span, arguments[{argIndex}])");
                 }
                 else if (type.MetadataType == MetadataType.Int32)
                 {
-                    caseArgumentsBuilder.Append($"context.ToInt(callerContext.Span, arg)");
+                    caseArgumentsBuilder.Append($"context.ToInt(callerContext.Span, arguments[{argIndex}])");
                 }
                 else
                 {
@@ -169,75 +146,23 @@ namespace Scriban.Runtime
                     {
                         if (type.Name == "IList")
                         {
-                            caseArgumentsBuilder.Append($"context.ToList(callerContext.Span, arg)");
+                            caseArgumentsBuilder.Append($"context.ToList(callerContext.Span, arguments[{argIndex}])");
                         }
                         else
                         {
-                            caseArgumentsBuilder.Append($"({PrettyType(type)})context.ToObject(callerContext.Span, arg, typeof({PrettyType(type)}))");
+                            caseArgumentsBuilder.Append($"({PrettyType(type)})context.ToObject(callerContext.Span, arguments[{argIndex}], typeof({PrettyType(type)}))");
                         }
                     }
                     else
                     {
-                        caseArgumentsBuilder.Append($"arg");
+                        caseArgumentsBuilder.Append($"arguments[{argIndex}]");
                     }
                 }
                 caseArgumentsBuilder.AppendLine(";");
 
-                // If argument is optional, we don't need to update the mask as it is already taken into account into the mask init
-                if (!arg.IsOptional)
-                {
-                    caseArgumentsBuilder.AppendLine($"                            argMask |= (1 << {argIndex});");
-                }
-                caseArgumentsBuilder.AppendLine($"                            break;");
-
                 delegateCallArgs.Append($"arg{argIndex}");
                 argIndex++;
             }
-
-            if (method.Parameters.Count != 0)
-            {
-                caseArguments = $@"
-                    switch (argIndex)
-                    {{
-{caseArgumentsBuilder}
-                    }}";
-            }
-
-            // Output default argument masking
-            var defaultArgMask = 0;
-            for (int i = minimunArg; i < argumentCount; i++)
-            {
-                defaultArgMask |= (1 << i);
-            }
-            arguments.AppendLine($"                int argMask = {defaultArgMask};");
-
-            var argCheck = $"arguments.Count";
-            string atLeast = "";
-            if (minimunArg != argumentCount)
-            {
-                atLeast = "at least ";
-                argCheck += " < " + minimunArg;
-                argCheck += " || arguments.Count > " + argumentCount;
-
-                for (var i = 0; i < method.Parameters.Count; i++)
-                {
-                    var arg = method.Parameters[i];
-
-                    if (arg.IsOptional)
-                    {
-                        argIndex = i - argOffset;
-                        defaultParamDeclaration.AppendLine();
-                        defaultParamDeclaration.Append($"            private readonly {PrettyType(arg.ParameterType)} defaultArg{argIndex};");
-                        defaultParamConstructors.AppendLine();
-                        defaultParamConstructors.Append($"                defaultArg{argIndex} = ({PrettyType(arg.ParameterType)})Parameters[{i}].DefaultValue;");
-                    }
-                }
-            }
-            else
-            {
-                argCheck += " != " + argumentCount;
-            }
-
 
             var template = $@"
         /// <summary>
@@ -247,45 +172,16 @@ namespace Scriban.Runtime
         {{
             private delegate {delegateSignature};
 
-            private readonly InternalDelegate _delegate;{defaultParamDeclaration}
+            private readonly InternalDelegate _delegate;
 
             public {name}(MethodInfo method) : base(method)
             {{
-                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));{defaultParamConstructors}
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
             }}
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {{
-                if ({argCheck})
-                {{
-                    throw new ScriptRuntimeException(callerContext.Span, $""Invalid number of arguments `{{arguments.Count}}` passed to `{{callerContext}}` while expecting {atLeast}`{minimunArg}` arguments"");
-                }}
-{arguments}
-                int argOrderedIndex = 0;
-                for (int i = 0; i < arguments.Count; i++)
-                {{
-                    int argIndex = 0;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {{
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index - {argOffset};
-                    }}
-                    else
-                    {{
-                        argIndex = argOrderedIndex;
-                        argOrderedIndex++;
-                    }}
-{caseArguments}
-                }}
-
-                if ({argCheckMask})
-                {{
-                    throw new ScriptRuntimeException(callerContext.Span, $""Invalid number of arguments `{{arguments.Count}}` passed to `{{callerContext}}` while expecting {atLeast}`{minimunArg}` arguments"");
-                }}
-
+{caseArgumentsBuilder}
                 return _delegate({delegateCallArgs});
             }}
         }}
@@ -392,8 +288,6 @@ namespace Scriban.Runtime
 
             Delegate,
         }
-
-
 
         private static string PrettyType(TypeReference typeReference)
         {

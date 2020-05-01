@@ -3,6 +3,7 @@
 
 using System;
 using System.Reflection;
+using System.Threading.Tasks;
 using Scriban.Parsing;
 using Scriban.Syntax;
 using Scriban.Helpers;
@@ -15,135 +16,19 @@ namespace Scriban.Runtime
     partial class GenericFunctionWrapper : DynamicCustomFunction
     {
         private readonly object _target;
-        private readonly object[] _arguments;
 
         public GenericFunctionWrapper(object target, MethodInfo method) : base(method)
         {
             _target = target;
-            _arguments = new object[Parameters.Length];
         }
 
-        public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
         {
-            // Convert arguments
-            object[] paramArguments = null;
-            var argMask = 0;
-            if (_hasObjectParams)
-            {
-                var objectParamsCount = arguments.Count - _paramsIndex;
-                if (_hasTemplateContext)
-                {
-                    objectParamsCount++;
-                    if (_hasSpan)
-                    {
-                        objectParamsCount++;
-                    }
-                }
-                paramArguments = new object[objectParamsCount];
-                _arguments[_paramsIndex] = paramArguments;
-                argMask |= 1 << _paramsIndex;
-            }
-
-            // Copy TemplateContext/SourceSpan parameters
-            int argOffset = 0;
-            if (_hasTemplateContext)
-            {
-                _arguments[0] = context;
-                argOffset++;
-                argMask |= 1;
-                if (_hasSpan)
-                {
-                    _arguments[1] = callerContext.Span;
-                    argOffset++;
-                    argMask |= 2;
-                }
-            }
-
-            var argOrderedIndex = argOffset;
-
-            // Setup any default parameters
-            if (_optionalParameterCount > 0)
-            {
-                for (int i = Parameters.Length - 1; i >= Parameters.Length - _optionalParameterCount; i--)
-                {
-                    _arguments[i] = Parameters[i].DefaultValue;
-                    argMask |= 1 << i;
-                }
-            }
-
-            int paramsIndex = 0;
-            for (int i = 0; i < arguments.Count; i++)
-            {
-                Type argType = null;
-                try
-                {
-                    int argIndex;
-                    var arg = arguments[i];
-                    var namedArg = arg as ScriptNamedArgument;
-                    if (namedArg != null)
-                    {
-                        var namedArgValue = GetValueFromNamedArgument(context, callerContext, namedArg);
-                        arg = namedArgValue.Value;
-                        argIndex = namedArgValue.Index;
-                        argType = namedArgValue.Type;
-                        if (_hasObjectParams && argIndex == _paramsIndex)
-                        {
-                            argType = _paramsElementType;
-                            argIndex = argIndex + paramsIndex;
-                            paramsIndex++;
-                        }
-                    }
-                    else
-                    {
-                        argIndex = argOrderedIndex;
-                        if (_hasObjectParams && argIndex == _paramsIndex)
-                        {
-                            argType = _paramsElementType;
-                            argIndex = argIndex + paramsIndex;
-                            paramsIndex++;
-                        }
-                        else
-                        {
-                            argType = Parameters[argIndex].ParameterType;
-                            argOrderedIndex++;
-                        }
-                    }
-
-                    var argValue = context.ToObject(callerContext.Span, arg, argType);
-                    if (paramArguments != null && argIndex >= _paramsIndex)
-                    {
-                        paramArguments[argIndex - _paramsIndex] = argValue;
-                    }
-                    else
-                    {
-                        _arguments[argIndex] = argValue;
-                        argMask |= 1 << argIndex;
-                    }
-                }
-                catch
-                {
-                    throw new ScriptArgumentException(i, $"Unable to convert parameter of type `{arguments[i]?.GetType().ScriptFriendlyName()}` to type `{argType?.ScriptFriendlyName()}`");
-                }
-            }
-
-            // In case we have named arguments we need to verify that all arguments were set
-            if (argMask != (1 << Parameters.Length) - 1)
-            {
-                if (_minimumRequiredParameters != _expectedNumberOfParameters)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting at least `{_minimumRequiredParameters}` arguments");
-                }
-                else
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{arguments.Count}` passed to `{callerContext}` while expecting `{_expectedNumberOfParameters}` arguments");
-                }
-            }
-
+            var arguments = PrepareArguments(context, callerContext, scriptArguments);
             // Call method
             try
             {
-                var result = Method.Invoke(_target, _arguments);
-                // NOTE: The following line should not be touch as it is being matched by ScribanAsyncCodeGen
+                var result = Method.Invoke(_target, arguments);
                 return result;
             }
             catch (TargetInvocationException exception)
@@ -154,6 +39,82 @@ namespace Scriban.Runtime
                 }
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}");
             }
+        }
+
+#if !SCRIBAN_NO_ASYNC
+        public override async ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
+        {
+            var arguments = PrepareArguments(context, callerContext, scriptArguments);
+            // Call method
+            try
+            {
+                var result = Method.Invoke(_target, arguments);
+                return IsAwaitable ? await ConfigureAwait(result) : result;
+            }
+            catch (TargetInvocationException exception)
+            {
+                if (exception.InnerException != null)
+                {
+                    throw exception.InnerException;
+                }
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}");
+            }
+        }
+#endif
+
+        private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments)
+        {
+            // TODO: optimize arguments allocations
+            var arguments = new object[Parameters.Length];
+
+            // Convert arguments
+            object[] paramArguments = null;
+            if (_hasObjectParams)
+            {
+                var objectParamsCount = scriptArguments.Count - _paramsIndex;
+                if (_hasTemplateContext)
+                {
+                    objectParamsCount++;
+                    if (_hasSpan)
+                    {
+                        objectParamsCount++;
+                    }
+                }
+
+                paramArguments = new object[objectParamsCount];
+                arguments[_paramsIndex] = paramArguments;
+            }
+
+            // Copy TemplateContext/SourceSpan parameters
+            int argOffset = 0;
+            if (_hasTemplateContext)
+            {
+                arguments[0] = context;
+                argOffset++;
+                if (_hasSpan)
+                {
+                    arguments[1] = callerContext.Span;
+                    argOffset++;
+                }
+            }
+
+            var argIndex = argOffset;
+            int paramsIndex = 0;
+            for (int i = 0; i < scriptArguments.Count; i++)
+            {
+                var argValue = scriptArguments[i];
+                if (_hasObjectParams && paramArguments != null && argIndex >= _paramsIndex)
+                {
+                    paramArguments[paramsIndex] = argValue;
+                    paramsIndex++;
+                }
+                else
+                {
+                    arguments[argIndex++] = argValue;
+                }
+            }
+
+            return arguments;
         }
     }
 }

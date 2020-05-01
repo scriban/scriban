@@ -401,9 +401,9 @@ namespace Scriban.Functions
 
         public int RequiredParameterCount => 0;
 
-        public int ParameterCount => 1;
+        public int ParameterCount => 0;
 
-        public bool HasVariableParams => false;
+        public bool HasVariableParams => true;
 
         private const string Parameter1Name = "text";
 

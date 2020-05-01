@@ -18,6 +18,12 @@ namespace Scriban.Syntax
         private ScriptList<ScriptExpression> _arguments;
         private ScriptToken _closeParen;
 
+        // Maximum number of parameters is 64
+        // it equals the argMask we are using for matching arguments passed
+        // as it is a long, it can only store 64 bits, so we are limiting
+        // the number of parameter to simplify the implementation.
+        private const int MaximumParameterCount = 64;
+
         public ScriptFunctionCall()
         {
             Arguments = new ScriptList<ScriptExpression>();
@@ -169,6 +175,11 @@ namespace Scriban.Syntax
                 throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({functionObject?.GetType().ScriptFriendlyName()})");
             }
 
+            if (function.ParameterCount >= MaximumParameterCount)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Out of range number of parameters {function.ParameterCount} for target function `{functionObject}`. The maximum number of parameters for a function is: {MaximumParameterCount}.");
+            }
+
             ScriptBlockStatement blockDelegate = null;
             if (context.BlockDelegates.Count > 0)
             {
@@ -199,18 +210,32 @@ namespace Scriban.Syntax
             }
 
             // Process direct arguments
+            ulong argMask = 0;
             if (arguments != null)
             {
-                ProcessArguments(context, callerContext, arguments, function, scriptFunction, argumentValues);
+                argMask = ProcessArguments(context, callerContext, arguments, function, scriptFunction, argumentValues);
             }
+
+            // Fill remaining argument default values
+
+            FillRemainingOptionalArguments(ref argMask, argumentValues.Count, function.ParameterCount , function, argumentValues);
 
             var hasVariableParams = function.HasVariableParams;
             var requiredParameterCount = function.RequiredParameterCount;
             var parameterCount = function.ParameterCount;
 
-            if (argumentValues.Count < requiredParameterCount)
+            // Check the required number of arguments
+            var requiredMask = (1U << requiredParameterCount) - 1;
+            argMask = argMask & requiredMask;
+            if (argMask != requiredMask)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
+                int argCount = 0;
+                while (argMask != 0)
+                {
+                    if ((argMask & 1) != 0) argCount++;
+                    argMask = argMask >> 1;
+                }
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argCount}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
             }
 
             if (!hasVariableParams && argumentValues.Count > parameterCount)
@@ -262,9 +287,11 @@ namespace Scriban.Syntax
             return result;
         }
 
-        private static void ProcessArguments(TemplateContext context, ScriptNode callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
+        private static ulong ProcessArguments(TemplateContext context, ScriptNode callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
         {
             bool hasNamedArgument = false;
+            ulong argMask = 0;
+            var parameterCount = function.ParameterCount;
             for (var argIndex = 0; argIndex < arguments.Count; argIndex++)
             {
                 var argument = arguments[argIndex];
@@ -332,14 +359,24 @@ namespace Scriban.Syntax
                     {
                         foreach (var subValue in valueEnumerator)
                         {
+                            if (argumentValues.Count < parameterCount) argMask |= 1U << argumentValues.Count;
+
+                            var paramType = function.GetParameterInfo(argumentValues.Count).ParameterType;
+                            value = context.ToObject(callerContext.Span, value, paramType);
                             argumentValues.Add(subValue);
                         }
                         continue;
                     }
                 }
 
+                {
+                    var paramType = function.GetParameterInfo(index).ParameterType;
+                    value = context.ToObject(callerContext.Span, value, paramType);
+                }
+
                 if (index == argumentValues.Count)
                 {
+                    if (argumentValues.Count < parameterCount) argMask |= 1U << argumentValues.Count;
                     argumentValues.Add(value);
                     continue;
                 }
@@ -348,21 +385,33 @@ namespace Scriban.Syntax
                 // with their default values.
                 if (index > argumentValues.Count)
                 {
-                    for (int i = argumentValues.Count; i < index; i++)
-                    {
-                        var parameterInfo = function.GetParameterInfo(i);
-                        if (parameterInfo.HasDefaultValue)
-                        {
-                            argumentValues[i] = parameterInfo.DefaultValue;
-                        }
-                        else
-                        {
-                            argumentValues[i] = null;
-                        }
-                    }
+                    FillRemainingOptionalArguments(ref argMask, argumentValues.Count, index, function, argumentValues);
                 }
 
+                if (index < parameterCount) argMask |= 1U << index;
                 argumentValues[index] = value;
+            }
+
+            return argMask;
+        }
+
+        private static void FillRemainingOptionalArguments(ref ulong argMask, int startIndex, int length, IScriptCustomFunction function, ScriptArray argumentValues)
+        {
+            var maxLength = function.ParameterCount;
+            if (length > maxLength) length = maxLength;
+
+            for (int i = startIndex; i < length; i++)
+            {
+                var parameterInfo = function.GetParameterInfo(i);
+                if (parameterInfo.HasDefaultValue)
+                {
+                    argumentValues[i] = parameterInfo.DefaultValue;
+                    argMask |= 1U << i;
+                }
+                else
+                {
+                    argumentValues[i] = null;
+                }
             }
         }
 
