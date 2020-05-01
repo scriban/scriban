@@ -57,6 +57,12 @@ namespace Scriban.Runtime
             }
         }
 
+        public int Capacity
+        {
+            get => _values.Capacity;
+            set => _values.Capacity = value;
+        }
+
         public virtual bool IsReadOnly
         {
             get => _isReadOnly;

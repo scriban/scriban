@@ -21,6 +21,96 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+        [Test]
+        public void TestScriptArguments()
+        {
+            var context = new TemplateContext();
+            var array0 = context.GetOrCreateScriptArguments(10);
+            var array1 = context.GetOrCreateScriptArguments(4);
+            Assert.AreNotSame(array0, array1);
+            array0[0] = 1;
+
+            context.ReleaseScriptArguments(array1);
+            context.ReleaseScriptArguments(array0);
+
+            var array3 = context.GetOrCreateScriptArguments(4);
+            Assert.AreEqual(0, array3.Count);
+            Assert.Null(array3[0]);
+            Assert.AreSame(array3, array0);
+        }
+
+        [Test]
+        public void TestReflectionArguments()
+        {
+            var context = new TemplateContext();
+
+            // Allocating a zero length object[] should return the same instance
+            {
+                var arg0_0 = context.GetOrCreateReflectionArguments(0);
+                var arg0_1 = context.GetOrCreateReflectionArguments(0);
+                Assert.AreSame(arg0_0, arg0_1);
+                context.ReleaseReflectionArguments(arg0_0);
+                context.ReleaseReflectionArguments(arg0_1);
+
+                arg0_0 = context.GetOrCreateReflectionArguments(0);
+                Assert.AreSame(arg0_0, arg0_1);
+            }
+
+            // Allocating a non-zero length object[] should return the != instance
+            const int maxArgument = ScriptFunctionCall.MaximumParameterCount;
+            {
+                for (int length = 1; length <= maxArgument; length++)
+                {
+                    var arg0_0 = context.GetOrCreateReflectionArguments(length);
+                    AssertAllNulls(arg0_0);
+                    var arg0_1 = context.GetOrCreateReflectionArguments(length);
+                    AssertAllNulls(arg0_1);
+
+                    Assert.AreNotSame(arg0_0, arg0_1);
+
+                    Array.Fill(arg0_0, (object)1);
+                    Array.Fill(arg0_1, (object)1);
+
+                    context.ReleaseReflectionArguments(arg0_0);
+                    context.ReleaseReflectionArguments(arg0_1);
+
+                    var arg1_0 = context.GetOrCreateReflectionArguments(length);
+                    AssertAllNulls(arg1_0);
+                    var arg1_1 = context.GetOrCreateReflectionArguments(length);
+                    AssertAllNulls(arg1_1);
+
+                    Assert.AreNotSame(arg1_0, arg1_1);
+
+                    Assert.AreSame(arg0_0, arg1_1);
+                    Assert.AreSame(arg0_1, arg1_0);
+
+                    context.ReleaseReflectionArguments(arg1_0);
+                    context.ReleaseReflectionArguments(arg1_1);
+                }
+            }
+
+            {
+                var arg0_0 = context.GetOrCreateReflectionArguments(maxArgument + 1);
+                AssertAllNulls(arg0_0);
+                Array.Fill(arg0_0, (object)1);
+                context.ReleaseReflectionArguments(arg0_0);
+
+                var arg0_1 = context.GetOrCreateReflectionArguments(maxArgument + 1);
+                AssertAllNulls(arg0_1);
+                Assert.AreNotSame(arg0_0, arg0_1);
+
+                context.ReleaseReflectionArguments(arg0_1);
+            }
+        }
+
+        private static void AssertAllNulls(object[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                Assert.Null(array[i], $"Array element {i} is not null. {array[i]}");
+            }
+        }
+
         public static class MyPipeFunctions
         {
             public static string A(TemplateContext context, object input, string currencyCode = null)

@@ -24,10 +24,11 @@ namespace Scriban.Runtime
 
         public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
         {
-            var arguments = PrepareArguments(context, callerContext, scriptArguments);
-            // Call method
+            object[] paramArguments = null;
+            var arguments = PrepareArguments(context, callerContext, scriptArguments, ref paramArguments);
             try
             {
+                // Call the method via reflection
                 var result = Method.Invoke(_target, arguments);
                 return result;
             }
@@ -37,17 +38,24 @@ namespace Scriban.Runtime
                 {
                     throw exception.InnerException;
                 }
+
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}");
+            }
+            finally
+            {
+                context.ReleaseReflectionArguments(arguments);
+                context.ReleaseReflectionArguments(paramArguments);
             }
         }
 
 #if !SCRIBAN_NO_ASYNC
         public override async ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
         {
-            var arguments = PrepareArguments(context, callerContext, scriptArguments);
-            // Call method
+            object[] paramArguments = null;
+            var arguments = PrepareArguments(context, callerContext, scriptArguments, ref paramArguments);
             try
             {
+                // Call the method via reflection
                 var result = Method.Invoke(_target, arguments);
                 return IsAwaitable ? await ConfigureAwait(result) : result;
             }
@@ -59,16 +67,21 @@ namespace Scriban.Runtime
                 }
                 throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}");
             }
+            finally
+            {
+                context.ReleaseReflectionArguments(arguments);
+                context.ReleaseReflectionArguments(paramArguments);
+            }
         }
 #endif
 
-        private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments)
+        private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ref object[] paramArguments)
         {
             // TODO: optimize arguments allocations
-            var arguments = new object[Parameters.Length];
+            var arguments = context.GetOrCreateReflectionArguments(Parameters.Length);
 
             // Convert arguments
-            object[] paramArguments = null;
+            paramArguments = null;
             if (_hasObjectParams)
             {
                 var objectParamsCount = scriptArguments.Count - _paramsIndex;
@@ -81,7 +94,7 @@ namespace Scriban.Runtime
                     }
                 }
 
-                paramArguments = new object[objectParamsCount];
+                paramArguments = context.GetOrCreateReflectionArguments(objectParamsCount);
                 arguments[_paramsIndex] = paramArguments;
             }
 

@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
 using Scriban.Functions;
@@ -16,6 +17,8 @@ using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
+
+[assembly:InternalsVisibleTo("Scriban.Tests")]
 
 namespace Scriban
 {
@@ -43,6 +46,8 @@ namespace Scriban
         private int _getOrSetValueLevel;
         private FastStack<ScriptPipeArguments> _availablePipeArguments;
         private FastStack<ScriptPipeArguments> _pipeArguments;
+        private FastStack<ScriptArray> _availableArguments;
+        private object[][] _availableReflectionArguments;
         private FastStack<Dictionary<object, object>> _localTagsStack;
         private FastStack<Dictionary<object, object>> _loopTagsStack;
         private FastStack<Dictionary<object, object>> _availableTags;
@@ -137,7 +142,12 @@ namespace Scriban
 
             _availablePipeArguments = new FastStack<ScriptPipeArguments>(4);
             _pipeArguments = new FastStack<ScriptPipeArguments>(4);
-
+            _availableArguments = new FastStack<ScriptArray>(4);
+            _availableReflectionArguments = new object[ScriptFunctionCall.MaximumParameterCount + 1][];
+            for (int i = 0; i < _availableReflectionArguments.Length; i++)
+            {
+                _availableReflectionArguments[i] = new object[i];
+            }
             _isFunctionCallDisabled = false;
 
             CachedTemplates = new Dictionary<string, Template>();
@@ -277,6 +287,7 @@ namespace Scriban
         /// </summary>
         internal ScriptPipeArguments CurrentPipeArguments => _currentPipeArguments;
 
+
         /// <summary>
         /// Gets or sets the internal state of control flow.
         /// </summary>
@@ -346,6 +357,52 @@ namespace Scriban
             while (_pipeArguments.Count > 0)
             {
                 PopPipeArguments();
+            }
+        }
+
+        internal ScriptArray GetOrCreateScriptArguments(int capacity)
+        {
+            var array  = _availableArguments.Count > 0 ? _availableArguments.Pop() : new ScriptArray();
+            if (capacity > array.Capacity) array.Capacity = capacity;
+            return array;
+        }
+
+        internal void ReleaseScriptArguments(ScriptArray scriptArguments)
+        {
+            scriptArguments.Clear();
+            _availableArguments.Push(scriptArguments);
+        }
+
+        internal object[] GetOrCreateReflectionArguments(int length)
+        {
+            if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
+
+            // Don't try to allocate more than we can allocate
+            if (length >= _availableReflectionArguments.Length) return new object[length];
+
+           var reflectionArguments =  _availableReflectionArguments[length] ?? new object[length];
+           if (length > 0)
+           {
+               _availableReflectionArguments[length] = (object[])reflectionArguments[0];
+               reflectionArguments[0] = null;
+           }
+           return reflectionArguments;
+        }
+
+        internal void ReleaseReflectionArguments(object[] reflectionArguments)
+        {
+            // Nothing to release
+            if (reflectionArguments == null) return;
+
+            if (reflectionArguments.Length >= _availableReflectionArguments.Length) return;
+            Array.Clear(reflectionArguments, 0, reflectionArguments.Length);
+
+            var previousArg = _availableReflectionArguments[reflectionArguments.Length];
+            _availableReflectionArguments[reflectionArguments.Length] = reflectionArguments;
+
+            if (reflectionArguments.Length > 0)
+            {
+                reflectionArguments[0] = previousArg;
             }
         }
 

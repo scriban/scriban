@@ -22,7 +22,7 @@ namespace Scriban.Syntax
         // it equals the argMask we are using for matching arguments passed
         // as it is a long, it can only store 64 bits, so we are limiting
         // the number of parameter to simplify the implementation.
-        private const int MaximumParameterCount = 64;
+        public const int MaximumParameterCount = 64;
 
         public ScriptFunctionCall()
         {
@@ -195,7 +195,7 @@ namespace Scriban.Syntax
             {
                 var allArguments = new List<ScriptExpression>();
                 var pipeFrom = context.CurrentPipeArguments.Pop();
-                argumentValues = new ScriptArray(Math.Max(function.RequiredParameterCount, 1 + (arguments?.Count ?? 0)));
+                argumentValues =  context.GetOrCreateScriptArguments(Math.Max(function.RequiredParameterCount, 1 + (arguments?.Count ?? 0)));
                 allArguments.Add(pipeFrom);
 
                 if (arguments != null)
@@ -206,52 +206,54 @@ namespace Scriban.Syntax
             }
             else
             {
-                argumentValues = new ScriptArray(arguments?.Count ?? 0);
+                argumentValues = context.GetOrCreateScriptArguments(arguments?.Count ?? 0);
             }
 
-            // Process direct arguments
-            ulong argMask = 0;
-            if (arguments != null)
-            {
-                argMask = ProcessArguments(context, callerContext, arguments, function, scriptFunction, argumentValues);
-            }
-
-            // Fill remaining argument default values
-
-            FillRemainingOptionalArguments(ref argMask, argumentValues.Count, function.ParameterCount , function, argumentValues);
-
-            var hasVariableParams = function.HasVariableParams;
-            var requiredParameterCount = function.RequiredParameterCount;
-            var parameterCount = function.ParameterCount;
-
-            // Check the required number of arguments
-            var requiredMask = (1U << requiredParameterCount) - 1;
-            argMask = argMask & requiredMask;
-            if (argMask != requiredMask)
-            {
-                int argCount = 0;
-                while (argMask != 0)
-                {
-                    if ((argMask & 1) != 0) argCount++;
-                    argMask = argMask >> 1;
-                }
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argCount}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
-            }
-
-            if (!hasVariableParams && argumentValues.Count > parameterCount)
-            {
-                if (argumentValues.Count > 0 && arguments != null && argumentValues.Count <= arguments.Count)
-                {
-                    throw new ScriptRuntimeException(arguments[argumentValues.Count - 1].Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
-                }
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
-            }
-
-            object result = null;
             var needLocal = !(function is ScriptFunction func && func.HasParameters);
-            context.EnterFunction(callerContext, needLocal);
+            object result = null;
+
             try
             {
+                // Process direct arguments
+                ulong argMask = 0;
+                if (arguments != null)
+                {
+                    argMask = ProcessArguments(context, callerContext, arguments, function, scriptFunction, argumentValues);
+                }
+
+                // Fill remaining argument default values
+
+                FillRemainingOptionalArguments(ref argMask, argumentValues.Count, function.ParameterCount , function, argumentValues);
+
+                var hasVariableParams = function.HasVariableParams;
+                var requiredParameterCount = function.RequiredParameterCount;
+                var parameterCount = function.ParameterCount;
+
+                // Check the required number of arguments
+                var requiredMask = (1U << requiredParameterCount) - 1;
+                argMask = argMask & requiredMask;
+                if (argMask != requiredMask)
+                {
+                    int argCount = 0;
+                    while (argMask != 0)
+                    {
+                        if ((argMask & 1) != 0) argCount++;
+                        argMask = argMask >> 1;
+                    }
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argCount}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
+                }
+
+                if (!hasVariableParams && argumentValues.Count > parameterCount)
+                {
+                    if (argumentValues.Count > 0 && arguments != null && argumentValues.Count <= arguments.Count)
+                    {
+                        throw new ScriptRuntimeException(arguments[argumentValues.Count - 1].Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
+                    }
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
+                }
+
+                context.EnterFunction(callerContext, needLocal);
+
                 try
                 {
                     result = function.Invoke(context, callerContext, argumentValues, blockDelegate);
@@ -279,6 +281,7 @@ namespace Scriban.Syntax
             }
             finally
             {
+                context.ReleaseScriptArguments(argumentValues);
                 context.ExitFunction(needLocal);
             }
 
