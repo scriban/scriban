@@ -1305,7 +1305,7 @@ namespace Scriban.Parsing
                 }
             }
 
-            if (c == 'f' || c == 'F' || c == 'd' || c == 'D' || c == 'm' || c == 'M')
+            if (!IsIdentifierLetter(PeekChar()) && c == 'f' || c == 'F' || c == 'd' || c == 'D' || c == 'm' || c == 'M')
             {
                 isFloat = true;
                 end = _position;
@@ -1337,7 +1337,7 @@ namespace Scriban.Parsing
                 NextChar();
             }
 
-            if (c == 'u' || c == 'U')
+            if (!IsIdentifierLetter(PeekChar()) && c == 'u' || c == 'U')
             {
                 end = _position;
                 NextChar();
@@ -1363,7 +1363,7 @@ namespace Scriban.Parsing
                 NextChar();
             } while (c == '0' || c == '1' || c == '_');
 
-            if (c == 'u' || c == 'U')
+            if (!IsIdentifierLetter(PeekChar()) && c == 'u' || c == 'U')
             {
                 end = _position;
                 NextChar();

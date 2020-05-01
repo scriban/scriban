@@ -134,6 +134,7 @@ namespace Scriban.Tests
         [TestCase("4.0m > 3.0m", 4.0m > 3.0m, "4.0m > 3.0m")]
         [TestCase("4.0m <= 3.0m", 4.0m <= 3.0m, "4.0m <= 3.0m")]
         [TestCase("4.0m >= 3.0m", 4.0m >= 3.0m, "4.0m >= 3.0m")]
+        [TestCase("3.0ff", 12.0, "3.0 * ff")]
         public void TestScientific(string script, object value, string scriptReformat)
         {
             var template = Template.Parse(script, lexerOptions: new LexerOptions() {Mode = ScriptMode.ScriptOnly, Lang = ScriptLang.Scientific});
@@ -143,6 +144,7 @@ namespace Scriban.Tests
             context.CurrentGlobal.SetValue("x", 1, false);
             context.CurrentGlobal.SetValue("y", 2, false);
             context.CurrentGlobal.SetValue("z", -10, false);
+            context.CurrentGlobal.SetValue("ff", 4, false);
 
             var result = template.Evaluate(context);
             Assert.AreEqual(result, value);
