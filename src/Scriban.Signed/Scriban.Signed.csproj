@@ -4,6 +4,7 @@
     <PackageId>Scriban.Signed</PackageId>
     <AssemblyOriginatorKeyFile>key.snk</AssemblyOriginatorKeyFile>
     <SignAssembly>true</SignAssembly>
+    <DefineConstants>$(DefineConstants);SCRIBAN_SIGNED</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\Scriban\**\*.cs" Exclude="..\Scriban\obj\**;..\Scriban\bin\**">

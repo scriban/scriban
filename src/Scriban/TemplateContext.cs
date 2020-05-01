@@ -18,7 +18,9 @@ using Scriban.Runtime;
 using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
 
+#if !SCRIBAN_SIGNED
 [assembly:InternalsVisibleTo("Scriban.Tests")]
+#endif
 
 namespace Scriban
 {
