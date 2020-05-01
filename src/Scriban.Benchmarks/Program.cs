@@ -52,7 +52,7 @@ namespace Scriban.Benchmarks
 
             var switcher = BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly);
             switcher.Run(args);
-        }        
+        }
     }
 
     /// <summary>
@@ -63,7 +63,7 @@ namespace Scriban.Benchmarks
     {
         public BenchParsers()
         {
-            // Due to issue https://github.com/rexm/Handlebars.Net/issues/105 cannot do the same as others, so 
+            // Due to issue https://github.com/rexm/Handlebars.Net/issues/105 cannot do the same as others, so
             // working around this here
             HandlebarsDotNet.Handlebars.RegisterHelper("truncate", (output, options, context, arguments) => {
                 output.Write(Scriban.Functions.StringFunctions.Truncate(context["description"], 15));
@@ -110,7 +110,7 @@ namespace Scriban.Benchmarks
 <ul id='products'>
    @foreach(dynamic product in Model.products)
     {
-    
+
     <li>
       <h2>@product.Name</h2>
            Only @product.Price
@@ -190,7 +190,7 @@ namespace Scriban.Benchmarks
         private readonly Func<object, string> _handlebarsTemplate;
         private readonly Cottle.Documents.SimpleDocument _cottleTemplate;
         private readonly Fluid.FluidTemplate _fluidTemplate;
-        private readonly RazorTemplatePage _razorTemplate;
+        //private readonly RazorTemplatePage _razorTemplate;
 
         private const string Lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
 
@@ -214,7 +214,7 @@ namespace Scriban.Benchmarks
             _handlebarsTemplate = parsers.TestHandlebars();
             _cottleTemplate = parsers.TestCottle();
             _fluidTemplate = parsers.TestFluid();
-            _razorTemplate = parsers.TestRazor();
+            //_razorTemplate = parsers.TestRazor();
 
             const int ProductCount = 500;
             _products = new List<Product>(ProductCount);
@@ -335,18 +335,18 @@ namespace Scriban.Benchmarks
             return Fluid.FluidTemplateExtensions.Render(_fluidTemplate, templateContext);
         }
 
-        [Benchmark(Description = "Razor")]
-        public string TestRazor()
-        {
-            dynamic expando = new ExpandoObject();
-            expando.products = _products;
-            expando.truncate = new Func<string, int, string>((text, length) => Scriban.Functions.StringFunctions.Truncate(text, length));
-            _razorTemplate.Output = new StringWriter();
-            _razorTemplate.Model = expando;
-            _razorTemplate.Execute();
-            var result = _razorTemplate.Output.ToString();
-            return result;
-        }
+        // [Benchmark(Description = "Razor")]
+        // public string TestRazor()
+        // {
+        //     dynamic expando = new ExpandoObject();
+        //     expando.products = _products;
+        //     expando.truncate = new Func<string, int, string>((text, length) => Scriban.Functions.StringFunctions.Truncate(text, length));
+        //     _razorTemplate.Output = new StringWriter();
+        //     _razorTemplate.Model = expando;
+        //     _razorTemplate.Execute();
+        //     var result = _razorTemplate.Output.ToString();
+        //     return result;
+        // }
 
         public class Product
         {
