@@ -26,6 +26,9 @@ namespace Scriban.Runtime
         public readonly MethodInfo Method;
 
         protected readonly ParameterInfo[] Parameters;
+        private readonly ScriptParameterInfo[] _parameterInfos;
+
+        private readonly ScriptParameterInfo _paramsParameterInfo;
 
 #if !SCRIBAN_NO_ASYNC
         protected readonly bool IsAwaitable;
@@ -45,19 +48,19 @@ namespace Scriban.Runtime
             Method = method;
             Parameters = method.GetParameters();
 #if !SCRIBAN_NO_ASYNC
-            IsAwaitable = method.ReturnType.GetTypeInfo().GetDeclaredMethod(nameof(Task.GetAwaiter)) != null;
+            IsAwaitable = method.ReturnType.GetMethod(nameof(Task.GetAwaiter)) != null;
 #endif
 
             _paramsIndex = -1;
             if (Parameters.Length > 0)
             {
                 // Check if we have TemplateContext+SourceSpan as first parameters
-                if (typeof(TemplateContext).GetTypeInfo().IsAssignableFrom(Parameters[0].ParameterType.GetTypeInfo()))
+                if (typeof(TemplateContext).IsAssignableFrom(Parameters[0].ParameterType))
                 {
                     _hasTemplateContext = true;
                     if (Parameters.Length > 1)
                     {
-                        _hasSpan = typeof(SourceSpan).GetTypeInfo().IsAssignableFrom(Parameters[1].ParameterType.GetTypeInfo());
+                        _hasSpan = typeof(SourceSpan).IsAssignableFrom(Parameters[1].ParameterType);
                     }
                 }
 
@@ -103,6 +106,23 @@ namespace Scriban.Runtime
 
             _expectedNumberOfParameters -= _firstIndexOfUserParameters;
             _minimumRequiredParameters = _expectedNumberOfParameters - _optionalParameterCount;
+
+            // Compute parameters
+            _parameterInfos = new ScriptParameterInfo[_expectedNumberOfParameters];
+            for (int i = 0; i < _expectedNumberOfParameters; i++)
+            {
+                var realIndex = _firstIndexOfUserParameters + i;
+                var parameterInfo = Parameters[realIndex];
+                var parameterType = parameterInfo.ParameterType;
+                _parameterInfos[i] =parameterInfo.HasDefaultValue
+                    ? new ScriptParameterInfo(parameterType, parameterInfo.Name, parameterInfo.DefaultValue)
+                    : new ScriptParameterInfo(parameterType, parameterInfo.Name);
+            }
+
+            if (_hasObjectParams)
+            {
+                _paramsParameterInfo = new ScriptParameterInfo(_paramsElementType, Parameters[_paramsIndex].Name);
+            }
         }
 
 
@@ -145,30 +165,18 @@ namespace Scriban.Runtime
         {
             if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Argument index must be >= 0");
 
-            var readIndex = _firstIndexOfUserParameters + index;
-
-            Type parameterType = null;
-
-            if (_hasObjectParams)
+            bool indexOutOfRegularParams = index >= _parameterInfos.Length;
+            if (_hasObjectParams && indexOutOfRegularParams)
             {
-                readIndex = readIndex >= Parameters.Length ? Parameters.Length - 1 : readIndex;
-                parameterType = _paramsElementType;
-            }
-            else if (readIndex >= Parameters.Length)
-            {
-                throw new ArgumentOutOfRangeException(nameof(readIndex), $"Argument index must be < {ParameterCount}");
+                return _paramsParameterInfo;
             }
 
-            var parameterInfo = Parameters[readIndex];
-
-            if (parameterType == null)
+            if (indexOutOfRegularParams)
             {
-                parameterType = parameterInfo.ParameterType;
+                throw new ArgumentOutOfRangeException(nameof(index), $"Argument index must be < {ParameterCount}");
             }
 
-            return parameterInfo.HasDefaultValue
-                ? new ScriptParameterInfo(parameterType, parameterInfo.Name, parameterInfo.DefaultValue)
-                : new ScriptParameterInfo(parameterType, parameterInfo.Name);
+            return _parameterInfos[index];
         }
 
 #if !SCRIBAN_NO_ASYNC

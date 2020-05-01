@@ -25,28 +25,26 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             object result = null;
-            for (int i = 0; i < Statements.Count; i++)
+            var statements = Statements;
+            for (int i = 0; i <  statements.Count; i++)
             {
-                var statement = Statements[i];
+                var statement =  statements[i];
 
-                var expressionStatement = statement as ScriptExpressionStatement;
-                var isAssign = expressionStatement?.Expression is ScriptAssignExpression;
-
-#if !SCRIBAN_NO_ASYNC
                 // Throw if cancellation is requested
                 if (context.CancellationToken.IsCancellationRequested)
                 {
                     context.CancellationToken.ThrowIfCancellationRequested();
                 }
-#endif
 
-                if (!(statement is ScriptEscapeStatement))
+                if (statement.CanSkipEvaluation)
                 {
-                    result = context.Evaluate(statement);
+                    continue;
                 }
 
+                result = context.Evaluate(statement);
+
                 // Top-level assignment expression don't output anything
-                if (isAssign)
+                if (!statement.CanOutput)
                 {
                     result = null;
                 }

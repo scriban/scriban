@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -17,6 +17,8 @@ namespace Scriban.Syntax
             get => _expression;
             set => ParentToThis(ref _expression, value);
         }
+
+        public override bool CanOutput => !(Expression is ScriptAssignExpression);
 
         public override object Evaluate(TemplateContext context)
         {

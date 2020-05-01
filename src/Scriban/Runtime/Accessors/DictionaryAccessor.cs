@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -38,10 +38,10 @@ namespace Scriban.Runtime.Accessors
             var dictionaryType = type.GetBaseOrInterface(typeof(IDictionary<,>));
             accessor = null;
             if (dictionaryType == null) return false;
-            var keyType = dictionaryType.GetTypeInfo().GetGenericArguments()[0];
-            var valueType = dictionaryType.GetTypeInfo().GetGenericArguments()[1];
+            var keyType = dictionaryType.GetGenericArguments()[0];
+            var valueType = dictionaryType.GetGenericArguments()[1];
 
-            var accessorType = typeof(GenericDictionaryAccessor<,>).GetTypeInfo().MakeGenericType(keyType, valueType);
+            var accessorType = typeof(GenericDictionaryAccessor<,>).MakeGenericType(keyType, valueType);
             accessor = (IObjectAccessor)Activator.CreateInstance(accessorType);
             return true;
         }
@@ -74,7 +74,7 @@ namespace Scriban.Runtime.Accessors
             }
             return false;
         }
-        
+
         public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
             ((IDictionary) target)[member] = value;

@@ -420,8 +420,8 @@ namespace Scriban.Runtime
                 return true;
             }
 
-            var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();
-            return !(obj is string || typeInfo.IsPrimitive || typeInfo == typeof(decimal).GetTypeInfo() || typeInfo.IsEnum || typeInfo.IsArray);
+            var typeInfo = (obj as Type ?? obj.GetType());
+            return !(obj is string || typeInfo.IsPrimitive || typeInfo == typeof(decimal) || typeInfo.IsEnum || typeInfo.IsArray);
         }
 
         // Methods for ICollection<KeyValuePair<string, object>> that we don't care to implement

@@ -47,6 +47,7 @@ namespace Scriban
         private FastStack<ScriptPipeArguments> _availablePipeArguments;
         private FastStack<ScriptPipeArguments> _pipeArguments;
         private FastStack<ScriptArray> _availableArguments;
+        private FastStack<List<ScriptExpression>> _availableScriptExpressionLists;
         private object[][] _availableReflectionArguments;
         private FastStack<Dictionary<object, object>> _localTagsStack;
         private FastStack<Dictionary<object, object>> _loopTagsStack;
@@ -143,6 +144,7 @@ namespace Scriban
             _availablePipeArguments = new FastStack<ScriptPipeArguments>(4);
             _pipeArguments = new FastStack<ScriptPipeArguments>(4);
             _availableArguments = new FastStack<ScriptArray>(4);
+            _availableScriptExpressionLists = new FastStack<List<ScriptExpression>>(4);
             _availableReflectionArguments = new object[ScriptFunctionCall.MaximumParameterCount + 1][];
             for (int i = 0; i < _availableReflectionArguments.Length; i++)
             {
@@ -178,12 +180,10 @@ namespace Scriban
         /// </summary>
         public string NewLine { get; set; }
 
-#if !SCRIBAN_NO_ASYNC
         /// <summary>
         /// Gets or sets the cancellation token used for async evaluation
         /// </summary>
         public CancellationToken CancellationToken { get; set; }
-#endif
 
         /// <summary>
         /// The <see cref="ParserOptions"/> used by the <see cref="TemplateLoader"/> via the include directive.
@@ -358,6 +358,19 @@ namespace Scriban
             {
                 PopPipeArguments();
             }
+        }
+
+        internal List<ScriptExpression> GetOrCreateListOfScriptExpressions(int capacity)
+        {
+            var list  = _availableScriptExpressionLists.Count > 0 ? _availableScriptExpressionLists.Pop() : new List<ScriptExpression>();
+            if (capacity > list.Capacity) list.Capacity = capacity;
+            return list;
+        }
+
+        internal void ReleaseListOfScriptExpressions(List<ScriptExpression> list)
+        {
+            _availableScriptExpressionLists.Push(list);
+            list.Clear();
         }
 
         internal ScriptArray GetOrCreateScriptArguments(int capacity)
@@ -811,7 +824,7 @@ namespace Scriban
             else if (DictionaryAccessor.TryGet(target, out accessor))
             {
             }
-            else if (type.GetTypeInfo().IsArray)
+            else if (type.IsArray)
             {
                 accessor = ArrayAccessor.Default;
             }
@@ -1194,7 +1207,7 @@ namespace Scriban
         /// <returns>A list accessor for the specified type of target</returns>
         protected virtual IListAccessor GetListAccessorImpl(object target, Type type)
         {
-            if (type.GetTypeInfo().IsArray)
+            if (type.IsArray)
             {
                 return ArrayAccessor.Default;
             }

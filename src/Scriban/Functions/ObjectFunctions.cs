@@ -205,7 +205,7 @@ namespace Scriban.Functions
                 return null;
             }
             var type = value.GetType();
-            var typeInfo = type.GetTypeInfo();
+            var typeInfo = type;
             if (type == typeof(string))
             {
                 return "string";
@@ -223,13 +223,13 @@ namespace Scriban.Functions
             }
 
             // Test first IList, then IEnumerable
-            if (typeof(IList).GetTypeInfo().IsAssignableFrom(typeInfo))
+            if (typeof(IList).IsAssignableFrom(typeInfo))
             {
                 return "array";
             }
 
-            if ((!typeof(ScriptObject).GetTypeInfo().IsAssignableFrom(typeInfo) && !typeof(IDictionary).GetTypeInfo().IsAssignableFrom(typeInfo)) &&
-                typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(typeInfo))
+            if ((!typeof(ScriptObject).IsAssignableFrom(typeInfo) && !typeof(IDictionary).IsAssignableFrom(typeInfo)) &&
+                typeof(IEnumerable).IsAssignableFrom(typeInfo))
             {
                 return "iterator";
             }

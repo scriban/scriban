@@ -67,7 +67,7 @@ namespace Scriban.Runtime
                 var name = "Function" + GetSignature(method, SignatureMode.Name);
 
                 var methodName = method.Name;
-                _writer.WriteLine($@"            BuiltinFunctionDelegates.Add(typeof({method.DeclaringType.FullName}).GetTypeInfo().GetDeclaredMethod(nameof({method.DeclaringType.FullName}.{methodName})), method => new {name}(method));");
+                _writer.WriteLine($@"            BuiltinFunctionDelegates.Add(typeof({method.DeclaringType.FullName}).GetMethod(nameof({method.DeclaringType.FullName}.{methodName}), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new {name}(method));");
             }
             _writer.Write(@"
         }

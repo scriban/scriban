@@ -82,11 +82,11 @@ namespace Scriban.Runtime.Accessors
 
         private void PrepareMembers()
         {
-            var type = this._type.GetTypeInfo();
+            var type = this._type;
 
             while (type != null)
             {
-                foreach (var field in type.GetDeclaredFields())
+                foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
                 {
                     var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
                     if (keep && !field.IsStatic && field.IsPublic && (_filter == null || _filter(field)))
@@ -104,7 +104,7 @@ namespace Scriban.Runtime.Accessors
                     }
                 }
 
-                foreach (var property in type.GetDeclaredProperties())
+                foreach (var property in type.GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
                 {
                     var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
 
@@ -129,7 +129,7 @@ namespace Scriban.Runtime.Accessors
                 {
                     break;
                 }
-                type = type.BaseType.GetTypeInfo();
+                type = type.BaseType;
             }
         }
 

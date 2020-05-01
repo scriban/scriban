@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -193,7 +193,7 @@ namespace Scriban.Runtime
                 throw new ArgumentOutOfRangeException(nameof(obj), $"Unsupported object type `{obj.GetType()}`. Expecting plain class or struct");
             }
 
-            var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();
+            var typeInfo = (obj as Type ?? obj.GetType());
             bool useStatic = false;
             bool useInstance = false;
             if (obj is Type)
@@ -212,7 +212,7 @@ namespace Scriban.Runtime
             {
                 if ((flags & ScriptMemberImportFlags.Field) != 0)
                 {
-                    foreach (var field in typeInfo.GetDeclaredFields())
+                    foreach (var field in typeInfo.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly))
                     {
                         if (!field.IsPublic)
                         {
@@ -240,7 +240,7 @@ namespace Scriban.Runtime
 
                 if ((flags & ScriptMemberImportFlags.Property) != 0)
                 {
-                    foreach (var property in typeInfo.GetDeclaredProperties())
+                    foreach (var property in typeInfo.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public| BindingFlags.DeclaredOnly))
                     {
                         // Workaround with .NET Core, extension method is not working (retuning null despite doing property.GetMethod), so we need to inline it here
                         var getMethod = property.GetMethod;
@@ -272,7 +272,7 @@ namespace Scriban.Runtime
 
                 if ((flags & ScriptMemberImportFlags.Method) != 0 && useStatic)
                 {
-                    foreach (var method in typeInfo.GetDeclaredMethods())
+                    foreach (var method in typeInfo.GetMethods(BindingFlags.Static | BindingFlags.Public| BindingFlags.DeclaredOnly))
                     {
                         if (filter != null && !filter(method))
                         {
@@ -297,7 +297,7 @@ namespace Scriban.Runtime
                 {
                     break;
                 }
-                typeInfo = typeInfo.BaseType.GetTypeInfo();
+                typeInfo = typeInfo.BaseType;
             }
         }
 

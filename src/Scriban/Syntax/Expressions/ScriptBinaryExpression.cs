@@ -552,13 +552,13 @@ namespace Scriban.Syntax
                 return CalculateLong(op, span, leftLong, (long)rightValue);
             }
 
-            if (leftType == typeof(int) || (leftType != null && leftType.GetTypeInfo().IsEnum))
+            if (leftType == typeof(int) || (leftType != null && leftType.IsEnum))
             {
                 var rightInt = (int)context.ToObject(span, rightValue, typeof(int));
                 return CalculateInt(op, span, (int)leftValue, rightInt);
             }
 
-            if (rightType == typeof(int) || (rightType != null && rightType.GetTypeInfo().IsEnum))
+            if (rightType == typeof(int) || (rightType != null && rightType.IsEnum))
             {
                 var leftInt = (int)context.ToObject(span, leftValue, typeof(int));
                 return CalculateInt(op, span, leftInt, (int)rightValue);

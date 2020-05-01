@@ -189,20 +189,22 @@ namespace Scriban.Syntax
             // We can't cache this array because it might be collect by the function
             // So we absolutely need to generate a new array everytime we call a function
             ScriptArray argumentValues;
+            List<ScriptExpression> allArgumentsWithPipe = null;
 
             // Handle pipe arguments here
             if (processPipeArguments && context.CurrentPipeArguments != null && context.CurrentPipeArguments.Count > 0)
             {
-                var allArguments = new List<ScriptExpression>();
+                var argCount = Math.Max(function.RequiredParameterCount, 1 + (arguments?.Count ?? 0));
+                allArgumentsWithPipe = context.GetOrCreateListOfScriptExpressions(argCount);
                 var pipeFrom = context.CurrentPipeArguments.Pop();
-                argumentValues =  context.GetOrCreateScriptArguments(Math.Max(function.RequiredParameterCount, 1 + (arguments?.Count ?? 0)));
-                allArguments.Add(pipeFrom);
+                argumentValues =  context.GetOrCreateScriptArguments(argCount);
+                allArgumentsWithPipe.Add(pipeFrom);
 
                 if (arguments != null)
                 {
-                    allArguments.AddRange(arguments);
+                    allArgumentsWithPipe.AddRange(arguments);
                 }
-                arguments = allArguments;
+                arguments = allArgumentsWithPipe;
             }
             else
             {
@@ -222,12 +224,11 @@ namespace Scriban.Syntax
                 }
 
                 // Fill remaining argument default values
-
-                FillRemainingOptionalArguments(ref argMask, argumentValues.Count, function.ParameterCount , function, argumentValues);
-
                 var hasVariableParams = function.HasVariableParams;
                 var requiredParameterCount = function.RequiredParameterCount;
                 var parameterCount = function.ParameterCount;
+
+                FillRemainingOptionalArguments(ref argMask, argumentValues.Count, parameterCount , function, argumentValues);
 
                 // Check the required number of arguments
                 var requiredMask = (1U << requiredParameterCount) - 1;
@@ -253,7 +254,6 @@ namespace Scriban.Syntax
                 }
 
                 context.EnterFunction(callerContext, needLocal);
-
                 try
                 {
                     result = function.Invoke(context, callerContext, argumentValues, blockDelegate);
@@ -276,13 +276,21 @@ namespace Scriban.Syntax
                     {
                         throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
                     }
+
                     throw;
+                }
+                finally
+                {
+                    context.ExitFunction(needLocal);
                 }
             }
             finally
             {
+                if (allArgumentsWithPipe != null)
+                {
+                    context.ReleaseListOfScriptExpressions(allArgumentsWithPipe);
+                }
                 context.ReleaseScriptArguments(argumentValues);
-                context.ExitFunction(needLocal);
             }
 
             // Restore the flow state to none

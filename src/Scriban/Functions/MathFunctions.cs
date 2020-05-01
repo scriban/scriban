@@ -72,7 +72,7 @@ namespace Scriban.Functions
             }
 
             // If it is a primitive it is already unsigned
-            if (value.GetType().GetTypeInfo().IsPrimitive)
+            if (value.GetType().IsPrimitive)
             {
                 return value;
             }

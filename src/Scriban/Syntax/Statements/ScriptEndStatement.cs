@@ -20,6 +20,8 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _endKeyword, value);
         }
 
+        public override bool CanSkipEvaluation => true;
+
         public override object Evaluate(TemplateContext context)
         {
             return null;

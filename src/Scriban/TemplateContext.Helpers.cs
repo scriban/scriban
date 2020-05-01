@@ -94,7 +94,7 @@ namespace Scriban
             {
                 try
                 {
-                    return Convert.ToString(value, CurrentCulture);
+                    return ((IFormattable) value).ToString(null, CurrentCulture);
                 }
                 catch (Exception ex)
                 {
@@ -102,7 +102,7 @@ namespace Scriban
                 }
             }
 
-            if (value is DateTime)
+            if (type == typeof(DateTime))
             {
                 // Output DateTime only if we have the date builtin object accessible (that provides the implementation of the ToString method)
                 var dateTimeFunctions = GetValue(DateTimeFunctions.DateVariable) as DateTimeFunctions;
@@ -113,22 +113,19 @@ namespace Scriban
             }
 
             // Dump a script object
-            var scriptObject = value as ScriptObject;
-            if (scriptObject != null)
+            if (value is ScriptObject scriptObject)
             {
                 return scriptObject.ToString(this, span);
             }
 
             // If the value is formattable, use the formatter directly
-            var fomattable = value as IFormattable;
-            if (fomattable != null)
+            if (value is IFormattable fomattable)
             {
-                return fomattable.ToString();
+                return fomattable.ToString(null, CurrentCulture);
             }
 
             // If we have an enumeration, we dump it
-            var enumerable = value as IEnumerable;
-            if (enumerable != null)
+            if (value is IEnumerable enumerable)
             {
                 var result = new StringBuilder();
                 result.Append("[");
@@ -243,7 +240,7 @@ namespace Scriban
             {
                 return ToBool(span, value);
             }
-            
+
             // Handle null case
             if (value == null)
             {
@@ -286,8 +283,8 @@ namespace Scriban
             }
 
             // Check for inheritance
-            var typeInfo = type.GetTypeInfo();
-            var destTypeInfo = destinationType.GetTypeInfo();
+            var typeInfo = type;
+            var destTypeInfo = destinationType;
 
             if (type.IsPrimitiveOrDecimal() && destinationType.IsPrimitiveOrDecimal())
             {

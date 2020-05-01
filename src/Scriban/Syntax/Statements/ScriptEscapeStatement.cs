@@ -13,6 +13,8 @@ namespace Scriban.Syntax
         {
         }
 
+        public override bool CanSkipEvaluation => true;
+
         public ScriptTrivias Trivias { get; set; }
 
         public ScriptWhitespaceMode WhitespaceMode { get; set; }

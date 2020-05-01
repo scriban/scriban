@@ -5,44 +5,42 @@ using System;
 using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Scriban.Runtime;
 
 namespace Scriban.Helpers
 {
     internal static class ReflectionHelper
     {
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPrimitiveOrDecimal(this Type type)
         {
-            var result = type.GetTypeInfo().IsPrimitive || type == typeof(decimal);
-            result = result || type == typeof(BigInteger);
-            return result;
+            return type.IsPrimitive || type == typeof(decimal) || type == typeof(BigInteger);
         }
 
-        public static Type GetBaseOrInterface(this Type type, Type lookInterfaceTypeArg)
+        public static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
-            if (lookInterfaceTypeArg == null)
-                throw new ArgumentNullException(nameof(lookInterfaceTypeArg));
-
-            var lookInterfaceType = lookInterfaceTypeArg.GetTypeInfo();
+            if (lookInterfaceType == null)
+                throw new ArgumentNullException(nameof(lookInterfaceType));
 
             if (lookInterfaceType.IsGenericTypeDefinition)
             {
                 if (lookInterfaceType.IsInterface)
-                    foreach (var interfaceType in type.GetTypeInfo().ImplementedInterfaces)
-                        if (interfaceType.GetTypeInfo().IsGenericType
-                            && interfaceType.GetTypeInfo().GetGenericTypeDefinition()  == lookInterfaceTypeArg)
+                    foreach (var interfaceType in type.GetInterfaces())
+                        if (interfaceType.IsGenericType
+                            && interfaceType.GetGenericTypeDefinition()  == lookInterfaceType)
                             return interfaceType;
 
-                for (var t = type; t != null; t = t.GetTypeInfo().BaseType)
-                    if (t.GetTypeInfo().IsGenericType && t.GetTypeInfo().GetGenericTypeDefinition() == lookInterfaceTypeArg)
+                for (var t = type; t != null; t = t.BaseType)
+                    if (t.IsGenericType && t.GetGenericTypeDefinition() == lookInterfaceType)
                         return t;
             }
             else
             {
-                if (lookInterfaceType.IsAssignableFrom(type.GetTypeInfo()))
-                    return lookInterfaceTypeArg;
+                if (lookInterfaceType.IsAssignableFrom(type))
+                    return lookInterfaceType;
             }
 
             return null;
@@ -65,7 +63,7 @@ namespace Scriban.Helpers
         {
             return type.DeclaredMethods;
         }
-        
+
         public static string ScriptFriendlyName(this Type type)
         {
             if (type == null) return "null";

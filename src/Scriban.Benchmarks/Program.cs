@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Threading.Tasks;
@@ -23,7 +24,7 @@ namespace Scriban.Benchmarks
             //var result1 = parser.TestScriban();
             //var result2 = parser.TestRazor();
 
-            //var program = new BenchRenderers();
+             var program = new BenchRenderers();
             ////var resultliquid = program.TestDotLiquid();
 
             //Console.WriteLine("Press enter for profiling scriban");
@@ -33,14 +34,17 @@ namespace Scriban.Benchmarks
 
             //Console.WriteLine("Press enter for end scriban");
             //Console.ReadLine();
-            ////program.TestScriban();
 
-            //var clock = Stopwatch.StartNew();
-            //for (int i = 0; i < 1000; i++)
-            //{
-            //    var result1 = program.TestScriban();
-            //}
-            //Console.WriteLine(clock.ElapsedMilliseconds + "ms");
+            // program.TestScriban();
+            //
+            // var clock = Stopwatch.StartNew();
+            // const int count = 4000;
+            // for (int i = 0; i < count; i++)
+            // {
+            //     var result1 = program.TestScriban();
+            // }
+            // Console.WriteLine($"{clock.Elapsed.TotalMilliseconds / count}ms");
+
             //var result2 = program.TestDotLiquid();
             //var result3 = program.TestStubble();
             //var result4 = program.TestNustache();
@@ -82,6 +86,18 @@ namespace Scriban.Benchmarks
 </ul>
 ";
 
+        protected const string TextTemplateScriban = @"
+<ul id='products'>
+  {{ for product in products; with product }}
+    <li>
+      <h2>{{ name }}</h2>
+           Only {{ price }}
+           {{ truncate description 15 }}
+    </li>
+  {{ end; end }}
+</ul>
+";
+
         public const string TextTemplateMustache = @"
 <ul id='products'>
   {{#products}}
@@ -106,22 +122,14 @@ namespace Scriban.Benchmarks
 </ul>
 ";
 
-        public const string TestTemplateRazor = @"
-<ul id='products'>
-   @foreach(dynamic product in Model.products)
-    {
-
-    <li>
-      <h2>@product.Name</h2>
-           Only @product.Price
-           @Model.truncate(product.Description, 15)
-    </li>
-   }
-</ul>
-";
-
         [Benchmark(Description = "Scriban - Parser")]
         public Scriban.Template TestScriban()
+        {
+            return Template.Parse(TextTemplateScriban);
+        }
+
+        [Benchmark(Description = "Scriban Liquid - Parser")]
+        public Scriban.Template TestScribanLiquid()
         {
             return Template.ParseLiquid(TextTemplateDotLiquid);
         }
@@ -168,12 +176,6 @@ namespace Scriban.Benchmarks
             }
             return template;
         }
-
-        [Benchmark(Description = "Razor - Parser")]
-        public RazorTemplatePage TestRazor()
-        {
-            return RazorBuilder.Compile(TestTemplateRazor);
-        }
     }
 
     /// <summary>
@@ -190,7 +192,6 @@ namespace Scriban.Benchmarks
         private readonly Func<object, string> _handlebarsTemplate;
         private readonly Cottle.Documents.SimpleDocument _cottleTemplate;
         private readonly Fluid.FluidTemplate _fluidTemplate;
-        //private readonly RazorTemplatePage _razorTemplate;
 
         private const string Lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
 
@@ -201,7 +202,7 @@ namespace Scriban.Benchmarks
 
         private readonly Dictionary<Cottle.Value, Cottle.Value> _cottleStringStore;
 
-        private readonly LiquidTemplateContext _liquidTemplateContext;
+        private readonly TemplateContext _templateContext;
 
         public BenchRenderers()
         {
@@ -214,7 +215,6 @@ namespace Scriban.Benchmarks
             _handlebarsTemplate = parsers.TestHandlebars();
             _cottleTemplate = parsers.TestCottle();
             _fluidTemplate = parsers.TestFluid();
-            //_razorTemplate = parsers.TestRazor();
 
             const int ProductCount = 500;
             _products = new List<Product>(ProductCount);
@@ -239,7 +239,8 @@ namespace Scriban.Benchmarks
 
             _cottleProducts = cottleProducts;
 
-            _liquidTemplateContext = new LiquidTemplateContext();
+            _templateContext = new TemplateContext();
+            _templateContext.BuiltinObject["truncate"] = ((ScriptObject) _templateContext.BuiltinObject["string"])["truncate"];
 
             // For Cottle, we match the behavior of Scriban that is accessing the Truncate function via an reflection invoke
             // In Scriban, we could also have a direct Truncate function, but it is much less practical in terms of declaration
@@ -253,16 +254,12 @@ namespace Scriban.Benchmarks
             // We could use the following simpler version, but we demonstrate the use of PushGlobal/PopGlobal object context
             // for a slightly higher efficiency and the reuse of a TemplateContext on the same thread
             //return _scribanTemplate.Render(new { products = _dotLiquidProducts });
-
-            var obj = new ScriptObject { { "products", _scribanProducts } };
-            _liquidTemplateContext.PushGlobal(obj);
-            _liquidTemplateContext.PushOutput(StringBuilderOutput.GetThreadInstance());
-            var result = _scribanTemplate.Render(_liquidTemplateContext);
-            _liquidTemplateContext.PopOutput();
-            _liquidTemplateContext.PopGlobal();
+            _templateContext.BuiltinObject.SetValue("products", _scribanProducts, false);
+            _templateContext.PushOutput(StringBuilderOutput.GetThreadInstance());
+            var result = _scribanTemplate.Render(_templateContext);
+            _templateContext.PopOutput();
             return result;
         }
-
 
         [Benchmark(Description = "ScribanAsync")]
         public async ValueTask<string> TestScribanAsync()
@@ -270,11 +267,10 @@ namespace Scriban.Benchmarks
             // We could use the following simpler version, but we demonstrate the use of PushGlobal/PopGlobal object context
             // for a slightly higher efficiency and the reuse of a TemplateContext on the same thread
             //return _scribanTemplate.Render(new { products = _dotLiquidProducts });
-
-            var obj = new ScriptObject { { "products", _dotLiquidProducts } };
-            _liquidTemplateContext.PushGlobal(obj);
-            var result = await _scribanTemplate.RenderAsync(_liquidTemplateContext);
-            _liquidTemplateContext.PopGlobal();
+            var obj = new ScriptObject { { "products", _scribanProducts } };
+            _templateContext.PushGlobal(obj);
+            var result = await _scribanTemplate.RenderAsync(_templateContext);
+            _templateContext.PopGlobal();
             return result;
         }
 
@@ -334,19 +330,6 @@ namespace Scriban.Benchmarks
             // DotLiquid forces to rework the original List<Product> into a custom object, which is not the same behavior as Scriban (easier somewhat because no late binding)
             return Fluid.FluidTemplateExtensions.Render(_fluidTemplate, templateContext);
         }
-
-        // [Benchmark(Description = "Razor")]
-        // public string TestRazor()
-        // {
-        //     dynamic expando = new ExpandoObject();
-        //     expando.products = _products;
-        //     expando.truncate = new Func<string, int, string>((text, length) => Scriban.Functions.StringFunctions.Truncate(text, length));
-        //     _razorTemplate.Output = new StringWriter();
-        //     _razorTemplate.Model = expando;
-        //     _razorTemplate.Execute();
-        //     var result = _razorTemplate.Output.ToString();
-        //     return result;
-        // }
 
         public class Product
         {
