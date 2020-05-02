@@ -133,7 +133,7 @@ namespace Scriban.Syntax
 
         public override ScriptNode Visit(ScriptFunctionCall node)
         {
-            if (_isScientific)
+            if (_isScientific && !node.ExplicitCall)
             {
                 var newNode = node.GetScientificExpression(_context);
                 if (newNode != node)
@@ -152,6 +152,11 @@ namespace Scriban.Syntax
                     functionCall.ExplicitCall = true;
                     functionCall.OpenParent ??= ScriptToken.OpenParen();
                     functionCall.CloseParen ??= ScriptToken.CloseParen();
+
+                    // We remove any trailing spaces after the target cos (x) => cos(x)
+                    functionCall.Target.RemoveTrailingSpace();
+                    functionCall.Arguments.RemoveLeadingSpace();
+                    functionCall.Arguments.RemoveTrailingSpace();
                 }
             }
 
@@ -219,6 +224,13 @@ namespace Scriban.Syntax
             else
             {
                 newFunction = (ScriptFunction) base.Visit(node);
+            }
+
+            if (_flags.HasFlags(ScriptFormatterFlags.Clean) && newFunction.OpenParen != null)
+            {
+                newFunction.NameOrDoToken.RemoveTrailingSpace();
+                newFunction.Parameters.RemoveLeadingSpace();
+                newFunction.Parameters.RemoveTrailingSpace();
             }
 
             if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators) &&  newFunction.EqualToken != null)
