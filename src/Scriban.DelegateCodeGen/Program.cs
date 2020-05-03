@@ -134,7 +134,7 @@ namespace Scriban.Runtime
 
                 if (type.MetadataType == MetadataType.String)
                 {
-                    caseArgumentsBuilder.Append($"context.ToString(callerContext.Span, arguments[{argIndex}])");
+                    caseArgumentsBuilder.Append($"context.ObjectToString(arguments[{argIndex}])");
                 }
                 else if (type.MetadataType == MetadataType.Int32)
                 {

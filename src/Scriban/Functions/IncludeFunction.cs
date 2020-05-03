@@ -25,7 +25,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the name of the template to include for the <include> function");
             }
 
-            var templateName = context.ToString(callerContext.Span, arguments[0]);
+            var templateName = context.ObjectToString(arguments[0]);
 
             // If template name is empty, throw an exception
             if (string.IsNullOrEmpty(templateName))

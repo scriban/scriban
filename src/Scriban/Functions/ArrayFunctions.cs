@@ -160,7 +160,7 @@ namespace Scriban.Functions
             {
                 return null;
             }
-            var strGroup = group == null ? Join(context, span, list, ",") : context.ToString(span, group);
+            var strGroup = group == null ? Join(context, span, list, ",") : context.ObjectToString(@group);
 
             // We create a cycle variable that is dependent on the exact AST context.
             // So we allow to have multiple cycle running in the same loop
@@ -286,7 +286,7 @@ namespace Scriban.Functions
                 {
                     text.Append(delimiter);
                 }
-                text.Append(context.ToString(span, obj));
+                text.Append(context.ObjectToString(obj));
                 afterFirst = true;
             }
             return text.ToString();

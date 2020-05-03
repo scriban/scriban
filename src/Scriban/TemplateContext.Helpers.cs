@@ -17,8 +17,13 @@ using Scriban.Syntax;
 
 namespace Scriban
 {
-    public partial class TemplateContext
+    public partial class TemplateContext : IFormatProvider
     {
+        public object GetFormat(Type formatType)
+        {
+            return CurrentCulture.GetFormat(formatType);
+        }
+
         /// <summary>
         /// Returns a boolean indicating whether the against object is empty (array/list count = 0, null, or no members for a dictionary/script object)
         /// </summary>
@@ -68,10 +73,9 @@ namespace Scriban
         /// <summary>
         /// Called whenever an objects is converted to a string. This method can be overriden.
         /// </summary>
-        /// <param name="span">The current span calling this ToString</param>
         /// <param name="value">The object value to print</param>
         /// <returns>A string representing the object value</returns>
-        public virtual string ToString(SourceSpan span, object value)
+        public virtual string ObjectToString(object value)
         {
             if (value is string)
             {
@@ -92,14 +96,7 @@ namespace Scriban
             var type = value.GetType();
             if (type.IsPrimitiveOrDecimal())
             {
-                try
-                {
-                    return ((IFormattable) value).ToString(null, CurrentCulture);
-                }
-                catch (Exception ex)
-                {
-                    throw new ScriptRuntimeException(span, $"Unable to convert value of type `{value.GetType()}` to string", ex);
-                }
+                return ((IFormattable) value).ToString(null, this);
             }
 
             if (type == typeof(DateTime))
@@ -112,16 +109,10 @@ namespace Scriban
                 }
             }
 
-            // Dump a script object
-            if (value is ScriptObject scriptObject)
-            {
-                return scriptObject.ToString(this, span);
-            }
-
             // If the value is formattable, use the formatter directly
-            if (value is IFormattable fomattable)
+            if (value is IFormattable formattable)
             {
-                return fomattable.ToString(null, CurrentCulture);
+                return formattable.ToString(null, this);
             }
 
             // If we have an enumeration, we dump it
@@ -136,7 +127,7 @@ namespace Scriban
                     {
                         result.Append(", ");
                     }
-                    result.Append(ToString(span, item));
+                    result.Append(ObjectToString(item));
                     isFirst = false;
                 }
                 result.Append("]");
@@ -149,7 +140,7 @@ namespace Scriban
             {
                 var keyValuePair = new ScriptObject(2);
                 keyValuePair.Import(value, renamer: this.MemberRenamer);
-                return ToString(span, keyValuePair);
+                return ObjectToString(keyValuePair);
             }
 
             if (value is IScriptCustomFunction)
@@ -228,7 +219,7 @@ namespace Scriban
 
             if (destinationType == typeof(string))
             {
-                return ToString(span, value);
+                return ObjectToString(value);
             }
 
             if (destinationType == typeof(int))
@@ -372,5 +363,6 @@ namespace Scriban
 
             throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`");
         }
+
     }
 }

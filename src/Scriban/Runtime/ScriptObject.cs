@@ -16,7 +16,7 @@ namespace Scriban.Runtime
     /// Base runtime object used to store properties.
     /// </summary>
     /// <seealso cref="System.Collections.IEnumerable" />
-    public partial class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject, IDictionary
+    public partial class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject, IDictionary, IFormattable
     {
         internal Dictionary<string, InternalValue> Store { get; private set; }
 
@@ -301,15 +301,9 @@ namespace Scriban.Runtime
             }
         }
 
-        /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
-        /// </summary>
-        /// <param name="context">The template context requesting this evaluation</param>
-        /// <param name="span">The span.</param>
-        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
-        public virtual string ToString(TemplateContext context, SourceSpan span)
+        public string ToString(string format, IFormatProvider formatProvider)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            var context = formatProvider as TemplateContext;
             var result = new StringBuilder();
             result.Append("{");
             bool isFirst = true;
@@ -322,11 +316,36 @@ namespace Scriban.Runtime
                 var keyPair = (KeyValuePair<string, object>)item;
                 result.Append(keyPair.Key);
                 result.Append(": ");
-                result.Append(context.ToString(span, keyPair.Value));
+                if (context != null)
+                {
+                    result.Append(context.ObjectToString(keyPair.Value));
+                }
+                else
+                {
+                    var value = keyPair.Value;
+                    if (value is IFormattable formattable)
+                    {
+                        result.Append(formattable.ToString(null, formatProvider));
+                    }
+                    else
+                    {
+                        result.Append(value);
+                    }
+                }
                 isFirst = false;
             }
             result.Append("}");
             return result.ToString();
+        }
+
+        public string ToString(IFormatProvider formatProvider)
+        {
+            return ToString(null, formatProvider);
+        }
+
+        public override string ToString()
+        {
+            return ToString(null, null);
         }
 
         public virtual void CopyTo(ScriptObject dest)
@@ -465,5 +484,6 @@ namespace Scriban.Runtime
 
             public bool IsReadOnly { get; set; }
         }
+
     }
 }

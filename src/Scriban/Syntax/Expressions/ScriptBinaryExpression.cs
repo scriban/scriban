@@ -134,7 +134,7 @@ namespace Scriban.Syntax
                     var leftDict = leftValue as IDictionary<string, object>;
                     if (leftDict != null)
                     {
-                        return ObjectFunctions.HasKey(leftDict, context.ToString(span, rightValue));
+                        return ObjectFunctions.HasKey(leftDict, context.ObjectToString(rightValue));
                     }
                 }
                     break;
@@ -144,7 +144,7 @@ namespace Scriban.Syntax
                     var leftDict = leftValue as IDictionary<string, object>;
                     if (leftDict != null)
                     {
-                        return ObjectFunctions.HasValue(leftDict, context.ToString(span, rightValue));
+                        return ObjectFunctions.HasValue(leftDict, context.ObjectToString(rightValue));
                     }
                 }
                     break;
@@ -268,7 +268,7 @@ namespace Scriban.Syntax
             switch (op)
             {
                 case ScriptBinaryOperator.Add:
-                    return context.ToString(span, left) + context.ToString(span, right);
+                    return context.ObjectToString(left) + context.ObjectToString(right);
                 case ScriptBinaryOperator.Multiply:
                     if (right is string)
                     {
@@ -287,7 +287,7 @@ namespace Scriban.Syntax
                     {
                         throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1
                     }
-                    var leftText = context.ToString(span, left);
+                    var leftText = context.ObjectToString(left);
                     var builder = new StringBuilder();
                     for (int i = 0; i < value; i++)
                     {
@@ -296,24 +296,24 @@ namespace Scriban.Syntax
                     return builder.ToString();
 
                 case ScriptBinaryOperator.CompareEqual:
-                    return context.ToString(span, left) == context.ToString(span, right);
+                    return context.ObjectToString(left) == context.ObjectToString(right);
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return context.ToString(span, left) != context.ToString(span, right);
+                    return context.ObjectToString(left) != context.ObjectToString(right);
                 case ScriptBinaryOperator.CompareGreater:
-                    return context.ToString(span, left).CompareTo(context.ToString(span, right)) > 0;
+                    return context.ObjectToString(left).CompareTo(context.ObjectToString(right)) > 0;
                 case ScriptBinaryOperator.CompareLess:
-                    return context.ToString(span, left).CompareTo(context.ToString(span, right)) < 0;
+                    return context.ObjectToString(left).CompareTo(context.ObjectToString(right)) < 0;
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return context.ToString(span, left).CompareTo(context.ToString(span, right)) >= 0;
+                    return context.ObjectToString(left).CompareTo(context.ObjectToString(right)) >= 0;
                 case ScriptBinaryOperator.CompareLessOrEqual:
-                    return context.ToString(span, left).CompareTo(context.ToString(span, right)) <= 0;
+                    return context.ObjectToString(left).CompareTo(context.ObjectToString(right)) <= 0;
 
                 case ScriptBinaryOperator.LiquidContains:
-                    return context.ToString(span, left).Contains(context.ToString(span, right));
+                    return context.ObjectToString(left).Contains(context.ObjectToString(right));
                 case ScriptBinaryOperator.LiquidStartsWith:
-                    return context.ToString(span, left).StartsWith(context.ToString(span, right));
+                    return context.ObjectToString(left).StartsWith(context.ObjectToString(right));
                 case ScriptBinaryOperator.LiquidEndsWith:
-                    return context.ToString(span, left).EndsWith(context.ToString(span, right));
+                    return context.ObjectToString(left).EndsWith(context.ObjectToString(right));
                 default:
                     break;
             }

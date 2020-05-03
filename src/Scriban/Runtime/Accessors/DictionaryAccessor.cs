@@ -55,7 +55,7 @@ namespace Scriban.Runtime.Accessors
         {
             foreach (var key in ((IDictionary) target).Keys)
             {
-                yield return context.ToString(span, key);
+                yield return context.ObjectToString(key);
             }
         }
 
@@ -102,7 +102,7 @@ namespace Scriban.Runtime.Accessors
         {
             foreach (var key in ((IDictionary<TKey, TValue>)target).Keys)
             {
-                yield return context.ToString(span, key);
+                yield return context.ObjectToString(key);
             }
         }
 

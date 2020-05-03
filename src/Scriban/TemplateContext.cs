@@ -684,7 +684,7 @@ namespace Scriban
         {
             if (textAsObject != null)
             {
-                var text = ToString(span, textAsObject);
+                var text = ObjectToString(textAsObject);
                 Write(text);
             }
             return this;

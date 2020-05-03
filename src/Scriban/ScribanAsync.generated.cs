@@ -376,7 +376,7 @@ namespace Scriban
         {
             if (textAsObject != null)
             {
-                var text = ToString(span, textAsObject);
+                var text = ObjectToString(textAsObject);
                 await WriteAsync(text).ConfigureAwait(false);
             }
             return this;
@@ -408,7 +408,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the name of the template to include for the <include> function");
             }
 
-            var templateName = context.ToString(callerContext.Span, arguments[0]);
+            var templateName = context.ObjectToString(arguments[0]);
 
             // If template name is empty, throw an exception
             if (string.IsNullOrEmpty(templateName))
@@ -1346,7 +1346,7 @@ namespace Scriban.Syntax
             if (targetObject is IDictionary || (targetObject is IScriptObject && listAccessor == null) || listAccessor == null)
             {
                 var accessor = context.GetMemberAccessor(targetObject);
-                var indexAsString = context.ToString(Index.Span, index);
+                var indexAsString = context.ObjectToString(index);
                 if (setter)
                 {
                     if (!accessor.TrySetValue(context, Span, targetObject, indexAsString, valueToSet))

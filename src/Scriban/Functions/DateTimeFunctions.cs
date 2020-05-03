@@ -393,7 +393,7 @@ namespace Scriban.Functions
                 case 0:
                     return this;
                 case 1:
-                    return Parse(context, context.ToString(callerContext.Span, arguments[0]));
+                    return Parse(context, context.ObjectToString(arguments[0]));
                 default:
                     throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{arguments.Count}` for `date` object/function.");
             }

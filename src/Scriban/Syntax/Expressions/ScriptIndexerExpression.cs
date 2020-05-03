@@ -122,7 +122,7 @@ namespace Scriban.Syntax
             if (targetObject is IDictionary || (targetObject is IScriptObject && listAccessor == null) || listAccessor == null)
             {
                 var accessor = context.GetMemberAccessor(targetObject);
-                var indexAsString = context.ToString(Index.Span, index);
+                var indexAsString = context.ObjectToString(index);
 
                 if (setter)
                 {

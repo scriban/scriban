@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 05/01/2020 12:18:59 by Scriban.DelegateCodeGen
+// This file was automatically generated - 05/03/2020 12:06:51 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -125,8 +125,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg0 = context.ObjectToString(arguments[0]);
+                var arg1 = context.ObjectToString(arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -305,8 +305,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg0 = context.ObjectToString(arguments[0]);
+                var arg1 = context.ObjectToString(arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -329,7 +329,7 @@ namespace Scriban.Runtime
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
                 var arg0 = arguments[0];
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg1 = context.ObjectToString(arguments[1]);
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -352,7 +352,7 @@ namespace Scriban.Runtime
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
                 var arg0 = arguments[0];
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg1 = context.ObjectToString(arguments[1]);
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -466,7 +466,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg0 = context.ObjectToString(arguments[0]);
 
                 return _delegate(arg0);
             }
@@ -646,7 +646,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg0 = context.ObjectToString(arguments[0]);
 
                 return _delegate(context, arg0);
             }
@@ -713,9 +713,9 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
-                var arg2 = context.ToString(callerContext.Span, arguments[2]);
+                var arg0 = context.ObjectToString(arguments[0]);
+                var arg1 = context.ObjectToString(arguments[1]);
+                var arg2 = context.ObjectToString(arguments[2]);
 
                 return _delegate(context, arg0, arg1, arg2);
             }
@@ -738,8 +738,8 @@ namespace Scriban.Runtime
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
                 var arg0 = context.ToInt(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
-                var arg2 = context.ToString(callerContext.Span, arguments[2]);
+                var arg1 = context.ObjectToString(arguments[1]);
+                var arg2 = context.ObjectToString(arguments[2]);
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -783,7 +783,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg0 = context.ObjectToString(arguments[0]);
 
                 return _delegate(arg0);
             }
@@ -805,7 +805,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg0 = context.ObjectToString(arguments[0]);
                 var arg1 = context.ToInt(callerContext.Span, arguments[1]);
 
                 return _delegate(arg0, arg1);
@@ -828,7 +828,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg0 = context.ObjectToString(arguments[0]);
                 var arg1 = context.ToInt(callerContext.Span, arguments[1]);
                 var arg2 = context.ToInt(callerContext.Span, arguments[2]);
 
@@ -852,9 +852,9 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg0 = context.ObjectToString(arguments[0]);
                 var arg1 = context.ToInt(callerContext.Span, arguments[1]);
-                var arg2 = context.ToString(callerContext.Span, arguments[2]);
+                var arg2 = context.ObjectToString(arguments[2]);
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -876,8 +876,8 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg0 = context.ObjectToString(arguments[0]);
+                var arg1 = context.ObjectToString(arguments[1]);
 
                 return _delegate(arg0, arg1);
             }
@@ -899,9 +899,9 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
-                var arg2 = context.ToString(callerContext.Span, arguments[2]);
+                var arg0 = context.ObjectToString(arguments[0]);
+                var arg1 = context.ObjectToString(arguments[1]);
+                var arg2 = context.ObjectToString(arguments[2]);
 
                 return _delegate(arg0, arg1, arg2);
             }
@@ -924,7 +924,7 @@ namespace Scriban.Runtime
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
                 var arg0 = (IEnumerable)context.ToObject(callerContext.Span, arguments[0], typeof(IEnumerable));
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
+                var arg1 = context.ObjectToString(arguments[1]);
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
             }
@@ -947,8 +947,8 @@ namespace Scriban.Runtime
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
                 var arg0 = arguments[0];
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
-                var arg2 = context.ToString(callerContext.Span, arguments[2]);
+                var arg1 = context.ObjectToString(arguments[1]);
+                var arg2 = context.ObjectToString(arguments[2]);
 
                 return _delegate(context, callerContext.Span, arg0, arg1, arg2);
             }
@@ -970,7 +970,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg0 = context.ObjectToString(arguments[0]);
 
                 return _delegate(context, arg0);
             }
@@ -992,10 +992,10 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
-                var arg1 = context.ToString(callerContext.Span, arguments[1]);
-                var arg2 = context.ToString(callerContext.Span, arguments[2]);
-                var arg3 = context.ToString(callerContext.Span, arguments[3]);
+                var arg0 = context.ObjectToString(arguments[0]);
+                var arg1 = context.ObjectToString(arguments[1]);
+                var arg2 = context.ObjectToString(arguments[2]);
+                var arg3 = context.ObjectToString(arguments[3]);
 
                 return _delegate(context, arg0, arg1, arg2, arg3);
             }
@@ -1039,7 +1039,7 @@ namespace Scriban.Runtime
 
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
-                var arg0 = context.ToString(callerContext.Span, arguments[0]);
+                var arg0 = context.ObjectToString(arguments[0]);
 
                 return _delegate(arg0);
             }
