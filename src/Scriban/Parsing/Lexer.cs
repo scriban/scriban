@@ -124,7 +124,7 @@ namespace Scriban.Parsing
                 }
 
                 // If we have errors or we are already at the end of the file, we don't continue
-                if (HasErrors || _token.Type == TokenType.Eof)
+                if (_token.Type == TokenType.Eof)
                 {
                     return false;
                 }
@@ -922,8 +922,9 @@ namespace Scriban.Parsing
                         else
                         {
                             // Else we have a close brace but it is invalid
-                            _token = new Token(TokenType.CloseBrace, _position, _position);
                             AddError("Unexpected } while no matching {", _position, _position);
+                            // Remove the previous error token to still output a valid token
+                            _token = new Token(TokenType.CloseBrace, _position, _position);
                             NextChar();
                         }
                     }
