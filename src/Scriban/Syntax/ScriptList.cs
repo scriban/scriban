@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Scriban.Helpers;
 
 namespace Scriban.Syntax
@@ -16,11 +17,11 @@ namespace Scriban.Syntax
     [DebuggerTypeProxy(typeof(ScriptListDebug))]
     public abstract class ScriptList : ScriptNode
     {
-        protected readonly List<ScriptNode> _children;
+        internal InlineList<ScriptNode> _children;
 
         internal ScriptList()
         {
-            _children = new List<ScriptNode>();
+            _children = new InlineList<ScriptNode>(0);
         }
 
         public int Count => _children.Count;
@@ -36,7 +37,7 @@ namespace Scriban.Syntax
 
         private sealed class ScriptListDebug
         {
-            private readonly List<ScriptNode> _children;
+            private readonly InlineList<ScriptNode> _children;
 
             public ScriptListDebug(ScriptList list)
             {
@@ -52,6 +53,7 @@ namespace Scriban.Syntax
     /// Abstract list of <see cref="ScriptNode"/>
     /// </summary>
     /// <typeparam name="TScriptNode">Type of the node</typeparam>
+    [DebuggerTypeProxy(typeof(ScriptList<>.DebugListView)), DebuggerDisplay("Count = {Count}")]
     public sealed class ScriptList<TScriptNode> : ScriptList, IList<TScriptNode>, IReadOnlyList<TScriptNode> where TScriptNode : ScriptNode
     {
         /// <summary>
@@ -84,12 +86,11 @@ namespace Scriban.Syntax
 
         public void Clear()
         {
-            foreach (var item in _children)
+            var children = _children;
+            for(int i = 0; i < children.Count; i++)
             {
-                if (item != null)
-                {
-                    item.Parent = null;
-                }
+                var item = children.Items[i];
+                item.Parent = null;
             }
             _children.Clear();
         }
@@ -154,7 +155,7 @@ namespace Scriban.Syntax
         /// <returns>The enumerator of this list</returns>
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(_children);
+            return new Enumerator(_children.Items, _children.Count);
         }
 
         IEnumerator<TScriptNode> IEnumerable<TScriptNode>.GetEnumerator()
@@ -172,22 +173,25 @@ namespace Scriban.Syntax
         /// </summary>
         public struct Enumerator : IEnumerator<TScriptNode>
         {
-            private readonly List<ScriptNode> _nodes;
+            private readonly ScriptNode[] _nodes;
+            private readonly int _count;
             private int _index;
 
             /// <summary>
             /// Initialize an enumerator with a list of <see cref="ScriptNode"/>
             /// </summary>
             /// <param name="nodes"></param>
-            public Enumerator(List<ScriptNode> nodes)
+            /// <param name="count"></param>
+            public Enumerator(ScriptNode[] nodes, int count)
             {
                 _nodes = nodes;
+                _count = count;
                 _index = -1;
             }
 
             public bool MoveNext()
             {
-                if (_index + 1 == _nodes.Count) return false;
+                if (_index + 1 == _count) return false;
                 _index++;
                 return true;
             }
@@ -202,7 +206,7 @@ namespace Scriban.Syntax
                 get
                 {
                     if (_index < 0) throw new InvalidOperationException("MoveNext must be called before accessing Current");
-                    return (TScriptNode)_nodes[_index];
+                    return Unsafe.As<TScriptNode>(_nodes[_index]);
                 }
             }
 
@@ -237,7 +241,7 @@ namespace Scriban.Syntax
 
         public new TScriptNode this[int index]
         {
-            get => (TScriptNode)_children[index];
+            get => Unsafe.As<TScriptNode>(_children[index]);
             set
             {
                 var previous = _children[index];
@@ -251,6 +255,30 @@ namespace Scriban.Syntax
         private void AssertNoParent(ScriptNode node)
         {
             if (node != null && node.Parent != null) throw new ArgumentException("Cannot add this node which is already attached to another list instance");
+        }
+
+        internal class DebugListView
+        {
+            private readonly ScriptList<TScriptNode> _collection;
+
+            public DebugListView(ScriptList<TScriptNode> collection)
+            {
+                this._collection = collection;
+            }
+
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            public TScriptNode[] Items
+            {
+                get
+                {
+                    var array = new TScriptNode[this._collection.Count];
+                    for (int i = 0; i < array.Length; i++)
+                    {
+                        array[i] = _collection[i];
+                    }
+                    return array;
+                }
+            }
         }
     }
 }
