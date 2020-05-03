@@ -186,6 +186,13 @@ namespace Scriban.Syntax
                 blockDelegate = context.BlockDelegates.Pop();
             }
 
+            // Generates an error only if the context is configured for it
+            if (context.ErrorForStatementFunctionAsExpression && function.ReturnType == typeof(void) && callerContext.Parent is ScriptExpression)
+            {
+                var firstToken = callerContext.FindFirstTerminal();
+                throw new ScriptRuntimeException(callerContext.Span, $"The function `{firstToken}` is a statement and cannot be used within an expression.");
+            }
+
             // We can't cache this array because it might be collect by the function
             // So we absolutely need to generate a new array everytime we call a function
             ScriptArray argumentValues;

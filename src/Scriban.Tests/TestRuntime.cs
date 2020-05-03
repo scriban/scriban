@@ -148,6 +148,22 @@ y and z = 5 and 0";
             var result = template.Render(tc);
             TextAssert.AreEqual(expected, result);
         }
+
+        [Test]
+
+        public void TestFunctionCallWithNoReturn()
+        {
+            var template = Template.Parse(@"
+{{-
+f(x) = x + 1
+func g(x); x ; end;
+1 + g(2)
+-}}
+");
+            var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+            Assert.Throws<ScriptRuntimeException>(() => template.Render(tc));
+        }
+
         [Test]
         public void TestFunctionWithTemplateContextAndObjectParams()
         {

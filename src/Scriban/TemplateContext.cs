@@ -228,9 +228,14 @@ namespace Scriban
         public IScriptOutput Output => _output;
 
         /// <summary>
-        ///
+        /// Gets or sets a boolean indicating if the runtime is running in scientific mode.
         /// </summary>
         public bool UseScientific { get; set; }
+
+        /// <summary>
+        /// Generates an explicit error for function without a return value that are used in an expression.
+        /// </summary>
+        public bool ErrorForStatementFunctionAsExpression { get; set; }
 
         /// <summary>
         /// Gets the builtin objects (that can be setup via the constructor). Default is retrieved via <see cref="GetDefaultBuiltinObject"/>.
