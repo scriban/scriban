@@ -10,7 +10,6 @@ namespace Scriban.Syntax
     {
         private ScriptKeyword _elseKeyword;
         private ScriptBlockStatement _body;
-        private ScriptConditionStatement _else;
 
         public ScriptElseStatement()
         {
@@ -29,23 +28,15 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _body, value);
         }
 
-        public ScriptConditionStatement Else
-        {
-            get => _else;
-            set => ParentToThis(ref _else, value);
-        }
-
         public override object Evaluate(TemplateContext context)
         {
-            context.Evaluate(Body);
-            return context.Evaluate(Else);
+            return context.Evaluate(Body);
         }
 
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(ElseKeyword).ExpectEos();
             printer.Write(Body);
-            printer.Write(Else);
         }
     }
 }

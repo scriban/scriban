@@ -22,6 +22,7 @@ namespace Scriban.Syntax
         private ScriptExpression _iterator;
         private ScriptList<ScriptNamedArgument> _namedArguments;
         private ScriptBlockStatement _body;
+        private ScriptElseStatement _else;
 
         public ScriptForStatement()
         {
@@ -63,6 +64,12 @@ namespace Scriban.Syntax
         {
             get => _body;
             set => ParentToThis(ref _body, value);
+        }
+
+        public ScriptElseStatement Else
+        {
+            get => _else;
+            set => ParentToThis(ref _else, value);
         }
 
         internal ScriptNode IteratorOrLastParameter => NamedArguments != null && NamedArguments.Count > 0
@@ -133,8 +140,10 @@ namespace Scriban.Syntax
                 context.SetValue(GetLoopVariable(context), loopState);
                 loopState.Length = list.Count;
 
+                bool enteredLoop = false;
                 while (!reversed && index <= endIndex || reversed && index >= startIndex)
                 {
+                    enteredLoop = true;
                     if (!context.StepLoop(this))
                     {
                         return null;
@@ -163,6 +172,12 @@ namespace Scriban.Syntax
                 AfterLoop(context);
 
                 context.SetValue(ScriptVariable.Continue, index);
+
+                if (!enteredLoop && Else != null)
+                {
+                    loopResult = context.Evaluate(Else);
+                }
+
                 return loopResult;
             }
 
@@ -194,6 +209,7 @@ namespace Scriban.Syntax
             }
             printer.ExpectEos();
             printer.Write(Body);
+            printer.Write(Else);
         }
 
         protected virtual void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)

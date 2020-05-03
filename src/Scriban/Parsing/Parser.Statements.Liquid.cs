@@ -128,12 +128,19 @@ namespace Scriban.Parsing
                             ((ScriptWhenStatement)parentCondition).Next = nextCondition;
                         }
                     }
+                    else if (identifier == "else" && parent is ScriptForStatement forStatement)
+                    {
+                        forStatement.Else = (ScriptElseStatement)nextCondition;
+                    }
                     else
                     {
                         nextStatement = false;
 
                         // unit test: 201-if-else-error3.txt
-                        LogError(startToken, "A else condition must be preceded by another if/else/when condition");
+                        LogError(startToken,
+                            identifier == "else"
+                                ? "A else condition must be preceded by another if/else/unless condition or a for loop."
+                                : "A else condition must be preceded by another if/else/unless.");
                     }
                     hasEnd = true;
                     break;
