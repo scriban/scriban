@@ -895,8 +895,8 @@ using System.Numerics;
                 var localProperties = type.GetMembers().OfType<IPropertySymbol>().Where(prop =>
                     prop.Name != "Trivias" &&
                     !prop.IsReadOnly &&
-                    (IsScriptNode(prop.Type)
-                    || includeNonScriptNode)
+                    (prop.SetMethod != null && prop.SetMethod.DeclaredAccessibility == Accessibility.Public) &&
+                    (IsScriptNode(prop.Type) || includeNonScriptNode)
                     ).ToList();
                 properties.AddRange(localProperties);
             }

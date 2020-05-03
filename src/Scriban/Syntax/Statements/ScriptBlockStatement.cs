@@ -28,14 +28,15 @@ namespace Scriban.Syntax
         {
             object result = null;
             var statements = Statements;
-            for (int i = 0; i <  statements.Count; i++)
+            var token = context.CancellationToken;
+            for (int i = 0; i < statements.Count; i++)
             {
                 var statement =  statements[i];
 
                 // Throw if cancellation is requested
-                if (context.CancellationToken.IsCancellationRequested)
+                if (token.IsCancellationRequested)
                 {
-                    context.CancellationToken.ThrowIfCancellationRequested();
+                    token.ThrowIfCancellationRequested();
                 }
 
                 if (statement.CanSkipEvaluation)

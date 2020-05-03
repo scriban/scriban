@@ -12,8 +12,14 @@ namespace Scriban.Syntax
     /// <seealso cref="ScriptNode" />
     public abstract partial class ScriptStatement : ScriptNode
     {
-        public virtual bool CanSkipEvaluation => false;
+        protected ScriptStatement()
+        {
+            CanOutput = true;
+        }
 
-        public virtual bool CanOutput => true;
+        public bool CanSkipEvaluation { get; protected set; }
+
+
+        public bool CanOutput { get; protected set; }
     }
 }

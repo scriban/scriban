@@ -12,6 +12,7 @@ namespace Scriban.Syntax
         public ScriptEndStatement()
         {
             EndKeyword = ScriptKeyword.End();
+            CanSkipEvaluation = true;
         }
 
         public ScriptKeyword EndKeyword
@@ -19,8 +20,6 @@ namespace Scriban.Syntax
             get => _endKeyword;
             set => ParentToThis(ref _endKeyword, value);
         }
-
-        public override bool CanSkipEvaluation => true;
 
         public override object Evaluate(TemplateContext context)
         {

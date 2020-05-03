@@ -11,9 +11,8 @@ namespace Scriban.Syntax
     {
         public ScriptEscapeStatement()
         {
+            CanSkipEvaluation = true;
         }
-
-        public override bool CanSkipEvaluation => true;
 
         public ScriptTrivias Trivias { get; set; }
 

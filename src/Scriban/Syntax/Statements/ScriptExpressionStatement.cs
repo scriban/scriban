@@ -15,10 +15,12 @@ namespace Scriban.Syntax
         public ScriptExpression Expression
         {
             get => _expression;
-            set => ParentToThis(ref _expression, value);
+            set
+            {
+                ParentToThis(ref _expression, value);
+                CanOutput = !(value is ScriptAssignExpression);
+            }
         }
-
-        public override bool CanOutput => !(Expression is ScriptAssignExpression);
 
         public override object Evaluate(TemplateContext context)
         {
