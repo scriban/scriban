@@ -743,6 +743,7 @@ namespace Scriban
         /// </summary>
         /// <param name="scriptNode">The script node.</param>
         /// <returns>The result of the evaluation.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public object Evaluate(ScriptNode scriptNode)
         {
             return Evaluate(scriptNode, false);
@@ -754,38 +755,26 @@ namespace Scriban
         /// <param name="scriptNode">The script node.</param>
         /// <param name="aliasReturnedFunction">if set to <c>true</c> and a function would be evaluated as part of this node, return the object function without evaluating it.</param>
         /// <returns>The result of the evaluation.</returns>
-        public object Evaluate(ScriptNode scriptNode, bool aliasReturnedFunction)
+        public virtual object Evaluate(ScriptNode scriptNode, bool aliasReturnedFunction)
         {
+            if (scriptNode == null) return null;
+
             var previousFunctionCallState = _isFunctionCallDisabled;
             var previousLevel = _getOrSetValueLevel;
             try
             {
                 _getOrSetValueLevel = 0;
                 _isFunctionCallDisabled = aliasReturnedFunction;
-                return EvaluateImpl(scriptNode);
+                return scriptNode.Evaluate(this);
+            }
+            catch (ScriptRuntimeException ex) when (this.RenderRuntimeException != null)
+            {
+                return this.RenderRuntimeException(ex);
             }
             finally
             {
                 _getOrSetValueLevel = previousLevel;
                 _isFunctionCallDisabled = previousFunctionCallState;
-            }
-        }
-
-        /// <summary>
-        /// Evaluates the specified script node by calling <see cref="ScriptNode.Evaluate"/>
-        /// </summary>
-        /// <param name="scriptNode">The script node (might be null but should not throw an error)</param>
-        /// <returns>The result of the evaluation</returns>
-        /// <remarks>The purpose of this method is to allow to hook during the evaluation of all ScriptNode. By default calls <see cref="ScriptNode.Evaluate"/></remarks>
-        protected virtual object EvaluateImpl(ScriptNode scriptNode)
-        {
-            try
-            {
-                return scriptNode != null ? scriptNode.Evaluate(this) : null;
-            }
-            catch (ScriptRuntimeException ex) when (this.RenderRuntimeException != null)
-            {
-                return this.RenderRuntimeException(ex);
             }
         }
 

@@ -127,6 +127,8 @@ namespace Scriban.Functions
 
         public bool HasVariableParams => true;
 
+        public Type ReturnType => typeof(object);
+
         public ScriptParameterInfo GetParameterInfo(int index)
         {
             if (index == 0) return new ScriptParameterInfo(typeof(string), "template_name");

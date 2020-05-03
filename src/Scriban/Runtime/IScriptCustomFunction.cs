@@ -46,6 +46,8 @@ namespace Scriban.Runtime
 
         bool HasVariableParams { get; }
 
+        Type ReturnType { get; }
+
         ScriptParameterInfo GetParameterInfo(int index);
     }
 

@@ -23,7 +23,7 @@ namespace Scriban.Syntax
             _children = new List<ScriptNode>();
         }
 
-        public int Count => ChildrenCount;
+        public int Count => _children.Count;
 
         public sealed override int ChildrenCount => _children.Count;
 

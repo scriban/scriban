@@ -22,6 +22,8 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _statements, value);
         }
 
+        public bool HasReturn => _statements != null && _statements.Count > 1 && _statements[_statements.Count - 2] is ScriptReturnStatement;
+
         public override object Evaluate(TemplateContext context)
         {
             object result = null;

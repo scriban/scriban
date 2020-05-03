@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Scriban.Parsing;
 using Scriban.Syntax;
 
@@ -190,6 +191,12 @@ namespace Scriban.Runtime
         public virtual void CopyTo(T[] array, int arrayIndex)
         {
             _values.CopyTo(array, arrayIndex);
+        }
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public void CopyTo(int index, T[] array, int arrayIndex, int count)
+        {
+            _values.CopyTo(index, array, arrayIndex, count);
         }
 
         public virtual int IndexOf(T item)

@@ -26,6 +26,7 @@ namespace Scriban.Runtime
         public readonly MethodInfo Method;
 
         protected readonly ParameterInfo[] Parameters;
+        private readonly Type _returnType;
         private readonly ScriptParameterInfo[] _parameterInfos;
 
         private readonly ScriptParameterInfo _paramsParameterInfo;
@@ -46,6 +47,8 @@ namespace Scriban.Runtime
         protected DynamicCustomFunction(MethodInfo method)
         {
             Method = method;
+            _returnType = method.ReturnType;
+
             Parameters = method.GetParameters();
 #if !SCRIBAN_NO_ASYNC
             IsAwaitable = method.ReturnType.GetMethod(nameof(Task.GetAwaiter)) != null;
@@ -160,6 +163,8 @@ namespace Scriban.Runtime
         public int ParameterCount => _expectedNumberOfParameters;
 
         public bool HasVariableParams => _hasObjectParams;
+
+        public Type ReturnType => _returnType;
 
         public ScriptParameterInfo GetParameterInfo(int index)
         {

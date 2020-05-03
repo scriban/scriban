@@ -405,6 +405,8 @@ namespace Scriban.Functions
 
         public bool HasVariableParams => true;
 
+        public Type ReturnType => typeof(object);
+
         private const string Parameter1Name = "text";
 
         public ScriptParameterInfo GetParameterInfo(int index)

@@ -75,59 +75,53 @@ namespace Scriban.Runtime
         }
 #endif
 
-        private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ref object[] paramArguments)
+        private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ref object[] paramsArguments)
         {
             // TODO: optimize arguments allocations
-            var arguments = context.GetOrCreateReflectionArguments(Parameters.Length);
-
-            // Convert arguments
-            paramArguments = null;
-            if (_hasObjectParams)
-            {
-                var objectParamsCount = scriptArguments.Count - _paramsIndex;
-                if (_hasTemplateContext)
-                {
-                    objectParamsCount++;
-                    if (_hasSpan)
-                    {
-                        objectParamsCount++;
-                    }
-                }
-
-                paramArguments = context.GetOrCreateReflectionArguments(objectParamsCount);
-                arguments[_paramsIndex] = paramArguments;
-            }
+            var reflectArgs = context.GetOrCreateReflectionArguments(Parameters.Length);
 
             // Copy TemplateContext/SourceSpan parameters
-            int argOffset = 0;
             if (_hasTemplateContext)
             {
-                arguments[0] = context;
-                argOffset++;
+                reflectArgs[0] = context;
                 if (_hasSpan)
                 {
-                    arguments[1] = callerContext.Span;
-                    argOffset++;
+                    reflectArgs[1] = callerContext.Span;
                 }
             }
 
-            var argIndex = argOffset;
-            int paramsIndex = 0;
-            for (int i = 0; i < scriptArguments.Count; i++)
+            var allArgCount = scriptArguments.Count;
+
+            // Convert arguments
+            paramsArguments = null;
+            int firstArgIndex = _firstIndexOfUserParameters;
+            if (_hasObjectParams)
             {
-                var argValue = scriptArguments[i];
-                if (_hasObjectParams && paramArguments != null && argIndex >= _paramsIndex)
+                // 0         1        _firstIndexOfUserParameters  _paramsIndex
+                // [context, [span]], arg0, arg1...,        ,argn, [varg0,varg1, ...]
+                int argCount = _paramsIndex - firstArgIndex;
+                var paramsCount = allArgCount - argCount;
+
+                paramsArguments = context.GetOrCreateReflectionArguments(paramsCount);
+                reflectArgs[_paramsIndex] = paramsArguments;
+
+                if (argCount > 0)
                 {
-                    paramArguments[paramsIndex] = argValue;
-                    paramsIndex++;
+                    // copy arg0, arg1, ..., argn
+                    scriptArguments.CopyTo(0, reflectArgs, firstArgIndex, argCount);
                 }
-                else
+
+                if (paramsCount > 0)
                 {
-                    arguments[argIndex++] = argValue;
+                    scriptArguments.CopyTo(argCount, paramsArguments, 0, paramsCount);
                 }
             }
+            else
+            {
+                scriptArguments.CopyTo(0, reflectArgs, firstArgIndex, allArgCount);
+            }
 
-            return arguments;
+            return reflectArgs;
         }
     }
 }

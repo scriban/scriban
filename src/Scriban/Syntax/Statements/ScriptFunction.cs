@@ -17,6 +17,7 @@ namespace Scriban.Syntax
         private ScriptToken _closeParen;
         private ScriptToken _equalToken;
         private ScriptStatement _body;
+        private bool _hasReturnType;
 
         public ScriptKeyword FuncToken
         {
@@ -65,7 +66,13 @@ namespace Scriban.Syntax
         public ScriptStatement Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set
+            {
+                ParentToThis(ref _body, value);
+
+                // Detects if this function is returning a value
+                _hasReturnType = value is ScriptExpressionStatement || value is ScriptBlockStatement blockStatement && blockStatement.HasReturn;
+            }
         }
 
         public bool IsAnonymous => !(NameOrDoToken is ScriptVariable);
@@ -74,6 +81,7 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
+
             if (NameOrDoToken is ScriptVariable variable)
             {
                 context.SetValue(variable, this);
@@ -169,6 +177,8 @@ namespace Scriban.Syntax
         public int ParameterCount => Parameters?.Count ?? 0;
 
         public bool HasVariableParams => Parameters == null;
+
+        public Type ReturnType => _hasReturnType ? typeof(object) : typeof(void);
 
         public ScriptParameterInfo GetParameterInfo(int index)
         {
