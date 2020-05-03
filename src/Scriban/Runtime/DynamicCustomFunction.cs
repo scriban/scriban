@@ -169,15 +169,12 @@ namespace Scriban.Runtime
         public ScriptParameterInfo GetParameterInfo(int index)
         {
             if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Argument index must be >= 0");
-
-            bool indexOutOfRegularParams = index >= _parameterInfos.Length;
-            if (_hasObjectParams && indexOutOfRegularParams)
+            if (index >= _parameterInfos.Length)
             {
-                return _paramsParameterInfo;
-            }
-
-            if (indexOutOfRegularParams)
-            {
+                if (_hasObjectParams)
+                {
+                    return _paramsParameterInfo;
+                }
                 throw new ArgumentOutOfRangeException(nameof(index), $"Argument index must be < {ParameterCount}");
             }
 
