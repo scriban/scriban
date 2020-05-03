@@ -130,35 +130,7 @@ namespace Scriban.Runtime
                     continue;
                 }
 
-                caseArgumentsBuilder.Append($"                var arg{argIndex} = ");
-
-                if (type.MetadataType == MetadataType.String)
-                {
-                    caseArgumentsBuilder.Append($"context.ObjectToString(arguments[{argIndex}])");
-                }
-                else if (type.MetadataType == MetadataType.Int32)
-                {
-                    caseArgumentsBuilder.Append($"context.ToInt(callerContext.Span, arguments[{argIndex}])");
-                }
-                else
-                {
-                    if (type.MetadataType != MetadataType.Object)
-                    {
-                        if (type.Name == "IList")
-                        {
-                            caseArgumentsBuilder.Append($"context.ToList(callerContext.Span, arguments[{argIndex}])");
-                        }
-                        else
-                        {
-                            caseArgumentsBuilder.Append($"({PrettyType(type)})context.ToObject(callerContext.Span, arguments[{argIndex}], typeof({PrettyType(type)}))");
-                        }
-                    }
-                    else
-                    {
-                        caseArgumentsBuilder.Append($"arguments[{argIndex}]");
-                    }
-                }
-                caseArgumentsBuilder.AppendLine(";");
+                caseArgumentsBuilder.AppendLine($"                var arg{argIndex} = ({PrettyType(type)})arguments[{argIndex}];");
 
                 delegateCallArgs.Append($"arg{argIndex}");
                 argIndex++;
