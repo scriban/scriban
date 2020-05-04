@@ -200,8 +200,6 @@ namespace Scriban.Syntax
 
                 try
                 {
-                    _context.SetValue(ScriptVariable.Arguments, string.Empty, true);
-
                     if (node.HasParameters)
                     {
                         for (var i = 0; i < node.Parameters.Count; i++)
