@@ -197,9 +197,15 @@ namespace Scriban.Syntax
                 {
                     _context.PushVariableScope(ScriptVariableScope.Global);
                 }
+                else
+                {
+                    _context.PushVariableScope(ScriptVariableScope.Local);
+                }
 
                 try
                 {
+                    _context.SetValue(ScriptVariable.Arguments, string.Empty, true);
+
                     if (node.HasParameters)
                     {
                         for (var i = 0; i < node.Parameters.Count; i++)
@@ -216,6 +222,10 @@ namespace Scriban.Syntax
                     if (node.HasParameters)
                     {
                         _context.PopVariableScope(ScriptVariableScope.Global);
+                    }
+                    else
+                    {
+                        _context.PopVariableScope(ScriptVariableScope.Local);
                     }
                 }
             }
