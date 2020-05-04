@@ -22,22 +22,16 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _statements, value);
         }
 
-        public bool HasReturn => _statements != null && _statements.Count > 1 && _statements[_statements.Count - 2] is ScriptReturnStatement;
-
         public override object Evaluate(TemplateContext context)
         {
             object result = null;
             var statements = Statements;
-            var token = context.CancellationToken;
             for (int i = 0; i < statements.Count; i++)
             {
                 var statement =  statements[i];
 
-                // Throw if cancellation is requested
-                if (token.IsCancellationRequested)
-                {
-                    token.ThrowIfCancellationRequested();
-                }
+                // Throws a cancellation
+                context.CheckAbort();
 
                 if (statement.CanSkipEvaluation)
                 {

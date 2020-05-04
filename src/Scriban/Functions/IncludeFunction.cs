@@ -107,14 +107,14 @@ namespace Scriban.Functions
 
             context.PushOutput();
             object result = null;
+            context.EnterRecursive(callerContext);
             try
             {
-                context.EnterRecursive(callerContext);
                 result = template.Render(context);
-                context.ExitRecursive(callerContext);
             }
             finally
             {
+                context.ExitRecursive(callerContext);
                 context.PopOutput();
             }
 

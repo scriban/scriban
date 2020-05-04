@@ -321,12 +321,31 @@ namespace Scriban
         public bool EnableRelaxedMemberAccess { get; set; }
 
         /// <summary>
+        /// Gets the current node being evaluated.
+        /// </summary>
+        public ScriptNode CurrentNode { get; private set; }
+
+        /// <summary>
         /// Indicates if we are in a looop
         /// </summary>
         /// <value>
         ///   <c>true</c> if [in loop]; otherwise, <c>false</c>.
         /// </value>
         internal bool IsInLoop => _loops.Count > 0;
+
+        /// <summary>
+        /// Throws a <see cref="ScriptAbortException"/> is a cancellation was issued on the <see cref="CancellationToken"/>.
+        /// </summary>
+        public void CheckAbort()
+        {
+            RuntimeHelpers.EnsureSufficientExecutionStack();
+            var token = this.CancellationToken;
+            // Throw if cancellation is requested
+            if (token.IsCancellationRequested)
+            {
+                throw new ScriptAbortException(CurrentNode?.Span ?? new SourceSpan(), token);
+            }
+        }
 
         /// <summary>
         /// Push a new <see cref="CultureInfo"/> to be used when rendering/parsing numbers.
@@ -766,8 +785,10 @@ namespace Scriban
 
             var previousFunctionCallState = _isFunctionCallDisabled;
             var previousLevel = _getOrSetValueLevel;
+            var previousNode = CurrentNode;
             try
             {
+                CurrentNode = scriptNode;
                 _getOrSetValueLevel = 0;
                 _isFunctionCallDisabled = aliasReturnedFunction;
                 return scriptNode.Evaluate(this);
@@ -778,6 +799,7 @@ namespace Scriban
             }
             finally
             {
+                CurrentNode = previousNode;
                 _getOrSetValueLevel = previousLevel;
                 _isFunctionCallDisabled = previousFunctionCallState;
             }
@@ -847,6 +869,15 @@ namespace Scriban
 
         public void EnterRecursive(ScriptNode node)
         {
+            try
+            {
+                RuntimeHelpers.EnsureSufficientExecutionStack();
+            }
+            catch (InsufficientExecutionStackException)
+            {
+                throw new ScriptRuntimeException(node.Span, $"Exceeding recursive depth limit, near to stack overflow");
+            }
+
             _callDepth++;
             if (_callDepth > RecursiveLimit)
             {
@@ -859,7 +890,7 @@ namespace Scriban
             _callDepth--;
             if (_callDepth < 0)
             {
-                throw new InvalidOperationException($"unexpected ExitRecursive not matching EnterRecursive for `{node}`");
+                throw new ScriptRuntimeException(node.Span, $"unexpected ExitRecursive not matching EnterRecursive for `{node}`");
             }
         }
 

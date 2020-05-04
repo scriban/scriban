@@ -150,7 +150,6 @@ y and z = 5 and 0";
         }
 
         [Test]
-
         public void TestFunctionCallWithNoReturn()
         {
             {
@@ -174,8 +173,22 @@ func g(x); if x < 0; ret x + 1; else; ret x + 2; end; end;
                 var result = template.Render(tc);
                 Assert.AreEqual("5", result);
             }
+        }
 
 
+        [Test]
+        public void TestStackOverflow()
+        {
+            {
+                var template = Template.Parse(@"
+{{-
+f(x) = f(x - 1)
+f(1)
+-}}
+");
+                var tc = new TemplateContext();
+                Assert.Throws<ScriptRuntimeException>(() => template.Render(tc));
+            }
         }
 
         [Test]

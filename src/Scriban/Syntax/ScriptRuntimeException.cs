@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Scriban.Helpers;
 using Scriban.Parsing;
 
@@ -47,7 +48,22 @@ namespace Scriban.Syntax
             return Message;
         }
     }
+    
+    public class ScriptAbortException : ScriptRuntimeException
+    {
+        public ScriptAbortException(SourceSpan span, CancellationToken cancellationToken) : this(span, "The operation was cancelled", cancellationToken)
+        {
+            CancellationToken = cancellationToken;
+        }
 
+        public ScriptAbortException(SourceSpan span, string message, CancellationToken cancellationToken) : base(span, message)
+        {
+            CancellationToken = cancellationToken;
+        }
+
+        public CancellationToken CancellationToken { get; }
+    }
+    
     public class ScriptParserRuntimeException : ScriptRuntimeException
     {
         public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages) : this(span, message, parserMessages, null)
