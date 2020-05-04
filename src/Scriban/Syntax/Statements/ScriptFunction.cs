@@ -69,10 +69,13 @@ namespace Scriban.Syntax
             set
             {
                 ParentToThis(ref _body, value);
-
-                // Detects if this function is returning a value
-                _hasReturnType = value is ScriptExpressionStatement || value is ScriptBlockStatement blockStatement && blockStatement.HasReturn;
+                UpdateReturnType();
             }
+        }
+
+        public void UpdateReturnType()
+        {
+            _hasReturnType = FindRetVisitor.HasRet(Body);
         }
 
         public bool IsAnonymous => !(NameOrDoToken is ScriptVariable);
@@ -187,6 +190,49 @@ namespace Scriban.Syntax
         {
             if (Parameters == null) return new ScriptParameterInfo(typeof(object), string.Empty);
             return new ScriptParameterInfo(typeof(object), Parameters[index].Name);
+        }
+
+        /// <summary>
+        /// Finds a <see cref="ScriptReturnStatement"/> in a tree.
+        /// TODO: could be provided as a generic version
+        /// </summary>
+        private class FindRetVisitor : ScriptVisitor
+        {
+            [ThreadStatic] private static FindRetVisitor _instance;
+
+            private FindRetVisitor(){}
+
+            public static bool HasRet(ScriptNode node)
+            {
+                if (node == null) return false;
+                var local = _instance ??= new FindRetVisitor();
+                local.Found = false;
+                local.Visit(node);
+                return local.Found;
+            }
+
+            public bool Found { get; private set; }
+
+            public override void Visit(ScriptReturnStatement node)
+            {
+                Found = true;
+            }
+
+            protected override void DefaultVisit(ScriptNode node)
+            {
+                if (Found) return;
+
+                if (node == null)
+                    return;
+
+                var childrenCount = node.ChildrenCount;
+                for(int i = 0; i < childrenCount; i++)
+                {
+                    var child = node.GetChildren(i);
+                    Visit(child);
+                    if (Found) return; // early exit if found
+                }
+            }
         }
     }
 }

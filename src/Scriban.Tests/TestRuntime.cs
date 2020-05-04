@@ -153,15 +153,29 @@ y and z = 5 and 0";
 
         public void TestFunctionCallWithNoReturn()
         {
-            var template = Template.Parse(@"
+            {
+                var template = Template.Parse(@"
 {{-
-f(x) = x + 1
 func g(x); x ; end;
 1 + g(2)
 -}}
 ");
-            var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
-            Assert.Throws<ScriptRuntimeException>(() => template.Render(tc));
+                var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+                Assert.Throws<ScriptRuntimeException>(() => template.Render(tc));
+            }
+            {
+                var template = Template.Parse(@"
+{{-
+func g(x); if x < 0; ret x + 1; else; ret x + 2; end; end;
+1 + g(2) + g(-1)
+-}}
+");
+                var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+                var result = template.Render(tc);
+                Assert.AreEqual("5", result);
+            }
+
+
         }
 
         [Test]
