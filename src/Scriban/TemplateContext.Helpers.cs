@@ -143,7 +143,7 @@ namespace Scriban
                 return ObjectToString(keyValuePair);
             }
 
-            if (value is IScriptCustomFunction)
+            if (value is IScriptCustomFunction && !(value is ScriptFunction))
             {
                 return "<function>";
             }
