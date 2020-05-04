@@ -55,7 +55,7 @@ namespace Scriban.Syntax
                     {
                         if (!(value is bool))
                         {
-                            throw new ScriptRuntimeException(Right.Span, $"Expecting a boolean instead of {value?.GetType().ScriptFriendlyName()} value: {value}");
+                            throw new ScriptRuntimeException(Right.Span, $"Expecting a boolean instead of {value?.GetType().ScriptPrettyName()} value: {value}");
                         }
                         return !(bool) value;
                     }

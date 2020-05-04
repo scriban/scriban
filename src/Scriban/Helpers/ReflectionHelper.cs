@@ -64,7 +64,7 @@ namespace Scriban.Helpers
             return type.DeclaredMethods;
         }
 
-        public static string ScriptFriendlyName(this Type type)
+        public static string ScriptPrettyName(this Type type)
         {
             if (type == null) return "null";
 
@@ -81,6 +81,7 @@ namespace Scriban.Helpers
             if (type == typeof(double)) return "double";
             if (type == typeof(decimal)) return "decimal";
             if (type == typeof(BigInteger)) return "BigInteger";
+            if (type == typeof(ScriptArray)) return "[]";
 
             string name = type.Name;
 

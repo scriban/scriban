@@ -172,7 +172,7 @@ namespace Scriban.Syntax
 
             if (function == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({functionObject?.GetType().ScriptFriendlyName()})");
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({functionObject?.GetType().ScriptPrettyName()})");
             }
 
             if (function.ParameterCount >= MaximumParameterCount)

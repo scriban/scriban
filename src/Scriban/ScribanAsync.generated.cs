@@ -1012,7 +1012,7 @@ namespace Scriban.Syntax
             var function = functionObject as IScriptCustomFunction;
             if (function == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({functionObject?.GetType().ScriptFriendlyName()})");
+                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({functionObject?.GetType().ScriptPrettyName()})");
             }
 
             if (function.ParameterCount >= MaximumParameterCount)
@@ -1774,7 +1774,7 @@ namespace Scriban.Syntax
                         {
                             if (!(value is bool))
                             {
-                                throw new ScriptRuntimeException(Right.Span, $"Expecting a boolean instead of {value?.GetType().ScriptFriendlyName()} value: {value}");
+                                throw new ScriptRuntimeException(Right.Span, $"Expecting a boolean instead of {value?.GetType().ScriptPrettyName()} value: {value}");
                             }
 
                             return !(bool)value;
