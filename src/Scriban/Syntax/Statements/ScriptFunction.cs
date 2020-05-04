@@ -81,12 +81,15 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-
             if (NameOrDoToken is ScriptVariable variable)
             {
                 context.SetValue(variable, this);
+                return null;
             }
-            return null;
+            else
+            {
+                return this;
+            }
         }
 
         public override bool CanHaveLeadingTrivia()
