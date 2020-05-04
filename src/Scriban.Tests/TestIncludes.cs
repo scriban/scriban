@@ -85,31 +85,31 @@ namespace Scriban.Tests
         [Test]
         public void TestLiquidNull()
         {
-            TestParser.AssertTemplate("", "{% include a %}", true);
+            TestParser.AssertTemplate("", "{% include a %}", ScriptLang.Liquid);
         }
 
         [Test]
         public void TestLiquidWith()
         {
-            TestParser.AssertTemplate("with_product: Orange", "{% include 'with_product' with product %}", true);
+            TestParser.AssertTemplate("with_product: Orange", "{% include 'with_product' with product %}", ScriptLang.Liquid);
         }
 
         [Test]
         public void TestLiquidFor()
         {
-            TestParser.AssertTemplate("for_product: Orange for_product: Banana for_product: Apple for_product: Computer for_product: Mobile Phone for_product: Table for_product: Sofa ", "{% include 'for_product' for products %}", true);
+            TestParser.AssertTemplate("for_product: Orange for_product: Banana for_product: Apple for_product: Computer for_product: Mobile Phone for_product: Table for_product: Sofa ", "{% include 'for_product' for products %}", ScriptLang.Liquid);
         }
 
         [Test]
         public void TestLiquidArguments()
         {
-            TestParser.AssertTemplate("1 + yoyo", "{% include 'arguments' var1: 1, var2: 'yoyo' %}", true);
+            TestParser.AssertTemplate("1 + yoyo", "{% include 'arguments' var1: 1, var2: 'yoyo' %}", ScriptLang.Liquid);
         }
 
         [Test]
         public void TestLiquidWithAndArguments()
         {
-            TestParser.AssertTemplate("tada : 1 + yoyo", "{% include 'with_arguments' with 'tada' var1: 1, var2: 'yoyo' %}", true);
+            TestParser.AssertTemplate("tada : 1 + yoyo", "{% include 'with_arguments' with 'tada' var1: 1, var2: 'yoyo' %}", ScriptLang.Liquid);
         }
 
         [Test]

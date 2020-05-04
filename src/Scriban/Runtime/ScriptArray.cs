@@ -4,7 +4,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using Scriban.Functions;
+using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Syntax;
 
@@ -15,9 +18,9 @@ namespace Scriban.Runtime
     /// </summary>
     /// <seealso cref="object" />
     /// <seealso cref="System.Collections.IList" />
-    public class ScriptArray<T> : IList<T>, IList, IScriptObject where T : class
+    public class ScriptArray : IList<object>, IList, IScriptObject, IScriptCustomBinaryOperation
     {
-        private List<T> _values;
+        private List<object> _values;
         private bool _isReadOnly;
 
         // Attached ScriptObject is only created if needed
@@ -28,7 +31,7 @@ namespace Scriban.Runtime
         /// </summary>
         public ScriptArray()
         {
-            _values = new List<T>();
+            _values = new List<object>();
         }
 
         /// <summary>
@@ -37,24 +40,24 @@ namespace Scriban.Runtime
         /// <param name="capacity">The capacity.</param>
         public ScriptArray(int capacity)
         {
-            _values = new List<T>(capacity);
+            _values = new List<object>(capacity);
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ScriptArray{T}"/> class.
+        /// Initializes a new instance of the <see cref="ScriptArray{object}"/> class.
         /// </summary>
         /// <param name="values">The values.</param>
-        public ScriptArray(IEnumerable<T> values)
+        public ScriptArray(IEnumerable<object> values)
         {
-            this._values = new List<T>(values);
+            this._values = new List<object>(values);
         }
 
         public ScriptArray(IEnumerable values)
         {
-            this._values = new List<T>();
+            this._values = new List<object>();
             foreach (var value in values)
             {
-                _values.Add((T)value);
+                _values.Add((object)value);
             }
         }
 
@@ -119,7 +122,7 @@ namespace Scriban.Runtime
 
         public int Count => _values.Count;
 
-        public virtual T this[int index]
+        public virtual object this[int index]
         {
             get => index < 0 || index >= _values.Count ? null : _values[index];
             set
@@ -141,13 +144,13 @@ namespace Scriban.Runtime
             }
         }
 
-        public virtual void Add(T item)
+        public virtual void Add(object item)
         {
             this.AssertNotReadOnly();
             _values.Add(item);
         }
 
-        public void AddRange(IEnumerable<T> items)
+        public void AddRange(IEnumerable<object> items)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
             foreach (var item in items)
@@ -158,7 +161,7 @@ namespace Scriban.Runtime
 
         int IList.Add(object value)
         {
-            Add((T) value);
+            Add((object) value);
             return 0;
         }
 
@@ -180,31 +183,31 @@ namespace Scriban.Runtime
 
         void IList.Insert(int index, object value)
         {
-            Insert(index, (T)value);
+            Insert(index, (object)value);
         }
 
-        public virtual bool Contains(T item)
+        public virtual bool Contains(object item)
         {
             return _values.Contains(item);
         }
 
-        public virtual void CopyTo(T[] array, int arrayIndex)
+        public virtual void CopyTo(object[] array, int arrayIndex)
         {
             _values.CopyTo(array, arrayIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, T[] array, int arrayIndex, int count)
+        public void CopyTo(int index, object[] array, int arrayIndex, int count)
         {
             _values.CopyTo(index, array, arrayIndex, count);
         }
 
-        public virtual int IndexOf(T item)
+        public virtual int IndexOf(object item)
         {
             return _values.IndexOf(item);
         }
 
-        public virtual void Insert(int index, T item)
+        public virtual void Insert(int index, object item)
         {
             this.AssertNotReadOnly();
             // Auto-expand the array in case of accessing a range outside the current value
@@ -218,7 +221,7 @@ namespace Scriban.Runtime
 
         void IList.Remove(object value)
         {
-            Remove((T) value);
+            Remove((object) value);
         }
 
         public virtual void RemoveAt(int index)
@@ -236,17 +239,17 @@ namespace Scriban.Runtime
             get => this[index];
             set
             {
-                this[index] = (T)value;
+                this[index] = (object)value;
             }
         }
 
-        public virtual bool Remove(T item)
+        public virtual bool Remove(object item)
         {
             this.AssertNotReadOnly();
             return _values.Remove(item);
         }
 
-        public List<T>.Enumerator GetEnumerator()
+        public List<object>.Enumerator GetEnumerator()
         {
             return _values.GetEnumerator();
         }
@@ -259,7 +262,7 @@ namespace Scriban.Runtime
 
         bool IList.IsReadOnly => IsReadOnly;
 
-        IEnumerator<T> IEnumerable<T>.GetEnumerator()
+        IEnumerator<object> IEnumerable<object>.GetEnumerator()
         {
             return _values.GetEnumerator();
         }
@@ -269,7 +272,7 @@ namespace Scriban.Runtime
             return _values.GetEnumerator();
         }
 
-        bool ICollection<T>.IsReadOnly => IsReadOnly;
+        bool ICollection<object>.IsReadOnly => IsReadOnly;
 
         void ICollection.CopyTo(Array array, int index)
         {
@@ -328,44 +331,226 @@ namespace Scriban.Runtime
         {
             ScriptObject.SetReadOnly(member, readOnly);
         }
-    }
 
-    /// <summary>
-    /// Base runtime object for arrays.
-    /// </summary>
-    /// <seealso cref="object" />
-    /// <seealso cref="System.Collections.IList" />
-    public class ScriptArray : ScriptArray<object>
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ScriptArray"/> class.
-        /// </summary>
-        public ScriptArray()
+        public object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
         {
+            var leftArray = TryGetArray(leftValue);
+            var rightArray = TryGetArray(rightValue);
+            int intModifier = 0;
+
+            string reason = null;
+            switch (op)
+            {
+                case ScriptBinaryOperator.BinaryOr:
+                case ScriptBinaryOperator.BinaryAnd:
+                case ScriptBinaryOperator.CompareEqual:
+                case ScriptBinaryOperator.CompareNotEqual:
+                case ScriptBinaryOperator.CompareLessOrEqual:
+                case ScriptBinaryOperator.CompareGreaterOrEqual:
+                case ScriptBinaryOperator.CompareLess:
+                case ScriptBinaryOperator.CompareGreater:
+                case ScriptBinaryOperator.Add:
+                    if (leftArray == null)
+                    {
+                        reason = " Expecting an array for the left argument.";
+                    }
+                    if (rightArray == null)
+                    {
+                        reason = " Expecting an array for the right argument.";
+                    }
+                    break;
+                case ScriptBinaryOperator.Multiply:
+                    if (leftArray == null && rightArray == null || leftArray != null && rightArray != null)
+                    {
+                        reason = " Expecting only one array for the left or right argument.";
+                    }
+                    else
+                    {
+                        intModifier = context.ToInt(span, leftArray == null ? leftValue : rightValue);
+                    }
+                    break;
+                case ScriptBinaryOperator.Divide:
+                case ScriptBinaryOperator.DivideRound:
+                case ScriptBinaryOperator.Modulus:
+                    if (leftArray == null)
+                    {
+                        reason = " Expecting an array for the left argument.";
+                    }
+                    else
+                    {
+                        intModifier = context.ToInt(span, rightValue);
+                    }
+                    break;
+                case ScriptBinaryOperator.ShiftLeft:
+                    if (leftArray == null)
+                    {
+                        reason = " Expecting an array for the left argument.";
+                    }
+                    break;
+                case ScriptBinaryOperator.ShiftRight:
+                    if (rightArray == null)
+                    {
+                        reason = " Expecting an array for the right argument.";
+                    }
+                    break;
+                default:
+                    reason = string.Empty;
+                    break;
+            }
+
+            if (intModifier < 0)
+            {
+                reason = $" Integer {intModifier} cannot be negative when multiplying";
+            }
+
+            if (reason != null)
+            {
+                throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and  {rightValue?.GetType().ScriptPrettyName()}.{reason}");
+            }
+
+            switch (op)
+            {
+                case ScriptBinaryOperator.BinaryOr:
+                    return new ScriptArray(leftArray.Union(rightArray));
+
+                case ScriptBinaryOperator.BinaryAnd:
+                    return new ScriptArray(leftArray.Intersect(rightArray));
+
+                case ScriptBinaryOperator.Add:
+                    return ArrayFunctions.Concat(leftArray, rightArray);
+
+                case ScriptBinaryOperator.CompareEqual:
+                case ScriptBinaryOperator.CompareNotEqual:
+                case ScriptBinaryOperator.CompareLessOrEqual:
+                case ScriptBinaryOperator.CompareGreaterOrEqual:
+                case ScriptBinaryOperator.CompareLess:
+                case ScriptBinaryOperator.CompareGreater:
+                    return CompareTo(context, span, op, leftArray, rightArray);
+
+                case ScriptBinaryOperator.Multiply:
+                {
+                    // array with integer
+                    var array = leftArray ?? rightArray;
+                    if (intModifier == 0) return new ScriptArray();
+
+                    var newArray = new ScriptArray(array);
+                    for (int i = 0; i < intModifier; i++)
+                    {
+                        newArray.AddRange(array);
+                    }
+
+                    return newArray;
+                }
+
+                case ScriptBinaryOperator.Divide:
+                case ScriptBinaryOperator.DivideRound:
+                {
+                    // array with integer
+                    var array = leftArray ?? rightArray;
+                    if (intModifier == 0) throw new ScriptRuntimeException(span, "Cannot divide by 0");
+
+                    var newLength = array.Count / intModifier;
+                    var newArray = new ScriptArray(newLength);
+                    for (int i = 0; i < newLength; i++)
+                    {
+                        newArray.Add(array[i]);
+                    }
+
+                    return newArray;
+                }
+
+                case ScriptBinaryOperator.Modulus:
+                {
+                    // array with integer
+                    var array = leftArray ?? rightArray;
+                    if (intModifier == 0) throw new ScriptRuntimeException(span, "Cannot divide by 0");
+
+                    var newArray = new ScriptArray(array.Count);
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        if ((i % intModifier) == 0)
+                        {
+                            newArray.Add(array[i]);
+                        }
+                    }
+
+                    return newArray;
+                }
+
+                case ScriptBinaryOperator.ShiftLeft:
+                    var newLeft = new ScriptArray(leftArray);
+                    newLeft.Add(rightValue);
+                    return newLeft;
+
+                case ScriptBinaryOperator.ShiftRight:
+                    var newRight = new ScriptArray(rightArray);
+                    newRight.Insert(0, leftValue);
+                    return newRight;
+
+                default:
+                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and  {rightValue?.GetType().ScriptPrettyName()}.");
+            }
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ScriptArray"/> class.
-        /// </summary>
-        /// <param name="capacity">The capacity.</param>
-        public ScriptArray(int capacity) : base(capacity)
+        private static ScriptArray TryGetArray(object rightValue)
         {
+            var rightArray = rightValue as ScriptArray;
+            if (rightArray == null)
+            {
+                var list = rightValue as IList;
+                if (list != null)
+                {
+                    rightArray = new ScriptArray(list);
+                }
+                else if (rightValue is IEnumerable enumerable && !(rightValue is string))
+                {
+                    rightArray = new ScriptArray(enumerable);
+                }
+            }
+            return rightArray;
         }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ScriptArray"/> class.
-        /// </summary>
-        /// <param name="values">The values.</param>
-        public ScriptArray(IEnumerable values) : base(values)
-        {
-        }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ScriptArray"/> class.
-        /// </summary>
-        /// <param name="values">The values.</param>
-        public ScriptArray(IEnumerable<object> values) : base(values)
+        private static bool CompareTo(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, ScriptArray left, ScriptArray right)
         {
+            // Compare the length first
+            var compare = left.Count.CompareTo(right.Count);
+            switch (op)
+            {
+                case ScriptBinaryOperator.CompareEqual:
+                    if (compare != 0) return false;
+                    break;
+                case ScriptBinaryOperator.CompareNotEqual:
+                    if (compare != 0) return true;
+                    if (left.Count == 0) return false;
+                    break;
+                case ScriptBinaryOperator.CompareLessOrEqual:
+                case ScriptBinaryOperator.CompareLess:
+                    if (compare < 0) return true;
+                    if (compare > 0) return false;
+                    if (left.Count == 0 && op == ScriptBinaryOperator.CompareLess) return false;
+                    break;
+                case ScriptBinaryOperator.CompareGreaterOrEqual:
+                case ScriptBinaryOperator.CompareGreater:
+                    if (compare < 0) return false;
+                    if (compare > 0) return true;
+                    if (left.Count == 0 && op == ScriptBinaryOperator.CompareGreater) return false;
+                    break;
+                default:
+                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {left?.GetType().ScriptPrettyName()} and  {right?.GetType().ScriptPrettyName()}.");
+            }
+
+            // Otherwise we need to compare each element
+            for (int i = 0; i < left.Count; i++)
+            {
+                var result = (bool) ScriptBinaryExpression.Evaluate(context, span, op, left[i], right[i]);
+                if (!result)
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
     }
 

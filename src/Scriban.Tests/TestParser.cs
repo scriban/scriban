@@ -524,15 +524,23 @@ end
             var expectedOutputText = LoadTestFile(expectedOutputName);
             Assert.NotNull(expectedOutputText, $"Expecting output result file `{expectedOutputName}` for input file `{inputName}`");
 
-            var isLiquid = inputName.Contains("liquid");
+            var lang = ScriptLang.Default;
+            if (inputName.Contains("liquid"))
+            {
+                lang = ScriptLang.Liquid;
+            }
+            else if (inputName.Contains("scientific"))
+            {
+                lang = ScriptLang.Scientific;
+            }
 
-            AssertTemplate(expectedOutputText, inputText, isLiquid, false, isSupportingExactRoundtrip, expectParsingErrorForRountrip: filename == "513-liquid-statement-for.variables.txt");
+            AssertTemplate(expectedOutputText, inputText, lang, false, isSupportingExactRoundtrip, expectParsingErrorForRountrip: filename == "513-liquid-statement-for.variables.txt");
         }
 
         private void AssertRoundtrip(string inputText, bool isLiquid = false)
         {
             inputText = inputText.Replace("\r\n", "\n");
-            AssertTemplate(inputText, inputText, isLiquid, true);
+            AssertTemplate(inputText, inputText, isLiquid ? ScriptLang.Liquid : ScriptLang.Default, true);
         }
 
 
@@ -548,15 +556,17 @@ end
             "470-html.txt"
         };
 
-        public static void AssertTemplate(string expected, string input, bool isLiquid = false, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false)
+        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false)
         {
+            bool isLiquid = lang == ScriptLang.Liquid;
+
             var parserOptions = new ParserOptions()
             {
-                LiquidFunctionsToScriban = isLiquid
+                LiquidFunctionsToScriban = isLiquid,
             };
             var lexerOptions = new LexerOptions()
             {
-                Lang = isLiquid ? ScriptLang.Liquid : ScriptLang.Default
+                Lang = lang
             };
 
             if (isRoundtripTest)
@@ -594,7 +604,7 @@ end
                     Console.WriteLine("Roundtrip");
                     Console.WriteLine("======================================");
                     Console.WriteLine(roundtripText);
-                    lexerOptions.Lang = ScriptLang.Default;
+                    lexerOptions.Lang = lang == ScriptLang.Scientific ? lang : ScriptLang.Default;
 
                     if (!isLiquid && supportExactRoundtrip)
                     {
@@ -678,7 +688,7 @@ end
 
                             // Render sync
                             {
-                                var context = NewTemplateContext(isLiquid);
+                                var context = NewTemplateContext(lang);
                                 context.PushOutput(new TextWriterOutput(new StringWriter() {NewLine = "\n"}));
                                 var contextObj = new ScriptObject();
                                 contextObj.Import(model);
@@ -688,7 +698,7 @@ end
 
                             // Render async
                             {
-                                var asyncContext = NewTemplateContext(isLiquid);
+                                var asyncContext = NewTemplateContext(lang);
                                 asyncContext.PushOutput(new TextWriterOutput(new StringWriter() {NewLine = "\n"}));
                                 var contextObj = new ScriptObject();
                                 contextObj.Import(model);
@@ -743,8 +753,9 @@ end
             }
         }
 
-        private static TemplateContext NewTemplateContext(bool isLiquid)
+        private static TemplateContext NewTemplateContext(ScriptLang lang)
         {
+            var isLiquid = lang == ScriptLang.Liquid;
             var context = isLiquid
                 ? new LiquidTemplateContext()
                 {
@@ -754,6 +765,10 @@ end
                 {
                     TemplateLoader = new CustomTemplateLoader()
                 };
+            if (lang == ScriptLang.Scientific)
+            {
+                context.UseScientific = true;
+            }
             // We use a custom output to make sure that all output is using the "\n"
             context.NewLine = "\n";
             return context;

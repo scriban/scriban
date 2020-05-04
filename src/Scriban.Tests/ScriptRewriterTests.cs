@@ -55,7 +55,17 @@ namespace Scriban.Tests
                     ? (Func<string, string, ParserOptions?, LexerOptions?, Template>) Template.ParseLiquid
                     : Template.Parse;
 
-            var template = parser(templateSource, inputName, default, default);
+            var options = new LexerOptions();
+            if (inputName.Contains("liquid"))
+            {
+                options.Lang = ScriptLang.Liquid;
+            }
+            else if (inputName.Contains("scientific"))
+            {
+                options.Lang = ScriptLang.Scientific;
+            }
+
+            var template = parser(templateSource, inputName, default, options);
             if (template.HasErrors || template.Page == null)
             {
                 if (inputName.Contains("error"))

@@ -65,7 +65,7 @@ namespace Scriban
             var iterator = value as IEnumerable;
             if (iterator == null)
             {
-                throw new ScriptRuntimeException(span, $"Unexpected list value. Expecting an array, list or iterator. Unablet to convert to a list");
+                throw new ScriptRuntimeException(span, $"Unexpected list value. Expecting an array, list or iterator. Unable to convert to a list.");
             }
             return new ScriptArray(iterator);
         }

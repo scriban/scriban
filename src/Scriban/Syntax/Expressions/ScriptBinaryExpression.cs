@@ -110,25 +110,6 @@ namespace Scriban.Syntax
 
             switch (op)
             {
-                case ScriptBinaryOperator.ShiftLeft:
-                    var leftList = leftValue as IList;
-                    if (leftList != null)
-                    {
-                        var newList = new ScriptArray(leftList) { rightValue };
-                        return newList;
-                    }
-                    goto case ScriptBinaryOperator.CompareEqual;
-
-                case ScriptBinaryOperator.ShiftRight:
-                    var rightList = rightValue as IList;
-                    if (rightList != null)
-                    {
-                        var newList = new ScriptArray(rightList);
-                        newList.Insert(0, leftValue);
-                        return newList;
-                    }
-                    goto case ScriptBinaryOperator.CompareEqual;
-
                 case ScriptBinaryOperator.LiquidHasKey:
                 {
                     var leftDict = leftValue as IDictionary<string, object>;
@@ -164,6 +145,8 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.Power:
                 case ScriptBinaryOperator.BinaryAnd:
                 case ScriptBinaryOperator.BinaryOr:
+                case ScriptBinaryOperator.ShiftLeft:
+                case ScriptBinaryOperator.ShiftRight:
                 case ScriptBinaryOperator.RangeInclude:
                 case ScriptBinaryOperator.RangeExclude:
                 case ScriptBinaryOperator.LiquidContains:
