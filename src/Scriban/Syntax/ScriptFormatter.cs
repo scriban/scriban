@@ -156,7 +156,7 @@ namespace Scriban.Syntax
                     // We remove any trailing spaces after the target cos (x) => cos(x)
                     functionCall.Target.RemoveTrailingSpace();
                     functionCall.Arguments.RemoveLeadingSpace();
-                    functionCall.Arguments.RemoveTrailingSpace();
+                    functionCall.Arguments.MoveTrailingTriviasTo(functionCall.CloseParen, false);
                 }
             }
 
