@@ -1270,7 +1270,12 @@ namespace Scriban.Parsing
             if (c == '.')
             {
                 // If the next char is a '.' it means that we have a range iterator, so we don't touch it
-                if (PeekChar() != '.')
+                var nc = PeekChar();
+                // Only support . followed
+                // - by the postfix: 1.f 2.f
+                // - by a digit: 1.0
+                // - by an exponent 1.e10
+                if (nc != '.' && (IsNumberPostFix(nc) || char.IsDigit(nc) || !char.IsLetter(nc) || nc == 'e' || nc == 'E'))
                 {
                     isFloat = true;
                     end = _position;
@@ -1306,7 +1311,7 @@ namespace Scriban.Parsing
                 }
             }
 
-            if (!IsIdentifierLetter(PeekChar()) && c == 'f' || c == 'F' || c == 'd' || c == 'D' || c == 'm' || c == 'M')
+            if (!IsIdentifierLetter(PeekChar()) && IsNumberPostFix(c))
             {
                 isFloat = true;
                 end = _position;
@@ -1314,6 +1319,11 @@ namespace Scriban.Parsing
             }
 
             _token = new Token(isFloat ? TokenType.Float : TokenType.Integer, start, end);
+        }
+
+        private static bool IsNumberPostFix(char c)
+        {
+            return c == 'f' || c == 'F' || c == 'd' || c == 'D' || c == 'm' || c == 'M';
         }
 
         private static bool IsHexa(char c)
