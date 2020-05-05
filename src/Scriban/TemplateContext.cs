@@ -839,6 +839,10 @@ namespace Scriban
             {
                 accessor = ScriptObjectAccessor.Default;
             }
+            else if (target is string || type.IsPrimitiveOrDecimal())
+            {
+                accessor = PrimitiveAccessor.Default;
+            }
             else if (DictionaryAccessor.TryGet(target, out accessor))
             {
             }
@@ -1242,6 +1246,11 @@ namespace Scriban
             if (type == typeof(string))
             {
                 return StringAccessor.Default;
+            }
+
+            if (type.IsPrimitiveOrDecimal())
+            {
+                return PrimitiveAccessor.Default;
             }
 
             if (target is IList)

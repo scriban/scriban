@@ -62,7 +62,11 @@ namespace Scriban.Syntax
             // In case TemplateContext.EnableRelaxedMemberAccess
             if (targetObject == null)
             {
-                return null;
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    return null;
+                }
+                throw new ScriptRuntimeException(this.Member.Span, $"Cannot get the member {this} from a null target");
             }
 
             var accessor = context.GetMemberAccessor(targetObject);
@@ -106,20 +110,6 @@ namespace Scriban.Syntax
                     throw new ScriptRuntimeException(this.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
                 }
             }
-            else if (targetObject is string || targetObject.GetType().IsPrimitiveOrDecimal())
-            {
-                if (isSet || !context.EnableRelaxedMemberAccess)
-                {
-                    throw new ScriptRuntimeException(this.Span, $"Cannot get or set a member on the primitive `{targetObject}/{targetObject.GetType()}` when accessing member: {this}"); // unit test: 132-member-accessor-error2.txt
-                }
-
-                // If this is relaxed, set the target object to null
-                if (context.EnableRelaxedMemberAccess)
-                {
-                    targetObject = null;
-                }
-            }
-
             return targetObject;
         }
     }
