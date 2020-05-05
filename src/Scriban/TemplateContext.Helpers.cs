@@ -191,9 +191,9 @@ namespace Scriban
                     return (int) bigInt;
                 }
 
-                if (value is IScriptConvertible convertible)
+                if (value is IScriptConvertibleTo convertible && convertible.TryConvertTo(this, span, typeof(int), out var intValue))
                 {
-                    return (int)convertible.ConvertTo(span, typeof(int));
+                    return (int) intValue;
                 }
                 return Convert.ToInt32(value, CurrentCulture);
             }
@@ -201,6 +201,11 @@ namespace Scriban
             {
                 throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to int", ex);
             }
+        }
+
+        public T ToObject<T>(SourceSpan span, object value)
+        {
+            return (T) ToObject(span, value, typeof(T));
         }
 
         /// <summary>
@@ -268,9 +273,18 @@ namespace Scriban
                 return value;
             }
 
-            if (value is IScriptConvertible convertible)
+            if (value is IScriptConvertibleTo convertible && convertible.TryConvertTo(this, span, destinationType, out var result))
             {
-                return convertible.ConvertTo(span, destinationType);
+                return result;
+            }
+
+            if (typeof(IScriptConvertibleFrom).IsAssignableFrom(destinationType))
+            {
+                var dest = (IScriptConvertibleFrom)Activator.CreateInstance(destinationType);
+                if (dest.TryConvertFrom(this, span, value))
+                {
+                    return dest;
+                }
             }
 
             // Check for inheritance
@@ -347,7 +361,7 @@ namespace Scriban
                 }
                 catch (Exception ex)
                 {
-                    throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`", ex);
+                    throw new ScriptRuntimeException(span, $"Unable to convert type `{type.ScriptPrettyName()}` to `{destinationType.ScriptPrettyName()}`", ex);
                 }
             }
 
@@ -361,7 +375,7 @@ namespace Scriban
                 return value;
             }
 
-            throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to `{destinationType}`");
+            throw new ScriptRuntimeException(span, $"Unable to convert type `{type.ScriptPrettyName()}` to `{destinationType.ScriptPrettyName()}`");
         }
 
     }
