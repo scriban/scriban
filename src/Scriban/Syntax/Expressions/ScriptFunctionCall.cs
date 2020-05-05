@@ -162,6 +162,15 @@ namespace Scriban.Syntax
 
         public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, IReadOnlyList<ScriptExpression> arguments)
         {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            // Pop immediately the block
+            ScriptBlockStatement blockDelegate = null;
+            if (context.BlockDelegates.Count > 0)
+            {
+                blockDelegate = context.BlockDelegates.Pop();
+            }
+
             if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (functionObject == null)
             {
@@ -178,12 +187,6 @@ namespace Scriban.Syntax
             if (function.ParameterCount >= MaximumParameterCount)
             {
                 throw new ScriptRuntimeException(callerContext.Span, $"Out of range number of parameters {function.ParameterCount} for target function `{functionObject}`. The maximum number of parameters for a function is: {MaximumParameterCount}.");
-            }
-
-            ScriptBlockStatement blockDelegate = null;
-            if (context.BlockDelegates.Count > 0)
-            {
-                blockDelegate = context.BlockDelegates.Pop();
             }
 
             // Generates an error only if the context is configured for it
