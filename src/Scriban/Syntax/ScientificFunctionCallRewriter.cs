@@ -34,7 +34,7 @@ namespace Scriban.Syntax
 
         private static readonly int PrecedenceTopLevel = PrecedenceOfMultiply - 1;
 
-        private ScriptExpression Rewrite(TemplateContext context, int precedence)
+        private ScriptExpression Rewrite(TemplateContext context, int precedence, bool expectingExpression = false)
         {
             ScriptExpression leftValue = null;
 
@@ -86,7 +86,7 @@ namespace Scriban.Syntax
                     continue;
                 }
 
-                if (nextExpression is IScriptVariablePath)
+                if (!expectingExpression && nextExpression is IScriptVariablePath)
                 {
                     var restoreStrictVariables = context.StrictVariables;
 
@@ -105,20 +105,21 @@ namespace Scriban.Syntax
                     // If one argument is a function, the remaining arguments
                     if (result is IScriptCustomFunction function)
                     {
-                        var maxArg = function.RequiredParameterCount;
+                        var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
                         if (maxArg > 1)
                         {
                             throw new ScriptRuntimeException(nextExpression.Span, $"Cannot use a function with more than 1 argument ({maxArg}) in a sequence of implicit multiplications.");
                         }
 
-                        if (maxArg == 1 || function.IsParameterType<ScriptExpression>(0))
+                        if (maxArg == 1)
                         {
                             if (PrecedenceTopLevel == precedence || leftValue == null)
                             {
                                 var functionCall = new ScriptFunctionCall { Target = (ScriptExpression)nextExpression.Clone(), ExplicitCall = true };
                                 _index++;
 
-                                var arg = Rewrite(context, 0);
+                                var isExpectingExpression = function.IsParameterType<ScriptExpression>(0);
+                                var arg = Rewrite(context, 0, isExpectingExpression);
 
                                 functionCall.Arguments.Add(arg);
 

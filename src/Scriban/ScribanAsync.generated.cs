@@ -558,7 +558,7 @@ namespace Scriban.Syntax
         /// </summary>
     internal partial class ScientificFunctionCallRewriter
     {
-        private async ValueTask<ScriptExpression> RewriteAsync(TemplateContext context, int precedence)
+        private async ValueTask<ScriptExpression> RewriteAsync(TemplateContext context, int precedence, bool expectingExpression = false)
         {
             ScriptExpression leftValue = null;
             while (_index < Count)
@@ -601,7 +601,7 @@ namespace Scriban.Syntax
                     continue;
                 }
 
-                if (nextExpression is IScriptVariablePath)
+                if (!expectingExpression && nextExpression is IScriptVariablePath)
                 {
                     var restoreStrictVariables = context.StrictVariables;
                     // Don't fail on trying to lookup for a variable
@@ -619,19 +619,20 @@ namespace Scriban.Syntax
                     // If one argument is a function, the remaining arguments
                     if (result is IScriptCustomFunction function)
                     {
-                        var maxArg = function.RequiredParameterCount;
+                        var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
                         if (maxArg > 1)
                         {
                             throw new ScriptRuntimeException(nextExpression.Span, $"Cannot use a function with more than 1 argument ({maxArg}) in a sequence of implicit multiplications.");
                         }
 
-                        if (maxArg == 1 || function.IsParameterType<ScriptExpression>(0))
+                        if (maxArg == 1)
                         {
                             if (PrecedenceTopLevel == precedence || leftValue == null)
                             {
                                 var functionCall = new ScriptFunctionCall { Target = (ScriptExpression)nextExpression.Clone(), ExplicitCall = true };
                                 _index++;
-                                var arg = await RewriteAsync(context, 0).ConfigureAwait(false);
+                                var isExpectingExpression = function.IsParameterType<ScriptExpression>(0);
+                                var arg = await RewriteAsync(context, 0, isExpectingExpression).ConfigureAwait(false);
                                 functionCall.Arguments.Add(arg);
                                 if (leftValue == null)
                                 {
@@ -744,7 +745,7 @@ namespace Scriban.Syntax
                 default:
                     {
                         var rightValue = await context.EvaluateAsync(Right).ConfigureAwait(false);
-                        return Evaluate(context, Span, Operator, leftValue, rightValue);
+                        return Evaluate(context, Span, Operator, Left.Span, leftValue, Right.Span, rightValue);
                     }
             }
         }
