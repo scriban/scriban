@@ -530,10 +530,10 @@ namespace Scriban.Parsing
                             break;
                         }
 
-
-                        if (functionCall == null)
+                        bool isLikelyExplicitFunctionCall = Current.Type == TokenType.OpenParen && !IsPreviousCharWhitespace();
+                        if (functionCall == null || isLikelyExplicitFunctionCall)
                         {
-                            if (_isScientific && Current.Type != TokenType.OpenParen)
+                            if (_isScientific && !isLikelyExplicitFunctionCall)
                             {
                                 newPrecedence = PrecedenceOfMultiply;
 
@@ -545,6 +545,7 @@ namespace Scriban.Parsing
                                 precedence = newPrecedence;
                             }
 
+                            var pendingFunctionCall = functionCall;
 
                             functionCall = Open<ScriptFunctionCall>();
                             functionCall.Target = leftOperand;
@@ -610,7 +611,8 @@ namespace Scriban.Parsing
                                 }
 
                                 leftOperand = functionCall;
-                                functionCall = null;
+
+                                functionCall = pendingFunctionCall;
                                 continue;
                             }
                         }
