@@ -75,7 +75,7 @@ namespace Scriban.Syntax
 
         public void UpdateReturnType()
         {
-            _hasReturnType = FindRetVisitor.HasRet(Body);
+            _hasReturnType = Body is ScriptExpressionStatement || FindRetVisitor.HasRet(Body);
         }
 
         public bool IsAnonymous => !(NameOrDoToken is ScriptVariable);
