@@ -172,12 +172,21 @@ namespace Scriban.Syntax
                         // Allow custom binary operation
                         else if (leftValue is IScriptCustomBinaryOperation leftBinaryOp)
                         {
-                            return leftBinaryOp.Evaluate(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
+                            if (leftBinaryOp.TryEvaluate(context, span, op, leftSpan, leftValue, rightSpan, rightValue, out var result))
+                            {
+                                return result;
+                            }
+                            break;
                         }
                         else if (rightValue is IScriptCustomBinaryOperation rightBinaryOp)
                         {
-                            return rightBinaryOp.Evaluate(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
+                            if (rightBinaryOp.TryEvaluate(context, span, op, leftSpan, leftValue, rightSpan, rightValue, out var result))
+                            {
+                                return result;
+                            }
+                            break;
                         }
+                        else
                         {
                             return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
@@ -187,7 +196,8 @@ namespace Scriban.Syntax
                         throw new ScriptRuntimeException(span, ex.Message);
                     }
             }
-            throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{leftValue}` and `{rightValue}`");
+
+            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between `{leftValue}` and `{rightValue}`");
         }
 
         private static object CalculateEmpty(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)

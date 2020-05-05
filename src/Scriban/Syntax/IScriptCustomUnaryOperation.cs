@@ -8,6 +8,6 @@ namespace Scriban.Syntax
 {
     public interface IScriptCustomUnaryOperation
     {
-        object Evaluate(TemplateContext context, SourceSpan span, ScriptUnaryOperator op, object rightValue);
+        bool TryEvaluate(TemplateContext context, SourceSpan span, ScriptUnaryOperator op, object rightValue, out object result);
     }
 }

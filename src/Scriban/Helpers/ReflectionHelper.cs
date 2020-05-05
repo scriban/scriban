@@ -10,7 +10,7 @@ using Scriban.Runtime;
 
 namespace Scriban.Helpers
 {
-    internal static class ReflectionHelper
+    public static class ReflectionHelper
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPrimitiveOrDecimal(this Type type)
@@ -18,7 +18,7 @@ namespace Scriban.Helpers
             return type.IsPrimitive || type == typeof(decimal) || type == typeof(BigInteger);
         }
 
-        public static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
+        internal static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -44,24 +44,6 @@ namespace Scriban.Helpers
             }
 
             return null;
-        }
-
-        public static Type[] GetGenericArguments(this TypeInfo type)
-        {
-            return type.GenericTypeArguments;
-        }
-
-        public static IEnumerable<FieldInfo> GetDeclaredFields(this TypeInfo type)
-        {
-            return type.DeclaredFields;
-        }
-        public static IEnumerable<PropertyInfo> GetDeclaredProperties(this TypeInfo type)
-        {
-            return type.DeclaredProperties;
-        }
-        public static IEnumerable<MethodInfo> GetDeclaredMethods(this TypeInfo type)
-        {
-            return type.DeclaredMethods;
         }
 
         public static string ScriptPrettyName(this Type type)

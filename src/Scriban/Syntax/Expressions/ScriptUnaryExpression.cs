@@ -44,70 +44,76 @@ namespace Scriban.Syntax
 
             if (value is IScriptCustomUnaryOperation customUnary)
             {
-                return customUnary.Evaluate(context, Right.Span, Operator, value);
-            }
-
-            switch (Operator)
-            {
-                case ScriptUnaryOperator.Not:
+                if (customUnary.TryEvaluate(context, Right.Span, Operator, value, out var result))
                 {
-                    if (context.UseScientific)
-                    {
-                        if (!(value is bool))
-                        {
-                            throw new ScriptRuntimeException(Right.Span, $"Expecting a boolean instead of {value?.GetType().ScriptPrettyName()} value: {value}");
-                        }
-                        return !(bool) value;
-                    }
-                    else
-                    {
-                        return !context.ToBool(Right.Span, value);
-                    }
+                    return result;
                 }
-                case ScriptUnaryOperator.Negate:
-                case ScriptUnaryOperator.Plus:
+            }
+            else
+            {
+                switch (Operator)
                 {
-                    bool negate = Operator == ScriptUnaryOperator.Negate;
-
-                    if (value != null)
+                    case ScriptUnaryOperator.Not:
                     {
-                        if (value is int)
+                        if (context.UseScientific)
                         {
-                            return negate ? -((int) value) : value;
-                        }
-                        else if (value is double)
-                        {
-                            return negate ? -((double) value) : value;
-                        }
-                        else if (value is float)
-                        {
-                            return negate ? -((float) value) : value;
-                        }
-                        else if (value is long)
-                        {
-                            return negate ? -((long) value) : value;
-                        }
-                        else if (value is decimal)
-                        {
-                            return negate ? -((decimal)value) : value;
-                        }
-                        else if (value is BigInteger)
-                        {
-                            return negate ? -((BigInteger)value) : value;
+                            if (!(value is bool))
+                            {
+                                throw new ScriptRuntimeException(Right.Span, $"Expecting a boolean instead of {value?.GetType().ScriptPrettyName()} value: {value}");
+                            }
+
+                            return !(bool) value;
                         }
                         else
                         {
-                            throw new ScriptRuntimeException(this.Span, $"Unexpected value `{value} / Type: {value?.GetType()}`. Cannot negate(-)/positive(+) a non-numeric value");
+                            return !context.ToBool(Right.Span, value);
                         }
                     }
-                }
-                    break;
-                case ScriptUnaryOperator.FunctionAlias:
-                    return context.Evaluate(Right, true);
+                    case ScriptUnaryOperator.Negate:
+                    case ScriptUnaryOperator.Plus:
+                    {
+                        bool negate = Operator == ScriptUnaryOperator.Negate;
 
-                case ScriptUnaryOperator.FunctionParametersExpand:
-                    // Function parameters expand is done at the function level, so here, we simply return the actual list
-                    return context.Evaluate(Right);
+                        if (value != null)
+                        {
+                            if (value is int)
+                            {
+                                return negate ? -((int) value) : value;
+                            }
+                            else if (value is double)
+                            {
+                                return negate ? -((double) value) : value;
+                            }
+                            else if (value is float)
+                            {
+                                return negate ? -((float) value) : value;
+                            }
+                            else if (value is long)
+                            {
+                                return negate ? -((long) value) : value;
+                            }
+                            else if (value is decimal)
+                            {
+                                return negate ? -((decimal) value) : value;
+                            }
+                            else if (value is BigInteger)
+                            {
+                                return negate ? -((BigInteger) value) : value;
+                            }
+                            else
+                            {
+                                throw new ScriptRuntimeException(this.Span, $"Unexpected value `{value} / Type: {value?.GetType()}`. Cannot negate(-)/positive(+) a non-numeric value");
+                            }
+                        }
+                    }
+                        break;
+                    case ScriptUnaryOperator.FunctionAlias:
+                        return context.Evaluate(Right, true);
+
+                    case ScriptUnaryOperator.FunctionParametersExpand:
+                        // Function parameters expand is done at the function level, so here, we simply return the actual list
+                        return context.Evaluate(Right);
+                }
             }
 
             throw new ScriptRuntimeException(Span, $"Operator `{OperatorAsText}` is not supported");

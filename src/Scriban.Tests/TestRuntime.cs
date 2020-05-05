@@ -9,6 +9,7 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -165,6 +166,17 @@ func g(x); x ; end;
             {
                 var template = Template.Parse(@"
 {{-
+g(x) = x * 5;
+1 + g(2)
+-}}
+");
+                var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+                var result = template.Render(tc);
+                Assert.AreEqual("11", result);
+            }
+            {
+                var template = Template.Parse(@"
+{{-
 func g(x); if x < 0; ret x + 1; else; ret x + 2; end; end;
 1 + g(2) + g(-1)
 -}}
@@ -173,6 +185,23 @@ func g(x); if x < 0; ret x + 1; else; ret x + 2; end; end;
                 var result = template.Render(tc);
                 Assert.AreEqual("5", result);
             }
+        }
+
+        [Test]
+        public void TestExplicitFunctionCall()
+        {
+            {
+                var template = Template.Parse(@"
+{{-
+g(x,y,z) = x + y * 2 + z * 10
+1 + g(1,2,3) }} {{ g(5,6,7) * g(1,2,3) + 1
+}}");
+                var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+                var result = template.Render(tc);
+                Assert.AreEqual($"{1 + g(1,2,3)} {g(5,6,7) * g(1,2,3) + 1}", result);
+            }
+
+            int g(int x, int y, int z) => x + y * 2 + z * 10;
         }
 
 

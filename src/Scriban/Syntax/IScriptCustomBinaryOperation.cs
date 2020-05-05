@@ -8,6 +8,6 @@ namespace Scriban.Syntax
 {
     public interface IScriptCustomBinaryOperation
     {
-        object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue);
+        bool TryEvaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue, out object result);
     }
 }

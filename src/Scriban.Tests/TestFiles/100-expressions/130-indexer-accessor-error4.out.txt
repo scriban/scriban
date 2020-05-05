@@ -1,1 +1,1 @@
-text(6,1) : error : Cannot access target `x` with an indexer: 0
+text(6,1) : error : Cannot use the int primitive `5` as a list.

@@ -332,8 +332,9 @@ namespace Scriban.Runtime
             ScriptObject.SetReadOnly(member, readOnly);
         }
 
-        public object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)
+        public bool TryEvaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue, out object result)
         {
+            result = null;
             var leftArray = TryGetArray(leftValue);
             var rightArray = TryGetArray(rightValue);
             int intModifier = 0;
@@ -421,13 +422,16 @@ namespace Scriban.Runtime
             switch (op)
             {
                 case ScriptBinaryOperator.BinaryOr:
-                    return new ScriptArray(leftArray.Union(rightArray));
+                    result = new ScriptArray(leftArray.Union(rightArray));
+                    return true;
 
                 case ScriptBinaryOperator.BinaryAnd:
-                    return new ScriptArray(leftArray.Intersect(rightArray));
+                    result = new ScriptArray(leftArray.Intersect(rightArray));
+                    return true;
 
                 case ScriptBinaryOperator.Add:
-                    return ArrayFunctions.Concat(leftArray, rightArray);
+                    result = ArrayFunctions.Concat(leftArray, rightArray);
+                    return true;
 
                 case ScriptBinaryOperator.CompareEqual:
                 case ScriptBinaryOperator.CompareNotEqual:
@@ -435,13 +439,18 @@ namespace Scriban.Runtime
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
                 case ScriptBinaryOperator.CompareLess:
                 case ScriptBinaryOperator.CompareGreater:
-                    return CompareTo(context, span, op, leftArray, rightArray);
+                    result = CompareTo(context, span, op, leftArray, rightArray);
+                    return true;
 
                 case ScriptBinaryOperator.Multiply:
                 {
                     // array with integer
                     var array = leftArray ?? rightArray;
-                    if (intModifier == 0) return new ScriptArray();
+                    if (intModifier == 0)
+                    {
+                        result = new ScriptArray();
+                        return true;
+                    }
 
                     var newArray = new ScriptArray(array);
                     for (int i = 0; i < intModifier; i++)
@@ -449,7 +458,8 @@ namespace Scriban.Runtime
                         newArray.AddRange(array);
                     }
 
-                    return newArray;
+                    result = newArray;
+                    return true;
                 }
 
                 case ScriptBinaryOperator.Divide:
@@ -466,7 +476,8 @@ namespace Scriban.Runtime
                         newArray.Add(array[i]);
                     }
 
-                    return newArray;
+                    result = newArray;
+                    return true;
                 }
 
                 case ScriptBinaryOperator.Modulus:
@@ -484,22 +495,24 @@ namespace Scriban.Runtime
                         }
                     }
 
-                    return newArray;
+                    result = newArray;
+                    return true;
                 }
 
                 case ScriptBinaryOperator.ShiftLeft:
                     var newLeft = new ScriptArray(leftArray);
                     newLeft.Add(rightValue);
-                    return newLeft;
+                    result = newLeft;
+                    return true;
 
                 case ScriptBinaryOperator.ShiftRight:
                     var newRight = new ScriptArray(rightArray);
                     newRight.Insert(0, leftValue);
-                    return newRight;
-
-                default:
-                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and {rightValue?.GetType().ScriptPrettyName()}.");
+                    result = newRight;
+                    return true;
             }
+
+            return false;
         }
 
         private static ScriptArray TryGetArray(object rightValue)
