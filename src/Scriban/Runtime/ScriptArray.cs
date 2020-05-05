@@ -317,9 +317,9 @@ namespace Scriban.Runtime
             return ScriptObject.CanWrite(member);
         }
 
-        public virtual void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+        public virtual bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
         {
-            ScriptObject.SetValue(context, span, member, value, readOnly);
+            return ScriptObject.TrySetValue(context, span, member, value, readOnly);
         }
 
         public virtual bool Remove(string member)

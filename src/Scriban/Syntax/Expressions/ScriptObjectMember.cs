@@ -39,7 +39,7 @@ namespace Scriban.Syntax
             var literal = Name as ScriptLiteral;
 
             var name = variable?.Name ?? literal?.Value?.ToString();
-            context.CurrentGlobal.SetValue(context, Span, name, context.Evaluate(Value), false);
+            context.CurrentGlobal.TrySetValue(context, Span, name, context.Evaluate(Value), false);
             return null;
         }
 

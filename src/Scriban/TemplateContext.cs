@@ -532,7 +532,7 @@ namespace Scriban
             {
                 // Try to set the variable
                 var store = _loopStores.Peek();
-                if (!store.TrySetValue(variable.Name, value, false))
+                if (!store.TrySetValue(this, variable.Span, variable.Name, value, false))
                 {
                     throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
                 }
@@ -605,7 +605,7 @@ namespace Scriban
             }
 
             // Try to set the variable
-            if (!firstStore.TrySetValue(variable.Name, value, asReadOnly))
+            if (!firstStore.TrySetValue(this, variable.Span, variable.Name, value, asReadOnly))
             {
                 throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
             }

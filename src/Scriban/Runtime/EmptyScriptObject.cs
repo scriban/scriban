@@ -49,7 +49,7 @@ namespace Scriban.Runtime
             return false;
         }
 
-        public void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+        public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
         {
             throw new ScriptRuntimeException(span, "Cannot set a property on the empty object");
         }

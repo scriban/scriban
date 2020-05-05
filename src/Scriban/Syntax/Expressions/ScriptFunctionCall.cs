@@ -343,7 +343,7 @@ namespace Scriban.Syntax
                             // We can't add an argument that is "size" for array
                             else if (argumentValues.CanWrite(argName))
                             {
-                                argumentValues.SetValue(context, callerContext.Span, argName, context.Evaluate(namedArg), false);
+                                argumentValues.TrySetValue(context, callerContext.Span, argName, context.Evaluate(namedArg), false);
                                 continue;
                             }
                             else

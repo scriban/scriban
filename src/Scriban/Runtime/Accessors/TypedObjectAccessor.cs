@@ -76,8 +76,10 @@ namespace Scriban.Runtime.Accessors
                     var propertyAccessor = (PropertyInfo)memberAccessor;
                     propertyAccessor.SetValue(target, value);
                 }
+
+                return true;
             }
-            return true;
+            return false;
         }
 
         private void PrepareMembers()

@@ -214,7 +214,7 @@ namespace Scriban.Runtime
             {
                 if (key == null) throw new ArgumentNullException(nameof(key));
                 this.AssertNotReadOnly();
-                SetValue(null, new SourceSpan(), key, value, false);
+                TrySetValue(null, new SourceSpan(), key, value, false);
             }
         }
 
@@ -254,19 +254,21 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        public virtual void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+        public virtual bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
         {
+            if (!CanWrite(member)) return false;
             this.AssertNotReadOnly();
             Store[member] = new InternalValue(value, readOnly);
+            return true;
         }
 
         public void SetValue(string member, object value, bool readOnly)
         {
-            SetValue(null, new SourceSpan(), member, value, readOnly);
+            TrySetValue(null, new SourceSpan(), member, value, readOnly);
         }
         public void Add(string key, object value)
         {
-            SetValue(null, new SourceSpan(), key, value, false);
+            TrySetValue(null, new SourceSpan(), key, value, false);
         }
 
         public bool ContainsKey(string key)

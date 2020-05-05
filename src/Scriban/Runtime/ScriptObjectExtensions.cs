@@ -68,27 +68,9 @@ namespace Scriban.Runtime
             return @this.TryGetValue(null, new SourceSpan(), key, out value);
         }
 
-        /// <summary>
-        /// Tries to set the value and readonly state of the specified member.
-        /// </summary>
-        /// <param name="this">The script object</param>
-        /// <param name="member">The member.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        /// <returns><c>true</c> if the value could be set; <c>false</c> if a value already exist an is readonly</returns>
-        public static bool TrySetValue(this IScriptObject @this, string member, object value, bool readOnly)
-        {
-            if (!@this.CanWrite(member))
-            {
-                return false;
-            }
-            @this.SetValue(null, new SourceSpan(), member, value, readOnly);
-            return true;
-        }
-
         public static void SetValue(this IScriptObject @this, string member, object value, bool readOnly)
         {
-            @this.SetValue(null, new SourceSpan(), member, value, readOnly);
+            @this.TrySetValue(null, new SourceSpan(), member, value, readOnly);
         }
 
         /// <summary>
@@ -233,7 +215,7 @@ namespace Scriban.Runtime
                             }
 
                             // If field is init only or literal, it cannot be set back so we mark it as read-only
-                            script.SetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                            script.TrySetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
                         }
                     }
                 }
@@ -265,7 +247,7 @@ namespace Scriban.Runtime
 
                             // Initially, we were setting readonly depending on the precense of a set method, but this is not compatible with liquid implems, so we remove readonly restriction
                             //script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
-                            script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
+                            script.TrySetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
                         }
                     }
                 }
@@ -288,7 +270,7 @@ namespace Scriban.Runtime
                                 newMethodName = method.Name;
                             }
 
-                            script.SetValue(null, new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
+                            script.TrySetValue(null, new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
                         }
                     }
                 }
@@ -313,7 +295,7 @@ namespace Scriban.Runtime
             if (member == null) throw new ArgumentNullException(nameof(member));
             if (function == null) throw new ArgumentNullException(nameof(function));
 
-            script.SetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function.Target, function.GetMethodInfo()), true);
+            script.TrySetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function.Target, function.GetMethodInfo()), true);
         }
     }
 }

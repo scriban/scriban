@@ -209,8 +209,9 @@ namespace Scriban.Syntax
                 throw new System.NotImplementedException();
             }
 
-            public void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+            public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
             {
+                return false;
             }
 
             public bool Remove(string member)
