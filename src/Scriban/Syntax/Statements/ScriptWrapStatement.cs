@@ -44,10 +44,10 @@ namespace Scriban.Syntax
             if (functionCall == null)
             {
                 var parameterLessFunction = context.Evaluate(Target, true);
-                if (!(parameterLessFunction is IScriptCustomFunction || parameterLessFunction is ScriptFunction))
+                if (!(parameterLessFunction is IScriptCustomFunction))
                 {
-                    var targetPrettyname = ScriptSyntaxAttribute.Get(Target);
-                    throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyname.Name}`");
+                    var targetPrettyName = ScriptSyntaxAttribute.Get(Target);
+                    throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyName.Name}`");
                 }
 
                 context.BlockDelegates.Push(Body);

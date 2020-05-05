@@ -332,12 +332,14 @@ namespace Scriban.Runtime
             ScriptObject.SetReadOnly(member, readOnly);
         }
 
-        public object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
+        public object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)
         {
             var leftArray = TryGetArray(leftValue);
             var rightArray = TryGetArray(rightValue);
             int intModifier = 0;
+            var intSpan = leftSpan;
 
+            var errorSpan = span;
             string reason = null;
             switch (op)
             {
@@ -352,10 +354,12 @@ namespace Scriban.Runtime
                 case ScriptBinaryOperator.Add:
                     if (leftArray == null)
                     {
+                        errorSpan = leftSpan;
                         reason = " Expecting an array for the left argument.";
                     }
                     if (rightArray == null)
                     {
+                        errorSpan = rightSpan;
                         reason = " Expecting an array for the right argument.";
                     }
                     break;
@@ -367,6 +371,7 @@ namespace Scriban.Runtime
                     else
                     {
                         intModifier = context.ToInt(span, leftArray == null ? leftValue : rightValue);
+                        if (rightArray == null) intSpan = rightSpan;
                     }
                     break;
                 case ScriptBinaryOperator.Divide:
@@ -374,22 +379,26 @@ namespace Scriban.Runtime
                 case ScriptBinaryOperator.Modulus:
                     if (leftArray == null)
                     {
+                        errorSpan = leftSpan;
                         reason = " Expecting an array for the left argument.";
                     }
                     else
                     {
                         intModifier = context.ToInt(span, rightValue);
+                        intSpan = rightSpan;
                     }
                     break;
                 case ScriptBinaryOperator.ShiftLeft:
                     if (leftArray == null)
                     {
+                        errorSpan = leftSpan;
                         reason = " Expecting an array for the left argument.";
                     }
                     break;
                 case ScriptBinaryOperator.ShiftRight:
                     if (rightArray == null)
                     {
+                        errorSpan = rightSpan;
                         reason = " Expecting an array for the right argument.";
                     }
                     break;
@@ -400,12 +409,13 @@ namespace Scriban.Runtime
 
             if (intModifier < 0)
             {
+                errorSpan = intSpan;
                 reason = $" Integer {intModifier} cannot be negative when multiplying";
             }
 
             if (reason != null)
             {
-                throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and  {rightValue?.GetType().ScriptPrettyName()}.{reason}");
+                throw new ScriptRuntimeException(errorSpan, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and {rightValue?.GetType().ScriptPrettyName()}.{reason}");
             }
 
             switch (op)
@@ -447,7 +457,7 @@ namespace Scriban.Runtime
                 {
                     // array with integer
                     var array = leftArray ?? rightArray;
-                    if (intModifier == 0) throw new ScriptRuntimeException(span, "Cannot divide by 0");
+                    if (intModifier == 0) throw new ScriptRuntimeException(intSpan, "Cannot divide by 0");
 
                     var newLength = array.Count / intModifier;
                     var newArray = new ScriptArray(newLength);
@@ -463,7 +473,7 @@ namespace Scriban.Runtime
                 {
                     // array with integer
                     var array = leftArray ?? rightArray;
-                    if (intModifier == 0) throw new ScriptRuntimeException(span, "Cannot divide by 0");
+                    if (intModifier == 0) throw new ScriptRuntimeException(intSpan, "Cannot divide by 0");
 
                     var newArray = new ScriptArray(array.Count);
                     for (int i = 0; i < array.Count; i++)
@@ -488,7 +498,7 @@ namespace Scriban.Runtime
                     return newRight;
 
                 default:
-                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and  {rightValue?.GetType().ScriptPrettyName()}.");
+                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and {rightValue?.GetType().ScriptPrettyName()}.");
             }
         }
 
@@ -537,7 +547,7 @@ namespace Scriban.Runtime
                     if (left.Count == 0 && op == ScriptBinaryOperator.CompareGreater) return false;
                     break;
                 default:
-                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {left?.GetType().ScriptPrettyName()} and  {right?.GetType().ScriptPrettyName()}.");
+                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {left?.GetType().ScriptPrettyName()} and {right?.GetType().ScriptPrettyName()}.");
             }
 
             // Otherwise we need to compare each element

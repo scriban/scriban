@@ -67,7 +67,7 @@ namespace Scriban.Syntax
                 default:
                 {
                     var rightValue = context.Evaluate(Right);
-                    return Evaluate(context, Span, Operator, leftValue, rightValue);
+                    return Evaluate(context, Span, Operator, Left.Span, leftValue, Right.Span, rightValue);
                 }
             }
         }
@@ -101,7 +101,14 @@ namespace Scriban.Syntax
         {
             return false;
         }
+
+
         public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
+        {
+            return Evaluate(context, span, op, span, leftValue, span, rightValue);
+        }
+
+        public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)
         {
             if (op == ScriptBinaryOperator.EmptyCoalescing)
             {
@@ -156,23 +163,23 @@ namespace Scriban.Syntax
                     {
                         if (leftValue is string || rightValue is string)
                         {
-                            return CalculateToString(context, span, op, leftValue, rightValue);
+                            return CalculateToString(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                         else if (leftValue == EmptyScriptObject.Default || rightValue == EmptyScriptObject.Default)
                         {
-                            return CalculateEmpty(context, span, op, leftValue, rightValue);
+                            return CalculateEmpty(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                         // Allow custom binary operation
                         else if (leftValue is IScriptCustomBinaryOperation leftBinaryOp)
                         {
-                            return leftBinaryOp.Evaluate(context, span, op, leftValue, rightValue);
+                            return leftBinaryOp.Evaluate(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                         else if (rightValue is IScriptCustomBinaryOperation rightBinaryOp)
                         {
-                            return rightBinaryOp.Evaluate(context, span, op, leftValue, rightValue);
+                            return rightBinaryOp.Evaluate(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                         {
-                            return CalculateOthers(context, span, op, leftValue, rightValue);
+                            return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                     }
                     catch (Exception ex) when(!(ex is ScriptRuntimeException))
@@ -183,7 +190,7 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{leftValue}` and `{rightValue}`");
         }
 
-        private static object CalculateEmpty(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
+        private static object CalculateEmpty(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)
         {
 
             var leftIsEmptyObject = leftValue == EmptyScriptObject.Default;
@@ -246,18 +253,21 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{(leftIsEmptyObject ? "empty" : leftValue)}` / `{(rightIsEmptyObject ? "empty" : rightValue)}`");
         }
 
-        private static object CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object left, object right)
+        private static object CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object left, SourceSpan rightSpan, object right)
         {
             switch (op)
             {
                 case ScriptBinaryOperator.Add:
                     return context.ObjectToString(left) + context.ObjectToString(right);
                 case ScriptBinaryOperator.Multiply:
+
+                    var spanMultiplier = rightSpan;
                     if (right is string)
                     {
                         var temp = left;
                         left = right;
                         right = temp;
+                        spanMultiplier = leftSpan;
                     }
 
                     // Don't fail when converting
@@ -268,7 +278,7 @@ namespace Scriban.Syntax
                     }
                     catch
                     {
-                        throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1
+                        throw new ScriptRuntimeException(spanMultiplier, $"Expecting an integer. The operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1
                     }
                     var leftText = context.ObjectToString(left);
                     var builder = new StringBuilder();
@@ -381,7 +391,7 @@ namespace Scriban.Syntax
             }
         }
 
-        private static object CalculateOthers(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
+        private static object CalculateOthers(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)
         {
             // Both values are null, applies the relevant binary ops
             if (leftValue == null && rightValue == null)
@@ -575,7 +585,7 @@ namespace Scriban.Syntax
                 return leftValue.Equals(rightValue);
             }
 
-            throw new ScriptRuntimeException(span, $"Unsupported types `{leftValue}/{leftType}` {op.ToText()} `{rightValue}/{rightType}` for binary operation");
+            throw new ScriptRuntimeException(span, $"Unsupported types `{leftValue}/{leftType?.ScriptPrettyName()}` {op.ToText()} `{rightValue}/{rightType?.ScriptPrettyName()}` for binary operation");
         }
 
         private static object CalculateInt(ScriptBinaryOperator op, SourceSpan span, int left, int right)
