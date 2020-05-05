@@ -46,7 +46,7 @@ namespace Scriban.Runtime
 
         protected DynamicCustomFunction(MethodInfo method)
         {
-            Method = method;
+            Method = method ?? throw new ArgumentNullException(nameof(method));
             _returnType = method.ReturnType;
 
             Parameters = method.GetParameters();
@@ -207,7 +207,18 @@ namespace Scriban.Runtime
             {
                 return newFunction(method);
             }
-            return new GenericFunctionWrapper(target, method);
+            return new DelegateCustomFunction(target, method);
+        }
+
+        /// <summary>
+        /// Returns a <see cref="DynamicCustomFunction"/> from the specified delegate.
+        /// </summary>
+        /// <param name="del">A delegate</param>
+        /// <returns>A custom <see cref="DynamicCustomFunction"/></returns>
+        public static DynamicCustomFunction Create(Delegate del)
+        {
+            if (del == null) throw new ArgumentNullException(nameof(del));
+            return new DelegateCustomFunction(del);
         }
 
         protected struct ArgumentValue
