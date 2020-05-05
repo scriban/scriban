@@ -1385,10 +1385,16 @@ namespace Scriban.Syntax
             else
             {
                 int i = context.ToInt(Index.Span, index);
+                var length = listAccessor.GetLength(context, Span, targetObject);
                 // Allow negative index from the end of the array
                 if (i < 0)
                 {
-                    i = listAccessor.GetLength(context, Span, targetObject) + i;
+                    i = length + i;
+                }
+
+                if (!context.EnableRelaxedIndexerAccess && (i < 0 || i >= length))
+                {
+                    throw new ScriptRuntimeException(Index.Span, $"The index {i} is out of bounds [0, {length}] on the `{Target}` with the indexer: {Index}");
                 }
 
                 if (i >= 0)
@@ -1515,7 +1521,12 @@ namespace Scriban.Syntax
             // In case TemplateContext.EnableRelaxedMemberAccess
             if (targetObject == null)
             {
-                return null;
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    return null;
+                }
+
+                throw new ScriptRuntimeException(this.Member.Span, $"Cannot get the member {this} from a null target");
             }
 
             var accessor = context.GetMemberAccessor(targetObject);

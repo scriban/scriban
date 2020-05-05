@@ -109,6 +109,7 @@ namespace Scriban
             BuiltinObject = builtin ?? GetDefaultBuiltinObject();
             EnableOutput = true;
             EnableBreakAndContinueAsReturnOutsideLoop = false;
+            EnableRelaxedIndexerAccess = true;
             LoopLimit = 1000;
             RecursiveLimit = 100;
             MemberRenamer = StandardMemberRenamer.Default;
@@ -316,14 +317,21 @@ namespace Scriban
         public bool EnableBreakAndContinueAsReturnOutsideLoop { get; set; }
 
         /// <summary>
-        /// Enables a member access on a null by returning null instead of an exception. Default is <c>false</c>
+        /// Enables a member/indexer access on a null by returning null instead of an exception. Default is <c>false</c>
         /// </summary>
         public bool EnableRelaxedMemberAccess { get; set; }
+
+        /// <summary>
+        /// Enables an indexer access to go out of bounds. Default is <c>true</c>
+        /// </summary>
+        public bool EnableRelaxedIndexerAccess { get; set; }
 
         /// <summary>
         /// Gets the current node being evaluated.
         /// </summary>
         public ScriptNode CurrentNode { get; private set; }
+
+        public SourceSpan CurrentSpan => CurrentNode?.Span ?? new SourceSpan();
 
         /// <summary>
         /// Indicates if we are in a looop
