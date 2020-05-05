@@ -166,6 +166,11 @@ namespace Scriban.Runtime
 
         public Type ReturnType => _returnType;
 
+        /// <summary>
+        /// Get or set an object tag for this instance.
+        /// </summary>
+        public object Tag { get; set; }
+
         public ScriptParameterInfo GetParameterInfo(int index)
         {
             if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Argument index must be >= 0");
