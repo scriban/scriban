@@ -95,7 +95,7 @@ namespace Scriban.Syntax
             var targetObject = context.GetValue(Target);
             if (targetObject == null)
             {
-                if (context.EnableRelaxedMemberAccess)
+                if (context.EnableRelaxedTargetAccess)
                 {
                     return null;
                 }
@@ -108,7 +108,7 @@ namespace Scriban.Syntax
             var index = context.Evaluate(Index);
             if (index == null)
             {
-                if (context.EnableRelaxedMemberAccess)
+                if (context.EnableNullIndexer)
                 {
                     return null;
                 }

@@ -109,6 +109,8 @@ namespace Scriban
             BuiltinObject = builtin ?? GetDefaultBuiltinObject();
             EnableOutput = true;
             EnableBreakAndContinueAsReturnOutsideLoop = false;
+            EnableRelaxedTargetAccess = false;
+            EnableRelaxedMemberAccess = true;
             EnableRelaxedIndexerAccess = true;
             LoopLimit = 1000;
             RecursiveLimit = 100;
@@ -317,7 +319,12 @@ namespace Scriban
         public bool EnableBreakAndContinueAsReturnOutsideLoop { get; set; }
 
         /// <summary>
-        /// Enables a member/indexer access on a null by returning null instead of an exception. Default is <c>false</c>
+        /// Enables the (e.g x) target of a member access (e.g x.y) to be null by returning null instead of an exception. Default is <c>false</c>
+        /// </summary>
+        public bool EnableRelaxedTargetAccess { get; set; }
+
+        /// <summary>
+        /// Enables a (e.g x.y) member/indexer access that does not exist to return null instead of an exception. Default is <c>true</c>
         /// </summary>
         public bool EnableRelaxedMemberAccess { get; set; }
 
@@ -325,6 +332,11 @@ namespace Scriban
         /// Enables an indexer access to go out of bounds. Default is <c>true</c>
         /// </summary>
         public bool EnableRelaxedIndexerAccess { get; set; }
+
+        /// <summary>
+        /// Enables the index of an indexer access to be null and return null instead of an exception. Default is <c>false</c>
+        /// </summary>
+        public bool EnableNullIndexer { get; set; }
 
         /// <summary>
         /// Gets the current node being evaluated.
@@ -847,7 +859,11 @@ namespace Scriban
             {
                 accessor = ScriptObjectAccessor.Default;
             }
-            else if (target is string || type.IsPrimitiveOrDecimal())
+            else if (target is string)
+            {
+                accessor = StringAccessor.Default;
+            }
+            else if (type.IsPrimitiveOrDecimal())
             {
                 accessor = PrimitiveAccessor.Default;
             }
@@ -1321,7 +1337,7 @@ namespace Scriban
         {
             // In liquid, if we have a break/continue outside a loop, we return from the current script
             EnableBreakAndContinueAsReturnOutsideLoop = true;
-            EnableRelaxedMemberAccess = true;
+            EnableRelaxedTargetAccess = true;
 
             TemplateLoaderLexerOptions = new LexerOptions() {Lang = ScriptLang.Liquid};
             TemplateLoaderParserOptions = new ParserOptions() {LiquidFunctionsToScriban = true};

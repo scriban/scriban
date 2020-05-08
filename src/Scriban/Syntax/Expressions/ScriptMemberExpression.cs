@@ -62,11 +62,12 @@ namespace Scriban.Syntax
             // In case TemplateContext.EnableRelaxedMemberAccess
             if (targetObject == null)
             {
-                if (context.EnableRelaxedMemberAccess)
+                if (context.EnableRelaxedTargetAccess)
                 {
                     return null;
                 }
-                throw new ScriptRuntimeException(this.Member.Span, $"Cannot get the member {this} from a null target");
+
+                throw new ScriptRuntimeException(this.Member.Span, $"Cannot get the member {this} for a null object.");
             }
 
             var accessor = context.GetMemberAccessor(targetObject);
@@ -76,7 +77,11 @@ namespace Scriban.Syntax
             object value;
             if (!accessor.TryGetValue(context, Span, targetObject, memberName, out value))
             {
-                context.TryGetMember?.Invoke(context, Span, targetObject, memberName, out value);
+                var result = context.TryGetMember?.Invoke(context, Span, targetObject, memberName, out value);
+                if (!context.EnableRelaxedMemberAccess && (!result.HasValue || !result.Value))
+                {
+                    throw new ScriptRuntimeException(this.Member.Span, $"Cannot get member with name {memberName}."); // unit test: 132-member-accessor-error2.txt
+                }
             }
             return value;
         }

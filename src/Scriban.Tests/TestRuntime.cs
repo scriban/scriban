@@ -762,7 +762,11 @@ Tax: {{ 7 | match_tax }}";
 
             // Test unrelaxed member access.
             {
-                var context = new TemplateContext();
+                var context = new TemplateContext()
+                {
+                    EnableRelaxedTargetAccess = false,
+                    EnableRelaxedMemberAccess = false,
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{a.property_a").Render(context);
@@ -777,7 +781,11 @@ Tax: {{ 7 | match_tax }}";
 
             // Test relaxed member access.
             {
-                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                var context = new TemplateContext
+                {
+                    EnableRelaxedTargetAccess = true,
+                    EnableRelaxedMemberAccess = true
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{a.property_a").Render(context);
@@ -801,7 +809,10 @@ Tax: {{ 7 | match_tax }}";
 
             // Test unrelaxed indexer access.
             {
-                var context = new TemplateContext();
+                var context = new TemplateContext()
+                {
+                    EnableRelaxedMemberAccess = false,
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{list[0]").Render(context);
@@ -819,7 +830,12 @@ Tax: {{ 7 | match_tax }}";
 
             // Test relaxed member access.
             {
-                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                var context = new TemplateContext
+                {
+                    EnableNullIndexer = false,
+                    EnableRelaxedTargetAccess = true,
+                    EnableRelaxedMemberAccess = true
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{list[0]").Render(context);
@@ -864,7 +880,11 @@ Tax: {{ 7 | match_tax }}";
 
             // Test relaxed member access.
             {
-                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                var context = new TemplateContext
+                {
+                    EnableRelaxedTargetAccess = true,
+                    EnableRelaxedMemberAccess = true
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{dictionary['key']").Render(context);

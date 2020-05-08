@@ -1,1 +1,3 @@
-text(6,1) : error : Cannot get or set a member on the primitive `value/string` when accessing member: y
+x = 'value'  # x is a string
+x.y          # x.y will fail
+===

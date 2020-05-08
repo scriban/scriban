@@ -119,6 +119,12 @@ namespace Scriban.Syntax
                                 _index++;
 
                                 var isExpectingExpression = function.IsParameterType<ScriptExpression>(0);
+
+                                if (_index == Count)
+                                {
+                                    throw new ScriptRuntimeException(nextExpression.Span, "The function is expecting a parameter");
+                                }
+
                                 var arg = Rewrite(context, 0, isExpectingExpression);
 
                                 functionCall.Arguments.Add(arg);
