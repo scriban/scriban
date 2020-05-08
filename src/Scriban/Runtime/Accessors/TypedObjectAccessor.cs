@@ -91,7 +91,7 @@ namespace Scriban.Runtime.Accessors
                 foreach (var field in type.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly))
                 {
                     var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
-                    if (keep && !field.IsStatic && field.IsPublic && (_filter == null || _filter(field)))
+                    if (keep && !field.IsStatic && field.IsPublic && !field.IsLiteral && (_filter == null || _filter(field)))
                     {
                         var newFieldName = Rename(field);
                         if (string.IsNullOrEmpty(newFieldName))

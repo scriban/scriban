@@ -177,8 +177,9 @@ namespace Scriban.Runtime
         /// </summary>
         /// <typeparam name="T">Type of the expected member</typeparam>
         /// <param name="name">The name of the member.</param>
+        /// <param name="defaultValue">Default value used if the value is not set or not of the expected type.</param>
         /// <returns>The value or default{T} is the value is different. Note that this method will override the value in this instance if the value doesn't match the type {T} </returns>
-        public T GetSafeValue<T>(string name)
+        public T GetSafeValue<T>(string name, T defaultValue = default)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             var obj = this[name];
@@ -186,11 +187,11 @@ namespace Scriban.Runtime
             // so we can safely return immediately with the default value
             if (obj == null)
             {
-                return default(T);
+                return defaultValue;
             }
             if (!(obj is T))
             {
-                obj = default(T);
+                obj = defaultValue;
                 this[name] = obj;
             }
             return (T)obj;

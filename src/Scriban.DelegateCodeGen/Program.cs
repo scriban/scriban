@@ -22,7 +22,7 @@ namespace Scriban.DelegateCodeGen
 
         public Program()
         {
-            _assemblyDefinition = AssemblyDefinition.ReadAssembly(@"..\..\..\..\Scriban\bin\Debug\net40\Scriban.dll");
+            _assemblyDefinition = AssemblyDefinition.ReadAssembly(@"..\..\..\..\Scriban\bin\Debug\netstandard2.0\Scriban.dll");
             _methods = new Dictionary<string, MethodDefinition>();
         }
 

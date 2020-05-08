@@ -222,6 +222,11 @@ namespace Scriban.Functions
                 return "number";
             }
 
+            if (typeof(ScriptRange).IsAssignableFrom(typeInfo))
+            {
+                return "iterator";
+            }
+
             // Test first IList, then IEnumerable
             if (typeof(IList).IsAssignableFrom(typeInfo))
             {

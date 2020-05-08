@@ -196,7 +196,7 @@ namespace Scriban.Runtime
                 {
                     foreach (var field in typeInfo.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly))
                     {
-                        if (!field.IsPublic)
+                        if (!field.IsPublic || field.IsLiteral)
                         {
                             continue;
                         }

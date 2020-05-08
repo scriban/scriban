@@ -97,6 +97,7 @@ namespace Scriban.Functions
         /// </summary>
         public DateTimeFunctions()
         {
+            this["default_format"] = DefaultFormat;
             Format = DefaultFormat;
             CreateImportFunctions();
         }

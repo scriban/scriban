@@ -18,7 +18,7 @@ namespace Scriban.Runtime
     /// </summary>
     /// <seealso cref="object" />
     /// <seealso cref="System.Collections.IList" />
-    public class ScriptArray : IList<object>, IList, IScriptObject, IScriptCustomBinaryOperation
+    public class ScriptArray : IList<object>, IList, IScriptObject, IScriptCustomBinaryOperation, IScriptTransformable
     {
         private List<object> _values;
         private bool _isReadOnly;
@@ -44,7 +44,7 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ScriptArray{object}"/> class.
+        /// Initializes a new instance of the <see cref="ScriptArray"/> class.
         /// </summary>
         /// <param name="values">The values.</param>
         public ScriptArray(IEnumerable<object> values)
@@ -87,7 +87,7 @@ namespace Scriban.Runtime
             array._script = null;
             if (deep)
             {
-                foreach (var value in array._values)
+                foreach (var value in _values)
                 {
                     var fromValue = value;
                     if (value is IScriptObject)
@@ -105,7 +105,7 @@ namespace Scriban.Runtime
             }
             else
             {
-                foreach (var value in array._values)
+                foreach (var value in _values)
                 {
                     array._values.Add(value);
                 }
@@ -533,7 +533,6 @@ namespace Scriban.Runtime
             return rightArray;
         }
 
-
         private static bool CompareTo(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, ScriptArray left, ScriptArray right)
         {
             // Compare the length first
@@ -575,16 +574,25 @@ namespace Scriban.Runtime
 
             return true;
         }
-    }
 
-    internal class ScriptPipeArguments : Stack<ScriptExpression>
-    {
-        public ScriptPipeArguments()
+        public Type ElementType => typeof(object);
+
+        public virtual bool CanTransform(Type transformType)
         {
+            return true;
         }
 
-        public ScriptPipeArguments(int capacity) : base(capacity)
+        public virtual object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply)
         {
+            if (apply == null) throw new ArgumentNullException(nameof(apply));
+            var clone = (ScriptArray)Clone(true);
+            var values = clone._values;
+            for (int i = 0; i < values.Count; i++)
+            {
+                values[i] = apply(values[i]);
+            }
+
+            return clone;
         }
     }
 }

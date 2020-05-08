@@ -688,9 +688,9 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
                 case ScriptBinaryOperator.RangeInclude:
-                    return RangeInclude(left, right);
+                    return new ScriptRange(RangeInclude(left, right));
                 case ScriptBinaryOperator.RangeExclude:
-                    return RangeExclude(left, right);
+                    return new ScriptRange(RangeExclude(left, right));
             }
             throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for long<->long");
         }
@@ -748,9 +748,9 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
                 case ScriptBinaryOperator.RangeInclude:
-                    return RangeInclude(left, right);
+                    return new ScriptRange(RangeInclude(left, right));
                 case ScriptBinaryOperator.RangeExclude:
-                    return RangeExclude(left, right);
+                    return new ScriptRange(RangeExclude(left, right));
             }
             throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for long<->long");
         }

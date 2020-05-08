@@ -4,6 +4,7 @@
 using System;
 using System.Reflection;
 using System.Threading.Tasks;
+using Scriban.Parsing;
 using Scriban.Syntax;
 
 namespace Scriban.Runtime
@@ -35,7 +36,7 @@ namespace Scriban.Runtime
             try
             {
                 // Call the method via reflection
-                var result = InvokeImpl(arguments);
+                var result = InvokeImpl(context, callerContext.Span, arguments);
                 return result;
             }
             catch (TargetInvocationException exception)
@@ -63,7 +64,7 @@ namespace Scriban.Runtime
             try
             {
                 // Call the method via reflection
-                var result = InvokeImpl(arguments);
+                var result = InvokeImpl(context, callerContext.Span, arguments);
                 return IsAwaitable ? await ConfigureAwait(result) : result;
             }
             catch (TargetInvocationException exception)
@@ -112,7 +113,7 @@ namespace Scriban.Runtime
             return new InternalDelegateCustomFunction<T1, T2, TResult>(func);
         }
 
-        protected virtual object InvokeImpl(object[] arguments)
+        protected virtual object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
         {
             return _del != null ? _del.DynamicInvoke(arguments) : Method.Invoke(Target, arguments);
         }
@@ -166,7 +167,7 @@ namespace Scriban.Runtime
             return reflectArgs;
         }
 
-        
+
         /// <summary>
         /// A custom function taking one argument.
         /// </summary>
@@ -181,7 +182,7 @@ namespace Scriban.Runtime
 
             public Func<T, TResult> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg = (T)arguments[0];
                 return Func(arg);
@@ -201,7 +202,7 @@ namespace Scriban.Runtime
 
             public Action<T> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg = (T)arguments[0];
                 Func(arg);
@@ -225,7 +226,7 @@ namespace Scriban.Runtime
             public Func<T1, T2, TResult> Func { get; }
 
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg1 = (T1)arguments[0];
                 var arg2 = (T2)arguments[1];
@@ -247,7 +248,7 @@ namespace Scriban.Runtime
 
             public Action<T1, T2> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg1 = (T1)arguments[0];
                 var arg2 = (T2)arguments[1];
@@ -272,7 +273,7 @@ namespace Scriban.Runtime
 
             public Func<T1, T2, T3, TResult> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg1 = (T1)arguments[0];
                 var arg2 = (T2)arguments[1];
@@ -296,7 +297,7 @@ namespace Scriban.Runtime
 
             public Action<T1, T2, T3> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg1 = (T1)arguments[0];
                 var arg2 = (T2)arguments[1];
@@ -323,7 +324,7 @@ namespace Scriban.Runtime
 
             public Func<T1, T2, T3, T4, TResult> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg1 = (T1)arguments[0];
                 var arg2 = (T2)arguments[1];
@@ -349,7 +350,7 @@ namespace Scriban.Runtime
 
             public Action<T1, T2, T3, T4> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg1 = (T1)arguments[0];
                 var arg2 = (T2)arguments[1];
@@ -378,7 +379,7 @@ namespace Scriban.Runtime
 
             public Func<T1, T2, T3, T4, T5, TResult> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg1 = (T1)arguments[0];
                 var arg2 = (T2)arguments[1];
@@ -406,7 +407,7 @@ namespace Scriban.Runtime
 
             public Action<T1, T2, T3, T4, T5> Func { get; }
 
-            protected override object InvokeImpl(object[] arguments)
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
             {
                 var arg1 = (T1)arguments[0];
                 var arg2 = (T2)arguments[1];
@@ -418,11 +419,10 @@ namespace Scriban.Runtime
             }
         }
     }
-    
+
     /// <summary>
     /// A custom action taking 1 argument.
     /// </summary>
-    /// <typeparam name="T">Func 0 arg type</typeparam>
     public class DelegateCustomAction : DelegateCustomFunction
     {
         public DelegateCustomAction(Action func) : base(func)
@@ -432,7 +432,7 @@ namespace Scriban.Runtime
 
         public Action Func { get; }
 
-        protected override object InvokeImpl(object[] arguments)
+        protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
         {
             Func();
             return null;
