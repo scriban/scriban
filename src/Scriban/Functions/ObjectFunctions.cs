@@ -139,6 +139,8 @@ namespace Scriban.Functions
             if (value is IDictionary dict) return new ScriptArray(dict.Keys);
             if (value is IDictionary<string, object> dictStringObject) return new ScriptArray(dictStringObject.Keys);
             if (value is IScriptObject scriptObj) return new ScriptArray(scriptObj.GetMembers());
+            // Don't try to return members of a custom function
+            if (value is IScriptCustomFunction) return new ScriptArray();
 
             var accessor = context.GetMemberAccessor(value);
             return new ScriptArray(accessor.GetMembers(context, context.CurrentSpan, value));
