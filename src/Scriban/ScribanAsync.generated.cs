@@ -745,7 +745,7 @@ namespace Scriban.Syntax
                 default:
                     {
                         var rightValue = await context.EvaluateAsync(Right).ConfigureAwait(false);
-                        return Evaluate(context, Span, Operator, Left.Span, leftValue, Right.Span, rightValue);
+                        return Evaluate(context, OperatorToken?.Span ?? Span, Operator, Left.Span, leftValue, Right.Span, rightValue);
                     }
             }
         }

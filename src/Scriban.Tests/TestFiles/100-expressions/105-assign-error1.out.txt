@@ -1,1 +1,1 @@
-text(4,4) : error : Unsupported target expression for assignment.
+text(4,2) : error : Unsupported target expression for assignment.

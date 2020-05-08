@@ -425,6 +425,7 @@ namespace Scriban.Parsing
                         // We fake entering an expression here to limit the number of expression
                         EnterExpression();
                         var binaryExpression = Open<ScriptBinaryExpression>();
+                        binaryExpression.Span = leftOperand.Span;
                         binaryExpression.Left = leftOperand;
                         binaryExpression.Operator = binaryOperatorType;
 
