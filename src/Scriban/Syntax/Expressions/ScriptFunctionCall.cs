@@ -365,7 +365,7 @@ namespace Scriban.Syntax
 
                 if (function.IsParameterType<ScriptExpression>(index))
                 {
-                    value = argument;
+                    value = namedArg != null ? namedArg.Value : argument;
                 }
                 else
                 {
@@ -392,7 +392,7 @@ namespace Scriban.Syntax
 
                 {
                     var paramType = function.GetParameterInfo(index).ParameterType;
-                    value = context.ToObject(callerContext.Span, value, paramType);
+                    value = context.ToObject(argument.Span, value, paramType);
                 }
 
                 if (index == argumentValues.Count)
