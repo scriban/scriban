@@ -289,7 +289,6 @@ namespace Scriban
 
             // Check for inheritance
             var typeInfo = type;
-            var destTypeInfo = destinationType;
 
             if (type.IsPrimitiveOrDecimal() && destinationType.IsPrimitiveOrDecimal())
             {
@@ -370,7 +369,7 @@ namespace Scriban
                 return ToList(span, value);
             }
 
-            if (destTypeInfo.IsAssignableFrom(typeInfo))
+            if (destinationType.IsAssignableFrom(typeInfo))
             {
                 return value;
             }

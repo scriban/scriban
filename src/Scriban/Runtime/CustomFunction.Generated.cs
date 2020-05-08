@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 05/06/2020 09:37:28 by Scriban.DelegateCodeGen
+// This file was automatically generated - 05/08/2020 10:34:32 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -45,6 +45,7 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetMethod(nameof(Scriban.Functions.MathFunctions.Abs), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionobject_TemplateContext_SourceSpan_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetMethod(nameof(Scriban.Functions.MathFunctions.Minus), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionobject_TemplateContext_SourceSpan_object_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.ToInt), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionobject_TemplateContext_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Keys), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionScriptArray_TemplateContext_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.RegexFunctions).GetMethod(nameof(Scriban.Functions.RegexFunctions.Match), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionScriptArray_TemplateContext_string_string_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Pluralize), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_int_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Typeof), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_object(method));
@@ -669,6 +670,28 @@ namespace Scriban.Runtime
             public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
             {
                 var arg0 = (string)arguments[0];
+
+                return _delegate(context, arg0);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: ScriptArray (TemplateContext, object)
+        /// </summary>
+        private partial class FunctionScriptArray_TemplateContext_object : DynamicCustomFunction
+        {
+            private delegate ScriptArray InternalDelegate(TemplateContext arg0, object arg1);
+
+            private readonly InternalDelegate _delegate;
+
+            public FunctionScriptArray_TemplateContext_object(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (object)arguments[0];
 
                 return _delegate(context, arg0);
             }

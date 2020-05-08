@@ -10,6 +10,7 @@ using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
+using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
 
 namespace Scriban.Functions
@@ -121,6 +122,7 @@ namespace Scriban.Functions
         /// <summary>
         /// Gets the members/keys of the specified value object.
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="value">The input object.</param>
         /// <returns>A list with the member names/key of the input object</returns>
         /// <remarks>
@@ -131,9 +133,15 @@ namespace Scriban.Functions
         /// [title, type]
         /// ```
         /// </remarks>
-        public new static ScriptArray Keys(IDictionary<string, object> value)
+        public new static ScriptArray Keys(TemplateContext context, object value)
         {
-            return value == null ? new ScriptArray() : new ScriptArray(value.Keys);
+            if (value == null) return new ScriptArray();
+            if (value is IDictionary dict) return new ScriptArray(dict.Keys);
+            if (value is IDictionary<string, object> dictStringObject) return new ScriptArray(dictStringObject.Keys);
+            if (value is IScriptObject scriptObj) return new ScriptArray(scriptObj.GetMembers());
+
+            var accessor = context.GetMemberAccessor(value);
+            return new ScriptArray(accessor.GetMembers(context, context.CurrentSpan, value));
         }
 
         /// <summary>
