@@ -46,6 +46,13 @@ namespace Scriban.Syntax
 
                 var result = context.Evaluate(To);
 
+                // If the result returns by the evaluation is a function and we haven't yet consumed the pipe argument
+                // that means that we need to evaluate this function with the actual pipe arguments.
+                if (result is IScriptCustomFunction && context.CurrentPipeArguments.Count > 0 && context.CurrentPipeArguments.Peek() == From)
+                {
+                    result = ScriptFunctionCall.Call(context, To, result, true, null);
+                }
+
                 // If we have still remaining arguments, it is likely that the destination expression is not a function
                 // so pipe arguments were not picked up and this is an error
                 if (context.CurrentPipeArguments.Count > 0 && context.CurrentPipeArguments.Peek() == From)
