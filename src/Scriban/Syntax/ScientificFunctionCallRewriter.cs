@@ -106,12 +106,8 @@ namespace Scriban.Syntax
                     if (result is IScriptCustomFunction function)
                     {
                         var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
-                        if (maxArg > 1)
-                        {
-                            throw new ScriptRuntimeException(nextExpression.Span, $"Cannot use a function with more than 1 argument ({maxArg}) in a sequence of implicit multiplications.");
-                        }
 
-                        if (maxArg == 1)
+                        if (maxArg > 0)
                         {
                             if (PrecedenceTopLevel == precedence || leftValue == null)
                             {
