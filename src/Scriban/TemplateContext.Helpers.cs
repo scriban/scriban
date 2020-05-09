@@ -218,9 +218,17 @@ namespace Scriban
         public virtual object ToObject(SourceSpan span, object value, Type destinationType)
         {
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
-
+            
             // Make sure that we are using the underlying type of a a Nullable type
             destinationType = Nullable.GetUnderlyingType(destinationType) ?? destinationType;
+
+            var type = value?.GetType();
+
+            // Early exit if types are already equal
+            if (destinationType == type)
+            {
+                return value;
+            }
 
             if (destinationType == typeof(string))
             {
@@ -265,12 +273,6 @@ namespace Scriban
                     return new BigInteger(0);
                 }
                 return null;
-            }
-
-            var type = value.GetType();
-            if (destinationType == type)
-            {
-                return value;
             }
 
             if (value is IScriptConvertibleTo convertible && convertible.TryConvertTo(this, span, destinationType, out var result))
