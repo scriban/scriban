@@ -18,6 +18,11 @@ namespace Scriban.Helpers
             return type.IsPrimitive || type == typeof(decimal) || type == typeof(BigInteger);
         }
 
+        public static bool IsNumber(this Type type)
+        {
+            return (type.IsPrimitive && type != typeof(bool)) || type == typeof(decimal) || type == typeof(BigInteger);
+        }
+
         internal static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
         {
             if (type == null)
