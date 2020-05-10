@@ -86,13 +86,13 @@ namespace Scriban.Syntax
                     continue;
                 }
 
+                object result = null;
                 if (!expectingExpression && nextExpression is IScriptVariablePath)
                 {
                     var restoreStrictVariables = context.StrictVariables;
 
                     // Don't fail on trying to lookup for a variable
                     context.StrictVariables = false;
-                    object result = null;
                     try
                     {
                         result = context.Evaluate(nextExpression, true);
@@ -157,7 +157,7 @@ namespace Scriban.Syntax
                     }
                     else
                     {
-                        int precedenceOfImplicitMultiply = PrecedenceOfMultiply + 1;
+                        int precedenceOfImplicitMultiply = result is IScriptCustomImplicitMultiplyPrecedence ? PrecedenceOfMultiply : PrecedenceOfMultiply + 1;
 
                         if (precedenceOfImplicitMultiply <= precedence)
                         {
