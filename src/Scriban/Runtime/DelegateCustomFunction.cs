@@ -31,7 +31,7 @@ namespace Scriban.Runtime
 
         public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
         {
-            object[] paramArguments = null;
+            Array paramArguments = null;
             var arguments = PrepareArguments(context, callerContext, scriptArguments, ref paramArguments);
             try
             {
@@ -51,7 +51,6 @@ namespace Scriban.Runtime
             finally
             {
                 context.ReleaseReflectionArguments(arguments);
-                context.ReleaseReflectionArguments(paramArguments);
             }
         }
 
@@ -59,7 +58,7 @@ namespace Scriban.Runtime
 #if !SCRIBAN_NO_ASYNC
         public override async ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
         {
-            object[] paramArguments = null;
+            Array paramArguments = null;
             var arguments = PrepareArguments(context, callerContext, scriptArguments, ref paramArguments);
             try
             {
@@ -78,7 +77,6 @@ namespace Scriban.Runtime
             finally
             {
                 context.ReleaseReflectionArguments(arguments);
-                context.ReleaseReflectionArguments(paramArguments);
             }
         }
 #endif
@@ -118,7 +116,7 @@ namespace Scriban.Runtime
             return _del != null ? _del.DynamicInvoke(arguments) : Method.Invoke(Target, arguments);
         }
 
-        private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ref object[] paramsArguments)
+        private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ref Array paramsArguments)
         {
             // TODO: optimize arguments allocations
             var reflectArgs = context.GetOrCreateReflectionArguments(Parameters.Length);
@@ -145,7 +143,7 @@ namespace Scriban.Runtime
                 int argCount = _paramsIndex - firstArgIndex;
                 var paramsCount = allArgCount - argCount;
 
-                paramsArguments = context.GetOrCreateReflectionArguments(paramsCount);
+                paramsArguments = _paramsElementType == typeof(object) ? context.GetOrCreateReflectionArguments(paramsCount) : Array.CreateInstance(_paramsElementType, paramsCount);
                 reflectArgs[_paramsIndex] = paramsArguments;
 
                 if (argCount > 0)
@@ -156,7 +154,10 @@ namespace Scriban.Runtime
 
                 if (paramsCount > 0)
                 {
-                    scriptArguments.CopyTo(argCount, paramsArguments, 0, paramsCount);
+                    for(int i = 0; i < paramsCount; i++)
+                    {
+                        paramsArguments.SetValue(scriptArguments[argCount + i], i);
+                    }
                 }
             }
             else
