@@ -90,9 +90,9 @@ namespace Scriban.Functions
                     if (builder == null)
                     {
                         builder = new StringBuilder(text.Length + 10);
-                        if (i > 0) builder.Append(text, 0, i - 1);
+                        if (i > 0) builder.Append(text, 0, i);
                     }
-                    
+
                     builder.Append(appendText);
                 }
                 else if (builder != null)
@@ -313,7 +313,7 @@ namespace Scriban.Functions
         /// ```
         /// > Highlight to see the empty spaces to the right of the string
         /// ```html
-        /// too many spaces           
+        /// too many spaces
         /// ```
         /// </remarks>
         public static string LStrip(string text)
