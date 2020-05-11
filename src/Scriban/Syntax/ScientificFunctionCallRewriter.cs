@@ -24,6 +24,8 @@ namespace Scriban.Syntax
         {
         }
 
+        public bool IgnoreExceptions { get; set; }
+
         public ScriptExpression Rewrite(TemplateContext context)
         {
             _index = 0;
@@ -96,6 +98,11 @@ namespace Scriban.Syntax
                     try
                     {
                         result = context.Evaluate(nextExpression, true);
+                    }
+                    catch (ScriptRuntimeException) when (IgnoreExceptions)
+                    {
+                        // ignore any exceptions during trial evaluating as we could try to evaluate
+                        // variable that aren't setup
                     }
                     finally
                     {

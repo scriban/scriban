@@ -33,13 +33,32 @@ namespace Scriban.Syntax
 
         public ScriptNode Format(ScriptNode node)
         {
-            var newNode = Visit(node);
+            bool previousStrictVariables = false;
 
-            if (_flags.HasFlags(ScriptFormatterFlags.CompressSpaces))
+            if (_context != null)
             {
-                _compressWhitespacesVisitor.CompressSpaces(newNode);
+                previousStrictVariables = _context.StrictVariables;
+                _context.StrictVariables = false;
             }
-            return newNode;
+
+            try
+            {
+                var newNode = Visit(node);
+
+                if (_flags.HasFlags(ScriptFormatterFlags.CompressSpaces))
+                {
+                    _compressWhitespacesVisitor.CompressSpaces(newNode);
+                }
+
+                return newNode;
+            }
+            finally
+            {
+                if (_context != null)
+                {
+                    _context.StrictVariables = previousStrictVariables;
+                }
+            }
         }
 
         public override ScriptNode Visit(ScriptNode node)
@@ -135,7 +154,7 @@ namespace Scriban.Syntax
         {
             if (_isScientific && !node.ExplicitCall)
             {
-                var newNode = node.GetScientificExpression(_context);
+                var newNode = node.GetScientificExpression(_context, true);
                 if (newNode != node)
                 {
                     return Visit((ScriptNode) newNode);
