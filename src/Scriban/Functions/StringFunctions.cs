@@ -31,6 +31,81 @@ namespace Scriban.Functions
         private static void ReleaseBuilder(StringBuilder builder) => builder.Length = 0;
 
         /// <summary>
+        /// Escapes a string with escape characters.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The two strings concatenated</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Hel\tlo\n\"W\\orld" | string.escape }}
+        /// ```
+        /// ```html
+        /// Hel\tlo\n\"W\\orld
+        /// ```
+        /// </remarks>
+        public static string Escape(string text)
+        {
+            if (text == null) return text;
+            StringBuilder builder = null;
+            for (int i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (c < 32 || c == '"' || c == '\\')
+                {
+                    string appendText;
+                    switch (c)
+                    {
+                        case '"':
+                            appendText = "\\\"";
+                            break;
+                        case '\\':
+                            appendText = "\\\\";
+                            break;
+                        case '\a':
+                            appendText = "\\a";
+                            break;
+                        case '\b':
+                            appendText = "\\b";
+                            break;
+                        case '\t':
+                            appendText = "\\t";
+                            break;
+                        case '\r':
+                            appendText = "\\r";
+                            break;
+                        case '\v':
+                            appendText = "\\v";
+                            break;
+                        case '\f':
+                            appendText = "\\f";
+                            break;
+                        case '\n':
+                            appendText = "\\n";
+                            break;
+                        default:
+                            appendText = $"\\x{(int)c:x2}";
+                            break;
+                    }
+
+                    if (builder == null)
+                    {
+                        builder = new StringBuilder(text.Length + 10);
+                        if (i > 0) builder.Append(text, 0, i - 1);
+                    }
+                    
+                    builder.Append(appendText);
+                }
+                else if (builder != null)
+                {
+                    // TODO: could be more optimized by adding range
+                    builder.Append(c);
+                }
+            }
+
+            return builder != null ? builder.ToString() : text;
+        }
+
+        /// <summary>
         /// Concatenates two strings
         /// </summary>
         /// <param name="text">The input string</param>

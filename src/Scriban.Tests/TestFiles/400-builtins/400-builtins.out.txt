@@ -40,6 +40,7 @@ List of all the builtin <string> functions:
  contains
  downcase
  ends_with
+ escape
  handleize
  hmac_sha1
  hmac_sha256

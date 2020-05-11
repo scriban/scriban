@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -121,7 +121,7 @@ namespace Scriban.Functions
         /// three
         /// one
         /// ```
-        /// `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template. 
+        /// `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template.
         /// If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
         /// </remarks>
         public static object Cycle(TemplateContext context, SourceSpan span, IList list, object group = null)
@@ -202,7 +202,7 @@ namespace Scriban.Functions
         /// {{ ["a", "b", "c"] | array.insert_at 2 "Yo" }}
         /// ```
         /// ```html
-        /// [a, b, Yo, c]
+        /// ["a", "b", "Yo", "c"]
         /// ```
         /// </remarks>
         public static IEnumerable InsertAt(IEnumerable list, int index, object value)
@@ -319,12 +319,12 @@ namespace Scriban.Functions
         /// <param name="member">The member to extract the value from</param>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 
+        /// {{
         /// products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
         /// products | array.map "type" | array.uniq | array.sort }}
         /// ```
         /// ```html
-        /// [electronics, fruit, furniture]
+        /// ["electronics", "fruit", "furniture"]
         /// ```
         /// </remarks>
         public static IEnumerable Map(TemplateContext context, SourceSpan span, object list, string member)
@@ -474,14 +474,14 @@ namespace Scriban.Functions
         /// <param name="member">The member name to sort according to its value. Null by default, meaning that the element's value are used instead.</param>
         /// <returns>A list sorted according to the value of each element or the value of the specified `member` of each element.</returns>
         /// <remarks>
-        /// Sorts by element's value: 
+        /// Sorts by element's value:
         /// ```scriban-html
         /// {{ [10, 2, 6] | array.sort }}
         /// ```
         /// ```html
         /// [2, 6, 10]
         /// ```
-        /// Sorts by elements member's value: 
+        /// Sorts by elements member's value:
         /// ```scriban-html
         /// {{
         /// products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
@@ -489,7 +489,7 @@ namespace Scriban.Functions
         /// }}
         /// ```
         /// ```html
-        /// [computer, orange, sofa]
+        /// ["computer", "orange", "sofa"]
         /// ```
         /// </remarks>
         public static IEnumerable Sort(TemplateContext context, SourceSpan span, object list, string member = null)
@@ -558,7 +558,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Returns if an `list` contains an specifique element 
+        /// Returns if an `list` contains an specifique element
         /// </summary>
         /// <param name="list">the input list</param>
         /// <param name="item">the input item</param>

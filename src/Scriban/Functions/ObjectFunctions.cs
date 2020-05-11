@@ -130,7 +130,7 @@ namespace Scriban.Functions
         /// {{ product | object.keys | array.sort }}
         /// ```
         /// ```html
-        /// [title, type]
+        /// ["title", "type"]
         /// ```
         /// </remarks>
         public new static ScriptArray Keys(TemplateContext context, object value)
@@ -262,7 +262,7 @@ namespace Scriban.Functions
         /// {{ product | object.values | array.sort }}
         /// ```
         /// ```html
-        /// [fruit, Orange]
+        /// ["fruit", "Orange"]
         /// ```
         /// </remarks>
         public new static ScriptArray Values(IDictionary<string, object> value)

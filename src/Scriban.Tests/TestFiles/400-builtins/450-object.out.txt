@@ -10,7 +10,7 @@ object
 4.24
 
 [1, 2]
-[a, b]
+["a", "b"]
 null | object.keys:[]
 null | object.values:[]
 product | object.has_key "title":true

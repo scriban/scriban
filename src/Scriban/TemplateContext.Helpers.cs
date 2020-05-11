@@ -70,16 +70,33 @@ namespace Scriban
             return new ScriptArray(iterator);
         }
 
+        private int _objectToStringLevel;
+
         /// <summary>
         /// Called whenever an objects is converted to a string. This method can be overriden.
         /// </summary>
         /// <param name="value">The object value to print</param>
+        /// <param name="escapeString">True if value is a string, the string should be escaped</param>
         /// <returns>A string representing the object value</returns>
-        public virtual string ObjectToString(object value)
+        public virtual string ObjectToString(object value, bool escapeString = false)
+        {
+            bool shouldEscapeString = escapeString || _objectToStringLevel > 0;
+            try
+            {
+                _objectToStringLevel++;
+                return ObjectToStringImpl(value, shouldEscapeString);
+            }
+            finally
+            {
+                _objectToStringLevel--;
+            }
+        }
+
+        private string ObjectToStringImpl(object value, bool escapeString)
         {
             if (value is string)
             {
-                return (string)value;
+                return escapeString ? $"\"{StringFunctions.Escape((string) value)}\"" : (string) value;
             }
 
             if (value == null || value == EmptyScriptObject.Default)
@@ -96,7 +113,7 @@ namespace Scriban
             var type = value.GetType();
             if (type.IsPrimitiveOrDecimal())
             {
-                return ((IFormattable) value).ToString(null, this);
+                return ((IFormattable)value).ToString(null, this);
             }
 
             if (type == typeof(DateTime))
@@ -150,6 +167,7 @@ namespace Scriban
 
             // Else just end-up trying to emit the ToString
             return value.ToString();
+
         }
 
         /// <summary>
