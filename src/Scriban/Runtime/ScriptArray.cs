@@ -4,6 +4,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using Scriban.Functions;
@@ -18,6 +19,8 @@ namespace Scriban.Runtime
     /// </summary>
     /// <seealso cref="object" />
     /// <seealso cref="System.Collections.IList" />
+    [DebuggerDisplay("Count = {Count}")]
+    [DebuggerTypeProxy(typeof(DebugListView))]
     public class ScriptArray : IList<object>, IList, IScriptObject, IScriptCustomBinaryOperation, IScriptTransformable
     {
         private List<object> _values;
@@ -593,6 +596,19 @@ namespace Scriban.Runtime
             }
 
             return clone;
+        }
+
+        internal class DebugListView
+        {
+            private readonly ScriptArray _collection;
+
+            public DebugListView(ScriptArray collection)
+            {
+                this._collection = collection;
+            }
+
+            [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
+            public object[] Items => _collection.ToArray();
         }
     }
 }
