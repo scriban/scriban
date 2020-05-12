@@ -13,6 +13,34 @@ namespace Scriban.Tests
     public class TestIncludes
     {
         [Test]
+        public void TestIndentedIncludes()
+        {
+            var template = Template.Parse(@"  {{ include 'header' }}
+    {{ include 'multilines' }}
+Test1
+      {{ include 'nested_templates_with_indent' }}
+Test2
+");
+            var context = new TemplateContext();
+            context.TemplateLoader = new CustomTemplateLoader();
+            context.IndentWithInclude = true;
+
+            var text = template.Render(context).Replace("\r\n", "\n");
+            var expectedText = @"  This is a header
+    Line 1
+    Line 2
+    Line 3
+Test1
+        Line 1
+        Line 2
+        Line 3
+Test2
+".Replace("\r\n", "\n");
+
+            TextAssert.AreEqual(expectedText, text);
+        }
+
+        [Test]
         public void TestJekyllInclude()
         {
             var input = "{% include /this/is/a/test.htm %}";

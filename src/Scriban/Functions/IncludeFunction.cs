@@ -60,6 +60,90 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
             }
 
+            string indent = null;
+
+            // Handle indent
+            if (context.IndentWithInclude)
+            {
+                // Find the statement for the include
+                var current = callerContext.Parent;
+                while (current != null && !(current is ScriptStatement))
+                {
+                    current = current.Parent;
+                }
+
+                // Find the RawStatement preceding this include
+                ScriptNode childNode = null;
+                bool shouldContinue = true;
+                while (shouldContinue && current != null)
+                {
+                    if (current is ScriptList<ScriptStatement> statementList && childNode is ScriptStatement childStatement)
+                    {
+                        var indexOf = statementList.IndexOf(childStatement);
+
+                        // Case for first indent, if it is not the first statement in the doc
+                        // it's not a valid indent
+                        if (indent != null && indexOf > 0)
+                        {
+                            indent = null;
+                            break;
+                        }
+
+                        for (int i = indexOf - 1; i >= 0; i--)
+                        {
+                            var previousStatement = statementList[i];
+                            if (previousStatement is ScriptEscapeStatement escapeStatement && escapeStatement.IsEntering)
+                            {
+                                if (i > 0 && statementList[i - 1] is ScriptRawStatement rawStatement)
+                                {
+
+                                    var text = rawStatement.Text;
+                                    for (int j = text.Length - 1; j >= 0; j--)
+                                    {
+                                        var c = text[j];
+                                        if (c == '\n')
+                                        {
+                                            shouldContinue = false;
+                                            indent = text.Substring(j + 1);
+                                            break;
+                                        }
+
+                                        if (!char.IsWhiteSpace(c))
+                                        {
+                                            shouldContinue = false;
+                                            break;
+                                        }
+
+                                        if (j == 0)
+                                        {
+                                            // We have a raw statement that has only white spaces
+                                            // It could be the first raw statement of the document
+                                            // so we continue but we handle it later
+                                            indent = text.ToString();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    shouldContinue = false;
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+
+                    childNode = current;
+                    current = childNode.Parent;
+                }
+
+                if (string.IsNullOrEmpty(indent))
+                {
+                    indent = null;
+                }
+            }
+
+
             // Compute a new parameters for the include
             var newParameters = new ScriptArray(arguments.Count - 1);
             for (int i = 1; i < arguments.Count; i++)
@@ -108,6 +192,8 @@ namespace Scriban.Functions
             context.PushOutput();
             object result = null;
             context.EnterRecursive(callerContext);
+            var previousIndent = context.CurrentIndent;
+            context.CurrentIndent = indent;
             try
             {
                 result = template.Render(context);
@@ -116,6 +202,7 @@ namespace Scriban.Functions
             {
                 context.ExitRecursive(callerContext);
                 context.PopOutput();
+                context.CurrentIndent = previousIndent;
             }
 
             return result;

@@ -341,19 +341,40 @@ namespace Scriban
         {
             if (text != null)
             {
-                await Output.WriteAsync(text, startIndex, count, CancellationToken).ConfigureAwait(false);
+                // Indented text
+                if (CurrentIndent != null)
+                {
+                    var index = startIndex;
+                    var indexEnd = startIndex + count;
+
+                    while (index < indexEnd)
+                    {
+                        // Write indents if necessary
+                        if (_previousTextWasNewLine)
+                        {
+                            await Output.WriteAsync(CurrentIndent, 0, CurrentIndent.Length, CancellationToken).ConfigureAwait(false);
+                            _previousTextWasNewLine = false;
+                        }
+
+                        var newLineIndex = text.IndexOf('\n', index);
+                        if (newLineIndex < 0)
+                        {
+                            await Output.WriteAsync(text, index, indexEnd - index, CancellationToken).ConfigureAwait(false);
+                            break;
+                        }
+
+                        // We output the new line
+                        await Output.WriteAsync(text, index, newLineIndex - index + 1, CancellationToken).ConfigureAwait(false);
+                        index = newLineIndex + 1;
+                        _previousTextWasNewLine = true;
+                    }
+                }
+                else
+                {
+                    await Output.WriteAsync(text, startIndex, count, CancellationToken).ConfigureAwait(false);
+                }
             }
 
-            return this;
-        }
-
-        /// <summary>
-        /// Writes the text to the current <see cref="Output"/>
-        /// </summary>
-        /// <param name="slice">The text.</param>
-        public async ValueTask<TemplateContext> WriteAsync(ScriptStringSlice slice)
-        {
-            await WriteAsync(slice.FullText, slice.Index, slice.Length).ConfigureAwait(false);
             return this;
         }
 
@@ -365,8 +386,18 @@ namespace Scriban
         {
             if (text != null)
             {
-                await Output.WriteAsync(text, CancellationToken).ConfigureAwait(false);
+                await WriteAsync(text, 0, text.Length).ConfigureAwait(false);
             }
+            return this;
+        }
+
+        /// <summary>
+        /// Writes the text to the current <see cref="Output"/>
+        /// </summary>
+        /// <param name="slice">The text.</param>
+        public async ValueTask<TemplateContext> WriteAsync(ScriptStringSlice slice)
+        {
+            await WriteAsync(slice.FullText, slice.Index, slice.Length).ConfigureAwait(false);
             return this;
         }
 
@@ -390,7 +421,7 @@ namespace Scriban
         /// </summary>
         public async ValueTask<TemplateContext> WriteLineAsync()
         {
-            await Output.WriteAsync(NewLine, CancellationToken).ConfigureAwait(false);
+            await WriteAsync(NewLine).ConfigureAwait(false);
             return this;
         }
     }
@@ -446,6 +477,90 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
             }
 
+            string indent = null;
+
+            // Handle indent
+            if (context.IndentWithInclude)
+            {
+                // Find the statement for the include
+                var current = callerContext.Parent;
+                while (current != null && !(current is ScriptStatement))
+                {
+                    current = current.Parent;
+                }
+
+                // Find the RawStatement preceding this include
+                ScriptNode childNode = null;
+                bool shouldContinue = true;
+                while (shouldContinue && current != null)
+                {
+                    if (current is ScriptList<ScriptStatement> statementList && childNode is ScriptStatement childStatement)
+                    {
+                        var indexOf = statementList.IndexOf(childStatement);
+
+                        // Case for first indent, if it is not the first statement in the doc
+                        // it's not a valid indent
+                        if (indent != null && indexOf > 0)
+                        {
+                            indent = null;
+                            break;
+                        }
+
+                        for (int i = indexOf - 1; i >= 0; i--)
+                        {
+                            var previousStatement = statementList[i];
+                            if (previousStatement is ScriptEscapeStatement escapeStatement && escapeStatement.IsEntering)
+                            {
+                                if (i > 0 && statementList[i - 1] is ScriptRawStatement rawStatement)
+                                {
+
+                                    var text = rawStatement.Text;
+                                    for (int j = text.Length - 1; j >= 0; j--)
+                                    {
+                                        var c = text[j];
+                                        if (c == '\n')
+                                        {
+                                            shouldContinue = false;
+                                            indent = text.Substring(j + 1);
+                                            break;
+                                        }
+
+                                        if (!char.IsWhiteSpace(c))
+                                        {
+                                            shouldContinue = false;
+                                            break;
+                                        }
+
+                                        if (j == 0)
+                                        {
+                                            // We have a raw statement that has only white spaces
+                                            // It could be the first raw statement of the document
+                                            // so we continue but we handle it later
+                                            indent = text.ToString();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    shouldContinue = false;
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+
+                    childNode = current;
+                    current = childNode.Parent;
+                }
+
+                if (string.IsNullOrEmpty(indent))
+                {
+                    indent = null;
+                }
+            }
+
+
             // Compute a new parameters for the include
             var newParameters = new ScriptArray(arguments.Count - 1);
             for (int i = 1; i < arguments.Count; i++)
@@ -494,6 +609,8 @@ namespace Scriban.Functions
             context.PushOutput();
             object result = null;
             context.EnterRecursive(callerContext);
+            var previousIndent = context.CurrentIndent;
+            context.CurrentIndent = indent;
             try
             {
                 result = await template.RenderAsync(context).ConfigureAwait(false);
@@ -502,6 +619,7 @@ namespace Scriban.Functions
             {
                 context.ExitRecursive(callerContext);
                 context.PopOutput();
+                context.CurrentIndent = previousIndent;
             }
 
             return result;

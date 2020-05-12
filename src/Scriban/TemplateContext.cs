@@ -55,6 +55,7 @@ namespace Scriban
         private FastStack<Dictionary<object, object>> _loopTagsStack;
         private FastStack<Dictionary<object, object>> _availableTags;
         private ScriptPipeArguments _currentPipeArguments;
+        private bool _previousTextWasNewLine;
 
         internal bool AllowPipeArguments => _getOrSetValueLevel <= 1;
 
@@ -179,6 +180,11 @@ namespace Scriban
         /// Gets a boolean if the context is being used  with liquid
         /// </summary>
         public bool IsLiquid { get; protected set; }
+
+        /// <summary>
+        /// If sets to <c>true</c>, the include statement will maintain the indent.
+        /// </summary>
+        public bool IndentWithInclude { get; set; }
 
         /// <summary>
         /// String used for new-line.
@@ -344,6 +350,11 @@ namespace Scriban
         public ScriptNode CurrentNode { get; private set; }
 
         public SourceSpan CurrentSpan => CurrentNode?.Span ?? new SourceSpan();
+
+        /// <summary>
+        /// Returns the current indent used for prefixing output lines.
+        /// </summary>
+        public string CurrentIndent { get; set; }
 
         /// <summary>
         /// Indicates if we are in a looop
@@ -742,7 +753,7 @@ namespace Scriban
         {
             if (text != null)
             {
-                Output.Write(text);
+                Write(text, 0, text.Length);
             }
             return this;
         }
@@ -752,7 +763,7 @@ namespace Scriban
         /// </summary>
         public TemplateContext WriteLine()
         {
-            Output.Write(NewLine);
+            Write(NewLine);
             return this;
         }
 
@@ -776,7 +787,38 @@ namespace Scriban
         {
             if (text != null)
             {
-                Output.Write(text, startIndex, count);
+                // Indented text
+                if (CurrentIndent != null)
+                {
+                    var index = startIndex;
+                    var indexEnd = startIndex + count;
+
+                    while (index < indexEnd)
+                    {
+                        // Write indents if necessary
+                        if (_previousTextWasNewLine)
+                        {
+                            Output.Write(CurrentIndent, 0, CurrentIndent.Length);
+                            _previousTextWasNewLine = false;
+                        }
+
+                        var newLineIndex = text.IndexOf('\n', index);
+                        if (newLineIndex < 0)
+                        {
+                            Output.Write(text, index, indexEnd - index);
+                            break;
+                        }
+
+                        // We output the new line
+                        Output.Write(text, index, newLineIndex - index + 1);
+                        index = newLineIndex + 1;
+                        _previousTextWasNewLine = true;
+                    }
+                }
+                else
+                {
+                    Output.Write(text, startIndex, count);
+                }
             }
 
             return this;

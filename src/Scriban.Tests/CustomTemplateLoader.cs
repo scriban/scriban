@@ -50,6 +50,12 @@ namespace Scriban.Tests
                 case "recursive_nested_templates":
                     return "{{$1}}{{ x = x ?? 0; x = x + 1; if x < 5; include 'recursive_nested_templates' ($1 + 1); end }}";
 
+                case "multilines":
+                    return "Line 1\nLine 2\nLine 3";
+
+                case "nested_templates_with_indent":
+                    return "  {{ include 'multilines'}}";
+
                 default:
                     return templatePath;
             }
