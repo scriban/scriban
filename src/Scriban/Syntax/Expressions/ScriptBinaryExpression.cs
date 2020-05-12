@@ -665,7 +665,14 @@ namespace Scriban.Syntax
                     return (BigInteger)left >> (int)right;
 
                 case ScriptBinaryOperator.Power:
-                    return BigInteger.ModPow(left, right, MaxBigInteger);
+                    if (right < 0)
+                    {
+                        return Math.Pow(left, right);
+                    }
+                    else
+                    {
+                        return BigInteger.ModPow(left, right, MaxBigInteger);
+                    }
 
                 case ScriptBinaryOperator.BinaryOr:
                     return left | right;
@@ -726,7 +733,14 @@ namespace Scriban.Syntax
                     return left >> (int)right;
 
                 case ScriptBinaryOperator.Power:
-                    return BigInteger.ModPow(left, right, MaxBigInteger);
+                    if (right < 0)
+                    {
+                        return Math.Pow((double)left, (double)right);
+                    }
+                    else
+                    {
+                        return BigInteger.ModPow(left, right, MaxBigInteger);
+                    }
 
                 case ScriptBinaryOperator.BinaryOr:
                     return left | right;
