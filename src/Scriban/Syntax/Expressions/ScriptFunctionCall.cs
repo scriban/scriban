@@ -107,7 +107,7 @@ namespace Scriban.Syntax
                 };
                 rewrite.Add(Target);
                 rewrite.AddRange(Arguments);
-                return rewrite.Rewrite(context);
+                return rewrite.Rewrite(context, this);
             }
             return this;
         }

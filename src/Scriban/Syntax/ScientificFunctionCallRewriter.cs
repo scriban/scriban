@@ -14,7 +14,10 @@ namespace Scriban.Syntax
     /// </summary>
     internal partial class ScientificFunctionCallRewriter : List<ScriptExpression>
     {
+        private static readonly int PrecedenceOfMultiply = Parser.GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator.Multiply);
+        private static readonly int PrecedenceTopLevel = PrecedenceOfMultiply - 1;
         private int _index;
+        private ScriptNode _parent;
 
         public ScientificFunctionCallRewriter()
         {
@@ -26,15 +29,17 @@ namespace Scriban.Syntax
 
         public bool IgnoreExceptions { get; set; }
 
-        public ScriptExpression Rewrite(TemplateContext context)
+        public ScriptExpression Rewrite(TemplateContext context, ScriptNode parent)
         {
+            _parent = parent;
             _index = 0;
-            return Rewrite(context, PrecedenceTopLevel);
+            var node = Rewrite(context, PrecedenceTopLevel);
+            if (node.Parent == null)
+            {
+                node.Parent = _parent?.Parent;
+            }
+            return node;
         }
-
-        private static readonly int PrecedenceOfMultiply = Parser.GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator.Multiply);
-
-        private static readonly int PrecedenceTopLevel = PrecedenceOfMultiply - 1;
 
         private ScriptExpression Rewrite(TemplateContext context, int precedence, bool expectingExpression = false)
         {
