@@ -293,7 +293,7 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="member">The member.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        public void SetReadOnly(string member, bool readOnly)
+        public virtual void SetReadOnly(string member, bool readOnly)
         {
             this.AssertNotReadOnly();
             InternalValue internalValue;
@@ -304,7 +304,7 @@ namespace Scriban.Runtime
             }
         }
 
-        public string ToString(string format, IFormatProvider formatProvider)
+        public virtual string ToString(string format, IFormatProvider formatProvider)
         {
             var context = formatProvider as TemplateContext;
             var result = new StringBuilder();
@@ -346,7 +346,7 @@ namespace Scriban.Runtime
             return ToString(null, formatProvider);
         }
 
-        public override string ToString()
+        public sealed override string ToString()
         {
             return ToString(null, null);
         }
