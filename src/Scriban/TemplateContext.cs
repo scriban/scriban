@@ -580,32 +580,38 @@ namespace Scriban
             if (variable == null) throw new ArgumentNullException(nameof(variable));
 
             var scope = variable.Scope;
-            IScriptObject firstStore = null;
+            IScriptObject finalStore = null;
 
             switch (scope)
             {
                 case ScriptVariableScope.Global:
-                    for (int i = _globalStores.Count - 1; i >= 0; i--)
+                    IScriptObject storeWithVariable = null;
+                    var name = variable.Name;
+                    int lastStoreIndex = _globalStores.Count - 1;
+                    for (int i = lastStoreIndex; i >= 0; i--)
                     {
                         var store = _globalStores.Items[i];
-                        if (firstStore == null)
+                        if (storeWithVariable == null && store.Contains(name))
                         {
-                            firstStore = store;
+                            storeWithVariable = store;
                         }
 
                         // We check that for upper store, we actually can write a variable with this name
                         // otherwise we don't allow to create a variable with the same name as a readonly variable
-                        if (!store.CanWrite(variable.Name))
+                        if (!store.CanWrite(name))
                         {
                             var variableType = store == BuiltinObject ? "builtin " : string.Empty;
                             throw new ScriptRuntimeException(variable.Span, $"Cannot set the {variableType}readonly variable `{variable}`");
                         }
                     }
+
+                    // If we have a store for this variable name use it, otherwise use the first store available.
+                    finalStore = storeWithVariable ?? _globalStores.Items[lastStoreIndex];
                     break;
                 case ScriptVariableScope.Local:
                     if (_localStores.Count > 0)
                     {
-                        firstStore = _localStores.Peek();
+                        finalStore = _localStores.Peek();
                     }
                     else
                     {
@@ -615,7 +621,7 @@ namespace Scriban
                 case ScriptVariableScope.Loop:
                     if (_loopStores.Count > 0)
                     {
-                        firstStore = _loopStores.Peek();
+                        finalStore = _loopStores.Peek();
                     }
                     else
                     {
@@ -628,7 +634,7 @@ namespace Scriban
             }
 
             // Try to set the variable
-            if (!firstStore.TrySetValue(this, variable.Span, variable.Name, value, asReadOnly))
+            if (!finalStore.TrySetValue(this, variable.Span, variable.Name, value, asReadOnly))
             {
                 throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
             }
