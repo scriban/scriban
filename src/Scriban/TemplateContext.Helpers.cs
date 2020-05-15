@@ -189,6 +189,19 @@ namespace Scriban
                 return (bool) value;
             }
 
+            if (UseScientific)
+            {
+                var type = value.GetType();
+                if (type.IsPrimitive || type == typeof(decimal))
+                {
+                    return Convert.ToBoolean(value);
+                }
+                if (value is BigInteger bigInt)
+                {
+                    return bigInt != BigInteger.Zero;
+                }
+            }
+
             return true;
         }
 
