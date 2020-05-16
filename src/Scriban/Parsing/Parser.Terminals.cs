@@ -213,40 +213,80 @@ namespace Scriban.Parsing
                 isUnsigned = true;
             }
 
-            var number = BigInteger.Zero;
-            for (int i = 2; i < text.Length; i++)
-            {
-                var c = text[i];
-                number <<= 1;
-                number |= c == '0' ? 0U : 1U;
-            }
+            var dotIndex = text.IndexOf('.');
+            var isDoubleOrFloat = dotIndex > 2;
 
-            if (number <= uint.MaxValue)
+            if (isDoubleOrFloat)
             {
-                if (isUnsigned)
+                bool isFloat = false;
+                if (text.EndsWith("f", StringComparison.OrdinalIgnoreCase))
                 {
-                    literal.Value = (long)(uint)number;
+                    text = text.Substring(0, text.Length - 1);
+                    isFloat = true;
+                }
+                else if (text.EndsWith("d", StringComparison.OrdinalIgnoreCase))
+                {
+                    text = text.Substring(0, text.Length - 1);
+                }
+
+                int exponent = dotIndex - 2;
+                var number = BigInteger.Zero;
+                int digit = 0;
+                for (int i = 2; i < text.Length; i++)
+                {
+                    var c = text[i];
+                    if (c == '.') continue;
+                    number <<= 1;
+                    number |= c == '0' ? 0U : 1U;
+                    digit++;
+                }
+
+                if (isFloat)
+                {
+                    literal.Value = (float)number * (float)Math.Pow(2, exponent - digit);
                 }
                 else
                 {
-                    literal.Value = unchecked((int)(uint)number);
-                }
-            }
-            else if (number <= ulong.MaxValue)
-            {
-                if (isUnsigned)
-                {
-                    literal.Value = number;
-                }
-
-                if (literal.Value == null)
-                {
-                    literal.Value = unchecked((long)(ulong)number);
+                    literal.Value = (double)number * Math.Pow(2, exponent - digit);
                 }
             }
             else
             {
-                literal.Value = number;
+                var number = BigInteger.Zero;
+                for (int i = 2; i < text.Length; i++)
+                {
+                    var c = text[i];
+                    number <<= 1;
+                    number |= c == '0' ? 0U : 1U;
+                }
+
+                if (number <= uint.MaxValue)
+                {
+                    if (isUnsigned)
+                    {
+                        literal.Value = (long) (uint) number;
+                    }
+                    else
+                    {
+                        literal.Value = unchecked((int) (uint) number);
+                    }
+                }
+                else if (number <= ulong.MaxValue)
+                {
+                    if (isUnsigned)
+                    {
+                        literal.Value = number;
+                    }
+
+                    if (literal.Value == null)
+                    {
+                        literal.Value = unchecked((long) (ulong) number);
+                    }
+                }
+                else
+                {
+                    literal.Value = number;
+                }
             }
 
             NextToken(); // Skip the literal

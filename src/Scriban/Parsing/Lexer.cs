@@ -1333,14 +1333,11 @@ namespace Scriban.Parsing
 
         private void ReadHexa(TextPosition start)
         {
-            TextPosition end = _position;
-            // Read first part
+            var end = _position;
+            NextChar(); // skip x
+
             bool hasHexa = false;
-
-            end = _position;
-            NextChar();
-
-            while(true)
+            while (true)
             {
                 if (IsHexa(c)) hasHexa = true;
                 else if (c != '_') break;
@@ -1348,7 +1345,7 @@ namespace Scriban.Parsing
                 NextChar();
             }
 
-            if (!IsIdentifierLetter(PeekChar()) && c == 'u' || c == 'U')
+            if (!IsIdentifierLetter(PeekChar()) && (c == 'u' || c == 'U'))
             {
                 end = _position;
                 NextChar();
@@ -1356,7 +1353,7 @@ namespace Scriban.Parsing
 
             if (!hasHexa)
             {
-                AddError($"Invalid hex number, expecting at least an hex digit [0-9a-fA-F] after 0x", start, end);
+                AddError($"Invalid hex number, expecting at least a hex digit [0-9a-fA-F] after 0x", start, end);
             }
             else
             {
@@ -1364,23 +1361,46 @@ namespace Scriban.Parsing
             }
         }
 
+        private static bool IsBinary(char c) => c == '0' || c == '1';
+        
         private void ReadBinary(TextPosition start)
         {
-            TextPosition end = _position;
+            var end = _position; 
+            NextChar(); // skip b
+             
             // Read first part
-            do
+            bool hasBinary = false;
+            bool hasDotAlready = false;
+            while (true)
             {
+                if (IsBinary(c)) hasBinary = true;
+                else if (c != '_') break;
                 end = _position;
                 NextChar();
-            } while (c == '0' || c == '1' || c == '_');
+                if (c == '.')
+                {
+                    if (hasDotAlready) break;
+                    var nc = PeekChar();
+                    if (nc != '0' && nc != '1') break;
+                    hasDotAlready = true;
+                    NextChar();
+                }
+            } 
 
-            if (!IsIdentifierLetter(PeekChar()) && c == 'u' || c == 'U')
+            if (!IsIdentifierLetter(PeekChar()) && (c == 'u' || c == 'U' || hasDotAlready && (c == 'f' || c == 'F' || c == 'd' || c == 'D')))
             {
                 end = _position;
                 NextChar();
             }
 
-            _token = new Token(TokenType.BinaryInteger, start, end);
+            if (!hasBinary)
+            {
+                AddError($"Invalid binary number, expecting at least a binary digit 0 or 1 after 0b", start, end);
+            }
+            else
+            {
+                _token = new Token(TokenType.BinaryInteger, start, end);
+            }
         }
 
         private void ReadString()
