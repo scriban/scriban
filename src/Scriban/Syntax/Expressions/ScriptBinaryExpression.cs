@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Reflection;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Numerics;
 using System.Text;
@@ -161,8 +162,11 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.LiquidEndsWith:
                     try
                     {
-                        if (leftValue is string || rightValue is string)
+                        if (leftValue is string || rightValue is string || leftValue is char || rightValue is char)
                         {
+                            if (leftValue is char leftChar) leftValue = leftChar.ToString(context.CurrentCulture);
+                            if (rightValue is char rightChar) rightValue = rightChar.ToString(CultureInfo.InvariantCulture);
+
                             return CalculateToString(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                         else if (leftValue == EmptyScriptObject.Default || rightValue == EmptyScriptObject.Default)
