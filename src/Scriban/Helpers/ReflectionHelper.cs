@@ -55,6 +55,7 @@ namespace Scriban.Helpers
         {
             if (type == null) return "null";
 
+            if (type == typeof(bool)) return "bool";
             if (type == typeof(byte)) return "byte";
             if (type == typeof(sbyte)) return "sbyte";
             if (type == typeof(ushort)) return "ushort";
@@ -67,7 +68,7 @@ namespace Scriban.Helpers
             if (type == typeof(float)) return "float";
             if (type == typeof(double)) return "double";
             if (type == typeof(decimal)) return "decimal";
-            if (type == typeof(BigInteger)) return "BigInteger";
+            if (type == typeof(BigInteger)) return "bigint";
             if (type == typeof(ScriptArray)) return "[]";
 
             string name = type.Name;
