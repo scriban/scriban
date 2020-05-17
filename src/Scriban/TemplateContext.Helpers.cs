@@ -213,24 +213,24 @@ namespace Scriban
         /// <returns>The integer value</returns>
         public virtual int ToInt(SourceSpan span, object value)
         {
+            if (value == null) return 0;
+            if (value is int intValue) return intValue;
             try
             {
-                if (value == null) return 0;
-                if (value is int) return (int) value;
                 if (value is BigInteger bigInt)
                 {
                     return (int) bigInt;
                 }
 
-                if (value is IScriptConvertibleTo convertible && convertible.TryConvertTo(this, span, typeof(int), out var intValue))
+                if (value is IScriptConvertibleTo convertible && convertible.TryConvertTo(this, span, typeof(int), out var intObj))
                 {
-                    return (int) intValue;
+                    return (int) intObj;
                 }
                 return Convert.ToInt32(value, CurrentCulture);
             }
             catch (Exception ex)
             {
-                throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType()}` to int", ex);
+                throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType().ScriptPrettyName()}` to int", ex);
             }
         }
 
