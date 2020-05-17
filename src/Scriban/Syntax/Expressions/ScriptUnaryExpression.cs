@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Numerics;
 using Scriban.Helpers;
+using Scriban.Parsing;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -42,81 +43,7 @@ namespace Scriban.Syntax
 
             var value = context.Evaluate(Right);
 
-            if (value is IScriptCustomUnaryOperation customUnary)
-            {
-                if (customUnary.TryEvaluate(context, Right.Span, Operator, value, out var result))
-                {
-                    return result;
-                }
-            }
-            else
-            {
-                switch (Operator)
-                {
-                    case ScriptUnaryOperator.Not:
-                    {
-                        if (context.UseScientific)
-                        {
-                            if (!(value is bool))
-                            {
-                                throw new ScriptRuntimeException(Right.Span, $"Expecting a boolean instead of {value?.GetType().ScriptPrettyName()} value: {value}");
-                            }
-
-                            return !(bool) value;
-                        }
-                        else
-                        {
-                            return !context.ToBool(Right.Span, value);
-                        }
-                    }
-                    case ScriptUnaryOperator.Negate:
-                    case ScriptUnaryOperator.Plus:
-                    {
-                        bool negate = Operator == ScriptUnaryOperator.Negate;
-
-                        if (value != null)
-                        {
-                            if (value is int)
-                            {
-                                return negate ? -((int) value) : value;
-                            }
-                            else if (value is double)
-                            {
-                                return negate ? -((double) value) : value;
-                            }
-                            else if (value is float)
-                            {
-                                return negate ? -((float) value) : value;
-                            }
-                            else if (value is long)
-                            {
-                                return negate ? -((long) value) : value;
-                            }
-                            else if (value is decimal)
-                            {
-                                return negate ? -((decimal) value) : value;
-                            }
-                            else if (value is BigInteger)
-                            {
-                                return negate ? -((BigInteger) value) : value;
-                            }
-                            else
-                            {
-                                throw new ScriptRuntimeException(this.Span, $"Unexpected value `{value} / Type: {value?.GetType()}`. Cannot negate(-)/positive(+) a non-numeric value");
-                            }
-                        }
-                    }
-                        break;
-                    case ScriptUnaryOperator.FunctionAlias:
-                        return context.Evaluate(Right, true);
-
-                    case ScriptUnaryOperator.FunctionParametersExpand:
-                        // Function parameters expand is done at the function level, so here, we simply return the actual list
-                        return context.Evaluate(Right);
-                }
-            }
-
-            throw new ScriptRuntimeException(Span, $"Operator `{OperatorAsText}` is not supported");
+            return Evaluate(context, Right.Span, Operator, value);
         }
 
         public override void PrintTo(ScriptPrinter printer)
@@ -130,6 +57,82 @@ namespace Scriban.Syntax
                 printer.Write(Operator.ToText());
             }
             printer.Write(Right);
+        }
+
+        public static object Evaluate(TemplateContext context, SourceSpan span, ScriptUnaryOperator op, object value)
+        {
+            if (value is IScriptCustomUnaryOperation customUnary)
+            {
+                if (customUnary.TryEvaluate(context, span, op, value, out var result))
+                {
+                    return result;
+                }
+            }
+            else
+            {
+                switch (op)
+                {
+                    case ScriptUnaryOperator.Not:
+                    {
+                        if (context.UseScientific)
+                        {
+                            if (!(value is bool))
+                            {
+                                throw new ScriptRuntimeException(span, $"Expecting a boolean instead of {value?.GetType().ScriptPrettyName()} value: {value}");
+                            }
+
+                            return !(bool)value;
+                        }
+                        else
+                        {
+                            return !context.ToBool(span, value);
+                        }
+                    }
+                    case ScriptUnaryOperator.Negate:
+                    case ScriptUnaryOperator.Plus:
+                    {
+                        bool negate = op == ScriptUnaryOperator.Negate;
+
+                        if (value != null)
+                        {
+                            if (value is int)
+                            {
+                                return negate ? -((int)value) : value;
+                            }
+                            else if (value is double)
+                            {
+                                return negate ? -((double)value) : value;
+                            }
+                            else if (value is float)
+                            {
+                                return negate ? -((float)value) : value;
+                            }
+                            else if (value is long)
+                            {
+                                return negate ? -((long)value) : value;
+                            }
+                            else if (value is decimal)
+                            {
+                                return negate ? -((decimal)value) : value;
+                            }
+                            else if (value is BigInteger)
+                            {
+                                return negate ? -((BigInteger)value) : value;
+                            }
+                            else
+                            {
+                                throw new ScriptRuntimeException(span, $"Unexpected value `{value} / Type: {value?.GetType().ScriptPrettyName()}`. Cannot negate(-)/positive(+) a non-numeric value");
+                            }
+                        }
+                    }
+                    break;
+
+                    case ScriptUnaryOperator.FunctionParametersExpand:
+                        return value;
+                }
+            }
+
+            throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported");
         }
 
 
