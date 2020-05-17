@@ -111,6 +111,24 @@ namespace Scriban.Runtime
             return new InternalDelegateCustomFunction<T1, T2, TResult>(func);
         }
 
+        public static DelegateCustomFunction CreateFunc<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> func)
+        {
+            if (func == null) throw new ArgumentNullException(nameof(func));
+            return new InternalDelegateCustomFunction<T1, T2, T3, TResult>(func);
+        }
+
+        public static DelegateCustomFunction CreateFunc<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> func)
+        {
+            if (func == null) throw new ArgumentNullException(nameof(func));
+            return new InternalDelegateCustomFunction<T1, T2, T3, T4, TResult>(func);
+        }
+        
+        public static DelegateCustomFunction CreateFunc<T1, T2, T3, T4, T5, TResult>(Func<T1, T2, T3, T4, T5, TResult> func)
+        {
+            if (func == null) throw new ArgumentNullException(nameof(func));
+            return new InternalDelegateCustomFunction<T1, T2, T3, T4, T5, TResult>(func);
+        }
+
         protected virtual object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
         {
             return _del != null ? _del.DynamicInvoke(arguments) : Method.Invoke(Target, arguments);
