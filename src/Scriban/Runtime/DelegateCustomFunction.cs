@@ -99,6 +99,12 @@ namespace Scriban.Runtime
             return new DelegateCustomAction<T1, T2>(action);
         }
 
+        public static DelegateCustomFunction CreateFunc<TResult>(Func<TResult> func)
+        {
+            if (func == null) throw new ArgumentNullException(nameof(func));
+            return new InternalDelegateCustomFunction<TResult>(func);
+        }
+
         public static DelegateCustomFunction CreateFunc<T1, TResult>(Func<T1, TResult> func)
         {
             if (func == null) throw new ArgumentNullException(nameof(func));
@@ -186,6 +192,25 @@ namespace Scriban.Runtime
             return reflectArgs;
         }
 
+
+        /// <summary>
+        /// A custom function taking one argument.
+        /// </summary>
+        /// <typeparam name="TResult">Type result</typeparam>
+        private class InternalDelegateCustomFunction<TResult> : DelegateCustomFunction
+        {
+            public InternalDelegateCustomFunction(Func<TResult> func) : base(func)
+            {
+                Func = func;
+            }
+
+            public Func<TResult> Func { get; }
+
+            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            {
+                return Func();
+            }
+        }
 
         /// <summary>
         /// A custom function taking one argument.
