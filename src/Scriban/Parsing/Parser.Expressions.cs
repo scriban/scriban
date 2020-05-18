@@ -765,7 +765,7 @@ namespace Scriban.Parsing
                     if (variable == null && literal == null)
                     {
                         hasErrors = true;
-                        LogError(positionBefore, $"Unexpected member type `{variableOrLiteral}/{ScriptSyntaxAttribute.Get(variableOrLiteral).Name}` found for object initializer member name");
+                        LogError(positionBefore, $"Unexpected member type `{variableOrLiteral}/{ScriptSyntaxAttribute.Get(variableOrLiteral).TypeName}` found for object initializer member name");
                         break;
                     }
 

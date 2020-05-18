@@ -230,8 +230,22 @@ namespace Scriban
             }
             catch (Exception ex)
             {
-                throw new ScriptRuntimeException(span, $"Unable to convert type `{value.GetType().ScriptPrettyName()}` to int", ex);
+                throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to int", ex);
             }
+        }
+
+        public virtual string GetTypeName(object value)
+        {
+            if (value == null) return "null";
+
+            if (value is Type type)
+            {
+                return type.ScriptPrettyName();
+            }
+
+            if (value is IScriptCustomType customType) return customType.TypeName;
+
+            return value.GetType().ScriptPrettyName();
         }
 
         public T ToObject<T>(SourceSpan span, object value)
@@ -393,7 +407,7 @@ namespace Scriban
                 }
                 catch (Exception ex)
                 {
-                    throw new ScriptRuntimeException(span, $"Unable to convert type `{type.ScriptPrettyName()}` to `{destinationType.ScriptPrettyName()}`", ex);
+                    throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to `{GetTypeName(destinationType)}`", ex);
                 }
             }
 
@@ -407,7 +421,7 @@ namespace Scriban
                 return value;
             }
 
-            throw new ScriptRuntimeException(span, $"Unable to convert type `{type.ScriptPrettyName()}` to `{destinationType.ScriptPrettyName()}`");
+            throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to `{GetTypeName(destinationType)}`");
         }
 
     }

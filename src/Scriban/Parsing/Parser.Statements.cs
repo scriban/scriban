@@ -50,7 +50,7 @@ namespace Scriban.Parsing
                     if (_isLiquid)
                     {
                         var syntax = ScriptSyntaxAttribute.Get(parentStatement);
-                        LogError(parentStatement, parentStatement?.Span ?? CurrentSpan, $"The `end{syntax.Name}` was not found");
+                        LogError(parentStatement, parentStatement?.Span ?? CurrentSpan, $"The `end{syntax.TypeName}` was not found");
                     }
                     else
                     {

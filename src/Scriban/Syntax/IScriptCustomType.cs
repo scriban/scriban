@@ -6,5 +6,6 @@ namespace Scriban.Syntax
 {
     public interface IScriptCustomType : IScriptCustomBinaryOperation, IScriptCustomUnaryOperation, IScriptConvertibleTo
     {
+        string TypeName { get; }
     }
 }

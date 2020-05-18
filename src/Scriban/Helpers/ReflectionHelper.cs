@@ -6,7 +6,9 @@ using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Helpers
 {
@@ -73,15 +75,38 @@ namespace Scriban.Helpers
 
             string name = type.Name;
 
+            var indexOfGenerics = name.IndexOf('`');
+            if (indexOfGenerics > 0)
+            {
+                name = name.Substring(0, indexOfGenerics);
+
+                var builder = new StringBuilder();
+                builder.Append(name);
+                builder.Append('<');
+                var genericArguments = type.GenericTypeArguments;
+                for (var i = 0; i < genericArguments.Length; i++)
+                {
+                    var argType = genericArguments[i];
+                    if (i > 0) builder.Append(", ");
+                    builder.Append(ScriptPrettyName(argType));
+                }
+                builder.Append('>');
+                name = builder.ToString();
+            }
+
+            var typeNameAttr = type.GetCustomAttribute<ScriptTypeNameAttribute>();
+            if (typeNameAttr != null)
+            {
+                return typeNameAttr.TypeName;
+            }
+            
             // For any Scriban ScriptXxxYyy name, return xxx_yyy
             if (type.Namespace != null && type.Namespace.StartsWith("Scriban."))
             {
-                name = type.Name;
                 if (name.StartsWith("Script"))
                 {
                     name = name.Substring("Script".Length);
                 }
-
                 return StandardMemberRenamer.Rename(name);
             }
 

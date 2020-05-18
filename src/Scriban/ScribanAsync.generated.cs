@@ -2008,7 +2008,7 @@ namespace Scriban.Syntax
                 if (!(parameterLessFunction is IScriptCustomFunction))
                 {
                     var targetPrettyName = ScriptSyntaxAttribute.Get(Target);
-                    throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyName.Name}`");
+                    throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyName.TypeName}`");
                 }
 
                 context.BlockDelegates.Push(Body);

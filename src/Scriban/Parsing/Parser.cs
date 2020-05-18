@@ -388,7 +388,7 @@ namespace Scriban.Parsing
             {
                 inMessage = string.Empty;
             }
-            LogError(span, $"Error while parsing {syntax.Name}: {message}{inMessage}: {syntax.Example}", isFatal);
+            LogError(span, $"Error while parsing {syntax.TypeName}: {message}{inMessage}: {syntax.Example}", isFatal);
         }
 
         private void Log(LogMessage logMessage, bool isFatal = false)

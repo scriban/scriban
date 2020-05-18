@@ -3,24 +3,28 @@
 // See license.txt file in the project root for full license information.
 
 using System;
-using Scriban.Helpers;
 using System.Reflection;
 
 namespace Scriban.Syntax
 {
-    public class ScriptSyntaxAttribute : Attribute
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Struct)]
+    public class ScriptTypeNameAttribute : Attribute
     {
-        private ScriptSyntaxAttribute()
+        public ScriptTypeNameAttribute(string typeName)
         {
+            TypeName = typeName;
         }
 
-        public ScriptSyntaxAttribute(string name, string example)
+        public string TypeName { get; }
+    }
+
+    [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Struct)]
+    public class ScriptSyntaxAttribute : ScriptTypeNameAttribute
+    {
+        public ScriptSyntaxAttribute(string typeName, string example) : base(typeName)
         {
-            Name = name;
             Example = example;
         }
-
-        public string Name { get; }
 
         public string Example { get; }
 
