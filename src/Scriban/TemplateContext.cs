@@ -546,6 +546,15 @@ namespace Scriban
             SetValue(variable, value ? TrueObject : FalseObject);
         }
 
+        public virtual void Import(ScriptObject obj)
+        {
+            if (obj == null)
+            {
+                throw new ScriptRuntimeException(CurrentSpan, $"Unexpected null object to import");
+            }
+            CurrentGlobal.Import(obj);
+        }
+
         /// <summary>
         /// Sets the variable with the specified value.
         /// </summary>

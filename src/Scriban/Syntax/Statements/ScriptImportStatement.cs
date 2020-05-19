@@ -43,7 +43,7 @@ namespace Scriban.Syntax
                 throw new ScriptRuntimeException(Expression.Span, $"Unexpected value `{value.GetType()}` for import. Expecting an plain script object {{}}");
             }
 
-            context.CurrentGlobal.Import(scriptObject);
+            context.Import(scriptObject);
             return null;
         }
 
