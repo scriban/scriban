@@ -101,6 +101,24 @@ namespace Scriban.Runtime
             return new DelegateCustomAction<T1, T2>(action);
         }
 
+        public static DelegateCustomFunction Create<T1, T2, T3>(Action<T1, T2, T3> action)
+        {
+            if (action == null) throw new ArgumentNullException(nameof(action));
+            return new DelegateCustomAction<T1, T2, T3>(action);
+        }
+
+        public static DelegateCustomFunction Create<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action)
+        {
+            if (action == null) throw new ArgumentNullException(nameof(action));
+            return new DelegateCustomAction<T1, T2, T3, T4>(action);
+        }
+
+        public static DelegateCustomFunction Create<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> action)
+        {
+            if (action == null) throw new ArgumentNullException(nameof(action));
+            return new DelegateCustomAction<T1, T2, T3, T4, T5>(action);
+        }
+
         public static DelegateCustomFunction CreateFunc<TResult>(Func<TResult> func)
         {
             if (func == null) throw new ArgumentNullException(nameof(func));
