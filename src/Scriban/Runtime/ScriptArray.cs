@@ -20,10 +20,10 @@ namespace Scriban.Runtime
     /// <seealso cref="object" />
     /// <seealso cref="System.Collections.IList" />
     [DebuggerDisplay("Count = {Count}")]
-    [DebuggerTypeProxy(typeof(DebugListView))]
-    public class ScriptArray : IList<object>, IList, IScriptObject, IScriptCustomBinaryOperation, IScriptTransformable
+    [DebuggerTypeProxy(typeof(ScriptArray<>.DebugListView))]
+    public class ScriptArray<T> : IList<T>, IList, IScriptObject, IScriptCustomBinaryOperation, IScriptTransformable
     {
-        private List<object> _values;
+        private List<T> _values;
         private bool _isReadOnly;
 
         // Attached ScriptObject is only created if needed
@@ -34,7 +34,7 @@ namespace Scriban.Runtime
         /// </summary>
         public ScriptArray()
         {
-            _values = new List<object>();
+            _values = new List<T>();
         }
 
         /// <summary>
@@ -43,24 +43,24 @@ namespace Scriban.Runtime
         /// <param name="capacity">The capacity.</param>
         public ScriptArray(int capacity)
         {
-            _values = new List<object>(capacity);
+            _values = new List<T>(capacity);
         }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptArray"/> class.
         /// </summary>
         /// <param name="values">The values.</param>
-        public ScriptArray(IEnumerable<object> values)
+        public ScriptArray(IEnumerable<T> values)
         {
-            this._values = new List<object>(values);
+            this._values = new List<T>(values);
         }
 
         public ScriptArray(IEnumerable values)
         {
-            this._values = new List<object>();
+            this._values = new List<T>();
             foreach (var value in values)
             {
-                _values.Add((object)value);
+                _values.Add((T)value);
             }
         }
 
@@ -85,8 +85,8 @@ namespace Scriban.Runtime
 
         public virtual IScriptObject Clone(bool deep)
         {
-            var array = (ScriptArray) MemberwiseClone();
-            array._values = new List<object>(_values.Count);
+            var array = (ScriptArray<T>) MemberwiseClone();
+            array._values = new List<T>(_values.Count);
             array._script = null;
             if (deep)
             {
@@ -96,7 +96,7 @@ namespace Scriban.Runtime
                     if (value is IScriptObject)
                     {
                         var fromObject = (IScriptObject)value;
-                        fromValue = fromObject.Clone(true);
+                        fromValue = (T)fromObject.Clone(true);
                     }
                     array._values.Add(fromValue);
                 }
@@ -125,9 +125,9 @@ namespace Scriban.Runtime
 
         public int Count => _values.Count;
 
-        public virtual object this[int index]
+        public virtual T this[int index]
         {
-            get => index < 0 || index >= _values.Count ? null : _values[index];
+            get => index < 0 || index >= _values.Count ? default : _values[index];
             set
             {
                 if (index < 0)
@@ -140,20 +140,20 @@ namespace Scriban.Runtime
                 // Auto-expand the array in case of accessing a range outside the current value
                 for (int i = _values.Count; i <= index; i++)
                 {
-                    _values.Add(null);
+                    _values.Add(default);
                 }
 
                 _values[index] = value;
             }
         }
 
-        public virtual void Add(object item)
+        public virtual void Add(T item)
         {
             this.AssertNotReadOnly();
             _values.Add(item);
         }
 
-        public void AddRange(IEnumerable<object> items)
+        public void AddRange(IEnumerable<T> items)
         {
             if (items == null) throw new ArgumentNullException(nameof(items));
             foreach (var item in items)
@@ -164,7 +164,7 @@ namespace Scriban.Runtime
 
         int IList.Add(object value)
         {
-            Add((object) value);
+            Add((T) value);
             return 0;
         }
 
@@ -186,37 +186,37 @@ namespace Scriban.Runtime
 
         void IList.Insert(int index, object value)
         {
-            Insert(index, (object)value);
+            Insert(index, (T)value);
         }
 
-        public virtual bool Contains(object item)
+        public virtual bool Contains(T item)
         {
             return _values.Contains(item);
         }
 
-        public virtual void CopyTo(object[] array, int arrayIndex)
+        public virtual void CopyTo(T[] array, int arrayIndex)
         {
             _values.CopyTo(array, arrayIndex);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public void CopyTo(int index, object[] array, int arrayIndex, int count)
+        public void CopyTo(int index, T[] array, int arrayIndex, int count)
         {
             _values.CopyTo(index, array, arrayIndex, count);
         }
 
-        public virtual int IndexOf(object item)
+        public virtual int IndexOf(T item)
         {
             return _values.IndexOf(item);
         }
 
-        public virtual void Insert(int index, object item)
+        public virtual void Insert(int index, T item)
         {
             this.AssertNotReadOnly();
             // Auto-expand the array in case of accessing a range outside the current value
             for (int i = _values.Count; i < index; i++)
             {
-                _values.Add(null);
+                _values.Add(default);
             }
 
             _values.Insert(index, item);
@@ -224,7 +224,7 @@ namespace Scriban.Runtime
 
         void IList.Remove(object value)
         {
-            Remove((object) value);
+            Remove((T) value);
         }
 
         public virtual void RemoveAt(int index)
@@ -242,17 +242,17 @@ namespace Scriban.Runtime
             get => this[index];
             set
             {
-                this[index] = (object)value;
+                this[index] = (T)value;
             }
         }
 
-        public virtual bool Remove(object item)
+        public virtual bool Remove(T item)
         {
             this.AssertNotReadOnly();
             return _values.Remove(item);
         }
 
-        public List<object>.Enumerator GetEnumerator()
+        public List<T>.Enumerator GetEnumerator()
         {
             return _values.GetEnumerator();
         }
@@ -265,7 +265,7 @@ namespace Scriban.Runtime
 
         bool IList.IsReadOnly => IsReadOnly;
 
-        IEnumerator<object> IEnumerable<object>.GetEnumerator()
+        IEnumerator<T> IEnumerable<T>.GetEnumerator()
         {
             return _values.GetEnumerator();
         }
@@ -275,7 +275,7 @@ namespace Scriban.Runtime
             return _values.GetEnumerator();
         }
 
-        bool ICollection<object>.IsReadOnly => IsReadOnly;
+        bool ICollection<T>.IsReadOnly => IsReadOnly;
 
         void ICollection.CopyTo(Array array, int index)
         {
@@ -425,11 +425,11 @@ namespace Scriban.Runtime
             switch (op)
             {
                 case ScriptBinaryOperator.BinaryOr:
-                    result = new ScriptArray(leftArray.Union(rightArray));
+                    result = new ScriptArray<T>(leftArray.Union(rightArray));
                     return true;
 
                 case ScriptBinaryOperator.BinaryAnd:
-                    result = new ScriptArray(leftArray.Intersect(rightArray));
+                    result = new ScriptArray<T>(leftArray.Intersect(rightArray));
                     return true;
 
                 case ScriptBinaryOperator.Add:
@@ -451,11 +451,11 @@ namespace Scriban.Runtime
                     var array = leftArray ?? rightArray;
                     if (intModifier == 0)
                     {
-                        result = new ScriptArray();
+                        result = new ScriptArray<T>();
                         return true;
                     }
 
-                    var newArray = new ScriptArray(array);
+                    var newArray = new ScriptArray<T>(array);
                     for (int i = 0; i < intModifier; i++)
                     {
                         newArray.AddRange(array);
@@ -473,7 +473,7 @@ namespace Scriban.Runtime
                     if (intModifier == 0) throw new ScriptRuntimeException(intSpan, "Cannot divide by 0");
 
                     var newLength = array.Count / intModifier;
-                    var newArray = new ScriptArray(newLength);
+                    var newArray = new ScriptArray<T>(newLength);
                     for (int i = 0; i < newLength; i++)
                     {
                         newArray.Add(array[i]);
@@ -489,7 +489,7 @@ namespace Scriban.Runtime
                     var array = leftArray ?? rightArray;
                     if (intModifier == 0) throw new ScriptRuntimeException(intSpan, "Cannot divide by 0");
 
-                    var newArray = new ScriptArray(array.Count);
+                    var newArray = new ScriptArray<T>(array.Count);
                     for (int i = 0; i < array.Count; i++)
                     {
                         if ((i % intModifier) == 0)
@@ -503,14 +503,14 @@ namespace Scriban.Runtime
                 }
 
                 case ScriptBinaryOperator.ShiftLeft:
-                    var newLeft = new ScriptArray(leftArray);
-                    newLeft.Add(rightValue);
+                    var newLeft = new ScriptArray<T>(leftArray);
+                    newLeft.Add(typeof(T) == typeof(object) ? (T)rightValue : context.ToObject<T>(rightSpan, rightValue));
                     result = newLeft;
                     return true;
 
                 case ScriptBinaryOperator.ShiftRight:
-                    var newRight = new ScriptArray(rightArray);
-                    newRight.Insert(0, leftValue);
+                    var newRight = new ScriptArray<T>(rightArray);
+                    newRight.Insert(0, typeof(T) == typeof(object) ? (T)leftValue : context.ToObject<T>(leftSpan, leftValue));
                     result = newRight;
                     return true;
             }
@@ -518,25 +518,25 @@ namespace Scriban.Runtime
             return false;
         }
 
-        private static ScriptArray TryGetArray(object rightValue)
+        private static ScriptArray<T> TryGetArray(object rightValue)
         {
-            var rightArray = rightValue as ScriptArray;
+            var rightArray = rightValue as ScriptArray<T>;
             if (rightArray == null)
             {
                 var list = rightValue as IList;
                 if (list != null)
                 {
-                    rightArray = new ScriptArray(list);
+                    rightArray = new ScriptArray<T>(list);
                 }
                 else if (rightValue is IEnumerable enumerable && !(rightValue is string))
                 {
-                    rightArray = new ScriptArray(enumerable);
+                    rightArray = new ScriptArray<T>(enumerable);
                 }
             }
             return rightArray;
         }
 
-        private static bool CompareTo(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, ScriptArray left, ScriptArray right)
+        private static bool CompareTo(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, ScriptArray<T> left, ScriptArray<T> right)
         {
             // Compare the length first
             var compare = left.Count.CompareTo(right.Count);
@@ -597,11 +597,21 @@ namespace Scriban.Runtime
         public virtual object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply)
         {
             if (apply == null) throw new ArgumentNullException(nameof(apply));
-            var clone = (ScriptArray)Clone(true);
+            var clone = (ScriptArray<T>)Clone(true);
             var values = clone._values;
-            for (int i = 0; i < values.Count; i++)
+            if (typeof(T) == typeof(object))
             {
-                values[i] = apply(values[i]);
+                for (int i = 0; i < values.Count; i++)
+                {
+                    values[i] = (T)apply(values[i]);
+                }
+            }
+            else
+            {
+                for (int i = 0; i < values.Count; i++)
+                {
+                    values[i] = context.ToObject<T>(span, apply(values[i]));
+                }
             }
 
             return clone;
@@ -609,15 +619,34 @@ namespace Scriban.Runtime
 
         internal class DebugListView
         {
-            private readonly ScriptArray _collection;
+            private readonly ScriptArray<T> _collection;
 
-            public DebugListView(ScriptArray collection)
+            public DebugListView(ScriptArray<T> collection)
             {
                 this._collection = collection;
             }
 
             [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-            public object[] Items => _collection.ToArray();
+            public object[] Items => _collection._values.Cast<object>().ToArray();
+        }
+    }
+
+    public class ScriptArray : ScriptArray<object>
+    {
+        public ScriptArray()
+        {
+        }
+
+        public ScriptArray(int capacity) : base(capacity)
+        {
+        }
+
+        public ScriptArray(IEnumerable<object> values) : base(values)
+        {
+        }
+
+        public ScriptArray(IEnumerable values) : base(values)
+        {
         }
     }
 }
