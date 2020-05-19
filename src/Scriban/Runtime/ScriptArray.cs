@@ -46,6 +46,16 @@ namespace Scriban.Runtime
             _values = new List<T>(capacity);
         }
 
+        public ScriptArray(T[] array)
+        {
+            if (array == null) throw new ArgumentNullException(nameof(array));
+            _values = new List<T>(array.Length);
+            for (int i = 0; i < array.Length; i++)
+            {
+                _values.Add(array[i]);
+            }
+        }
+        
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptArray"/> class.
         /// </summary>
