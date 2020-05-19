@@ -1326,11 +1326,6 @@ namespace Scriban.Parsing
             return c == 'f' || c == 'F' || c == 'd' || c == 'D' || c == 'm' || c == 'M';
         }
 
-        private static bool IsHexa(char c)
-        {
-            return char.IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
-        }
-
         private void ReadHexa(TextPosition start)
         {
             var end = _position;
@@ -1339,7 +1334,7 @@ namespace Scriban.Parsing
             bool hasHexa = false;
             while (true)
             {
-                if (IsHexa(c)) hasHexa = true;
+                if (CharHelper.IsHexa(c)) hasHexa = true;
                 else if (c != '_') break;
                 end = _position;
                 NextChar();
@@ -1360,9 +1355,7 @@ namespace Scriban.Parsing
                 _token = new Token(TokenType.HexaInteger, start, end);
             }
         }
-
-        private static bool IsBinary(char c) => c == '0' || c == '1';
-        
+            
         private void ReadBinary(TextPosition start)
         {
             var end = _position; 
@@ -1373,7 +1366,7 @@ namespace Scriban.Parsing
             bool hasDotAlready = false;
             while (true)
             {
-                if (IsBinary(c)) hasBinary = true;
+                if (CharHelper.IsBinary(c)) hasBinary = true;
                 else if (c != '_') break;
                 end = _position;
                 NextChar();
