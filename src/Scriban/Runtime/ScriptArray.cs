@@ -585,6 +585,15 @@ namespace Scriban.Runtime
             return true;
         }
 
+        public virtual bool Visit(TemplateContext context, SourceSpan span, Func<object, bool> visit)
+        {
+            foreach (var item in this)
+            {
+                if (!visit(item)) return false;
+            }
+            return true;
+        }
+
         public virtual object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply)
         {
             if (apply == null) throw new ArgumentNullException(nameof(apply));

@@ -16,6 +16,8 @@ namespace Scriban.Runtime
 
         bool CanTransform(Type transformType);
 
+        bool Visit(TemplateContext context, SourceSpan span, Func<object, bool> visit);
+
         object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply);
     }
 }

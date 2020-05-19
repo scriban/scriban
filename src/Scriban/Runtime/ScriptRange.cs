@@ -28,6 +28,8 @@ namespace Scriban.Runtime
             _values = values ?? throw new ArgumentNullException(nameof(values));
         }
 
+        public IEnumerable Values => _values;
+
         public IEnumerator<object> GetEnumerator()
         {
             var enumerator = _values.GetEnumerator();
@@ -48,7 +50,20 @@ namespace Scriban.Runtime
             return true;
         }
 
-        public object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply)
+        public virtual bool Visit(TemplateContext context, SourceSpan span, Func<object, bool> visit)
+        {
+            foreach (var item in this)
+            {
+                if (!visit(item))
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public virtual object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply)
         {
             return new ScriptRange(TransformImpl(apply));
         }
