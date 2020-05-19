@@ -115,6 +115,7 @@ namespace Scriban
             EnableRelaxedIndexerAccess = true;
             LoopLimit = 1000;
             RecursiveLimit = 100;
+            LimitToString = 0;
             MemberRenamer = StandardMemberRenamer.Default;
 
             RegexTimeOut = TimeSpan.FromSeconds(10);
@@ -185,6 +186,11 @@ namespace Scriban
         /// If sets to <c>true</c>, the include statement will maintain the indent.
         /// </summary>
         public bool IndentWithInclude { get; set; }
+
+        /// <summary>
+        /// Gets or sets the buffer limit in characters for a ToString in a list/string. Default is 0, no limit.
+        /// </summary>
+        public int LimitToString { get; set; }
 
         /// <summary>
         /// String used for new-line.

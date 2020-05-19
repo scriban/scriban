@@ -71,6 +71,7 @@ namespace Scriban
         }
 
         private int _objectToStringLevel;
+        private int _currentToStringLength;
 
         /// <summary>
         /// Called whenever an objects is converted to a string. This method can be overriden.
@@ -81,10 +82,19 @@ namespace Scriban
         public virtual string ObjectToString(object value, bool escapeString = false)
         {
             bool shouldEscapeString = escapeString || _objectToStringLevel > 0;
+            if (_objectToStringLevel == 0)
+            {
+                _currentToStringLength = 0;
+            }
             try
             {
                 _objectToStringLevel++;
-                return ObjectToStringImpl(value, shouldEscapeString);
+                var result = ObjectToStringImpl(value, shouldEscapeString);
+                if (LimitToString > 0 && _objectToStringLevel  == 1 && result != null && result.Length >= LimitToString)
+                {
+                    return result + "...";
+                }
+                return result;
             }
             finally
             {
@@ -94,9 +104,19 @@ namespace Scriban
 
         private string ObjectToStringImpl(object value, bool escapeString)
         {
-            if (value is string)
+            if (LimitToString > 0 && _currentToStringLength >= LimitToString) return string.Empty;
+
+            if (value is string str)
             {
-                return escapeString ? $"\"{StringFunctions.Escape((string) value)}\"" : (string) value;
+                if (LimitToString > 0 && _currentToStringLength + str.Length >= LimitToString)
+                {
+                    var index = LimitToString - _currentToStringLength;
+                    if (index <= 0) return string.Empty;
+                    str = str.Substring(0, index);
+                    return escapeString ? $"\"{StringFunctions.Escape(str)}" : (string)value;
+                }
+
+                return escapeString ? $"\"{StringFunctions.Escape(str)}\"" : (string) value;
             }
 
             if (value == null || value == EmptyScriptObject.Default)
@@ -137,17 +157,30 @@ namespace Scriban
             {
                 var result = new StringBuilder();
                 result.Append("[");
+                _currentToStringLength++;
                 bool isFirst = true;
                 foreach (var item in enumerable)
                 {
                     if (!isFirst)
                     {
                         result.Append(", ");
+                        _currentToStringLength += 2;
                     }
-                    result.Append(ObjectToString(item));
+
+                    var itemStr = ObjectToString(item);
+                    result.Append(itemStr);
+                    if (itemStr != null) _currentToStringLength += itemStr.Length;
+
+                    // Limit to size
+                    if (LimitToString > 0 && _currentToStringLength >= LimitToString)
+                    {
+                        return result.ToString();
+                    }
+
                     isFirst = false;
                 }
                 result.Append("]");
+                _currentToStringLength += 1;
                 return result.ToString();
             }
 
@@ -167,7 +200,6 @@ namespace Scriban
 
             // Else just end-up trying to emit the ToString
             return value.ToString();
-
         }
 
         /// <summary>
