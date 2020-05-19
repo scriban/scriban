@@ -641,12 +641,10 @@ namespace Scriban.Functions
         {
             if (string.IsNullOrEmpty(text))
             {
-                return Enumerable.Empty<string>();
+                return new ScriptRange(Enumerable.Empty<string>());
             }
 
-            match = match ?? string.Empty;
-
-            return text.Split(new[] {match}, StringSplitOptions.RemoveEmptyEntries);
+            return new ScriptRange(text.Split(new[] {match}, StringSplitOptions.RemoveEmptyEntries));
         }
 
         /// <summary>
