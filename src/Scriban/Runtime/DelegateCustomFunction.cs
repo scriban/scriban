@@ -29,6 +29,8 @@ namespace Scriban.Runtime
 
         public object Target { get; }
 
+        public object Tag { get; set; }
+
         public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
         {
             Array paramArguments = null;
