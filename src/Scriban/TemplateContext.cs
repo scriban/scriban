@@ -546,13 +546,14 @@ namespace Scriban
             SetValue(variable, value ? TrueObject : FalseObject);
         }
 
-        public virtual void Import(ScriptObject obj)
+        public virtual void Import(SourceSpan span, object objectToImport)
         {
-            if (obj == null)
+            var scriptObject = objectToImport as ScriptObject;
+            if (scriptObject == null)
             {
-                throw new ScriptRuntimeException(CurrentSpan, $"Unexpected null object to import");
+                throw new ScriptRuntimeException(span, $"Unexpected value `{GetTypeName(objectToImport)}` for import. Expecting an plain script object.");
             }
-            CurrentGlobal.Import(obj);
+            CurrentGlobal.Import(objectToImport);
         }
 
         /// <summary>

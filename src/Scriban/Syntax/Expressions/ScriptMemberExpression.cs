@@ -75,9 +75,9 @@ namespace Scriban.Syntax
             var memberName = this.Member.Name;
 
             object value;
-            if (!accessor.TryGetValue(context, Span, targetObject, memberName, out value))
+            if (!accessor.TryGetValue(context, Member.Span, targetObject, memberName, out value))
             {
-                var result = context.TryGetMember?.Invoke(context, Span, targetObject, memberName, out value);
+                var result = context.TryGetMember?.Invoke(context, Member.Span, targetObject, memberName, out value);
                 if (!context.EnableRelaxedMemberAccess && (!result.HasValue || !result.Value))
                 {
                     throw new ScriptRuntimeException(this.Member.Span, $"Cannot get member with name {memberName}."); // unit test: 132-member-accessor-error2.txt
@@ -93,7 +93,7 @@ namespace Scriban.Syntax
 
             var memberName = this.Member.Name;
 
-            if (!accessor.TrySetValue(context, this.Span, targetObject, memberName, valueToSet))
+            if (!accessor.TrySetValue(context, this.Member.Span, targetObject, memberName, valueToSet))
             {
                 throw new ScriptRuntimeException(this.Member.Span, $"Cannot set a value for the readonly member: {this}"); // unit test: 132-member-accessor-error3.txt
             }
@@ -112,7 +112,7 @@ namespace Scriban.Syntax
             {
                 if (isSet || !context.EnableRelaxedMemberAccess)
                 {
-                    throw new ScriptRuntimeException(this.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
+                    throw new ScriptRuntimeException(this.Member.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
                 }
             }
             return targetObject;

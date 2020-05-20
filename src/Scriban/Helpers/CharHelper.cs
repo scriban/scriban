@@ -9,6 +9,17 @@ namespace Scriban.Helpers
             return Char.IsDigit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
         }
 
+        public static bool TryParseDigit(char c, out int value)
+        {
+            if (c >= '0' && c <= '9')
+            {
+                value = c - '0';
+                return true;
+            }
+            value = 0;
+            return false;
+        }
+
         public static bool TryHexaToInt(char c, out int value)
         {
             if (c >= '0' && c <= '9')

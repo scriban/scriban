@@ -37,13 +37,7 @@ namespace Scriban.Syntax
             {
                 return null;
             }
-            var scriptObject = value as ScriptObject;
-            if (scriptObject == null)
-            {
-                throw new ScriptRuntimeException(Expression.Span, $"Unexpected value `{value.GetType()}` for import. Expecting an plain script object {{}}");
-            }
-
-            context.Import(scriptObject);
+            context.Import(Expression.Span, value);
             return null;
         }
 

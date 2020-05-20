@@ -126,19 +126,19 @@ namespace Scriban.Syntax
 
                 if (setter)
                 {
-                    if (!accessor.TrySetValue(context, Span, targetObject, indexAsString, valueToSet))
+                    if (!accessor.TrySetValue(context, Index.Span, targetObject, indexAsString, valueToSet))
                     {
                         throw new ScriptRuntimeException(Index.Span, $"Cannot set a value for the readonly member `{indexAsString}` in the indexer: {Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
                     }
                 }
                 else
                 {
-                    if (!accessor.TryGetValue(context, Span, targetObject, indexAsString, out value))
+                    if (!accessor.TryGetValue(context, Index.Span, targetObject, indexAsString, out value))
                     {
-                        var result = context.TryGetMember?.Invoke(context, Span, targetObject, indexAsString, out value) ?? false;
+                        var result = context.TryGetMember?.Invoke(context, Index.Span, targetObject, indexAsString, out value) ?? false;
                         if (!context.EnableRelaxedMemberAccess && !result)
                         {
-                            throw new ScriptRuntimeException(Target.Span, $"Cannot access target `{Target}` with an indexer: {Index}");
+                            throw new ScriptRuntimeException(Index.Span, $"Cannot access target `{Target}` with an indexer: {Index}");
                         }
                     }
                 }
@@ -147,7 +147,7 @@ namespace Scriban.Syntax
             {
                 int i = context.ToInt(Index.Span, index);
 
-                var length = listAccessor.GetLength(context, Span, targetObject);
+                var length = listAccessor.GetLength(context, Target.Span, targetObject);
                 // Allow negative index from the end of the array
                 if (i < 0)
                 {
@@ -163,11 +163,11 @@ namespace Scriban.Syntax
                 {
                     if (setter)
                     {
-                        listAccessor.SetValue(context, Span, targetObject, i, valueToSet);
+                        listAccessor.SetValue(context, Index.Span, targetObject, i, valueToSet);
                     }
                     else
                     {
-                        value = listAccessor.GetValue(context, Span, targetObject, i);
+                        value = listAccessor.GetValue(context, Index.Span, targetObject, i);
                     }
                 }
             }

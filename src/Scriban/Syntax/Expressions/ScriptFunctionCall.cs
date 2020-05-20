@@ -246,6 +246,12 @@ namespace Scriban.Syntax
                 // Check the required number of arguments
                 var requiredMask = (1U << requiredParameterCount) - 1;
                 argMask = argMask & requiredMask;
+
+                // Create a span after the caller for missing arguments
+                var afterCallerSpan = callerContext.Span;
+                afterCallerSpan.Start = afterCallerSpan.End.NextColumn();
+                afterCallerSpan.End = afterCallerSpan.End.NextColumn();
+
                 if (argMask != requiredMask)
                 {
                     int argCount = 0;
@@ -254,7 +260,7 @@ namespace Scriban.Syntax
                         if ((argMask & 1) != 0) argCount++;
                         argMask = argMask >> 1;
                     }
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argCount}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
+                    throw new ScriptRuntimeException(afterCallerSpan, $"Invalid number of arguments `{argCount}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
                 }
 
                 if (!hasVariableParams && argumentValues.Count > parameterCount)
@@ -263,7 +269,7 @@ namespace Scriban.Syntax
                     {
                         throw new ScriptRuntimeException(arguments[argumentValues.Count - 1].Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
                     }
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
+                    throw new ScriptRuntimeException(afterCallerSpan, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
                 }
 
                 context.EnterFunction(callerContext, needLocal);
