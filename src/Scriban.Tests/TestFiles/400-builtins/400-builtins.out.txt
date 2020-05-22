@@ -108,6 +108,7 @@ List of all the builtin <object> functions:
 List of all the builtin <regex> functions:
  escape
  match
+ matches
  replace
  split
  unescape

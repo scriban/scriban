@@ -73,6 +73,53 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Searches an input string for multiple substrings that matches a regular expression pattern and returns an array with the match occurences.
+        /// </summary>
+        /// <param name="context">The template context (to fetch the timeout configuration)</param>
+        /// <param name="text">The string to search for a match.</param>
+        /// <param name="pattern">The regular expression pattern to match.</param>
+        /// <param name="options">A string with regex options, that can contain the following option characters (default is `null`):
+        /// - `i`: Specifies case-insensitive matching.
+        /// - `m`: Multiline mode. Changes the meaning of `^` and `$` so they match at the beginning and end, respectively, of any line, and not just the beginning and end of the entire string.
+        /// - `s`: Specifies single-line mode. Changes the meaning of the dot `.` so it matches every character (instead of every character except `\n`).
+        /// - `x`: Eliminates unescaped white space from the pattern and enables comments marked with `#`.
+        /// </param>
+        /// <returns>An array of matches that contains all the match groups. The first group contains the entire match. The other elements contain regex matched groups `(..)`. An empty array returned means no match.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "this is a text123" | regex.matches `(\w+)` }}
+        /// ```
+        /// ```html
+        /// [["this", "this"], ["is", "is"], ["a", "a"], ["text123", "text123"]]
+        /// ```
+        /// Notice that the first element returned in the sub array is the entire regex match, followed by the regex group matches.
+        /// </remarks>
+        public static ScriptArray Matches(TemplateContext context, string text, string pattern, string options = null)
+        {
+            var matches = Regex.Matches(text, pattern, GetOptions(options), context.RegexTimeOut);
+            var allMatches = new ScriptArray();
+
+            foreach (Match match in matches)
+            {
+                if (match.Success)
+                {
+                    var matchObject = new ScriptArray();
+                    for (var i = 0; i < match.Groups.Count; i++)
+                    {
+                        Group @group = match.Groups[i];
+                        matchObject.Add(@group.Value);
+                    }
+
+                    allMatches.Add(matchObject);
+                }
+            }
+
+            // otherwise return an empty array
+            return allMatches;
+        }
+
+
+        /// <summary>
         /// In a specified input string, replaces strings that match a regular expression pattern with a specified replacement string.
         /// </summary>
         /// <param name="context">The template context (to fetch the timeout configuration)</param>

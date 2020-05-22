@@ -309,7 +309,7 @@ namespace Scriban.Functions
         /// <returns>The input string without any left whitespace characters</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ '   too many spaces           ' | string.lstrip  }}
+        /// {{ '   too many spaces' | string.lstrip  }}
         /// ```
         /// > Highlight to see the empty spaces to the right of the string
         /// ```html
