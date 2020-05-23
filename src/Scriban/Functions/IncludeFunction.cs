@@ -143,16 +143,6 @@ namespace Scriban.Functions
                 }
             }
 
-
-            // Compute a new parameters for the include
-            var newParameters = new ScriptArray(arguments.Count - 1);
-            for (int i = 1; i < arguments.Count; i++)
-            {
-                newParameters[i] = arguments[i];
-            }
-
-            context.SetValue(ScriptVariable.Arguments, newParameters, true);
-
             Template template;
 
             if (!context.CachedTemplates.TryGetValue(templatePath, out template))
@@ -188,21 +178,31 @@ namespace Scriban.Functions
             }
 
             // Make sure that we cannot recursively include a template
-
-            context.PushOutput();
             object result = null;
             context.EnterRecursive(callerContext);
+
             var previousIndent = context.CurrentIndent;
             context.CurrentIndent = indent;
+            context.PushOutput();
+            context.PushLocal();
             try
             {
+                // Compute a new parameters for the include
+                var newParameters = new ScriptArray(arguments.Count - 1);
+                for (int i = 1; i < arguments.Count; i++)
+                {
+                    newParameters[i] = arguments[i];
+                }
+                context.SetValue(ScriptVariable.Arguments, newParameters, true);
+
                 result = template.Render(context);
             }
             finally
             {
-                context.ExitRecursive(callerContext);
+                context.PopLocal();
                 context.PopOutput();
                 context.CurrentIndent = previousIndent;
+                context.ExitRecursive(callerContext);
             }
 
             return result;

@@ -27,8 +27,6 @@ namespace Scriban.Syntax
         {
         }
 
-        public bool IgnoreExceptions { get; set; }
-
         public ScriptExpression Rewrite(TemplateContext context, ScriptNode parent)
         {
             _parent = parent;
@@ -104,7 +102,7 @@ namespace Scriban.Syntax
                     {
                         result = context.Evaluate(nextExpression, true);
                     }
-                    catch (ScriptRuntimeException) when (IgnoreExceptions)
+                    catch (ScriptRuntimeException) when (context.IgnoreExceptionsWhileRewritingScientific)
                     {
                         // ignore any exceptions during trial evaluating as we could try to evaluate
                         // variable that aren't setup

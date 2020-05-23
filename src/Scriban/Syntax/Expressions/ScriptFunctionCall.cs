@@ -95,16 +95,13 @@ namespace Scriban.Syntax
             }
         }
 
-        public ScriptExpression GetScientificExpression(TemplateContext context, bool ignoreExceptions = false)
+        public ScriptExpression GetScientificExpression(TemplateContext context)
         {
             // If we are in scientific mode and we have a function which takes arguments, and is not an explicit call (e.g sin(x) rather then sin x)
             // Then we need to rewrite the call to a proper expression.
             if (context.UseScientific && !ExplicitCall && Arguments.Count > 0)
             {
-                var rewrite = new ScientificFunctionCallRewriter(1 + Arguments.Count)
-                {
-                    IgnoreExceptions = ignoreExceptions
-                };
+                var rewrite = new ScientificFunctionCallRewriter(1 + Arguments.Count);
                 rewrite.Add(Target);
                 rewrite.AddRange(Arguments);
                 return rewrite.Rewrite(context, this);
@@ -272,7 +269,7 @@ namespace Scriban.Syntax
                     throw new ScriptRuntimeException(afterCallerSpan, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
                 }
 
-                context.EnterFunction(callerContext, needLocal);
+                context.EnterFunction(callerContext);
                 try
                 {
                     result = function.Invoke(context, callerContext, argumentValues, blockDelegate);
@@ -300,7 +297,7 @@ namespace Scriban.Syntax
                 }
                 finally
                 {
-                    context.ExitFunction(needLocal);
+                    context.ExitFunction(callerContext);
                 }
             }
             finally

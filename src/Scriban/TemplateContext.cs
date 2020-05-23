@@ -34,11 +34,11 @@ namespace Scriban
         private FastStack<IScriptObject> _globalStores;
         private FastStack<CultureInfo> _cultures;
         private readonly Dictionary<Type, IListAccessor> _listAccessors;
-        private FastStack<ScriptObject> _localStores;
         private FastStack<ScriptLoopStatementBase> _loops;
-        private FastStack<ScriptObject> _loopStores;
         private readonly Dictionary<Type, IObjectAccessor> _memberAccessors;
         private FastStack<IScriptOutput> _outputs;
+        private FastStack<LocalContext> _localContexts;
+        private LocalContext _currentLocalContext;
         private IScriptOutput _output;
         private FastStack<string> _sourceFiles;
         private FastStack<object> _caseValues;
@@ -46,13 +46,12 @@ namespace Scriban
         private bool _isFunctionCallDisabled;
         private int _loopStep;
         private int _getOrSetValueLevel;
+        private FastStack<LocalContext> _availableLocalContexts;
         private FastStack<ScriptPipeArguments> _availablePipeArguments;
         private FastStack<ScriptPipeArguments> _pipeArguments;
         private FastStack<ScriptArray> _availableArguments;
         private FastStack<List<ScriptExpression>> _availableScriptExpressionLists;
         private object[][] _availableReflectionArguments;
-        private FastStack<Dictionary<object, object>> _localTagsStack;
-        private FastStack<Dictionary<object, object>> _loopTagsStack;
         private FastStack<Dictionary<object, object>> _availableTags;
         private ScriptPipeArguments _currentPipeArguments;
         private bool _previousTextWasNewLine;
@@ -130,14 +129,12 @@ namespace Scriban
             _outputs.Push(_output);
 
             _globalStores = new FastStack<IScriptObject>(4);
-            _localStores = new FastStack<ScriptObject>(4);
-            _loopStores = new FastStack<ScriptObject>(4);
+            _availableLocalContexts = new FastStack<LocalContext>(4);
+            _localContexts = new FastStack<LocalContext>(4);
             _availableStores = new FastStack<ScriptObject>(4);
             _cultures = new FastStack<CultureInfo>(4);
             _caseValues = new FastStack<object>(4);
 
-            _localTagsStack = new FastStack<Dictionary<object, object>>(1);
-            _loopTagsStack = new FastStack<Dictionary<object, object>>(1);
             _availableTags = new FastStack<Dictionary<object, object>>(4);
 
             _sourceFiles = new FastStack<string>(4);
@@ -295,20 +292,9 @@ namespace Scriban
         public Dictionary<object, object> Tags { get; }
 
         /// <summary>
-        /// Gets the tags currently available only inside the current local scope
-        /// </summary>
-        public Dictionary<object, object> TagsCurrentLocal => _localTagsStack.Count == 0 ? null : _localTagsStack.Peek();
-
-        /// <summary>
-        /// Gets the tags currently available only inside the current loop
-        /// </summary>
-        public Dictionary<object, object> TagsCurrentLoop => _loopTagsStack.Count == 0 ? null : _loopTagsStack.Peek();
-
-        /// <summary>
         /// Store the current stack of pipe arguments used by <see cref="ScriptPipeCall"/> and <see cref="ScriptFunctionCall"/>
         /// </summary>
         internal ScriptPipeArguments CurrentPipeArguments => _currentPipeArguments;
-
 
         /// <summary>
         /// Gets or sets the internal state of control flow.
@@ -369,6 +355,8 @@ namespace Scriban
         ///   <c>true</c> if [in loop]; otherwise, <c>false</c>.
         /// </value>
         internal bool IsInLoop => _loops.Count > 0;
+
+        internal bool IgnoreExceptionsWhileRewritingScientific { get; set; }
 
         /// <summary>
         /// Throws a <see cref="ScriptAbortException"/> is a cancellation was issued on the <see cref="CancellationToken"/>.
@@ -557,122 +545,6 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Sets the variable with the specified value.
-        /// </summary>
-        /// <param name="variable">The variable.</param>
-        /// <param name="value">The value.</param>
-        /// <exception cref="System.ArgumentNullException">If variable is null</exception>
-        /// <exception cref="ScriptRuntimeException">If an existing variable is already read-only</exception>
-        public void SetValue(ScriptVariableLoop variable, object value)
-        {
-            if (variable == null) throw new ArgumentNullException(nameof(variable));
-
-            if (_loopStores.Count > 0)
-            {
-                // Try to set the variable
-                var store = _loopStores.Peek();
-                if (!store.TrySetValue(this, variable.Span, variable.Name, value, false))
-                {
-                    throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
-                }
-            }
-            else
-            {
-                // unit test: 215-for-special-var-error1.txt
-                throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
-            }
-        }
-
-        /// <summary>
-        /// Sets the variable with the specified value.
-        /// </summary>
-        /// <param name="variable">The variable.</param>
-        /// <param name="value">The value.</param>
-        /// <param name="asReadOnly">if set to <c>true</c> the variable set will be read-only.</param>
-        /// <exception cref="System.ArgumentNullException">If variable is null</exception>
-        /// <exception cref="ScriptRuntimeException">If an existing variable is already read-only</exception>
-        public void SetValue(ScriptVariable variable, object value, bool asReadOnly = false)
-        {
-            if (variable == null) throw new ArgumentNullException(nameof(variable));
-
-            var scope = variable.Scope;
-            IScriptObject finalStore = null;
-
-            switch (scope)
-            {
-                case ScriptVariableScope.Global:
-                    IScriptObject storeWithVariable = null;
-                    var name = variable.Name;
-                    int lastStoreIndex = _globalStores.Count - 1;
-                    for (int i = lastStoreIndex; i >= 0; i--)
-                    {
-                        var store = _globalStores.Items[i];
-                        if (storeWithVariable == null && store.Contains(name))
-                        {
-                            storeWithVariable = store;
-                        }
-
-                        // We check that for upper store, we actually can write a variable with this name
-                        // otherwise we don't allow to create a variable with the same name as a readonly variable
-                        if (!store.CanWrite(name))
-                        {
-                            var variableType = store == BuiltinObject ? "builtin " : string.Empty;
-                            throw new ScriptRuntimeException(variable.Span, $"Cannot set the {variableType}readonly variable `{variable}`");
-                        }
-                    }
-
-                    // If we have a store for this variable name use it, otherwise use the first store available.
-                    finalStore = storeWithVariable ?? _globalStores.Items[lastStoreIndex];
-                    break;
-                case ScriptVariableScope.Local:
-                    if (_localStores.Count > 0)
-                    {
-                        finalStore = _localStores.Peek();
-                    }
-                    else
-                    {
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable `{variable}` in the current context");
-                    }
-                    break;
-                case ScriptVariableScope.Loop:
-                    if (_loopStores.Count > 0)
-                    {
-                        finalStore = _loopStores.Peek();
-                    }
-                    else
-                    {
-                        // unit test: 215-for-special-var-error1.txt
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException($"Variable scope `{scope}` is not implemented");
-            }
-
-            // Try to set the variable
-            if (!finalStore.TrySetValue(this, variable.Span, variable.Name, value, asReadOnly))
-            {
-                throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
-            }
-        }
-
-        /// <summary>
-        /// Sets the variable to read only.
-        /// </summary>
-        /// <param name="variable">The variable.</param>
-        /// <param name="isReadOnly">if set to <c>true</c> the variable will be set to readonly.</param>
-        /// <exception cref="System.ArgumentNullException">If variable is null</exception>
-        /// <remarks>
-        /// This will not throw an exception if a previous variable was readonly.
-        /// </remarks>
-        public void SetReadOnly(ScriptVariable variable, bool isReadOnly = true)
-        {
-            if (variable == null) throw new ArgumentNullException(nameof(variable));
-            var store = GetStoreForSet(variable).First();
-            store.SetReadOnly(variable.Name, isReadOnly);
-        }
-
-        /// <summary>
         /// Sets the target expression with the specified value.
         /// </summary>
         /// <param name="target">The target expression.</param>
@@ -690,34 +562,6 @@ namespace Scriban
             {
                 _getOrSetValueLevel--;
             }
-        }
-
-        /// <summary>
-        /// Pushes a new object context accessible to the template.
-        /// </summary>
-        /// <param name="scriptObject">The script object.</param>
-        /// <exception cref="System.ArgumentNullException"></exception>
-        public void PushGlobal(IScriptObject scriptObject)
-        {
-            if (scriptObject == null) throw new ArgumentNullException(nameof(scriptObject));
-            _globalStores.Push(scriptObject);
-            PushVariableScope(ScriptVariableScope.Local);
-        }
-
-        /// <summary>
-        /// Pops the previous object context.
-        /// </summary>
-        /// <returns>The previous object context</returns>
-        /// <exception cref="System.InvalidOperationException">Unexpected PopGlobal() not matching a PushGlobal</exception>
-        public IScriptObject PopGlobal()
-        {
-            if (_globalStores.Count == 1)
-            {
-                throw new InvalidOperationException("Unexpected PopGlobal() not matching a PushGlobal");
-            }
-            var store = _globalStores.Pop();
-            PopVariableScope(ScriptVariableScope.Local);
-            return store;
         }
 
         /// <summary>
@@ -990,97 +834,19 @@ namespace Scriban
         /// Called when entering a function.
         /// </summary>
         /// <param name="caller"></param>
-        /// <param name="pushLocal"><c>true</c> to push a local scope.</param>
-        internal void EnterFunction(ScriptNode caller, bool pushLocal)
+        internal void EnterFunction(ScriptNode caller)
         {
             EnterRecursive(caller);
-            // pushLocal might be false in case of a function with parameters which is going to push a global scope anyway.
-            if (pushLocal) PushVariableScope(ScriptVariableScope.Local);
         }
 
         /// <summary>
         /// Called when exiting a function.
         /// </summary>
-        internal void ExitFunction(bool popLocal)
+        internal void ExitFunction(ScriptNode caller)
         {
-            if (popLocal) PopVariableScope(ScriptVariableScope.Local);
-            _callDepth--;
+            ExitRecursive(caller);
         }
 
-        /// <summary>
-        /// Push a new <see cref="ScriptVariableScope"/> for variables
-        /// </summary>
-        /// <param name="scope"></param>
-        internal void PushVariableScope(ScriptVariableScope scope)
-        {
-            var store = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
-            if (scope == ScriptVariableScope.Local)
-            {
-                var tags = _availableTags.Count > 0 ? _availableTags.Pop() : new Dictionary<object, object>();
-                _localStores.Push(store);
-                _localTagsStack.Push(tags);
-            }
-            else if (scope == ScriptVariableScope.Global)
-            {
-                PushGlobal(store);
-            }
-            else
-            {
-                var tags = _availableTags.Count > 0 ? _availableTags.Pop() : new Dictionary<object, object>();
-                _loopStores.Push(store);
-                _loopTagsStack.Push(tags);
-            }
-        }
-
-        /// <summary>
-        /// Pops a previous <see cref="ScriptVariableScope"/>.
-        /// </summary>
-        /// <param name="scope"></param>
-        internal void PopVariableScope(ScriptVariableScope scope)
-        {
-            Dictionary<object, object> tags = null;
-            if (scope == ScriptVariableScope.Local)
-            {
-                PopVariableScope(ref _localStores);
-                tags = _localTagsStack.Pop();
-            }
-            else if (scope == ScriptVariableScope.Global)
-            {
-                var global = (ScriptObject)PopGlobal();
-                global.Clear();
-                _availableStores.Push(global);
-            }
-            else
-            {
-                PopVariableScope(ref _loopStores);
-                tags = _loopTagsStack.Pop();
-            }
-
-            if (tags != null)
-            {
-                // Make sure that tags are clear
-                tags.Clear();
-                _availableTags.Push(tags);
-            }
-        }
-
-        /// <summary>
-        /// Pops a previous <see cref="ScriptVariableScope"/>.
-        /// </summary>
-        internal void PopVariableScope(ref FastStack<ScriptObject> stores)
-        {
-            if (stores.Count == 0)
-            {
-                // Should not happen at runtime
-                throw new InvalidOperationException("Invalid number of matching push/pop VariableScope.");
-            }
-
-            var store = stores.Pop();
-            // The store is cleanup once it is pushed back
-            store.Clear();
-
-            _availableStores.Push(store);
-        }
 
         /// <summary>
         /// Notifies this context when entering a loop.
@@ -1108,10 +874,16 @@ namespace Scriban
         /// </summary>
         internal void ExitLoop(ScriptLoopStatementBase loop)
         {
-            OnExitLoop(loop);
-            PopVariableScope(ScriptVariableScope.Loop);
-            _loops.Pop();
-            _loopStep = 0;
+            try
+            {
+                OnExitLoop(loop);
+            }
+            finally
+            {
+                PopVariableScope(ScriptVariableScope.Loop);
+                _loops.Pop();
+                _loopStep = 0;
+            }
         }
 
         /// <summary>
@@ -1165,92 +937,6 @@ namespace Scriban
             return _caseValues.Pop();
         }
 
-        /// <summary>
-        /// Gets the value for the specified variable from the current object context/scope.
-        /// </summary>
-        /// <param name="variable">The variable to retrieve the value</param>
-        /// <returns>Value of the variable</returns>
-        public object GetValue(ScriptVariable variable)
-        {
-            if (variable == null) throw new ArgumentNullException(nameof(variable));
-            var stores = GetStoreForSet(variable);
-            object value = null;
-            foreach (var store in stores)
-            {
-                if (store.TryGetValue(this, variable.Span, variable.Name, out value))
-                {
-                    return value;
-                }
-            }
-
-            bool found = false;
-            if (TryGetVariable != null)
-            {
-                if (TryGetVariable(this, variable.Span, variable, out value))
-                {
-                    found = true;
-                }
-            }
-
-            CheckVariableFound(variable, found);
-            return value;
-        }
-
-        /// <summary>
-        /// Gets the value for the specified global variable from the current object context/scope.
-        /// </summary>
-        /// <param name="variable">The variable to retrieve the value</param>
-        /// <returns>Value of the variable</returns>
-        public object GetValue(ScriptVariableGlobal variable)
-        {
-            if (variable == null) throw new ArgumentNullException(nameof(variable));
-            object value = null;
-
-            if (IsInLoop)
-            {
-                var count = _loopStores.Count;
-                var items = _loopStores.Items;
-                for (int i = count - 1; i >= 0; i--)
-                {
-                    if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
-                    {
-                        return value;
-                    }
-                }
-            }
-
-            {
-                var count = _globalStores.Count;
-                var items = _globalStores.Items;
-                for (int i = count - 1; i >= 0; i--)
-                {
-                    if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
-                    {
-                        return value;
-                    }
-                }
-            }
-
-            bool found = false;
-            if (TryGetVariable != null)
-            {
-                if (TryGetVariable(this, variable.Span, variable, out value))
-                {
-                    found = true;
-                }
-            }
-
-            CheckVariableFound(variable, found);
-            return value;
-        }
-
-        private void CheckVariableFound(ScriptVariable variable, bool found)
-        {
-            if (StrictVariables && !found)
-            {
-                throw new ScriptRuntimeException(variable.Span, $"The variable or function `{variable}` was not found");
-            }
-        }
 
         /// <summary>
         /// Evaluates the specified expression
@@ -1346,49 +1032,6 @@ namespace Scriban
                 return ListAccessor.Default;
             }
             return null;
-        }
-
-        /// <summary>
-        /// Returns the list of <see cref="ScriptObject"/> depending on the scope of the variable.
-        /// </summary>
-        /// <param name="variable"></param>
-        /// <exception cref="NotImplementedException"></exception>
-        /// <returns>The list of script objects valid for the specified variable scope</returns>
-        private IEnumerable<IScriptObject> GetStoreForSet(ScriptVariable variable)
-        {
-            var scope = variable.Scope;
-            switch (scope)
-            {
-                case ScriptVariableScope.Global:
-                    for (int i = _globalStores.Count - 1; i >= 0; i--)
-                    {
-                            yield return _globalStores.Items[i];
-                    }
-                    break;
-                case ScriptVariableScope.Local:
-                    if (_localStores.Count > 0)
-                    {
-                        yield return _localStores.Peek();
-                    }
-                    else
-                    {
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable `{variable}` in the current context");
-                    }
-                    break;
-                case ScriptVariableScope.Loop:
-                    if (_loopStores.Count > 0)
-                    {
-                        yield return _loopStores.Peek();
-                    }
-                    else
-                    {
-                        // unit test: 215-for-special-var-error1.txt
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
-                    }
-                    break;
-                default:
-                    throw new NotImplementedException($"Variable scope `{scope}` is not implemented");
-            }
         }
     }
 

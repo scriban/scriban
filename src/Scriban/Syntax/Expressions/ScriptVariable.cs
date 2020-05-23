@@ -20,18 +20,28 @@ namespace Scriban.Syntax
 
         public static readonly ScriptVariableLocal Arguments = new ScriptVariableLocal(string.Empty);
         public static readonly ScriptVariableLocal BlockDelegate = new ScriptVariableLocal("$");
-        public static readonly ScriptVariableLocal Continue = new ScriptVariableLocal("continue");
+        public static readonly ScriptVariableLocal Continue = new ScriptVariableLocal("continue"); // Used by liquid offset:continue
         public static readonly ScriptVariableLoop ForObject = new ScriptVariableLoop("for");
         public static readonly ScriptVariableLoop TablerowObject = new ScriptVariableLoop("tablerow");
         public static readonly ScriptVariableLoop WhileObject = new ScriptVariableLoop("while");
 
         protected ScriptVariable(string name, ScriptVariableScope scope)
         {
-            Name = name;
+            BaseName = name;
             Scope = scope;
+            switch (scope)
+            {
+                case ScriptVariableScope.Global:
+                case ScriptVariableScope.Loop:
+                    Name = name;
+                    break;
+                case ScriptVariableScope.Local:
+                    Name = $"${name}";
+                    break;
+            }
             unchecked
             {
-                _hashCode = (Name.GetHashCode() * 397) ^ (int)Scope;
+                _hashCode = (BaseName.GetHashCode() * 397) ^ (int)Scope;
             }
         }
 
@@ -58,19 +68,12 @@ namespace Scriban.Syntax
             }
         }
 
+        public string BaseName { get; }
+
         /// <summary>
         /// Gets or sets the name of the variable (without the $ sign for local variable)
         /// </summary>
-        public string Name { get; private set; }
-
-        internal void ChangeName(string name)
-        {
-            Name = name;
-            unchecked
-            {
-                _hashCode = (Name.GetHashCode() * 397) ^ (int)Scope;
-            }
-        }
+        public string Name { get; }
 
         /// <summary>
         /// Gets or sets a boolean indicating whether this variable is a local variable (starting with $ in the template ) or global.
@@ -79,7 +82,7 @@ namespace Scriban.Syntax
 
         public string GetFirstPath()
         {
-            return Scope == ScriptVariableScope.Local ? $"${Name}" : Name;
+            return Name;
         }
 
         public virtual bool Equals(ScriptVariable other)
@@ -128,7 +131,7 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(Scope == ScriptVariableScope.Local ? $"${Name}" : Name);
+            printer.Write(Name);
         }
     }
 

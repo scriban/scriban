@@ -33,32 +33,48 @@ namespace Scriban.Syntax
 
         public ScriptNode Format(ScriptNode node)
         {
-            bool previousStrictVariables = false;
-
+            ScriptNode newNode;
             if (_context != null)
             {
-                previousStrictVariables = _context.StrictVariables;
+                var contextStrictVariables = _context.StrictVariables;
+                var contextEnableRelaxedIndexerAccess = _context.EnableRelaxedIndexerAccess;
+                var contextEnableRelaxedMemberAccess = _context.EnableRelaxedMemberAccess;
+                var contextEnableRelaxedTargetAccess = _context.EnableRelaxedTargetAccess;
+                var contextEnableNullIndexer = _context.EnableNullIndexer;
+                var contextIgnoreExceptionsWhileRewritingScientific = _context.IgnoreExceptionsWhileRewritingScientific;
+
                 _context.StrictVariables = false;
-            }
+                _context.EnableRelaxedIndexerAccess = true;
+                _context.EnableRelaxedMemberAccess = true;
+                _context.EnableRelaxedTargetAccess = true;
+                _context.EnableNullIndexer = true;
+                _context.IgnoreExceptionsWhileRewritingScientific = true;
 
-            try
-            {
-                var newNode = Visit(node);
-
-                if (_flags.HasFlags(ScriptFormatterFlags.CompressSpaces))
+                try
                 {
-                    _compressWhitespacesVisitor.CompressSpaces(newNode);
+                    newNode = Visit(node);
                 }
-
-                return newNode;
-            }
-            finally
-            {
-                if (_context != null)
+                finally
                 {
-                    _context.StrictVariables = previousStrictVariables;
+                    _context.StrictVariables = contextStrictVariables;
+                    _context.EnableRelaxedIndexerAccess = contextEnableRelaxedIndexerAccess;
+                    _context.EnableRelaxedMemberAccess = contextEnableRelaxedMemberAccess;
+                    _context.EnableRelaxedTargetAccess = contextEnableRelaxedTargetAccess;
+                    _context.EnableNullIndexer = contextEnableNullIndexer;
+                    _context.IgnoreExceptionsWhileRewritingScientific = contextIgnoreExceptionsWhileRewritingScientific;
                 }
             }
+            else
+            {
+                newNode = Visit(node);
+            }
+
+            if (_flags.HasFlags(ScriptFormatterFlags.CompressSpaces))
+            {
+                _compressWhitespacesVisitor.CompressSpaces(newNode);
+            }
+
+            return newNode;
         }
 
         public override ScriptNode Visit(ScriptNode node)
@@ -154,7 +170,7 @@ namespace Scriban.Syntax
         {
             if (_isScientific && !node.ExplicitCall)
             {
-                var newNode = node.GetScientificExpression(_context, true);
+                var newNode = node.GetScientificExpression(_context);
                 if (newNode != node)
                 {
                     return Visit((ScriptNode) newNode);
@@ -212,14 +228,7 @@ namespace Scriban.Syntax
             ScriptFunction newFunction;
             if (_context != null)
             {
-                if (node.HasParameters)
-                {
-                    _context.PushVariableScope(ScriptVariableScope.Global);
-                }
-                else
-                {
-                    _context.PushVariableScope(ScriptVariableScope.Local);
-                }
+                _context.PushLocal();
 
                 try
                 {
@@ -238,14 +247,7 @@ namespace Scriban.Syntax
                 }
                 finally
                 {
-                    if (node.HasParameters)
-                    {
-                        _context.PopVariableScope(ScriptVariableScope.Global);
-                    }
-                    else
-                    {
-                        _context.PopVariableScope(ScriptVariableScope.Local);
-                    }
+                    _context.PopLocal();
                 }
             }
             else

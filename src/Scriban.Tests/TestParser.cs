@@ -556,7 +556,7 @@ end
             "470-html.txt"
         };
 
-        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false)
+        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false, bool supportRoundTrip = true)
         {
             bool isLiquid = lang == ScriptLang.Liquid;
 
@@ -746,7 +746,7 @@ end
                     TextAssert.AreEqual(expected, resultAsync);
                 }
 
-                if (isRoundtripTest || isRoundtrip || hasErrors)
+                if (!supportRoundTrip || isRoundtripTest || isRoundtrip || hasErrors)
                 {
                     break;
                 }

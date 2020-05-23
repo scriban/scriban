@@ -33,17 +33,17 @@ namespace Scriban.Syntax
 
         public override ScriptNode Visit(ScriptVariableGlobal node)
         {
-            return new ScriptVariableGlobal(node.Name);
+            return new ScriptVariableGlobal(node.BaseName);
         }
 
         public override ScriptNode Visit(ScriptVariableLocal node)
         {
-            return new ScriptVariableLocal(node.Name);
+            return new ScriptVariableLocal(node.BaseName);
         }
 
         public override ScriptNode Visit(ScriptVariableLoop node)
         {
-            return new ScriptVariableLoop(node.Name);
+            return new ScriptVariableLoop(node.BaseName);
         }
 
         protected ScriptList<TNode> VisitAll<TNode>(ScriptList<TNode> nodes)

@@ -47,7 +47,7 @@ namespace Scriban.Syntax
             BeforeLoop(context);
 
             var loopState = CreateLoopState();
-            context.SetValue(ScriptVariable.WhileObject, loopState);
+            context.SetLoopVariable(ScriptVariable.WhileObject, loopState);
 
             while (context.StepLoop(this))
             {

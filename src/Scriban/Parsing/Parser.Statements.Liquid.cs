@@ -145,7 +145,9 @@ namespace Scriban.Parsing
                     hasEnd = true;
                     break;
                 case "for":
-                    statement = ParseForStatement<ScriptForStatement>();
+                    var localForStatement = ParseForStatement<ScriptForStatement>();
+                    localForStatement.SetContinue = true;
+                    statement = localForStatement;
                     break;
                 case "tablerow":
                     statement = ParseForStatement<ScriptTableRowStatement>();
@@ -334,7 +336,7 @@ namespace Scriban.Parsing
             var statement = Open<ScriptIfStatement>();
             statement.IfKeyword.Span = CurrentSpan;
             NextToken(); // skip ifchanged token
-            statement.Condition = new ScriptMemberExpression() { Target = ScriptVariable.Create(ScriptVariable.ForObject.Name, ScriptVariableScope.Loop), Member = ScriptVariable.Create("changed", ScriptVariableScope.Global) };
+            statement.Condition = new ScriptMemberExpression() { Target = ScriptVariable.Create(ScriptVariable.ForObject.BaseName, ScriptVariableScope.Loop), Member = ScriptVariable.Create("changed", ScriptVariableScope.Global) };
             statement.Then = ParseBlockStatement(statement);
             Close(statement);
             statement.Condition.Span = statement.Span;

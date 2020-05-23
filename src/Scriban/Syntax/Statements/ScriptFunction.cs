@@ -143,11 +143,7 @@ namespace Scriban.Syntax
         }
         public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            if (HasParameters)
-            {
-                context.PushVariableScope(ScriptVariableScope.Global);
-            }
-
+            context.PushLocal();
             try
             {
                 context.SetValue(ScriptVariable.Arguments, arguments, true);
@@ -171,10 +167,7 @@ namespace Scriban.Syntax
             }
             finally
             {
-                if (HasParameters)
-                {
-                    context.PopVariableScope(ScriptVariableScope.Global);
-                }
+                context.PopLocal();
             }
         }
 

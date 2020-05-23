@@ -72,6 +72,11 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _else, value);
         }
 
+        /// <summary>
+        /// <c>true</c> to set the global variable `continue` after the loop (used by liquid)
+        /// </summary>
+        public bool SetContinue { get; set; }
+
         internal ScriptNode IteratorOrLastParameter => NamedArguments != null && NamedArguments.Count > 0
             ? NamedArguments[NamedArguments.Count - 1]
             : Iterator;
@@ -156,7 +161,15 @@ namespace Scriban.Syntax
                     loopState.LocalIndex = i;
                     loopState.IsLast = isLast;
                     loopState.ValueChanged = isFirst || !Equals(previousValue, value);
-                    context.SetValue(Variable, value);
+
+                    if (Variable is ScriptVariable loopVariable)
+                    {
+                        context.SetLoopVariable(loopVariable, value);
+                    }
+                    else
+                    {
+                        context.SetValue(Variable, value);
+                    }
 
                     loopResult = LoopItem(context, loopState);
                     if (!ContinueLoop(context))
@@ -171,7 +184,10 @@ namespace Scriban.Syntax
                 }
                 AfterLoop(context);
 
-                context.SetValue(ScriptVariable.Continue, index);
+                if (SetContinue)
+                {
+                    context.SetValue(ScriptVariable.Continue, index);
+                }
 
                 if (!enteredLoop && Else != null)
                 {

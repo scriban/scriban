@@ -344,7 +344,7 @@ namespace Scriban.Parsing
                 // A global variable used in a for should always be a loop only variable
                 if (forStatement.Variable is ScriptVariableGlobal previousVar)
                 {
-                    var loopVar = ScriptVariable.Create(previousVar.Name, ScriptVariableScope.Loop);
+                    var loopVar = ScriptVariable.Create(previousVar.BaseName, ScriptVariableScope.Loop);
                     loopVar.Span = previousVar.Span;
                     loopVar.Trivias = previousVar.Trivias;
                     forStatement.Variable = loopVar;

@@ -449,7 +449,7 @@ namespace Scriban.Parsing
                 int index;
                 if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
                 {
-                    var target = new ScriptVariableLocal(ScriptVariable.Arguments.Name)
+                    var target = new ScriptVariableLocal(ScriptVariable.Arguments.BaseName)
                     {
                         Span = currentSpan
                     };

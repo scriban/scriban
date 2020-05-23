@@ -2,6 +2,8 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
+
 namespace Scriban.Syntax
 {
     /// <summary>
@@ -22,7 +24,7 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            return null;
+            throw new InvalidOperationException("This node should not be evaluated");
         }
 
         public override void PrintTo(ScriptPrinter printer)

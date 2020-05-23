@@ -24,7 +24,7 @@ namespace Scriban.Benchmarks
             //var result1 = parser.TestScriban();
             //var result2 = parser.TestRazor();
 
-             var program = new BenchRenderers();
+            // var program = new BenchRenderers();
             ////var resultliquid = program.TestDotLiquid();
 
             //Console.WriteLine("Press enter for profiling scriban");

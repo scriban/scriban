@@ -29,8 +29,6 @@ namespace Scriban.Runtime
 
         public object Target { get; }
 
-        public object Tag { get; set; }
-
         public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
         {
             Array paramArguments = null;
@@ -148,7 +146,7 @@ namespace Scriban.Runtime
             if (func == null) throw new ArgumentNullException(nameof(func));
             return new InternalDelegateCustomFunction<T1, T2, T3, T4, TResult>(func);
         }
-        
+
         public static DelegateCustomFunction CreateFunc<T1, T2, T3, T4, T5, TResult>(Func<T1, T2, T3, T4, T5, TResult> func)
         {
             if (func == null) throw new ArgumentNullException(nameof(func));
