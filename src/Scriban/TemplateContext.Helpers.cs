@@ -275,7 +275,7 @@ namespace Scriban
                 return type.ScriptPrettyName();
             }
 
-            if (value is IScriptCustomType customType) return customType.TypeName;
+            if (value is IScriptCustomTypeInfo customTypeInfo) return customTypeInfo.TypeName;
 
             return value.GetType().ScriptPrettyName();
         }
