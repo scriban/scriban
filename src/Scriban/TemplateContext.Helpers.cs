@@ -295,7 +295,7 @@ namespace Scriban
         public virtual object ToObject(SourceSpan span, object value, Type destinationType)
         {
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
-            
+
             // Make sure that we are using the underlying type of a a Nullable type
             destinationType = Nullable.GetUnderlyingType(destinationType) ?? destinationType;
 
@@ -350,6 +350,22 @@ namespace Scriban
                     return new BigInteger(0);
                 }
                 return null;
+            }
+
+            if (destinationType.IsEnum)
+            {
+                try
+                {
+                    if (value is string str)
+                    {
+                        return Enum.Parse(destinationType, str);
+                    }
+                    return Enum.ToObject(destinationType, value);
+                }
+                catch (Exception ex)
+                {
+                    throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to `{GetTypeName(destinationType)}`", ex);
+                }
             }
 
             if (value is IScriptConvertibleTo convertible && convertible.TryConvertTo(this, span, destinationType, out var result))
