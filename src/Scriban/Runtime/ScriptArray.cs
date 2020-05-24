@@ -55,7 +55,7 @@ namespace Scriban.Runtime
                 _values.Add(array[i]);
             }
         }
-        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptArray"/> class.
         /// </summary>
@@ -252,7 +252,21 @@ namespace Scriban.Runtime
             get => this[index];
             set
             {
-                this[index] = (T)value;
+                if (typeof(T) == typeof(object))
+                {
+                    this[index] = (T)value;
+                }
+                else
+                {
+                    if (value is T tValue)
+                    {
+                        this[index] = tValue;
+                    }
+                    else
+                    {
+                        this[index] = (T)Convert.ChangeType(value, typeof(T));
+                    }
+                }
             }
         }
 
