@@ -533,7 +533,7 @@ namespace Scriban.Functions
         /// ell
         /// ```
         /// </remarks>
-        public static string Slice(string text, int start, int length = 0)
+        public static string Slice(string text, int start, int? length = null)
         {
             if (string.IsNullOrEmpty(text) || start >= text.Length)
             {
@@ -545,7 +545,7 @@ namespace Scriban.Functions
                 start = start + text.Length;
             }
 
-            if (length <= 0)
+            if (!length.HasValue)
             {
                 length = text.Length;
             }
@@ -565,7 +565,7 @@ namespace Scriban.Functions
                 length = text.Length - start;
             }
 
-            return text.Substring(start, length);
+            return text.Substring(start, length.Value);
         }
 
         /// <summary>

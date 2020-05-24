@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 05/22/2020 12:23:22 by Scriban.DelegateCodeGen
+// This file was automatically generated - 05/24/2020 19:23:26 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -51,7 +51,7 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Typeof), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.HtmlFunctions).GetMethod(nameof(Scriban.Functions.HtmlFunctions.Escape), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.PadLeft), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_int(method));
-            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Slice), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_int_int___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Slice1), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_int_int___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Truncate), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_int_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Append), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Replace), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string_string(method));
