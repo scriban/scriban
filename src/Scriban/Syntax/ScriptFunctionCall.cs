@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -28,9 +28,14 @@ namespace Scriban.Syntax
             // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
             var targetFunction = context.Evaluate(Target, true);
 
-            // Throw an exception if the target function is null
             if (targetFunction == null)
             {
+                if (context.EnableRelaxedMemberAccess)
+                {
+                    return null;
+                }
+
+                // Throw an exception if the target function is null
                 throw new ScriptRuntimeException(Target.Span, $"The function `{Target}` was not found");
             }
 

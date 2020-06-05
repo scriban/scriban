@@ -3,6 +3,7 @@
 ## 2.1.3 (5 Jun 2020)
 - Fix comparison != with null (#189)
 - Fix flow state after a return in a template to allow to reuse the same TemplateContext (#182)
+- Fix EnableRelaxedMemberAccess for function call (#200) 
 
 ## 2.1.2 (8 Mar 2020)
 - Case insensitive member lookup in ScriptObject
