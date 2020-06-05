@@ -253,7 +253,7 @@ namespace Scriban.Parsing
 
                     // If we have a bracket but left operand is a (variable || member || indexer), then we consider next as an indexer
                     // unit test: 130-indexer-accessor-accept1.txt
-                    if (Current.Type == TokenType.OpenBracket && (leftOperand is IScriptVariablePath || leftOperand is ScriptLiteral)  && !IsPreviousCharWhitespace())
+                    if (Current.Type == TokenType.OpenBracket && (leftOperand is IScriptVariablePath || leftOperand is ScriptLiteral || leftOperand is ScriptFunctionCall) && !IsPreviousCharWhitespace())
                     {
                         var indexerExpression = Open<ScriptIndexerExpression>();
                         indexerExpression.Span = leftOperand.Span;
