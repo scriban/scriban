@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -208,8 +208,26 @@ namespace Scriban.Runtime
 
             renamer = renamer ?? StandardMemberRenamer.Default;
 
+#if NET35 || NET40
+            var typeToImports = new Stack<Type>();
+#else
+            var typeToImports = new Stack<TypeInfo>();
+#endif
             while (typeInfo != null)
             {
+                typeToImports.Push(typeInfo);
+                if (typeInfo.BaseType == typeof(object))
+                {
+                    break;
+                }
+
+                typeInfo = typeInfo.BaseType.GetTypeInfo();
+            }
+
+            while (typeToImports.Count > 0)
+            {
+                typeInfo = typeToImports.Pop();
+
                 if ((flags & ScriptMemberImportFlags.Field) != 0)
                 {
                     foreach (var field in typeInfo.GetDeclaredFields())
@@ -296,12 +314,6 @@ namespace Scriban.Runtime
                         }
                     }
                 }
-
-                if (typeInfo.BaseType == typeof(object))
-                {
-                    break;
-                }
-                typeInfo = typeInfo.BaseType.GetTypeInfo();
             }
         }
 
