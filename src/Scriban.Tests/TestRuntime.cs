@@ -23,6 +23,14 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestRecursiveLocal()
+        {
+            var template = Template.Parse("{{ x = {}; with x; func $tester; if $0 == 0; ret; end; $0; $0 - 1 | $tester; end; export = @$tester; end; x.export 5; }}");
+            var result = template.Render();
+            Assert.AreEqual("54321", result);
+        }
+
+        [Test]
         public void TestScriptArguments()
         {
             var context = new TemplateContext();

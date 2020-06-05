@@ -146,6 +146,11 @@ namespace Scriban.Syntax
             context.PushLocal();
             try
             {
+                if (NameOrDoToken is ScriptVariableLocal localVariable)
+                {
+                    context.SetValue(localVariable, this);
+                }
+
                 context.SetValue(ScriptVariable.Arguments, arguments, true);
 
                 if (HasParameters)
