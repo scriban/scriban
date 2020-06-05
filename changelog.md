@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.3 (5 Jun 2020)
+- Fix comparison != with null
+
 ## 2.1.2 (8 Mar 2020)
 - Case insensitive member lookup in ScriptObject
 
