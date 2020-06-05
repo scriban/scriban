@@ -124,6 +124,10 @@ namespace Scriban.Syntax
             // Throw an exception if the target function is null
             if (targetFunction == null)
             {
+                if (context.EnableRelaxedFunctionAccess)
+                {
+                    return null;
+                }
                 throw new ScriptRuntimeException(Target.Span, $"The function `{Target}` was not found");
             }
 

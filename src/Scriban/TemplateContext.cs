@@ -111,6 +111,7 @@ namespace Scriban
             EnableBreakAndContinueAsReturnOutsideLoop = false;
             EnableRelaxedTargetAccess = false;
             EnableRelaxedMemberAccess = true;
+            EnableRelaxedFunctionAccess = false;
             EnableRelaxedIndexerAccess = true;
             LoopLimit = 1000;
             RecursiveLimit = 100;
@@ -325,6 +326,11 @@ namespace Scriban
         /// Enables a (e.g x.y) member/indexer access that does not exist to return null instead of an exception. Default is <c>true</c>
         /// </summary>
         public bool EnableRelaxedMemberAccess { get; set; }
+
+        /// <summary>
+        /// Enables a function call access that does not exist to return null instead of an exception. Default is <c>false</c>
+        /// </summary>
+        public bool EnableRelaxedFunctionAccess { get; set; }
 
         /// <summary>
         /// Enables an indexer access to go out of bounds. Default is <c>true</c>

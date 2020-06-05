@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using Scriban.Parsing;
@@ -39,7 +39,15 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            return context.Evaluate(Body);
+            context.FlowState = ScriptFlowState.None;
+            try
+            {
+                return context.Evaluate(Body);
+            }
+            finally
+            {
+                context.FlowState = ScriptFlowState.None;
+            }
         }
 
         public override void PrintTo(ScriptPrinter printer)

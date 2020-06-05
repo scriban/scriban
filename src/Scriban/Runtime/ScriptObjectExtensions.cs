@@ -190,8 +190,24 @@ namespace Scriban.Runtime
 
             renamer = renamer ?? StandardMemberRenamer.Default;
 
+            var typeToImports = new Stack<Type>();
             while (typeInfo != null)
             {
+                typeToImports.Push(typeInfo);
+                if (typeInfo.BaseType == typeof(object))
+                {
+                    break;
+                }
+
+                typeInfo = typeInfo.BaseType;
+            }
+
+            var scriptObj = script as ScriptObject;
+
+            while (typeToImports.Count > 0)
+            {
+                typeInfo = typeToImports.Pop();
+
                 if ((flags & ScriptMemberImportFlags.Field) != 0)
                 {
                     foreach (var field in typeInfo.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly))
@@ -215,7 +231,14 @@ namespace Scriban.Runtime
                             }
 
                             // If field is init only or literal, it cannot be set back so we mark it as read-only
-                            script.TrySetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                            if (scriptObj == null)
+                            {
+                                script.TrySetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                            }
+                            else
+                            {
+                                scriptObj.SetValue(newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                            }
                         }
                     }
                 }
@@ -247,7 +270,14 @@ namespace Scriban.Runtime
 
                             // Initially, we were setting readonly depending on the precense of a set method, but this is not compatible with liquid implems, so we remove readonly restriction
                             //script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
-                            script.TrySetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
+                            if (scriptObj == null)
+                            {
+                                script.TrySetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
+                            }
+                            else
+                            {
+                                scriptObj.SetValue(newPropertyName, property.GetValue(obj), false);
+                            }
                         }
                     }
                 }
@@ -270,16 +300,17 @@ namespace Scriban.Runtime
                                 newMethodName = method.Name;
                             }
 
-                            script.TrySetValue(null, new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
+                            if (scriptObj == null)
+                            {
+                                script.TrySetValue(null, new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
+                            }
+                            else
+                            {
+                                scriptObj.SetValue(newMethodName, DynamicCustomFunction.Create(obj, method), true);
+                            }
                         }
                     }
                 }
-
-                if (typeInfo.BaseType == typeof(object))
-                {
-                    break;
-                }
-                typeInfo = typeInfo.BaseType;
             }
         }
 

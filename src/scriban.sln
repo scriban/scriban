@@ -18,6 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{061866E2
 		..\license.txt = ..\license.txt
 		..\readme.md = ..\readme.md
 		..\doc\runtime.md = ..\doc\runtime.md
+		..\.editorconfig = ..\.editorconfig
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.Benchmarks", "Scriban.Benchmarks\Scriban.Benchmarks.csproj", "{843677EB-1242-4476-A287-B300E4A60149}"

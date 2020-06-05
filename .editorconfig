@@ -24,8 +24,8 @@ indent_size = 2
 [*.{json,xml,yml,config,props,targets,nuspec,resx,ruleset}]
 indent_size = 2
 
-# Markdown Files
-[*.md]
+# Txt/Markdown Files
+[*.{md,txt}]
 trim_trailing_whitespace = false
 
 # Web Files
@@ -36,3 +36,5 @@ insert_final_newline = true
 # Bash Files
 [*.sh]
 end_of_line = lf
+
+

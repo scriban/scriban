@@ -41,3 +41,10 @@ null ?? 1 -> {{ null ?? 1 }}
 test ?? "yes" -> {{ test ?? "yes" }}
 
 5 + math.abs(-2) -> {{ 5 + math.abs (-2) }}
+
+null == null -> {{ null == null }}
+null != null -> {{ null != null }}
+1 == null -> {{ 1 == null }}
+null == 1 -> {{ null == 1 }}
+1 != null -> {{ 1 != null }}
+null != 1 -> {{ null != 1 }}

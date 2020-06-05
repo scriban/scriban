@@ -265,11 +265,12 @@ namespace Scriban.Runtime
 
         public void SetValue(string member, object value, bool readOnly)
         {
-            TrySetValue(null, new SourceSpan(), member, value, readOnly);
+            Store[member] = new InternalValue(value, readOnly);
         }
+
         public void Add(string key, object value)
         {
-            TrySetValue(null, new SourceSpan(), key, value, false);
+            Store.Add(key, new InternalValue(value, false));
         }
 
         public bool ContainsKey(string key)

@@ -150,6 +150,23 @@ y and z = 5 and 0";
             TextAssert.AreEqual(expected, result);
         }
 
+
+        [Test]
+        public void ReturnInTemplate()
+        {
+
+            var template = Template.Parse(@"{{ if x }}return{{ ret; end }}not return");
+
+            var tc = new TemplateContext();
+            tc.CurrentGlobal.SetValue("x", true, false);
+            var result = template.Render(tc);
+            Assert.AreEqual("return", result);
+            tc.CurrentGlobal.SetValue("x", false, false);
+            result = template.Render(tc);
+            Assert.AreEqual("not return", result);
+        }
+
+
         [Test]
         public void TestFunctionCallWithNoReturn()
         {
@@ -606,6 +623,18 @@ Tax: {{ 7 | match_tax }}";
                 Assert.False(obj.ContainsKey("invalid"));
             }
 
+            // Check new overrides
+            {
+                var obj = new ScriptObject();
+                obj.Import(typeof(MyStaticObject2));
+
+                Assert.True(obj.ContainsKey("static_yoyo"));
+                var function = (IScriptCustomFunction)obj["static_yoyo"];
+                var context = new TemplateContext();
+                var result = function.Invoke(context, new ScriptFunctionCall(), new ScriptArray() {"a"}, null);
+                Assert.AreEqual("yoyo2 a", result);
+            }
+
             // Test MemberFilterDelegate
             {
                 var obj = new ScriptObject();
@@ -964,6 +993,14 @@ Tax: {{ 7 | match_tax }}";
             public static string StaticYoyo(string text)
             {
                 return "yoyo " + text;
+            }
+        }
+
+        private class MyStaticObject2 : MyStaticObject
+        {
+            public static new string StaticYoyo(string text)
+            {
+                return "yoyo2 " + text;
             }
         }
 
