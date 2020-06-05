@@ -61,6 +61,24 @@ y and z = 5 and 0";
             var result = template.Render(tc);
             TextAssert.AreEqual(expected, result);
         }
+
+
+        [Test]
+        public void ReturnInTemplate()
+        {
+
+            var template = Template.Parse(@"{{ if x }}return{{ ret; end }}not return");
+
+            var tc = new TemplateContext();
+            tc.CurrentGlobal.SetValue("x", true, false);
+            var result = template.Render(tc);
+            Assert.AreEqual("return", result);
+            tc.CurrentGlobal.SetValue("x", false, false);
+            result = template.Render(tc);
+            Assert.AreEqual("not return", result);
+        }
+
+
         [Test]
         public void TestFunctionWithTemplateContextAndObjectParams()
         {
