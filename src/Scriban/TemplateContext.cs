@@ -731,6 +731,15 @@ namespace Scriban
             {
                 return this.RenderRuntimeException(ex);
             }
+            catch (Exception ex) when (!(ex is ScriptRuntimeException))
+            {
+                var toThrow = new ScriptRuntimeException(scriptNode.Span, ex.Message, ex);
+                if (RenderRuntimeException != null)
+                {
+                    return RenderRuntimeException(toThrow);
+                }
+                throw toThrow;
+            }
             finally
             {
                 CurrentNode = previousNode;
