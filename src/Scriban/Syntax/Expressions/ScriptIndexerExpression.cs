@@ -119,7 +119,7 @@ namespace Scriban.Syntax
             }
 
             var listAccessor = context.GetListAccessor(targetObject);
-            if (targetObject is IDictionary || (targetObject is IScriptObject && listAccessor == null) || listAccessor == null)
+            if (targetObject is IDictionary || (targetObject is IScriptObject && (listAccessor == null || index is string)) || listAccessor == null)
             {
                 var accessor = context.GetMemberAccessor(targetObject);
                 var indexAsString = context.ObjectToString(index);
