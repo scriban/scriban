@@ -18,6 +18,6 @@ namespace Scriban.Runtime
 
         bool Visit(TemplateContext context, SourceSpan span, Func<object, bool> visit);
 
-        object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply);
+        object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply, Type destType);
     }
 }

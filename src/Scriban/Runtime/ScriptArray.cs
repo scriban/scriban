@@ -618,7 +618,7 @@ namespace Scriban.Runtime
             return true;
         }
 
-        public virtual object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply)
+        public virtual object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply, Type destType)
         {
             if (apply == null) throw new ArgumentNullException(nameof(apply));
             var clone = (ScriptArray<T>)Clone(true);
