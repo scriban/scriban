@@ -8,6 +8,7 @@ using System.Linq;
 using Scriban.Helpers;
 using System.Reflection;
 using System.Text;
+using Scriban.Functions;
 using Scriban.Parsing;
 
 namespace Scriban.Runtime
@@ -305,6 +306,21 @@ namespace Scriban.Runtime
             }
         }
 
+        private static bool IsSimpleKey(string key)
+        {
+            if (string.IsNullOrEmpty(key)) return false;
+
+            var c = key[0];
+            if (!(char.IsLetter(key[0]) || c == '_')) return false;
+
+            for (int i = 1; i < key.Length; i++)
+            {
+                c = key[i];
+                if (!(char.IsLetterOrDigit(c) || c == '_')) return false;
+            }
+            return true;
+        }
+
         public virtual string ToString(string format, IFormatProvider formatProvider)
         {
             var context = formatProvider as TemplateContext;
@@ -317,16 +333,22 @@ namespace Scriban.Runtime
                 {
                     result.Append(", ");
                 }
-                var keyPair = (KeyValuePair<string, object>)item;
-                result.Append(keyPair.Key);
-                result.Append(": ");
-                if (context != null)
+                if (IsSimpleKey(item.Key))
                 {
-                    result.Append(context.ObjectToString(keyPair.Value));
+                    result.Append(item.Key);
                 }
                 else
                 {
-                    var value = keyPair.Value;
+                    result.Append(context != null ? context.ObjectToString(item.Key, true) : $"\"{StringFunctions.Escape(item.Key)}\"");
+                }
+                result.Append(": ");
+                if (context != null)
+                {
+                    result.Append(context.ObjectToString(item.Value, true));
+                }
+                else
+                {
+                    var value = item.Value;
                     if (value is IFormattable formattable)
                     {
                         result.Append(formattable.ToString(null, formatProvider));

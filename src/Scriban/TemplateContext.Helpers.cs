@@ -77,11 +77,11 @@ namespace Scriban
         /// Called whenever an objects is converted to a string. This method can be overriden.
         /// </summary>
         /// <param name="value">The object value to print</param>
-        /// <param name="escapeString">True if value is a string, the string should be escaped</param>
+        /// <param name="nested">True if value is a string, the string should be escaped</param>
         /// <returns>A string representing the object value</returns>
-        public virtual string ObjectToString(object value, bool escapeString = false)
+        public virtual string ObjectToString(object value, bool nested = false)
         {
-            bool shouldEscapeString = escapeString || _objectToStringLevel > 0;
+            bool shouldEscapeString = nested || _objectToStringLevel > 0;
             if (_objectToStringLevel == 0)
             {
                 _currentToStringLength = 0;
@@ -102,7 +102,7 @@ namespace Scriban
             }
         }
 
-        private string ObjectToStringImpl(object value, bool escapeString)
+        private string ObjectToStringImpl(object value, bool nested)
         {
             if (LimitToString > 0 && _currentToStringLength >= LimitToString) return string.Empty;
 
@@ -113,15 +113,15 @@ namespace Scriban
                     var index = LimitToString - _currentToStringLength;
                     if (index <= 0) return string.Empty;
                     str = str.Substring(0, index);
-                    return escapeString ? $"\"{StringFunctions.Escape(str)}" : (string)value;
+                    return nested ? $"\"{StringFunctions.Escape(str)}" : (string)value;
                 }
 
-                return escapeString ? $"\"{StringFunctions.Escape(str)}\"" : (string) value;
+                return nested ? $"\"{StringFunctions.Escape(str)}\"" : (string) value;
             }
 
             if (value == null || value == EmptyScriptObject.Default)
             {
-                return null;
+                return nested ? "null" : null;
             }
 
             if (value is bool)
