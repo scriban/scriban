@@ -139,10 +139,18 @@ namespace Scriban
             if (type == typeof(DateTime))
             {
                 // Output DateTime only if we have the date builtin object accessible (that provides the implementation of the ToString method)
-                var dateTimeFunctions = GetValue(DateTimeFunctions.DateVariable) as DateTimeFunctions;
-                if (dateTimeFunctions != null)
+                bool isStrict = StrictVariables;
+                try
                 {
-                    return dateTimeFunctions.ToString((DateTime)value, dateTimeFunctions.Format, CurrentCulture);
+                    StrictVariables = false;
+                    if (GetValue(DateTimeFunctions.DateVariable) is DateTimeFunctions dateTimeFunctions)
+                    {
+                        return dateTimeFunctions.ToString((DateTime) value, dateTimeFunctions.Format, CurrentCulture);
+                    }
+                }
+                finally
+                {
+                    StrictVariables = isStrict;
                 }
             }
 
