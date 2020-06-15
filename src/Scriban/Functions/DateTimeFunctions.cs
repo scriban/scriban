@@ -385,7 +385,7 @@ namespace Scriban.Functions
 
         }
 
-        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public virtual object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             // If we access `date` without any parameter, it calls by default the "parse" function
             // otherwise it is the 'date' object itself
