@@ -37,8 +37,9 @@ namespace Scriban
             }
 
             _isScriptOnly = options.Mode == ScriptMode.ScriptOnly;
-            _isInCode = _isScriptOnly;
+            _isInCode = _isScriptOnly || (options.Mode == ScriptMode.FrontMatterOnly || options.Mode == ScriptMode.FrontMatterAndContent);
             _output = output;
+            _hasEndOfStatement = true; // We start as if we were on a new line
         }
 
         /// <summary>
@@ -197,15 +198,18 @@ namespace Scriban
             }
         }
 
+        private static bool IsFrontMarker(ScriptNode node) => node is ScriptToken token && token.TokenType == TokenType.FrontMatterMarker;
+
         private void HandleEos(ScriptNode node)
         {
-            if (node is ScriptStatement && !IsBlockOrPage(node) && _isInCode && _expectEndOfStatement)
+            var isFrontMarker = IsFrontMarker(node);
+            if ((node is ScriptStatement || isFrontMarker) && !IsBlockOrPage(node) && _isInCode && _expectEndOfStatement)
             {
                 if (!_hasEndOfStatement)
                 {
                     if (!(node is ScriptEscapeStatement))
                     {
-                        Write("; ");
+                        Write(isFrontMarker ? "\n" : "; ");
                     }
                 }
                 _expectEndOfStatement = false; // We expect always a end of statement before and after

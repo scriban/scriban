@@ -66,6 +66,7 @@ namespace Scriban.Parsing
         }
 
         public readonly ParserOptions Options;
+        private ScriptFrontMatter _frontmatter;
 
         public LogMessageBag Messages { get; private set; }
 
@@ -104,17 +105,22 @@ namespace Scriban.Parsing
                     _inFrontMatter = true;
                     _inCodeSection = true;
 
-                    // Skip the frontmatter marker
-                    NextToken();
+                    _frontmatter = Open<ScriptFrontMatter>();
 
-                    // Parse the front matter
-                    page.FrontMatter = ParseBlockStatement(null);
+                    // Parse the frontmatter start=-marker
+                    ExpectAndParseTokenTo(_frontmatter.StartMarker, TokenType.FrontMatterMarker);
+
+                    // Parse front-marker statements
+                    _frontmatter.Statements = ParseBlockStatement(_frontmatter);
 
                     // We should not be in a frontmatter after parsing the statements
                     if (_inFrontMatter)
                     {
                         LogError($"End of frontmatter `{_lexer.Options.FrontMatterMarker}` not found");
                     }
+
+                    page.FrontMatter = _frontmatter;
+                    page.Span = _frontmatter.Span;
 
                     if (parsingMode == ScriptMode.FrontMatterOnly)
                     {

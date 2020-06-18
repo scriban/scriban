@@ -119,12 +119,13 @@ namespace Scriban.Parsing
                     {
                         _inFrontMatter = false;
                         _inCodeSection = false;
-                        // When we expect to parse only the front matter, don't try to tokenize the following text
-                        // Keep the current token as the code exit of the front matter
-                        if (CurrentParsingMode != ScriptMode.FrontMatterOnly)
-                        {
-                            NextToken();
-                        }
+
+                        // Parse the frontmatter end-marker
+                        ExpectAndParseTokenTo(_frontmatter.EndMarker, TokenType.FrontMatterMarker);
+
+                        Close(_frontmatter);
+
+                        _frontmatter.TextPositionAfterEndMarker = Current.Start;
 
                         if (CurrentParsingMode == ScriptMode.FrontMatterAndContent || CurrentParsingMode == ScriptMode.FrontMatterOnly)
                         {

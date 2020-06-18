@@ -9,7 +9,7 @@ namespace Scriban.Syntax
 {
     public partial class ScriptPage : ScriptNode
     {
-        private ScriptBlockStatement _frontMatter;
+        private ScriptFrontMatter _frontMatter;
         private ScriptBlockStatement _body;
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace Scriban.Syntax
         /// <remarks>
         /// Note that this code block is not executed when evaluating this page. It has to be evaluated separately (usually before evaluating the page).
         /// </remarks>
-        public ScriptBlockStatement FrontMatter
+        public ScriptFrontMatter FrontMatter
         {
             get => _frontMatter;
             set => ParentToThis(ref _frontMatter, value);

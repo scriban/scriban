@@ -327,10 +327,9 @@ variable + 1
 
             // Check that the parser finished parsing on the first code exit }}
             // and hasn't tried to run the lexer on the remaining text
-            Assert.AreEqual(new TextPosition(30, 3, 0), parser.CurrentSpan.Start);
-            Assert.AreEqual(new TextPosition(33, 3, 3), parser.CurrentSpan.End);
+            Assert.AreEqual(new TextPosition(34, 4, 0), parser.CurrentSpan.Start);
 
-            var startPositionAfterFrontMatter = parser.CurrentSpan.End.NextLine();
+            var startPositionAfterFrontMatter = page.FrontMatter.TextPositionAfterEndMarker;
 
             // Make sure that we have a front matter
             Assert.NotNull(page.FrontMatter);
