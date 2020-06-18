@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0-alpha.1 (18 Jun 2020)
+-  First alpha version for 3.0.0, no changelog yet.
+
 ## 2.1.3 (5 Jun 2020)
 - Fix comparison != with null (#189)
 - Fix flow state after a return in a template to allow to reuse the same TemplateContext (#182)
