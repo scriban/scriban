@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0-alpha.2 (6 Jul 2020)
+-  Add object.eval function.
+
 ## 3.0.0-alpha.1 (18 Jun 2020)
 -  First alpha version for 3.0.0, no changelog yet.
 
