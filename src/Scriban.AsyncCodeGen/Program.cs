@@ -151,7 +151,8 @@ namespace Scriban.AsyncCodeGen
                     // Skip also entirely any methods related to ScriptVisitor
                     if (callingMethodSymbol.Name == "ToString" ||
                             (callingMethodSymbol.OverriddenMethod != null && callingMethodSymbol.OverriddenMethod.ContainingType.Name == "ScriptNode" && callingMethodSymbol.Name != "Evaluate") ||
-                        InheritFrom(callingMethodSymbol.ContainingType, "Syntax", "ScriptVisitor"))
+                        InheritFrom(callingMethodSymbol.ContainingType, "Syntax", "ScriptVisitor") ||
+                        InheritFrom(callingMethodSymbol.ContainingType, "Runtime", "ScriptObject"))
                     {
                         continue;
                     }

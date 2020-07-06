@@ -1505,6 +1505,7 @@ The results of the multiplication: `value` * `with`
 Object functions available through the builtin object 'object'.
 
 - [`object.default`](#objectdefault)
+- [`object.eval`](#objecteval)
 - [`object.format`](#objectformat)
 - [`object.has_key`](#objecthas_key)
 - [`object.has_value`](#objecthas_value)
@@ -1542,6 +1543,36 @@ The `default` value is returned if the input `value` is null or an empty string 
 > **output**
 ```html
 Yo
+```
+
+[:top:](#builtins)
+### `object.eval`
+
+```
+object.eval <value>
+```
+
+#### Description
+
+The evaluates a string as a scriban template or evaluate the passed function or return the passed value.
+
+#### Arguments
+
+- `value`: The input value, either a scriban template in a string, or an alias function or directly a value.
+
+#### Returns
+
+The evaluation of the input value.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "This is a template text {{ 1 + 2 }}" | object.eval }}
+```
+> **output**
+```html
+This is a template text 3
 ```
 
 [:top:](#builtins)
@@ -2573,7 +2604,7 @@ The length of the input string
 ### `string.slice`
 
 ```
-string.slice <text> <start> <length: 0>?
+string.slice <text> <start> <length>?
 ```
 
 #### Description
