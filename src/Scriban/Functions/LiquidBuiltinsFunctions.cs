@@ -78,6 +78,7 @@ namespace Scriban.Functions
                 case "truncate": target = "string"; member = "truncate"; return true;
                 case "truncatewords": target = "string"; member = "truncatewords"; return true;
                 case "uniq": target = "array"; member = "uniq"; return true;
+                case "upcase": target = "string"; member = "upcase"; return true;
                 case "contains": target = "array"; member = "contains"; return true;
             }
 
@@ -145,6 +146,7 @@ namespace Scriban.Functions
                 SetValue("truncate", str["truncate"], true);
                 SetValue("truncatewords", str["truncatewords"], true);
                 SetValue("uniq", array["uniq"], true);
+                SetValue("upcase", str["upcase"], true);
                 SetValue("contains", array["contains"], true);
 
                 this.Import(typeof(LiquidBuiltinsFunctions), ScriptMemberImportFlags.All);
