@@ -124,7 +124,7 @@ namespace Scriban.Runtime
         {
             return list == null ? null : new ScriptRange(list.Cast<object>().Distinct());
         }
-        
+
         public static ScriptRange Reverse(IEnumerable list)
         {
             if (list == null)
@@ -134,7 +134,7 @@ namespace Scriban.Runtime
 
             return new ScriptRange(list.Cast<object>().Reverse());
         }
-        
+
 
         private static IEnumerable CompactImpl(IEnumerable list)
         {
@@ -335,7 +335,7 @@ namespace Scriban.Runtime
 
             if (reason != null)
             {
-                throw new ScriptRuntimeException(errorSpan, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and {rightValue?.GetType().ScriptPrettyName()}.{reason}");
+                throw new ScriptRuntimeException(errorSpan, $"The operator `{op.ToText()}` is not supported between {context.GetTypeName(leftValue)} and {context.GetTypeName(rightValue)}.{reason}");
             }
 
             switch (op)
@@ -441,7 +441,7 @@ namespace Scriban.Runtime
                     if (leftCount == 0 && op == ScriptBinaryOperator.CompareGreater) return false;
                     break;
                 default:
-                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {left?.GetType().ScriptPrettyName()} and {right?.GetType().ScriptPrettyName()}.");
+                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {context.GetTypeName(left)} and {context.GetTypeName(right)}.");
             }
 
             // Otherwise we need to compare each element
@@ -477,7 +477,7 @@ namespace Scriban.Runtime
             }
             return list.Add(item);
         }
-        
+
         int IList.Add(object value)
         {
             return AddImpl(value);

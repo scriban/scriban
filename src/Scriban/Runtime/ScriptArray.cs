@@ -443,7 +443,7 @@ namespace Scriban.Runtime
 
             if (reason != null)
             {
-                throw new ScriptRuntimeException(errorSpan, $"The operator `{op.ToText()}` is not supported between {leftValue?.GetType().ScriptPrettyName()} and {rightValue?.GetType().ScriptPrettyName()}.{reason}");
+                throw new ScriptRuntimeException(errorSpan, $"The operator `{op.ToText()}` is not supported between {context.GetTypeName(leftValue)} and {context.GetTypeName(rightValue)}.{reason}");
             }
 
             switch (op)
@@ -586,7 +586,7 @@ namespace Scriban.Runtime
                     if (left.Count == 0 && op == ScriptBinaryOperator.CompareGreater) return false;
                     break;
                 default:
-                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {left?.GetType().ScriptPrettyName()} and {right?.GetType().ScriptPrettyName()}.");
+                    throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between {context.GetTypeName(left)} and {context.GetTypeName(right)}.");
             }
 
             // Otherwise we need to compare each element

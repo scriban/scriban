@@ -71,7 +71,10 @@ namespace Scriban.Helpers
             if (type == typeof(double)) return "double";
             if (type == typeof(decimal)) return "decimal";
             if (type == typeof(BigInteger)) return "bigint";
-            if (type == typeof(ScriptArray)) return "[]";
+            if (type == typeof(ScriptRange)) return "range";
+            if (type == typeof(ScriptArray) || typeof(System.Collections.IList).IsAssignableFrom(type)) return "array";
+            if (typeof(IScriptObject).IsAssignableFrom(type)) return "object";
+            if (typeof(IScriptCustomFunction).IsAssignableFrom(type)) return "function";
 
             string name = type.Name;
 
@@ -99,7 +102,7 @@ namespace Scriban.Helpers
             {
                 return typeNameAttr.TypeName;
             }
-            
+
             // For any Scriban ScriptXxxYyy name, return xxx_yyy
             if (type.Namespace != null && type.Namespace.StartsWith("Scriban."))
             {

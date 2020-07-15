@@ -454,7 +454,7 @@ namespace Scriban.Syntax
                     	return false;
                     case ScriptBinaryOperator.CompareNotEqual:
                         return true;
-                    
+
                     case ScriptBinaryOperator.CompareGreater:
                     case ScriptBinaryOperator.CompareLess:
                     case ScriptBinaryOperator.CompareGreaterOrEqual:
@@ -601,7 +601,7 @@ namespace Scriban.Syntax
                 return leftValue.Equals(rightValue);
             }
 
-            throw new ScriptRuntimeException(span, $"Unsupported types `{leftValue}/{leftType?.ScriptPrettyName()}` {op.ToText()} `{rightValue}/{rightType?.ScriptPrettyName()}` for binary operation");
+            throw new ScriptRuntimeException(span, $"Unsupported types `{leftValue}/{context.GetTypeName(leftValue)}` {op.ToText()} `{rightValue}/{context.GetTypeName(rightValue)}` for binary operation");
         }
 
         private static object CalculateInt(ScriptBinaryOperator op, SourceSpan span, int left, int right)

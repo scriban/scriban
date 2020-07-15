@@ -23,6 +23,34 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestGetTypeName()
+        {
+            var context = new TemplateContext();
+
+            Assert.AreEqual("bool", context.GetTypeName(true));
+            Assert.AreEqual("bool", context.GetTypeName(false));
+            Assert.AreEqual("byte", context.GetTypeName((byte)1));
+            Assert.AreEqual("sbyte", context.GetTypeName((sbyte)1));
+            Assert.AreEqual("ushort", context.GetTypeName((ushort)1));
+            Assert.AreEqual("short", context.GetTypeName((short)1));
+            Assert.AreEqual("uint", context.GetTypeName((uint)1));
+            Assert.AreEqual("int", context.GetTypeName((int)1));
+            Assert.AreEqual("ulong", context.GetTypeName((ulong)1));
+            Assert.AreEqual("long", context.GetTypeName((long)1));
+            Assert.AreEqual("float", context.GetTypeName((float)1.5f));
+            Assert.AreEqual("double", context.GetTypeName((double)1.5));
+            Assert.AreEqual("decimal", context.GetTypeName((decimal)1.5m));
+            Assert.AreEqual("bigint", context.GetTypeName(new BigInteger(1)));
+            Assert.AreEqual("string", context.GetTypeName("test"));
+            Assert.AreEqual("range", context.GetTypeName(new ScriptRange()));
+            Assert.AreEqual("array", context.GetTypeName(new ScriptArray()));
+            Assert.AreEqual("array", context.GetTypeName(new ScriptArray<float>()));
+            Assert.AreEqual("object", context.GetTypeName(new ScriptObject()));
+            Assert.AreEqual("function", context.GetTypeName(DelegateCustomAction.Create(() => {})));
+        }
+
+
+        [Test]
         public void TestRecursiveLocal()
         {
             var template = Template.Parse("{{ x = {}; with x; func $tester; if $0 == 0; ret; end; $0; $0 - 1 | $tester; end; export = @$tester; end; x.export 5; }}");
@@ -279,7 +307,7 @@ f(1)
         {
             var template = Template.ParseLiquid("{{html>0}}");
             var ex = Assert.Catch<ScriptRuntimeException>(() => template.Render(new {x = 0}));
-            Assert.AreEqual("<input>(1,7) : error : Unable to convert type `html_functions` to int", ex.Message);
+            Assert.AreEqual("<input>(1,7) : error : Unable to convert type `object` to int", ex.Message);
         }
 
         [Test]

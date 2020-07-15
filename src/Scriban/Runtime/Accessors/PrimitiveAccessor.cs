@@ -32,7 +32,7 @@ namespace Scriban.Runtime.Accessors
         {
             if (!context.EnableRelaxedMemberAccess)
             {
-                throw new ScriptRuntimeException(span, $"Cannot get or set a member on the primitive `{target}/{target.GetType().ScriptPrettyName()}` when accessing member: {member}"); // unit test: 132-member-accessor-error2.txt
+                throw new ScriptRuntimeException(span, $"Cannot get or set a member on the primitive `{target}/{context.GetTypeName(target)}` when accessing member: {member}"); // unit test: 132-member-accessor-error2.txt
             }
 
             // If this is relaxed, set the target object to null
@@ -42,22 +42,22 @@ namespace Scriban.Runtime.Accessors
 
         public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
-            throw new ScriptRuntimeException(span, $"Cannot get or set a member on the primitive `{target}/{target.GetType().ScriptPrettyName()}` when accessing member: {member}"); // unit test: 132-member-accessor-error2.txt
+            throw new ScriptRuntimeException(span, $"Cannot get or set a member on the primitive `{target}/{context.GetTypeName(target)}` when accessing member: {member}"); // unit test: 132-member-accessor-error2.txt
         }
 
         public int GetLength(TemplateContext context, SourceSpan span, object target)
         {
-            throw new ScriptRuntimeException(span, $"Cannot use the {target.GetType().ScriptPrettyName()} primitive `{target}` as a list.");
+            throw new ScriptRuntimeException(span, $"Cannot use the {context.GetTypeName(target)} primitive `{target}` as a list.");
         }
 
         public object GetValue(TemplateContext context, SourceSpan span, object target, int index)
         {
-            throw new ScriptRuntimeException(span, $"Cannot index the {target.GetType().ScriptPrettyName()} primitive `{target}`."); // unit test: 130-indexer-accessor-error4.txt
+            throw new ScriptRuntimeException(span, $"Cannot index the {context.GetTypeName(target)} primitive `{target}`."); // unit test: 130-indexer-accessor-error4.txt
         }
 
         public void SetValue(TemplateContext context, SourceSpan span, object target, int index, object value)
         {
-            throw new ScriptRuntimeException(span, $"Cannot index the {target.GetType().ScriptPrettyName()} primitive `{target}`."); // unit test: 130-indexer-accessor-error4.txt
+            throw new ScriptRuntimeException(span, $"Cannot index the {context.GetTypeName(target)} primitive `{target}`."); // unit test: 130-indexer-accessor-error4.txt
         }
     }
 }

@@ -78,7 +78,7 @@ namespace Scriban.Syntax
                         {
                             if (!(value is bool))
                             {
-                                throw new ScriptRuntimeException(span, $"Expecting a boolean instead of {value?.GetType().ScriptPrettyName()} value: {value}");
+                                throw new ScriptRuntimeException(span, $"Expecting a boolean instead of {context.GetTypeName(value)} value: {value}");
                             }
 
                             return !(bool)value;
@@ -121,7 +121,7 @@ namespace Scriban.Syntax
                             }
                             else
                             {
-                                throw new ScriptRuntimeException(span, $"Unexpected value `{value} / Type: {value?.GetType().ScriptPrettyName()}`. Cannot negate(-)/positive(+) a non-numeric value");
+                                throw new ScriptRuntimeException(span, $"Unexpected value `{value} / Type: {context.GetTypeName(value)}`. Cannot negate(-)/positive(+) a non-numeric value");
                             }
                         }
                     }
