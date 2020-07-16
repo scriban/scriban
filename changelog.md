@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.0.0-alpha.3 (16 Jul 2020)
+- Improve TemplateContext.GetTypeName
+- Added upcase string filter to list of built-in Liquid functions
+
 ## 3.0.0-alpha.2 (6 Jul 2020)
 -  Add object.eval function.
 
