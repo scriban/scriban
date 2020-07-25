@@ -49,7 +49,6 @@ namespace Scriban
         private FastStack<LocalContext> _availableLocalContexts;
         private FastStack<ScriptPipeArguments> _availablePipeArguments;
         private FastStack<ScriptPipeArguments> _pipeArguments;
-        private FastStack<ScriptArray> _availableArguments;
         private FastStack<List<ScriptExpression>> _availableScriptExpressionLists;
         private object[][] _availableReflectionArguments;
         private FastStack<Dictionary<object, object>> _availableTags;
@@ -148,7 +147,6 @@ namespace Scriban
 
             _availablePipeArguments = new FastStack<ScriptPipeArguments>(4);
             _pipeArguments = new FastStack<ScriptPipeArguments>(4);
-            _availableArguments = new FastStack<ScriptArray>(4);
             _availableScriptExpressionLists = new FastStack<List<ScriptExpression>>(4);
             _availableReflectionArguments = new object[ScriptFunctionCall.MaximumParameterCount + 1][];
             for (int i = 0; i < _availableReflectionArguments.Length; i++)
@@ -428,19 +426,6 @@ namespace Scriban
         {
             _availableScriptExpressionLists.Push(list);
             list.Clear();
-        }
-
-        internal ScriptArray GetOrCreateScriptArguments(int capacity)
-        {
-            var array  = _availableArguments.Count > 0 ? _availableArguments.Pop() : new ScriptArray();
-            if (capacity > array.Capacity) array.Capacity = capacity;
-            return array;
-        }
-
-        internal void ReleaseScriptArguments(ScriptArray scriptArguments)
-        {
-            scriptArguments.Clear();
-            _availableArguments.Push(scriptArguments);
         }
 
         internal object[] GetOrCreateReflectionArguments(int length)

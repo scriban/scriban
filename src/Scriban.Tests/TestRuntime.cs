@@ -59,24 +59,6 @@ namespace Scriban.Tests
         }
 
         [Test]
-        public void TestScriptArguments()
-        {
-            var context = new TemplateContext();
-            var array0 = context.GetOrCreateScriptArguments(10);
-            var array1 = context.GetOrCreateScriptArguments(4);
-            Assert.AreNotSame(array0, array1);
-            array0[0] = 1;
-
-            context.ReleaseScriptArguments(array1);
-            context.ReleaseScriptArguments(array0);
-
-            var array3 = context.GetOrCreateScriptArguments(4);
-            Assert.AreEqual(0, array3.Count);
-            Assert.Null(array3[0]);
-            Assert.AreSame(array3, array0);
-        }
-
-        [Test]
         public void TestReflectionArguments()
         {
             var context = new TemplateContext();

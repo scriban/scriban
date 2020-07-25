@@ -211,7 +211,7 @@ namespace Scriban.Syntax
                 var argCount = Math.Max(function.RequiredParameterCount, 1 + (arguments?.Count ?? 0));
                 allArgumentsWithPipe = context.GetOrCreateListOfScriptExpressions(argCount);
                 var pipeFrom = context.CurrentPipeArguments.Pop();
-                argumentValues =  context.GetOrCreateScriptArguments(argCount);
+                argumentValues =  new ScriptArray(argCount);
                 allArgumentsWithPipe.Add(pipeFrom);
 
                 if (arguments != null)
@@ -222,7 +222,7 @@ namespace Scriban.Syntax
             }
             else
             {
-                argumentValues = context.GetOrCreateScriptArguments(arguments?.Count ?? 0);
+                argumentValues = new ScriptArray(arguments?.Count ?? 0);
             }
 
             var needLocal = !(function is ScriptFunction func && func.HasParameters);
@@ -310,7 +310,6 @@ namespace Scriban.Syntax
                 {
                     context.ReleaseListOfScriptExpressions(allArgumentsWithPipe);
                 }
-                context.ReleaseScriptArguments(argumentValues);
             }
 
             // Restore the flow state to none
