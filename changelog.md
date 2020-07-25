@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0-alpha.4 (25 Jul 2020)
+- Allow to pass regular arguments to function calls in-between named arguments
+
 ## 3.0.0-alpha.3 (16 Jul 2020)
 - Improve TemplateContext.GetTypeName
 - Added upcase string filter to list of built-in Liquid functions

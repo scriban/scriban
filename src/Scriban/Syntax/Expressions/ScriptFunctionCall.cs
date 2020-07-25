@@ -320,7 +320,6 @@ namespace Scriban.Syntax
 
         private static ulong ProcessArguments(TemplateContext context, ScriptNode callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
         {
-            bool hasNamedArgument = false;
             ulong argMask = 0;
             var parameterCount = function.ParameterCount;
             for (var argIndex = 0; argIndex < arguments.Count; argIndex++)
@@ -334,7 +333,6 @@ namespace Scriban.Syntax
                 var namedArg = argument as ScriptNamedArgument;
                 if (namedArg != null)
                 {
-                    hasNamedArgument = true;
                     var argName = namedArg.Name?.Name;
                     if (argName == null)
                     {
@@ -367,10 +365,6 @@ namespace Scriban.Syntax
                     {
                         index = argumentValues.Count;
                     }
-                }
-                else if (hasNamedArgument)
-                {
-                    throw new ScriptRuntimeException(argument.Span, "Cannot pass this argument after a named argument");
                 }
 
                 if (function.IsParameterType<ScriptExpression>(index))

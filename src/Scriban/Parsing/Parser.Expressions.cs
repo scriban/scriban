@@ -477,7 +477,8 @@ namespace Scriban.Parsing
 
                             while (true)
                             {
-                                if (Current.Type != TokenType.Identifier)
+                                // Don't parse boolean parameters as named parameters for function calls
+                                if (Current.Type != TokenType.Identifier || (paramContainer == null && PeekToken().Type != TokenType.Colon))
                                 {
                                     break;
                                 }
@@ -520,15 +521,20 @@ namespace Scriban.Parsing
                                 }
                             }
 
-                            // As we have handled leftOperand here, we don't let the function out of this while to pick up the leftOperand
-                            if (functionCall != null)
+                            if (paramContainer != null || !IsStartOfExpression())
                             {
-                                leftOperand = functionCall;
-                                functionCall = null;
+                                if (functionCall != null)
+                                {
+                                    leftOperand = functionCall;
+                                    functionCall = null;
+                                }
+
+                                // We don't allow anything after named parameters for IScriptNamedArgumentContainer
+                                break;
                             }
 
-                            // We don't allow anything after named parameters
-                            break;
+                            // Otherwise we allow to mix normal parameters within named parameters
+                            goto parseExpression;
                         }
 
                         bool isLikelyExplicitFunctionCall = Current.Type == TokenType.OpenParen && !IsPreviousCharWhitespace();

@@ -1,6 +1,7 @@
 {{
 func nv
-	ret "name: " + $.name + " value: " + $.value
+	ret "name: " + $.name + " value: " + $.value + " items: " + $
 end
 nv name: "Yes" value: "No"
 }}
+{{ nv 1 name: "First" 2 value: "Second" 3 }}
