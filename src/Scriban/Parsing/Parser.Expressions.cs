@@ -283,7 +283,7 @@ namespace Scriban.Parsing
                     }
 
                     // Named argument
-                    if (Current.Type == TokenType.Colon)
+                    if (mode != ParseExpressionMode.DefaultNoNamedArgument && Current.Type == TokenType.Colon)
                     {
                         if (!(leftOperand is ScriptVariable))
                         {
@@ -445,6 +445,38 @@ namespace Scriban.Parsing
                         leftOperand = Close(binaryExpression);
 
                         continue;
+                    }
+
+                    // Parse conditional expression
+                    if (!_isLiquid && Current.Type == TokenType.Question)
+                    {
+                        // If we have any pending function call, we close it
+                        if (functionCall != null)
+                        {
+                            functionCall.Arguments.Add(leftOperand);
+                            Close(functionCall);
+                            leftOperand = functionCall;
+                            functionCall = null;
+                        }
+
+                        var conditionalExpression = Open<ScriptConditionalExpression>();
+                        conditionalExpression.Span = leftOperand.Span;
+
+                        conditionalExpression.Condition = leftOperand;
+
+                        // Parse ?
+                        ExpectAndParseTokenTo(conditionalExpression.QuestionToken, TokenType.Question);
+
+                        conditionalExpression.ThenValue = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.DefaultNoNamedArgument);
+
+                        // Parse :
+                        ExpectAndParseTokenTo(conditionalExpression.ColonToken, TokenType.Colon);
+
+                        conditionalExpression.ElseValue = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.DefaultNoNamedArgument);
+
+                        Close(conditionalExpression);
+                        leftOperand = conditionalExpression;
+                        break;
                     }
 
                     if (IsStartOfExpression())
@@ -1228,6 +1260,11 @@ namespace Scriban.Parsing
             /// All expressions (e.g literals, function calls, function pipes...etc.)
             /// </summary>
             Default,
+
+            /// <summary>
+            /// All expressions (e.g literals, function calls, function pipes...etc.)
+            /// </summary>
+            DefaultNoNamedArgument,
 
             /// <summary>
             /// Only literal, unary, nested, array/object initializer, dot access, array access
