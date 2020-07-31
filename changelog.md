@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0-alpha.6 (31 Jul 2020)
+- Add support for conditional ternary epxression (e.g `condition ? thenValue : elseValue`)
+
 ## 3.0.0-alpha.4 (25 Jul 2020)
 - Allow to pass regular arguments to function calls in-between named arguments
 
