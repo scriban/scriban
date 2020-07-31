@@ -20,6 +20,10 @@ namespace Scriban.Syntax
     [ScriptSyntax("binary expression", "<expression> operator <expression>")]
     public partial class ScriptBinaryExpression : ScriptExpression
     {
+        private ScriptExpression _left;
+        private ScriptToken _operatorToken;
+        private ScriptExpression _right;
+
         public ScriptExpression Left
         {
             get => _left;
@@ -642,10 +646,6 @@ namespace Scriban.Syntax
         /// Use this value as a maximum integer
         /// </summary>
         private static readonly BigInteger MaxBigInteger = BigInteger.One << 1024 * 1024;
-
-        private ScriptExpression _left;
-        private ScriptToken _operatorToken;
-        private ScriptExpression _right;
 
         private static object CalculateLongWithInt(ScriptBinaryOperator op, SourceSpan span, int leftInt, int rightInt)
         {
