@@ -450,6 +450,11 @@ namespace Scriban.Parsing
                     // Parse conditional expression
                     if (!_isLiquid && Current.Type == TokenType.Question)
                     {
+                        if (precedence > 0)
+                        {
+                            break;
+                        }
+
                         // If we have any pending function call, we close it
                         if (functionCall != null)
                         {
