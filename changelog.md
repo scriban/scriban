@@ -33,7 +33,7 @@
 - Reduce allocations for string functions
 - Add support for rendering exceptions
 - Add base64 functions
-- Limit the supported .NET platforms to `net35 , `net40`, `net45`, `netstandard1.1`, `netstandard1.3`, `netstandard2.0`
+- Limit the supported .NET platforms to `net35`, `net40`, `net45`, `netstandard1.1`, `netstandard1.3`, `netstandard2.0`
 
 ## 2.0.0-alpha-005 (15 Jan 2019)
 - Allow binary compare to work on any objects and object.Equals for non primitives (#109)
