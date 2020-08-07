@@ -43,6 +43,7 @@ namespace Scriban.Syntax
         public static ScriptToken Comma() => new ScriptToken(TokenType.Comma);
         public static ScriptToken Dot() => new ScriptToken(TokenType.Dot);
         public static ScriptToken DoubleDot() => new ScriptToken(TokenType.DoubleDot);
+        public static ScriptToken TripleDot() => new ScriptToken(TokenType.TripleDot);
         public static ScriptToken DoubleDotLess() => new ScriptToken(TokenType.DoubleDotLess);
         public static ScriptToken OpenParen() => new ScriptToken(TokenType.OpenParen);
         public static ScriptToken CloseParen() => new ScriptToken(TokenType.CloseParen);

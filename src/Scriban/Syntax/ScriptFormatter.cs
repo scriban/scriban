@@ -239,7 +239,7 @@ namespace Scriban.Syntax
                         for (var i = 0; i < node.Parameters.Count; i++)
                         {
                             var arg = node.Parameters[i];
-                            _context.SetValue(arg, string.Empty);
+                            _context.SetValue(arg.Name, string.Empty);
                         }
                     }
 

@@ -173,43 +173,38 @@ namespace Scriban.Runtime
                 }
             }
 
-            var allArgCount = scriptArguments.Count;
-
             // Convert arguments
             paramsArguments = null;
-            int firstArgIndex = _firstIndexOfUserParameters;
-            if (_hasObjectParams)
+            if (_varParamKind == ScriptVarParamKind.LastParameter)
             {
                 // 0         1        _firstIndexOfUserParameters  _paramsIndex
                 // [context, [span]], arg0, arg1...,        ,argn, [varg0,varg1, ...]
-                int argCount = _paramsIndex - firstArgIndex;
-                var paramsCount = allArgCount - argCount;
+                var varArgs = (ScriptArray)scriptArguments[scriptArguments.Count - 1];
 
-                paramsArguments = _paramsElementType == typeof(object) ? context.GetOrCreateReflectionArguments(paramsCount) : Array.CreateInstance(_paramsElementType, paramsCount);
-                reflectArgs[_paramsIndex] = paramsArguments;
-
-                if (argCount > 0)
+                // Copy all normal arguments
+                var normalArgCount = scriptArguments.Count - 1;
+                if (normalArgCount > 0)
                 {
-                    // copy arg0, arg1, ..., argn
-                    scriptArguments.CopyTo(0, reflectArgs, firstArgIndex, argCount);
+                    scriptArguments.CopyTo(0, reflectArgs, _firstIndexOfUserParameters, normalArgCount);
                 }
 
-                if (paramsCount > 0)
+                paramsArguments = _paramsElementType == typeof(object) ? context.GetOrCreateReflectionArguments(varArgs.Count) : Array.CreateInstance(_paramsElementType, varArgs.Count);
+                reflectArgs[_paramsIndex] = paramsArguments;
+
+                // Convert each argument
+                for(int i = 0; i < varArgs.Count; i++)
                 {
-                    for(int i = 0; i < paramsCount; i++)
-                    {
-                        paramsArguments.SetValue(scriptArguments[argCount + i], i);
-                    }
+                    var destValue = context.ToObject(context.CurrentSpan, varArgs[i], _paramsElementType);
+                    paramsArguments.SetValue(destValue, i);
                 }
             }
             else
             {
-                scriptArguments.CopyTo(0, reflectArgs, firstArgIndex, allArgCount);
+                scriptArguments.CopyTo(0, reflectArgs, _firstIndexOfUserParameters, scriptArguments.Count);
             }
 
             return reflectArgs;
         }
-
 
         /// <summary>
         /// A custom function taking one argument.

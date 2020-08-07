@@ -29,12 +29,10 @@ namespace Scriban.Runtime
         private readonly Type _returnType;
         private readonly ScriptParameterInfo[] _parameterInfos;
 
-        private readonly ScriptParameterInfo _paramsParameterInfo;
-
 #if !SCRIBAN_NO_ASYNC
         protected readonly bool IsAwaitable;
 #endif
-        protected readonly bool _hasObjectParams;
+        protected readonly ScriptVarParamKind _varParamKind;
         protected readonly int _paramsIndex;
         protected readonly bool _hasTemplateContext;
         protected readonly bool _hasSpan;
@@ -72,7 +70,7 @@ namespace Scriban.Runtime
                 {
                     foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
                     {
-                        _hasObjectParams = true;
+                        _varParamKind = ScriptVarParamKind.LastParameter;
                         _paramsElementType = lastParam.ParameterType.GetElementType();
                         _paramsIndex = Parameters.Length - 1;
                         break;
@@ -83,7 +81,7 @@ namespace Scriban.Runtime
             _expectedNumberOfParameters = Parameters.Length;
             _firstIndexOfUserParameters = 0;
 
-            if (!_hasObjectParams)
+            if (_varParamKind == ScriptVarParamKind.None)
             {
                 for (int i = 0; i < Parameters.Length; i++)
                 {
@@ -92,10 +90,6 @@ namespace Scriban.Runtime
                         _optionalParameterCount++;
                     }
                 }
-            }
-            else
-            {
-                _expectedNumberOfParameters--;
             }
 
             if (_hasTemplateContext)
@@ -109,6 +103,10 @@ namespace Scriban.Runtime
 
             _expectedNumberOfParameters -= _firstIndexOfUserParameters;
             _minimumRequiredParameters = _expectedNumberOfParameters - _optionalParameterCount;
+            if (_varParamKind == ScriptVarParamKind.LastParameter)
+            {
+                _minimumRequiredParameters--;
+            }
 
             // Compute parameters
             _parameterInfos = new ScriptParameterInfo[_expectedNumberOfParameters];
@@ -116,18 +114,12 @@ namespace Scriban.Runtime
             {
                 var realIndex = _firstIndexOfUserParameters + i;
                 var parameterInfo = Parameters[realIndex];
-                var parameterType = parameterInfo.ParameterType;
-                _parameterInfos[i] =parameterInfo.HasDefaultValue
+                var parameterType = realIndex == Parameters.Length - 1 && _varParamKind == ScriptVarParamKind.LastParameter ? _paramsElementType : parameterInfo.ParameterType;
+                _parameterInfos[i] = parameterInfo.HasDefaultValue
                     ? new ScriptParameterInfo(parameterType, parameterInfo.Name, parameterInfo.DefaultValue)
                     : new ScriptParameterInfo(parameterType, parameterInfo.Name);
             }
-
-            if (_hasObjectParams)
-            {
-                _paramsParameterInfo = new ScriptParameterInfo(_paramsElementType, Parameters[_paramsIndex].Name);
-            }
         }
-
 
 #if !SCRIBAN_NO_ASYNC
         protected async ValueTask<object> ConfigureAwait(object result)
@@ -162,7 +154,7 @@ namespace Scriban.Runtime
 
         public int ParameterCount => _expectedNumberOfParameters;
 
-        public bool HasVariableParams => _hasObjectParams;
+        public ScriptVarParamKind VarParamKind => _varParamKind;
 
         public Type ReturnType => _returnType;
 
@@ -176,13 +168,15 @@ namespace Scriban.Runtime
             if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Argument index must be >= 0");
             if (index >= _parameterInfos.Length)
             {
-                if (_hasObjectParams)
+                if (_varParamKind == ScriptVarParamKind.LastParameter)
                 {
-                    return _paramsParameterInfo;
+                    index = _parameterInfos.Length - 1;
                 }
-                throw new ArgumentOutOfRangeException(nameof(index), $"Argument index must be < {ParameterCount}");
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index), $"Argument index must be < {ParameterCount}");
+                }
             }
-
             return _parameterInfos[index];
         }
 

@@ -404,7 +404,7 @@ namespace Scriban.Functions
 
         public int ParameterCount => 0;
 
-        public bool HasVariableParams => true;
+        public ScriptVarParamKind VarParamKind => ScriptVarParamKind.Direct;
 
         public Type ReturnType => typeof(object);
 

@@ -1,0 +1,1 @@
+text(1,18) : error : Cannot declare a normal parameter after an optional parameter.

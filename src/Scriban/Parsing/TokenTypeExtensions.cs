@@ -50,6 +50,7 @@ namespace Scriban.Parsing
                 TokenType.Comma => ",",
                 TokenType.Dot => ".",
                 TokenType.DoubleDot => "..",
+                TokenType.TripleDot => "...",
                 TokenType.DoubleDotLess => "..<",
                 TokenType.OpenParen => "(",
                 TokenType.CloseParen => ")",

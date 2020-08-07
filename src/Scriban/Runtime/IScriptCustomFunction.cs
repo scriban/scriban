@@ -38,13 +38,20 @@ namespace Scriban.Runtime
     }
 
 
+    public enum ScriptVarParamKind
+    {
+        None,
+        Direct,
+        LastParameter
+    }
+
     public interface IScriptFunctionInfo
     {
         int RequiredParameterCount { get; }
 
         int ParameterCount { get; }
 
-        bool HasVariableParams { get; }
+        ScriptVarParamKind VarParamKind { get; }
 
         Type ReturnType { get; }
 

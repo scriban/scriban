@@ -203,7 +203,9 @@ namespace Scriban.Parsing
             if (Current.Type == TokenType.OpenParen)
             {
                 scriptFunction.OpenParen = ParseToken();
-                scriptFunction.Parameters = new ScriptList<ScriptVariable>();
+                var parameters = new ScriptList<ScriptParameter>();
+                bool hasTripleDot = false;
+                bool hasOptionals = false;
 
                 bool isFirst = true;
                 while (true)
@@ -213,6 +215,7 @@ namespace Scriban.Parsing
                     if (Current.Type == TokenType.CloseParen)
                     {
                         scriptFunction.CloseParen = ParseToken();
+                        scriptFunction.Span.End = scriptFunction.CloseParen.Span.End;
                         break;
                     }
 
@@ -234,13 +237,58 @@ namespace Scriban.Parsing
                     // Else we expect an expression
                     if (IsStartOfExpression())
                     {
+                        var parameter = Open<ScriptParameter>();
                         var arg = ExpectAndParseVariable(scriptFunction);
                         if (!(arg is ScriptVariableGlobal))
                         {
                             LogError(arg.Span, "Expecting only a simple name parameter for a function");
                         }
-                        scriptFunction.Parameters.Add(arg);
-                        scriptFunction.Span.End = arg.Span.End;
+
+                        parameter.Name = arg;
+
+                        if (Current.Type == TokenType.Equal)
+                        {
+                            if (hasTripleDot)
+                            {
+                                LogError(arg.Span, "Cannot declare an optional parameter after a variable parameter (`...`).");
+                            }
+                            hasOptionals = true;
+                            parameter.EqualOrTripleDotToken = ScriptToken.Equal();
+                            ExpectAndParseTokenTo(parameter.EqualOrTripleDotToken, TokenType.Equal);
+
+                            parameter.Span.End = parameter.EqualOrTripleDotToken.Span.End;
+
+                            var defaultValue = ExpectAndParseExpression(parameter);
+                            if (defaultValue is ScriptLiteral literal)
+                            {
+                                parameter.DefaultValue = literal;
+                                parameter.Span.End = literal.Span.End;
+                            }
+                            else
+                            {
+                                LogError(arg.Span, "Expecting only a literal for an optional parameter value.");
+                            }
+                        }
+                        else if (Current.Type == TokenType.TripleDot)
+                        {
+                            if (hasTripleDot)
+                            {
+                                LogError(arg.Span, "Cannot declare multiple variable parameters.");
+                            }
+
+                            hasTripleDot = true;
+                            hasOptionals = true;
+                            parameter.EqualOrTripleDotToken = ScriptToken.TripleDot();
+                            ExpectAndParseTokenTo(parameter.EqualOrTripleDotToken, TokenType.TripleDot);
+                            parameter.Span.End = parameter.EqualOrTripleDotToken.Span.End;
+                        }
+                        else if (hasOptionals)
+                        {
+                            LogError(arg.Span, "Cannot declare a normal parameter after an optional parameter.");
+                        }
+
+                        parameters.Add(parameter);
+                        scriptFunction.Span.End = parameter.Span.End;
                     }
                     else
                     {
@@ -253,6 +301,9 @@ namespace Scriban.Parsing
                 {
                     LogError(Current, "Expecting a closing parenthesis for a function call.");
                 }
+
+                // Setup parameters once they have been all parsed
+                scriptFunction.Parameters = parameters;
             }
 
             ExpectEndOfStatement();

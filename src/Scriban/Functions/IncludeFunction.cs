@@ -187,14 +187,7 @@ namespace Scriban.Functions
             context.PushLocal();
             try
             {
-                // Compute a new parameters for the include
-                var newParameters = new ScriptArray(arguments.Count - 1);
-                for (int i = 1; i < arguments.Count; i++)
-                {
-                    newParameters[i] = arguments[i];
-                }
-                context.SetValue(ScriptVariable.Arguments, newParameters, true);
-
+                context.SetValue(ScriptVariable.Arguments, arguments, true);
                 result = template.Render(context);
             }
             finally
@@ -212,7 +205,7 @@ namespace Scriban.Functions
 
         public int ParameterCount => 1;
 
-        public bool HasVariableParams => true;
+        public ScriptVarParamKind VarParamKind => ScriptVarParamKind.Direct;
 
         public Type ReturnType => typeof(object);
 

@@ -67,20 +67,23 @@ namespace Scriban.Syntax
                 if (!(arg is ScriptVariableGlobal)) return false;
             }
 
+
+            var parameters = new ScriptList<ScriptParameter>();
+
             function = new ScriptFunction
             {
                 NameOrDoToken = (ScriptVariable)name.Clone(),
                 OpenParen = (ScriptToken)OpenParent.Clone(),
-                Parameters = new ScriptList<ScriptVariable>(),
                 CloseParen = (ScriptToken)CloseParen.Clone(),
                 Span = Span
             };
 
             foreach (var arg in Arguments)
             {
-                var parameter = (ScriptVariableGlobal) arg.Clone();
-                function.Parameters.Add(parameter);
+                var variableName = (ScriptVariableGlobal) arg.Clone();
+                parameters.Add(new ScriptParameter() {Name = variableName});
             }
+            function.Parameters = parameters;
 
             return true;
         }
@@ -227,7 +230,6 @@ namespace Scriban.Syntax
 
             var needLocal = !(function is ScriptFunction func && func.HasParameters);
             object result = null;
-
             try
             {
                 // Process direct arguments
@@ -238,11 +240,14 @@ namespace Scriban.Syntax
                 }
 
                 // Fill remaining argument default values
-                var hasVariableParams = function.HasVariableParams;
+                var hasVariableParams = function.VarParamKind != ScriptVarParamKind.None;
                 var requiredParameterCount = function.RequiredParameterCount;
                 var parameterCount = function.ParameterCount;
 
-                FillRemainingOptionalArguments(ref argMask, argumentValues.Count, parameterCount , function, argumentValues);
+                if (function.VarParamKind != ScriptVarParamKind.Direct)
+                {
+                    FillRemainingOptionalArguments(ref argMask, argumentValues.Count, parameterCount - 1 , function, argumentValues);
+                }
 
                 // Check the required number of arguments
                 var requiredMask = (1U << requiredParameterCount) - 1;
@@ -321,6 +326,7 @@ namespace Scriban.Syntax
         {
             ulong argMask = 0;
             var parameterCount = function.ParameterCount;
+
             for (var argIndex = 0; argIndex < arguments.Count; argIndex++)
             {
                 var argument = arguments[argIndex];
@@ -342,7 +348,7 @@ namespace Scriban.Syntax
                     // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
                     if (scriptFunction != null)
                     {
-                        if (function.HasVariableParams)
+                        if (function.VarParamKind != ScriptVarParamKind.None)
                         {
                             if (index >= 0)
                             {
@@ -383,11 +389,11 @@ namespace Scriban.Syntax
                     {
                         foreach (var subValue in valueEnumerator)
                         {
-                            if (argumentValues.Count < parameterCount) argMask |= 1U << argumentValues.Count;
-
                             var paramType = function.GetParameterInfo(argumentValues.Count).ParameterType;
-                            value = context.ToObject(callerContext.Span, value, paramType);
-                            argumentValues.Add(subValue);
+                            var newValue = context.ToObject(callerContext.Span, subValue, paramType);
+
+                            SetArgumentValue(index, newValue, function, ref argMask, argumentValues, parameterCount);
+                            index++;
                         }
                         continue;
                     }
@@ -398,33 +404,46 @@ namespace Scriban.Syntax
                     value = context.ToObject(argument.Span, value, paramType);
                 }
 
-                if (index == argumentValues.Count)
-                {
-                    if (argumentValues.Count < parameterCount) argMask |= 1U << argumentValues.Count;
-                    argumentValues.Add(value);
-                    continue;
-                }
-
-                // NamedArguments can index further, so we need to fill any intermediate argument values
-                // with their default values.
-                if (index > argumentValues.Count)
-                {
-                    FillRemainingOptionalArguments(ref argMask, argumentValues.Count, index, function, argumentValues);
-                }
-
-                if (index < parameterCount) argMask |= 1U << index;
-                argumentValues[index] = value;
+                SetArgumentValue(index, value, function, ref argMask, argumentValues, parameterCount);
             }
 
             return argMask;
         }
 
-        private static void FillRemainingOptionalArguments(ref ulong argMask, int startIndex, int length, IScriptCustomFunction function, ScriptArray argumentValues)
+        private static void SetArgumentValue(int index, object value, IScriptCustomFunction function, ref ulong argMask, ScriptArray argumentValues, int parameterCount)
         {
-            var maxLength = function.ParameterCount;
-            if (length > maxLength) length = maxLength;
+            // NamedArguments can index further, so we need to fill any intermediate argument values
+            // with their default values.
+            if (index > argumentValues.Count)
+            {
+                FillRemainingOptionalArguments(ref argMask, argumentValues.Count, index, function, argumentValues);
+            }
 
-            for (int i = startIndex; i < length; i++)
+            if (index < parameterCount) argMask |= 1U << index;
+
+            if (function.VarParamKind == ScriptVarParamKind.LastParameter && index >= parameterCount - 1)
+            {
+                var varArgs = (ScriptArray) argumentValues[parameterCount - 1];
+                if (varArgs == null)
+                {
+                    argumentValues[index] = varArgs = new ScriptArray();
+                }
+                varArgs.Add(value);
+            }
+            else
+            {
+                argumentValues[index] = value;
+            }
+        }
+
+        private static void FillRemainingOptionalArguments(ref ulong argMask, int startIndex, int endIndex, IScriptCustomFunction function, ScriptArray argumentValues)
+        {
+            var maxIndex = function.ParameterCount - 1;
+            if (endIndex > maxIndex) endIndex = maxIndex;
+
+            int paramsVarIndex = function.VarParamKind == ScriptVarParamKind.LastParameter ? maxIndex : -1;
+
+            for (int i = startIndex; i <= endIndex; i++)
             {
                 var parameterInfo = function.GetParameterInfo(i);
                 if (parameterInfo.HasDefaultValue)
@@ -434,7 +453,7 @@ namespace Scriban.Syntax
                 }
                 else
                 {
-                    argumentValues[i] = null;
+                    argumentValues[i] = i == paramsVarIndex ? new ScriptArray() : null;
                 }
             }
         }

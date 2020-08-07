@@ -823,6 +823,13 @@ namespace Scriban.Parsing
                             break;
                         }
 
+                        if (c == '.')
+                        {
+                            _token = new Token(TokenType.TripleDot, start, _position);
+                            NextChar();
+                            break;
+                        }
+
                         _token = new Token(TokenType.DoubleDot, start, index);
                         break;
                     }
@@ -1355,12 +1362,12 @@ namespace Scriban.Parsing
                 _token = new Token(TokenType.HexaInteger, start, end);
             }
         }
-            
+
         private void ReadBinary(TextPosition start)
         {
-            var end = _position; 
+            var end = _position;
             NextChar(); // skip b
-             
+
             // Read first part
             bool hasBinary = false;
             bool hasDotAlready = false;
@@ -1378,7 +1385,7 @@ namespace Scriban.Parsing
                     hasDotAlready = true;
                     NextChar();
                 }
-            } 
+            }
 
             if (!IsIdentifierLetter(PeekChar()) && (c == 'u' || c == 'U' || hasDotAlready && (c == 'f' || c == 'F' || c == 'd' || c == 'D')))
             {

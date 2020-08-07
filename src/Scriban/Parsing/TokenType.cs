@@ -178,6 +178,9 @@ namespace Scriban.Parsing
         /// <summary>Token ".."</summary>
         DoubleDot,
 
+        /// <summary>Token "..."</summary>
+        TripleDot,
+
         /// <summary>Token "..&lt;"</summary>
         DoubleDotLess,
 

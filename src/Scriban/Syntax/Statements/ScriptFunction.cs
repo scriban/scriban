@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using Scriban.Parsing;
 using Scriban.Runtime;
 
 namespace Scriban.Syntax
@@ -13,11 +14,18 @@ namespace Scriban.Syntax
         private ScriptKeyword _funcToken;
         private ScriptNode _nameOrDoToken;
         private ScriptToken _openParen;
-        private ScriptList<ScriptVariable> _parameters;
+        private ScriptList<ScriptParameter> _parameters;
         private ScriptToken _closeParen;
         private ScriptToken _equalToken;
         private ScriptStatement _body;
         private bool _hasReturnType;
+        private ScriptVarParamKind _varParamKind;
+        private int _requiredParameterCount;
+
+        public ScriptFunction()
+        {
+            _varParamKind = ScriptVarParamKind.Direct;
+        }
 
         public ScriptKeyword FuncToken
         {
@@ -45,10 +53,38 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _openParen, value);
         }
 
-        public ScriptList<ScriptVariable> Parameters
+        public ScriptList<ScriptParameter> Parameters
         {
             get => _parameters;
-            set => ParentToThis(ref _parameters, value);
+            set
+            {
+                ParentToThis(ref _parameters, value);
+
+                // Pre-calculate parameters
+                _requiredParameterCount = _parameters?.Count ?? 0;
+                _varParamKind = _parameters == null ? ScriptVarParamKind.Direct : ScriptVarParamKind.None;
+                if (_parameters != null)
+                {
+                    for (int i = 0; i < _parameters.Count; i++)
+                    {
+                        var param = _parameters[i];
+                        var token = param.EqualOrTripleDotToken;
+                        if (token != null)
+                        {
+                            if (token.TokenType == TokenType.TripleDot)
+                            {
+                                _requiredParameterCount--;
+                                _varParamKind = ScriptVarParamKind.LastParameter;
+                            }
+
+                            if (token.TokenType == TokenType.Equal)
+                            {
+                                _requiredParameterCount--;
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         public ScriptToken CloseParen
@@ -157,8 +193,8 @@ namespace Scriban.Syntax
                 {
                     for (var i = 0; i < Parameters.Count; i++)
                     {
-                        var arg = Parameters[i];
-                        context.SetValue(arg, arguments[i]);
+                        var param = Parameters[i];
+                        context.SetValue(param.Name, arguments[i]);
                     }
                 }
 
@@ -176,18 +212,26 @@ namespace Scriban.Syntax
             }
         }
 
-        public int RequiredParameterCount => Parameters?.Count ?? 0;
+        public int RequiredParameterCount => _requiredParameterCount;
 
         public int ParameterCount => Parameters?.Count ?? 0;
 
-        public bool HasVariableParams => Parameters == null;
+        public ScriptVarParamKind VarParamKind => _varParamKind;
 
         public Type ReturnType => _hasReturnType ? typeof(object) : typeof(void);
 
         public ScriptParameterInfo GetParameterInfo(int index)
         {
             if (Parameters == null) return new ScriptParameterInfo(typeof(object), string.Empty);
-            return new ScriptParameterInfo(typeof(object), Parameters[index].Name);
+            var parameterCount = ParameterCount;
+            if (index > parameterCount - 1)
+            {
+                index = parameterCount - 1;
+            }
+            var param = Parameters[index];
+            var name = param.Name.Name;
+            var defaultValue = param.DefaultValue?.Value;
+            return defaultValue != null ? new ScriptParameterInfo(typeof(object), name, defaultValue) : new ScriptParameterInfo(typeof(object), name);
         }
 
         /// <summary>
