@@ -1,7 +1,11 @@
 # Changelog
 
+## 3.0.0-alpha.8 (7 Aug 2020)
+- Add support for custom functions with optional and variable parameters (e.g `func f(x, y = 2, z...); end;`)
+- Add support for safe dot expression (e.g `target?.member1?.sub_member1`)
+
 ## 3.0.0-alpha.6 (31 Jul 2020)
-- Add support for conditional ternary epxression (e.g `condition ? thenValue : elseValue`)
+- Add support for conditional ternary expression (e.g `condition ? thenValue : elseValue`)
 
 ## 3.0.0-alpha.4 (25 Jul 2020)
 - Allow to pass regular arguments to function calls in-between named arguments
