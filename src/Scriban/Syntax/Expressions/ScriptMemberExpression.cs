@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using Scriban.Helpers;
+using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
@@ -62,7 +63,7 @@ namespace Scriban.Syntax
             // In case TemplateContext.EnableRelaxedMemberAccess
             if (targetObject == null)
             {
-                if (context.EnableRelaxedTargetAccess)
+                if (context.EnableRelaxedTargetAccess || DotToken.TokenType == TokenType.QuestionDot)
                 {
                     return null;
                 }

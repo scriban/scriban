@@ -205,15 +205,12 @@ namespace Scriban.Parsing
                     }
 
                     // Parse Member expression are expected to be followed only by an identifier
-                    if (Current.Type == TokenType.Dot)
+                    if (Current.Type == TokenType.Dot || (!_isLiquid && Current.Type == TokenType.QuestionDot))
                     {
                         var nextToken = PeekToken();
                         if (nextToken.Type == TokenType.Identifier)
                         {
-                            var dotToken = ScriptToken.Dot();
-                            Open(dotToken);
-                            NextToken(); // Skip .
-                            Close(dotToken);
+                            var dotToken = ParseToken(Current.Type);
 
                             if (GetAsText(Current) == "empty" && PeekToken().Type == TokenType.Question)
                             {
@@ -293,7 +290,7 @@ namespace Scriban.Parsing
 
                         var namedArgument = Open<ScriptNamedArgument>();
                         namedArgument.Name = (ScriptVariable) leftOperand;
-                        namedArgument.ColonToken = ParseToken();
+                        namedArgument.ColonToken = ParseToken(TokenType.Colon);
                         namedArgument.Value = ExpectAndParseExpression(parentNode);
                         Close(namedArgument);
                         leftOperand = namedArgument;
@@ -309,7 +306,7 @@ namespace Scriban.Parsing
                                 LogError(leftOperand, $"Creating a function is only allowed for a top level assignment");
                             }
 
-                            declaration.EqualToken = ParseToken(); // eat equal token
+                            declaration.EqualToken = ParseToken(TokenType.Equal); // eat equal token
                             declaration.Body = ParseExpressionStatement();
                             declaration.Span.End = declaration.Body.Span.End;
                             leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
@@ -412,7 +409,7 @@ namespace Scriban.Parsing
 
                             var binaryArgument = Open<ScriptArgumentBinary>();
                             binaryArgument.Operator = binaryOperatorType;
-                            binaryArgument.OperatorToken = ParseToken();
+                            binaryArgument.OperatorToken = ParseToken(Current.Type);
                             Close(binaryArgument);
 
                             functionCall.AddArgument(binaryArgument);
@@ -430,7 +427,7 @@ namespace Scriban.Parsing
                         binaryExpression.Operator = binaryOperatorType;
 
                         // Parse the operator
-                        binaryExpression.OperatorToken = ParseToken();
+                        binaryExpression.OperatorToken = ParseToken(Current.Type);
 
                         // Special case for liquid, we revert the verbatim to the original scriban operator
                         if (_isLiquid && binaryOperatorType != ScriptBinaryOperator.Custom)
@@ -607,7 +604,7 @@ namespace Scriban.Parsing
                             {
                                 // This is an explicit call
                                 functionCall.ExplicitCall = true;
-                                functionCall.OpenParent = ParseToken();
+                                functionCall.OpenParent = ParseToken(TokenType.OpenParen);
 
                                 bool isFirst = true;
                                 while (true)
@@ -616,7 +613,7 @@ namespace Scriban.Parsing
                                     // Or closing parent (and we exit the loop)
                                     if (Current.Type == TokenType.CloseParen)
                                     {
-                                        functionCall.CloseParen = ParseToken();
+                                        functionCall.CloseParen = ParseToken(TokenType.CloseParen);
                                         break;
                                     }
 
@@ -684,7 +681,7 @@ namespace Scriban.Parsing
                         var pipeCall = Open<ScriptPipeCall>();
                         pipeCall.From = leftOperand;
 
-                        pipeCall.PipeToken = ParseToken(); // skip | or |>
+                        pipeCall.PipeToken = ParseToken(Current.Type); // skip | or |>
 
                         // unit test: 310-func-pipe-error1.txt
                         pipeCall.To = ExpectAndParseExpression(pipeCall, ref hasAnonymousFunction);
@@ -912,10 +909,15 @@ namespace Scriban.Parsing
             return Close(expression);
         }
 
-        private ScriptToken ParseToken()
+        private ScriptToken ParseToken(TokenType tokenType)
         {
             var verbatim = Open<ScriptToken>();
-            verbatim.Value = GetAsText(Current);
+            if (Current.Type != tokenType)
+            {
+                LogError(CurrentSpan, $"Unexpected token found `{GetAsText(Current)}` while expecting `{tokenType.ToText()}`.");
+            }
+            verbatim.TokenType = Current.Type;
+            verbatim.Value = tokenType.ToText();
             NextToken();
             return Close(verbatim);
         }
@@ -955,7 +957,7 @@ namespace Scriban.Parsing
             // Parse the operator as verbatim text
             var unaryTokenType = Current.Type;
 
-            unaryExpression.OperatorToken = ParseToken();
+            unaryExpression.OperatorToken = ParseToken(Current.Type);
             // Else we parse standard unary operators
             switch (unaryTokenType)
             {

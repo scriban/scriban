@@ -202,7 +202,7 @@ namespace Scriban.Parsing
             // If we have parenthesis, this is a function with explicit parameters
             if (Current.Type == TokenType.OpenParen)
             {
-                scriptFunction.OpenParen = ParseToken();
+                scriptFunction.OpenParen = ParseToken(TokenType.OpenParen);
                 var parameters = new ScriptList<ScriptParameter>();
                 bool hasTripleDot = false;
                 bool hasOptionals = false;
@@ -214,7 +214,7 @@ namespace Scriban.Parsing
                     // Or closing parent (and we exit the loop)
                     if (Current.Type == TokenType.CloseParen)
                     {
-                        scriptFunction.CloseParen = ParseToken();
+                        scriptFunction.CloseParen = ParseToken(TokenType.CloseParen);
                         scriptFunction.Span.End = scriptFunction.CloseParen.Span.End;
                         break;
                     }
