@@ -1,5 +1,8 @@
 # Changelog
 
+## 2.1.4 (16 Aug 2020)
+- Fix issue if/else returns null (#251)
+
 ## 2.1.3 (5 Jun 2020)
 - Fix comparison != with null (#189)
 - Fix flow state after a return in a template to allow to reuse the same TemplateContext (#182)
