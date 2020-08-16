@@ -34,6 +34,33 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void TestScribanIfElseFunction()
+        {
+            var template = Template.Parse(@"
+    func testIfElse
+        if $0 < 0
+            ret 1
+        else
+            ret 0
+        end
+        ret -1
+    end
+    testIfElse testValue
+    ", lexerOptions: new LexerOptions { KeepTrivia = false, Mode = ScriptMode.ScriptOnly });
+            var templateContext = new TemplateContext
+            {
+                LoopLimit = int.MaxValue,
+            };
+
+            templateContext.BuiltinObject.SetValue("testValue", -1, true);
+            var result = template.Evaluate(templateContext);
+            Assert.AreEqual(1, result);
+            templateContext.BuiltinObject.SetValue("testValue", 1, true);
+            result = template.Evaluate(templateContext);
+            Assert.AreEqual(0, result); // returns null
+        }
+
+        [Test]
         public void TestRoundtrip1()
         {
             var text = "This is a text {{ code | pipe a b c | a + b }} and a text";
