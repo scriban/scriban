@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 namespace Scriban.Syntax
 {
@@ -12,8 +12,7 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            context.Evaluate(Body);
-            return context.Evaluate(Else);
+            return Body != null ? context.Evaluate(Body) : context.Evaluate(Else);
         }
 
         public override void Write(TemplateRewriterContext context)
