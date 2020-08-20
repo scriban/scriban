@@ -30,7 +30,7 @@ namespace Scriban
         {
             if (scriptObject == null) throw new ArgumentNullException(nameof(scriptObject));
             _globalStores.Push(scriptObject);
-            PushLocalContext();
+            PushLocal();
         }
 
         /// <summary>
@@ -45,7 +45,7 @@ namespace Scriban
                 throw new InvalidOperationException("Unexpected PopGlobal() not matching a PushGlobal");
             }
             var store = _globalStores.Pop();
-            PopLocalContext();
+            PopLocal();
             return store;
         }
 
@@ -221,16 +221,6 @@ namespace Scriban
                 }
             }
 
-            // In scientific, we always resolve to local storage first
-            if (UseScientific && _currentLocalContext.LocalObject != null)
-            {
-                var local = _currentLocalContext.LocalObject;
-                if (local.TryGetValue(this, variable.Span, variable.Name, out value))
-                {
-                    return value;
-                }
-            }
-
             {
                 var count = _globalStores.Count;
                 var items = _globalStores.Items;
@@ -265,7 +255,7 @@ namespace Scriban
             {
                 case ScriptVariableScope.Global:
                     // In scientific we always resolve to local storage first
-                    IScriptObject storeWithVariable = UseScientific && _currentLocalContext.LocalObject != null ? _currentLocalContext.LocalObject : null;
+                    IScriptObject storeWithVariable = null;
 
                     var name = variable.Name;
                     int lastStoreIndex = _globalStores.Count - 1;
@@ -344,11 +334,6 @@ namespace Scriban
                         yield return loopItems[i];
                     }
 
-                    // In scientific, we always resolve to local storage first
-                    if (UseScientific && _currentLocalContext.LocalObject != null)
-                    {
-                        yield return _currentLocalContext.LocalObject;
-                    }
                     for (int i = _globalStores.Count - 1; i >= 0; i--)
                     {
                             yield return _globalStores.Items[i];

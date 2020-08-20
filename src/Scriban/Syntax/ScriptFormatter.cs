@@ -228,7 +228,16 @@ namespace Scriban.Syntax
             ScriptFunction newFunction;
             if (_context != null)
             {
-                _context.PushLocal();
+                var hasParams = node.HasParameters;
+
+                if (hasParams)
+                {
+                    _context.PushGlobal(new ScriptObject());
+                }
+                else
+                {
+                    _context.PushLocal();
+                }
 
                 try
                 {
@@ -236,10 +245,11 @@ namespace Scriban.Syntax
 
                     if (node.HasParameters)
                     {
+                        var glob = _context.CurrentGlobal;
                         for (var i = 0; i < node.Parameters.Count; i++)
                         {
                             var arg = node.Parameters[i];
-                            _context.SetValue(arg.Name, string.Empty);
+                            glob.SetValue(arg.Name.Name, string.Empty, false);
                         }
                     }
 
@@ -247,7 +257,14 @@ namespace Scriban.Syntax
                 }
                 finally
                 {
-                    _context.PopLocal();
+                    if (hasParams)
+                    {
+                        _context.PopGlobal();
+                    }
+                    else
+                    {
+                        _context.PopLocal();
+                    }
                 }
             }
             else

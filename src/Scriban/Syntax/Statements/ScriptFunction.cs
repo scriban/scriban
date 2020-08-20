@@ -179,7 +179,15 @@ namespace Scriban.Syntax
         }
         public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
-            context.PushLocal();
+            bool hasParams = HasParameters;
+            if (hasParams)
+            {
+                context.PushGlobal(new ScriptObject());
+            }
+            else
+            {
+                context.PushLocal();
+            }
             try
             {
                 if (NameOrDoToken is ScriptVariableLocal localVariable)
@@ -189,12 +197,13 @@ namespace Scriban.Syntax
 
                 context.SetValue(ScriptVariable.Arguments, arguments, true);
 
-                if (HasParameters)
+                if (hasParams)
                 {
+                    var glob = context.CurrentGlobal;
                     for (var i = 0; i < Parameters.Count; i++)
                     {
                         var param = Parameters[i];
-                        context.SetValue(param.Name, arguments[i]);
+                        glob.SetValue(param.Name.Name, arguments[i], false);
                     }
                 }
 
@@ -208,7 +217,14 @@ namespace Scriban.Syntax
             }
             finally
             {
-                context.PopLocal();
+                if (hasParams)
+                {
+                    context.PopGlobal();
+                }
+                else
+                {
+                    context.PopLocal();
+                }
             }
         }
 
