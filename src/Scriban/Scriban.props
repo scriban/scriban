@@ -7,7 +7,7 @@
     <VersionPrefix>3.0.0</VersionPrefix>
     <LangVersion>8.0</LangVersion>
     <VersionSuffix>alpha</VersionSuffix>
-    <BuildNumber>8</BuildNumber>
+    <BuildNumber>9</BuildNumber>
     <VersionSuffix Condition="'$(VersionSuffix)' != '' AND '$(BuildNumber)' != ''">$(VersionSuffix).$(BuildNumber)</VersionSuffix>
     <Authors>Alexandre Mutel</Authors>
     <TargetFramework>netstandard2.0</TargetFramework>

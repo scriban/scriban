@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0-alpha.9 (20 Aug 2020)
+- Fix global scope variable for function with parameters
+
 ## 3.0.0-alpha.8 (7 Aug 2020)
 - Add support for custom functions with optional and variable parameters (e.g `func f(x, y = 2, z...); end;`)
 - Add support for safe dot expression (e.g `target?.member1?.sub_member1`)
