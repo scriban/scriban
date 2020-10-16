@@ -706,12 +706,13 @@ A conditional expression produces a boolean by comparing a left and right value.
 
 They work with both `numbers`, `strings` and datetimes.
 
-You can combine conditionnal expressions with `&&` (and operator) and `||` (or operator)
+You can combine conditional expressions with `&&` (and operator) and `||` (or operator).
+Unlike in `javascript` it always returns `boolean` and never `<left>` or `<right>`.
 
 |Operator            | Description
 |--------------------|------------
-| `<left> && <right>` | Is left true and right true? 
-| `<left> || <right>` | Is left true or right true?
+| `<left> && <right>` | Is left true and right true?
+| `<left> \|\| <right>` | Is left true or right true?
 
 [:top:](#language)
 ### 8.6 Unary expressions
