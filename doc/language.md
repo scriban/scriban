@@ -381,6 +381,7 @@ b.x
 1
 ```
 
+[:top:](#language)
 ### 4.2 The special variable `empty`
 
 The `empty` variable represents simply an empty object. It is mainly relevant to be compatible with liquid, by providing a way to compare an object with the `empty` object to check if it is empty or not:
@@ -544,6 +545,7 @@ a.x + a[0]
 yes5
 ```
 
+[:top:](#language)
 ### 6.2 The special `size` property
 
 Arrays have a `size` property that can be used to query the number of elements in the array:
@@ -976,7 +978,7 @@ Like the `if` statement, the `expression` is evaluated to a boolean.
 
 #### `tablerow <variable> in <expression> ... end`
 
-This function generates HTML rows compatible with an HTML table. Must be wrapped in an opening <table> and closing </table> HTML tags.
+This function generates HTML rows compatible with an HTML table. Must be wrapped in an opening `<table>` and closing `</table>` HTML tags.
 
 This statement is mainly for compatibility reason with the liquid `tablerow` tag.
 It has overall the same syntax as a `for` statement (supporting the same parameters).
