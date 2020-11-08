@@ -25,9 +25,6 @@ jobs:
       with:
         dotnet-version: 3.0.100
 
-    - name: Add coveralls.net
-      run: dotnet tool install coveralls.net --version 1.0.0 --tool-path tools
-
     - name: Build & test (Release)
       run: dotnet test src -c Release
 
