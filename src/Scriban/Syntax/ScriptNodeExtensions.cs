@@ -117,9 +117,8 @@ namespace Scriban.Syntax
         public static void MoveLeadingTriviasTo<T>(this ScriptNode node, T destinationNode) where T : ScriptNode, IScriptTerminal
         {
             var firstTerminal = (IScriptTerminal)node.FindFirstTerminal();
-            if (firstTerminal == null) throw new InvalidOperationException("No terminal found");
 
-            var trivias = firstTerminal.Trivias;
+            var trivias = firstTerminal?.Trivias;
             if (trivias != null)
             {
                 var before = trivias.Before;
@@ -134,9 +133,8 @@ namespace Scriban.Syntax
         public static void MoveTrailingTriviasTo<T>(this ScriptNode node, T destinationNode, bool before) where T : ScriptNode, IScriptTerminal
         {
             var lastTerminal = (IScriptTerminal)node.FindLastTerminal();
-            if (lastTerminal == null) throw new InvalidOperationException("No terminal found");
 
-            var trivias = lastTerminal.Trivias;
+            var trivias = lastTerminal?.Trivias;
             if (trivias != null)
             {
                 var after = trivias.After;
