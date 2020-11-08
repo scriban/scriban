@@ -176,6 +176,11 @@ namespace Scriban.Syntax
                 printer.Write(EqualToken);
                 printer.Write(Body);
             }
+
+            if (!IsAnonymous)
+            {
+                printer.ExpectEos();
+            }
         }
         public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {

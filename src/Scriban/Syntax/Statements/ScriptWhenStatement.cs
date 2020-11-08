@@ -70,7 +70,7 @@ namespace Scriban.Syntax
             printer.Write(WhenKeyword).ExpectSpace();
             printer.WriteListWithCommas(Values);
             printer.ExpectEos();
-            printer.Write(Body);
+            printer.Write(Body).ExpectEos();
             printer.Write(Next);
         }
     }

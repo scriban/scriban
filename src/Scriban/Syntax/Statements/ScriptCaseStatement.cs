@@ -56,7 +56,7 @@ namespace Scriban.Syntax
         {
             printer.Write(CaseKeyword).ExpectSpace();
             printer.Write(Value).ExpectEos();
-            printer.Write(Body);
+            printer.Write(Body).ExpectEos();
         }
     }
 }

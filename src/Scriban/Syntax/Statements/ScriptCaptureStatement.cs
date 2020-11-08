@@ -55,9 +55,8 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(CaptureKeyword).ExpectSpace();
-            printer.Write(Target);
-            printer.ExpectEos();
-            printer.Write(Body);
+            printer.Write(Target).ExpectEos();
+            printer.Write(Body).ExpectEos();
         }
     }
 }

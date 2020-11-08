@@ -224,7 +224,7 @@ namespace Scriban.Syntax
                 }
             }
             printer.ExpectEos();
-            printer.Write(Body);
+            printer.Write(Body).ExpectEos();
             printer.Write(Else);
         }
 

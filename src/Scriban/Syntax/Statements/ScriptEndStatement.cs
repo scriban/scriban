@@ -28,7 +28,7 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(EndKeyword).ExpectEos();
+            printer.Write(EndKeyword);
         }
     }
 }

@@ -1,0 +1,2 @@
+x = (do; ret 1; end) + (do; ret 2; end); x => {{ x = (do; ret 1; end) + (do; ret 2; end); x }}
+x = do; ret 1 + 2; end; x => {{ x = do; ret 1 + 2; end; x }}

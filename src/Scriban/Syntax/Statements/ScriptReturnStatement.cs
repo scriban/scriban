@@ -39,8 +39,7 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(RetKeyword).ExpectSpace();
-            printer.Write(Expression);
-            printer.ExpectEos();
+            printer.Write(Expression).ExpectEos();
         }
     }
 }

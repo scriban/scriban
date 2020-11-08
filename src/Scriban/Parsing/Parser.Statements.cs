@@ -16,7 +16,7 @@ namespace Scriban.Parsing
 {
     public partial class Parser
     {
-        private ScriptBlockStatement ParseBlockStatement(ScriptStatement parentStatement)
+        private ScriptBlockStatement ParseBlockStatement(ScriptStatement parentStatement, bool parseEndOfStatementAfterEnd = true)
         {
             Debug.Assert(!(parentStatement is ScriptBlockStatement));
 
@@ -29,7 +29,7 @@ namespace Scriban.Parsing
 
             ScriptStatement statement;
             bool hasEnd;
-            while (TryParseStatement(parentStatement, out statement, out hasEnd))
+            while (TryParseStatement(parentStatement, parseEndOfStatementAfterEnd, out statement, out hasEnd))
             {
                 // statement may be null if we have parsed an else continuation of a previous block
                 if (statement != null)
@@ -67,7 +67,7 @@ namespace Scriban.Parsing
             return Close(blockStatement);
         }
 
-        private bool TryParseStatement(ScriptStatement parent, out ScriptStatement statement, out bool hasEnd)
+        private bool TryParseStatement(ScriptStatement parent, bool parseEndOfStatementAfterEnd, out ScriptStatement statement, out bool hasEnd)
         {
             hasEnd = false;
             bool nextStatement = true;
@@ -161,7 +161,7 @@ namespace Scriban.Parsing
                                 }
                                 else
                                 {
-                                    ParseScribanStatement(identifier, parent, ref statement, ref hasEnd, ref nextStatement);
+                                    ParseScribanStatement(identifier, parent, parseEndOfStatementAfterEnd, ref statement, ref hasEnd, ref nextStatement);
                                 }
                                 break;
                             default:
@@ -307,9 +307,8 @@ namespace Scriban.Parsing
         private ScriptStatement ParseExpressionStatement()
         {
             var expressionStatement = Open<ScriptExpressionStatement>();
-            bool hasAnonymous;
 
-            var expression = TransformKeyword(ExpectAndParseExpressionAndAnonymous(expressionStatement, out hasAnonymous));
+            var expression = TransformKeyword(ExpectAndParseExpressionAndAnonymous(expressionStatement));
 
             // Special case, if the expression return should be converted back to a statement
             if (expression is ScriptExpressionAsStatement expressionAsStatement)
@@ -318,12 +317,7 @@ namespace Scriban.Parsing
             }
             expressionStatement.Expression = expression;
 
-            // In case of an anonymous, there was already an ExpectEndOfStatement issued for the function
-            // so we don't have to verify this here again
-            if (!hasAnonymous)
-            {
-                ExpectEndOfStatement();
-            }
+            ExpectEndOfStatement();
             return Close(expressionStatement);
         }
 

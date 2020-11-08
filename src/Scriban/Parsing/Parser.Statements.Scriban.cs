@@ -16,14 +16,14 @@ namespace Scriban.Parsing
     public partial class Parser
     {
 
-        private void ParseScribanStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
+        private void ParseScribanStatement(string identifier, ScriptStatement parent, bool parseEndOfStatementAfterEnd, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
             var startToken = Current;
             switch (identifier)
             {
                 case "end":
                     hasEnd = true;
-                    statement = ParseEndStatement();
+                    statement = ParseEndStatement(parseEndOfStatementAfterEnd);
                     break;
                 case "wrap":
                     CheckNotInCase(parent, startToken);
@@ -178,136 +178,154 @@ namespace Scriban.Parsing
             }
         }
 
-        private ScriptEndStatement ParseEndStatement()
+        private ScriptEndStatement ParseEndStatement(bool parseEndOfStatementAfterEnd)
         {
             var endStatement = Open<ScriptEndStatement>();
             ExpectAndParseKeywordTo(endStatement.EndKeyword);
-            ExpectEndOfStatement();
+            if (parseEndOfStatementAfterEnd)
+            {
+                ExpectEndOfStatement();
+            }
             return Close(endStatement);
         }
 
         private ScriptFunction ParseFunctionStatement(bool isAnonymous)
         {
             var scriptFunction = Open<ScriptFunction>();
-            if (isAnonymous)
-            {
-                scriptFunction.NameOrDoToken = ExpectAndParseKeywordTo(ScriptKeyword.Do());
-            }
-            else
-            {
-                scriptFunction.FuncToken = ExpectAndParseKeywordTo(ScriptKeyword.Func());
-                scriptFunction.NameOrDoToken = ExpectAndParseVariable(scriptFunction);
-            }
 
-            // If we have parenthesis, this is a function with explicit parameters
-            if (Current.Type == TokenType.OpenParen)
+            var previousExpressionLevel = _expressionLevel;
+            try
             {
-                scriptFunction.OpenParen = ParseToken(TokenType.OpenParen);
-                var parameters = new ScriptList<ScriptParameter>();
-                bool hasTripleDot = false;
-                bool hasOptionals = false;
+                // Reset expression level when parsing
+                _expressionLevel = 0;
 
-                bool isFirst = true;
-                while (true)
+                if (isAnonymous)
                 {
-                    // Parse any required comma (before each new non-first argument)
-                    // Or closing parent (and we exit the loop)
-                    if (Current.Type == TokenType.CloseParen)
-                    {
-                        scriptFunction.CloseParen = ParseToken(TokenType.CloseParen);
-                        scriptFunction.Span.End = scriptFunction.CloseParen.Span.End;
-                        break;
-                    }
+                    scriptFunction.NameOrDoToken = ExpectAndParseKeywordTo(ScriptKeyword.Do());
+                }
+                else
+                {
+                    scriptFunction.FuncToken = ExpectAndParseKeywordTo(ScriptKeyword.Func());
+                    scriptFunction.NameOrDoToken = ExpectAndParseVariable(scriptFunction);
+                }
 
-                    if (!isFirst)
-                    {
-                        if (Current.Type == TokenType.Comma)
-                        {
-                            PushTokenToTrivia();
-                            NextToken();
-                            FlushTriviasToLastTerminal();
-                        }
-                        else
-                        {
-                            LogError(Current, "Expecting a comma to separate arguments in a function call.");
-                        }
-                    }
-                    isFirst = false;
+                // If we have parenthesis, this is a function with explicit parameters
+                if (Current.Type == TokenType.OpenParen)
+                {
+                    scriptFunction.OpenParen = ParseToken(TokenType.OpenParen);
+                    var parameters = new ScriptList<ScriptParameter>();
+                    bool hasTripleDot = false;
+                    bool hasOptionals = false;
 
-                    // Else we expect an expression
-                    if (IsStartOfExpression())
+                    bool isFirst = true;
+                    while (true)
                     {
-                        var parameter = Open<ScriptParameter>();
-                        var arg = ExpectAndParseVariable(scriptFunction);
-                        if (!(arg is ScriptVariableGlobal))
+                        // Parse any required comma (before each new non-first argument)
+                        // Or closing parent (and we exit the loop)
+                        if (Current.Type == TokenType.CloseParen)
                         {
-                            LogError(arg.Span, "Expecting only a simple name parameter for a function");
+                            scriptFunction.CloseParen = ParseToken(TokenType.CloseParen);
+                            scriptFunction.Span.End = scriptFunction.CloseParen.Span.End;
+                            break;
                         }
 
-                        parameter.Name = arg;
-
-                        if (Current.Type == TokenType.Equal)
+                        if (!isFirst)
                         {
-                            if (hasTripleDot)
+                            if (Current.Type == TokenType.Comma)
                             {
-                                LogError(arg.Span, "Cannot declare an optional parameter after a variable parameter (`...`).");
-                            }
-                            hasOptionals = true;
-                            parameter.EqualOrTripleDotToken = ScriptToken.Equal();
-                            ExpectAndParseTokenTo(parameter.EqualOrTripleDotToken, TokenType.Equal);
-
-                            parameter.Span.End = parameter.EqualOrTripleDotToken.Span.End;
-
-                            var defaultValue = ExpectAndParseExpression(parameter);
-                            if (defaultValue is ScriptLiteral literal)
-                            {
-                                parameter.DefaultValue = literal;
-                                parameter.Span.End = literal.Span.End;
+                                PushTokenToTrivia();
+                                NextToken();
+                                FlushTriviasToLastTerminal();
                             }
                             else
                             {
-                                LogError(arg.Span, "Expecting only a literal for an optional parameter value.");
+                                LogError(Current, "Expecting a comma to separate arguments in a function call.");
                             }
                         }
-                        else if (Current.Type == TokenType.TripleDot)
+
+                        isFirst = false;
+
+                        // Else we expect an expression
+                        if (IsStartOfExpression())
                         {
-                            if (hasTripleDot)
+                            var parameter = Open<ScriptParameter>();
+                            var arg = ExpectAndParseVariable(scriptFunction);
+                            if (!(arg is ScriptVariableGlobal))
                             {
-                                LogError(arg.Span, "Cannot declare multiple variable parameters.");
+                                LogError(arg.Span, "Expecting only a simple name parameter for a function");
                             }
 
-                            hasTripleDot = true;
-                            hasOptionals = true;
-                            parameter.EqualOrTripleDotToken = ScriptToken.TripleDot();
-                            ExpectAndParseTokenTo(parameter.EqualOrTripleDotToken, TokenType.TripleDot);
-                            parameter.Span.End = parameter.EqualOrTripleDotToken.Span.End;
+                            parameter.Name = arg;
+
+                            if (Current.Type == TokenType.Equal)
+                            {
+                                if (hasTripleDot)
+                                {
+                                    LogError(arg.Span, "Cannot declare an optional parameter after a variable parameter (`...`).");
+                                }
+
+                                hasOptionals = true;
+                                parameter.EqualOrTripleDotToken = ScriptToken.Equal();
+                                ExpectAndParseTokenTo(parameter.EqualOrTripleDotToken, TokenType.Equal);
+
+                                parameter.Span.End = parameter.EqualOrTripleDotToken.Span.End;
+
+                                var defaultValue = ExpectAndParseExpression(parameter);
+                                if (defaultValue is ScriptLiteral literal)
+                                {
+                                    parameter.DefaultValue = literal;
+                                    parameter.Span.End = literal.Span.End;
+                                }
+                                else
+                                {
+                                    LogError(arg.Span, "Expecting only a literal for an optional parameter value.");
+                                }
+                            }
+                            else if (Current.Type == TokenType.TripleDot)
+                            {
+                                if (hasTripleDot)
+                                {
+                                    LogError(arg.Span, "Cannot declare multiple variable parameters.");
+                                }
+
+                                hasTripleDot = true;
+                                hasOptionals = true;
+                                parameter.EqualOrTripleDotToken = ScriptToken.TripleDot();
+                                ExpectAndParseTokenTo(parameter.EqualOrTripleDotToken, TokenType.TripleDot);
+                                parameter.Span.End = parameter.EqualOrTripleDotToken.Span.End;
+                            }
+                            else if (hasOptionals)
+                            {
+                                LogError(arg.Span, "Cannot declare a normal parameter after an optional parameter.");
+                            }
+
+                            parameters.Add(parameter);
+                            scriptFunction.Span.End = parameter.Span.End;
                         }
-                        else if (hasOptionals)
+                        else
                         {
-                            LogError(arg.Span, "Cannot declare a normal parameter after an optional parameter.");
+                            LogError(Current, "Expecting an expression for argument function calls instead of this token.");
+                            break;
                         }
-
-                        parameters.Add(parameter);
-                        scriptFunction.Span.End = parameter.Span.End;
                     }
-                    else
+
+                    if (scriptFunction.CloseParen == null)
                     {
-                        LogError(Current, "Expecting an expression for argument function calls instead of this token.");
-                        break;
+                        LogError(Current, "Expecting a closing parenthesis for a function call.");
                     }
+
+                    // Setup parameters once they have been all parsed
+                    scriptFunction.Parameters = parameters;
                 }
 
-                if (scriptFunction.CloseParen == null)
-                {
-                    LogError(Current, "Expecting a closing parenthesis for a function call.");
-                }
-
-                // Setup parameters once they have been all parsed
-                scriptFunction.Parameters = parameters;
+                ExpectEndOfStatement();
+                // If the function is anonymous we don't expect an EOS after the `end`
+                scriptFunction.Body = ParseBlockStatement(scriptFunction, !isAnonymous);
             }
-
-            ExpectEndOfStatement();
-            scriptFunction.Body = ParseBlockStatement(scriptFunction);
+            finally
+            {
+                _expressionLevel = previousExpressionLevel;
+            }
 
             return Close(scriptFunction);
         }

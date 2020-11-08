@@ -62,7 +62,7 @@ namespace Scriban.Syntax
             printer.Write(WithKeyword).ExpectSpace();
             printer.Write(Name);
             printer.ExpectEos();
-            printer.Write(Body);
+            printer.Write(Body).ExpectEos();
         }
     }
 }
