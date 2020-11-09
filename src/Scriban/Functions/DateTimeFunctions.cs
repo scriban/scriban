@@ -426,7 +426,13 @@ namespace Scriban.Functions
         {
             // This function is very specific, as it is calling a member function of this instance
             // in order to retrieve the `date.format`
-            this.Import("to_string", new Func<TemplateContext, DateTime?, string, string>((context, date, pattern) => ToString(date, pattern, context.CurrentCulture)));
+            this.Import("to_string", new Func<TemplateContext, DateTime?, string, string, string>(ToStringTrampoline));
+        }
+
+        private string ToStringTrampoline(TemplateContext context, DateTime? date, string pattern, string culture = null)
+        {
+            var cultureObject = culture != null ? CultureInfo.GetCultureInfo(culture) : null;
+            return ToString(date, pattern, cultureObject ?? context.CurrentCulture);
         }
     }
 }
