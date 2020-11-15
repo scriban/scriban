@@ -40,7 +40,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// The evaluates a string as a scriban template or evaluate the passed function or return the passed value.
+        /// The evaluates a string as a scriban expression or evaluate the passed function or return the passed value.
         /// </summary>
         /// <param name="context">The template context</param>
         /// <param name="span">The source span</param>
@@ -48,10 +48,10 @@ namespace Scriban.Functions
         /// <returns>The evaluation of the input value.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "This is a template text {{ 1 + 2 }}" | object.eval }}
+        /// {{ "1 + 2" | object.eval }}
         /// ```
         /// ```html
-        /// This is a template text 3
+        /// 3
         /// ```
         /// </remarks>
         public static object Eval(TemplateContext context, SourceSpan span, object value)
@@ -62,7 +62,47 @@ namespace Scriban.Functions
             {
                 try
                 {
-                    var template = Template.Parse(templateStr);
+                    var template = Template.Parse(templateStr, lexerOptions: new LexerOptions() { Lang = context.Language, Mode = ScriptMode.ScriptOnly });
+                    return context.Evaluate(template.Page);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException(ex.Message, nameof(value));
+                }
+            }
+
+            if (value is IScriptCustomFunction function)
+            {
+                return ScriptFunctionCall.Call(context, context.CurrentNode, function, false, null);
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// The evaluates a string as a scriban template or evaluate the passed function or return the passed value.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value, either a scriban template in a string, or an alias function or directly a value.</param>
+        /// <returns>The evaluation of the input value.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "This is a template text {{ 1 + 2 }}" | object.eval_template }}
+        /// ```
+        /// ```html
+        /// This is a template text 3
+        /// ```
+        /// </remarks>
+        public static object EvalTemplate(TemplateContext context, SourceSpan span, object value)
+        {
+            if (value == null) return null;
+
+            if (value is string templateStr)
+            {
+                try
+                {
+                    var template = Template.Parse(templateStr, lexerOptions: new LexerOptions() { Lang = context.Language, Mode = ScriptMode.Default });
                     var output = new StringBuilderOutput();
                     context.PushOutput(output);
                     try

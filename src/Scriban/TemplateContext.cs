@@ -124,6 +124,8 @@ namespace Scriban
 
             NewLine = Environment.NewLine;
 
+            Language = ScriptLang.Default;
+
             _outputs = new FastStack<IScriptOutput>(4);
             _output = new StringBuilderOutput();
             _outputs.Push(_output);
@@ -192,6 +194,11 @@ namespace Scriban
         /// String used for new-line.
         /// </summary>
         public string NewLine { get; set; }
+
+        /// <summary>
+        /// Gets or sets the default scripting language - used for example by <see cref="ObjectFunctions.Eval"/>.
+        /// </summary>
+        public ScriptLang Language { get; set; }
 
         /// <summary>
         /// Gets or sets the cancellation token used for async evaluation
@@ -1042,6 +1049,8 @@ namespace Scriban
     {
         public LiquidTemplateContext() : base(new LiquidBuiltinsFunctions())
         {
+            Language = ScriptLang.Liquid;
+
             // In liquid, if we have a break/continue outside a loop, we return from the current script
             EnableBreakAndContinueAsReturnOutsideLoop = true;
             EnableRelaxedTargetAccess = true;

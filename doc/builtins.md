@@ -1508,6 +1508,7 @@ Object functions available through the builtin object 'object'.
 
 - [`object.default`](#objectdefault)
 - [`object.eval`](#objecteval)
+- [`object.eval_template`](#objecteval_template)
 - [`object.format`](#objectformat)
 - [`object.has_key`](#objecthas_key)
 - [`object.has_value`](#objecthas_value)
@@ -1556,6 +1557,36 @@ object.eval <value>
 
 #### Description
 
+The evaluates a string as a scriban expression or evaluate the passed function or return the passed value.
+
+#### Arguments
+
+- `value`: The input value, either a scriban template in a string, or an alias function or directly a value.
+
+#### Returns
+
+The evaluation of the input value.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "1 + 2" | object.eval }}
+```
+> **output**
+```html
+3
+```
+
+[:top:](#builtins)
+### `object.eval_template`
+
+```
+object.eval_template <value>
+```
+
+#### Description
+
 The evaluates a string as a scriban template or evaluate the passed function or return the passed value.
 
 #### Arguments
@@ -1570,7 +1601,7 @@ The evaluation of the input value.
 
 > **input**
 ```scriban-html
-{{ "This is a template text {{ 1 + 2 }}" | object.eval }}
+{{ "This is a template text {{ 1 + 2 }}" | object.eval_template }}
 ```
 > **output**
 ```html

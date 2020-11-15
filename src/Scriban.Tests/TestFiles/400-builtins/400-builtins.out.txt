@@ -98,6 +98,7 @@ List of all the builtin <timespan> functions:
 List of all the builtin <object> functions:
  default
  eval
+ eval_template
  format
  has_key
  has_value
