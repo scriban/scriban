@@ -1,1 +1,1 @@
-text(1,10) : error : Invalid number of arguments `0` passed to `array.cycle` while expecting at least `1` arguments
+text(1,15) : error : Invalid number of arguments `0` passed to `array.cycle` while expecting `1` arguments

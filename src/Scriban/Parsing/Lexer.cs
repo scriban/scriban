@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections;
@@ -32,6 +32,7 @@ namespace Scriban.Parsing
         private readonly char _stripWhiteSpaceRestrictedSpecialChar;
         private const char RawEscapeSpecialChar = '%';
         private readonly Queue<Token> _pendingTokens;
+        private readonly TryMatchCustomTokenDelegate _tryMatchCustomToken;
 
         /// <summary>
         /// Lexer options.
@@ -58,6 +59,8 @@ namespace Scriban.Parsing
             }
             Options = localOptions;
 
+            _tryMatchCustomToken = Options.TryMatchCustomToken;
+
             _position = Options.StartPosition;
 
             if (_position.Offset > text.Length)
@@ -73,7 +76,7 @@ namespace Scriban.Parsing
 
             _isExpectingFrontMatter = Options.Mode == ScriptMode.FrontMatterOnly ||
                                      Options.Mode == ScriptMode.FrontMatterAndContent;
-            _isLiquid = Options.Mode == ScriptMode.Liquid;
+            _isLiquid = Options.Lang == ScriptLang.Liquid;
             _stripWhiteSpaceFullSpecialChar = '-';
             _stripWhiteSpaceRestrictedSpecialChar = '~';
         }
@@ -84,7 +87,7 @@ namespace Scriban.Parsing
         public string Text { get; }
 
         /// <summary>
-        /// 
+        ///
         /// </summary>
         public string SourcePath { get; private set; }
 
@@ -121,7 +124,7 @@ namespace Scriban.Parsing
                 }
 
                 // If we have errors or we are already at the end of the file, we don't continue
-                if (HasErrors || _token.Type == TokenType.Eof)
+                if (_token.Type == TokenType.Eof)
                 {
                     return false;
                 }
@@ -143,18 +146,13 @@ namespace Scriban.Parsing
 
                 if (Options.Mode != ScriptMode.ScriptOnly)
                 {
-                    bool hasEnter = false;
                     if (_blockType == BlockType.Raw)
                     {
                         TokenType whiteSpaceMode;
                         if (IsCodeEnterOrEscape(out whiteSpaceMode))
                         {
                             ReadCodeEnterOrEscape();
-                            hasEnter = true;
-                            if (_blockType == BlockType.Code || _blockType == BlockType.Raw)
-                            {
-                                return true;
-                            }
+                            return true;
                         }
                         else if (_isExpectingFrontMatter && TryParseFrontMatterMarker())
                         {
@@ -165,7 +163,7 @@ namespace Scriban.Parsing
                         // Else we have a BlockType.EscapeRaw, so we need to parse the raw block
                     }
 
-                    if (!hasEnter && _blockType != BlockType.Raw && IsCodeExit())
+                    if (_blockType != BlockType.Raw && IsCodeExit())
                     {
                         var wasInBlock = _blockType == BlockType.Code;
                         ReadCodeExitOrEscape();
@@ -334,7 +332,7 @@ namespace Scriban.Parsing
             {
                 _isLiquidTagBlock = true;
             }
-            NextChar(); // Skip {
+            NextChar(); // Skip { or %
 
             if (c == _stripWhiteSpaceFullSpecialChar || (!_isLiquid && c == _stripWhiteSpaceRestrictedSpecialChar))
             {
@@ -345,6 +343,7 @@ namespace Scriban.Parsing
             if (_escapeRawCharCount > 0)
             {
                 _blockType = BlockType.Escape;
+                _token = new Token(TokenType.EscapeEnter, start, end);
             }
             else
             {
@@ -371,6 +370,7 @@ namespace Scriban.Parsing
                 PeekSkipSpaces(ref offset);
                 if (TryMatchPeek("%}", offset, out offset))
                 {
+                    codeEnterEnd = new TextPosition(start.Offset + offset - 1, start.Line, start.Column + offset - 1);
                     start = new TextPosition(start.Offset + offset, start.Line, start.Column + offset);
                     // Reinitialize the position to the prior character
                     _position = new TextPosition(start.Offset - 1, start.Line, start.Column - 1);
@@ -379,6 +379,7 @@ namespace Scriban.Parsing
                     {
                         var end = _position;
                         NextChar();
+                        var codeExitStart = _position;
                         if (c == '{')
                         {
                             NextChar();
@@ -394,7 +395,6 @@ namespace Scriban.Parsing
                                 if (TryMatch(isComment ? "endcomment" : "endraw"))
                                 {
                                     SkipSpaces();
-                                    var codeExitStart = _position;
                                     if (c == '-')
                                     {
                                         NextChar();
@@ -409,15 +409,17 @@ namespace Scriban.Parsing
                                             _blockType = BlockType.Raw;
                                             if (isComment)
                                             {
-                                                // Convert a liquit comment into a Scriban multi-line {{ ## comment ## }}
+                                                // Convert a liquid comment into a Scriban multi-line {{ ## comment ## }}
                                                 _token = new Token(TokenType.CodeEnter, codeEnterStart, codeEnterEnd);
                                                 _pendingTokens.Enqueue(new Token(TokenType.CommentMulti, start, end));
                                                 _pendingTokens.Enqueue(new Token(TokenType.CodeExit, codeExitStart, codeExitEnd));
                                             }
                                             else
                                             {
-                                                _token = new Token(TokenType.Escape, start, end);
-                                                _pendingTokens.Enqueue(new Token(TokenType.EscapeCount1, end, end));
+                                                // Convert a liquid comment into a Scriban multi-line {{ ## comment ## }}
+                                                _token = new Token(TokenType.EscapeEnter, codeEnterStart, codeEnterEnd);
+                                                _pendingTokens.Enqueue(new Token(TokenType.Escape, start, end));
+                                                _pendingTokens.Enqueue(new Token(TokenType.EscapeExit, codeExitStart, codeExitEnd));
                                             }
 
                                             _isLiquidTagBlock = false;
@@ -555,7 +557,7 @@ namespace Scriban.Parsing
             if (_escapeRawCharCount > 0)
             {
                 // We limit the escape count to 9 levels (only for roundtrip mode)
-                _pendingTokens.Enqueue(new Token((TokenType)(TokenType.EscapeCount1 + Math.Min(_escapeRawCharCount - 1, 8)), start, end));
+                _pendingTokens.Enqueue(new Token(TokenType.EscapeExit, start, end));
                 _escapeRawCharCount = 0;
             }
             else
@@ -684,6 +686,13 @@ namespace Scriban.Parsing
         {
             bool hasTokens = true;
             var start = _position;
+
+            // Try match a custom token
+            if (TryMatchCustomToken(start))
+            {
+                return true;
+            }
+
             switch (c)
             {
                 case '\n':
@@ -721,11 +730,18 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '^':
-                    _token = new Token(TokenType.Caret, start, start);
                     NextChar();
+                    if (c == '^')
+                    {
+                        _token = new Token(TokenType.DoubleCaret, start, _position);
+                        NextChar();
+                        break;
+                    }
+
+                    _token = new Token(TokenType.Caret, start, start);
                     break;
                 case '*':
-                    _token = new Token(TokenType.Multiply, start, start);
+                    _token = new Token(TokenType.Asterisk, start, start);
                     NextChar();
                     break;
                 case '/':
@@ -747,7 +763,7 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '%':
-                    _token = new Token(TokenType.Modulus, start, start);
+                    _token = new Token(TokenType.Percent, start, start);
                     NextChar();
                     break;
                 case ',':
@@ -758,19 +774,26 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '&')
                     {
-                        _token = new Token(TokenType.And, start, _position);
+                        _token = new Token(TokenType.DoubleAmp, start, _position);
                         NextChar();
                         break;
                     }
 
                     // & is an invalid char alone
-                    _token = new Token(TokenType.Invalid, start, start);
+                    _token = new Token(TokenType.Amp, start, start);
                     break;
                 case '?':
                     NextChar();
                     if (c == '?')
                     {
-                        _token = new Token(TokenType.EmptyCoalescing, start, _position);
+                        _token = new Token(TokenType.DoubleQuestion, start, _position);
+                        NextChar();
+                        break;
+                    }
+
+                    if (c == '.')
+                    {
+                        _token = new Token(TokenType.QuestionDot, start, _position);
                         NextChar();
                         break;
                     }
@@ -781,11 +804,18 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '|')
                     {
-                        _token = new Token(TokenType.Or, start, _position);
+                        _token = new Token(TokenType.DoubleVerticalBar, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.Pipe, start, start);
+                    else if (c == '>')
+                    {
+                        _token = new Token(TokenType.PipeGreater, start, _position);
+                        NextChar();
+                        break;
+                    }
+
+                    _token = new Token(TokenType.VerticalBar, start, start);
                     break;
                 case '.':
                     NextChar();
@@ -800,6 +830,13 @@ namespace Scriban.Parsing
                             break;
                         }
 
+                        if (c == '.')
+                        {
+                            _token = new Token(TokenType.TripleDot, start, _position);
+                            NextChar();
+                            break;
+                        }
+
                         _token = new Token(TokenType.DoubleDot, start, index);
                         break;
                     }
@@ -810,18 +847,18 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareNotEqual, start, _position);
+                        _token = new Token(TokenType.ExclamationEqual, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.Not, start, start);
+                    _token = new Token(TokenType.Exclamation, start, start);
                     break;
 
                 case '=':
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareEqual, start, _position);
+                        _token = new Token(TokenType.DoubleEqual, start, _position);
                         NextChar();
                         break;
                     }
@@ -831,40 +868,40 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareLessOrEqual, start, _position);
+                        _token = new Token(TokenType.LessEqual, start, _position);
                         NextChar();
                         break;
                     }
                     if (c == '<')
                     {
-                        _token = new Token(TokenType.ShiftLeft, start, _position);
+                        _token = new Token(TokenType.DoubleLessThan, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.CompareLess, start, start);
+                    _token = new Token(TokenType.Less, start, start);
                     break;
                 case '>':
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareGreaterOrEqual, start, _position);
+                        _token = new Token(TokenType.GreaterEqual, start, _position);
                         NextChar();
                         break;
                     }
                     if (c == '>')
                     {
-                        _token = new Token(TokenType.ShiftRight, start, _position);
+                        _token = new Token(TokenType.DoubleGreaterThan, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.CompareGreater, start, start);
+                    _token = new Token(TokenType.Greater, start, start);
                     break;
                 case '(':
-                    _token = new Token(TokenType.OpenParent, _position, _position);
+                    _token = new Token(TokenType.OpenParen, _position, _position);
                     NextChar();
                     break;
                 case ')':
-                    _token = new Token(TokenType.CloseParent, _position, _position);
+                    _token = new Token(TokenType.CloseParen, _position, _position);
                     NextChar();
                     break;
                 case '[':
@@ -899,8 +936,9 @@ namespace Scriban.Parsing
                         else
                         {
                             // Else we have a close brace but it is invalid
-                            _token = new Token(TokenType.CloseBrace, _position, _position);
                             AddError("Unexpected } while no matching {", _position, _position);
+                            // Remove the previous error token to still output a valid token
+                            _token = new Token(TokenType.CloseBrace, _position, _position);
                             NextChar();
                         }
                     }
@@ -957,6 +995,40 @@ namespace Scriban.Parsing
             return hasTokens;
         }
 
+        private bool TryMatchCustomToken(TextPosition start)
+        {
+            if (_tryMatchCustomToken != null)
+            {
+                if (_tryMatchCustomToken(Text, _position, out var matchLength, out var matchTokenType))
+                {
+                    if (matchLength <= 0) throw new InvalidOperationException($"Invalid match length ({matchLength}) for custom token must be > 0");
+                    if (_position.Offset + matchLength > Text.Length) throw new InvalidOperationException($"Invalid match length ({matchLength}) out of range of the input text.");
+                    if (matchTokenType < TokenType.Custom && matchTokenType > TokenType.Custom9)
+                        throw new InvalidOperationException($"Invalid token type {matchTokenType}. Expecting between {nameof(TokenType)}.{TokenType.Custom} ... {nameof(TokenType)}.{TokenType.Custom9}.");
+
+                    TextPosition matchEnd = _position;
+                    while (matchLength > 0)
+                    {
+                        NextChar();
+
+                        if (_position.Line != start.Line)
+                        {
+                            throw new InvalidOperationException($"Invalid match, cannot match between new lines at {_position}");
+                        }
+
+                        matchEnd = _position;
+
+                        matchLength--;
+                    }
+
+                    _token = new Token(matchTokenType, start, matchEnd);
+
+                    return true;
+                }
+            }
+
+            return false;
+        }
 
         private bool ReadCodeLiquid()
         {
@@ -973,7 +1045,7 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '|':
-                    _token = new Token(TokenType.Pipe, start, start);
+                    _token = new Token(TokenType.VerticalBar, start, start);
                     NextChar();
                     break;
                 case '?':
@@ -996,7 +1068,7 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareNotEqual, start, _position);
+                        _token = new Token(TokenType.ExclamationEqual, start, _position);
                         NextChar();
                         break;
                     }
@@ -1007,7 +1079,7 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareEqual, start, _position);
+                        _token = new Token(TokenType.DoubleEqual, start, _position);
                         NextChar();
                         break;
                     }
@@ -1017,28 +1089,28 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareLessOrEqual, start, _position);
+                        _token = new Token(TokenType.LessEqual, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.CompareLess, start, start);
+                    _token = new Token(TokenType.Less, start, start);
                     break;
                 case '>':
                     NextChar();
                     if (c == '=')
                     {
-                        _token = new Token(TokenType.CompareGreaterOrEqual, start, _position);
+                        _token = new Token(TokenType.GreaterEqual, start, _position);
                         NextChar();
                         break;
                     }
-                    _token = new Token(TokenType.CompareGreater, start, start);
+                    _token = new Token(TokenType.Greater, start, start);
                     break;
                 case '(':
-                    _token = new Token(TokenType.OpenParent, _position, _position);
+                    _token = new Token(TokenType.OpenParen, _position, _position);
                     NextChar();
                     break;
                 case ')':
-                    _token = new Token(TokenType.CloseParent, _position, _position);
+                    _token = new Token(TokenType.CloseParen, _position, _position);
                     NextChar();
                     break;
                 case '[':
@@ -1180,23 +1252,46 @@ namespace Scriban.Parsing
         {
             var start = _position;
             var end = _position;
-            var hasDot = false;
+            var isFloat = false;
+
+            var isZero = c == '0';
+            NextChar();
+
+            if (isZero && c == 'x')
+            {
+                ReadHexa(start);
+                return;
+            }
+
+            if (isZero && c == 'b')
+            {
+                ReadBinary(start);
+                return;
+            }
 
             // Read first part
-            do
+            if (char.IsDigit(c) || c == '_')
             {
-                end = _position;
-                NextChar();
-            } while (char.IsDigit(c));
+                do
+                {
+                    end = _position;
+                    NextChar();
+                } while (char.IsDigit(c) || c == '_');
+            }
 
 
             // Read any number following
             if (c == '.')
             {
                 // If the next char is a '.' it means that we have a range iterator, so we don't touch it
-                if (PeekChar() != '.')
+                var nc = PeekChar();
+                // Only support . followed
+                // - by the postfix: 1.f 2.f
+                // - by a digit: 1.0
+                // - by an exponent 1.e10
+                if (nc != '.' && (IsNumberPostFix(nc) || char.IsDigit(nc) || !char.IsLetter(nc) || nc == 'e' || nc == 'E'))
                 {
-                    hasDot = true;
+                    isFloat = true;
                     end = _position;
                     NextChar();
                     while (char.IsDigit(c))
@@ -1230,7 +1325,89 @@ namespace Scriban.Parsing
                 }
             }
 
-            _token = new Token(hasDot ? TokenType.Float : TokenType.Integer, start, end);
+            if (!IsIdentifierLetter(PeekChar()) && IsNumberPostFix(c))
+            {
+                isFloat = true;
+                end = _position;
+                NextChar();
+            }
+
+            _token = new Token(isFloat ? TokenType.Float : TokenType.Integer, start, end);
+        }
+
+        private static bool IsNumberPostFix(char c)
+        {
+            return c == 'f' || c == 'F' || c == 'd' || c == 'D' || c == 'm' || c == 'M';
+        }
+
+        private void ReadHexa(TextPosition start)
+        {
+            var end = _position;
+            NextChar(); // skip x
+
+            bool hasHexa = false;
+            while (true)
+            {
+                if (CharHelper.IsHexa(c)) hasHexa = true;
+                else if (c != '_') break;
+                end = _position;
+                NextChar();
+            }
+
+            if (!IsIdentifierLetter(PeekChar()) && (c == 'u' || c == 'U'))
+            {
+                end = _position;
+                NextChar();
+            }
+
+            if (!hasHexa)
+            {
+                AddError($"Invalid hex number, expecting at least a hex digit [0-9a-fA-F] after 0x", start, end);
+            }
+            else
+            {
+                _token = new Token(TokenType.HexaInteger, start, end);
+            }
+        }
+
+        private void ReadBinary(TextPosition start)
+        {
+            var end = _position;
+            NextChar(); // skip b
+
+            // Read first part
+            bool hasBinary = false;
+            bool hasDotAlready = false;
+            while (true)
+            {
+                if (CharHelper.IsBinary(c)) hasBinary = true;
+                else if (c != '_') break;
+                end = _position;
+                NextChar();
+                if (c == '.')
+                {
+                    if (hasDotAlready) break;
+                    var nc = PeekChar();
+                    if (nc != '0' && nc != '1') break;
+                    hasDotAlready = true;
+                    NextChar();
+                }
+            }
+
+            if (!IsIdentifierLetter(PeekChar()) && (c == 'u' || c == 'U' || hasDotAlready && (c == 'f' || c == 'F' || c == 'd' || c == 'D')))
+            {
+                end = _position;
+                NextChar();
+            }
+
+            if (!hasBinary)
+            {
+                AddError($"Invalid binary number, expecting at least a binary digit 0 or 1 after 0b", start, end);
+            }
+            else
+            {
+                _token = new Token(TokenType.BinaryInteger, start, end);
+            }
         }
 
         private void ReadString()

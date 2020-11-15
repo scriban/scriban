@@ -1,4 +1,4 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 using System;
 using System.Globalization;
@@ -112,11 +112,7 @@ namespace Scriban.Tests
                         return $"\\u{(int) c:X};";
                 }
             }
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
             return c.ToString(CultureInfo.InvariantCulture);
-#else
-            return c.ToString();
-#endif
         }
     }
 }

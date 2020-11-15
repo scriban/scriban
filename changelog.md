@@ -1,7 +1,30 @@
 # Changelog
 
-## 2.1.4 (16 Aug 2020)
-- Fix issue if/else returns null (#251)
+## 3.0.0 (15 Nov 2020)
+- Final release of 3.0.0
+
+## 3.0.0-alpha.9 (20 Aug 2020)
+- Fix global scope variable for function with parameters
+
+## 3.0.0-alpha.8 (7 Aug 2020)
+- Add support for custom functions with optional and variable parameters (e.g `func f(x, y = 2, z...); end;`)
+- Add support for safe dot expression (e.g `target?.member1?.sub_member1`)
+
+## 3.0.0-alpha.6 (31 Jul 2020)
+- Add support for conditional ternary expression (e.g `condition ? thenValue : elseValue`)
+
+## 3.0.0-alpha.4 (25 Jul 2020)
+- Allow to pass regular arguments to function calls in-between named arguments
+
+## 3.0.0-alpha.3 (16 Jul 2020)
+- Improve TemplateContext.GetTypeName
+- Added upcase string filter to list of built-in Liquid functions
+
+## 3.0.0-alpha.2 (6 Jul 2020)
+-  Add object.eval function.
+
+## 3.0.0-alpha.1 (18 Jun 2020)
+-  First alpha version for 3.0.0, no changelog yet.
 
 ## 2.1.3 (5 Jun 2020)
 - Fix comparison != with null (#189)

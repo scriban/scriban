@@ -10,6 +10,7 @@ using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
+using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
 
 namespace Scriban.Functions
@@ -36,6 +37,96 @@ namespace Scriban.Functions
         public static object Default(object value, object @default)
         {
             return value == null || (value is string && string.IsNullOrEmpty((string)value)) ? @default : value;
+        }
+
+        /// <summary>
+        /// The evaluates a string as a scriban expression or evaluate the passed function or return the passed value.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value, either a scriban template in a string, or an alias function or directly a value.</param>
+        /// <returns>The evaluation of the input value.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "1 + 2" | object.eval }}
+        /// ```
+        /// ```html
+        /// 3
+        /// ```
+        /// </remarks>
+        public static object Eval(TemplateContext context, SourceSpan span, object value)
+        {
+            if (value == null) return null;
+
+            if (value is string templateStr)
+            {
+                try
+                {
+                    var template = Template.Parse(templateStr, lexerOptions: new LexerOptions() { Lang = context.Language, Mode = ScriptMode.ScriptOnly });
+                    return context.Evaluate(template.Page);
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException(ex.Message, nameof(value));
+                }
+            }
+
+            if (value is IScriptCustomFunction function)
+            {
+                return ScriptFunctionCall.Call(context, context.CurrentNode, function, false, null);
+            }
+
+            return value;
+        }
+
+        /// <summary>
+        /// The evaluates a string as a scriban template or evaluate the passed function or return the passed value.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="value">The input value, either a scriban template in a string, or an alias function or directly a value.</param>
+        /// <returns>The evaluation of the input value.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "This is a template text {{ 1 + 2 }}" | object.eval_template }}
+        /// ```
+        /// ```html
+        /// This is a template text 3
+        /// ```
+        /// </remarks>
+        public static object EvalTemplate(TemplateContext context, SourceSpan span, object value)
+        {
+            if (value == null) return null;
+
+            if (value is string templateStr)
+            {
+                try
+                {
+                    var template = Template.Parse(templateStr, lexerOptions: new LexerOptions() { Lang = context.Language, Mode = ScriptMode.Default });
+                    var output = new StringBuilderOutput();
+                    context.PushOutput(output);
+                    try
+                    {
+                        context.Evaluate(template.Page);
+                    }
+                    finally
+                    {
+                        context.PopOutput();
+                    }
+                    return output.ToString();
+                }
+                catch (Exception ex)
+                {
+                    throw new ArgumentException(ex.Message, nameof(value));
+                }
+            }
+
+            if (value is IScriptCustomFunction function)
+            {
+                return ScriptFunctionCall.Call(context, context.CurrentNode, function, false, null);
+            }
+
+            return value;
         }
 
         /// <summary>
@@ -121,6 +212,7 @@ namespace Scriban.Functions
         /// <summary>
         /// Gets the members/keys of the specified value object.
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="value">The input object.</param>
         /// <returns>A list with the member names/key of the input object</returns>
         /// <remarks>
@@ -128,12 +220,20 @@ namespace Scriban.Functions
         /// {{ product | object.keys | array.sort }}
         /// ```
         /// ```html
-        /// [title, type]
+        /// ["title", "type"]
         /// ```
         /// </remarks>
-        public new static ScriptArray Keys(IDictionary<string, object> value)
+        public new static ScriptArray Keys(TemplateContext context, object value)
         {
-            return value == null ? new ScriptArray() : new ScriptArray(value.Keys);
+            if (value == null) return new ScriptArray();
+            if (value is IDictionary dict) return new ScriptArray(dict.Keys);
+            if (value is IDictionary<string, object> dictStringObject) return new ScriptArray(dictStringObject.Keys);
+            if (value is IScriptObject scriptObj) return new ScriptArray(scriptObj.GetMembers());
+            // Don't try to return members of a custom function
+            if (value is IScriptCustomFunction) return new ScriptArray();
+
+            var accessor = context.GetMemberAccessor(value);
+            return new ScriptArray(accessor.GetMembers(context, context.CurrentSpan, value));
         }
 
         /// <summary>
@@ -142,8 +242,6 @@ namespace Scriban.Functions
         /// - If the input is a list, it will return the number of elements
         /// - If the input is an object, it will return the number of members
         /// </summary>
-        /// <param name="context">The template context</param>
-        /// <param name="span">The source span</param>
         /// <param name="value">The input object.</param>
         /// <returns>The size of the input object.</returns>
         /// <remarks>
@@ -154,7 +252,7 @@ namespace Scriban.Functions
         /// 3
         /// ```
         /// </remarks>
-        public static int Size(TemplateContext context, SourceSpan span, object value)
+        public static int Size(object value)
         {
             if (value is string)
             {
@@ -205,7 +303,7 @@ namespace Scriban.Functions
                 return null;
             }
             var type = value.GetType();
-            var typeInfo = type.GetTypeInfo();
+            var typeInfo = type;
             if (type == typeof(string))
             {
                 return "string";
@@ -222,14 +320,19 @@ namespace Scriban.Functions
                 return "number";
             }
 
+            if (typeof(ScriptRange).IsAssignableFrom(typeInfo))
+            {
+                return "iterator";
+            }
+
             // Test first IList, then IEnumerable
-            if (typeof(IList).GetTypeInfo().IsAssignableFrom(typeInfo))
+            if (typeof(IList).IsAssignableFrom(typeInfo))
             {
                 return "array";
             }
 
-            if ((!typeof(ScriptObject).GetTypeInfo().IsAssignableFrom(typeInfo) && !typeof(IDictionary).GetTypeInfo().IsAssignableFrom(typeInfo)) &&
-                typeof(IEnumerable).GetTypeInfo().IsAssignableFrom(typeInfo))
+            if ((!typeof(ScriptObject).IsAssignableFrom(typeInfo) && !typeof(IDictionary).IsAssignableFrom(typeInfo)) &&
+                typeof(IEnumerable).IsAssignableFrom(typeInfo))
             {
                 return "iterator";
             }
@@ -247,7 +350,7 @@ namespace Scriban.Functions
         /// {{ product | object.values | array.sort }}
         /// ```
         /// ```html
-        /// [fruit, Orange]
+        /// ["fruit", "Orange"]
         /// ```
         /// </remarks>
         public new static ScriptArray Values(IDictionary<string, object> value)

@@ -1,0 +1,3 @@
+func f(x = 1); ret x * 2; end; f() + f(10) + f(x: 100) => 222
+func f(x = 1, y = 2); ret x * 2 + y; end; f() + f(10) + f(x: 100) + f(y: 11) + f(5, 6) => 257
+func f(x, y = 2, z = 3); ret x * 3 + y * 2 + z; end; f(1) + f(10, 3, 4)  => 50

@@ -1,1 +1,3 @@
-text(6,3) : error : Cannot get or set a member on the primitive `value/System.String` when accessing member: x.y
+x = 'value'  # x is a string
+x.y          # x.y will fail
+===

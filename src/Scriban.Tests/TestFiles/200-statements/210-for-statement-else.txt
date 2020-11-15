@@ -1,0 +1,17 @@
+{{for x in []-}}
+Not empty
+{{-else-}}
+empty
+{{-end}}
+
+{{for x in [1,2,3,4]; if x >= 3 -}}
+Loop {{ x }}
+{{else-}}
+Else {{ x }}
+{{end; end~}}
+
+{{for x in [0,2]; for y in 0..<x -}}
+Loop2 {{ x }} {{ y }}
+{{else-}}
+Empty {{ x }}
+{{end; end-}}

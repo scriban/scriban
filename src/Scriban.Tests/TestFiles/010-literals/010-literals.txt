@@ -9,8 +9,23 @@ This is a {{ `0``` }}
 This is a {{ ```1` }}
 This is a the number {{ 1 }}
 This is a the long number {{ 100000000000 }}
+This is a the big number {{ 100000000000000000000000000 }}
+This is a the big number1 with power {{ 1e3 }}
+This is a the big number2 with power {{ 1e15 }}
+This is a the big number3 with power {{ 1e40 }}
 This is a the float {{ 2.5 }}
+This is a the float1 {{ 1f }}
+This is a the float2 {{ 1F }}
 This is a double {{ 2.123456789123 }}
 These are booleans {{ true }} and {{ false }}
 This is a null value <{{ null }}>
 This is a string with unicode chars {{ "\u00B1\u010C" }}
+This is a the an hexa number {{ 0xff }}
+This is a the a binary number {{ 0b11111111 }}
+This is a the a number with underscore {{ 1_2_3 }}
+This is a the an hexa number with underscores {{ 0x1_ff }}
+This is a the a binary number with underscores {{ 0b_1111_1111 }}
+This is a the an integer number1 and unsigned {{ 0xFFFFFFFFu }}
+This is a the an integer number2 and unsigned {{ 0xFFFFFFFFU }}
+This is a the a binary number1 with underscores {{ 0b_1_1111u }}
+This is a the a binary number2 with underscores {{ 0b_1_1111U }}

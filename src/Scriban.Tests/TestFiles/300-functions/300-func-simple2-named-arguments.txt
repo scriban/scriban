@@ -1,6 +1,27 @@
 {{
 func nv
-	ret "name: " + $.name + " value: " + $.value
+	ret "name: " + $.name + " value: " + $.value + " items: " + $
 end
 nv name: "Yes" value: "No"
+}}
+{{ nv 1 name: "First" 2 value: "Second" 3 }}
+{{
+func nv1
+    $.name
+    " "
+    $0
+end
+func nv2
+    nv1 name: $.name @$0
+end
+nv2 name: "special" do 
+    "no"
+end
+nv2 do
+    "no1"
+end
+}}
+{{ nv2 do
+       "no2"
+   end
 }}

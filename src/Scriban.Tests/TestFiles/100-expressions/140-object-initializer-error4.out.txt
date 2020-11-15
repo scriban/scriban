@@ -1,1 +1,2 @@
-text(3,2) : error : Unexpected member type `test 1/function call expression` found for object initializer member name
+text(3,7) : error : Unexpected token `1` Expecting a colon : after identifier `test` for object initializer member name
+text(3,8) : error : Invalid token found `}`. Expecting <EOL>/end of line.

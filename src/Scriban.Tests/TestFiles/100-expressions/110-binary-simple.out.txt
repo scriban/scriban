@@ -40,6 +40,8 @@ null ?? 1 -> 1
 1 ?? null -> 1
 test ?? "yes" -> yes
 
+5 + math.abs(-2) -> 7
+
 null == null -> true
 null != null -> false
 1 == null -> false

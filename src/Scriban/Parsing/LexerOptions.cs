@@ -24,13 +24,18 @@ namespace Scriban.Parsing
         public ScriptMode Mode { get; set; }
 
         /// <summary>
+        /// Gets or sets the scripting language used (e.g default, liquid, scientific...).
+        /// </summary>
+        public ScriptLang Lang { get; set; }
+
+        /// <summary>
         /// If selected mode is <see cref="ScriptMode.FrontMatterOnly"/> or <see cref="ScriptMode.FrontMatterAndContent"/>, this marker will be used
         /// </summary>
         public string FrontMatterMarker { get; set; }
 
         /// <summary>
         /// <c>true</c> to parse the include target as an implicit string (to support Jekyll passing raw path /a/b/c.txt as an include target).
-        /// Only valid if Mode == <see cref="ScriptMode.Liquid"/> as well.
+        /// Only valid if Lang == <see cref="ScriptLang.Liquid"/> as well.
         /// </summary>
         public bool EnableIncludeImplicitString { get; set; }
 
@@ -43,5 +48,21 @@ namespace Scriban.Parsing
         /// The lexer will return whitespaces tokens
         /// </summary>
         public bool KeepTrivia { get; set; }
+
+        /// <summary>
+        /// Gets or sets a delegate to allow to match a custom token.
+        /// </summary>
+        public TryMatchCustomTokenDelegate TryMatchCustomToken { get; set; }
+
     }
+
+    /// <summary>
+    /// A delegate used for matching a custom token. NOTE: A custom token should not parse new lines (`\n` or `\r`)
+    /// </summary>
+    /// <param name="text">Text being parsed</param>
+    /// <param name="position">Current position within the string (to increment if the token is parsed, to keep it as it is if not)</param>
+    /// <param name="length">Output the number of character successfully matched at <paramref name="position"/>.</param>
+    /// <param name="tokenType">The custom token type within the range (<see cref="TokenType.Custom"/> to <see cref="TokenType.Custom9"/></param>
+    /// <returns><c>true</c> if the text at position <paramref name="position"/> is a custom token.</returns>
+    public delegate bool TryMatchCustomTokenDelegate(string text, TextPosition position, out int length, out TokenType tokenType);
 }

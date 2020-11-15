@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using NUnit.Framework;
@@ -35,12 +35,12 @@ namespace Scriban.Tests
             [Test]
             public void TestSliceError()
             {
-                TestParser.AssertTemplate("text(1,11) : error : Invalid number of arguments `0` passed to `string.slice` while expecting at least `2` arguments", "{{ string.slice }}");
+                TestParser.AssertTemplate("text(1,16) : error : Invalid number of arguments `0` passed to `string.slice` while expecting `2` arguments", "{{ string.slice }}");
             }
             [Test]
             public void TestSliceAtError()
             {
-                TestParser.AssertTemplate("text(1,11) : error : Invalid number of arguments `0` passed to `string.slice1` while expecting at least `2` arguments", "{{ string.slice1 }}");
+                TestParser.AssertTemplate("text(1,17) : error : Invalid number of arguments `0` passed to `string.slice1` while expecting `2` arguments", "{{ string.slice1 }}");
             }
         }
     }

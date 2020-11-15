@@ -1,0 +1,4 @@
+func f(x...); ret x.size ; end; f + f(1) + f(1, 2) + f(1, 5, 10, 20) => 7
+func f(x, y...); ret x + y.size * 2 ; end; f(1) + f(10, 2) + f(20, 5, 10, 20) => 39
+func f(x, y = 2, z...); ret x + y * 2 + z.size * 10 ; end; f(1) + f(10, 2) + f(20, 5, 10, 20) => 69
+func f(x...); ret x[0] + x[1] + x[2] ; end; f(2, 3, 4) + f(1, 5, 10, 20) => 25

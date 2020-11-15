@@ -1,1 +1,1 @@
-text(4,5) : error : Error while parsing assign expression: Expecting <expression> instead of `CodeExit` in: <target_expression> = <value_expression>
+text(4,5) : error : Error while parsing assign expression: Expecting <expression> instead of `}}` in: <target_expression> = <value_expression>

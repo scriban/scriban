@@ -1,15 +1,14 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
+using Scriban.Helpers;
 using Scriban.Parsing;
+using Scriban.Runtime;
 
 namespace Scriban.Syntax
 {
@@ -24,9 +23,9 @@ namespace Scriban.Syntax
         public SourceSpan Span;
 
         /// <summary>
-        /// Trivias, null if <see cref="LexerOptions.KeepTrivia"/> was false.
+        /// Gets the parent of this node.
         /// </summary>
-        public ScriptTrivias Trivias { get; set; }
+        public ScriptNode Parent { get; internal set; }
 
         /// <summary>
         /// Evaluates this instance with the specified context.
@@ -34,7 +33,50 @@ namespace Scriban.Syntax
         /// <param name="context">The template context.</param>
         public abstract object Evaluate(TemplateContext context);
 
-#if SCRIBAN_ASYNC
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public virtual int ChildrenCount => 0;
+
+        /// <summary>
+        /// Clones this node including its trivias.
+        /// </summary>
+        /// <returns>Return a clone of this node.</returns>
+        public ScriptNode Clone()
+        {
+            return Clone(true);
+        }
+
+        /// <summary>
+        /// Clones this node.
+        /// </summary>
+        /// <param name="withTrivias"><c>true</c> to copy the trivias.</param>
+        /// <returns>Return a clone of this node.</returns>
+        public ScriptNode Clone(bool withTrivias)
+        {
+            var cloner = withTrivias ? ScriptCloner.WithTrivias : ScriptCloner.Instance;
+            return cloner.Visit(this);
+        }
+
+        /// <summary>
+        /// Gets a children at the specified index.
+        /// </summary>
+        /// <param name="index">Index of the children</param>
+        /// <returns>A children at the specified index</returns>
+        public ScriptNode GetChildren(int index)
+        {
+            if (index < 0) throw ThrowHelper.GetIndexNegativeArgumentOutOfRangeException();
+            if (index > ChildrenCount) throw ThrowHelper.GetIndexArgumentOutOfRangeException(ChildrenCount);
+            return GetChildrenImpl(index);
+        }
+
+        /// <summary>
+        /// Gets a children at the specified index.
+        /// </summary>
+        /// <param name="index">Index of the children</param>
+        /// <returns>A children at the specified index</returns>
+        /// <remarks>The index is safe to use</remarks>
+        protected virtual ScriptNode GetChildrenImpl(int index) => null;
+
+#if !SCRIBAN_NO_ASYNC
         public virtual ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             return new ValueTask<object>(Evaluate(context));
@@ -46,159 +88,54 @@ namespace Scriban.Syntax
             return true;
         }
 
-        public abstract void Write(TemplateRewriterContext context);
-    }
+        public abstract void PrintTo(ScriptPrinter printer);
 
-    public static class ScriptNodeExtensions
-    {
+        public virtual void Accept(ScriptVisitor visitor) => throw new NotImplementedException($"This method must be implemented by the type {this.GetType()}");
 
-        public static void AddTrivia(this ScriptNode node, ScriptTrivia trivia, bool before)
+        public virtual TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => throw new NotImplementedException($"This method must be implemented by the type {this.GetType()}");
+
+        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+        public IEnumerable<ScriptNode> Children
         {
-            var trivias = node.Trivias;
-            if (trivias == null)
+            get
             {
-                node.Trivias = trivias = new ScriptTrivias();
-            }
-
-            (before ? trivias.Before : trivias.After).Add(trivia);
-        }
-
-        public static void AddTrivias<T>(this ScriptNode node, T trivias, bool before) where T : IEnumerable<ScriptTrivia>
-        {
-            foreach (var trivia in trivias)
-            {
-                node.AddTrivia(trivia, before);
-            }
-        }
-
-        public static bool HasTrivia(this ScriptNode node, ScriptTriviaType triviaType, bool before)
-        {
-            if (node.Trivias == null)
-            {
-                return false;
-            }
-
-            foreach (var trivia in (before ? node.Trivias.Before : node.Trivias.After))
-            {
-                if (trivia.Type == triviaType)
+                var count = ChildrenCount;
+                for (int i = 0; i < count; i++)
                 {
-                    return true;
+                    yield return GetChildrenImpl(i);
                 }
             }
-            return false;
         }
 
-        public static bool HasTriviaEndOfStatement(this ScriptNode node, bool before)
+        /// <summary>
+        /// Helper method to deparent/parent a node to this instance.
+        /// </summary>
+        /// <typeparam name="TSyntaxNode">Type of the node</typeparam>
+        /// <param name="set">The previous child node parented to this instance</param>
+        /// <param name="node">The new child node to parent to this instance</param>
+        protected void ParentToThis<TSyntaxNode>(ref TSyntaxNode set, TSyntaxNode node) where TSyntaxNode : ScriptNode
         {
-            if (node.Trivias == null)
+            if (node == set) return;
+            if (node?.Parent != null) throw ThrowHelper.GetExpectingNoParentException();
+            if (set != null)
             {
-                return false;
+                set.Parent = null;
             }
-
-            foreach (var trivia in (before ? node.Trivias.Before : node.Trivias.After))
+            if (node != null)
             {
-                if (trivia.Type == ScriptTriviaType.NewLine || trivia.Type == ScriptTriviaType.SemiColon)
-                {
-                    return true;
-                }
+                node.Parent = this;
             }
-            return false;
+            set = node;
         }
-    }
 
-    public class ScriptTrivias
-    {
-        public ScriptTrivias()
+        public sealed override string ToString()
         {
-            Before = new List<ScriptTrivia>();
-            After = new List<ScriptTrivia>();
+            var strOutput = new StringBuilderOutput();
+            var printer = new ScriptPrinter(strOutput , new ScriptPrinterOptions() { Mode = ScriptMode.ScriptOnly });
+            printer.Write(this);
+            var result = strOutput.ToString();
+            strOutput.Builder.Length = 0;
+            return result;
         }
-
-        public List<ScriptTrivia> Before { get; }
-
-        public List<ScriptTrivia> After { get; }
-    }
-
-    public struct ScriptTrivia
-    {
-        public ScriptTrivia(SourceSpan span, ScriptTriviaType type)
-        {
-            Span = span;
-            Type = type;
-            Text = null;
-        }
-
-        public ScriptTrivia(SourceSpan span, ScriptTriviaType type, string text)
-        {
-            Span = span;
-            Type = type;
-            Text = text;
-        }
-
-        public readonly SourceSpan Span;
-
-        public readonly ScriptTriviaType Type;
-
-        public readonly string Text;
-
-        public void Write(TemplateRewriterContext context)
-        {
-            var rawText = ToString();
-
-            bool isRawComment = Type == ScriptTriviaType.CommentMulti && !rawText.StartsWith("##");
-            if (isRawComment)
-            {
-                // Escape any # by \#
-                rawText = rawText.Replace("#", "\\#");
-                // Escape any }}
-                rawText = rawText.Replace("}", "\\}");
-                context.Write("## ");
-            }
-
-            context.Write(rawText);
-
-            if (isRawComment)
-            {
-                context.Write(" ##");
-            }
-        }
-
-        public override string ToString()
-        {
-            switch (Type)
-            {
-                case ScriptTriviaType.Empty:
-                    return string.Empty;
-                case ScriptTriviaType.End:
-                    return "end";
-                case ScriptTriviaType.Comma:
-                    return ",";
-                case ScriptTriviaType.SemiColon:
-                    return ";";
-            }
-            var length = Span.End.Offset - Span.Start.Offset + 1;
-            return Text?.Substring(Span.Start.Offset, length);
-        }
-    }
-
-    public enum ScriptTriviaType
-    {
-        Empty = 0,
-
-        Whitespace,
-
-        WhitespaceFull,
-
-        Comment,
-
-        Comma,
-
-        CommentMulti,
-
-        NewLine,
-
-        SemiColon,
-
-        End,
     }
 }

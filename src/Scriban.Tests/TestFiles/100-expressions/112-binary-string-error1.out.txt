@@ -1,1 +1,1 @@
-text(4,7) : error : Operator `*` is not supported for the expression. Only working on string x int or int x string
+text(4,1) : error : Expecting an integer. The operator `*` is not supported for the expression. Only working on string x int or int x string

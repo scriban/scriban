@@ -1,2 +1,2 @@
-text(3,2) : error : Unexpected token `Integer` while parsing object initializer. Expecting a simple identifier for the member name instead of `1250`
-text(3,1) : error : Error while parsing expression statement: Invalid token found `}`. Expecting <EOL>/end of line after: <expression>
+text(3,2) : error : Unexpected token `1250` while parsing object initializer. Expecting a simple identifier for the member name.
+text(3,6) : error : Invalid token found `}`. Expecting <EOL>/end of line.

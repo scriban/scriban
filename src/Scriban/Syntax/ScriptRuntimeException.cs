@@ -1,9 +1,10 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
+using System.Threading;
 using Scriban.Helpers;
 using Scriban.Parsing;
 
@@ -47,27 +48,41 @@ namespace Scriban.Syntax
             return Message;
         }
     }
+    
+    public class ScriptAbortException : ScriptRuntimeException
+    {
+        public ScriptAbortException(SourceSpan span, CancellationToken cancellationToken) : this(span, "The operation was cancelled", cancellationToken)
+        {
+            CancellationToken = cancellationToken;
+        }
 
+        public ScriptAbortException(SourceSpan span, string message, CancellationToken cancellationToken) : base(span, message)
+        {
+            CancellationToken = cancellationToken;
+        }
+
+        public CancellationToken CancellationToken { get; }
+    }
+    
     public class ScriptParserRuntimeException : ScriptRuntimeException
     {
-        public ScriptParserRuntimeException(SourceSpan span, string message, List<LogMessage> parserMessages) : this(span, message, parserMessages, null)
+        public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages) : this(span, message, parserMessages, null)
         {
         }
 
-        public ScriptParserRuntimeException(SourceSpan span, string message, List<LogMessage> parserMessages, Exception innerException) : base(span, message, innerException)
+        public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages, Exception innerException) : base(span, message, innerException)
         {
             if (parserMessages == null) throw new ArgumentNullException(nameof(parserMessages));
             ParserMessages = parserMessages;
         }
 
-        public List<LogMessage> ParserMessages { get; }
+        public LogMessageBag ParserMessages { get; }
 
         public override string Message
         {
             get
             {
-                var messagesAsText = StringHelper.Join("\n", ParserMessages);
-                return $"{base.Message} Parser messages:\n {messagesAsText}";
+                return $"{base.Message} Parser messages:\n {ParserMessages}";
             }
         }
 

@@ -1,1 +1,4 @@
-name: Yes value: No
+name: Yes value: No items: []
+name: First value: Second items: [1, 2, 3]
+special no no1
+ no2

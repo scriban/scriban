@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -13,10 +13,38 @@ namespace Scriban.Tests
     public class TestIncludes
     {
         [Test]
+        public void TestIndentedIncludes()
+        {
+            var template = Template.Parse(@"  {{ include 'header' }}
+    {{ include 'multilines' }}
+Test1
+      {{ include 'nested_templates_with_indent' }}
+Test2
+");
+            var context = new TemplateContext();
+            context.TemplateLoader = new CustomTemplateLoader();
+            context.IndentWithInclude = true;
+
+            var text = template.Render(context).Replace("\r\n", "\n");
+            var expectedText = @"  This is a header
+    Line 1
+    Line 2
+    Line 3
+Test1
+        Line 1
+        Line 2
+        Line 3
+Test2
+".Replace("\r\n", "\n");
+
+            TextAssert.AreEqual(expectedText, text);
+        }
+
+        [Test]
         public void TestJekyllInclude()
         {
             var input = "{% include /this/is/a/test.htm %}";
-            var template = Template.ParseLiquid(input, lexerOptions: new LexerOptions() { EnableIncludeImplicitString = true, Mode = ScriptMode.Liquid });
+            var template = Template.ParseLiquid(input, lexerOptions: new LexerOptions() { EnableIncludeImplicitString = true, Lang = ScriptLang.Liquid });
             var context = new TemplateContext { TemplateLoader = new LiquidCustomTemplateLoader() };
             var result = template.Render(context);
             TextAssert.AreEqual("/this/is/a/test.htm", result);
@@ -28,7 +56,7 @@ namespace Scriban.Tests
             var template = Template.Parse("Test with a include {{ include }}");
             var context = new TemplateContext();
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
-            var expectedString = "Expecting at least the name of the template to include for the <include> function";
+            var expectedString = "Invalid number of arguments";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
         }
 
@@ -69,7 +97,7 @@ namespace Scriban.Tests
         {
             TestParser.AssertTemplate("product: Orange", "{{ include 'product' }}");
         }
-        
+
         [Test]
         public void TestNested()
         {
@@ -85,31 +113,31 @@ namespace Scriban.Tests
         [Test]
         public void TestLiquidNull()
         {
-            TestParser.AssertTemplate("", "{% include a %}", true);
+            TestParser.AssertTemplate("", "{% include a %}", ScriptLang.Liquid);
         }
 
         [Test]
         public void TestLiquidWith()
         {
-            TestParser.AssertTemplate("with_product: Orange", "{% include 'with_product' with product %}", true);
+            TestParser.AssertTemplate("with_product: Orange", "{% include 'with_product' with product %}", ScriptLang.Liquid);
         }
 
         [Test]
         public void TestLiquidFor()
         {
-            TestParser.AssertTemplate("for_product: Orange for_product: Banana for_product: Apple for_product: Computer for_product: Mobile Phone for_product: Table for_product: Sofa ", "{% include 'for_product' for products %}", true);
+            TestParser.AssertTemplate("for_product: Orange for_product: Banana for_product: Apple for_product: Computer for_product: Mobile Phone for_product: Table for_product: Sofa ", "{% include 'for_product' for products %}", ScriptLang.Liquid);
         }
-        
+
         [Test]
         public void TestLiquidArguments()
         {
-            TestParser.AssertTemplate("1 + yoyo", "{% include 'arguments' var1: 1, var2: 'yoyo' %}", true);
+            TestParser.AssertTemplate("1 + yoyo", "{% include 'arguments' var1: 1, var2: 'yoyo' %}", ScriptLang.Liquid);
         }
 
         [Test]
         public void TestLiquidWithAndArguments()
         {
-            TestParser.AssertTemplate("tada : 1 + yoyo", "{% include 'with_arguments' with 'tada' var1: 1, var2: 'yoyo' %}", true);
+            TestParser.AssertTemplate("tada : 1 + yoyo", "{% include 'with_arguments' with 'tada' var1: 1, var2: 'yoyo' %}", ScriptLang.Liquid);
         }
 
         [Test]

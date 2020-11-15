@@ -10,25 +10,21 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using DotLiquid.Tests.Tags;
 using NUnit.Framework;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
+using static Scriban.Tests.TestFilesHelper;
 
 namespace Scriban.Tests
 {
     [TestFixture]
     public class TestParser
     {
-        private const string RelativeBasePath = @"..\..\..\TestFiles";
         private const string BuiltinMarkdownDocFile = @"..\..\..\..\..\doc\builtins.md";
-        private const string InputFilePattern = "*.txt";
-        private const string OutputEndFileExtension = ".out.txt";
 
         [Test]
         public void TestRoundtrip()
@@ -85,6 +81,107 @@ namespace Scriban.Tests
         {
             var template = Template.ParseLiquid(@"{%""\u""");
             Assert.True(template.HasErrors);
+        }
+
+        [TestCase("-5|>math.abs", 5, "-5 |> math.abs")]
+        [TestCase("-5*2|>math.abs", 10, "-5 * 2 |> math.abs")]
+        [TestCase("2x", 2, "2 * x")]
+        [TestCase("10x/2", 5.0, "(10 * x) / 2")]
+        [TestCase("10x y + y", 22, "10 * x * y + y")]
+        [TestCase("10x * y + 3y + 1 + 2", 29, "10 * x * y + 3 * y + 1 + 2")]
+        [TestCase("2 y math.abs z * 5 // 2 + 1 + z", 91, "2 * y * math.abs((z * 5) // 2) + 1 + z")] // 2 * 2 * abs(-10) * 5 / 2 + 1 + (-10) = 91
+        [TestCase("2 y math.abs z * 5 // 2 + 1 * 3 + z + 17", 110, "2 * y * math.abs((z * 5) // 2) + 1 * 3 + z + 17")] // 2 * 2 * abs(-10) * 5 / 2 + 3 + (-10) + 17 = 110
+        [TestCase("2^3^4", 4096, "(2 ^ 3) ^ 4")]
+        [TestCase("3y^2 + 3x", 15, "3 * (y ^ 2) + 3 * x")]
+        [TestCase("1 + 2 + 3x + 4y + z", 4, "1 + 2 + 3 * x + 4 * y + z")]
+        [TestCase("y^5 * 2 + 1", 65, "(y ^ 5) * 2 + 1")]
+        [TestCase("y^5 // 2 + 1", 17, "((y ^ 5) // 2) + 1")]
+        [TestCase("f(x)= x*2 +1* 50; f(10* 2)", 90, "f(x) = x * 2 + 1 * 50; f(10 * 2)")]
+        [TestCase("f(x)= x*2 +1* 50; 10* 2|>f", 90, "f(x) = x * 2 + 1 * 50; 10 * 2 |> f")]
+        // int binaries
+        [TestCase("1 << 2", 4, "1 << 2")]
+        [TestCase("8 >> 2", 2, "8 >> 2")]
+        [TestCase("1 | 2", 3, "1 | 2")]
+        [TestCase("3 & 2", 2, "3 & 2")]
+        // long
+        [TestCase("10000000000 + 1", (long)10000000000 + 1, "10000000000 + 1")]
+        [TestCase("10000000000 - 1", (long)10000000000 - 1, "10000000000 - 1")]
+        [TestCase("10000000000 * 3", (long)10000000000 * 3, "10000000000 * 3")]
+        [TestCase("10000000000 / 3", (double)10000000000 / 3, "10000000000 / 3")]
+        [TestCase("10000000000 // 3", (long)10000000000 / 3, "10000000000 // 3")]
+        [TestCase("10000000000 << 2", (long)10000000000 << 2, "10000000000 << 2")]
+        [TestCase("10000000000 >> 2", (long)10000000000 >> 2, "10000000000 >> 2")]
+        [TestCase("10000000001 | 2", (long)10000000001 | 2, "10000000001 | 2")]
+        [TestCase("10000000003 & 2", (long)10000000003 & 2, "10000000003 & 2")]
+        [TestCase("10000000003 % 7", (long)10000000003 % 7, "10000000003 % 7")]
+        [TestCase("10000000003 == 7", 10000000003 == 7, "10000000003 == 7")]
+        [TestCase("10000000003 != 7", 10000000003 != 7, "10000000003 != 7")]
+        [TestCase("10000000003 < 7", 10000000003 < 7, "10000000003 < 7")]
+        [TestCase("10000000003 > 7", 10000000003 > 7, "10000000003 > 7")]
+        [TestCase("10000000003 <= 7", 10000000003 <= 7, "10000000003 <= 7")]
+        [TestCase("10000000003 >= 7", 10000000003 >= 7, "10000000003 >= 7")]
+        // float
+        [TestCase("1.0f + 2.0f", 1.0f + 2.0f, "1.0f + 2.0f")]
+        [TestCase("1.0f - 2.0f", 1.0f - 2.0f, "1.0f - 2.0f")]
+        [TestCase("2.0f * 3.0f", 2.0f * 3.0f, "2.0f * 3.0f")]
+        [TestCase("2.0f / 3.0f", 2.0f / 3.0f, "2.0f / 3.0f")]
+        [TestCase("4.0f // 3.0f", (float)(int)(4.0f / 3.0f), "4.0f // 3.0f")]
+        [TestCase("4.0f ^ 2.0f", (float)16.0, "4.0f ^ 2.0f")]
+        [TestCase("4.0f << 1", (float)4.0f * 2.0f, "4.0f << 1")]
+        [TestCase("4.0f >> 1", (float)4.0f / 2.0f, "4.0f >> 1")]
+        [TestCase("4.0f % 3.0f", (float)4.0f % 3.0f, "4.0f % 3.0f")]
+        [TestCase("4.0f == 3.0f", 4.0f == 3.0f, "4.0f == 3.0f")]
+        [TestCase("4.0f != 3.0f", 4.0f != 3.0f, "4.0f != 3.0f")]
+        [TestCase("4.0f < 3.0f", 4.0f < 3.0f, "4.0f < 3.0f")]
+        [TestCase("4.0f > 3.0f", 4.0f > 3.0f, "4.0f > 3.0f")]
+        [TestCase("4.0f <= 3.0f", 4.0f <= 3.0f, "4.0f <= 3.0f")]
+        [TestCase("4.0f >= 3.0f", 4.0f >= 3.0f, "4.0f >= 3.0f")]
+        // double
+        [TestCase("4.0 // 3.0", (double)(int)(4.0f / 3.0), "4.0 // 3.0")]
+        [TestCase("4.0 ^ 2.0", (double)16.0, "4.0 ^ 2.0")]
+        [TestCase("4.0 << 1", (double)4.0 * 2.0, "4.0 << 1")]
+        [TestCase("4.0 >> 1", (double)4.0 / 2.0, "4.0 >> 1")]
+        [TestCase("4.0d", 4.0, "4.0")]
+        [TestCase("4.0D", 4.0, "4.0")]
+        // decimal
+        [TestCase("4.0m", 4.0, "4.0m")]
+        [TestCase("4.0M", 4.0, "4.0m")]
+        [TestCase("4.0m + 2.0m", 6.0, "4.0m + 2.0m")]
+        [TestCase("4.0m - 2.0m", 2.0, "4.0m - 2.0m")]
+        [TestCase("4.0m * 2.0m", 8.0, "4.0m * 2.0m")]
+        [TestCase("8.0m / 2.0m", 4.0, "8.0m / 2.0m")]
+        [TestCase("5.0m // 2.0m", 2.0, "5.0m // 2.0m")]
+        [TestCase("2.0m ^ 3.0m", 8.0, "2.0m ^ 3.0m")]
+        [TestCase("2.0m << 1", 4.0, "2.0m << 1")]
+        [TestCase("4.0m >> 1", 2.0, "4.0m >> 1")]
+        [TestCase("4.0m % 3.0m", 1.0, "4.0m % 3.0m")]
+        [TestCase("4.0m == 3.0m", 4.0m == 3.0m, "4.0m == 3.0m")]
+        [TestCase("4.0m != 3.0m", 4.0m != 3.0m, "4.0m != 3.0m")]
+        [TestCase("4.0m < 3.0m", 4.0m < 3.0m, "4.0m < 3.0m")]
+        [TestCase("4.0m > 3.0m", 4.0m > 3.0m, "4.0m > 3.0m")]
+        [TestCase("4.0m <= 3.0m", 4.0m <= 3.0m, "4.0m <= 3.0m")]
+        [TestCase("4.0m >= 3.0m", 4.0m >= 3.0m, "4.0m >= 3.0m")]
+        [TestCase("3.0ff", 12.0, "3.0 * ff")]
+        public void TestScientific(string script, object value, string scriptReformat)
+        {
+            var template = Template.Parse(script, lexerOptions: new LexerOptions() {Mode = ScriptMode.ScriptOnly, Lang = ScriptLang.Scientific});
+            Assert.False(template.HasErrors, $"Template has errors: {template.Messages}");
+
+            var context = new TemplateContext();
+            context.CurrentGlobal.SetValue("x", 1, false);
+            context.CurrentGlobal.SetValue("y", 2, false);
+            context.CurrentGlobal.SetValue("z", -10, false);
+            context.CurrentGlobal.SetValue("ff", 4, false);
+
+            var result = template.Evaluate(context);
+            Assert.AreEqual(result, value);
+
+            var resultAsync = template.EvaluateAsync(context).Result;
+            Assert.AreEqual(resultAsync, value, "Invalid async result");
+
+            var reformat = template.Page.Format(new ScriptFormatterOptions(context, ScriptLang.Scientific, ScriptFormatterFlags.ExplicitClean));
+            var exprAsString = reformat.ToString();
+            Assert.AreEqual(scriptReformat, exprAsString, "Format string don't match");
         }
 
         [Test]
@@ -257,10 +354,9 @@ variable + 1
 
             // Check that the parser finished parsing on the first code exit }}
             // and hasn't tried to run the lexer on the remaining text
-            Assert.AreEqual(new TextPosition(30, 3, 0), parser.CurrentSpan.Start);
-            Assert.AreEqual(new TextPosition(33, 3, 3), parser.CurrentSpan.End);
+            Assert.AreEqual(new TextPosition(34, 4, 0), parser.CurrentSpan.Start);
 
-            var startPositionAfterFrontMatter = parser.CurrentSpan.End.NextLine();
+            var startPositionAfterFrontMatter = page.FrontMatter.TextPositionAfterEndMarker;
 
             // Make sure that we have a front matter
             Assert.NotNull(page.FrontMatter);
@@ -354,43 +450,43 @@ end
             Console.WriteLine(result);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "000-basic" }, Category= "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "000-basic" })]
         public static void A000_basic(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "010-literals" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "010-literals" })]
         public static void A010_literals(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "100-expressions" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "100-expressions" })]
         public static void A100_expressions(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "200-statements" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "200-statements" })]
         public static void A200_statements(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "300-functions" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "300-functions" })]
         public static void A300_functions(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "400-builtins" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "400-builtins" })]
         public static void A400_builtins(string inputName)
         {
             TestFile(inputName);
         }
 
-        [TestCaseSource("ListTestFiles", new object[] { "500-liquid" }, Category = "Basic")]
+        [TestCaseSource("ListTestFiles", new object[] { "500-liquid" })]
         public static void A500_liquid(string inputName)
         {
             TestFile(inputName);
@@ -449,24 +545,28 @@ end
             var filename = Path.GetFileName(inputName);
             var isSupportingExactRoundtrip = !NotSupportingExactRoundtrip.Contains(filename);
 
-            var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
+            var inputText = LoadTestFile(inputName);
+            var expectedOutputName = Path.ChangeExtension(inputName, OutputEndFileExtension);
+            var expectedOutputText = LoadTestFile(expectedOutputName);
+            Assert.NotNull(expectedOutputText, $"Expecting output result file `{expectedOutputName}` for input file `{inputName}`");
 
-            var inputFile = Path.Combine(baseDir, inputName);
-            var inputText = File.ReadAllText(inputFile);
+            var lang = ScriptLang.Default;
+            if (inputName.Contains("liquid"))
+            {
+                lang = ScriptLang.Liquid;
+            }
+            else if (inputName.Contains("scientific"))
+            {
+                lang = ScriptLang.Scientific;
+            }
 
-            var expectedOutputFile = Path.ChangeExtension(inputFile, OutputEndFileExtension);
-            Assert.True(File.Exists(expectedOutputFile), $"Expecting output result file `{expectedOutputFile}` for input file `{inputName}`");
-            var expectedOutputText = File.ReadAllText(expectedOutputFile, Encoding.UTF8);
-
-            var isLiquid = inputName.Contains("liquid");
-
-            AssertTemplate(expectedOutputText, inputText, isLiquid, false, isSupportingExactRoundtrip, expectParsingErrorForRountrip: filename == "513-liquid-statement-for.variables.txt");
+            AssertTemplate(expectedOutputText, inputText, lang, false, isSupportingExactRoundtrip, expectParsingErrorForRountrip: filename == "513-liquid-statement-for.variables.txt");
         }
 
         private void AssertRoundtrip(string inputText, bool isLiquid = false)
         {
             inputText = inputText.Replace("\r\n", "\n");
-            AssertTemplate(inputText, inputText, isLiquid, true);
+            AssertTemplate(inputText, inputText, isLiquid ? ScriptLang.Liquid : ScriptLang.Default, true);
         }
 
 
@@ -482,15 +582,17 @@ end
             "470-html.txt"
         };
 
-        public static void AssertTemplate(string expected, string input, bool isLiquid = false, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false)
+        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false, bool supportRoundTrip = true)
         {
+            bool isLiquid = lang == ScriptLang.Liquid;
+
             var parserOptions = new ParserOptions()
             {
-                LiquidFunctionsToScriban = isLiquid
+                LiquidFunctionsToScriban = isLiquid,
             };
             var lexerOptions = new LexerOptions()
             {
-                Mode = isLiquid ? ScriptMode.Liquid : ScriptMode.Default
+                Lang = lang
             };
 
             if (isRoundtripTest)
@@ -522,17 +624,15 @@ end
             {
                 bool isRoundtrip = roundtripText != null;
                 bool hasErrors = false;
-#if SCRIBAN_ASYNC
                 bool hasException = false;
-#endif
                 if (isRoundtrip)
                 {
                     Console.WriteLine("Roundtrip");
                     Console.WriteLine("======================================");
                     Console.WriteLine(roundtripText);
-                    lexerOptions.Mode = ScriptMode.Default;
+                    lexerOptions.Lang = lang == ScriptLang.Scientific ? lang : ScriptLang.Default;
 
-                    if (lexerOptions.Mode == ScriptMode.Default && !isLiquid && supportExactRoundtrip)
+                    if (!isLiquid && supportExactRoundtrip)
                     {
                         Console.WriteLine("Checking Exact Roundtrip - Input");
                         Console.WriteLine("======================================");
@@ -550,9 +650,7 @@ end
                 var template = Template.Parse(input, "text", parserOptions, lexerOptions);
 
                 var result = string.Empty;
-#if SCRIBAN_ASYNC
                 var resultAsync = string.Empty;
-#endif
                 if (template.HasErrors)
                 {
                     hasErrors = true;
@@ -616,7 +714,7 @@ end
 
                             // Render sync
                             {
-                                var context = NewTemplateContext(isLiquid);
+                                var context = NewTemplateContext(lang);
                                 context.PushOutput(new TextWriterOutput(new StringWriter() {NewLine = "\n"}));
                                 var contextObj = new ScriptObject();
                                 contextObj.Import(model);
@@ -624,23 +722,19 @@ end
                                 result = template.Render(context);
                             }
 
-#if SCRIBAN_ASYNC
                             // Render async
                             {
-                                var asyncContext = NewTemplateContext(isLiquid);
+                                var asyncContext = NewTemplateContext(lang);
                                 asyncContext.PushOutput(new TextWriterOutput(new StringWriter() {NewLine = "\n"}));
                                 var contextObj = new ScriptObject();
                                 contextObj.Import(model);
                                 asyncContext.PushGlobal(contextObj);
                                 resultAsync = template.RenderAsync(asyncContext).Result;
                             }
-#endif
                         }
                         catch (Exception exception)
                         {
-#if SCRIBAN_ASYNC
                             hasException = true;
-#endif
                             if (specialLiquid)
                             {
                                 throw;
@@ -671,24 +765,23 @@ end
                     TextAssert.AreEqual(expected, result);
                 }
 
-#if SCRIBAN_ASYNC
                 if (!isRoundtrip && !isRoundtripTest && !hasErrors && !hasException)
                 {
                     Console.WriteLine("Checking async");
                     Console.WriteLine("======================================");
                     TextAssert.AreEqual(expected, resultAsync);
                 }
-#endif
 
-                if (isRoundtripTest || isRoundtrip || hasErrors)
+                if (!supportRoundTrip || isRoundtripTest || isRoundtrip || hasErrors)
                 {
                     break;
                 }
             }
         }
 
-        private static TemplateContext NewTemplateContext(bool isLiquid)
+        private static TemplateContext NewTemplateContext(ScriptLang lang)
         {
+            var isLiquid = lang == ScriptLang.Liquid;
             var context = isLiquid
                 ? new LiquidTemplateContext()
                 {
@@ -698,6 +791,10 @@ end
                 {
                     TemplateLoader = new CustomTemplateLoader()
                 };
+            if (lang == ScriptLang.Scientific)
+            {
+                context.UseScientific = true;
+            }
             // We use a custom output to make sure that all output is using the "\n"
             context.NewLine = "\n";
             return context;
@@ -797,55 +894,7 @@ end
 
         public static IEnumerable ListTestFiles(string folder)
         {
-            var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
-            foreach (var file in
-                Directory.GetFiles(Path.Combine(baseDir, folder), InputFilePattern, SearchOption.AllDirectories)
-                    .Where(f => !f.EndsWith(OutputEndFileExtension))
-                    .Select(f => f.StartsWith(baseDir) ? f.Substring(baseDir.Length + 1) : f)
-                    .OrderBy(f => f))
-            {
-                var caseData = new TestCaseData(file);
-                var category = Path.GetDirectoryName(file);
-                caseData.TestName = category + "/" + Path.GetFileNameWithoutExtension(file);
-                caseData.SetCategory(category);
-                yield return caseData;
-            }
-        }
-
-        /// <summary>
-        /// Use an internal class to have a better display of the filename in Resharper Unit Tests runner.
-        /// </summary>
-        public struct TestFilePath
-        {
-            public TestFilePath(string filePath)
-            {
-                FilePath = filePath;
-                Category = Path.GetDirectoryName(filePath);
-            }
-
-            public string FilePath { get; }
-
-            public string Category { get; }
-
-            public override string ToString()
-            {
-                return FilePath;
-            }
-        }
-
-        private static string BaseDirectory
-        {
-            get
-            {
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
-                var assembly = Assembly.GetExecutingAssembly();
-                var codebase = new Uri(assembly.CodeBase);
-                var path = codebase.LocalPath;
-                return Path.GetDirectoryName(path);
-#else
-                return Directory.GetCurrentDirectory();
-#endif
-            }
+            return ListTestFilesInFolder(folder);
         }
     }
 }

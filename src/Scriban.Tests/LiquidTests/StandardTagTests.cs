@@ -74,7 +74,7 @@ namespace DotLiquid.Tests.Tags
         public void TestForWithNestedDictionary()
         {
             var dictionary = new Dictionary<string, object> { {
-            "People", 
+            "People",
             new Dictionary<string, object> {
                     { "ID1", new Dictionary<string, object>{ { "First", "Jane" }, { "Last", "Green" } } },
                     { "ID2", new Dictionary<string, object>{ { "First", "Mike" }, { "Last", "Doe" } } }
@@ -197,7 +197,7 @@ namespace DotLiquid.Tests.Tags
                 456
                 next
                 789";
-            Helper.AssertTemplateResult(expected, markup, assigns);
+            Helper.AssertTemplateResult(expected, markup, assigns, supportRoundTrip: false);
         }
 
         [Test]
@@ -214,7 +214,7 @@ namespace DotLiquid.Tests.Tags
                 456
                 next
                 7";
-            Helper.AssertTemplateResult(expected, markup, assigns);
+            Helper.AssertTemplateResult(expected, markup, assigns, supportRoundTrip: false);
         }
 
         [Test]
@@ -233,7 +233,7 @@ namespace DotLiquid.Tests.Tags
                 456
                 next
                 7890";
-            Helper.AssertTemplateResult(expected, markup, assigns);
+            Helper.AssertTemplateResult(expected, markup, assigns, supportRoundTrip: false);
         }
 
         [Test]
@@ -252,7 +252,7 @@ namespace DotLiquid.Tests.Tags
                 456
                 next
                 ";
-            Helper.AssertTemplateResult(expected, markup, assigns);
+            Helper.AssertTemplateResult(expected, markup, assigns, supportRoundTrip: false);
         }
 
         [Test]

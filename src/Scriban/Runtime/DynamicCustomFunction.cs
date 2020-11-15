@@ -5,10 +5,9 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using Scriban.Helpers;
+using Scriban.Parsing;
 using Scriban.Syntax;
 
 
@@ -27,22 +26,102 @@ namespace Scriban.Runtime
         public readonly MethodInfo Method;
 
         protected readonly ParameterInfo[] Parameters;
+        private readonly Type _returnType;
+        private readonly ScriptParameterInfo[] _parameterInfos;
 
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         protected readonly bool IsAwaitable;
 #endif
+        protected readonly ScriptVarParamKind _varParamKind;
+        protected readonly int _paramsIndex;
+        protected readonly bool _hasTemplateContext;
+        protected readonly bool _hasSpan;
+        protected readonly int _optionalParameterCount;
+        protected readonly Type _paramsElementType;
+        protected readonly int _expectedNumberOfParameters;
+        protected readonly int _minimumRequiredParameters;
+        protected readonly int _firstIndexOfUserParameters;
 
         protected DynamicCustomFunction(MethodInfo method)
         {
-            Method = method;
+            Method = method ?? throw new ArgumentNullException(nameof(method));
+            _returnType = method.ReturnType;
+
             Parameters = method.GetParameters();
-#if SCRIBAN_ASYNC
-            IsAwaitable = method.ReturnType.GetTypeInfo().GetDeclaredMethod(nameof(Task.GetAwaiter)) != null;
+#if !SCRIBAN_NO_ASYNC
+            IsAwaitable = method.ReturnType.GetMethod(nameof(Task.GetAwaiter)) != null;
 #endif
+
+            _paramsIndex = -1;
+            if (Parameters.Length > 0)
+            {
+                // Check if we have TemplateContext+SourceSpan as first parameters
+                if (typeof(TemplateContext).IsAssignableFrom(Parameters[0].ParameterType))
+                {
+                    _hasTemplateContext = true;
+                    if (Parameters.Length > 1)
+                    {
+                        _hasSpan = typeof(SourceSpan).IsAssignableFrom(Parameters[1].ParameterType);
+                    }
+                }
+
+                var lastParam = Parameters[Parameters.Length - 1];
+                if (lastParam.ParameterType.IsArray)
+                {
+                    foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
+                    {
+                        _varParamKind = ScriptVarParamKind.LastParameter;
+                        _paramsElementType = lastParam.ParameterType.GetElementType();
+                        _paramsIndex = Parameters.Length - 1;
+                        break;
+                    }
+                }
+            }
+
+            _expectedNumberOfParameters = Parameters.Length;
+            _firstIndexOfUserParameters = 0;
+
+            if (_varParamKind == ScriptVarParamKind.None)
+            {
+                for (int i = 0; i < Parameters.Length; i++)
+                {
+                    if (Parameters[i].IsOptional)
+                    {
+                        _optionalParameterCount++;
+                    }
+                }
+            }
+
+            if (_hasTemplateContext)
+            {
+                _firstIndexOfUserParameters++;
+                if (_hasSpan)
+                {
+                    _firstIndexOfUserParameters++;
+                }
+            }
+
+            _expectedNumberOfParameters -= _firstIndexOfUserParameters;
+            _minimumRequiredParameters = _expectedNumberOfParameters - _optionalParameterCount;
+            if (_varParamKind == ScriptVarParamKind.LastParameter)
+            {
+                _minimumRequiredParameters--;
+            }
+
+            // Compute parameters
+            _parameterInfos = new ScriptParameterInfo[_expectedNumberOfParameters];
+            for (int i = 0; i < _expectedNumberOfParameters; i++)
+            {
+                var realIndex = _firstIndexOfUserParameters + i;
+                var parameterInfo = Parameters[realIndex];
+                var parameterType = realIndex == Parameters.Length - 1 && _varParamKind == ScriptVarParamKind.LastParameter ? _paramsElementType : parameterInfo.ParameterType;
+                _parameterInfos[i] = parameterInfo.HasDefaultValue
+                    ? new ScriptParameterInfo(parameterType, parameterInfo.Name, parameterInfo.DefaultValue)
+                    : new ScriptParameterInfo(parameterType, parameterInfo.Name);
+            }
         }
 
-
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         protected async ValueTask<object> ConfigureAwait(object result)
         {
             switch (result)
@@ -61,7 +140,7 @@ namespace Scriban.Runtime
             for (int j = 0; j < Parameters.Length; j++)
             {
                 var arg = Parameters[j];
-                if (arg.Name == namedArg.Name)
+                if (arg.Name == namedArg.Name.Name)
                 {
                     return new ArgumentValue(j, arg.ParameterType, context.Evaluate(namedArg));
                 }
@@ -71,7 +150,37 @@ namespace Scriban.Runtime
 
         public abstract object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
 
-#if SCRIBAN_ASYNC
+        public int RequiredParameterCount => _minimumRequiredParameters;
+
+        public int ParameterCount => _expectedNumberOfParameters;
+
+        public ScriptVarParamKind VarParamKind => _varParamKind;
+
+        public Type ReturnType => _returnType;
+
+        /// <summary>
+        /// Get or set an object tag for this instance.
+        /// </summary>
+        public object Tag { get; set; }
+
+        public ScriptParameterInfo GetParameterInfo(int index)
+        {
+            if (index < 0) throw new ArgumentOutOfRangeException(nameof(index), "Argument index must be >= 0");
+            if (index >= _parameterInfos.Length)
+            {
+                if (_varParamKind == ScriptVarParamKind.LastParameter)
+                {
+                    index = _parameterInfos.Length - 1;
+                }
+                else
+                {
+                    throw new ArgumentOutOfRangeException(nameof(index), $"Argument index must be < {ParameterCount}");
+                }
+            }
+            return _parameterInfos[index];
+        }
+
+#if !SCRIBAN_NO_ASYNC
         public virtual ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));
@@ -92,9 +201,19 @@ namespace Scriban.Runtime
             {
                 return newFunction(method);
             }
-            return new GenericFunctionWrapper(target, method);
+            return new DelegateCustomFunction(target, method);
         }
 
+        /// <summary>
+        /// Returns a <see cref="DynamicCustomFunction"/> from the specified delegate.
+        /// </summary>
+        /// <param name="del">A delegate</param>
+        /// <returns>A custom <see cref="DynamicCustomFunction"/></returns>
+        public static DynamicCustomFunction Create(Delegate del)
+        {
+            if (del == null) throw new ArgumentNullException(nameof(del));
+            return new DelegateCustomFunction(del);
+        }
 
         protected struct ArgumentValue
         {
@@ -111,8 +230,6 @@ namespace Scriban.Runtime
 
             public readonly object Value;
         }
-
-
 
         private class MethodComparer : IEqualityComparer<MethodInfo>
         {

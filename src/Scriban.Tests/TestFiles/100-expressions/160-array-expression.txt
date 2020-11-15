@@ -36,11 +36,11 @@ x4 = 1 >> x4
 
 Check precedence
 x5 = []
-x5 << 1 + 2
+x5 << (1 + 2)
 ===
 {{
 x5 = []
-x5 << 1 + 2
+x5 << (1 + 2)
 }}
 
 Check Array Size

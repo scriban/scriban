@@ -1,12 +1,11 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
-#if SCRIBAN_ASYNC
 using System.Threading;
 using System.Threading.Tasks;
-#endif
+using Scriban.Syntax;
 
 namespace Scriban.Runtime
 {
@@ -15,10 +14,10 @@ namespace Scriban.Runtime
     /// </summary>
     public interface IScriptOutput
     {
-        IScriptOutput Write(string text, int offset, int count);
+        void Write(string text, int offset, int count);
 
-#if SCRIBAN_ASYNC
-        ValueTask<IScriptOutput> WriteAsync(string text, int offset, int count, CancellationToken cancellationToken);
+#if !SCRIBAN_NO_ASYNC
+        ValueTask WriteAsync(string text, int offset, int count, CancellationToken cancellationToken);
 #endif
     }
 
@@ -27,10 +26,17 @@ namespace Scriban.Runtime
     /// </summary>
     public static partial class ScriptOutputExtensions
     {
-        public static IScriptOutput Write(this IScriptOutput scriptOutput, string text)
+        public static void Write(this IScriptOutput scriptOutput, string text)
         {
             if (text == null) throw new ArgumentNullException(nameof(text));
-            return scriptOutput.Write(text, 0, text.Length);
+            scriptOutput.Write(text, 0, text.Length);
+        }
+
+        public static void Write(this IScriptOutput scriptOutput, ScriptStringSlice text)
+        {
+            if (text.FullText == null) throw new ArgumentNullException(nameof(text));
+            if (text.Length == 0) return;
+            scriptOutput.Write(text.FullText, text.Index, text.Length);
         }
     }
 }

@@ -1,6 +1,8 @@
 # Language
 
-This document describes the syntax of the scriban templating language.
+This document describes the syntax of the scriban language in a templating context (within `{{` and `}}`).
+
+The language rules are the same in a pure scripting context.
 
 > NOTE: This document does not describe the `liquid` language. Check the [`liquid website`](https://shopify.github.io/liquid/) directly.
 
@@ -26,6 +28,11 @@ This document describes the syntax of the scriban templating language.
   - [6.1 Array with properties](#61-array-with-properties)
   - [6.2 The special <code>size</code> property](#62-the-special-size-property)
 - [7 Functions](#7-functions)
+  - [7.1 Simple functions](#71-simple-functions)
+  - [7.2 Anonymous functions](#72-anonymous-functions)
+  - [7.3 Parametric functions](#73-parametric-functions)
+  - [7.4 Inline functions](#74-inline-functions)
+  - [7.5 Function Pointers](#75-function-pointers)
 - [8 Expressions](#8-expressions)
   - [8.1 Variable path expressions](#81-variable-path-expressions)
   - [8.2 Assign expression](#82-assign-expression)
@@ -56,12 +63,11 @@ This document describes the syntax of the scriban templating language.
     - [<code>break</code> and <code>continue</code>](#break-and-continue)
   - [9.4 <code>capture &lt;variable&gt; ... end</code>](#94-capture-variable--end)
   - [9.5 <code>readonly &lt;variable&gt;</code>](#95-readonly-variable)
-  - [9.6 <code>import &lt;variable_path&gt;</code>](#96-import-variablepath)
+  - [9.6 <code>import &lt;variable_path&gt;</code>](#96-import-variable_path)
   - [9.7 <code>with &lt;variable&gt; ... end</code>](#97-with-variable--end)
   - [9.8 <code>wrap &lt;function&gt; &lt;arg1...argn&gt; ... end</code>](#98-wrap-function-arg1argn--end)
   - [9.9 <code>include &lt;name&gt; arg1?...argn?</code>](#99-include-name-arg1argn)
   - [9.10 <code>ret &lt;expression&gt;?</code>](#910-ret-expression)
-- [10 Built-in functions](builtins.md)
 
 [:top:](#language)
 ## 1. Blocks
@@ -288,7 +294,11 @@ Scriban supports two types of strings:
 A number in scriban `{{ 100 }}` is similar to a javascript number: 
 
 - Integers: `100`, `1e3`
-- Floats: `100.0`, `1.0e3`, `1.0e-3` 
+  - Hexadecimal integers: `0x1ef` and unsigned `0x80000000u`
+- Floats: `100.0`, `1.0e3`, `1.0e-3`
+  - 32-bit floats: `100.0f`
+  - 64-bit floats: `100.0d`
+  - 128-bit decimals: `100.0m` 
 
 [:top:](#language)
 ### 3.3 Boolean
@@ -431,6 +441,11 @@ Members of an object can be accessed:
 
 `{{ myobject.member1 }}` also equivalent to `{{ myobject["member1"] }}`
 
+
+You can access optional members in chain via the optional member operator `?.` (instead of the regular member operator: `.` ) (**New in 3.0**)
+
+`{{ myobject.member1?.submember1?.submember2 ?? "nothing" }}` will return `"nothing"` as `member1` doesn't contain a `submember1`/`submember2`.
+
 If the object is a "pure" scriban objects (created with a `{...}` or  instantiated by the runtime as a `ScriptObject`), you can also add members to it with a simple assignment:
 
 > **input**
@@ -563,7 +578,14 @@ a.size
 [:top:](#language)
 ## 7 Functions
 
-Scriban allows to define functions:
+Scriban allows to define 4 kind of functions:
+
+- Simple functions
+- Anonymous functions
+- Parametric functions (**New in 3.0**)
+- Inline functions (**New in 3.0**)
+
+### 7.1 Simple functions
 
 The following declares a function `sub` that uses its first argument and subtract from it the second argument:
 
@@ -602,7 +624,133 @@ Note that a function can have mixed text statements as well:
 {{func inc}}
    This is a text with the following argument {{ $0 + 1 }}
 {{end}}
+```
+
+> NOTE: Setting a non-local variable (e.g `a = 10`) in a simple function will be set at the global level and not at the function level.
+>
+> Parametric functions are solving this behavior by introducing a new variable scope inside the function that includes parameters. 
+ 
+### 7.2 Anonymous functions
+
+Anonymous functions are like simple functions but can be used in expressions (e.g as the last argument of function call)
+
+
+> **input**
+```
+{{ sub = do; ret $0 - $1; end; 1 | sub 3 }}
+```
+> **output**
+```
+-2
+```
+
+They are very convenient to build custom block functions:
+
+> **input**
+```
+{{ func launch; ret $0 1 2; end
+launch do 
+    ret $0 + $1
+end
+}}
+```
+> **output**
+```
+3
 ``` 
+ 
+### 7.3 Parametric functions
+
+They are similar to simple functions but they are declared with parenthesis, while also supporting declaration of different kind of parameters (normal, optional, variable).
+
+Another difference with simple functions is that they require function calls and arguments to match the expected function parameters. 
+
+- A function with normal parameters:
+
+``` 
+{{func sub(x,y)
+   ret x - y
+end}}
+``` 
+
+> **input**
+```
+{{sub 5 1}}
+{{5 | sub 1}}
+```
+> **output**
+```
+4
+4
+```
+
+
+- A function with normal parameters and optional parameters with default values:
+
+``` 
+{{func sub_opt(x, y, z = 1, w = 2)
+   ret x - y - z - w
+end}}
+``` 
+
+> **input**
+```
+{{sub_opt 5 1}}
+{{5 | sub_opt 1}}
+```
+> **output**
+```
+1
+1
+```
+
+Here we override the value of `z` and set it to `0` instead of default `1`:
+
+> **input**
+```
+{{sub_opt 5 1 0 }}
+{{5 | sub_opt 1 0}}
+```
+> **output**
+```
+2
+2
+```
+
+- A function with normal parameters and optional parameters with default values:
+
+``` 
+{{func sub_variable(x, y...)
+   ret x - (y[0] ?? 0) - (y[1] ?? 0)
+end}}
+``` 
+
+> **input**
+```
+{{sub_variable 5 1 -1}
+{{5 | sub_variable 1 -1}}
+```
+> **output**
+```
+5
+5
+```
+
+> NOTE: The special variable `$` is still accessible in parametric functions and represent the direct list of arguments. In the example above, `$ =  [5, [1, -1]]` 
+ 
+### 7.4 Inline functions
+
+For simple functions, it is convenient to define simple functions like mathematical functions:
+
+```
+{{ sub(x,y) = x - y }}
+```
+
+Inline functions are similar to parametric functions but they only support normal parameters. They don't support optional or variable parameters.
+
+
+
+### 7.5 Function Pointers
 
 Because functions are object, they can be stored into a property of an object by using the alias `@` operator:
 
@@ -693,7 +841,7 @@ The following literals are converted to plain strings:
 [:top:](#language)
 ### 8.5 Conditional expressions
 
-A conditional expression produces a boolean by comparing a left and right value.
+A boolean expression produces a boolean by comparing a left and right value.
 
 |Operator            | Description
 |--------------------|------------
@@ -712,6 +860,8 @@ You can combine conditionnal expressions with `&&` (and operator) and `||` (or o
 |--------------------|------------
 | `<left> && <right>` | Is left true and right true? 
 | `<left> || <right>` | Is left true or right true?
+
+The conditional expression `cond ? left : right` allow to return `left` if `cond` is `true` otherwise `right`. (**New in 3.0**)
 
 [:top:](#language)
 ### 8.6 Unary expressions

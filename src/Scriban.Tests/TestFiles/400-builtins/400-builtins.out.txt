@@ -40,6 +40,7 @@ List of all the builtin <string> functions:
  contains
  downcase
  ends_with
+ escape
  handleize
  hmac_sha1
  hmac_sha256
@@ -96,6 +97,8 @@ List of all the builtin <timespan> functions:
 
 List of all the builtin <object> functions:
  default
+ eval
+ eval_template
  format
  has_key
  has_value
@@ -107,6 +110,7 @@ List of all the builtin <object> functions:
 List of all the builtin <regex> functions:
  escape
  match
+ matches
  replace
  split
  unescape

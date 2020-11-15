@@ -1,1 +1,1 @@
-text(5,1) : error : Unexpected token `CodeExit`. Expecting a closing ] for the array initializer
+text(5,1) : error : Unexpected token found `}}` while expecting `]`.

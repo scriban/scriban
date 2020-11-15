@@ -3,19 +3,29 @@
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Text;
+using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Helpers
 {
-    internal static class ReflectionHelper
+    public static class ReflectionHelper
     {
-#if NET35 || NET40
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPrimitiveOrDecimal(this Type type)
         {
-            return type.IsPrimitive || type == typeof(decimal);
+            return type.IsPrimitive || type == typeof(decimal) || type == typeof(BigInteger);
         }
 
-        public static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
+        public static bool IsNumber(this Type type)
+        {
+            return (type.IsPrimitive && type != typeof(bool)) || type == typeof(decimal) || type == typeof(BigInteger);
+        }
+
+        internal static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));
@@ -27,7 +37,7 @@ namespace Scriban.Helpers
                 if (lookInterfaceType.IsInterface)
                     foreach (var interfaceType in type.GetInterfaces())
                         if (interfaceType.IsGenericType
-                            && interfaceType.GetGenericTypeDefinition() == lookInterfaceType)
+                            && interfaceType.GetGenericTypeDefinition()  == lookInterfaceType)
                             return interfaceType;
 
                 for (var t = type; t != null; t = t.BaseType)
@@ -43,112 +53,67 @@ namespace Scriban.Helpers
             return null;
         }
 
-        public static Delegate CreateDelegate(this MethodInfo method, Type type)
+        public static string ScriptPrettyName(this Type type)
         {
-            return Delegate.CreateDelegate(type, method);
-        }
+            if (type == null) return "null";
 
-        public static Type GetTypeInfo(this Type type)
-        {
-            return type;
-        }
-        public static IEnumerable<FieldInfo> GetDeclaredFields(this Type type)
-        {
-            return
-                type.GetFields(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance |
-                               BindingFlags.Static);
-        }
-        public static IEnumerable<PropertyInfo> GetDeclaredProperties(this Type type)
-        {
-            return
-                type.GetProperties(BindingFlags.Public | BindingFlags.DeclaredOnly | BindingFlags.Instance |
-                                   BindingFlags.Static);
-        }
-        public static object GetValue(this PropertyInfo propInfo, object obj)
-        {
-            return propInfo.GetValue(obj, null);
-        }
-        public static void SetValue(this PropertyInfo propInfo, object obj, object value)
-        {
-            propInfo.SetValue(obj, value, null);
-        }
-        public static MethodInfo GetDeclaredMethod(this Type type, string name)
-        {
-            return type.GetMethod(name, BindingFlags.Public | BindingFlags.Instance | BindingFlags.Static | BindingFlags.DeclaredOnly);
-        }
-        public static IEnumerable<MethodInfo> GetDeclaredMethods(this Type type)
-        {
-            return type.GetMethods(BindingFlags.Public| BindingFlags.Instance|BindingFlags.Static|BindingFlags.DeclaredOnly);
-        }
-        public static T GetCustomAttribute<T>(this MemberInfo memberInfo) where T : Attribute
-        {
-            foreach (var attribute in memberInfo.GetCustomAttributes(true))
+            if (type == typeof(bool)) return "bool";
+            if (type == typeof(byte)) return "byte";
+            if (type == typeof(sbyte)) return "sbyte";
+            if (type == typeof(ushort)) return "ushort";
+            if (type == typeof(short)) return "short";
+            if (type == typeof(uint)) return "uint";
+            if (type == typeof(int)) return "int";
+            if (type == typeof(ulong)) return "ulong";
+            if (type == typeof(long)) return "long";
+            if (type == typeof(string)) return "string";
+            if (type == typeof(float)) return "float";
+            if (type == typeof(double)) return "double";
+            if (type == typeof(decimal)) return "decimal";
+            if (type == typeof(BigInteger)) return "bigint";
+            if (type == typeof(ScriptRange)) return "range";
+            if (type == typeof(ScriptArray) || typeof(System.Collections.IList).IsAssignableFrom(type)) return "array";
+            if (typeof(IScriptObject).IsAssignableFrom(type)) return "object";
+            if (typeof(IScriptCustomFunction).IsAssignableFrom(type)) return "function";
+
+            string name = type.Name;
+
+            var indexOfGenerics = name.IndexOf('`');
+            if (indexOfGenerics > 0)
             {
-                var attributeT = attribute as T;
-                if (attributeT != null)
+                name = name.Substring(0, indexOfGenerics);
+
+                var builder = new StringBuilder();
+                builder.Append(name);
+                builder.Append('<');
+                var genericArguments = type.GenericTypeArguments;
+                for (var i = 0; i < genericArguments.Length; i++)
                 {
-                    return attributeT;
+                    var argType = genericArguments[i];
+                    if (i > 0) builder.Append(", ");
+                    builder.Append(ScriptPrettyName(argType));
                 }
+                builder.Append('>');
+                name = builder.ToString();
             }
-            return (T)null;
-        }
-        public static MethodInfo GetMethodInfo(this Delegate del)
-        {
-            return del.Method;
-        }
-#else
-        public static bool IsPrimitiveOrDecimal(this Type type)
-        {
-            return type.GetTypeInfo().IsPrimitive || type == typeof(decimal);
-        }
 
-        public static Type GetBaseOrInterface(this Type type, Type lookInterfaceTypeArg)
-        {
-            if (type == null)
-                throw new ArgumentNullException(nameof(type));
-            if (lookInterfaceTypeArg == null)
-                throw new ArgumentNullException(nameof(lookInterfaceTypeArg));
-
-            var lookInterfaceType = lookInterfaceTypeArg.GetTypeInfo();
-
-            if (lookInterfaceType.IsGenericTypeDefinition)
+            var typeNameAttr = type.GetCustomAttribute<ScriptTypeNameAttribute>();
+            if (typeNameAttr != null)
             {
-                if (lookInterfaceType.IsInterface)
-                    foreach (var interfaceType in type.GetTypeInfo().ImplementedInterfaces)
-                        if (interfaceType.GetTypeInfo().IsGenericType
-                            && interfaceType.GetTypeInfo().GetGenericTypeDefinition()  == lookInterfaceTypeArg)
-                            return interfaceType;
-
-                for (var t = type; t != null; t = t.GetTypeInfo().BaseType)
-                    if (t.GetTypeInfo().IsGenericType && t.GetTypeInfo().GetGenericTypeDefinition() == lookInterfaceTypeArg)
-                        return t;
+                return typeNameAttr.TypeName;
             }
-            else
+
+            // For any Scriban ScriptXxxYyy name, return xxx_yyy
+            if (type.Namespace != null && type.Namespace.StartsWith("Scriban."))
             {
-                if (lookInterfaceType.IsAssignableFrom(type.GetTypeInfo()))
-                    return lookInterfaceTypeArg;
+                if (name.StartsWith("Script"))
+                {
+                    name = name.Substring("Script".Length);
+                }
+                return StandardMemberRenamer.Rename(name);
             }
 
-            return null;
+            return name;
         }
-
-        public static Type[] GetGenericArguments(this TypeInfo type)
-        {
-            return type.GenericTypeArguments;
-        }
-
-        public static IEnumerable<FieldInfo> GetDeclaredFields(this TypeInfo type)
-        {
-            return type.DeclaredFields;
-        }
-        public static IEnumerable<PropertyInfo> GetDeclaredProperties(this TypeInfo type)
-        {
-            return type.DeclaredProperties;
-        }
-        public static IEnumerable<MethodInfo> GetDeclaredMethods(this TypeInfo type)
-        {
-            return type.DeclaredMethods;
-        }
-#endif
     }
 }

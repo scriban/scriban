@@ -1,1 +1,1 @@
-text(3,8) : error : Error while parsing binary expression: Expecting an <expression> to the right of the operator instead of `CodeExit` in: <expression> operator <expression>
+text(3,8) : error : Error while parsing binary expression: Expecting an <expression> to the right of the operator instead of `}}` in: <expression> operator <expression>

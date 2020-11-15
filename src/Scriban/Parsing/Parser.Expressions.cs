@@ -1,9 +1,10 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using Scriban.Functions;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -12,53 +13,99 @@ namespace Scriban.Parsing
 {
     public partial class Parser
     {
-        private static readonly Dictionary<TokenType, ScriptBinaryOperator> BinaryOperators = new Dictionary<TokenType, ScriptBinaryOperator>();
-
         private int _allowNewLineLevel = 0;
         private int _expressionLevel = 0;
 
-        static Parser()
+        public int ExpressionLevel => _expressionLevel;
+
+        private static readonly int PrecedenceOfMultiply = GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator.Multiply);
+
+        private bool TryBinaryOperator(out ScriptBinaryOperator binaryOperator, out int precedence)
         {
-            BinaryOperators.Add(TokenType.Multiply, ScriptBinaryOperator.Multiply);
-            BinaryOperators.Add(TokenType.Divide, ScriptBinaryOperator.Divide);
-            BinaryOperators.Add(TokenType.DoubleDivide, ScriptBinaryOperator.DivideRound);
-            BinaryOperators.Add(TokenType.Plus, ScriptBinaryOperator.Add);
-            BinaryOperators.Add(TokenType.Minus, ScriptBinaryOperator.Substract);
-            BinaryOperators.Add(TokenType.Modulus, ScriptBinaryOperator.Modulus);
-            BinaryOperators.Add(TokenType.ShiftLeft, ScriptBinaryOperator.ShiftLeft);
-            BinaryOperators.Add(TokenType.ShiftRight, ScriptBinaryOperator.ShiftRight);
-            BinaryOperators.Add(TokenType.EmptyCoalescing, ScriptBinaryOperator.EmptyCoalescing);
-            BinaryOperators.Add(TokenType.And, ScriptBinaryOperator.And);
-            BinaryOperators.Add(TokenType.Or, ScriptBinaryOperator.Or);
-            BinaryOperators.Add(TokenType.CompareEqual, ScriptBinaryOperator.CompareEqual);
-            BinaryOperators.Add(TokenType.CompareNotEqual, ScriptBinaryOperator.CompareNotEqual);
-            BinaryOperators.Add(TokenType.CompareGreater, ScriptBinaryOperator.CompareGreater);
-            BinaryOperators.Add(TokenType.CompareGreaterOrEqual, ScriptBinaryOperator.CompareGreaterOrEqual);
-            BinaryOperators.Add(TokenType.CompareLess, ScriptBinaryOperator.CompareLess);
-            BinaryOperators.Add(TokenType.CompareLessOrEqual, ScriptBinaryOperator.CompareLessOrEqual);
-            BinaryOperators.Add(TokenType.DoubleDot, ScriptBinaryOperator.RangeInclude);
-            BinaryOperators.Add(TokenType.DoubleDotLess, ScriptBinaryOperator.RangeExclude);
+            var tokenType = Current.Type;
+
+            precedence = 0;
+
+            binaryOperator = ScriptBinaryOperator.None;
+            switch (tokenType)
+            {
+                case TokenType.Asterisk: binaryOperator = ScriptBinaryOperator.Multiply; break;
+                case TokenType.Divide: binaryOperator = ScriptBinaryOperator.Divide; break;
+                case TokenType.DoubleDivide: binaryOperator = ScriptBinaryOperator.DivideRound; break;
+                case TokenType.Plus: binaryOperator = ScriptBinaryOperator.Add; break;
+                case TokenType.Minus: binaryOperator = ScriptBinaryOperator.Substract; break;
+                case TokenType.Percent: binaryOperator = ScriptBinaryOperator.Modulus; break;
+                case TokenType.DoubleLessThan: binaryOperator = ScriptBinaryOperator.ShiftLeft; break;
+                case TokenType.DoubleGreaterThan: binaryOperator = ScriptBinaryOperator.ShiftRight; break;
+                case TokenType.DoubleQuestion: binaryOperator = ScriptBinaryOperator.EmptyCoalescing; break;
+                case TokenType.DoubleAmp: binaryOperator = ScriptBinaryOperator.And; break;
+                case TokenType.DoubleVerticalBar: binaryOperator = ScriptBinaryOperator.Or; break;
+                case TokenType.DoubleEqual: binaryOperator = ScriptBinaryOperator.CompareEqual; break;
+                case TokenType.ExclamationEqual: binaryOperator = ScriptBinaryOperator.CompareNotEqual; break;
+                case TokenType.Greater: binaryOperator = ScriptBinaryOperator.CompareGreater; break;
+                case TokenType.GreaterEqual: binaryOperator = ScriptBinaryOperator.CompareGreaterOrEqual; break;
+                case TokenType.Less: binaryOperator = ScriptBinaryOperator.CompareLess; break;
+                case TokenType.LessEqual: binaryOperator = ScriptBinaryOperator.CompareLessOrEqual; break;
+                case TokenType.DoubleDot: binaryOperator = ScriptBinaryOperator.RangeInclude; break;
+                case TokenType.DoubleDotLess: binaryOperator = ScriptBinaryOperator.RangeExclude; break;
+                default:
+                    if (_isScientific)
+                    {
+                        switch (tokenType)
+                        {
+                            case TokenType.Caret: binaryOperator = ScriptBinaryOperator.Power; break;
+                            case TokenType.Amp: binaryOperator = ScriptBinaryOperator.BinaryAnd; break;
+                            case TokenType.VerticalBar: binaryOperator = ScriptBinaryOperator.BinaryOr; break;
+                        }
+                    }
+                    break;
+            }
+
+            if (binaryOperator != ScriptBinaryOperator.None)
+            {
+                precedence = GetDefaultBinaryOperatorPrecedence(binaryOperator);
+            }
+
+            return binaryOperator != ScriptBinaryOperator.None;
+        }
+
+        private ScriptExpression ParseExpressionAsVariableOrStringOrExpression(ScriptNode parentNode)
+        {
+            switch (Current.Type)
+            {
+                case TokenType.Identifier:
+                case TokenType.IdentifierSpecial:
+                    return ParseVariable();
+                case TokenType.String:
+                    return ParseString();
+                case TokenType.VerbatimString:
+                    return ParseVerbatimString();
+                default:
+                    return ParseExpression(parentNode);
+            }
         }
 
         private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             bool hasAnonymousFunction = false;
-            return ParseExpression(parentNode, ref hasAnonymousFunction, parentExpression, precedence, mode, allowAssignment);
-        }
-
-        private ScriptExpression ParseExpression(ScriptNode parentNode, ref bool hasAnonymousFunction, ScriptExpression parentExpression = null, int precedence = 0,
-            ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
-        {
             int expressionCount = 0;
             _expressionLevel++;
             var expressionDepthBeforeEntering = _expressionDepth;
+
+            var enteringPrecedence = precedence;
+
             EnterExpression();
             try
             {
                 ScriptFunctionCall functionCall = null;
+
                 parseExpression:
                 expressionCount++;
+
+                // Allow custom parsing for a first pre-expression
                 ScriptExpression leftOperand = null;
+                bool isLeftOperandClosed = false;
+
                 switch (Current.Type)
                 {
                     case TokenType.Identifier:
@@ -90,6 +137,12 @@ namespace Scriban.Parsing
                     case TokenType.Integer:
                         leftOperand = ParseInteger();
                         break;
+                    case TokenType.HexaInteger:
+                        leftOperand = ParseHexaInteger();
+                        break;
+                    case TokenType.BinaryInteger:
+                        leftOperand = ParseBinaryInteger();
+                        break;
                     case TokenType.Float:
                         leftOperand = ParseFloat();
                         break;
@@ -102,8 +155,8 @@ namespace Scriban.Parsing
                     case TokenType.VerbatimString:
                         leftOperand = ParseVerbatimString();
                         break;
-                    case TokenType.OpenParent:
-                        leftOperand = ParseParenthesis(ref hasAnonymousFunction);
+                    case TokenType.OpenParen:
+                        leftOperand = ParseParenthesis();
                         break;
                     case TokenType.OpenBrace:
                         leftOperand = ParseObjectInitializer();
@@ -111,12 +164,11 @@ namespace Scriban.Parsing
                     case TokenType.OpenBracket:
                         leftOperand = ParseArrayInitializer();
                         break;
-                    case TokenType.Not:
-                    case TokenType.Minus:
-                    case TokenType.Arroba:
-                    case TokenType.Plus:
-                    case TokenType.Caret:
-                        leftOperand = ParseUnaryExpression(ref hasAnonymousFunction);
+                    default:
+                        if (IsStartingAsUnaryExpression())
+                        {
+                            leftOperand = ParseUnaryExpression();
+                        }
                         break;
                 }
 
@@ -147,25 +199,31 @@ namespace Scriban.Parsing
                     }
 
                     // Parse Member expression are expected to be followed only by an identifier
-                    if (Current.Type == TokenType.Dot)
+                    if (Current.Type == TokenType.Dot || (!_isLiquid && Current.Type == TokenType.QuestionDot))
                     {
                         var nextToken = PeekToken();
                         if (nextToken.Type == TokenType.Identifier)
                         {
-                            NextToken();
+                            var dotToken = ParseToken(Current.Type);
 
                             if (GetAsText(Current) == "empty" && PeekToken().Type == TokenType.Question)
                             {
                                 var memberExpression = Open<ScriptIsEmptyExpression>();
-                                NextToken(); // skip empty
-                                NextToken(); // skip ?
+                                memberExpression.Span = leftOperand.Span;
+                                memberExpression.DotToken = dotToken;
+                                memberExpression.Member = (ScriptVariable)ParseVariable();
+                                ExpectAndParseTokenTo(memberExpression.QuestionToken, TokenType.Question);
                                 memberExpression.Target = leftOperand;
                                 leftOperand = Close(memberExpression);
                             }
                             else
                             {
                                 var memberExpression = Open<ScriptMemberExpression>();
+                                memberExpression.Span = leftOperand.Span;
+
+                                memberExpression.DotToken = dotToken;
                                 memberExpression.Target = leftOperand;
+
                                 var member = ParseVariable();
                                 if (!(member is ScriptVariable))
                                 {
@@ -186,21 +244,24 @@ namespace Scriban.Parsing
 
                     // If we have a bracket but left operand is a (variable || member || indexer), then we consider next as an indexer
                     // unit test: 130-indexer-accessor-accept1.txt
-                    if (Current.Type == TokenType.OpenBracket && leftOperand is IScriptVariablePath && !IsPreviousCharWhitespace())
+                    if (Current.Type == TokenType.OpenBracket && (leftOperand is IScriptVariablePath || leftOperand is ScriptLiteral || leftOperand is ScriptFunctionCall) && !IsPreviousCharWhitespace())
                     {
-                        NextToken();
                         var indexerExpression = Open<ScriptIndexerExpression>();
+                        indexerExpression.Span = leftOperand.Span;
                         indexerExpression.Target = leftOperand;
+
+                        ExpectAndParseTokenTo(indexerExpression.OpenBracket, TokenType.OpenBracket); // parse [
+
                         // unit test: 130-indexer-accessor-error5.txt
-                        indexerExpression.Index = ExpectAndParseExpression(indexerExpression, ref hasAnonymousFunction, functionCall, 0, $"Expecting <index_expression> instead of `{Current.Type}`");
+                        indexerExpression.Index = ExpectAndParseExpression(indexerExpression, functionCall, 0, $"Expecting <index_expression> instead of `{GetAsText(Current)}`");
 
                         if (Current.Type != TokenType.CloseBracket)
                         {
-                            LogError($"Unexpected `{Current.Type}`. Expecting ']'");
+                            LogError($"Unexpected `{GetAsText(Current)}`. Expecting ']'");
                         }
                         else
                         {
-                            NextToken();
+                            ExpectAndParseTokenTo(indexerExpression.CloseBracket, TokenType.CloseBracket); // parse ]
                         }
 
                         leftOperand = Close(indexerExpression);
@@ -212,60 +273,209 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (Current.Type == TokenType.Equal)
+                    // Named argument
+                    if (mode != ParseExpressionMode.DefaultNoNamedArgument && Current.Type == TokenType.Colon)
                     {
-                        var assignExpression = Open<ScriptAssignExpression>();
-
-                        if (_expressionLevel > 1 || !allowAssignment)
+                        if (!(leftOperand is ScriptVariable))
                         {
-                            // unit test: 101-assign-complex-error1.txt
-                            LogError(assignExpression, $"Expression is only allowed for a top level assignment");
+                            LogError(leftOperand.Span, $"Expecting a simple global or local variable before `:` in order to create a named argument");
+                            break;
                         }
 
-                        NextToken();
-
-                        assignExpression.Target = TransformKeyword(leftOperand);
-
-                        // unit test: 105-assign-error3.txt
-                        assignExpression.Value = ExpectAndParseExpression(assignExpression, ref hasAnonymousFunction, parentExpression);
-
-                        leftOperand = Close(assignExpression);
-                        continue;
+                        var namedArgument = Open<ScriptNamedArgument>();
+                        namedArgument.Name = (ScriptVariable) leftOperand;
+                        namedArgument.ColonToken = ParseToken(TokenType.Colon);
+                        namedArgument.Value = ExpectAndParseExpression(parentNode);
+                        Close(namedArgument);
+                        leftOperand = namedArgument;
+                        break;
                     }
+
+                    if (Current.Type == TokenType.Equal)
+                    {
+                        if (leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out ScriptFunction declaration))
+                        {
+                            if (_expressionLevel > 1 || !allowAssignment)
+                            {
+                                LogError(leftOperand, $"Creating a function is only allowed for a top level assignment");
+                            }
+
+                            declaration.EqualToken = ParseToken(TokenType.Equal); // eat equal token
+                            declaration.Body = ParseExpressionStatement();
+                            declaration.Span.End = declaration.Body.Span.End;
+                            leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
+                        }
+                        else
+                        {
+                            var assignExpression = Open<ScriptAssignExpression>();
+
+                            if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
+                            {
+                                // unit test: 101-assign-complex-error1.txt
+                                LogError(assignExpression, $"Expression is only allowed for a top level assignment");
+                            }
+
+                            ExpectAndParseTokenTo(assignExpression.EqualToken, TokenType.Equal);
+
+                            assignExpression.Target = TransformKeyword(leftOperand);
+
+                            // unit test: 105-assign-error3.txt
+                            assignExpression.Value = ExpectAndParseExpression(assignExpression, parentExpression);
+
+                            leftOperand = Close(assignExpression);
+                        }
+
+                        break;
+                    }
+
+                    // Parse unary -1 if a minus is not followed by a space
+                    bool isUnaryMinus = _isScientific && Current.Type == TokenType.Minus && !IsNextCharWhitespace();
 
                     // Handle binary operators here
                     ScriptBinaryOperator binaryOperatorType;
-                    if (BinaryOperators.TryGetValue(Current.Type, out binaryOperatorType) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType)))
+                    int newPrecedence;
+                    if (!isUnaryMinus && TryBinaryOperator(out binaryOperatorType, out newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
                     {
-                        var newPrecedence = GetOperatorPrecedence(binaryOperatorType);
-
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
                         if (newPrecedence <= precedence)
-                            break;
+                        {
+                            if (_isScientific)
+                            {
+                                if (functionCall != null)
+                                {
+                                    // if we were in the middle of a function call and the new operator
+                                    // doesn't have the same associativity (/*%^) we will transform
+                                    // the pending call into a left operand and let the current operator (eg +)
+                                    // to work on it. Example: cos 2x + 1
+                                    // functionCall: cos 2
+                                    // leftOperand: x
+                                    // binaryOperatorType: Add
+                                    if (newPrecedence < precedence)
+                                    {
+                                        functionCall.AddArgument(leftOperand);
+                                        leftOperand = functionCall;
+                                        functionCall = null;
+                                    }
+                                    precedence = newPrecedence;
+                                }
+                                else
+                                {
+                                    if (enteringPrecedence == 0)
+                                    {
+                                        precedence = enteringPrecedence;
+                                        continue;
+                                    }
+                                    break;
+                                }
+                            }
+                            else
+                            {
+                                if (enteringPrecedence == 0)
+                                {
+                                    precedence = enteringPrecedence;
+                                    continue;
+                                }
+                                break;
+                            }
+                        }
+
+                        // In scientific mode, with a pending function call, we can't detect how
+                        // operations of similar precedence (*/%^) are going to behave until
+                        // we resolve the functions (to detect if they take a parameter or not)
+                        // In fact case, we need create a ScriptArgumentBinary for the operator
+                        // and push it as an argument of the function call:
+                        // expression to parse: cos 2x * cos 2x
+                        // function call will be => cos(2, x, *, cos, 2, x)
+                        // which is incorrect so we will rewrite it to cos(2 * x) * cos(2 * x)
+                        if (_isScientific && (functionCall != null || newPrecedence >= PrecedenceOfMultiply))
+                        {
+                            // Store %*/^ in a pseudo function call
+                            if (functionCall == null)
+                            {
+                                functionCall = Open<ScriptFunctionCall>();
+                                functionCall.Target = leftOperand;
+                                functionCall.Span = leftOperand.Span;
+                            }
+                            else
+                            {
+                                functionCall.AddArgument(leftOperand);
+                            }
+
+                            var binaryArgument = Open<ScriptArgumentBinary>();
+                            binaryArgument.Operator = binaryOperatorType;
+                            binaryArgument.OperatorToken = ParseToken(Current.Type);
+                            Close(binaryArgument);
+
+                            functionCall.AddArgument(binaryArgument);
+
+                            precedence = newPrecedence;
+
+                            goto parseExpression;
+                        }
 
                         // We fake entering an expression here to limit the number of expression
                         EnterExpression();
                         var binaryExpression = Open<ScriptBinaryExpression>();
+                        binaryExpression.Span = leftOperand.Span;
                         binaryExpression.Left = leftOperand;
                         binaryExpression.Operator = binaryOperatorType;
 
-                        NextToken(); // skip the operator
+                        // Parse the operator
+                        binaryExpression.OperatorToken = ParseToken(Current.Type);
+
+                        // Special case for liquid, we revert the verbatim to the original scriban operator
+                        if (_isLiquid && binaryOperatorType != ScriptBinaryOperator.Custom)
+                        {
+                            binaryExpression.OperatorToken.Value = binaryOperatorType.ToText();
+                        }
 
                         // unit test: 110-binary-simple-error1.txt
-                        binaryExpression.Right = ExpectAndParseExpression(binaryExpression, ref hasAnonymousFunction,
+                        binaryExpression.Right = ExpectAndParseExpression(binaryExpression,
                             functionCall ?? parentExpression, newPrecedence,
-                            $"Expecting an <expression> to the right of the operator instead of `{Current.Type}`");
+                            $"Expecting an <expression> to the right of the operator instead of `{GetAsText(Current)}`");
                         leftOperand = Close(binaryExpression);
 
                         continue;
                     }
 
-                    if (precedence > 0)
+                    // Parse conditional expression
+                    if (!_isLiquid && Current.Type == TokenType.Question)
                     {
+                        if (precedence > 0)
+                        {
+                            break;
+                        }
+
+                        // If we have any pending function call, we close it
+                        if (functionCall != null)
+                        {
+                            functionCall.Arguments.Add(leftOperand);
+                            Close(functionCall);
+                            leftOperand = functionCall;
+                            functionCall = null;
+                        }
+
+                        var conditionalExpression = Open<ScriptConditionalExpression>();
+                        conditionalExpression.Span = leftOperand.Span;
+
+                        conditionalExpression.Condition = leftOperand;
+
+                        // Parse ?
+                        ExpectAndParseTokenTo(conditionalExpression.QuestionToken, TokenType.Question);
+
+                        conditionalExpression.ThenValue = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.DefaultNoNamedArgument);
+
+                        // Parse :
+                        ExpectAndParseTokenTo(conditionalExpression.ColonToken, TokenType.Colon);
+
+                        conditionalExpression.ElseValue = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.DefaultNoNamedArgument);
+
+                        Close(conditionalExpression);
+                        leftOperand = conditionalExpression;
                         break;
                     }
 
-                    if (StartAsExpression())
+                    if (IsStartOfExpression())
                     {
                         // If we can parse a statement, we have a method call
                         if (parentExpression != null)
@@ -275,7 +485,7 @@ namespace Scriban.Parsing
 
                         // Parse named parameters
                         var paramContainer = parentNode as IScriptNamedArgumentContainer;
-                        if (Current.Type == TokenType.Identifier && (parentNode is IScriptNamedArgumentContainer || !_isLiquid && PeekToken().Type == TokenType.Colon))
+                        if (!_isScientific && Current.Type == TokenType.Identifier && (parentNode is IScriptNamedArgumentContainer || !_isLiquid && PeekToken().Type == TokenType.Colon))
                         {
                             if (paramContainer == null)
                             {
@@ -289,22 +499,29 @@ namespace Scriban.Parsing
                                 {
                                     functionCall.Arguments.Add(leftOperand);
                                 }
-                                Close(leftOperand);
                             }
+                            Close(leftOperand);
+                            isLeftOperandClosed = true;
 
                             while (true)
                             {
-                                if (Current.Type != TokenType.Identifier)
+                                // Don't parse boolean parameters as named parameters for function calls
+                                if (Current.Type != TokenType.Identifier || (paramContainer == null && PeekToken().Type != TokenType.Colon))
                                 {
                                     break;
                                 }
 
                                 var parameter = Open<ScriptNamedArgument>();
-                                var parameterName = GetAsText(Current);
-                                parameter.Name = parameterName;
 
-                                // Skip argument name
-                                NextToken();
+                                // Parse the name
+                                var variable = ParseVariable();
+                                if (!(variable is ScriptVariable))
+                                {
+                                    LogError(variable.Span, $"Invalid identifier passed as a named argument. Expecting a simple variable name");
+                                    break;
+                                }
+
+                                parameter.Name = (ScriptVariable)variable;
 
                                 if (paramContainer != null)
                                 {
@@ -319,7 +536,9 @@ namespace Scriban.Parsing
                                 // otherwise it is a boolean argument name
                                 if (Current.Type == TokenType.Colon)
                                 {
-                                    NextToken();
+                                    // Parse : token
+                                    parameter.ColonToken = ScriptToken.Colon();
+                                    ExpectAndParseTokenTo(parameter.ColonToken, TokenType.Colon);
                                     parameter.Value = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.BasicExpression);
                                     parameter.Span.End = parameter.Value.Span.End;
                                 }
@@ -327,22 +546,46 @@ namespace Scriban.Parsing
                                 if (functionCall != null)
                                 {
                                     functionCall.Span.End = parameter.Span.End;
+                                    if (parameter.Value is ScriptAnonymousFunction)
+                                    {
+                                        break;
+                                    }
                                 }
                             }
 
-                            // As we have handled leftOperand here, we don't let the function out of this while to pick up the leftOperand
-                            if (functionCall != null)
+                            if (paramContainer != null || !IsStartOfExpression())
                             {
-                                leftOperand = functionCall;
-                                functionCall = null;
+                                if (functionCall != null)
+                                {
+                                    leftOperand = functionCall;
+                                    functionCall = null;
+                                }
+
+                                // We don't allow anything after named parameters for IScriptNamedArgumentContainer
+                                break;
                             }
 
-                            // We don't allow anything after named parameters
-                            break;
+                            // Otherwise we allow to mix normal parameters within named parameters
+                            goto parseExpression;
                         }
 
-                        if (functionCall == null)
+                        bool isLikelyExplicitFunctionCall = Current.Type == TokenType.OpenParen && !IsPreviousCharWhitespace();
+                        if (functionCall == null || isLikelyExplicitFunctionCall)
                         {
+                            if (_isScientific && !isLikelyExplicitFunctionCall)
+                            {
+                                newPrecedence = PrecedenceOfMultiply;
+
+                                if (newPrecedence <= precedence)
+                                {
+                                    break;
+                                }
+
+                                precedence = newPrecedence;
+                            }
+
+                            var pendingFunctionCall = functionCall;
+
                             functionCall = Open<ScriptFunctionCall>();
                             functionCall.Target = leftOperand;
 
@@ -353,28 +596,99 @@ namespace Scriban.Parsing
                             }
 
                             functionCall.Span.Start = leftOperand.Span.Start;
+
+                            // Regular function call target(arg0, arg1, arg3, arg4...)
+                            if (Current.Type == TokenType.OpenParen && !IsPreviousCharWhitespace())
+                            {
+                                // This is an explicit call
+                                functionCall.ExplicitCall = true;
+                                functionCall.OpenParent = ParseToken(TokenType.OpenParen);
+
+                                bool isFirst = true;
+                                while (true)
+                                {
+                                    // Parse any required comma (before each new non-first argument)
+                                    // Or closing parent (and we exit the loop)
+                                    if (Current.Type == TokenType.CloseParen)
+                                    {
+                                        functionCall.CloseParen = ParseToken(TokenType.CloseParen);
+                                        break;
+                                    }
+
+                                    if (!isFirst)
+                                    {
+                                        if (Current.Type == TokenType.Comma)
+                                        {
+                                            PushTokenToTrivia();
+                                            NextToken();
+                                            FlushTriviasToLastTerminal();
+                                        }
+                                        else
+                                        {
+                                            LogError(Current, "Expecting a comma to separate arguments in a function call.");
+                                        }
+                                    }
+                                    isFirst = false;
+
+                                    // Else we expect an expression
+                                    if (IsStartOfExpression())
+                                    {
+                                        var arg = ParseExpression(functionCall);
+                                        functionCall.Arguments.Add(arg);
+                                        functionCall.Span.End = arg.Span.End;
+                                    }
+                                    else
+                                    {
+                                        LogError(Current, "Expecting an expression for argument function calls instead of this token.");
+                                        break;
+                                    }
+                                }
+
+                                if (functionCall.CloseParen == null)
+                                {
+                                    LogError(Current, "Expecting a closing parenthesis for a function call.");
+                                }
+
+                                leftOperand = functionCall;
+
+                                functionCall = pendingFunctionCall;
+                                continue;
+                            }
                         }
                         else
                         {
-                            functionCall.Arguments.Add(leftOperand);
+                            functionCall.AddArgument(leftOperand);
+                            functionCall.Span.End = leftOperand.Span.End;
+
+                            if (leftOperand is ScriptAnonymousFunction)
+                            {
+                                break;
+                            }
                         }
                         goto parseExpression;
                     }
 
-                    if (Current.Type == TokenType.Pipe)
+                    if (enteringPrecedence > 0)
+                    {
+                        break;
+                    }
+
+                    if (_isScientific && Current.Type == TokenType.PipeGreater || !_isScientific && (Current.Type == TokenType.VerticalBar || Current.Type == TokenType.PipeGreater))
                     {
                         if (functionCall != null)
                         {
                             functionCall.Arguments.Add(leftOperand);
                             leftOperand = functionCall;
+                            functionCall = null;
                         }
 
                         var pipeCall = Open<ScriptPipeCall>();
                         pipeCall.From = leftOperand;
-                        NextToken(); // skip |
+
+                        pipeCall.PipeToken = ParseToken(Current.Type); // skip | or |>
 
                         // unit test: 310-func-pipe-error1.txt
-                        pipeCall.To = ExpectAndParseExpression(pipeCall, ref hasAnonymousFunction);
+                        pipeCall.To = ExpectAndParseExpression(pipeCall);
                         return Close(pipeCall);
                     }
 
@@ -387,7 +701,8 @@ namespace Scriban.Parsing
                     functionCall.Span.End = leftOperand.Span.End;
                     return functionCall;
                 }
-                return Close(leftOperand);
+
+                return isLeftOperandClosed ? leftOperand : Close(leftOperand);
             }
             finally
             {
@@ -404,7 +719,9 @@ namespace Scriban.Parsing
 
             // Should happen before the NextToken to consume any EOL after
             _allowNewLineLevel++;
-            NextToken(); // Skip [
+
+            // Parse [
+            ExpectAndParseTokenTo(scriptArray.OpenBracketToken, TokenType.OpenBracket);
 
             bool expectingEndOfInitializer = false;
 
@@ -431,15 +748,14 @@ namespace Scriban.Parsing
                         // Record trailing Commas
                         if (_isKeepTrivia)
                         {
-                            expression.AddTrivia(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Comma, _lexer.Text), false);
+                            PushTokenToTrivia();
                         }
 
                         NextToken();
 
-                        if (_isKeepTrivia && _trivias.Count > 0)
+                        if (_isKeepTrivia)
                         {
-                            expression.AddTrivias(_trivias, false);
-                            _trivias.Clear();
+                            FlushTriviasToLastTerminal();
                         }
                     }
                     else
@@ -449,16 +765,16 @@ namespace Scriban.Parsing
                 }
                 else
                 {
-                    // unit test: 120-array-initializer-error1.txt
-                    LogError($"Unexpected token `{Current.Type}`. Expecting a closing ] for the array initializer");
                     break;
                 }
             }
 
             // Should happen before NextToken() to stop on the next EOF
             _allowNewLineLevel--;
-            NextToken(); // Skip ]
 
+            // Parse ]
+            // unit test: 120-array-initializer-error1.txt
+            ExpectAndParseTokenTo(scriptArray.CloseBracketToken, TokenType.CloseBracket);
             return Close(scriptArray);
         }
 
@@ -468,10 +784,11 @@ namespace Scriban.Parsing
 
             // Should happen before the NextToken to consume any EOL after
             _allowNewLineLevel++;
-            NextToken(); // Skip {
+            ExpectAndParseTokenTo(scriptObject.OpenBrace, TokenType.OpenBrace); // Parse {
 
             // unit test: 140-object-initializer-accessor.txt
             bool expectingEndOfInitializer = false;
+            bool hasErrors = false;
             while (true)
             {
                 if (Current.Type == TokenType.CloseBrace)
@@ -482,18 +799,23 @@ namespace Scriban.Parsing
                 if (!expectingEndOfInitializer && (Current.Type == TokenType.Identifier || Current.Type == TokenType.String))
                 {
                     var positionBefore = Current;
-                    var variableOrLiteral = ParseExpression(scriptObject);
+
+                    var objectMember = Open<ScriptObjectMember>();
+
+                    var variableOrLiteral = ParseExpressionAsVariableOrStringOrExpression(scriptObject);
                     var variable = variableOrLiteral as ScriptVariable;
                     var literal = variableOrLiteral as ScriptLiteral;
 
                     if (variable == null && literal == null)
                     {
-                        LogError(positionBefore, $"Unexpected member type `{variableOrLiteral}/{ScriptSyntaxAttribute.Get(variableOrLiteral).Name}` found for object initializer member name");
+                        hasErrors = true;
+                        LogError(positionBefore, $"Unexpected member type `{variableOrLiteral}/{ScriptSyntaxAttribute.Get(variableOrLiteral).TypeName}` found for object initializer member name");
                         break;
                     }
 
                     if (literal != null && !(literal.Value is string))
                     {
+                        hasErrors = true;
                         LogError(positionBefore,
                             $"Invalid literal member `{literal.Value}/{literal.Value?.GetType()}` found for object initializer member name. Only literal string or identifier name are allowed");
                         break;
@@ -504,6 +826,7 @@ namespace Scriban.Parsing
                         if (variable.Scope != ScriptVariableScope.Global)
                         {
                             // unit test: 140-object-initializer-error3.txt
+                            hasErrors = true;
                             LogError("Expecting a simple identifier for member names");
                             break;
                         }
@@ -512,39 +835,39 @@ namespace Scriban.Parsing
                     if (Current.Type != TokenType.Colon)
                     {
                         // unit test: 140-object-initializer-error4.txt
-                        LogError($"Unexpected token `{Current.Type}` Expecting a colon : after identifier `{variable.Name}` for object initializer member name");
+                        hasErrors = true;
+                        LogError($"Unexpected token `{GetAsText(Current)}` Expecting a colon : after identifier `{variable?.Name}` for object initializer member name");
                         break;
                     }
 
-                    // TODO: record as trivia
-                    NextToken(); // Skip :
+                    ExpectAndParseTokenTo(objectMember.ColonToken, TokenType.Colon); // Parse :
+                    objectMember.Name = variableOrLiteral;
 
-                    if (!StartAsExpression())
+                    if (!IsStartOfExpression())
                     {
                         // unit test: 140-object-initializer-error5.txt
-                        LogError($"Unexpected token `{Current.Type}`. Expecting an expression for the value of the member instead of `{GetAsText(Current)}`");
+                        hasErrors = true;
+                        LogError($"Unexpected token `{GetAsText(Current)}`. Expecting an expression for the value of the member.");
                         break;
                     }
 
                     var expression = ParseExpression(scriptObject);
+                    objectMember.Value = expression;
+                    objectMember.Span.End = expression.Span.End;
+                    Close(objectMember);
 
                     // Erase any previous declaration of this member
-                    scriptObject.Members[variableOrLiteral] = expression;
+                    scriptObject.Members.Add(objectMember);
 
                     if (Current.Type == TokenType.Comma)
                     {
                         // Record trailing Commas
                         if (_isKeepTrivia)
                         {
-                            expression.AddTrivia(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Comma, _lexer.Text), false);
+                            PushTokenToTrivia();
+                            FlushTriviasToLastTerminal();
                         }
                         NextToken();
-
-                        if (_isKeepTrivia && _trivias.Count > 0)
-                        {
-                            expression.AddTrivias(_trivias, false);
-                            _trivias.Clear();
-                        }
                     }
                     else
                     {
@@ -554,44 +877,96 @@ namespace Scriban.Parsing
                 else
                 {
                     // unit test: 140-object-initializer-error1.txt
-                    LogError($"Unexpected token `{Current.Type}` while parsing object initializer. Expecting a simple identifier for the member name instead of `{GetAsText(Current)}`");
+                    hasErrors = true;
+                    LogError($"Unexpected token `{GetAsText(Current)}` while parsing object initializer. Expecting a simple identifier for the member name.");
                     break;
                 }
             }
 
             // Should happen before NextToken() to stop on the next EOF
             _allowNewLineLevel--;
-            NextToken(); // Skip }
+
+            if (!hasErrors)
+            {
+                ExpectAndParseTokenTo(scriptObject.CloseBrace, TokenType.CloseBrace); // Parse }
+            }
 
             return Close(scriptObject);
         }
 
-        private ScriptExpression ParseParenthesis(ref bool hasAnonymousFunction)
+        private ScriptExpression ParseParenthesis()
         {
             // unit test: 106-parenthesis.txt
             var expression = Open<ScriptNestedExpression>();
-            NextToken(); // Skip (
-            expression.Expression = ExpectAndParseExpression(expression, ref hasAnonymousFunction);
+            ExpectAndParseTokenTo(expression.OpenParen, TokenType.OpenParen); // Parse (
+            bool hasAnonymousFunction = false;
+            expression.Expression = ExpectAndParseExpression(expression);
 
-            if (Current.Type == TokenType.CloseParent)
+            if (Current.Type == TokenType.CloseParen)
             {
-                NextToken();
+                ExpectAndParseTokenTo(expression.CloseParen, TokenType.CloseParen); // Parse )
             }
             else
             {
                 // unit test: 106-parenthesis-error1.txt
-                LogError(Current, $"Invalid token `{Current.Type}`. Expecting closing ) for opening `{expression.Span.Start}`");
+                LogError(Current, $"Invalid token `{GetAsText(Current)}`. Expecting a closing `)`.");
             }
             return Close(expression);
         }
 
-        private ScriptExpression ParseUnaryExpression(ref bool hasAnonymousFunction)
+        private ScriptToken ParseToken(TokenType tokenType)
+        {
+            var verbatim = Open<ScriptToken>();
+            if (Current.Type != tokenType)
+            {
+                LogError(CurrentSpan, $"Unexpected token found `{GetAsText(Current)}` while expecting `{tokenType.ToText()}`.");
+            }
+            verbatim.TokenType = Current.Type;
+            verbatim.Value = tokenType.ToText();
+            NextToken();
+            return Close(verbatim);
+        }
+
+        private void ExpectAndParseTokenTo(ScriptToken existingToken, TokenType expectedTokenType)
+        {
+            var verbatim = Open(existingToken);
+            if (Current.Type != expectedTokenType)
+            {
+                LogError(CurrentSpan, $"Unexpected token found `{GetAsText(Current)}` while expecting `{expectedTokenType.ToText()}`.");
+            }
+            NextToken();
+            Close(verbatim);
+        }
+
+        private ScriptKeyword ExpectAndParseKeywordTo(ScriptKeyword existingKeyword)
+        {
+            if (existingKeyword == null) throw new ArgumentNullException(nameof(existingKeyword));
+            if (existingKeyword.Value == null) throw new InvalidOperationException($"{nameof(ScriptKeyword)}.{nameof(ScriptKeyword.Value)} cannot be null");
+
+            var verbatim = Open(existingKeyword);
+            if (!MatchText(Current, existingKeyword.Value))
+            {
+                LogError(CurrentSpan, $"Unexpected keyword found `{GetAsText(Current)}` while expecting `{existingKeyword.Value}`.");
+            }
+            NextToken();
+            Close(verbatim);
+            return existingKeyword;
+        }
+
+        private ScriptExpression ParseUnaryExpression()
         {
             // unit test: 113-unary.txt
             var unaryExpression = Open<ScriptUnaryExpression>();
-            switch (Current.Type)
+            int newPrecedence;
+
+            // Parse the operator as verbatim text
+            var unaryTokenType = Current.Type;
+
+            unaryExpression.OperatorToken = ParseToken(Current.Type);
+            // Else we parse standard unary operators
+            switch (unaryTokenType)
             {
-                case TokenType.Not:
+                case TokenType.Exclamation:
                     unaryExpression.Operator = ScriptUnaryOperator.Not;
                     break;
                 case TokenType.Minus:
@@ -603,17 +978,23 @@ namespace Scriban.Parsing
                 case TokenType.Arroba:
                     unaryExpression.Operator = ScriptUnaryOperator.FunctionAlias;
                     break;
-                case TokenType.Caret:
-                    unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
-                    break;
                 default:
-                    LogError($"Unexpected token `{Current.Type}` for unary expression");
+                    if (_isScientific && unaryTokenType == TokenType.DoubleCaret || !_isScientific && unaryTokenType == TokenType.Caret)
+                    {
+                        unaryExpression.Operator = ScriptUnaryOperator.FunctionParametersExpand;
+                    }
+
+                    if (unaryExpression.Operator == ScriptUnaryOperator.None)
+                    {
+                        LogError($"Unexpected token `{unaryTokenType}` for unary expression");
+                    }
                     break;
             }
-            var newPrecedence = GetOperatorPrecedence(unaryExpression.Operator);
-            NextToken();
+            newPrecedence = GetDefaultUnaryOperatorPrecedence(unaryExpression.Operator);
+
+            bool hasAnonymousFunction = false;
             // unit test: 115-unary-error1.txt
-            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, ref hasAnonymousFunction, null, newPrecedence);
+            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence);
             return Close(unaryExpression);
         }
 
@@ -622,19 +1003,7 @@ namespace Scriban.Parsing
             // In case we are in liquid and we are assigning to a scriban keyword, we escape the variable with a nested expression
             if (_isLiquid && leftOperand is IScriptVariablePath && IsScribanKeyword(((IScriptVariablePath) leftOperand).GetFirstPath()) && !(leftOperand is ScriptNestedExpression))
             {
-                var nestedExpression = new ScriptNestedExpression
-                {
-                    Expression = leftOperand,
-                    Span = leftOperand.Span
-                };
-
-                // If the variable has any trivia, we copy them to the NestedExpression instead
-                if (_isKeepTrivia && leftOperand.Trivias != null)
-                {
-                    nestedExpression.Trivias = leftOperand.Trivias;
-                    leftOperand.Trivias = null;
-                }
-
+                var nestedExpression = ScriptNestedExpression.Wrap(leftOperand, _isKeepTrivia);
                 return nestedExpression;
             }
 
@@ -649,18 +1018,21 @@ namespace Scriban.Parsing
             // In case of cycle we transform it to array.cycle at runtime
             if (liquidTarget != null && LiquidBuiltinsFunctions.TryLiquidToScriban(liquidTarget.Name, out targetName, out memberName))
             {
+                var targetVariable = new ScriptVariableGlobal(targetName) {Span = liquidTarget.Span};
+                var memberVariable = new ScriptVariableGlobal(memberName) {Span = liquidTarget.Span};
+
                 var arrayCycle = new ScriptMemberExpression
                 {
                     Span = liquidTarget.Span,
-                    Target = new ScriptVariableGlobal(targetName) {Span = liquidTarget.Span},
-                    Member = new ScriptVariableGlobal(memberName) {Span = liquidTarget.Span},
+                    Target = targetVariable,
+                    Member = memberVariable,
                 };
 
                 // Transfer trivias accordingly to target (trivias before) and member (trivias after)
                 if (_isKeepTrivia && liquidTarget.Trivias != null)
                 {
-                    arrayCycle.Target.AddTrivias(liquidTarget.Trivias.Before, true);
-                    arrayCycle.Member.AddTrivias(liquidTarget.Trivias.After, false);
+                    targetVariable.AddTrivias(liquidTarget.Trivias.Before, true);
+                    memberVariable.AddTrivias(liquidTarget.Trivias.After, false);
                 }
                 functionCall.Target = arrayCycle;
             }
@@ -676,147 +1048,173 @@ namespace Scriban.Parsing
             }
         }
 
-        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null,
-            ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
+        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null,  ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
-            if (StartAsExpression())
+            if (IsStartOfExpression())
             {
                 return ParseExpression(parentNode, parentExpression, newPrecedence, mode, allowAssignment);
             }
-            LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of `{Current.Type}`");
+            LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of `{GetAsText(Current)}`");
             return null;
         }
 
-        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ref bool hasAnonymousExpression, ScriptExpression parentExpression = null, int newPrecedence = 0,
-            string message = null, ParseExpressionMode mode = ParseExpressionMode.Default)
+        private ScriptExpression ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
-            if (StartAsExpression())
+            if (IsStartOfExpression())
             {
-                return ParseExpression(parentNode, ref hasAnonymousExpression, parentExpression, newPrecedence, mode);
+                return ParseExpression(parentNode, null, 0, mode);
             }
-            LogError(parentNode, CurrentSpan, message ?? $"Expecting <expression> instead of `{Current.Type}`");
+            LogError(parentNode, CurrentSpan, $"Expecting <expression> instead of `{GetAsText(Current)}`");
             return null;
         }
 
-        private ScriptExpression ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, out bool hasAnonymousFunction, ParseExpressionMode mode = ParseExpressionMode.Default)
+        public bool IsStartOfExpression()
         {
-            hasAnonymousFunction = false;
-            if (StartAsExpression())
-            {
-                return ParseExpression(parentNode, ref hasAnonymousFunction, null, 0, mode);
-            }
-            LogError(parentNode, CurrentSpan, $"Expecting <expression> instead of `{Current.Type}`");
-            return null;
-        }
+            if (IsStartingAsUnaryExpression()) return true;
 
-        private bool StartAsExpression()
-        {
             switch (Current.Type)
             {
                 case TokenType.Identifier:
                 case TokenType.IdentifierSpecial:
                 case TokenType.Integer:
+                case TokenType.HexaInteger:
+                case TokenType.BinaryInteger:
                 case TokenType.Float:
                 case TokenType.String:
                 case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
-                case TokenType.OpenParent:
+                case TokenType.OpenParen:
                 case TokenType.OpenBrace:
                 case TokenType.OpenBracket:
-                case TokenType.Not:
-                case TokenType.Minus:
-                case TokenType.Plus:
-                case TokenType.Arroba:
-                case TokenType.Caret:
                     return true;
             }
 
             return false;
         }
 
-        private bool TryLiquidBinaryOperator(out ScriptBinaryOperator binOp)
+        private bool IsStartingAsUnaryExpression()
         {
-            binOp = 0;
+            switch (Current.Type)
+            {
+                case TokenType.Exclamation:
+                case TokenType.Minus:
+                case TokenType.Plus:
+                case TokenType.Arroba:
+                    return true;
+
+                case TokenType.Caret:
+                case TokenType.DoubleCaret:
+                    // In scientific Caret is used for exponent (so it is a binary operator)
+                    if (_isScientific && Current.Type == TokenType.DoubleCaret || !_isScientific && Current.Type == TokenType.Caret)
+                    {
+                        return true;
+                    }
+                    break;
+            }
+
+            return false;
+        }
+
+        private bool TryLiquidBinaryOperator(out ScriptBinaryOperator binaryOperator, out int precedence)
+        {
+            binaryOperator = ScriptBinaryOperator.None;
+            precedence = 0;
+
+            var text = GetAsText(Current);
+
             if (Current.Type != TokenType.Identifier)
             {
                 return false;
             }
 
-            var text = GetAsText(Current);
             switch (text)
             {
                 case "or":
-                    binOp = ScriptBinaryOperator.Or;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.Or;
+                    break;
                 case "and":
-                    binOp = ScriptBinaryOperator.And;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.And;
+                    break;
                 case "contains":
-                    binOp = ScriptBinaryOperator.LiquidContains;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidContains;
+                    break;
                 case "startsWith":
-                    binOp = ScriptBinaryOperator.LiquidStartsWith;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidStartsWith;
+                    break;
                 case "endsWith":
-                    binOp = ScriptBinaryOperator.LiquidEndsWith;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidEndsWith;
+                    break;
                 case "hasKey":
-                    binOp = ScriptBinaryOperator.LiquidHasKey;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidHasKey;
+                    break;
                 case "hasValue":
-                    binOp = ScriptBinaryOperator.LiquidHasValue;
-                    return true;
+                    binaryOperator = ScriptBinaryOperator.LiquidHasValue;
+                    break;
             }
 
-            return false;
+            if (binaryOperator != ScriptBinaryOperator.None)
+            {
+                precedence = GetDefaultBinaryOperatorPrecedence(binaryOperator);
+            }
+
+            return binaryOperator != ScriptBinaryOperator.None;
         }
 
-        private static int GetOperatorPrecedence(ScriptBinaryOperator op)
+        internal static int GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator op)
         {
             switch (op)
             {
                 case ScriptBinaryOperator.EmptyCoalescing:
                     return 20;
-                case ScriptBinaryOperator.ShiftLeft:
-                case ScriptBinaryOperator.ShiftRight:
-                    return 25;
                 case ScriptBinaryOperator.Or:
                     return 30;
                 case ScriptBinaryOperator.And:
                     return 40;
+
+                case ScriptBinaryOperator.BinaryOr:
+                    return 50;
+
+                case ScriptBinaryOperator.BinaryAnd:
+                    return 60;
+
                 case ScriptBinaryOperator.CompareEqual:
                 case ScriptBinaryOperator.CompareNotEqual:
-                    return 50;
+                    return 70;
+
                 case ScriptBinaryOperator.CompareLess:
                 case ScriptBinaryOperator.CompareLessOrEqual:
                 case ScriptBinaryOperator.CompareGreater:
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return 60;
+                    return 80;
 
                 case ScriptBinaryOperator.LiquidContains:
                 case ScriptBinaryOperator.LiquidStartsWith:
                 case ScriptBinaryOperator.LiquidEndsWith:
                 case ScriptBinaryOperator.LiquidHasKey:
                 case ScriptBinaryOperator.LiquidHasValue:
-                    return 65;
+                    return 90;
 
                 case ScriptBinaryOperator.Add:
                 case ScriptBinaryOperator.Substract:
-                    return 70;
+                    return 100;
                 case ScriptBinaryOperator.Multiply:
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
-                    return 80;
+                case ScriptBinaryOperator.ShiftLeft:
+                case ScriptBinaryOperator.ShiftRight:
+                    return 110;
+                case ScriptBinaryOperator.Power:
+                    return 120;
                 case ScriptBinaryOperator.RangeInclude:
                 case ScriptBinaryOperator.RangeExclude:
-                    return 90;
+                    return 130;
                 default:
                     return 0;
             }
         }
 
-        private static int GetOperatorPrecedence(ScriptUnaryOperator op)
+        private static int GetDefaultUnaryOperatorPrecedence(ScriptUnaryOperator op)
         {
             switch (op)
             {
@@ -825,7 +1223,7 @@ namespace Scriban.Parsing
                 case ScriptUnaryOperator.Plus:
                 case ScriptUnaryOperator.FunctionAlias:
                 case ScriptUnaryOperator.FunctionParametersExpand:
-                    return 100;
+                    return 200;
                 default:
                     return 0;
             }
@@ -835,6 +1233,16 @@ namespace Scriban.Parsing
         {
             int position = Current.Start.Offset - 1;
             if (position >= 0)
+            {
+                return char.IsWhiteSpace(_lexer.Text[position]);
+            }
+            return false;
+        }
+
+        bool IsNextCharWhitespace()
+        {
+            int position = Current.End.Offset + 1;
+            if (position >= 0 && position < _lexer.Text.Length)
             {
                 return char.IsWhiteSpace(_lexer.Text[position]);
             }
@@ -852,6 +1260,11 @@ namespace Scriban.Parsing
             /// All expressions (e.g literals, function calls, function pipes...etc.)
             /// </summary>
             Default,
+
+            /// <summary>
+            /// All expressions (e.g literals, function calls, function pipes...etc.)
+            /// </summary>
+            DefaultNoNamedArgument,
 
             /// <summary>
             /// Only literal, unary, nested, array/object initializer, dot access, array access

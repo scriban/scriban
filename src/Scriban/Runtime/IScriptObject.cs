@@ -57,7 +57,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly);
+        bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly);
 
         /// <summary>
         /// Removes the specified member from this object.

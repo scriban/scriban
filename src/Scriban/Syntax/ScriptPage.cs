@@ -3,11 +3,15 @@
 // See license.txt file in the project root for full license information.
 
 using Scriban.Parsing;
+using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
     public partial class ScriptPage : ScriptNode
     {
+        private ScriptFrontMatter _frontMatter;
+        private ScriptBlockStatement _body;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptPage"/> class.
         /// </summary>
@@ -21,9 +25,17 @@ namespace Scriban.Syntax
         /// <remarks>
         /// Note that this code block is not executed when evaluating this page. It has to be evaluated separately (usually before evaluating the page).
         /// </remarks>
-        public ScriptBlockStatement FrontMatter { get; set; }
+        public ScriptFrontMatter FrontMatter
+        {
+            get => _frontMatter;
+            set => ParentToThis(ref _frontMatter, value);
+        }
 
-        public ScriptBlockStatement Body { get; set; }
+        public ScriptBlockStatement Body
+        {
+            get => _body;
+            set => ParentToThis(ref _body, value);
+        }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -38,9 +50,9 @@ namespace Scriban.Syntax
             }
         }
 
-        public override void Write(TemplateRewriterContext context)
+        public override void PrintTo(ScriptPrinter printer)
         {
-            context.Write(Body);
+            printer.Write(Body);
         }
     }
 }

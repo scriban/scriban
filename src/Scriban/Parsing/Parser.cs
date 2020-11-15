@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -31,9 +31,11 @@ namespace Scriban.Parsing
         private bool _isExpressionDepthLimitReached;
         private int _expressionDepth;
         private bool _hasFatalError;
+        private readonly bool _isScientific;
         private readonly bool _isKeepTrivia;
         private readonly List<ScriptTrivia> _trivias;
         private readonly Queue<ScriptStatement> _pendingStatements;
+        private IScriptTerminal _lastTerminalWithTrivias;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -44,9 +46,10 @@ namespace Scriban.Parsing
         public Parser(Lexer lexer, ParserOptions? options = null)
         {
             _lexer = lexer ?? throw new ArgumentNullException(nameof(lexer));
-            _isLiquid = _lexer.Options.Mode == ScriptMode.Liquid;
+            _isLiquid = _lexer.Options.Lang == ScriptLang.Liquid;
+            _isScientific = _lexer.Options.Lang == ScriptLang.Scientific;
             _tokensPreview = new List<Token>(4);
-            Messages = new List<LogMessage>();
+            Messages = new LogMessageBag();
             _trivias = new List<ScriptTrivia>();
 
             Options = options ?? new ParserOptions();
@@ -63,8 +66,9 @@ namespace Scriban.Parsing
         }
 
         public readonly ParserOptions Options;
+        private ScriptFrontMatter _frontmatter;
 
-        public List<LogMessage> Messages { get; private set; }
+        public LogMessageBag Messages { get; private set; }
 
         public bool HasErrors { get; private set; }
 
@@ -80,7 +84,7 @@ namespace Scriban.Parsing
 
         public ScriptPage Run()
         {
-            Messages = new List<LogMessage>();
+            Messages = new LogMessageBag();
             HasErrors = false;
             _blockLevel = 0;
             _isExpressionDepthLimitReached = false;
@@ -101,17 +105,22 @@ namespace Scriban.Parsing
                     _inFrontMatter = true;
                     _inCodeSection = true;
 
-                    // Skip the frontmatter marker
-                    NextToken();
+                    _frontmatter = Open<ScriptFrontMatter>();
 
-                    // Parse the front matter
-                    page.FrontMatter = ParseBlockStatement(null);
+                    // Parse the frontmatter start=-marker
+                    ExpectAndParseTokenTo(_frontmatter.StartMarker, TokenType.FrontMatterMarker);
+
+                    // Parse front-marker statements
+                    _frontmatter.Statements = ParseBlockStatement(_frontmatter);
 
                     // We should not be in a frontmatter after parsing the statements
                     if (_inFrontMatter)
                     {
                         LogError($"End of frontmatter `{_lexer.Options.FrontMatterMarker}` not found");
                     }
+
+                    page.FrontMatter = _frontmatter;
+                    page.Span = _frontmatter.Span;
 
                     if (parsingMode == ScriptMode.FrontMatterOnly)
                     {
@@ -124,6 +133,12 @@ namespace Scriban.Parsing
             }
 
             page.Body = ParseBlockStatement(null);
+
+            // Flush any pending trivias
+            if (_isKeepTrivia && _lastTerminalWithTrivias != null)
+            {
+                FlushTriviasToLastTerminal();
+            }
 
             if (page.FrontMatter != null)
             {
@@ -147,41 +162,82 @@ namespace Scriban.Parsing
             {
                 if (Current.Type == TokenType.NewLine)
                 {
-                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.NewLine, _lexer.Text));
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.NewLine, CurrentStringSlice));
                 }
                 else if (Current.Type == TokenType.SemiColon)
                 {
-                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.SemiColon, _lexer.Text));
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.SemiColon, CurrentStringSlice));
+                }
+                else if (Current.Type == TokenType.Comma)
+                {
+                    _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.Comma, CurrentStringSlice));
                 }
             }
+        }
+
+        private ScriptStringSlice CurrentStringSlice => GetAsStringSlice(Current);
+
+        private ScriptStringSlice GetAsStringSlice(Token token)
+        {
+            return new ScriptStringSlice(_lexer.Text,  token.Start.Offset,  token.End.Offset -  token.Start.Offset + 1);
+        }
+
+        private T Open<T>(T element) where T : ScriptNode
+        {
+            element.Span = new SourceSpan() { FileName = _lexer.SourcePath, Start = Current.Start };
+            if (_isKeepTrivia && element is IScriptTerminal terminal)
+            {
+                FlushTrivias(terminal, true);
+            }
+            return element;
         }
 
         private T Open<T>() where T : ScriptNode, new()
         {
             var element = new T() { Span = {FileName = _lexer.SourcePath, Start = Current.Start}};
-            FlushTrivias(element, true);
+            if (_isKeepTrivia && element is IScriptTerminal terminal)
+            {
+                FlushTrivias(terminal, true);
+            }
             return element;
         }
 
-        private void FlushTrivias(ScriptNode element, bool isBefore)
+        private void FlushTrivias(IScriptTerminal element, bool isBefore)
         {
-            if (_isKeepTrivia && _trivias.Count > 0 && !(element is ScriptBlockStatement))
+            if (_isKeepTrivia && _trivias.Count > 0)
             {
                 element.AddTrivias(_trivias, isBefore);
                 _trivias.Clear();
             }
         }
 
-        private T Close<T>(T statement) where T : ScriptNode
+        private T Close<T>(T node) where T : ScriptNode
         {
-            statement.Span.End = Previous.End;
-            FlushTrivias(statement, false);
-            return statement;
+            node.Span.End = Previous.End;
+            if (_isKeepTrivia && node is IScriptTerminal terminal)
+            {
+                _lastTerminalWithTrivias = terminal;
+                FlushTrivias(terminal, false);
+            }
+            return node;
+        }
+
+        private void FlushTriviasToLastTerminal()
+        {
+            if (_isKeepTrivia && _lastTerminalWithTrivias != null)
+            {
+                FlushTrivias(_lastTerminalWithTrivias, false);
+            }
         }
 
         private string GetAsText(Token localToken)
         {
             return localToken.GetText(_lexer.Text);
+        }
+
+        private bool MatchText(Token localToken, string text)
+        {
+            return localToken.Match(text, _lexer.Text);
         }
 
         private void NextToken()
@@ -212,7 +268,7 @@ namespace Scriban.Parsing
                 {
                     return;
                 }
-                
+
             }
 
             // Skip Comments
@@ -262,7 +318,7 @@ namespace Scriban.Parsing
                     throw new InvalidOperationException($"Token type `{token.Type}` not supported by trivia");
             }
 
-            var trivia = new ScriptTrivia(GetSpanForToken(token), type,  _lexer.Text);
+            var trivia = new ScriptTrivia(GetSpanForToken(token), type,  GetAsStringSlice(token));
             _trivias.Add(trivia);
         }
 
@@ -290,6 +346,14 @@ namespace Scriban.Parsing
             }
 
             return Token.Eof;
+        }
+
+        private ScriptIdentifier ParseIdentifier()
+        {
+            var identifier = Open<ScriptIdentifier>();
+            identifier.Value = GetAsText(Current);
+            NextToken();
+            return Close(identifier);
         }
 
         private bool IsHidden(TokenType tokenType)
@@ -330,7 +394,7 @@ namespace Scriban.Parsing
             {
                 inMessage = string.Empty;
             }
-            LogError(span, $"Error while parsing {syntax.Name}: {message}{inMessage}: {syntax.Example}", isFatal);
+            LogError(span, $"Error while parsing {syntax.TypeName}: {message}{inMessage}: {syntax.Example}", isFatal);
         }
 
         private void Log(LogMessage logMessage, bool isFatal = false)

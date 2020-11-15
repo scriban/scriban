@@ -1,2 +1,2 @@
-text(5,1) : error : Error while parsing function statement: Invalid token found `.`. Expecting <EOL>/end of line after: func <variable> ... end
+text(5,7) : error : Invalid token found `.`. Expecting <EOL>/end of line.
 text(5,6) : error : Error while parsing function statement: The <end> statement was not found in: func <variable> ... end

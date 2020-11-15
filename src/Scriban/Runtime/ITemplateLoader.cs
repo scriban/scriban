@@ -3,10 +3,8 @@
 // See license.txt file in the project root for full license information.
 
 using Scriban.Parsing;
-#if SCRIBAN_ASYNC
 using System.Threading;
 using System.Threading.Tasks;
-#endif
 
 namespace Scriban.Runtime
 {
@@ -34,7 +32,7 @@ namespace Scriban.Runtime
         /// <returns>The content string loaded from the specified template path/key</returns>
         string Load(TemplateContext context, SourceSpan callerSpan, string templatePath);
 
-#if SCRIBAN_ASYNC
+#if !SCRIBAN_NO_ASYNC
         /// <summary>
         /// Loads a template using the specified template path/key.
         /// </summary>

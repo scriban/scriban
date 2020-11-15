@@ -196,7 +196,7 @@ two
 three
 one
 ```
-`cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template. 
+`cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template.
 If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
 
 [:top:](#builtins)
@@ -258,7 +258,7 @@ A new list with the element inserted.
 ```
 > **output**
 ```html
-[a, b, Yo, c]
+["a", "b", "Yo", "c"]
 ```
 
 [:top:](#builtins)
@@ -377,13 +377,13 @@ Accepts an array element's attribute as a parameter and creates an array out of 
 
 > **input**
 ```scriban-html
-{{ 
+{{
 products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
 products | array.map "type" | array.uniq | array.sort }}
 ```
 > **output**
 ```html
-[electronics, fruit, furniture]
+["electronics", "fruit", "furniture"]
 ```
 
 [:top:](#builtins)
@@ -539,7 +539,7 @@ A list sorted according to the value of each element or the value of the specifi
 
 #### Examples
 
-Sorts by element's value: 
+Sorts by element's value:
 > **input**
 ```scriban-html
 {{ [10, 2, 6] | array.sort }}
@@ -548,7 +548,7 @@ Sorts by element's value:
 ```html
 [2, 6, 10]
 ```
-Sorts by elements member's value: 
+Sorts by elements member's value:
 > **input**
 ```scriban-html
 {{
@@ -558,7 +558,7 @@ products | array.sort "title" | array.map "title"
 ```
 > **output**
 ```html
-[computer, orange, sofa]
+["computer", "orange", "sofa"]
 ```
 
 [:top:](#builtins)
@@ -600,7 +600,7 @@ array.contains <list> <item>
 
 #### Description
 
-Returns if an `list` contains an specifique element 
+Returns if an `list` contains an specifique element
 
 #### Arguments
 
@@ -625,11 +625,11 @@ true
 
 ## `date` functions
 
-A datetime object represents an instant in time, expressed as a date and time of day. 
+A datetime object represents an instant in time, expressed as a date and time of day.
 
 | Name             | Description
 |--------------    |-----------------
-| `.year`          | Gets the year of a date object 
+| `.year`          | Gets the year of a date object
 | `.month`         | Gets the month of a date object
 | `.day`           | Gets the day in the month of a date object
 | `.day_of_year`   | Gets the day within the year
@@ -696,7 +696,7 @@ date.add_days <date> <days>
 
 #### Description
 
-Adds the specified number of days to the input date. 
+Adds the specified number of days to the input date.
 
 #### Arguments
 
@@ -727,7 +727,7 @@ date.add_months <date> <months>
 
 #### Description
 
-Adds the specified number of months to the input date. 
+Adds the specified number of months to the input date.
 
 #### Arguments
 
@@ -758,7 +758,7 @@ date.add_years <date> <years>
 
 #### Description
 
-Adds the specified number of years to the input date. 
+Adds the specified number of years to the input date.
 
 #### Arguments
 
@@ -789,7 +789,7 @@ date.add_hours <date> <hours>
 
 #### Description
 
-Adds the specified number of hours to the input date. 
+Adds the specified number of hours to the input date.
 
 #### Arguments
 
@@ -813,7 +813,7 @@ date.add_minutes <date> <minutes>
 
 #### Description
 
-Adds the specified number of minutes to the input date. 
+Adds the specified number of minutes to the input date.
 
 #### Arguments
 
@@ -837,7 +837,7 @@ date.add_seconds <date> <seconds>
 
 #### Description
 
-Adds the specified number of seconds to the input date. 
+Adds the specified number of seconds to the input date.
 
 #### Arguments
 
@@ -861,7 +861,7 @@ date.add_milliseconds <date> <millis>
 
 #### Description
 
-Adds the specified number of milliseconds to the input date. 
+Adds the specified number of milliseconds to the input date.
 
 #### Arguments
 
@@ -885,7 +885,7 @@ date.parse <text>
 
 #### Description
 
-Parses the specified input string to a date object. 
+Parses the specified input string to a date object.
 
 #### Arguments
 
@@ -978,11 +978,13 @@ Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the f
 Note that the format is using a good part of the ruby format ([source](http://apidock.com/ruby/DateTime/strftime))
 > **input**
 ```scriban-html
-{{ date.parse '2016/01/05' | date.to_string `%d %b %Y` }}
+{{ date.parse '2016/01/05' | date.to_string '%d %b %Y' }}
+{{ date.parse '2016/01/05' | date.to_string '%d %B %Y' 'fr-FR' }}
 ```
 > **output**
 ```html
 05 Jan 2016
+05 janvier 2016
 ```
 
 #### Arguments
@@ -1505,6 +1507,8 @@ The results of the multiplication: `value` * `with`
 Object functions available through the builtin object 'object'.
 
 - [`object.default`](#objectdefault)
+- [`object.eval`](#objecteval)
+- [`object.eval_template`](#objecteval_template)
 - [`object.format`](#objectformat)
 - [`object.has_key`](#objecthas_key)
 - [`object.has_value`](#objecthas_value)
@@ -1542,6 +1546,66 @@ The `default` value is returned if the input `value` is null or an empty string 
 > **output**
 ```html
 Yo
+```
+
+[:top:](#builtins)
+### `object.eval`
+
+```
+object.eval <value>
+```
+
+#### Description
+
+The evaluates a string as a scriban expression or evaluate the passed function or return the passed value.
+
+#### Arguments
+
+- `value`: The input value, either a scriban template in a string, or an alias function or directly a value.
+
+#### Returns
+
+The evaluation of the input value.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "1 + 2" | object.eval }}
+```
+> **output**
+```html
+3
+```
+
+[:top:](#builtins)
+### `object.eval_template`
+
+```
+object.eval_template <value>
+```
+
+#### Description
+
+The evaluates a string as a scriban template or evaluate the passed function or return the passed value.
+
+#### Arguments
+
+- `value`: The input value, either a scriban template in a string, or an alias function or directly a value.
+
+#### Returns
+
+The evaluation of the input value.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "This is a template text {{ 1 + 2 }}" | object.eval_template }}
+```
+> **output**
+```html
+This is a template text 3
 ```
 
 [:top:](#builtins)
@@ -1667,7 +1731,7 @@ A list with the member names/key of the input object
 ```
 > **output**
 ```html
-[title, type]
+["title", "type"]
 ```
 
 [:top:](#builtins)
@@ -1776,7 +1840,7 @@ A list with the member values of the input object
 ```
 > **output**
 ```html
-[fruit, Orange]
+["fruit", "Orange"]
 ```
 [:top:](#builtins)
 
@@ -1786,6 +1850,7 @@ Functions exposed through `regex` builtin object.
 
 - [`regex.escape`](#regexescape)
 - [`regex.match`](#regexmatch)
+- [`regex.matches`](#regexmatches)
 - [`regex.replace`](#regexreplace)
 - [`regex.split`](#regexsplit)
 - [`regex.unescape`](#regexunescape)
@@ -1799,8 +1864,8 @@ regex.escape <pattern>
 
 #### Description
 
-Escapes a minimal set of characters (`\`, `*`, `+`, `?`, `|`, `{`, `[`, `(`,`)`, `^`, `$`,`.`, `#`, and white space) 
-by replacing them with their escape codes. 
+Escapes a minimal set of characters (`\`, `*`, `+`, `?`, `|`, `{`, `[`, `(`,`)`, `^`, `$`,`.`, `#`, and white space)
+by replacing them with their escape codes.
 This instructs the regular expression engine to interpret these characters literally rather than as metacharacters.
 
 #### Arguments
@@ -1831,17 +1896,17 @@ regex.match <text> <pattern> <options>?
 
 #### Description
 
-Searches an input string for a substring that matches a regular expression pattern and returns an array with the match occurences. 
+Searches an input string for a substring that matches a regular expression pattern and returns an array with the match occurences.
 
 #### Arguments
 
 - `text`: The string to search for a match.
 - `pattern`: The regular expression pattern to match.
 - `options`: A string with regex options, that can contain the following option characters (default is `null`):
-            - `i`: Specifies case-insensitive matching. 
+            - `i`: Specifies case-insensitive matching.
             - `m`: Multiline mode. Changes the meaning of `^` and `$` so they match at the beginning and end, respectively, of any line, and not just the beginning and end of the entire string.
             - `s`: Specifies single-line mode. Changes the meaning of the dot `.` so it matches every character (instead of every character except `\n`).
-            - `x`: Eliminates unescaped white space from the pattern and enables comments marked with `#`. 
+            - `x`: Eliminates unescaped white space from the pattern and enables comments marked with `#`.
 
 #### Returns
 
@@ -1855,9 +1920,46 @@ An array that contains all the match groups. The first group contains the entire
 ```
 > **output**
 ```html
-[is a text123, is, text123]
+["is a text123", "is", "text123"]
 ```
 Notice that the first element returned in the array is the entire regex match, followed by the regex group matches.
+
+[:top:](#builtins)
+### `regex.matches`
+
+```
+regex.matches <text> <pattern> <options>?
+```
+
+#### Description
+
+Searches an input string for multiple substrings that matches a regular expression pattern and returns an array with the match occurences.
+
+#### Arguments
+
+- `text`: The string to search for a match.
+- `pattern`: The regular expression pattern to match.
+- `options`: A string with regex options, that can contain the following option characters (default is `null`):
+            - `i`: Specifies case-insensitive matching.
+            - `m`: Multiline mode. Changes the meaning of `^` and `$` so they match at the beginning and end, respectively, of any line, and not just the beginning and end of the entire string.
+            - `s`: Specifies single-line mode. Changes the meaning of the dot `.` so it matches every character (instead of every character except `\n`).
+            - `x`: Eliminates unescaped white space from the pattern and enables comments marked with `#`.
+
+#### Returns
+
+An array of matches that contains all the match groups. The first group contains the entire match. The other elements contain regex matched groups `(..)`. An empty array returned means no match.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "this is a text123" | regex.matches `(\w+)` }}
+```
+> **output**
+```html
+[["this", "this"], ["is", "is"], ["a", "a"], ["text123", "text123"]]
+```
+Notice that the first element returned in the sub array is the entire regex match, followed by the regex group matches.
 
 [:top:](#builtins)
 ### `regex.replace`
@@ -1868,7 +1970,7 @@ regex.replace <text> <pattern> <replace> <options>?
 
 #### Description
 
-In a specified input string, replaces strings that match a regular expression pattern with a specified replacement string. 
+In a specified input string, replaces strings that match a regular expression pattern with a specified replacement string.
 
 #### Arguments
 
@@ -1876,10 +1978,10 @@ In a specified input string, replaces strings that match a regular expression pa
 - `pattern`: The regular expression pattern to match.
 - `replace`: The replacement string.
 - `options`: A string with regex options, that can contain the following option characters (default is `null`):
-            - `i`: Specifies case-insensitive matching. 
+            - `i`: Specifies case-insensitive matching.
             - `m`: Multiline mode. Changes the meaning of `^` and `$` so they match at the beginning and end, respectively, of any line, and not just the beginning and end of the entire string.
             - `s`: Specifies single-line mode. Changes the meaning of the dot `.` so it matches every character (instead of every character except `\n`).
-            - `x`: Eliminates unescaped white space from the pattern and enables comments marked with `#`. 
+            - `x`: Eliminates unescaped white space from the pattern and enables comments marked with `#`.
 
 #### Returns
 
@@ -1912,10 +2014,10 @@ Splits an input string into an array of substrings at the positions defined by a
 - `text`: The string to split.
 - `pattern`: The regular expression pattern to match.
 - `options`: A string with regex options, that can contain the following option characters (default is `null`):
-            - `i`: Specifies case-insensitive matching. 
+            - `i`: Specifies case-insensitive matching.
             - `m`: Multiline mode. Changes the meaning of `^` and `$` so they match at the beginning and end, respectively, of any line, and not just the beginning and end of the entire string.
             - `s`: Specifies single-line mode. Changes the meaning of the dot `.` so it matches every character (instead of every character except `\n`).
-            - `x`: Eliminates unescaped white space from the pattern and enables comments marked with `#`. 
+            - `x`: Eliminates unescaped white space from the pattern and enables comments marked with `#`.
 
 #### Returns
 
@@ -1929,7 +2031,7 @@ A string array.
 ```
 > **output**
 ```html
-[a, b, c, d]
+["a", "b", "c", "d"]
 ```
 
 [:top:](#builtins)
@@ -1967,6 +2069,7 @@ A string of characters with any escaped characters converted to their unescaped 
 
 String functions available through the builtin object 'string`.
 
+- [`string.escape`](#stringescape)
 - [`string.append`](#stringappend)
 - [`string.capitalize`](#stringcapitalize)
 - [`string.capitalizewords`](#stringcapitalizewords)
@@ -2005,6 +2108,36 @@ String functions available through the builtin object 'string`.
 - [`string.pad_right`](#stringpad_right)
 - [`string.base64_encode`](#stringbase64_encode)
 - [`string.base64_decode`](#stringbase64_decode)
+
+[:top:](#builtins)
+### `string.escape`
+
+```
+string.escape <text>
+```
+
+#### Description
+
+Escapes a string with escape characters.
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+The two strings concatenated
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "Hel\tlo\n\"W\\orld" | string.escape }}
+```
+> **output**
+```html
+Hel\tlo\n\"W\\orld
+```
 
 [:top:](#builtins)
 ### `string.append`
@@ -2242,12 +2375,12 @@ The input string without any left whitespace characters
 
 > **input**
 ```scriban-html
-{{ '   too many spaces           ' | string.lstrip  }}
+{{ '   too many spaces' | string.lstrip  }}
 ```
 > Highlight to see the empty spaces to the right of the string
 > **output**
 ```html
-too many spaces           
+too many spaces
 ```
 
 [:top:](#builtins)
@@ -2504,7 +2637,7 @@ The length of the input string
 ### `string.slice`
 
 ```
-string.slice <text> <start> <length: 0>?
+string.slice <text> <start> <length>?
 ```
 
 #### Description

@@ -4,6 +4,7 @@
 
 using System;
 using System.Globalization;
+using System.Numerics;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -71,7 +72,7 @@ namespace Scriban.Functions
             }
 
             // If it is a primitive it is already unsigned
-            if (value.GetType().GetTypeInfo().IsPrimitive)
+            if (value.GetType().IsPrimitive)
             {
                 return value;
             }
@@ -217,7 +218,8 @@ namespace Scriban.Functions
                    || value is ulong
                    || value is float
                    || value is double
-                   || value is decimal;
+                   || value is decimal
+                   || value is BigInteger;
         }
 
         /// <summary>

@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Collections.Generic;
@@ -25,7 +25,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the name of the template to include for the <include> function");
             }
 
-            var templateName = context.ToString(callerContext.Span, arguments[0]);
+            var templateName = context.ObjectToString(arguments[0]);
 
             // If template name is empty, throw an exception
             if (string.IsNullOrEmpty(templateName))
@@ -60,14 +60,88 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
             }
 
-            // Compute a new parameters for the include
-            var newParameters = new ScriptArray(arguments.Count - 1);
-            for (int i = 1; i < arguments.Count; i++)
-            {
-                newParameters[i] = arguments[i];
-            }
+            string indent = null;
 
-            context.SetValue(ScriptVariable.Arguments, newParameters, true);
+            // Handle indent
+            if (context.IndentWithInclude)
+            {
+                // Find the statement for the include
+                var current = callerContext.Parent;
+                while (current != null && !(current is ScriptStatement))
+                {
+                    current = current.Parent;
+                }
+
+                // Find the RawStatement preceding this include
+                ScriptNode childNode = null;
+                bool shouldContinue = true;
+                while (shouldContinue && current != null)
+                {
+                    if (current is ScriptList<ScriptStatement> statementList && childNode is ScriptStatement childStatement)
+                    {
+                        var indexOf = statementList.IndexOf(childStatement);
+
+                        // Case for first indent, if it is not the first statement in the doc
+                        // it's not a valid indent
+                        if (indent != null && indexOf > 0)
+                        {
+                            indent = null;
+                            break;
+                        }
+
+                        for (int i = indexOf - 1; i >= 0; i--)
+                        {
+                            var previousStatement = statementList[i];
+                            if (previousStatement is ScriptEscapeStatement escapeStatement && escapeStatement.IsEntering)
+                            {
+                                if (i > 0 && statementList[i - 1] is ScriptRawStatement rawStatement)
+                                {
+
+                                    var text = rawStatement.Text;
+                                    for (int j = text.Length - 1; j >= 0; j--)
+                                    {
+                                        var c = text[j];
+                                        if (c == '\n')
+                                        {
+                                            shouldContinue = false;
+                                            indent = text.Substring(j + 1);
+                                            break;
+                                        }
+
+                                        if (!char.IsWhiteSpace(c))
+                                        {
+                                            shouldContinue = false;
+                                            break;
+                                        }
+
+                                        if (j == 0)
+                                        {
+                                            // We have a raw statement that has only white spaces
+                                            // It could be the first raw statement of the document
+                                            // so we continue but we handle it later
+                                            indent = text.ToString();
+                                        }
+                                    }
+                                }
+                                else
+                                {
+                                    shouldContinue = false;
+                                }
+
+                                break;
+                            }
+                        }
+                    }
+
+                    childNode = current;
+                    current = childNode.Parent;
+                }
+
+                if (string.IsNullOrEmpty(indent))
+                {
+                    indent = null;
+                }
+            }
 
             Template template;
 
@@ -104,21 +178,46 @@ namespace Scriban.Functions
             }
 
             // Make sure that we cannot recursively include a template
-
-            context.PushOutput();
             object result = null;
+            context.EnterRecursive(callerContext);
+
+            var previousIndent = context.CurrentIndent;
+            context.CurrentIndent = indent;
+            context.PushOutput();
+            context.PushLocal();
             try
             {
-                context.EnterRecursive(callerContext);
+                context.SetValue(ScriptVariable.Arguments, arguments, true);
                 result = template.Render(context);
-                context.ExitRecursive(callerContext);
             }
             finally
             {
+                context.PopLocal();
                 context.PopOutput();
+                context.CurrentIndent = previousIndent;
+                context.ExitRecursive(callerContext);
             }
 
             return result;
+        }
+
+        public int RequiredParameterCount => 1;
+
+        public int ParameterCount => 1;
+
+        public ScriptVarParamKind VarParamKind => ScriptVarParamKind.Direct;
+
+        public Type ReturnType => typeof(object);
+
+        public ScriptParameterInfo GetParameterInfo(int index)
+        {
+            if (index == 0) return new ScriptParameterInfo(typeof(string), "template_name");
+            return new ScriptParameterInfo(typeof(object), "value");
+        }
+
+        public int GetParameterIndexByName(string name)
+        {
+            throw new NotImplementedException();
         }
     }
 }

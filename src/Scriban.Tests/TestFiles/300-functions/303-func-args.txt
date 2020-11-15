@@ -1,0 +1,6 @@
+func f(); ret 5; end; f(); => {{ func f(); ret 5; end; f(); }}
+func f(x); ret x + 2; end; f(10); => {{ func f(x); ret x + 2; end; f(10); }}
+func f(x, y); ret x + 2 * y + 1; end; f(10, 20); => {{ func f(x, y); ret x + 2 * y + 1; end; f(10, 20); }}
+f() = 5; f(); => {{ f() = 5; f(); }}
+f(x) =  x + 2; f(10); => {{ f(x) =  x + 2; f(10); }}
+f(x, y) = x + 2 * y + 1; f(10, 20); => {{ f(x, y) = x + 2 * y + 1; f(10, 20); }}

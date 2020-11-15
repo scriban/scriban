@@ -1,1 +1,1 @@
-text(3,1) : error : Invalid target function `1 1 2 3`( as `System.Int32`)
+text(3,1) : error : Invalid target function `1` (int)

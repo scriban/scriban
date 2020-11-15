@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -16,7 +16,7 @@ namespace Scriban.Functions
     /// <summary>
     /// Array functions available through the object 'array' in scriban.
     /// </summary>
-    public class ArrayFunctions : ScriptObject
+    public partial class ArrayFunctions : ScriptObject
     {
         /// <summary>
         /// Adds a value to the input list.
@@ -32,15 +32,14 @@ namespace Scriban.Functions
         /// [1, 2, 3, 4]
         /// ```
         /// </remarks>
-        public static IList Add(IList list, object value)
+        public static IEnumerable Add(IEnumerable list, object value)
         {
             if (list == null)
             {
-                return new ScriptArray {value};
+                return new ScriptRange { value };
             }
 
-            list = new ScriptArray(list) {value};
-            return list;
+            return list is IList ? (IEnumerable)new ScriptArray(list) {value} : new ScriptRange(list) {value};
         }
 
 
@@ -77,22 +76,9 @@ namespace Scriban.Functions
         /// [1, 3]
         /// ```
         /// </remarks>
-        public static ScriptArray Compact(IEnumerable list)
+        public static IEnumerable Compact(IEnumerable list)
         {
-            if (list == null)
-            {
-                return null;
-            }
-
-            var result = new ScriptArray();
-            foreach (var item in list)
-            {
-                if (item != null)
-                {
-                    result.Add(item);
-                }
-            }
-            return result;
+            return ScriptRange.Compact(list);
         }
 
         /// <summary>
@@ -111,23 +97,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static IEnumerable Concat(IEnumerable list1, IEnumerable list2)
         {
-            if (list2 == null && list1 == null)
-            {
-                return null;
-            }
-            if (list2 == null)
-            {
-                return list1;
-            }
-
-            if (list1 == null)
-            {
-                return list2;
-            }
-
-            var result = new ScriptArray(list1);
-            foreach (var item in list2) result.Add(item);
-            return result;
+            return ScriptRange.Concat(list1, list2);
         }
 
         /// <summary>
@@ -151,7 +121,7 @@ namespace Scriban.Functions
         /// three
         /// one
         /// ```
-        /// `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template. 
+        /// `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template.
         /// If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
         /// </remarks>
         public static object Cycle(TemplateContext context, SourceSpan span, IList list, object group = null)
@@ -160,7 +130,7 @@ namespace Scriban.Functions
             {
                 return null;
             }
-            var strGroup = group == null ? Join(context, span, list, ",") : context.ToString(span, group);
+            var strGroup = group == null ? Join(context, span, list, ",") : context.ObjectToString(@group);
 
             // We create a cycle variable that is dependent on the exact AST context.
             // So we allow to have multiple cycle running in the same loop
@@ -232,26 +202,26 @@ namespace Scriban.Functions
         /// {{ ["a", "b", "c"] | array.insert_at 2 "Yo" }}
         /// ```
         /// ```html
-        /// [a, b, Yo, c]
+        /// ["a", "b", "Yo", "c"]
         /// ```
         /// </remarks>
-        public static IList InsertAt(IList list, int index, object value)
+        public static IEnumerable InsertAt(IEnumerable list, int index, object value)
         {
             if (index < 0)
             {
                 index = 0;
             }
 
-            list = list == null ? new ScriptArray() : new ScriptArray(list);
+            var array = list == null ? new ScriptArray() : new ScriptArray(list);
             // Make sure that the list has already inserted elements before the index
-            for (int i = list.Count; i < index; i++)
+            for (int i = array.Count; i < index; i++)
             {
-                list.Add(null);
+                array.Add(null);
             }
 
-            list.Insert(index, value);
+            array.Insert(index, value);
 
-            return list;
+            return array;
         }
 
 
@@ -286,7 +256,7 @@ namespace Scriban.Functions
                 {
                     text.Append(delimiter);
                 }
-                text.Append(context.ToString(span, obj));
+                text.Append(context.ObjectToString(obj));
                 afterFirst = true;
             }
             return text.ToString();
@@ -335,24 +305,9 @@ namespace Scriban.Functions
         /// [4, 5]
         /// ```
         /// </remarks>
-        public static ScriptArray Limit(IEnumerable list, int count)
+        public static IEnumerable Limit(IEnumerable list, int count)
         {
-            if (list == null)
-            {
-                return null;
-            }
-
-            var result = new ScriptArray();
-            foreach (var item in list)
-            {
-                count--;
-                if (count < 0)
-                {
-                    break;
-                }
-                result.Add(item);
-            }
-            return result;
+            return ScriptRange.Limit(list, count);
         }
 
         /// <summary>
@@ -364,15 +319,20 @@ namespace Scriban.Functions
         /// <param name="member">The member to extract the value from</param>
         /// <remarks>
         /// ```scriban-html
-        /// {{ 
+        /// {{
         /// products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
         /// products | array.map "type" | array.uniq | array.sort }}
         /// ```
         /// ```html
-        /// [electronics, fruit, furniture]
+        /// ["electronics", "fruit", "furniture"]
         /// ```
         /// </remarks>
         public static IEnumerable Map(TemplateContext context, SourceSpan span, object list, string member)
+        {
+            return new ScriptRange(MapImpl(context, span, list, member));
+        }
+
+        private static IEnumerable MapImpl(TemplateContext context, SourceSpan span, object list, string member)
         {
             if (list == null || member == null)
             {
@@ -380,7 +340,7 @@ namespace Scriban.Functions
             }
 
             var enumerable = list as IEnumerable;
-            var realList = enumerable?.Cast<object>().ToList() ?? new List<object>(1) {list};
+            var realList = enumerable?.Cast<object>().ToList() ?? new List<object>(1) { list };
             if (realList.Count == 0)
             {
                 yield break;
@@ -410,26 +370,9 @@ namespace Scriban.Functions
         /// [6, 7, 8]
         /// ```
         /// </remarks>
-        public static ScriptArray Offset(IEnumerable list, int index)
+        public static IEnumerable Offset(IEnumerable list, int index)
         {
-            if (list == null)
-            {
-                return null;
-            }
-
-            var result = new ScriptArray();
-            foreach (var item in list)
-            {
-                if (index <= 0)
-                {
-                    result.Add(item);
-                }
-                else
-                {
-                    index--;
-                }
-            }
-            return result;
+            return ScriptRange.Offset(list, index);
         }
 
         /// <summary>
@@ -490,17 +433,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static IEnumerable Reverse(IEnumerable list)
         {
-            if (list == null)
-            {
-                return Enumerable.Empty<object>();
-            }
-
-            // TODO: provide a special path for IList
-            //var list = list as IList;
-            //if (list != null)
-            //{
-            //}
-            return list.Cast<object>().Reverse();
+            return ScriptRange.Reverse(list);
         }
 
         /// <summary>
@@ -541,14 +474,14 @@ namespace Scriban.Functions
         /// <param name="member">The member name to sort according to its value. Null by default, meaning that the element's value are used instead.</param>
         /// <returns>A list sorted according to the value of each element or the value of the specified `member` of each element.</returns>
         /// <remarks>
-        /// Sorts by element's value: 
+        /// Sorts by element's value:
         /// ```scriban-html
         /// {{ [10, 2, 6] | array.sort }}
         /// ```
         /// ```html
         /// [2, 6, 10]
         /// ```
-        /// Sorts by elements member's value: 
+        /// Sorts by elements member's value:
         /// ```scriban-html
         /// {{
         /// products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
@@ -556,14 +489,14 @@ namespace Scriban.Functions
         /// }}
         /// ```
         /// ```html
-        /// [computer, orange, sofa]
+        /// ["computer", "orange", "sofa"]
         /// ```
         /// </remarks>
         public static IEnumerable Sort(TemplateContext context, SourceSpan span, object list, string member = null)
         {
             if (list == null)
             {
-                return Enumerable.Empty<object>();
+                return new ScriptRange();
             }
 
             var enumerable = list as IEnumerable;
@@ -574,7 +507,7 @@ namespace Scriban.Functions
 
             var realList = enumerable.Cast<object>().ToList();
             if (realList.Count == 0)
-                return realList;
+                return new ScriptArray();
 
             if (string.IsNullOrEmpty(member))
             {
@@ -603,7 +536,7 @@ namespace Scriban.Functions
                 });
             }
 
-            return realList;
+            return new ScriptArray(realList);
         }
 
         /// <summary>
@@ -621,11 +554,11 @@ namespace Scriban.Functions
         /// </remarks>
         public static IEnumerable Uniq(IEnumerable list)
         {
-            return list?.Cast<object>().Distinct();
+            return ScriptRange.Uniq(list);
         }
 
         /// <summary>
-        /// Returns if an `list` contains an specifique element 
+        /// Returns if an `list` contains an specifique element
         /// </summary>
         /// <param name="list">the input list</param>
         /// <param name="item">the input item</param>

@@ -1,1 +1,1 @@
-text(6,3) : error : Object `x` is null. Cannot access member: x.y
+text(6,3) : error : Cannot get the member x.y for a null object.

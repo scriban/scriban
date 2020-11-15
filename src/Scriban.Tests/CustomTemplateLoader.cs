@@ -1,6 +1,4 @@
-#if SCRIBAN_ASYNC
 using System.Threading.Tasks;
-#endif
 using Scriban.Parsing;
 using Scriban.Runtime;
 
@@ -52,17 +50,21 @@ namespace Scriban.Tests
                 case "recursive_nested_templates":
                     return "{{$1}}{{ x = x ?? 0; x = x + 1; if x < 5; include 'recursive_nested_templates' ($1 + 1); end }}";
 
+                case "multilines":
+                    return "Line 1\nLine 2\nLine 3";
+
+                case "nested_templates_with_indent":
+                    return "  {{ include 'multilines'}}";
+
                 default:
                     return templatePath;
             }
         }
 
-#if SCRIBAN_ASYNC
         public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
             return new ValueTask<string>(Load(context, callerSpan, templatePath));
         }
-#endif
     }
 
     class LiquidCustomTemplateLoader : ITemplateLoader
@@ -93,11 +95,9 @@ namespace Scriban.Tests
             }
         }
 
-#if SCRIBAN_ASYNC
         public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
             return new ValueTask<string>(Load(context, callerSpan, templatePath));
         }
-#endif
     }
 }

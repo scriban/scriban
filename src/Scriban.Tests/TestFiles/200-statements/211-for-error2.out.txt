@@ -1,1 +1,1 @@
-text(5,1) : error : Error while parsing for statement: Expecting 'in' word instead of `Identifier toto` in: for <variable> in <expression> ... end
+text(5,1) : error : Error while parsing for statement: Expecting 'in' word instead of `toto` in: for <variable> in <expression> ... end

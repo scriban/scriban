@@ -1,0 +1,12 @@
+true ? 1 : 2 => {{ true ? 1 : 2 }}
+false ? 1 : 2 => {{ false ? 1 : 2 }}
+"test1 check" | string.ends_with "check" ? 3 : 4 => {{ "test1 check" | string.ends_with "check" ? 3 : 4 }}
+"test2 check" | string.ends_with "nocheck" ? 3 : 4 => {{ "test2 check" | string.ends_with "nocheck" ? 3 : 4 }}
+"test3 check" | string.ends_with "check" ? string.handleize "a b" : string.handleize "c d" => {{ "test3 check" | string.ends_with "check" ? string.handleize "a b" : string.handleize "c d" }}
+"test4 check" | string.ends_with "nocheck" ? string.handleize "a b" : string.handleize "c d" => {{ "test4 check" | string.ends_with "nocheck" ? string.handleize "a b" : string.handleize "c d" }}
+true ? true ? 1 : 2 : 3 => {{ true ? true ? 1 : 2 : 3 }}
+true ? false ? 1 : 2 : 3 => {{ true ? false ? 1 : 2 : 3 }}
+false ? true ? 1 : 2 : 3 => {{ false ? true ? 1 : 2 : 3 }}
+x = {}; x.test = true == true ? true ? 1 : 2 : 3; x.test => {{ x = {}; x.test = true == true ? true ? 1 : 2 : 3; x.test }}
+x = {}; x.test = true == true ? false ? 1 : 2 : 3; x.test => {{ x = {}; x.test = true == true ? false ? 1 : 2 : 3; x.test }}
+x = {}; x.test = false == true ? true ? 1 : 2 : 3; x.test => {{ x = {}; x.test = false == true ? true ? 1 : 2 : 3; x.test }}

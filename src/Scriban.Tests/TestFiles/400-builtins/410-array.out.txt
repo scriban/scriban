@@ -36,8 +36,8 @@ null | array.map "name":[]
 null | array.sort:[]
 null | array.sort "name":[]
 null | array.insert_at (-1) 5:[5]
-null | array.insert_at 1 5:[, 5]
-[] | array.insert_at 1 5:[, 5]
+null | array.insert_at 1 5:[null, 5]
+[] | array.insert_at 1 5:[null, 5]
 [] | array.sort:[]
 [{id: 5}, {id: 1}, {id: 10}]| array.sort "id":[{id: 1}, {id: 5}, {id: 10}]
 Cycle:
@@ -59,5 +59,5 @@ null | array.concat [5,6]: [5, 6]
 null | array.concat null:
 [1, null, 3] | array.compact: [1, 3]
 null | array.compact:
-products | array.sort "title" | array.map "title": [Apple, Banana, Computer, Mobile Phone, Orange, Sofa, Table]
+products | array.sort "title" | array.map "title": ["Apple", "Banana", "Computer", "Mobile Phone", "Orange", "Sofa", "Table"]
 5 | array.sort: [5]

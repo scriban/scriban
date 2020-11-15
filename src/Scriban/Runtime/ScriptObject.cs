@@ -8,6 +8,7 @@ using System.Linq;
 using Scriban.Helpers;
 using System.Reflection;
 using System.Text;
+using Scriban.Functions;
 using Scriban.Parsing;
 
 namespace Scriban.Runtime
@@ -16,7 +17,7 @@ namespace Scriban.Runtime
     /// Base runtime object used to store properties.
     /// </summary>
     /// <seealso cref="System.Collections.IEnumerable" />
-    public class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject, IDictionary
+    public partial class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject, IDictionary, IFormattable
     {
         internal Dictionary<string, InternalValue> Store { get; private set; }
 
@@ -177,8 +178,9 @@ namespace Scriban.Runtime
         /// </summary>
         /// <typeparam name="T">Type of the expected member</typeparam>
         /// <param name="name">The name of the member.</param>
+        /// <param name="defaultValue">Default value used if the value is not set or not of the expected type.</param>
         /// <returns>The value or default{T} is the value is different. Note that this method will override the value in this instance if the value doesn't match the type {T} </returns>
-        public T GetSafeValue<T>(string name)
+        public T GetSafeValue<T>(string name, T defaultValue = default)
         {
             if (name == null) throw new ArgumentNullException(nameof(name));
             var obj = this[name];
@@ -186,11 +188,11 @@ namespace Scriban.Runtime
             // so we can safely return immediately with the default value
             if (obj == null)
             {
-                return default(T);
+                return defaultValue;
             }
             if (!(obj is T))
             {
-                obj = default(T);
+                obj = defaultValue;
                 this[name] = obj;
             }
             return (T)obj;
@@ -214,7 +216,7 @@ namespace Scriban.Runtime
             {
                 if (key == null) throw new ArgumentNullException(nameof(key));
                 this.AssertNotReadOnly();
-                SetValue(null, new SourceSpan(), key, value, false);
+                TrySetValue(null, new SourceSpan(), key, value, false);
             }
         }
 
@@ -254,19 +256,22 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        public virtual void SetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+        public virtual bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
         {
+            if (!CanWrite(member)) return false;
             this.AssertNotReadOnly();
             Store[member] = new InternalValue(value, readOnly);
+            return true;
         }
 
         public void SetValue(string member, object value, bool readOnly)
         {
-            SetValue(null, new SourceSpan(), member, value, readOnly);
+            Store[member] = new InternalValue(value, readOnly);
         }
+
         public void Add(string key, object value)
         {
-            SetValue(null, new SourceSpan(), key, value, false);
+            Store.Add(key, new InternalValue(value, false));
         }
 
         public bool ContainsKey(string key)
@@ -290,7 +295,7 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="member">The member.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        public void SetReadOnly(string member, bool readOnly)
+        public virtual void SetReadOnly(string member, bool readOnly)
         {
             this.AssertNotReadOnly();
             InternalValue internalValue;
@@ -301,15 +306,24 @@ namespace Scriban.Runtime
             }
         }
 
-        /// <summary>
-        /// Returns a <see cref="System.String" /> that represents this instance.
-        /// </summary>
-        /// <param name="context">The template context requesting this evaluation</param>
-        /// <param name="span">The span.</param>
-        /// <returns>A <see cref="System.String" /> that represents this instance.</returns>
-        public virtual string ToString(TemplateContext context, SourceSpan span)
+        private static bool IsSimpleKey(string key)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (string.IsNullOrEmpty(key)) return false;
+
+            var c = key[0];
+            if (!(char.IsLetter(key[0]) || c == '_')) return false;
+
+            for (int i = 1; i < key.Length; i++)
+            {
+                c = key[i];
+                if (!(char.IsLetterOrDigit(c) || c == '_')) return false;
+            }
+            return true;
+        }
+
+        public virtual string ToString(string format, IFormatProvider formatProvider)
+        {
+            var context = formatProvider as TemplateContext;
             var result = new StringBuilder();
             result.Append("{");
             bool isFirst = true;
@@ -319,14 +333,45 @@ namespace Scriban.Runtime
                 {
                     result.Append(", ");
                 }
-                var keyPair = (KeyValuePair<string, object>)item;
-                result.Append(keyPair.Key);
+                if (IsSimpleKey(item.Key))
+                {
+                    result.Append(item.Key);
+                }
+                else
+                {
+                    result.Append(context != null ? context.ObjectToString(item.Key, true) : $"\"{StringFunctions.Escape(item.Key)}\"");
+                }
                 result.Append(": ");
-                result.Append(context.ToString(span, keyPair.Value));
+                if (context != null)
+                {
+                    result.Append(context.ObjectToString(item.Value, true));
+                }
+                else
+                {
+                    var value = item.Value;
+                    if (value is IFormattable formattable)
+                    {
+                        result.Append(formattable.ToString(null, formatProvider));
+                    }
+                    else
+                    {
+                        result.Append(value);
+                    }
+                }
                 isFirst = false;
             }
             result.Append("}");
             return result.ToString();
+        }
+
+        public string ToString(IFormatProvider formatProvider)
+        {
+            return ToString(null, formatProvider);
+        }
+
+        public sealed override string ToString()
+        {
+            return ToString(null, null);
         }
 
         public virtual void CopyTo(ScriptObject dest)
@@ -420,8 +465,8 @@ namespace Scriban.Runtime
                 return true;
             }
 
-            var typeInfo = (obj as Type ?? obj.GetType()).GetTypeInfo();
-            return !(obj is string || typeInfo.IsPrimitive || typeInfo == typeof(decimal).GetTypeInfo() || typeInfo.IsEnum || typeInfo.IsArray);
+            var typeInfo = (obj as Type ?? obj.GetType());
+            return !(obj is string || typeInfo.IsPrimitive || typeInfo == typeof(decimal) || typeInfo.IsEnum || typeInfo.IsArray);
         }
 
         // Methods for ICollection<KeyValuePair<string, object>> that we don't care to implement
@@ -465,5 +510,6 @@ namespace Scriban.Runtime
 
             public bool IsReadOnly { get; set; }
         }
+
     }
 }

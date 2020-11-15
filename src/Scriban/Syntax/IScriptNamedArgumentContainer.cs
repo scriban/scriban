@@ -10,6 +10,6 @@ namespace Scriban.Syntax
     /// </summary>
     public interface IScriptNamedArgumentContainer
     {
-        List<ScriptNamedArgument> NamedArguments { get; set; }
+        ScriptList<ScriptNamedArgument> NamedArguments { get; set; }
     }
 }

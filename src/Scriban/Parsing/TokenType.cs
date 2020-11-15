@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 namespace Scriban.Parsing
 {
@@ -12,31 +12,23 @@ namespace Scriban.Parsing
 
         FrontMatterMarker,
 
-        [TokenText("{{")]
+        /// <summary>Token "{{"</summary>
         CodeEnter,
 
-        [TokenText("{%")]
+        /// <summary>Token "{%"</summary>
         LiquidTagEnter,
 
-        [TokenText("}}")]
+        /// <summary>Token "}}"</summary>
         CodeExit,
 
-        [TokenText("%}")]
+        /// <summary>Token "%}"</summary>
         LiquidTagExit,
 
         Raw,
-
         Escape,
 
-        EscapeCount1,
-        EscapeCount2,
-        EscapeCount3,
-        EscapeCount4,
-        EscapeCount5,
-        EscapeCount6,
-        EscapeCount7,
-        EscapeCount8,
-        EscapeCount9,
+        EscapeEnter,
+        EscapeExit,
 
         NewLine,
 
@@ -64,6 +56,16 @@ namespace Scriban.Parsing
         Integer,
 
         /// <summary>
+        /// A Hexadecimal integer (int, long...)
+        /// </summary>
+        HexaInteger,
+
+        /// <summary>
+        /// A binary integer (int, long...)
+        /// </summary>
+        BinaryInteger,
+
+        /// <summary>
         /// A floating point number
         /// </summary>
         Float,
@@ -83,107 +85,139 @@ namespace Scriban.Parsing
         /// </summary>
         VerbatimString,
 
-        [TokenText(";")]
+        /// <summary>Token ";"</summary>
         SemiColon,
 
-        [TokenText("@")]
+        /// <summary>Token "@"</summary>
         Arroba,
 
-        [TokenText("^")]
+        /// <summary>Token "^"</summary>
         Caret,
 
-        [TokenText(":")]
+        /// <summary>Token "^^"</summary>
+        DoubleCaret,
+
+        /// <summary>Token ":"</summary>
         Colon,
 
-        [TokenText("=")]
+        /// <summary>Token "="</summary>
         Equal,
 
-        [TokenText("|")]
-        Pipe,  // |
+        /// <summary>Token "|"</summary>
+        VerticalBar, // |
 
-        [TokenText("!")]
-        Not, // !
+        /// <summary>Token "|>"</summary>
+        PipeGreater, // |>
 
-        [TokenText("&&")]
-        And, // &&
+        /// <summary>Token "!"</summary>
+        Exclamation, // !
 
-        [TokenText("||")]
-        Or,  // ||
+        /// <summary>Token "&amp;&amp;"</summary>
+        DoubleAmp, // &&
 
-        [TokenText("?")]
+        /// <summary>Token "||"</summary>
+        DoubleVerticalBar, // ||
+
+        /// <summary>Token "&amp;"</summary>
+        Amp, // &
+
+        /// <summary>Token "?"</summary>
         Question,
 
-        [TokenText("??")]
-        EmptyCoalescing,
+        /// <summary>Token "??"</summary>
+        DoubleQuestion,
 
-        [TokenText("==")]
-        CompareEqual,
+        /// <summary>Token "?."</summary>
+        QuestionDot,
 
-        [TokenText("!=")]
-        CompareNotEqual,
+        /// <summary>Token "=="</summary>
+        DoubleEqual,
 
-        [TokenText("<")]
-        CompareLess,
+        /// <summary>Token "!="</summary>
+        ExclamationEqual,
 
-        [TokenText(">")]
-        CompareGreater,
+        /// <summary>Token "&lt;"</summary>
+        Less,
 
-        [TokenText("<=")]
-        CompareLessOrEqual,
+        /// <summary>Token ">"</summary>
+        Greater,
 
-        [TokenText(">=")]
-        CompareGreaterOrEqual,
+        /// <summary>Token "&lt;="</summary>
+        LessEqual,
 
-        [TokenText("/")]
+        /// <summary>Token ">="</summary>
+        GreaterEqual,
+
+        /// <summary>Token "/"</summary>
         Divide,
 
-        [TokenText("//")]
+        /// <summary>Token "//"</summary>
         DoubleDivide,
 
-        [TokenText("*")]
-        Multiply,
+        /// <summary>Token "*"</summary>
+        Asterisk,
 
-        [TokenText("+")]
+        /// <summary>Token "+"</summary>
         Plus,
 
-        [TokenText("-")]
+        /// <summary>Token "-"</summary>
         Minus,
 
-        [TokenText("%")]
-        Modulus,
+        /// <summary>Token "%"</summary>
+        Percent,
 
-        [TokenText("<<")]
-        ShiftLeft,
+        /// <summary>Token "&lt;&lt;"</summary>
+        DoubleLessThan,
 
-        [TokenText(">>")]
-        ShiftRight,
+        /// <summary>Token ">>"</summary>
+        DoubleGreaterThan,
 
-        [TokenText(",")]
+        /// <summary>Token ","</summary>
         Comma,
 
-        [TokenText(".")]
+        /// <summary>Token "."</summary>
         Dot,
 
-        [TokenText("..")]
+        /// <summary>Token ".."</summary>
         DoubleDot,
 
-        [TokenText("..<")]
+        /// <summary>Token "..."</summary>
+        TripleDot,
+
+        /// <summary>Token "..&lt;"</summary>
         DoubleDotLess,
 
-        [TokenText("(")]
-        OpenParent,
-        [TokenText(")")]
-        CloseParent,
+        /// <summary>Token "("</summary>
+        OpenParen,
 
-        [TokenText("{")]
+        /// <summary>Token ")"</summary>
+        CloseParen,
+
+        /// <summary>Token "{"</summary>
         OpenBrace,
-        [TokenText("}")]
+
+        /// <summary>Token "}"</summary>
         CloseBrace,
 
-        [TokenText("[")]
+        /// <summary>Token "["</summary>
         OpenBracket,
-        [TokenText("]")]
+
+        /// <summary>Token "]"</summary>
         CloseBracket,
+
+        /// <summary>
+        /// Custom token
+        /// </summary>
+        Custom,
+        Custom1,
+        Custom2,
+        Custom3,
+        Custom4,
+        Custom5,
+        Custom6,
+        Custom7,
+        Custom8,
+        Custom9,
 
         Eof,
     }

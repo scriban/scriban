@@ -1,0 +1,12 @@
+true ? 1 : 2 => 1
+false ? 1 : 2 => 2
+"test1 check" | string.ends_with "check" ? 3 : 4 => 3
+"test2 check" | string.ends_with "nocheck" ? 3 : 4 => 4
+"test3 check" | string.ends_with "check" ? string.handleize "a b" : string.handleize "c d" => a-b
+"test4 check" | string.ends_with "nocheck" ? string.handleize "a b" : string.handleize "c d" => c-d
+true ? true ? 1 : 2 : 3 => 1
+true ? false ? 1 : 2 : 3 => 2
+false ? true ? 1 : 2 : 3 => 3
+x = {}; x.test = true == true ? true ? 1 : 2 : 3; x.test => 1
+x = {}; x.test = true == true ? false ? 1 : 2 : 3; x.test => 2
+x = {}; x.test = false == true ? true ? 1 : 2 : 3; x.test => 3

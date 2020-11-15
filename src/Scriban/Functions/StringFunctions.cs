@@ -31,6 +31,81 @@ namespace Scriban.Functions
         private static void ReleaseBuilder(StringBuilder builder) => builder.Length = 0;
 
         /// <summary>
+        /// Escapes a string with escape characters.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The two strings concatenated</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Hel\tlo\n\"W\\orld" | string.escape }}
+        /// ```
+        /// ```html
+        /// Hel\tlo\n\"W\\orld
+        /// ```
+        /// </remarks>
+        public static string Escape(string text)
+        {
+            if (text == null) return text;
+            StringBuilder builder = null;
+            for (int i = 0; i < text.Length; i++)
+            {
+                var c = text[i];
+                if (c < 32 || c == '"' || c == '\\')
+                {
+                    string appendText;
+                    switch (c)
+                    {
+                        case '"':
+                            appendText = "\\\"";
+                            break;
+                        case '\\':
+                            appendText = "\\\\";
+                            break;
+                        case '\a':
+                            appendText = "\\a";
+                            break;
+                        case '\b':
+                            appendText = "\\b";
+                            break;
+                        case '\t':
+                            appendText = "\\t";
+                            break;
+                        case '\r':
+                            appendText = "\\r";
+                            break;
+                        case '\v':
+                            appendText = "\\v";
+                            break;
+                        case '\f':
+                            appendText = "\\f";
+                            break;
+                        case '\n':
+                            appendText = "\\n";
+                            break;
+                        default:
+                            appendText = $"\\x{(int)c:x2}";
+                            break;
+                    }
+
+                    if (builder == null)
+                    {
+                        builder = new StringBuilder(text.Length + 10);
+                        if (i > 0) builder.Append(text, 0, i);
+                    }
+
+                    builder.Append(appendText);
+                }
+                else if (builder != null)
+                {
+                    // TODO: could be more optimized by adding range
+                    builder.Append(c);
+                }
+            }
+
+            return builder != null ? builder.ToString() : text;
+        }
+
+        /// <summary>
         /// Concatenates two strings
         /// </summary>
         /// <param name="text">The input string</param>
@@ -234,11 +309,11 @@ namespace Scriban.Functions
         /// <returns>The input string without any left whitespace characters</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ '   too many spaces           ' | string.lstrip  }}
+        /// {{ '   too many spaces' | string.lstrip  }}
         /// ```
         /// > Highlight to see the empty spaces to the right of the string
         /// ```html
-        /// too many spaces           
+        /// too many spaces
         /// ```
         /// </remarks>
         public static string LStrip(string text)
@@ -458,7 +533,7 @@ namespace Scriban.Functions
         /// ell
         /// ```
         /// </remarks>
-        public static string Slice(string text, int start, int length = 0)
+        public static string Slice(string text, int start, int? length = null)
         {
             if (string.IsNullOrEmpty(text) || start >= text.Length)
             {
@@ -470,7 +545,7 @@ namespace Scriban.Functions
                 start = start + text.Length;
             }
 
-            if (length <= 0)
+            if (!length.HasValue)
             {
                 length = text.Length;
             }
@@ -490,7 +565,7 @@ namespace Scriban.Functions
                 length = text.Length - start;
             }
 
-            return text.Substring(start, length);
+            return text.Substring(start, length.Value);
         }
 
         /// <summary>
@@ -566,12 +641,10 @@ namespace Scriban.Functions
         {
             if (string.IsNullOrEmpty(text))
             {
-                return Enumerable.Empty<string>();
+                return new ScriptRange(Enumerable.Empty<string>());
             }
 
-            match = match ?? string.Empty;
-
-            return text.Split(new[] {match}, StringSplitOptions.RemoveEmptyEntries);
+            return new ScriptRange(text.Split(new[] {match}, StringSplitOptions.RemoveEmptyEntries));
         }
 
         /// <summary>
@@ -817,7 +890,6 @@ namespace Scriban.Functions
             return text?.ToUpperInvariant();
         }
 
-#if !NETSTANDARD1_1
         /// <summary>
         /// Computes the `md5` hash of the input string
         /// </summary>
@@ -941,32 +1013,6 @@ namespace Scriban.Functions
             ReleaseBuilder(sb);
             return result;
         }
-#else
-        public static string Md5(string text)
-        {
-            throw new NotSupportedException("`string.md5` is not supported on this .NET platform");
-        }
-
-        public static string Sha1(string text)
-        {
-            throw new NotSupportedException("`string.sha1` is not supported on this .NET platform");
-        }
-
-        public static string Sha256(string text)
-        {
-            throw new NotSupportedException("`string.sha256` is not supported on this .NET platform");
-        }
-
-        public static string HmacSha1(string text, string secretKey)
-        {
-            throw new NotSupportedException("`string.hmac_sha1` is not supported on this .NET platform");
-        }
-
-        public static string HmacSha256(string text, string secretKey)
-        {
-            throw new NotSupportedException("`string.hmac_sha256` is not supported on this .NET platform");
-        }
-#endif
 
         /// <summary>
         /// Pads a string with leading spaces to a specified total length.
@@ -1042,11 +1088,7 @@ namespace Scriban.Functions
         public static string Base64Decode(string text)
         {
             var decoded = Convert.FromBase64String(text ?? string.Empty);
-            #if NETSTANDARD1_1
-            return Encoding.UTF8.GetString(decoded, 0, decoded.Length);
-            #else
             return Encoding.UTF8.GetString(decoded);
-            #endif
         }
     }
 }

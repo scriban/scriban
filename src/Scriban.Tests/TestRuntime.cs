@@ -3,16 +3,14 @@
 
 using System;
 using System.Collections.Generic;
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
 using System.Data;
-#endif
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
-#if SCRIBAN_ASYNC
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-#endif
 using Newtonsoft.Json;
 using NUnit.Framework;
 using Scriban.Parsing;
@@ -24,6 +22,114 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+        [Test]
+        public void TestGetTypeName()
+        {
+            var context = new TemplateContext();
+
+            Assert.AreEqual("bool", context.GetTypeName(true));
+            Assert.AreEqual("bool", context.GetTypeName(false));
+            Assert.AreEqual("byte", context.GetTypeName((byte)1));
+            Assert.AreEqual("sbyte", context.GetTypeName((sbyte)1));
+            Assert.AreEqual("ushort", context.GetTypeName((ushort)1));
+            Assert.AreEqual("short", context.GetTypeName((short)1));
+            Assert.AreEqual("uint", context.GetTypeName((uint)1));
+            Assert.AreEqual("int", context.GetTypeName((int)1));
+            Assert.AreEqual("ulong", context.GetTypeName((ulong)1));
+            Assert.AreEqual("long", context.GetTypeName((long)1));
+            Assert.AreEqual("float", context.GetTypeName((float)1.5f));
+            Assert.AreEqual("double", context.GetTypeName((double)1.5));
+            Assert.AreEqual("decimal", context.GetTypeName((decimal)1.5m));
+            Assert.AreEqual("bigint", context.GetTypeName(new BigInteger(1)));
+            Assert.AreEqual("string", context.GetTypeName("test"));
+            Assert.AreEqual("range", context.GetTypeName(new ScriptRange()));
+            Assert.AreEqual("array", context.GetTypeName(new ScriptArray()));
+            Assert.AreEqual("array", context.GetTypeName(new ScriptArray<float>()));
+            Assert.AreEqual("object", context.GetTypeName(new ScriptObject()));
+            Assert.AreEqual("function", context.GetTypeName(DelegateCustomAction.Create(() => {})));
+        }
+
+
+        [Test]
+        public void TestRecursiveLocal()
+        {
+            var template = Template.Parse("{{ x = {}; with x; func $tester; if $0 == 0; ret; end; $0; $0 - 1 | $tester; end; export = @$tester; end; x.export 5; }}");
+            var result = template.Render();
+            Assert.AreEqual("54321", result);
+        }
+
+        [Test]
+        public void TestReflectionArguments()
+        {
+            var context = new TemplateContext();
+
+            // Allocating a zero length object[] should return the same instance
+            {
+                var arg0_0 = context.GetOrCreateReflectionArguments(0);
+                var arg0_1 = context.GetOrCreateReflectionArguments(0);
+                Assert.AreSame(arg0_0, arg0_1);
+                context.ReleaseReflectionArguments(arg0_0);
+                context.ReleaseReflectionArguments(arg0_1);
+
+                arg0_0 = context.GetOrCreateReflectionArguments(0);
+                Assert.AreSame(arg0_0, arg0_1);
+            }
+
+            // Allocating a non-zero length object[] should return the != instance
+            const int maxArgument = ScriptFunctionCall.MaximumParameterCount;
+            {
+                for (int length = 1; length <= maxArgument; length++)
+                {
+                    var arg0_0 = context.GetOrCreateReflectionArguments(length);
+                    AssertAllNulls(arg0_0);
+                    var arg0_1 = context.GetOrCreateReflectionArguments(length);
+                    AssertAllNulls(arg0_1);
+
+                    Assert.AreNotSame(arg0_0, arg0_1);
+
+                    Array.Fill(arg0_0, (object)1);
+                    Array.Fill(arg0_1, (object)1);
+
+                    context.ReleaseReflectionArguments(arg0_0);
+                    context.ReleaseReflectionArguments(arg0_1);
+
+                    var arg1_0 = context.GetOrCreateReflectionArguments(length);
+                    AssertAllNulls(arg1_0);
+                    var arg1_1 = context.GetOrCreateReflectionArguments(length);
+                    AssertAllNulls(arg1_1);
+
+                    Assert.AreNotSame(arg1_0, arg1_1);
+
+                    Assert.AreSame(arg0_0, arg1_1);
+                    Assert.AreSame(arg0_1, arg1_0);
+
+                    context.ReleaseReflectionArguments(arg1_0);
+                    context.ReleaseReflectionArguments(arg1_1);
+                }
+            }
+
+            {
+                var arg0_0 = context.GetOrCreateReflectionArguments(maxArgument + 1);
+                AssertAllNulls(arg0_0);
+                Array.Fill(arg0_0, (object)1);
+                context.ReleaseReflectionArguments(arg0_0);
+
+                var arg0_1 = context.GetOrCreateReflectionArguments(maxArgument + 1);
+                AssertAllNulls(arg0_1);
+                Assert.AreNotSame(arg0_0, arg0_1);
+
+                context.ReleaseReflectionArguments(arg0_1);
+            }
+        }
+
+        private static void AssertAllNulls(object[] array)
+        {
+            for (int i = 0; i < array.Length; i++)
+            {
+                Assert.Null(array[i], $"Array element {i} is not null. {array[i]}");
+            }
+        }
+
         public static class MyPipeFunctions
         {
             public static string A(TemplateContext context, object input, string currencyCode = null)
@@ -80,6 +186,76 @@ y and z = 5 and 0";
 
 
         [Test]
+        public void TestFunctionCallWithNoReturn()
+        {
+            {
+                var template = Template.Parse(@"
+{{-
+func g(x); x ; end;
+1 + g(2)
+-}}
+");
+                var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+                Assert.Throws<ScriptRuntimeException>(() => template.Render(tc));
+            }
+            {
+                var template = Template.Parse(@"
+{{-
+g(x) = x * 5;
+1 + g(2)
+-}}
+");
+                var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+                var result = template.Render(tc);
+                Assert.AreEqual("11", result);
+            }
+            {
+                var template = Template.Parse(@"
+{{-
+func g(x); if x < 0; ret x + 1; else; ret x + 2; end; end;
+1 + g(2) + g(-1)
+-}}
+");
+                var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+                var result = template.Render(tc);
+                Assert.AreEqual("5", result);
+            }
+        }
+
+        [Test]
+        public void TestExplicitFunctionCall()
+        {
+            {
+                var template = Template.Parse(@"
+{{-
+g(x,y,z) = x + y * 2 + z * 10
+1 + g(1,2,3) }} {{ g(5,6,7) * g(1,2,3) + 1
+}}");
+                var tc = new TemplateContext() {ErrorForStatementFunctionAsExpression = true};
+                var result = template.Render(tc);
+                Assert.AreEqual($"{1 + g(1,2,3)} {g(5,6,7) * g(1,2,3) + 1}", result);
+            }
+
+            int g(int x, int y, int z) => x + y * 2 + z * 10;
+        }
+
+
+        [Test]
+        public void TestStackOverflow()
+        {
+            {
+                var template = Template.Parse(@"
+{{-
+f(x) = f(x - 1)
+f(1)
+-}}
+");
+                var tc = new TemplateContext();
+                Assert.Throws<ScriptRuntimeException>(() => template.Render(tc));
+            }
+        }
+
+        [Test]
         public void TestFunctionWithTemplateContextAndObjectParams()
         {
             {
@@ -113,7 +289,7 @@ y and z = 5 and 0";
         {
             var template = Template.ParseLiquid("{{html>0}}");
             var ex = Assert.Catch<ScriptRuntimeException>(() => template.Render(new {x = 0}));
-            Assert.AreEqual("<input>(1,7) : error : Unable to convert type `Scriban.Functions.HtmlFunctions` to int", ex.Message);
+            Assert.AreEqual("<input>(1,7) : error : Unable to convert type `object` to int", ex.Message);
         }
 
         [Test]
@@ -163,7 +339,6 @@ end
             TextAssert.AreEqual("22AB", result);
         }
 
-#if SCRIBAN_ASYNC
         [Test]
         public async Task TestAsyncAwait()
         {
@@ -174,7 +349,7 @@ end
             const int MinDelay = 100;
             context.CurrentGlobal.Import("wait_and_see", new Func<Task<string>>(async () =>
             {
-                await Task.Delay(MinDelay);
+                await Task.Delay(MinDelay + 10);
                 return "yes";
             }));
             var clock = Stopwatch.StartNew();
@@ -186,7 +361,6 @@ end
 
             Assert.AreEqual("yes", result);
         }
-#endif
 
         [Test]
         public void CheckReturnInsideLoop()
@@ -315,7 +489,7 @@ Tax: {{ 7 | match_tax }}";
             });
             var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
             var result = exception.ToString();
-            Assert.True(result.Contains("a.b.c"), $"The exception string `{result}` does not contain a.b.c");
+            Assert.True(result.Contains("The object is readonly"), $"The exception string `{result}` does not contain \"The object is readonly\"");
         }
 
         [Test]
@@ -349,7 +523,7 @@ Tax: {{ 7 | match_tax }}";
                 context.StrictVariables = true;
                 var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
                 var result = exception.ToString();
-                var check = "The variable `myvar2` was not found";
+                var check = "The variable or function `myvar2` was not found";
                 Assert.True(result.Contains(check), $"The exception string `{result}` does not contain the expected value");
             }
         }
@@ -383,7 +557,6 @@ Tax: {{ 7 | match_tax }}";
             TextAssert.AreEqual("Test with a dynamic yes", result);
         }
 
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
         [Test]
         public void TestJson()
         {
@@ -448,7 +621,6 @@ Tax: {{ 7 | match_tax }}";
 
             TextAssert.AreEqual(expected, result);
         }
-#endif
 
         [Test]
         public void TestScriptObjectImport()
@@ -637,7 +809,11 @@ Tax: {{ 7 | match_tax }}";
 
             // Test unrelaxed member access.
             {
-                var context = new TemplateContext();
+                var context = new TemplateContext()
+                {
+                    EnableRelaxedTargetAccess = false,
+                    EnableRelaxedMemberAccess = false,
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{a.property_a").Render(context);
@@ -652,7 +828,11 @@ Tax: {{ 7 | match_tax }}";
 
             // Test relaxed member access.
             {
-                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                var context = new TemplateContext
+                {
+                    EnableRelaxedTargetAccess = true,
+                    EnableRelaxedMemberAccess = true
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{a.property_a").Render(context);
@@ -676,7 +856,10 @@ Tax: {{ 7 | match_tax }}";
 
             // Test unrelaxed indexer access.
             {
-                var context = new TemplateContext();
+                var context = new TemplateContext()
+                {
+                    EnableRelaxedMemberAccess = false,
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{list[0]").Render(context);
@@ -694,7 +877,12 @@ Tax: {{ 7 | match_tax }}";
 
             // Test relaxed member access.
             {
-                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                var context = new TemplateContext
+                {
+                    EnableNullIndexer = false,
+                    EnableRelaxedTargetAccess = true,
+                    EnableRelaxedMemberAccess = true
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{list[0]").Render(context);
@@ -739,7 +927,11 @@ Tax: {{ 7 | match_tax }}";
 
             // Test relaxed member access.
             {
-                var context = new TemplateContext { EnableRelaxedMemberAccess = true };
+                var context = new TemplateContext
+                {
+                    EnableRelaxedTargetAccess = true,
+                    EnableRelaxedMemberAccess = true
+                };
                 context.PushGlobal(scriptObject);
 
                 var result = Template.Parse("{{dictionary['key']").Render(context);

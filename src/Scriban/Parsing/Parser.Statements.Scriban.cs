@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -16,27 +16,14 @@ namespace Scriban.Parsing
     public partial class Parser
     {
 
-        private void ParseScribanStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
+        private void ParseScribanStatement(string identifier, ScriptStatement parent, bool parseEndOfStatementAfterEnd, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
             var startToken = Current;
             switch (identifier)
             {
                 case "end":
                     hasEnd = true;
-                    nextStatement = false;
-
-                    if (_isKeepTrivia)
-                    {
-                        _trivias.Add(new ScriptTrivia(CurrentSpan, ScriptTriviaType.End, _lexer.Text));
-                    }
-                    NextToken();
-
-                    var matchingStatement = FindFirstStatementExpectingEnd();
-                    ExpectEndOfStatement(matchingStatement);
-                    if (_isKeepTrivia)
-                    {
-                        FlushTrivias(matchingStatement, false);
-                    }
+                    statement = ParseEndStatement(parseEndOfStatementAfterEnd);
                     break;
                 case "wrap":
                     CheckNotInCase(parent, startToken);
@@ -44,7 +31,7 @@ namespace Scriban.Parsing
                     break;
                 case "if":
                     CheckNotInCase(parent, startToken);
-                    statement = ParseIfStatement(false, false);
+                    statement = ParseIfStatement(false, null);
                     break;
                 case "case":
                     CheckNotInCase(parent, startToken);
@@ -84,12 +71,16 @@ namespace Scriban.Parsing
                             ((ScriptWhenStatement)parentCondition).Next = nextCondition;
                         }
                     }
+                    else if (parent is ScriptForStatement forStatement)
+                    {
+                        forStatement.Else = (ScriptElseStatement)nextCondition;
+                    }
                     else
                     {
                         nextStatement = false;
 
                         // unit test: 201-if-else-error3.txt
-                        LogError(startToken, "A else condition must be preceded by another if/else/when condition");
+                        LogError(startToken, "A else condition must be preceded by another if/else/when condition or a for loop.");
                     }
                     hasEnd = true;
                     break;
@@ -105,6 +96,7 @@ namespace Scriban.Parsing
                     }
                     break;
                 case "tablerow":
+                    if (_isScientific) goto default;
                     CheckNotInCase(parent, startToken);
                     if (PeekToken().Type == TokenType.Dot)
                     {
@@ -140,9 +132,10 @@ namespace Scriban.Parsing
                     break;
                 case "break":
                     CheckNotInCase(parent, startToken);
-                    statement = Open<ScriptBreakStatement>();
-                    NextToken();
-                    ExpectEndOfStatement(statement);
+                    var breakStatement = Open<ScriptBreakStatement>();
+                    statement = breakStatement;
+                    ExpectAndParseKeywordTo(breakStatement.BreakKeyword); // Parse break
+                    ExpectEndOfStatement();
                     Close(statement);
 
                     // This has to be done at execution time, because of the wrap statement
@@ -153,9 +146,10 @@ namespace Scriban.Parsing
                     break;
                 case "continue":
                     CheckNotInCase(parent, startToken);
-                    statement = Open<ScriptContinueStatement>();
-                    NextToken();
-                    ExpectEndOfStatement(statement);
+                    var continueStatement =  Open<ScriptContinueStatement>();
+                    statement = continueStatement;
+                    ExpectAndParseKeywordTo(continueStatement.ContinueKeyword); // Parse continue keyword
+                    ExpectEndOfStatement();
                     Close(statement);
 
                     // This has to be done at execution time, because of the wrap statement
@@ -184,28 +178,165 @@ namespace Scriban.Parsing
             }
         }
 
+        private ScriptEndStatement ParseEndStatement(bool parseEndOfStatementAfterEnd)
+        {
+            var endStatement = Open<ScriptEndStatement>();
+            ExpectAndParseKeywordTo(endStatement.EndKeyword);
+            if (parseEndOfStatementAfterEnd)
+            {
+                ExpectEndOfStatement();
+            }
+            return Close(endStatement);
+        }
+
         private ScriptFunction ParseFunctionStatement(bool isAnonymous)
         {
             var scriptFunction = Open<ScriptFunction>();
-            NextToken(); // skip func or do
 
-            if (!isAnonymous)
+            var previousExpressionLevel = _expressionLevel;
+            try
             {
-                scriptFunction.Name = ExpectAndParseVariable(scriptFunction);
-            }
-            ExpectEndOfStatement(scriptFunction);
+                // Reset expression level when parsing
+                _expressionLevel = 0;
 
-            scriptFunction.Body = ParseBlockStatement(scriptFunction);
+                if (isAnonymous)
+                {
+                    scriptFunction.NameOrDoToken = ExpectAndParseKeywordTo(ScriptKeyword.Do());
+                }
+                else
+                {
+                    scriptFunction.FuncToken = ExpectAndParseKeywordTo(ScriptKeyword.Func());
+                    scriptFunction.NameOrDoToken = ExpectAndParseVariable(scriptFunction);
+                }
+
+                // If we have parenthesis, this is a function with explicit parameters
+                if (Current.Type == TokenType.OpenParen)
+                {
+                    scriptFunction.OpenParen = ParseToken(TokenType.OpenParen);
+                    var parameters = new ScriptList<ScriptParameter>();
+                    bool hasTripleDot = false;
+                    bool hasOptionals = false;
+
+                    bool isFirst = true;
+                    while (true)
+                    {
+                        // Parse any required comma (before each new non-first argument)
+                        // Or closing parent (and we exit the loop)
+                        if (Current.Type == TokenType.CloseParen)
+                        {
+                            scriptFunction.CloseParen = ParseToken(TokenType.CloseParen);
+                            scriptFunction.Span.End = scriptFunction.CloseParen.Span.End;
+                            break;
+                        }
+
+                        if (!isFirst)
+                        {
+                            if (Current.Type == TokenType.Comma)
+                            {
+                                PushTokenToTrivia();
+                                NextToken();
+                                FlushTriviasToLastTerminal();
+                            }
+                            else
+                            {
+                                LogError(Current, "Expecting a comma to separate arguments in a function call.");
+                            }
+                        }
+
+                        isFirst = false;
+
+                        // Else we expect an expression
+                        if (IsStartOfExpression())
+                        {
+                            var parameter = Open<ScriptParameter>();
+                            var arg = ExpectAndParseVariable(scriptFunction);
+                            if (!(arg is ScriptVariableGlobal))
+                            {
+                                LogError(arg.Span, "Expecting only a simple name parameter for a function");
+                            }
+
+                            parameter.Name = arg;
+
+                            if (Current.Type == TokenType.Equal)
+                            {
+                                if (hasTripleDot)
+                                {
+                                    LogError(arg.Span, "Cannot declare an optional parameter after a variable parameter (`...`).");
+                                }
+
+                                hasOptionals = true;
+                                parameter.EqualOrTripleDotToken = ScriptToken.Equal();
+                                ExpectAndParseTokenTo(parameter.EqualOrTripleDotToken, TokenType.Equal);
+
+                                parameter.Span.End = parameter.EqualOrTripleDotToken.Span.End;
+
+                                var defaultValue = ExpectAndParseExpression(parameter);
+                                if (defaultValue is ScriptLiteral literal)
+                                {
+                                    parameter.DefaultValue = literal;
+                                    parameter.Span.End = literal.Span.End;
+                                }
+                                else
+                                {
+                                    LogError(arg.Span, "Expecting only a literal for an optional parameter value.");
+                                }
+                            }
+                            else if (Current.Type == TokenType.TripleDot)
+                            {
+                                if (hasTripleDot)
+                                {
+                                    LogError(arg.Span, "Cannot declare multiple variable parameters.");
+                                }
+
+                                hasTripleDot = true;
+                                hasOptionals = true;
+                                parameter.EqualOrTripleDotToken = ScriptToken.TripleDot();
+                                ExpectAndParseTokenTo(parameter.EqualOrTripleDotToken, TokenType.TripleDot);
+                                parameter.Span.End = parameter.EqualOrTripleDotToken.Span.End;
+                            }
+                            else if (hasOptionals)
+                            {
+                                LogError(arg.Span, "Cannot declare a normal parameter after an optional parameter.");
+                            }
+
+                            parameters.Add(parameter);
+                            scriptFunction.Span.End = parameter.Span.End;
+                        }
+                        else
+                        {
+                            LogError(Current, "Expecting an expression for argument function calls instead of this token.");
+                            break;
+                        }
+                    }
+
+                    if (scriptFunction.CloseParen == null)
+                    {
+                        LogError(Current, "Expecting a closing parenthesis for a function call.");
+                    }
+
+                    // Setup parameters once they have been all parsed
+                    scriptFunction.Parameters = parameters;
+                }
+
+                ExpectEndOfStatement();
+                // If the function is anonymous we don't expect an EOS after the `end`
+                scriptFunction.Body = ParseBlockStatement(scriptFunction, !isAnonymous);
+            }
+            finally
+            {
+                _expressionLevel = previousExpressionLevel;
+            }
+
             return Close(scriptFunction);
         }
 
         private ScriptImportStatement ParseImportStatement()
         {
             var importStatement = Open<ScriptImportStatement>();
-            NextToken(); // skip import
+            ExpectAndParseKeywordTo(importStatement.ImportKeyword); // Parse import keyword
 
             importStatement.Expression = ExpectAndParseExpression(importStatement);
-            ExpectEndOfStatement(importStatement);
+            ExpectEndOfStatement();
 
             return Close(importStatement);
         }
@@ -213,10 +344,10 @@ namespace Scriban.Parsing
         private ScriptReadOnlyStatement ParseReadOnlyStatement()
         {
             var readOnlyStatement = Open<ScriptReadOnlyStatement>();
-            NextToken(); // Skip readonly keyword
+            ExpectAndParseKeywordTo(readOnlyStatement.ReadOnlyKeyword); // Parse readonly keyword
 
             readOnlyStatement.Variable = ExpectAndParseVariable(readOnlyStatement);
-            ExpectEndOfStatement(readOnlyStatement);
+            ExpectEndOfStatement();
 
             return Close(readOnlyStatement);
         }
@@ -224,13 +355,13 @@ namespace Scriban.Parsing
         private ScriptReturnStatement ParseReturnStatement()
         {
             var ret = Open<ScriptReturnStatement>();
-            NextToken(); // skip ret
+            ExpectAndParseKeywordTo(ret.RetKeyword); // Parse ret keyword
 
-            if (StartAsExpression())
+            if (IsStartOfExpression())
             {
                 ret.Expression = ParseExpression(ret);
             }
-            ExpectEndOfStatement(ret);
+            ExpectEndOfStatement();
 
             return Close(ret);
         }
@@ -238,15 +369,14 @@ namespace Scriban.Parsing
         private ScriptWhileStatement ParseWhileStatement()
         {
             var whileStatement = Open<ScriptWhileStatement>();
-            NextToken(); // Skip while
+            ExpectAndParseKeywordTo(whileStatement.WhileKeyword); // Parse while keyword
 
             // Parse the condition
             // unit test: 220-while-error1.txt
             whileStatement.Condition = ExpectAndParseExpression(whileStatement, allowAssignment: false);
 
-            if (ExpectEndOfStatement(whileStatement))
+            if (ExpectEndOfStatement())
             {
-                FlushTrivias(whileStatement.Condition, false);
                 whileStatement.Body = ParseBlockStatement(whileStatement);
             }
 
@@ -256,10 +386,10 @@ namespace Scriban.Parsing
         private ScriptWithStatement ParseWithStatement()
         {
             var withStatement = Open<ScriptWithStatement>();
-            NextToken();
+            ExpectAndParseKeywordTo(withStatement.WithKeyword); // // Parse with keyword
             withStatement.Name = ExpectAndParseExpression(withStatement);
 
-            if (ExpectEndOfStatement(withStatement))
+            if (ExpectEndOfStatement())
             {
                 withStatement.Body = ParseBlockStatement(withStatement);
             }
@@ -269,13 +399,12 @@ namespace Scriban.Parsing
         private ScriptWrapStatement ParseWrapStatement()
         {
             var wrapStatement = Open<ScriptWrapStatement>();
-            NextToken(); // skip wrap
+            ExpectAndParseKeywordTo(wrapStatement.WrapKeyword); // Parse wrap keyword
 
             wrapStatement.Target = ExpectAndParseExpression(wrapStatement);
 
-            if (ExpectEndOfStatement(wrapStatement))
+            if (ExpectEndOfStatement())
             {
-                FlushTrivias(wrapStatement.Target, false);
                 wrapStatement.Body = ParseBlockStatement(wrapStatement);
             }
 
@@ -285,38 +414,14 @@ namespace Scriban.Parsing
         private void FixRawStatementAfterFrontMatter(ScriptPage page)
         {
             // In case of parsing a front matter, we don't want to include any \r\n after the end of the front-matter
-            // So we manipulate back the syntax tree for the expected raw statement (if any), otherwise we can early 
+            // So we manipulate back the syntax tree for the expected raw statement (if any), otherwise we can early
             // exit.
             var rawStatement = page.Body.Statements.FirstOrDefault() as ScriptRawStatement;
             if (rawStatement == null)
             {
                 return;
             }
-
-            var startOffset = rawStatement.Span.Start.Offset;
-            var endOffset = rawStatement.Span.End.Offset;
-            for (int i = startOffset; i <= endOffset; i++)
-            {
-                var c = rawStatement.Text[i];
-                if (c == ' ' || c == '\t')
-                {
-                    continue;
-                }
-                if (c == '\r')
-                {
-                    if (i + 1 <= endOffset && rawStatement.Text[i + 1] == '\n')
-                    {
-                        rawStatement.Span.Start = new TextPosition(i + 2, rawStatement.Span.Start.Line + 1, 0);
-                    }
-                    break;
-                }
-
-                if (c == '\n')
-                {
-                    rawStatement.Span.Start = new TextPosition(i + 1, rawStatement.Span.Start.Line + 1, 0);
-                }
-                break;
-            }
+            rawStatement.Text = rawStatement.Text.TrimStart();
         }
 
         private static bool IsScribanKeyword(string text)

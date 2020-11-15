@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections.Generic;
@@ -33,7 +33,7 @@ namespace Scriban.Runtime.Accessors
 
         public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
-            return ((IScriptObject)target).TrySetValue(member, value, false);
+            return ((IScriptObject)target).TrySetValue(context, span, member, value, false);
         }
     }
 }

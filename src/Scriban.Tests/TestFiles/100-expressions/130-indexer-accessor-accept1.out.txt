@@ -10,3 +10,7 @@ end
 zzz ["ok"]   # Should display "ok"
 ===
 yesok
+
+Indexer accessors:
+x = []; x[0] = 1; x[3] = 5; x; => [1, null, null, 5]
+x = []; x[0] = 1; x[-1] = 6; x; => [6]
