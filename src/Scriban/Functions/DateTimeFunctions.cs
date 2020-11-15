@@ -324,10 +324,12 @@ namespace Scriban.Functions
         ///
         /// Note that the format is using a good part of the ruby format ([source](http://apidock.com/ruby/DateTime/strftime))
         /// ```scriban-html
-        /// {{ date.parse '2016/01/05' | date.to_string `%d %b %Y` }}
+        /// {{ date.parse '2016/01/05' | date.to_string '%d %b %Y' }}
+        /// {{ date.parse '2016/01/05' | date.to_string '%d %B %Y' 'fr-FR' }}
         /// ```
         /// ```html
         /// 05 Jan 2016
+        /// 05 janvier 2016
         /// ```
         /// </summary>
         /// <param name="datetime">The input datetime to format</param>
