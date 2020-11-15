@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.0 (15 Nov 2020)
+- Final release of 3.0.0
+
 ## 3.0.0-alpha.9 (20 Aug 2020)
 - Fix global scope variable for function with parameters
 
