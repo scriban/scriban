@@ -56,7 +56,7 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
 - Separate language mode (via `ScriptLang` enum) from template/scripting parsing mode (`ScriptMode`).
 - New language parsing mode `Scientific`, in addition to default Scriban and Liquid language mode.
 - More fine-grained options on the `TemplateContext` to define scripting behaviors (`EnableRelaxedTargetAccess`, `EnableRelaxedMemberAccess`, `EnableRelaxedFunctionAccess`, `EnableRelaxedIndexerAccess`, `EnableNullIndexer`)
-- New `object.eval` function to evaluate Scriban expression at runtime.
+- New `object.eval` and `object.eval_template` function to evaluate Scriban expressions/templates at runtime.
 - Better support for `IFormattable` objects.   
   
 ## Features

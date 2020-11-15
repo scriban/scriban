@@ -13,6 +13,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
 
 - [Parsing a template](#parsing-a-template)
   - [Parsing modes](#parsing-modes)
+  - [Parsing languages](#parsing-languages)
   - [Liquid support](#liquid-support)
 - [Rendering a template](#rendering-a-template)
   - [Overview](#overview)
@@ -111,7 +112,32 @@ var result = template.Evaluate(new {x = 10});
 Console.WriteLine(result);
 ```
 
-> Note: As we will see in the following section about rendering, you can also avoid rendering a script only mode by evaluating the template instead of rendering. 
+[:top:](#runtime)
+### Parsing languages
+
+Scriban provides 3 languages through the `ScriptLang` enum:
+
+- `ScriptLang.Default`: which is the default Scriban Language
+- `ScriptLang.Liquid`: which is used to parse the language with liquid syntax.
+- `ScriptLang.Scientific`: which is similar to the default, but handles expression slight differently:
+  - Arguments separated by a space will convert to a multiplication: `2 x` will be evaluated as `2 * x`
+  - Except if a function is taking one argument, and in that case it resolves to a function call `cos x` resolves to `cos(x)`
+  - Otherwise function calls need to use explicit parenthesis `myfunction(1,2,3)`
+
+The language is defined by the `LexerOptions.Lang` property which.
+
+For example illustrate how to use the the `ScriptLang.Scientific` and the `ScriptOnly` mode:
+
+```c#
+// Create a template in ScriptOnly mode
+var lexerOptions = new LexerOptions() { Lang = ScriptLang.Scientific, Mode = ScriptMode.ScriptOnly };
+// Notice that code is not enclosed by `{{` and `}}`
+var template = Template.Parse("y = x + 1; 2y;", lexerOptions: lexerOptions);
+// Renders it with the specified parameter
+var result = template.Evaluate(new {x = 10});
+// Prints 22
+Console.WriteLine(result);
+```
 
 [:top:](#runtime)
 ### Liquid support

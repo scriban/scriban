@@ -446,7 +446,6 @@ You can access optional members in chain via the optional member operator `?.` (
 
 `{{ myobject.member1?.submember1?.submember2 ?? "nothing" }}` will return `"nothing"` as `member1` doesn't contain a `submember1`/`submember2`.
 
-
 If the object is a "pure" scriban objects (created with a `{...}` or  instantiated by the runtime as a `ScriptObject`), you can also add members to it with a simple assignment:
 
 > **input**
