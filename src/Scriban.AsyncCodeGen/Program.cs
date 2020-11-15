@@ -493,7 +493,7 @@ using System.Numerics;
                     IdentifierName("Scriban"),
                     IdentifierName("Syntax")));
 
-            var allScriptNodeTypes = await SymbolFinder.FindDerivedClassesAsync(_scriptNodeType, solution, new[] {project}.ToImmutableHashSet());
+            var allScriptNodeTypes = await SymbolFinder.FindDerivedClassesAsync(_scriptNodeType, solution, true, new[] {project}.ToImmutableHashSet());
             var listOfScriptNodes = allScriptNodeTypes.OrderBy(x => x.Name).ToList();
             listOfScriptNodes = listOfScriptNodes.Where(x => (x.DeclaredAccessibility & Accessibility.Public) != 0 && !x.IsAbstract && x.Name != "ScriptList").ToList();
 
