@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.1 (22 Nov 2020)
+- Fix TemplateContext.CurrentNode when current node is a value
+
 ## 3.0.0 (15 Nov 2020)
 - Final release of 3.0.0
 
