@@ -512,13 +512,17 @@ namespace Scriban
         /// <returns>The value of the expression</returns>
         public object GetValue(ScriptExpression target)
         {
+
+            var previousNode = CurrentNode;
             _getOrSetValueLevel++;
             try
             {
+                CurrentNode = target;
                 return GetOrSetValue(target, null, false);
             }
             finally
             {
+                CurrentNode = previousNode;
                 _getOrSetValueLevel--;
             }
         }
