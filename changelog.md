@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.2 (23 Nov 2020)
+- Fix array multiply
+
 ## 3.0.1 (22 Nov 2020)
 - Fix TemplateContext.CurrentNode when current node is a value
 
