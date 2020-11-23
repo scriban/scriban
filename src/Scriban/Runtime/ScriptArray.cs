@@ -479,7 +479,7 @@ namespace Scriban.Runtime
                         return true;
                     }
 
-                    var newArray = new ScriptArray<T>(array);
+                    var newArray = new ScriptArray<T>(intModifier * array.Count);
                     for (int i = 0; i < intModifier; i++)
                     {
                         newArray.AddRange(array);
