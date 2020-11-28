@@ -92,7 +92,7 @@ The concatenation of the two input lists
 
 > **input**
 ```scriban-html
-{{ [1, 2, 3] | array.concat [4, 5] }}
+{{ [1, 2, 3] | array.add_range [4, 5] }}
 ```
 > **output**
 ```html
