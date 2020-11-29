@@ -31,6 +31,22 @@ namespace Scriban.Tests
             Assert.AreEqual(text, tokens[0].GetText(text));
         }
 
+
+        [Test]
+        public void ParseComment()
+        {
+            var text = "# This is a comment {{ and some interpolated}} and another text";
+            var lexer = new Lexer(text, options: new LexerOptions() { Lang = ScriptLang.Default, Mode = ScriptMode.ScriptOnly });
+
+            var tokens = lexer.ToList<Token>();
+            Assert.AreEqual(new List<Token>
+            {
+                new Token(TokenType.Comment, new TextPosition(0,0, 0), new TextPosition(62,0, 62)),
+                Token.Eof
+            }, tokens);
+            Assert.AreEqual(text, tokens[0].GetText(text));
+        }
+
         [Test]
         public void ParseLiquidComment()
         {

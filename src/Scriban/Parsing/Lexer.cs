@@ -1593,7 +1593,7 @@ namespace Scriban.Parsing
             }
             else
             {
-                while (!IsCodeExit())
+                while (Options.Mode == ScriptMode.ScriptOnly || !IsCodeExit())
                 {
                     if (c == '\0' || c == '\r' || c == '\n')
                     {
