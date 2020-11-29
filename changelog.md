@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.3 (29 Nov 2020)
+- Fix parsing of comment with a code exit when parsing mode is script only.
+
 ## 3.0.2 (23 Nov 2020)
 - Fix array multiply
 
