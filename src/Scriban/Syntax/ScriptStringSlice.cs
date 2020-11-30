@@ -57,7 +57,8 @@ namespace Scriban.Syntax
 
         public string Substring(int index)
         {
-            if ((uint)index >= (uint)Length) throw new ArgumentOutOfRangeException(nameof(index));
+            if (index == Length) return "";
+            if ((uint)index > (uint)Length) throw new ArgumentOutOfRangeException(nameof(index));
             return FullText?.Substring(Index + index, Length - index);
         }
 

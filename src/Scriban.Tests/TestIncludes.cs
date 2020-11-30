@@ -12,6 +12,26 @@ namespace Scriban.Tests
 {
     public class TestIncludes
     {
+
+        [Test]
+        public void TestIndentedIncludes2()
+        {
+            var template = Template.Parse(@"Test
+{{ include 'header' }}
+");
+            var context = new TemplateContext();
+            context.TemplateLoader = new CustomTemplateLoader();
+            context.IndentWithInclude = true;
+
+            var text = template.Render(context).Replace("\r\n", "\n");
+            var expected = @"Test
+This is a header
+".Replace("\r\n", "\n");
+            TextAssert.AreEqual(expected, text);
+        }
+
+
+
         [Test]
         public void TestIndentedIncludes()
         {
