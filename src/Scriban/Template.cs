@@ -150,13 +150,11 @@ namespace Scriban
                 scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
             }
 
-            var context = new TemplateContext
-            {
-                EnableOutput = false,
-                MemberRenamer = memberRenamer,
-                MemberFilter = memberFilter,
-                UseScientific = LexerOptions.Lang == ScriptLang.Scientific,
-            };
+            var context = LexerOptions.Lang == ScriptLang.Liquid ? new LiquidTemplateContext() : new TemplateContext();
+            context.EnableOutput = false;
+            context.MemberRenamer = memberRenamer;
+            context.MemberFilter = memberFilter;
+            context.UseScientific = LexerOptions.Lang == ScriptLang.Scientific;
             context.PushGlobal(scriptObject);
             var result = Evaluate(context);
             context.PopGlobal();

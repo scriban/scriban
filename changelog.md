@@ -2,7 +2,8 @@
 
 ## 3.0.4 (30 Nov 2020)
 - Fix formatting/ToString of char.
-- Fix issue when using a local variable inside an object initializer
+- Fix issue when using a local variable inside an object initializer.
+- Fix Template.Evaluate if used with Liquid.
 
 ## 3.0.3 (29 Nov 2020)
 - Fix parsing of comment with a code exit when parsing mode is script only.
