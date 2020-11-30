@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.4 (30 Nov 2020)
+- Fix formatting/ToString of char.
+
 ## 3.0.3 (29 Nov 2020)
 - Fix parsing of comment with a code exit when parsing mode is script only.
 

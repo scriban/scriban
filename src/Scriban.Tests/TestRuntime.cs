@@ -800,6 +800,25 @@ Tax: {{ 7 | match_tax }}";
         }
 
         [Test]
+        public void TestWithCharProperty()
+        {
+            var test = new ClassWithChar()
+            {
+                Char = 'a'
+            };
+
+            var template = Template.Parse("{{ model.char }}");
+            var context = new TemplateContext();
+            var result = template.Render(new {model = test});
+            Assert.AreEqual("a", result);
+        }
+
+        private class ClassWithChar
+        {
+            public char Char { get; set; }
+        }
+
+        [Test]
         public void TestRelaxedMemberAccess()
         {
             var scriptObject = new ScriptObject

@@ -124,19 +124,12 @@ namespace Scriban
                 return nested ? "null" : null;
             }
 
-            if (value is bool)
+            if (value is bool b)
             {
-                return ((bool)value) ? "true" : "false";
+                return b ? "true" : "false";
             }
 
-            // If we have a primitive, we can try to convert it
-            var type = value.GetType();
-            if (type.IsPrimitiveOrDecimal())
-            {
-                return ((IFormattable)value).ToString(null, this);
-            }
-
-            if (type == typeof(DateTime))
+            if (value is DateTime dt)
             {
                 // Output DateTime only if we have the date builtin object accessible (that provides the implementation of the ToString method)
                 bool isStrict = StrictVariables;
@@ -145,7 +138,7 @@ namespace Scriban
                     StrictVariables = false;
                     if (GetValue(DateTimeFunctions.DateVariable) is DateTimeFunctions dateTimeFunctions)
                     {
-                        return dateTimeFunctions.ToString((DateTime) value, dateTimeFunctions.Format, CurrentCulture);
+                        return dateTimeFunctions.ToString(dt, dateTimeFunctions.Format, CurrentCulture);
                     }
                 }
                 finally
@@ -158,6 +151,11 @@ namespace Scriban
             if (value is IFormattable formattable)
             {
                 return formattable.ToString(null, this);
+            }
+
+            if (value is IConvertible convertible)
+            {
+                return convertible.ToString(this);
             }
 
             // If we have an enumeration, we dump it
@@ -193,6 +191,7 @@ namespace Scriban
             }
 
             // Special case to display KeyValuePair as key, value
+            var type = value.GetType();
             var typeName = type.FullName;
             if (typeName != null && typeName.StartsWith("System.Collections.Generic.KeyValuePair"))
             {
