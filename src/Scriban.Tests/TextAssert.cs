@@ -19,25 +19,25 @@ namespace Scriban.Tests
             Minimal
         }
 
-        public static void AreEqual(string expectedValue, string actualValue)
+        public static void AreEqual(string expected, string actual)
         {
-            AreEqual(expectedValue, actualValue, DiffStyle.Full, Console.Out);
+            AreEqual(expected, actual, DiffStyle.Full, Console.Out);
         }
 
-        public static void AreEqual(string expectedValue, string actualValue, DiffStyle diffStyle)
+        public static void AreEqual(string expected, string actual, DiffStyle diffStyle)
         {
-            AreEqual(expectedValue, actualValue, diffStyle, Console.Out);
+            AreEqual(expected, actual, diffStyle, Console.Out);
         }
 
-        public static void AreEqual(string expectedValue, string actualValue, DiffStyle diffStyle, TextWriter output)
+        public static void AreEqual(string expected, string actual, DiffStyle diffStyle, TextWriter output)
         {
-            if (actualValue == null || expectedValue == null)
+            if (actual == null || expected == null)
             {
-                Assert.AreEqual(expectedValue, actualValue);
+                Assert.AreEqual(expected, actual);
                 return;
             }
 
-            if (actualValue.Equals(expectedValue, StringComparison.Ordinal))
+            if (actual.Equals(expected, StringComparison.Ordinal))
             {
                 return;
             }
@@ -45,15 +45,15 @@ namespace Scriban.Tests
             Console.WriteLine();
             output.WriteLine("Index    Expected     Actual");
             output.WriteLine("----------------------------");
-            int maxLen = Math.Max(actualValue.Length, expectedValue.Length);
-            int minLen = Math.Min(actualValue.Length, expectedValue.Length);
+            int maxLen = Math.Max(actual.Length, expected.Length);
+            int minLen = Math.Min(actual.Length, expected.Length);
 
             if (diffStyle != DiffStyle.Minimal)
             {
                 int startDifferAt = 0;
                 for (int i = 0; i < maxLen; i++)
                 {
-                    if (i >= minLen || actualValue[i] != expectedValue[i])
+                    if (i >= minLen || actual[i] != expected[i])
                     {
                         startDifferAt = i;
                         break;
@@ -66,17 +66,17 @@ namespace Scriban.Tests
                 bool isFirstDiff = true;
                 for (int i = startDifferAt; i < endDifferAt; i++)
                 {
-                    if (i >= minLen || actualValue[i] != expectedValue[i])
+                    if (i >= minLen || actual[i] != expected[i])
                     {
                         output.WriteLine("{0,-3} {1,-3}    {2,-4} {3,-3}   {4,-4} {5,-3}",
-                            i < minLen && actualValue[i] == expectedValue[i] ? " " : isFirstDiff  ? ">>>": "***",
+                            i < minLen && actual[i] == expected[i] ? " " : isFirstDiff  ? ">>>": "***",
                             // put a mark beside a differing row
                             i, // the index
-                            i < expectedValue.Length ? ((int) expectedValue[i]).ToString() : "",
+                            i < expected.Length ? ((int) expected[i]).ToString() : "",
                             // character decimal value
-                            i < expectedValue.Length ? expectedValue[i].ToSafeString() : "", // character safe string
-                            i < actualValue.Length ? ((int) actualValue[i]).ToString() : "", // character decimal value
-                            i < actualValue.Length ? actualValue[i].ToSafeString() : "" // character safe string
+                            i < expected.Length ? expected[i].ToSafeString() : "", // character safe string
+                            i < actual.Length ? ((int) actual[i]).ToString() : "", // character decimal value
+                            i < actual.Length ? actual[i].ToSafeString() : "" // character safe string
                             );
 
                         isFirstDiff = false;
@@ -85,7 +85,14 @@ namespace Scriban.Tests
                 //output.WriteLine();
             }
 
-            Assert.AreEqual(expectedValue, actualValue);
+            Console.WriteLine("Actual");
+            Console.WriteLine("-----------");
+            Console.WriteLine(actual);
+            Console.WriteLine();
+            Console.WriteLine("Expected");
+            Console.WriteLine("-----------");
+            Console.WriteLine(expected);
+            Assert.AreEqual(expected, actual);
         }
 
         private static string ToSafeString(this char c)

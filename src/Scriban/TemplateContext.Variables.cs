@@ -22,29 +22,40 @@ namespace Scriban
     public partial class TemplateContext
     {
         /// <summary>
-        /// Pushes a new object context accessible to the template.
+        /// Pushes a new object context accessible to the template. This method creates also a new context for local variables.
         /// </summary>
         /// <param name="scriptObject">The script object.</param>
         /// <exception cref="System.ArgumentNullException"></exception>
         public void PushGlobal(IScriptObject scriptObject)
         {
-            if (scriptObject == null) throw new ArgumentNullException(nameof(scriptObject));
-            _globalStores.Push(scriptObject);
+            PushGlobalOnly(scriptObject);
             PushLocal();
         }
 
-        /// <summary>
-        /// Pops the previous object context.
-        /// </summary>
-        /// <returns>The previous object context</returns>
-        /// <exception cref="System.InvalidOperationException">Unexpected PopGlobal() not matching a PushGlobal</exception>
-        public IScriptObject PopGlobal()
+        internal void PushGlobalOnly(IScriptObject scriptObject)
+        {
+            if (scriptObject == null) throw new ArgumentNullException(nameof(scriptObject));
+            _globalStores.Push(scriptObject);
+        }
+
+        internal IScriptObject PopGlobalOnly()
         {
             if (_globalStores.Count == 1)
             {
                 throw new InvalidOperationException("Unexpected PopGlobal() not matching a PushGlobal");
             }
             var store = _globalStores.Pop();
+            return store;
+        }
+
+        /// <summary>
+        /// Pops the previous object context. This method pops also a local variable context.
+        /// </summary>
+        /// <returns>The previous object context</returns>
+        /// <exception cref="System.InvalidOperationException">Unexpected PopGlobal() not matching a PushGlobal</exception>
+        public IScriptObject PopGlobal()
+        {
+            var store = PopGlobalOnly();
             PopLocal();
             return store;
         }

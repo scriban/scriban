@@ -43,7 +43,7 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             var obj = new ScriptObject();
-            context.PushGlobal(obj);
+            context.PushGlobalOnly(obj);
             try
             {
                 foreach (var member in Members)
@@ -53,7 +53,7 @@ namespace Scriban.Syntax
             }
             finally
             {
-                context.PopGlobal();
+                context.PopGlobalOnly();
             }
             return obj;
         }

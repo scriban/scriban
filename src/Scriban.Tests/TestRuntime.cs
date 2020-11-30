@@ -49,6 +49,41 @@ namespace Scriban.Tests
             Assert.AreEqual("function", context.GetTypeName(DelegateCustomAction.Create(() => {})));
         }
 
+        [Test]
+        public void TestLocalVariableReturned()
+        {
+            var text = @"{{
+func hello1
+ $hello = 'hello1'
+ ret $hello
+end
+
+func hello2
+ $hello = 'hello2'
+ ret [ $hello ]
+end
+
+func hello3
+ $hello = 'hello3'
+ ret { hello: $hello }
+end
+
+func hello4
+ ret { hello: 'hello4' }
+end
+~}}
+hello1: {{ hello1 }}
+hello2: {{ hello2 }}
+hello3: {{ hello3 }}
+hello4: {{ hello4 }}";
+
+            var template = Template.Parse(text);
+            var result = template.Render().Replace("\r\n", "\n");
+            TextAssert.AreEqual(@"hello1: hello1
+hello2: [""hello2""]
+hello3: {hello: ""hello3""}
+hello4: {hello: ""hello4""}".Replace("\r\n", "\n"), result);
+        }
 
         [Test]
         public void TestRecursiveLocal()
