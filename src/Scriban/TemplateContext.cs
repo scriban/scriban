@@ -671,7 +671,7 @@ namespace Scriban
                         }
 
                         var newLineIndex = text.IndexOf('\n', index);
-                        if (newLineIndex < 0)
+                        if (newLineIndex < 0 || newLineIndex >= indexEnd)
                         {
                             Output.Write(text, index, indexEnd - index);
                             break;
