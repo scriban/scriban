@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.5 (1 Dev 2020)
+- Fix indentation for nested includes when using TemplateContext.IndentWithInclude
+
 ## 3.0.4 (30 Nov 2020)
 - Fix formatting/ToString of char.
 - Fix issue when using a local variable inside an object initializer.
