@@ -1044,6 +1044,11 @@ namespace Scriban
             }
             return null;
         }
+
+        internal void ResetPreviousNewLine()
+        {
+            _previousTextWasNewLine = false;
+        }
     }
 
     /// <summary>

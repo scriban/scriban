@@ -188,7 +188,16 @@ namespace Scriban.Functions
             try
             {
                 context.SetValue(ScriptVariable.Arguments, arguments, true);
+                if (indent != null)
+                {
+                    // We reset before and after the fact that we have a new line
+                    context.ResetPreviousNewLine();
+                }
                 result = template.Render(context);
+                if (indent != null)
+                {
+                    context.ResetPreviousNewLine();
+                }
             }
             finally
             {

@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Scriban.Parsing;
 using Scriban.Runtime;
@@ -12,6 +13,65 @@ namespace Scriban.Tests
 {
     public class TestIncludes
     {
+        public class Loader : ITemplateLoader
+        {
+            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            {
+                return templateName == "test" ? "test" : "nested";
+            }
+
+            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                return templatePath == "test" ? "AA\r\nBB\r\nCC\r\n  {{include 'nested'}}{{include 'nested'}}" : "DD\r\nEE\r\nFF\r\n";
+            }
+
+            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
+
+
+        [Test]
+        public void TestIndentedNestedIncludes()
+        {
+            var context = new TemplateContext
+            {
+                TemplateLoader = new Loader(),
+                IndentWithInclude = true
+            };
+
+            var template = Template.Parse(@"Test
+        {{include 'test' ~}}
+    {{include 'test' ~}}
+");
+            var result = template.Render(context).Replace("\r\n", "\n");
+
+            TextAssert.AreEqual(@"Test
+        AA
+        BB
+        CC
+          DD
+          EE
+          FF
+        DD
+        EE
+        FF
+    AA
+    BB
+    CC
+      DD
+      EE
+      FF
+    DD
+    EE
+    FF
+".Replace("\r\n", "\n"), result);
+
+        }
+
+
+
 
         [Test]
         public void TestIndentedIncludes2()
