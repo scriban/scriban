@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.0.5 (1 Dev 2020)
+## 3.0.5 (1 Dec 2020)
 - Fix indentation for nested includes when using TemplateContext.IndentWithInclude
 
 ## 3.0.4 (30 Nov 2020)
