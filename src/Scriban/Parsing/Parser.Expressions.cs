@@ -328,13 +328,10 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    // Parse unary -1 if a minus is not followed by a space
-                    bool isUnaryMinus = _isScientific && Current.Type == TokenType.Minus && !IsNextCharWhitespace();
-
                     // Handle binary operators here
                     ScriptBinaryOperator binaryOperatorType;
                     int newPrecedence;
-                    if (!isUnaryMinus && TryBinaryOperator(out binaryOperatorType, out newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
+                    if (TryBinaryOperator(out binaryOperatorType, out newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
                     {
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
                         if (newPrecedence <= precedence)
