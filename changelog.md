@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.0.6 (6 Dev 2020)
+- Fix substraction in scientific mode when no whitespace was involved (e.g `1-2`) reslting in an implicit multiplication (1 * -2).
+
 ## 3.0.5 (1 Dev 2020)
 - Fix indentation for nested includes when using TemplateContext.IndentWithInclude
 
