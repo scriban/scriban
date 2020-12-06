@@ -1012,7 +1012,7 @@ The following values are used for converting literals to boolean:
 
 Example testing a page object:
  
-`{{ if !page }}Page is not null{{ else }}Page is null!{{ end }}` 
+`{{ if page }}Page is not null{{ else }}Page is null!{{ end }}` 
 
 
 [:top:](#language)
