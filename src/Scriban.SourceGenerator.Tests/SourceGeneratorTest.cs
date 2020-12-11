@@ -99,7 +99,9 @@ namespace Scriban.SourceGenerator.Tests
                 .AddAdditionalTexts(additionalFiles);
 
             Compilation fullCompilation;
-            gd.RunGeneratorsAndUpdateCompilation(c, out fullCompilation, out var diagnostics);
+            ImmutableArray<Diagnostic> diagnostics = ImmutableArray<Diagnostic>.Empty;
+
+            gd.RunGeneratorsAndUpdateCompilation(c, out fullCompilation, out diagnostics);
 
             var assemblyStream = new MemoryStream();
             var symbolsStream = new MemoryStream();
@@ -107,14 +109,14 @@ namespace Scriban.SourceGenerator.Tests
 
             if (result.Success == false)
             {
-                return new SourceGeneratorResult(result, null);
+                return new SourceGeneratorResult(result, null, diagnostics);
             }
 
             var assemblyBytes = assemblyStream.GetBuffer();
             var symbolsBytes = symbolsStream.GetBuffer();
             var asm = Assembly.Load(assemblyBytes, symbolsBytes);
 
-            return new SourceGeneratorResult(result, asm);
+            return new SourceGeneratorResult(result, asm, diagnostics);
         }
     }
 
@@ -122,9 +124,12 @@ namespace Scriban.SourceGenerator.Tests
     {
         Assembly asm;
 
-        public SourceGeneratorResult(EmitResult emitResult, Assembly asm)
+        public ImmutableArray<Diagnostic> Diagnostics { get; }
+
+        public SourceGeneratorResult(EmitResult emitResult, Assembly asm, ImmutableArray<Diagnostic> diagnostics)
         {
             this.CompileResult = emitResult;
+            this.Diagnostics = diagnostics;
             this.asm = asm;
         }
 

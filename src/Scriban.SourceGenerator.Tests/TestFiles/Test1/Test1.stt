@@ -1,1 +1,6 @@
-{{
+class MyCode 
+{
+	public static string Name { get; }
+
+	{{
+}

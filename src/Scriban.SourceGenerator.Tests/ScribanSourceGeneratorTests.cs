@@ -7,7 +7,8 @@ namespace Scriban.SourceGenerator.Tests
         [Test]
         public void Test1()
         {
-            RunSourceGeneratorTest<ScribanSourceGenerator>();
+            var result = RunSourceGeneratorTest<ScribanSourceGenerator>();
+            Assert.True(result.Diagnostics[0].Severity == Microsoft.CodeAnalysis.DiagnosticSeverity.Error);
         }
     }
 }
