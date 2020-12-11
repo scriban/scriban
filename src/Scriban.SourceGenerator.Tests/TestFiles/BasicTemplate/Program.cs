@@ -1,9 +1,11 @@
-using System;
+﻿using System;
 
 class Program
 {
     public static void Main()
     {
-        Console.Write($"{A.Name} {B.Name}");
+        // the debugger can hit a breakpoint here.
+        A.Run();
+        B.Run();
     }
 }

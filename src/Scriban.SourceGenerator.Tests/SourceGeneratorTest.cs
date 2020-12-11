@@ -67,11 +67,19 @@ namespace Scriban.SourceGenerator.Tests
             var sourceFiles =
                 Directory
                 .EnumerateFiles(testDir, "*.cs", SearchOption.AllDirectories)
+                .Select(f => Path.GetFullPath(f))
                 .ToArray();
 
             var syntaxes =
                 sourceFiles
-                .Select(f => CSharpSyntaxTree.ParseText(File.ReadAllText(f), path: f, encoding: Encoding.UTF8));
+                .Select(f => {
+                    using var r = File.OpenText(f);
+                    var text = r.ReadToEnd();
+                    var enc = r.CurrentEncoding;
+
+                    return CSharpSyntaxTree.ParseText(text, path: f, encoding: enc);
+
+                });
 
             var additionalFiles =
                 Directory

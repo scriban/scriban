@@ -21,7 +21,7 @@ namespace Scriban.SourceGenerator.Tests
             var result = RunSourceGeneratorTest<ScribanSourceGenerator>();
             result.AssertSuccess();
             var ir = result.Invoke();
-            Assert.AreEqual("A B", ir.Output);
+            Assert.AreEqual("AB", ir.Output);
         }
 
         [Test]

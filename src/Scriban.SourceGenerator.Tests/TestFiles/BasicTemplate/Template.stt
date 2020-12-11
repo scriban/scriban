@@ -1,7 +1,12 @@
+using System;
 
 {{ for item in ["A", "B"] }}
 class {{item}}
 {
+    public static void Run() {
+        // can I get the debugger to step in here?
+        Console.Write(Name);
+    }
 	public static string Name => "{{item}}";
 }
 

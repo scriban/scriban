@@ -17,7 +17,7 @@ namespace Scriban.SourceGenerator
         {
             var files = context.AdditionalFiles.Where(f => StringComparer.OrdinalIgnoreCase.Equals(".stt", Path.GetExtension(f.Path)));
 
-            foreach(var file in files)
+            foreach (var file in files)
             {
                 var path = file.Path;
                 var templateText = File.ReadAllText(path);
@@ -25,7 +25,7 @@ namespace Scriban.SourceGenerator
                 var template = Template.Parse(templateText, Path.GetFullPath(path));
                 if (template.HasErrors)
                 {
-                    foreach(var err in template.Messages)
+                    foreach (var err in template.Messages)
                     {
                         var location = err.Span.ToLocation();
                         var diag = Diagnostic.Create(TemplateError, location, err.Message);
@@ -37,8 +37,12 @@ namespace Scriban.SourceGenerator
                 // TODO: Is there a render option that can render to a TextWriter?
                 // then I could render directly to a memory stream that I could pass to SourceText.
                 var sourceText = template.Render();
-                var buff = Encoding.UTF8.GetBytes(sourceText);
-                var source = SourceText.From(new MemoryStream(buff), Encoding.UTF8, canBeEmbedded: true);
+                var ms = new MemoryStream();
+                var sw = new StreamWriter(ms, Encoding.UTF8);
+                sw.Write(sourceText);
+                sw.Flush();
+                ms.Seek(0, SeekOrigin.Begin);
+                var source = SourceText.From(ms, Encoding.UTF8, canBeEmbedded: true);
 
                 context.AddSource(Path.GetFileName(file.Path) + ".cs", source);
             }
