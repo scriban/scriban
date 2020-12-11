@@ -23,9 +23,9 @@ namespace Scriban.SourceGenerator
             );
         }
 
-        public static Location ToLocation(this SourceSpan span, string path)
+        public static Location ToLocation(this SourceSpan span)
         {
-            return Location.Create(path, span.ToTextSpan(), span.ToLinePositionSpan());
+            return Location.Create(span.FileName, span.ToTextSpan(), span.ToLinePositionSpan());
         }
     }
 }

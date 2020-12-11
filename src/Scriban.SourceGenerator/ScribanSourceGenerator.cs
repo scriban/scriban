@@ -24,12 +24,12 @@ namespace Scriban.SourceGenerator
                 var templateText = File.ReadAllText(path);
                 string source;
 
-                var template = Template.Parse(templateText);
+                var template = Template.Parse(templateText, Path.GetFullPath(path));
                 if (template.HasErrors)
                 {
                     foreach(var err in template.Messages)
                     {
-                        var location = err.Span.ToLocation(path);
+                        var location = err.Span.ToLocation();
                         var diag = Diagnostic.Create(TemplateError, location, err.Message);
                         context.ReportDiagnostic(diag);
                     }
