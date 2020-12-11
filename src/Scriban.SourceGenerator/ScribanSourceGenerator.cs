@@ -33,6 +33,7 @@ namespace Scriban.SourceGenerator
                         var diag = Diagnostic.Create(TemplateError, location, err.Message);
                         context.ReportDiagnostic(diag);
                     }
+                    continue;
                 }
 
                 source = template.Render();
