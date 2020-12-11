@@ -11,8 +11,6 @@ namespace Scriban.SourceGenerator
     [Generator]
     public class ScribanSourceGenerator : ISourceGenerator
     {
-
-
         static readonly DiagnosticDescriptor TemplateError =
             new DiagnosticDescriptor("SG0001", "Template Error", "{0}", "Template", DiagnosticSeverity.Error, true);
 
