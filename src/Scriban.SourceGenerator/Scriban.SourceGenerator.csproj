@@ -4,7 +4,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <VersionPrefix>3.0.6</VersionPrefix>
-    <VersionSuffix>8</VersionSuffix>
+    <VersionSuffix>10</VersionSuffix>
     <NoPackageAnalysis>true</NoPackageAnalysis>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <Authors>Alexandre Mutel</Authors>

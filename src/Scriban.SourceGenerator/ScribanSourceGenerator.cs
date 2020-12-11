@@ -1,7 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -22,7 +21,6 @@ namespace Scriban.SourceGenerator
             {
                 var path = file.Path;
                 var templateText = File.ReadAllText(path);
-                string source;
 
                 var template = Template.Parse(templateText, Path.GetFullPath(path));
                 if (template.HasErrors)
@@ -36,9 +34,13 @@ namespace Scriban.SourceGenerator
                     continue;
                 }
 
-                source = template.Render();
+                // TODO: Is there a render option that can render to a TextWriter?
+                // then I could render directly to a memory stream that I could pass to SourceText.
+                var sourceText = template.Render();
+                var buff = Encoding.UTF8.GetBytes(sourceText);
+                var source = SourceText.From(new MemoryStream(buff), Encoding.UTF8, canBeEmbedded: true);
 
-                context.AddSource(Path.GetFileName(file.Path) + ".cs", SourceText.From(source, Encoding.UTF8));
+                context.AddSource(Path.GetFileName(file.Path) + ".cs", source);
             }
         }
 

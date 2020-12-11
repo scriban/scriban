@@ -1,0 +1,7 @@
+{{ for item in ["A", "B"] }
+class {{item}}
+{
+	public static string Name => "{{item}}";
+}
+
+{{ end }}

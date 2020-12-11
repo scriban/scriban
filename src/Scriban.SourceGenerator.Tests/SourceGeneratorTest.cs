@@ -124,12 +124,12 @@ namespace Scriban.SourceGenerator.Tests
     {
         Assembly asm;
 
-        public ImmutableArray<Diagnostic> Diagnostics { get; }
+        public ImmutableArray<Diagnostic> SourceGeneratorDiagnostics { get; }
 
         public SourceGeneratorResult(EmitResult emitResult, Assembly asm, ImmutableArray<Diagnostic> diagnostics)
         {
             this.CompileResult = emitResult;
-            this.Diagnostics = diagnostics;
+            this.SourceGeneratorDiagnostics = diagnostics;
             this.asm = asm;
         }
 
@@ -137,6 +137,17 @@ namespace Scriban.SourceGenerator.Tests
 
         public void AssertSuccess()
         {
+            if (this.SourceGeneratorDiagnostics.Any())
+            {
+                var sw = new StringWriter();
+                sw.WriteLine("Source generation failed:");
+                foreach (var diag in SourceGeneratorDiagnostics)
+                {
+                    sw.WriteLine(diag.ToString());
+                }
+                throw new Exception(sw.ToString());
+            }
+
             if (!CompileResult.Success)
             {
                 var sw = new StringWriter();
@@ -149,25 +160,35 @@ namespace Scriban.SourceGenerator.Tests
             }
         }
 
-        //public InvocationResult Invoke(params string[] args)
-        //{
+        public InvocationResult Invoke()
+        {
+            return Invoke(Array.Empty<object>());
+        }
 
-        //    var sw = new TestTextWriter();
-        //    Exception ex = null;
-        //    int? result = null;
-        //    bool success = false;
-        //    try
-        //    {
-        //        result = (int)asm.EntryPoint.Invoke(null, new object[] { args });
-        //        success = true;
-        //    }
-        //    catch (TargetInvocationException e)
-        //    {
-        //        ex = e.InnerException;
-        //    }
-        //    var output = sw.ToString();
-        //    return new InvocationResult(success, result, output, ex);
-        //}
+        public InvocationResult Invoke(params string[] args)
+        {
+            return Invoke(new object[] { args });
+        }
+
+        InvocationResult Invoke(object[] args)
+        {
+            var sw = new TestTextWriter();
+            Exception ex = null;
+            int? result = null;
+            bool success = false;
+            try
+            {
+                var returnValue = asm.EntryPoint.Invoke(null, args);
+                result = returnValue is int i ? i : (int?)null;
+                success = true;
+            }
+            catch (TargetInvocationException e)
+            {
+                ex = e.InnerException;
+            }
+            var output = sw.ToString();
+            return new InvocationResult(success, result, output, ex);
+        }
     }
 
     public class InvocationResult
