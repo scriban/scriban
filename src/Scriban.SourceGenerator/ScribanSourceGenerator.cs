@@ -16,8 +16,26 @@ namespace Scriban.SourceGenerator
             foreach(var file in files)
             {
                 var templateText = File.ReadAllText(file.Path);
-                var src = Template.Parse(templateText).Render();                
-                context.AddSource(Path.GetFileName(file.Path) + ".cs", SourceText.From(src, Encoding.UTF8));
+                Template template = null;
+                string source;
+                try
+                {
+                    template = Template.Parse(templateText);
+                } catch(Exception e)
+                {
+
+                    continue;
+                }
+
+                try
+                {
+                    source = template.Render();
+                } catch(Exception e)
+                {
+                    continue;
+                }
+
+                context.AddSource(Path.GetFileName(file.Path) + ".cs", SourceText.From(source, Encoding.UTF8));
             }
         }
 

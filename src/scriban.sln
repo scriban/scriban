@@ -34,6 +34,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.AsyncCodeGen", "Scr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.SourceGenerator", "Scriban.SourceGenerator\Scriban.SourceGenerator.csproj", "{41678B3F-C906-4C6E-A657-0295DB1663FF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Scriban.SourceGenerator.Tests", "Scriban.SourceGenerator.Tests\Scriban.SourceGenerator.Tests.csproj", "{F2F577E2-13F4-4746-B8F1-8D57A770983A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -72,6 +74,10 @@ Global
 		{41678B3F-C906-4C6E-A657-0295DB1663FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{41678B3F-C906-4C6E-A657-0295DB1663FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{41678B3F-C906-4C6E-A657-0295DB1663FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F2F577E2-13F4-4746-B8F1-8D57A770983A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F2F577E2-13F4-4746-B8F1-8D57A770983A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F2F577E2-13F4-4746-B8F1-8D57A770983A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F2F577E2-13F4-4746-B8F1-8D57A770983A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
