@@ -1,0 +1,10 @@
+<Project>
+
+  <ItemGroup>
+    <AvailableItemName>ScribanTemplate</AvailableItemName>
+    <ScribanTemplate Include="**/*.stt"/>
+    <None Remove="@(ScribanTemplate)"/>
+    <AdditionalFiles Include="@(ScribanTemplate)"/>
+  </ItemGroup>
+
+</Project>

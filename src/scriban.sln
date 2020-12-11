@@ -32,6 +32,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.DocGen", "Scriban.D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.AsyncCodeGen", "Scriban.AsyncCodeGen\Scriban.AsyncCodeGen.csproj", "{9AFAFD50-E753-4058-88EA-D3A217FCB518}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban.SourceGenerator", "Scriban.SourceGenerator\Scriban.SourceGenerator.csproj", "{41678B3F-C906-4C6E-A657-0295DB1663FF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -66,6 +68,10 @@ Global
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9AFAFD50-E753-4058-88EA-D3A217FCB518}.Release|Any CPU.Build.0 = Release|Any CPU
+		{41678B3F-C906-4C6E-A657-0295DB1663FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{41678B3F-C906-4C6E-A657-0295DB1663FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{41678B3F-C906-4C6E-A657-0295DB1663FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{41678B3F-C906-4C6E-A657-0295DB1663FF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

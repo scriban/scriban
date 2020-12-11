@@ -1,0 +1,48 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>8.0</LangVersion>
+    <VersionPrefix>3.0.6</VersionPrefix>
+    <VersionSuffix>5</VersionSuffix>
+    <NoPackageAnalysis>true</NoPackageAnalysis>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <Authors>Alexandre Mutel</Authors>
+    <Description>A source generator for Scriban (.stt) files.</Description>
+    <PackageTags>templating;source generator</PackageTags>
+    <PackageIcon>scriban.png</PackageIcon>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
+    <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
+    <!-- prevent Scriban from becomming a transitive pkg dpendency for consumers -->
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.8.0" PrivateAssets="all" />
+    <ProjectReference Include="..\Scriban\Scriban.csproj" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="../../img/scriban.png" Pack="true" PackagePath="" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Content Include="Scriban.SourceGenerator.props" PackagePath="build"/>
+    <Content Include="Scriban.SourceGenerator.targets" PackagePath="build"/>
+  </ItemGroup>
+
+  <Target Name="ScribanBeforePack" BeforeTargets="PrepareForBuild">
+    <!--
+    These items cause the bin/Debug/ folder to show up in the solution explorer
+    if they are added via an ItemGroup outside a target.
+    -->
+
+    <ItemGroup>
+      <None Pack="true" Include="$(OutputPath)\Scriban.dll" PackagePath="analyzers/dotnet/cs" />
+      <None Pack="true" Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs" />
+    </ItemGroup>
+  </Target>
+
+</Project>
+
