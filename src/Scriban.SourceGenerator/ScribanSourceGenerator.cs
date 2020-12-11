@@ -1,6 +1,8 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.Text;
 using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -13,13 +15,55 @@ namespace Scriban.SourceGenerator
         static readonly DiagnosticDescriptor TemplateError =
             new DiagnosticDescriptor("SG0001", "Template Error", "{0}", "Template", DiagnosticSeverity.Error, true);
 
+        static int Count;
+        static int CtorCount;
+        static TimeSpan Duration;
+        static int CacheHit;
+        static int CacheMiss;
+        static int MaxLength;
+
+        public ScribanSourceGenerator()
+        {
+            CtorCount++;
+            cache = new Dictionary<string, CachedSource>();
+        }
+
+        Dictionary<string, CachedSource> cache;
+
+        class CachedSource
+        {
+            public SourceText Source { get; set; }
+            public DateTime Timestamp { get; set; }
+        }
+
         public void Execute(GeneratorExecutionContext context)
         {
+            Count++;
+            var stopwatch = Stopwatch.StartNew();
+            
             var files = context.AdditionalFiles.Where(f => StringComparer.OrdinalIgnoreCase.Equals(".stt", Path.GetExtension(f.Path)));
 
             foreach (var file in files)
             {
                 var path = file.Path;
+                var updateTime = File.GetLastWriteTimeUtc(path);
+                var genSourceName = Path.GetFileName(file.Path) + ".cs";
+                CachedSource cs;
+                if (cache.TryGetValue(path, out cs)) {
+                    if(updateTime <= cs.Timestamp)
+                    {
+                        CacheHit++;
+                        context.AddSource(genSourceName, cs.Source);
+                        continue;
+                    } else
+                    {
+                        CacheMiss++;
+                    }
+                } else
+                {
+                    cache.Add(path, cs = new CachedSource());
+                }
+
                 var templateText = File.ReadAllText(path);
 
                 var template = Template.Parse(templateText, Path.GetFullPath(path));
@@ -42,10 +86,33 @@ namespace Scriban.SourceGenerator
                 sw.Write(sourceText);
                 sw.Flush();
                 ms.Seek(0, SeekOrigin.Begin);
-                var source = SourceText.From(ms, Encoding.UTF8, canBeEmbedded: true);
-
+                MaxLength = Math.Max(MaxLength, (int) ms.Length);
+                var source = SourceText.From(ms.GetBuffer(), (int)ms.Length, Encoding.UTF8, canBeEmbedded: true);
+                cs.Timestamp = updateTime;
+                cs.Source = source;
                 context.AddSource(Path.GetFileName(file.Path) + ".cs", source);
             }
+
+            stopwatch.Stop();
+            Duration += stopwatch.Elapsed;
+
+            EmitDebugInfo();
+        }
+
+        // hack to allow inspecting some metrics.
+        void EmitDebugInfo()
+        {
+            try
+            {
+                using var sw = File.CreateText("debugInfo.txt");
+                sw.WriteLine("Duration = " + Duration.ToString() + "");
+                sw.WriteLine("GenCount = " + Count);
+                sw.WriteLine("Ctor = " + CtorCount);
+                sw.WriteLine("Hits = " + CacheHit);
+                sw.WriteLine("Misses = " + CacheMiss);
+                sw.WriteLine("MaxLen = " + MaxLength);
+            }
+            catch (Exception) { }
         }
 
         public void Initialize(GeneratorInitializationContext context)
