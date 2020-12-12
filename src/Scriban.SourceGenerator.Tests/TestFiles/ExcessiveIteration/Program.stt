@@ -1,0 +1,10 @@
+class Program 
+{
+	public static void Main() {
+        System.Console.Write("Hello, code gen!");
+	}
+    
+    {{ for i in 1..1001 }}
+	 // {i}
+    {{ end }}
+}

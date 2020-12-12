@@ -31,5 +31,13 @@ namespace Scriban.SourceGenerator.Tests
             // TODO: probably need some simple API for diagnostic assertions.
             Assert.True(result.SourceGeneratorDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error));
         }
+
+        [Test]
+        public void ExcessiveIteration()
+        {
+            var result = RunSourceGeneratorTest<ScribanSourceGenerator>();
+
+            Assert.True(result.SourceGeneratorDiagnostics.Any(d => d.Severity == DiagnosticSeverity.Error));
+        }
     }
 }

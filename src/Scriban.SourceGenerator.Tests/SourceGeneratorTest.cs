@@ -136,7 +136,6 @@ namespace Scriban.SourceGenerator.Tests
 
             var assemblyBytes = assemblyStream.GetBuffer();
             var symbolsBytes = symbolsStream.GetBuffer();
-            File.WriteAllBytes("symbols.pdb.bin", symbolsBytes);
             var asm = Assembly.Load(assemblyBytes, symbolsBytes);
 
             return new SourceGeneratorResult(result, asm, diagnostics);
