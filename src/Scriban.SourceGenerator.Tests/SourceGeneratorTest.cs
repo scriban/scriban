@@ -10,6 +10,7 @@ using System.Text;
 using System.Threading;
 using System.Collections.Immutable;
 using System.Runtime.CompilerServices;
+using System.Collections.Generic;
 
 namespace Scriban.SourceGenerator.Tests
 {
@@ -70,16 +71,20 @@ namespace Scriban.SourceGenerator.Tests
                 .Select(f => Path.GetFullPath(f))
                 .ToArray();
 
+            var ets = new List<EmbeddedText>();
+
             var syntaxes =
                 sourceFiles
                 .Select(f => {
                     using var r = File.OpenText(f);
                     var text = r.ReadToEnd();
                     var enc = r.CurrentEncoding;
-
+                    var et = EmbeddedText.FromStream(f, File.OpenRead(f));
+                    ets.Add(et);
                     return CSharpSyntaxTree.ParseText(text, path: f, encoding: enc);
-
                 });
+
+            
 
             var additionalFiles =
                 Directory
@@ -109,11 +114,20 @@ namespace Scriban.SourceGenerator.Tests
             Compilation fullCompilation;
             ImmutableArray<Diagnostic> diagnostics = ImmutableArray<Diagnostic>.Empty;
 
-            gd.RunGeneratorsAndUpdateCompilation(c, out fullCompilation, out diagnostics);
+            gd = gd.RunGeneratorsAndUpdateCompilation(c, out fullCompilation, out diagnostics);
+            var runResult = gd.GetRunResult();
+
+            foreach (var srcTxt in runResult.GeneratedTrees)
+            {
+                var et = EmbeddedText.FromSource(srcTxt.FilePath, srcTxt.GetText());
+                ets.Add(et);
+            }
 
             var assemblyStream = new MemoryStream();
             var symbolsStream = new MemoryStream();
-            var result = fullCompilation.Emit(assemblyStream, symbolsStream);
+
+            var eo = new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb);
+            var result = fullCompilation.Emit(assemblyStream, symbolsStream, embeddedTexts: ets, options: eo);
 
             if (result.Success == false)
             {
@@ -122,6 +136,7 @@ namespace Scriban.SourceGenerator.Tests
 
             var assemblyBytes = assemblyStream.GetBuffer();
             var symbolsBytes = symbolsStream.GetBuffer();
+            File.WriteAllBytes("symbols.pdb.bin", symbolsBytes);
             var asm = Assembly.Load(assemblyBytes, symbolsBytes);
 
             return new SourceGeneratorResult(result, asm, diagnostics);

@@ -85,18 +85,21 @@ namespace Scriban.SourceGenerator
                 var sw = new StreamWriter(ms, Encoding.UTF8);
                 sw.Write(sourceText);
                 sw.Flush();
-                ms.Seek(0, SeekOrigin.Begin);
+                
                 MaxLength = Math.Max(MaxLength, (int) ms.Length);
-                var source = SourceText.From(ms.GetBuffer(), (int)ms.Length, Encoding.UTF8, canBeEmbedded: true);
+                var buf = ms.GetBuffer();
+                var source = SourceText.From(buf, (int)ms.Length, Encoding.UTF8, canBeEmbedded: true);
                 cs.Timestamp = updateTime;
                 cs.Source = source;
-                context.AddSource(Path.GetFileName(file.Path) + ".cs", source);
+                var name = Path.GetFileName(file.Path) + ".cs";
+
+                context.AddSource(name, source);
             }
 
             stopwatch.Stop();
             Duration += stopwatch.Elapsed;
 
-            EmitDebugInfo();
+            //EmitDebugInfo();
         }
 
         // hack to allow inspecting some metrics.
