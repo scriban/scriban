@@ -297,6 +297,14 @@ namespace DotLiquid.Tests.Tags
         }
 
         [Test]
+        public void TestAssignMinus()
+        {
+            Hash assigns = Hash.FromAnonymousObject(new { notused = "content" });
+            Helper.AssertTemplateResult("var2:  var2:-1", "var2:{{var2}} {% assign var2 = -1 %} var2:{{var2}}", assigns);
+        }
+        
+
+        [Test]
         public void TestHyphenatedAssign()
         {
             Hash assigns = Hash.FromDictionary(new Dictionary<string, object> { { "a-b", "1" } });

@@ -570,7 +570,7 @@ namespace Scriban.Tests
                 {"^", TokenType.Invalid},
                 {"*", TokenType.Invalid},
                 {"+", TokenType.Invalid},
-                {"-", TokenType.Invalid},
+                {"-", TokenType.Minus},
                 {"/", TokenType.Invalid},
                 {"%", TokenType.Invalid},
                 {"=", TokenType.Equal},
