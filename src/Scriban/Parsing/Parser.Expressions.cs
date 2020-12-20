@@ -310,7 +310,7 @@ namespace Scriban.Parsing
                             var assignExpression = Open<ScriptAssignExpression>();
 
                             if (leftOperand != null)
-                            {                                
+                            {
                                 assignExpression.Span.Start = leftOperand.Span.Start;
                             }
 
@@ -905,7 +905,6 @@ namespace Scriban.Parsing
             // unit test: 106-parenthesis.txt
             var expression = Open<ScriptNestedExpression>();
             ExpectAndParseTokenTo(expression.OpenParen, TokenType.OpenParen); // Parse (
-            bool hasAnonymousFunction = false;
             expression.Expression = ExpectAndParseExpression(expression);
 
             if (Current.Type == TokenType.CloseParen)
@@ -998,7 +997,6 @@ namespace Scriban.Parsing
             }
             newPrecedence = GetDefaultUnaryOperatorPrecedence(unaryExpression.Operator);
 
-            bool hasAnonymousFunction = false;
             // unit test: 115-unary-error1.txt
             unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence);
             return Close(unaryExpression);
