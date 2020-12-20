@@ -309,6 +309,11 @@ namespace Scriban.Parsing
                         {
                             var assignExpression = Open<ScriptAssignExpression>();
 
+                            if (leftOperand != null)
+                            {                                
+                                assignExpression.Span.Start = leftOperand.Span.Start;
+                            }
+
                             if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
                             {
                                 // unit test: 101-assign-complex-error1.txt
