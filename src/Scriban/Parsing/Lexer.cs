@@ -1052,7 +1052,10 @@ namespace Scriban.Parsing
                     NextChar();
                     _token = new Token(TokenType.Question, start, start);
                     break;
-
+                case '-':
+                    _token = new Token(TokenType.Minus, start, start);
+                    NextChar();
+                    break;
                 case '.':
                     NextChar();
                     if (c == '.')

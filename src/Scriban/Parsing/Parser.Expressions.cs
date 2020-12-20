@@ -309,6 +309,11 @@ namespace Scriban.Parsing
                         {
                             var assignExpression = Open<ScriptAssignExpression>();
 
+                            if (leftOperand != null)
+                            {                                
+                                assignExpression.Span.Start = leftOperand.Span.Start;
+                            }
+
                             if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
                             {
                                 // unit test: 101-assign-complex-error1.txt
@@ -328,13 +333,10 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    // Parse unary -1 if a minus is not followed by a space
-                    bool isUnaryMinus = _isScientific && Current.Type == TokenType.Minus && !IsNextCharWhitespace();
-
                     // Handle binary operators here
                     ScriptBinaryOperator binaryOperatorType;
                     int newPrecedence;
-                    if (!isUnaryMinus && TryBinaryOperator(out binaryOperatorType, out newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
+                    if (TryBinaryOperator(out binaryOperatorType, out newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
                     {
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
                         if (newPrecedence <= precedence)
@@ -683,6 +685,10 @@ namespace Scriban.Parsing
                         }
 
                         var pipeCall = Open<ScriptPipeCall>();
+                        if (leftOperand != null)
+                        {
+                            pipeCall.Span.Start = leftOperand.Span.Start;
+                        }
                         pipeCall.From = leftOperand;
 
                         pipeCall.PipeToken = ParseToken(Current.Type); // skip | or |>

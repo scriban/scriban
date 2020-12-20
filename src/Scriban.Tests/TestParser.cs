@@ -83,6 +83,7 @@ namespace Scriban.Tests
             Assert.True(template.HasErrors);
         }
 
+        [TestCase("1-2", -1, "1 - 2")]
         [TestCase("-5|>math.abs", 5, "-5 |> math.abs")]
         [TestCase("-5*2|>math.abs", 10, "-5 * 2 |> math.abs")]
         [TestCase("2x", 2, "2 * x")]
@@ -174,14 +175,14 @@ namespace Scriban.Tests
             context.CurrentGlobal.SetValue("ff", 4, false);
 
             var result = template.Evaluate(context);
-            Assert.AreEqual(result, value);
+            Assert.AreEqual(value, result);
 
             var resultAsync = template.EvaluateAsync(context).Result;
-            Assert.AreEqual(resultAsync, value, "Invalid async result");
+            Assert.AreEqual(value, resultAsync, "Invalid async result");
 
             var reformat = template.Page.Format(new ScriptFormatterOptions(context, ScriptLang.Scientific, ScriptFormatterFlags.ExplicitClean));
             var exprAsString = reformat.ToString();
-            Assert.AreEqual(scriptReformat, exprAsString, "Format string don't match");
+            Assert.AreEqual(exprAsString, scriptReformat, "Format string don't match");
         }
 
         [Test]
