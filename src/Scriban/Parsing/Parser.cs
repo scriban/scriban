@@ -133,6 +133,10 @@ namespace Scriban.Parsing
             }
 
             page.Body = ParseBlockStatement(null);
+            if (page.Body != null)
+            {
+                page.Span = page.Body.Span;
+            }
 
             // Flush any pending trivias
             if (_isKeepTrivia && _lastTerminalWithTrivias != null)
