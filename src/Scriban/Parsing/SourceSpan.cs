@@ -23,6 +23,8 @@ namespace Scriban.Parsing
 
         public TextPosition End { get; set; }
 
+        public int Length => End.Offset - Start.Offset + 1;
+
         public override string ToString()
         {
             return $"{FileName}({Start})-({End})";
