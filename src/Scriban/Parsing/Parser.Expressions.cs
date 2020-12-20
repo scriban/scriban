@@ -685,6 +685,10 @@ namespace Scriban.Parsing
                         }
 
                         var pipeCall = Open<ScriptPipeCall>();
+                        if (leftOperand != null)
+                        {
+                            pipeCall.Span.Start = leftOperand.Span.Start;
+                        }
                         pipeCall.From = leftOperand;
 
                         pipeCall.PipeToken = ParseToken(Current.Type); // skip | or |>
