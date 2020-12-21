@@ -13,6 +13,7 @@ namespace Scriban.Syntax
         {
             EndKeyword = ScriptKeyword.End();
             CanSkipEvaluation = true;
+            ExpectEos = true;
         }
 
         public ScriptKeyword EndKeyword
@@ -20,6 +21,8 @@ namespace Scriban.Syntax
             get => _endKeyword;
             set => ParentToThis(ref _endKeyword, value);
         }
+
+        public bool ExpectEos { get; set; }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -29,6 +32,10 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(EndKeyword);
+            if (ExpectEos)
+            {
+                printer.ExpectEos();
+            }
         }
     }
 }

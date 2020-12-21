@@ -2,8 +2,11 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using Scriban.Parsing;
+using Scriban.Runtime;
 using Scriban.Syntax;
 
 namespace Scriban.Tests
@@ -89,6 +92,47 @@ namespace Scriban.Tests
                 var result = Format(script,ScriptFormatterFlags.CompressSpaces | ScriptFormatterFlags.AddSpaceBetweenOperators | ScriptFormatterFlags.ExplicitParenthesis);
                 Assert.AreEqual("x + ((1 * 2) / 5); y + 2\nz = z + 3;", result);
             }
+        }
+
+        [Test]
+        public void TestEosWithEnd()
+        {
+            var templateText = @"
+{{-
+func foo
+   if b
+-}}
+bar
+{{-
+    end
+end
+-}}{{foo}}";
+            var template = Template.Parse(templateText);
+            var templateText2 = template.ToText();
+            var template2 = Template.Parse(templateText2);
+            var templateText3 = template2.ToText();
+            TextAssert.AreEqual(templateText2, templateText3);
+            TextAssert.AreEqual(template.Render(), template2.Render());
+        }
+
+        /// <summary>
+        /// Case with anonymous functions
+        /// </summary>
+        [Test]
+        public void TestEosWithEnd2()
+        {
+            var templateText = @"
+{{-
+foo = (do; ret 'fo'; end) + (do; ret 'o'; end)
+-}}
+{{foo}}";
+            var template = Template.Parse(templateText);
+            var templateText2 = template.ToText();
+            var template2 = Template.Parse(templateText2);
+            var templateText3 = template2.ToText();
+            Console.WriteLine(templateText3);
+            TextAssert.AreEqual(templateText2, templateText3);
+            TextAssert.AreEqual(template.Render(), template2.Render());
         }
 
         private static Template ParseScriptOnly(string text)

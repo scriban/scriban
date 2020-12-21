@@ -42,6 +42,12 @@ namespace Scriban.Parsing
                 }
             }
 
+            // Don't emit an EOS for an end statement that doesn't expect it
+            if (!parseEndOfStatementAfterEnd && statement is ScriptEndStatement endStatement)
+            {
+                endStatement.ExpectEos = false;
+            }
+
             if (!hasEnd)
             {
                 // If there are any end block not matching, we have an error
