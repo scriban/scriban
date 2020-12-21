@@ -298,6 +298,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Typeof(object value)
         {
+            // TODO: rewrite this in a major version with TemplateContext.GetTypeName
             if (value == null)
             {
                 return null;
