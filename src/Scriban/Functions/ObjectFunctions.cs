@@ -342,6 +342,46 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Returns string representing the type of the input object. The type can be `string`, `bool`, `number`, `array`, `iterator` and `object`
+        /// </summary>
+        /// <param name="value">The input object.</param>
+        /// <remarks>
+        /// This function is newer than object.typeof and returns more detailed results about the types (e.g instead of `number`, returns `int` or `double`)
+        ///
+        /// ```scriban-html
+        /// {{ null | object.kind }}
+        /// {{ true | object.kind }}
+        /// {{ 1 | object.kind }}
+        /// {{ 1.0 | object.kind }}
+        /// {{ "text" | object.kind }}
+        /// {{ 1..5 | object.kind }}
+        /// {{ [1,2,3,4,5] | object.kind }}
+        /// {{ {} | object.kind }}
+        /// {{ object | object.kind }}
+        /// ```
+        /// ```html
+        ///
+        /// bool
+        /// int
+        /// double
+        /// string
+        /// range
+        /// array
+        /// object
+        /// object
+        /// ```
+        /// </remarks>
+        public static string Kind(TemplateContext context, object value)
+        {
+            if (value == null)
+            {
+                return null;
+            }
+            return context.GetTypeName(value);
+        }
+
+
+        /// <summary>
         /// Gets the member's values of the specified value object.
         /// </summary>
         /// <param name="value">The input object.</param>

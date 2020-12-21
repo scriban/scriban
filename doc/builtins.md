@@ -1515,6 +1515,7 @@ Object functions available through the builtin object 'object'.
 - [`object.keys`](#objectkeys)
 - [`object.size`](#objectsize)
 - [`object.typeof`](#objecttypeof)
+- [`object.kind`](#objectkind)
 - [`object.values`](#objectvalues)
 
 [:top:](#builtins)
@@ -1808,6 +1809,54 @@ number
 number
 string
 iterator
+array
+object
+object
+```
+
+[:top:](#builtins)
+### `object.kind`
+
+```
+object.kind <value>
+```
+
+#### Description
+
+Returns string representing the type of the input object. The type can be `string`, `bool`, `number`, `array`, `iterator` and `object`
+
+#### Arguments
+
+- `value`: The input object.
+
+#### Returns
+
+
+
+#### Examples
+
+This function is newer than object.typeof and returns more detailed results about the types (e.g instead of `number`, returns `int` or `double`)
+
+> **input**
+```scriban-html
+{{ null | object.kind }}
+{{ true | object.kind }}
+{{ 1 | object.kind }}
+{{ 1.0 | object.kind }}
+{{ "text" | object.kind }}
+{{ 1..5 | object.kind }}
+{{ [1,2,3,4,5] | object.kind }}
+{{ {} | object.kind }}
+{{ object | object.kind }}
+```
+> **output**
+```html
+
+bool
+int
+double
+string
+range
 array
 object
 object

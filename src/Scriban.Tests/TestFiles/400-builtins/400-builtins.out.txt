@@ -103,6 +103,7 @@ List of all the builtin <object> functions:
  has_key
  has_value
  keys
+ kind
  size
  typeof
  values
