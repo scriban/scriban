@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.1.0 (21 Dec 2021)
+- Fix issue with end of statement not followed by an EOS (#275)
+- Fix parent node span does not include all its children (#280)
+
 ## 3.0.7 (15 Dec 2020)
 - Fix unary minus operator missing in Liquid
 
