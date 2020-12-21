@@ -20,26 +20,37 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="3.8.0" PrivateAssets="all" />
-    <ProjectReference Include="..\Scriban\Scriban.csproj" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <!--<ProjectReference Include="..\Scriban\Scriban.csproj" />-->
   </ItemGroup>
   
   <ItemGroup>
     <None Include="../../img/scriban.png" Pack="true" PackagePath="" />
+    
   </ItemGroup>
   
   <ItemGroup>
-    <Content Include="Scriban.SourceGenerator.props" PackagePath="build"/>
-    <Content Include="Scriban.SourceGenerator.targets" PackagePath="build"/>
+    <Content Include="Scriban.SourceGenerator.props" PackagePath="build" />
+    <Content Include="Scriban.SourceGenerator.targets" PackagePath="build" />
   </ItemGroup>
 
-  <Target Name="ScribanBeforePack" BeforeTargets="PrepareForBuild">
-    <!--
-    These items cause the bin/Debug/ folder to show up in the solution explorer
-    if they are added via an ItemGroup outside a target.
-    -->
 
+  <!--
+    These targets add external items that, if added normally, would cause
+    empty folders to appear in the solution explorer.
+    -->
+  <Target Name="IncludeScriban" BeforeTargets="CoreCompile">
     <ItemGroup>
-      <None Pack="true" Include="$(OutputPath)\Scriban.dll" PackagePath="analyzers/dotnet/cs" />
+      <!-- statically include the scriban library source -->
+      <Compile
+        Include="../scriban/**/*.cs"
+        Exclude="../scriban/**/*.AssemblyInfo.cs;**/obj/**"
+      />
+    </ItemGroup>
+  </Target>
+  
+  <Target Name="ScribanBeforePack" BeforeTargets="PrepareForBuild">
+    <ItemGroup>
       <None Pack="true" Include="$(OutputPath)\$(AssemblyName).dll" PackagePath="analyzers/dotnet/cs" />
     </ItemGroup>
   </Target>

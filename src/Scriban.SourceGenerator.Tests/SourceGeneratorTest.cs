@@ -126,8 +126,7 @@ namespace Scriban.SourceGenerator.Tests
             var assemblyStream = new MemoryStream();
             var symbolsStream = new MemoryStream();
 
-            var eo = new EmitOptions(debugInformationFormat: DebugInformationFormat.PortablePdb);
-            var result = fullCompilation.Emit(assemblyStream, symbolsStream, embeddedTexts: ets, options: eo);
+            var result = fullCompilation.Emit(assemblyStream, symbolsStream, embeddedTexts: ets);
 
             if (result.Success == false)
             {
