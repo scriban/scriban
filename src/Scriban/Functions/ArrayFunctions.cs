@@ -51,7 +51,7 @@ namespace Scriban.Functions
         /// <returns>The concatenation of the two input lists</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ [1, 2, 3] | array.concat [4, 5] }}
+        /// {{ [1, 2, 3] | array.add_range [4, 5] }}
         /// ```
         /// ```html
         /// [1, 2, 3, 4, 5]
