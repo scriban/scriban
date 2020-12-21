@@ -9,6 +9,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using Scriban.Runtime;
 using Scriban.Syntax;
+using Enum = System.Enum;
 
 namespace Scriban.Helpers
 {
@@ -71,6 +72,7 @@ namespace Scriban.Helpers
             if (type == typeof(double)) return "double";
             if (type == typeof(decimal)) return "decimal";
             if (type == typeof(BigInteger)) return "bigint";
+            if (type == typeof(Enum)) return "enum";
             if (type == typeof(ScriptRange)) return "range";
             if (type == typeof(ScriptArray) || typeof(System.Collections.IList).IsAssignableFrom(type)) return "array";
             if (typeof(IScriptObject).IsAssignableFrom(type)) return "object";
