@@ -47,6 +47,7 @@ namespace Scriban.Tests
             Assert.AreEqual("array", context.GetTypeName(new ScriptArray<float>()));
             Assert.AreEqual("object", context.GetTypeName(new ScriptObject()));
             Assert.AreEqual("function", context.GetTypeName(DelegateCustomAction.Create(() => {})));
+            Assert.AreEqual("enum", context.GetTypeName(ScriptLang.Default));
         }
 
         [Test]
