@@ -1640,7 +1640,7 @@ Formats an object using specified format.
 > **output**
 ```html
 00FF
-1 523,00
+1 523,000
 ```
 
 [:top:](#builtins)
@@ -3389,11 +3389,11 @@ A timespan object represents a time interval.
 
 | Name             | Description
 |--------------    |-----------------
-| `.days`          | Gets the number of days of this interval 
+| `.days`          | Gets the number of days of this interval
 | `.hours`         | Gets the number of hours of this interval
 | `.minutes`       | Gets the number of minutes of this interval
 | `.seconds`       | Gets the number of seconds of this interval
-| `.milliseconds`  | Gets the number of milliseconds of this interval 
+| `.milliseconds`  | Gets the number of milliseconds of this interval
 | `.total_days`    | Gets the total number of days in fractional part
 | `.total_hours`   | Gets the total number of hours in fractional part
 | `.total_minutes` | Gets the total number of minutes in fractional part
@@ -3566,7 +3566,7 @@ timespan.parse <text>
 
 #### Description
 
-Parses the specified input string into a timespan object. 
+Parses the specified input string into a timespan object.
 
 #### Arguments
 
