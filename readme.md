@@ -143,6 +143,8 @@ If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, in order to co
 ```
 
 > NOTE: In this mode, all Scriban types are marked as `internal`.
+> 
+> You should see a Scriban folder and empty subfolders in your project. This is an issue with Visual Studio 2019 16.8.x (and before) and it will be fixed in VS 2019 16.9+
 
 ## Benchmarks
 
