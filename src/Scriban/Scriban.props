@@ -26,8 +26,8 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Pack sources in the nuget packages -->
-    <None Remove="build\Scriban.*"/>
-    <Content Include="build\Scriban.*">
+    <None Remove="Package\Scriban.*"/>
+    <Content Include="Package\Scriban.*">
       <Pack>true</Pack>
       <PackagePath>build\</PackagePath>
       <PackageCopyToOutput>true</PackageCopyToOutput>

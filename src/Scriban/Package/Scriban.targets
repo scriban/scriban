@@ -1,0 +1,5 @@
+<Project>
+  <ItemGroup Condition="'$(PackageScribanIncludeSource)' == 'true'">
+    <Compile Include="$(MSBuildThisFileDirectory)../src/**/*.cs" Visible="false"/>
+  </ItemGroup>
+</Project>
