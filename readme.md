@@ -117,8 +117,6 @@ Also the [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet 
 Starting with Scriban 3.2.0+, the package comes with source included so that you can internalize your usage of Scriban into your project. This can be useful in an environment where you can't easily consume NuGet references (e.g Roslyn Source Generators).
 
 > WARNING: Currently, the Scriban sources are not set as readonly, so you should not modify Scriban sources in that mode as it will modify the sources for other projects using Scriban on your machine. Use this feature at your own risks!
-> 
-> This feature also doesn't currently work with **Jetbrains Rider 2020.3**
 
 In order to activate this feature you need to:
 
