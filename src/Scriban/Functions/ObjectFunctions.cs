@@ -145,11 +145,11 @@ namespace Scriban.Functions
         /// <remarks>
         /// ```scriban-html
         /// {{ 255 | object.format "X4" }}
-        /// {{ 1523 | object.format "N" "fr-FR" }}
+        /// {{ 1523 | object.format "N2" "fr-FR" }}
         /// ```
         /// ```html
         /// 00FF
-        /// 1 523,000
+        /// 1 523,00
         /// ```
         /// </remarks>
         public static string Format(TemplateContext context, SourceSpan span, object value, string format, string culture = null)
