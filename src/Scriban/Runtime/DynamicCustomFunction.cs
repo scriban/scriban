@@ -16,7 +16,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Creates a reflection based <see cref="IScriptCustomFunction"/> from a <see cref="MethodInfo"/>.
     /// </summary>
-    public abstract partial class DynamicCustomFunction : IScriptCustomFunction
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract partial class DynamicCustomFunction : IScriptCustomFunction
     {
         private static readonly Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>> BuiltinFunctionDelegates = new Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>>(MethodComparer.Default);
 

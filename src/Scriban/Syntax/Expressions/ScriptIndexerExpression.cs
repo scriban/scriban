@@ -11,7 +11,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("indexer expression", "<expression>[<index_expression>]")]
-    public partial class ScriptIndexerExpression : ScriptExpression, IScriptVariablePath
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptIndexerExpression : ScriptExpression, IScriptVariablePath
     {
         private ScriptExpression _target;
         private ScriptToken _openBracket;

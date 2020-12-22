@@ -7,7 +7,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("return statement", "return <expression>?")]
-    public partial class ScriptReturnStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptReturnStatement : ScriptStatement
     {
         private ScriptExpression _expression;
         private ScriptKeyword _retKeyword;

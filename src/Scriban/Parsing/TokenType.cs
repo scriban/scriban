@@ -6,7 +6,12 @@ namespace Scriban.Parsing
     /// <summary>
     /// An enumeration to categorize tokens.
     /// </summary>
-    public enum TokenType
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum TokenType
     {
         Invalid,
 

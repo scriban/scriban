@@ -8,7 +8,12 @@ namespace Scriban.Syntax
     /// Implicit multiplication 1/2x are interpreted by 1/(2*x), but if
     /// x implements this interface, it will be interpreted as 1/2 * x
     /// </summary>
-    public interface IScriptCustomImplicitMultiplyPrecedence
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptCustomImplicitMultiplyPrecedence
     {
     }
 }

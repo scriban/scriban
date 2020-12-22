@@ -8,7 +8,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("import statement", "import <expression>")]
-    public partial class ScriptImportStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptImportStatement : ScriptStatement
     {
         private ScriptKeyword _importKeyword;
         private ScriptExpression _expression;

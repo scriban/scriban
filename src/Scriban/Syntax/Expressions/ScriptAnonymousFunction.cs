@@ -1,18 +1,23 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
-    public partial class ScriptAnonymousFunction : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptAnonymousFunction : ScriptExpression
     {
         private ScriptFunction _function;
-        
+
         public ScriptAnonymousFunction()
         {
         }
-       
+
         public ScriptFunction Function
         {
             get => _function;

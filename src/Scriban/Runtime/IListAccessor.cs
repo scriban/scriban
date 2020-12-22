@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using Scriban.Parsing;
@@ -9,7 +9,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Generic interface used to access a list/array, used by <see cref="TemplateContext"/> via <see cref="TemplateContext.GetListAccessor"/>
     /// </summary>
-    public interface IListAccessor
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IListAccessor
     {
         /// <summary>
         /// Gets the length of the specified target object

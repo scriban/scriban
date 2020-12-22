@@ -7,7 +7,12 @@ using System;
 namespace Scriban.Syntax
 {
     [Flags]
-    public enum ScriptFormatterFlags
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ScriptFormatterFlags
     {
         /// <summary>
         /// No flags defined.

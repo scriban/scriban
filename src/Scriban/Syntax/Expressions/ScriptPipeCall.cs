@@ -10,7 +10,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("pipe expression", "<expression> | <expression>")]
-    public partial class ScriptPipeCall : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptPipeCall : ScriptExpression
     {
         private ScriptExpression _from;
         private ScriptToken _pipeToken;

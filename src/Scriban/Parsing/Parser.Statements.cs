@@ -14,7 +14,12 @@ using Scriban.Syntax;
 
 namespace Scriban.Parsing
 {
-    public partial class Parser
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class Parser
     {
         private ScriptBlockStatement ParseBlockStatement(ScriptStatement parentStatement, bool parseEndOfStatementAfterEnd = true)
         {

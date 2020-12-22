@@ -1,6 +1,9 @@
 # Changelog
 
-## 3.1.0 (21 Dec 2021)
+## 3.2.0 (21 Dec 2020)
+- Add support for Scriban package bundled with sources 
+
+## 3.1.0 (21 Dec 2020)
 - Fix issue with end of statement not followed by an EOS (#275)
 - Fix parent node span does not include all its children (#280)
 - Add object.kind method and fix TemplateContext.GetTypeName for enum

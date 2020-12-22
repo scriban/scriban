@@ -5,7 +5,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public partial class ScriptFrontMatter : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptFrontMatter : ScriptStatement
     {
         private ScriptToken _startMarker;
         private ScriptToken _endMarker;

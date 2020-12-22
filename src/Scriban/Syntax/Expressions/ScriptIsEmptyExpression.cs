@@ -8,7 +8,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("empty expression", "<expression>.empty?")]
-    public partial class ScriptIsEmptyExpression: ScriptMemberExpression, IScriptVariablePath
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptIsEmptyExpression: ScriptMemberExpression, IScriptVariablePath
     {
         private ScriptToken _questionToken;
 

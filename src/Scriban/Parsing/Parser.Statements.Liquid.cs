@@ -13,7 +13,12 @@ using Scriban.Syntax;
 
 namespace Scriban.Parsing
 {
-    public partial class Parser
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class Parser
     {
         private void ParseLiquidStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {

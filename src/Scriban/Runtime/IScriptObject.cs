@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
 using Scriban.Parsing;
@@ -9,7 +9,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Base interface for a scriptable object.
     /// </summary>
-    public interface IScriptObject
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptObject
     {
         /// <summary>
         /// Gets the number of members

@@ -8,7 +8,12 @@ using System.Linq;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("continue statement", "continue")]
-    public partial class ScriptContinueStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptContinueStatement : ScriptStatement
     {
         private ScriptKeyword _continueKeyword;
 

@@ -11,7 +11,12 @@ using Scriban.Parsing;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("member expression", "<expression>.<variable_name>")]
-    public partial class ScriptMemberExpression : ScriptExpression, IScriptVariablePath
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptMemberExpression : ScriptExpression, IScriptVariablePath
     {
         private ScriptExpression _target;
         private ScriptToken _dotToken;

@@ -7,7 +7,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// Whitespace mode handling for code/escape enter/exit.
     /// </summary>
-    public enum ScriptWhitespaceMode
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ScriptWhitespaceMode
     {
         /// <summary>
         /// No change in whitespaces.

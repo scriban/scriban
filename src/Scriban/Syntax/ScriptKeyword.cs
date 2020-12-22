@@ -7,7 +7,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// A verbatim node (use for custom parsing).
     /// </summary>
-    public partial class ScriptKeyword : ScriptVerbatim
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptKeyword : ScriptVerbatim
     {
         public static ScriptKeyword This() => new ScriptKeyword("this");
 

@@ -17,7 +17,12 @@ namespace Scriban.Functions
     /// <summary>
     /// String functions available through the builtin object 'string`.
     /// </summary>
-    public class StringFunctions : ScriptObject
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class StringFunctions : ScriptObject
     {
         [ThreadStatic] private static StringBuilder _tlsBuilder;
 

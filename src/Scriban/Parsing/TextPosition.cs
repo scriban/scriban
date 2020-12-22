@@ -1,13 +1,18 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 
 namespace Scriban.Parsing
 {
-    public struct TextPosition : IEquatable<TextPosition>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    struct TextPosition : IEquatable<TextPosition>
     {
-        public static readonly TextPosition Eof = new TextPosition(-1, -1, -1);   
+        public static readonly TextPosition Eof = new TextPosition(-1, -1, -1);
 
         public TextPosition(int offset, int line, int column)
         {

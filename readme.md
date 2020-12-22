@@ -112,6 +112,38 @@ For support for older framework (.NET 3.5, 4.0, 4.5, .NET Standard 1.1, 1.3, the
 
 Also the [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet package provides signed assemblies.
 
+## Source Embedding
+
+Starting with Scriban 3.2.0+, the package comes with source included so that you can internalize your usage of Scriban into your project. This can be useful in an environment where you can't easily consume NuGet references (e.g Roslyn Source Generators).
+
+> WARNING: Currently, the Scriban sources are not set as readonly, so you should not modify Scriban sources in that mode as it will modify the sources for other projects using Scriban on your machine. Use this feature at your own risks!
+
+In order to activate this feature you need to:
+
+- Set the property `PackageScribanIncludeSource` to `true` in your project:
+  ```xml
+  <PropertyGroup>
+    <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+  </PropertyGroup>
+  ```
+- Add the `IncludeAssets="Build"` to the NuGet PackageReference for Scriban:
+  ```xml
+  <ItemGroup>
+    <PackageReference Include="Scriban" Version="3.2.0" IncludeAssets="Build"/>
+  </ItemGroup>
+  ```
+
+If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, in order to compile Scriban you will need these NuGet package references (that can come from a dependency that you already have):
+
+```xml
+<ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.0" />
+</ItemGroup>
+```
+
+> NOTE: In this mode, all Scriban types are marked as `internal`.
+
 ## Benchmarks
 
 **Scriban is blazing fast**! For more details, you can check the [benchmarks document](doc/benchmarks.md).

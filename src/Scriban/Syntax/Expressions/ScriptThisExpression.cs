@@ -10,7 +10,12 @@ namespace Scriban.Syntax
     /// this expression returns the current <see cref="TemplateContext.CurrentGlobal"/> script object.
     /// </summary>
     [ScriptSyntax("this expression", "this")]
-    public partial class ScriptThisExpression : ScriptExpression, IScriptVariablePath
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptThisExpression : ScriptExpression, IScriptVariablePath
     {
         private ScriptKeyword _thisKeyword;
 

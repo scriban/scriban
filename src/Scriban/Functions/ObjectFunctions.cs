@@ -18,7 +18,12 @@ namespace Scriban.Functions
     /// <summary>
     /// Object functions available through the builtin object 'object'.
     /// </summary>
-    public class ObjectFunctions : ScriptObject
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ObjectFunctions : ScriptObject
     {
         /// <summary>
         /// The `default` value is returned if the input `value` is null or an empty string "". A string containing whitespace characters will not resolve to the default value.

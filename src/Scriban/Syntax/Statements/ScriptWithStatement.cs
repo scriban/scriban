@@ -7,7 +7,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("with statement", "with <variable> ... end")]
-    public partial class ScriptWithStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptWithStatement : ScriptStatement
     {
         private ScriptKeyword _withKeyword;
         private ScriptExpression _name;

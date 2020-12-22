@@ -1,12 +1,17 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using System.Text;
 
 namespace Scriban.Parsing
 {
-    public class LogMessage
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class LogMessage
     {
         public LogMessage(ParserMessageType type, SourceSpan span, string message)
         {
@@ -36,7 +41,12 @@ namespace Scriban.Parsing
         }
     }
 
-    public enum ParserMessageType
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ParserMessageType
     {
         Error,
 

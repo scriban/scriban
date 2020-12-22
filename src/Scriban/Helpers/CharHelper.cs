@@ -2,7 +2,12 @@ using System;
 
 namespace Scriban.Helpers
 {
-    public class CharHelper
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class CharHelper
     {
         public static bool IsHexa(char c)
         {

@@ -14,7 +14,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("unary expression", "<operator> <expression>")]
-    public partial class ScriptUnaryExpression : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptUnaryExpression : ScriptExpression
     {
         private ScriptToken _operatorToken;
         private ScriptExpression _right;

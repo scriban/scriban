@@ -9,7 +9,12 @@ using Scriban.Functions;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("when statement", "when <expression> ... end|when|else")]
-    public partial class ScriptWhenStatement : ScriptConditionStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptWhenStatement : ScriptConditionStatement
     {
         private ScriptKeyword _whenKeyword;
         private ScriptList<ScriptExpression> _values;

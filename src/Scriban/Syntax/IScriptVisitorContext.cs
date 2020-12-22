@@ -6,7 +6,12 @@ using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
-    public interface IScriptVisitorContext
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptVisitorContext
     {
         ScriptNode Current { get; }
         ScriptNode Parent { get; }

@@ -1,6 +1,11 @@
 namespace Scriban.Syntax
 {
-    public interface IScriptCustomTypeInfo
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptCustomTypeInfo
     {
         string TypeName { get; }
     }

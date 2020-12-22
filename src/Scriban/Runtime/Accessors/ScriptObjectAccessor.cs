@@ -7,7 +7,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Runtime.Accessors
 {
-    public class ScriptObjectAccessor : IObjectAccessor
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptObjectAccessor : IObjectAccessor
     {
         public static readonly IObjectAccessor Default = new ScriptObjectAccessor();
 

@@ -13,7 +13,12 @@ using Enum = System.Enum;
 
 namespace Scriban.Helpers
 {
-    public static class ReflectionHelper
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ReflectionHelper
     {
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsPrimitiveOrDecimal(this Type type)

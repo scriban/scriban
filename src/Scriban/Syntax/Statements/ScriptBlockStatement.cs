@@ -7,7 +7,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("block statement", "<statement>...end")]
-    public sealed partial class ScriptBlockStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    sealed partial class ScriptBlockStatement : ScriptStatement
     {
         private ScriptList<ScriptStatement> _statements;
 

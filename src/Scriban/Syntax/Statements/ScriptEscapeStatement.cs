@@ -7,7 +7,12 @@ using System;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("{{ or }}", "{{ or }}")]
-    public partial class ScriptEscapeStatement : ScriptStatement, IScriptTerminal
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptEscapeStatement : ScriptStatement, IScriptTerminal
     {
         public ScriptEscapeStatement()
         {

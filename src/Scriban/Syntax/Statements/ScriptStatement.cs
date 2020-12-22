@@ -10,7 +10,12 @@ namespace Scriban.Syntax
     /// Base class for all statements.
     /// </summary>
     /// <seealso cref="ScriptNode" />
-    public abstract partial class ScriptStatement : ScriptNode
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract partial class ScriptStatement : ScriptNode
     {
         protected ScriptStatement()
         {

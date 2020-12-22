@@ -1,11 +1,16 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 namespace Scriban.Syntax
 {
     [ScriptSyntax("break statement", "break")]
-    public partial class ScriptBreakStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptBreakStatement : ScriptStatement
     {
         private ScriptKeyword _breakKeyword;
 
@@ -13,13 +18,13 @@ namespace Scriban.Syntax
         {
             BreakKeyword = ScriptKeyword.Break();
         }
-        
+
         public ScriptKeyword BreakKeyword
         {
             get => _breakKeyword;
             set => ParentToThis(ref _breakKeyword, value);
         }
-        
+
         public override object Evaluate(TemplateContext context)
         {
             // Only valid when we are in a loop (this should not happen as this is detected by the parser)

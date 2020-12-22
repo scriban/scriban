@@ -8,7 +8,12 @@ using System.IO;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("expression statement", "<expression>")]
-    public partial class ScriptExpressionStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptExpressionStatement : ScriptStatement
     {
         private ScriptExpression _expression;
 

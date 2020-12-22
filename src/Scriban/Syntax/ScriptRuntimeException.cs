@@ -10,7 +10,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public class ScriptRuntimeException : Exception
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptRuntimeException : Exception
     {
         public ScriptRuntimeException(SourceSpan span, string message) : base(message)
         {
@@ -48,8 +53,13 @@ namespace Scriban.Syntax
             return Message;
         }
     }
-    
-    public class ScriptAbortException : ScriptRuntimeException
+
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptAbortException : ScriptRuntimeException
     {
         public ScriptAbortException(SourceSpan span, CancellationToken cancellationToken) : this(span, "The operation was cancelled", cancellationToken)
         {
@@ -63,8 +73,13 @@ namespace Scriban.Syntax
 
         public CancellationToken CancellationToken { get; }
     }
-    
-    public class ScriptParserRuntimeException : ScriptRuntimeException
+
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptParserRuntimeException : ScriptRuntimeException
     {
         public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages) : this(span, message, parserMessages, null)
         {

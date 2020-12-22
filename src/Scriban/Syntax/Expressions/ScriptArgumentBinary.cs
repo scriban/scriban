@@ -10,7 +10,12 @@ namespace Scriban.Syntax
     /// A binary operation argument used with <see cref="ScriptFunctionCall"/>
     /// when parsing with scientific mode.
     /// </summary>
-    public partial class ScriptArgumentBinary : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptArgumentBinary : ScriptExpression
     {
         private ScriptToken _operatorToken;
 

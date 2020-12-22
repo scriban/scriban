@@ -7,7 +7,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Runtime.Accessors
 {
-    public class ListAccessor : IListAccessor, IObjectAccessor
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ListAccessor : IListAccessor, IObjectAccessor
     {
         public static ListAccessor Default = new ListAccessor();
 

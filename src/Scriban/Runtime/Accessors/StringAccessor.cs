@@ -7,7 +7,12 @@ using Scriban.Syntax;
 
 namespace Scriban.Runtime.Accessors
 {
-    public class StringAccessor : IListAccessor, IObjectAccessor
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class StringAccessor : IListAccessor, IObjectAccessor
     {
         public static StringAccessor Default = new StringAccessor();
 

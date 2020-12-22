@@ -18,7 +18,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("binary expression", "<expression> operator <expression>")]
-    public partial class ScriptBinaryExpression : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptBinaryExpression : ScriptExpression
     {
         private ScriptExpression _left;
         private ScriptToken _operatorToken;

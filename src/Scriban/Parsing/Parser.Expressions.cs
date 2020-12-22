@@ -11,7 +11,12 @@ using Scriban.Syntax;
 
 namespace Scriban.Parsing
 {
-    public partial class Parser
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class Parser
     {
         private int _allowNewLineLevel = 0;
         private int _expressionLevel = 0;

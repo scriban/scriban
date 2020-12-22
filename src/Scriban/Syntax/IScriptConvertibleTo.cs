@@ -7,7 +7,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public interface IScriptConvertibleTo
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptConvertibleTo
     {
         bool TryConvertTo(TemplateContext context, SourceSpan span, Type type, out object value);
     }

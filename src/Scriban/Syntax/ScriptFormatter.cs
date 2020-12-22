@@ -10,7 +10,12 @@ using Scriban.Runtime;
 
 namespace Scriban.Syntax
 {
-    public partial class ScriptFormatter : ScriptRewriter
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptFormatter : ScriptRewriter
     {
         private readonly TemplateContext _context;
         private readonly ScriptFormatterFlags _flags;

@@ -12,7 +12,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Generic function wrapper handling any kind of function parameters.
     /// </summary>
-    public partial class DelegateCustomFunction : DynamicCustomFunction
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class DelegateCustomFunction : DynamicCustomFunction
     {
         private readonly Delegate _del;
 
@@ -480,7 +485,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// A custom action taking 1 argument.
     /// </summary>
-    public class DelegateCustomAction : DelegateCustomFunction
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class DelegateCustomAction : DelegateCustomFunction
     {
         public DelegateCustomAction(Action func) : base(func)
         {

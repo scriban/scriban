@@ -1,12 +1,17 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 namespace Scriban.Parsing
 {
     /// <summary>
     /// Defines the options for the lexer.
     /// </summary>
-    public struct LexerOptions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    struct LexerOptions
     {
         public const string DefaultFrontMatterMarker = "+++";
 
@@ -64,5 +69,10 @@ namespace Scriban.Parsing
     /// <param name="length">Output the number of character successfully matched at <paramref name="position"/>.</param>
     /// <param name="tokenType">The custom token type within the range (<see cref="TokenType.Custom"/> to <see cref="TokenType.Custom9"/></param>
     /// <returns><c>true</c> if the text at position <paramref name="position"/> is a custom token.</returns>
-    public delegate bool TryMatchCustomTokenDelegate(string text, TextPosition position, out int length, out TokenType tokenType);
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    delegate bool TryMatchCustomTokenDelegate(string text, TextPosition position, out int length, out TokenType tokenType);
 }

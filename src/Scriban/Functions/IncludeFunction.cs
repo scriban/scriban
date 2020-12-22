@@ -12,7 +12,12 @@ namespace Scriban.Functions
     /// <summary>
     /// The include function available through the function 'include' in scriban.
     /// </summary>
-    public sealed partial class IncludeFunction : IScriptCustomFunction
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    sealed partial class IncludeFunction : IScriptCustomFunction
     {
         public IncludeFunction()
         {

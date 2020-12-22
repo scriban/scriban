@@ -5,7 +5,12 @@
 namespace Scriban.Syntax
 {
     [ScriptSyntax("end statement", "end")]
-    public partial class ScriptEndStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptEndStatement : ScriptStatement
     {
         private ScriptKeyword _endKeyword;
 

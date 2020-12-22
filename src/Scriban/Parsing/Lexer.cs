@@ -14,7 +14,12 @@ namespace Scriban.Parsing
     /// <summary>
     /// Lexer enumerator that generates <see cref="Token"/>, to use in a foreach.
     /// </summary>
-    public class Lexer : IEnumerable<Token>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class Lexer : IEnumerable<Token>
     {
         private TextPosition _position;
         private readonly int _textLength;

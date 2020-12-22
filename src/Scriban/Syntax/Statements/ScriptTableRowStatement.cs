@@ -13,7 +13,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// Statement handling the `tablerow`
     /// </summary>
-    public partial class ScriptTableRowStatement : ScriptForStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptTableRowStatement : ScriptForStatement
     {
         private int _columnsCount;
 
