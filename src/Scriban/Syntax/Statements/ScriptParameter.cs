@@ -7,7 +7,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public partial class ScriptParameter : ScriptNode
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptParameter : ScriptNode
     {
         private ScriptVariable _name;
         private ScriptToken _equalOrTripleDotToken;

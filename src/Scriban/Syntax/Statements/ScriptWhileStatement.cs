@@ -6,7 +6,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("while statement", "while <expression> ... end")]
-    public partial class ScriptWhileStatement : ScriptLoopStatementBase
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptWhileStatement : ScriptLoopStatementBase
     {
         private ScriptKeyword _whileKeyword;
         private ScriptExpression _condition;

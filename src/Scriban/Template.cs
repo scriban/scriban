@@ -12,7 +12,12 @@ namespace Scriban
     /// <summary>
     /// Basic entry point class to parse templates and render them. For more advanced scenario, you should use <see cref="TemplateContext"/> directly.
     /// </summary>
-    public partial class Template
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class Template
     {
         private Template(ParserOptions? parserOptions, LexerOptions? lexerOptions, string sourceFilePath)
         {

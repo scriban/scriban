@@ -7,7 +7,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("capture statement", "capture <variable> ... end")]
-    public partial class ScriptCaptureStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptCaptureStatement : ScriptStatement
     {
         private ScriptExpression _target;
         private ScriptBlockStatement _body;

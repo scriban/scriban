@@ -7,7 +7,12 @@ using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
-    public static class ScriptNodeExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ScriptNodeExtensions
     {
         public static ScriptNode FindFirstTerminal(this ScriptNode node)
         {

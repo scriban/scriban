@@ -6,7 +6,12 @@ using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
-    public class ScriptTrivias
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptTrivias
     {
         public ScriptTrivias()
         {

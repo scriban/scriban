@@ -5,7 +5,12 @@ using System;
 
 namespace Scriban.Syntax
 {
-    public class ScriptArgumentException : Exception
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptArgumentException : Exception
     {
         public ScriptArgumentException(int argumentIndex, string message) : base(message)
         {

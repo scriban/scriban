@@ -19,7 +19,12 @@ using Scriban.Syntax;
 
 namespace Scriban
 {
-    public partial class TemplateContext
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class TemplateContext
     {
         /// <summary>
         /// Pushes a new object context accessible to the template. This method creates also a new context for local variables.

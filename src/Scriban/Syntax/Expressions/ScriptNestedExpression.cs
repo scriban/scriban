@@ -9,7 +9,12 @@ using System.IO;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("nested expression", "(<expression>)")]
-    public partial class ScriptNestedExpression : ScriptExpression, IScriptVariablePath
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptNestedExpression : ScriptExpression, IScriptVariablePath
     {
         private ScriptExpression _expression;
         private ScriptToken _openParen;

@@ -7,7 +7,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public enum ScriptBinaryOperator
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ScriptBinaryOperator
     {
         None,
 
@@ -60,7 +65,12 @@ namespace Scriban.Syntax
         Custom,
     }
 
-    public static class ScriptBinaryOperatorExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ScriptBinaryOperatorExtensions
     {
         public static ScriptToken ToToken(this ScriptBinaryOperator op)
         {

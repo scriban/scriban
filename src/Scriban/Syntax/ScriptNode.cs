@@ -15,7 +15,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// Base class for the abstract syntax tree of a scriban program.
     /// </summary>
-    public abstract class ScriptNode
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract class ScriptNode
     {
         /// <summary>
         /// The source span of this node.

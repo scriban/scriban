@@ -7,7 +7,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("readonly statement", "readonly <variable>")]
-    public partial class ScriptReadOnlyStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptReadOnlyStatement : ScriptStatement
     {
         private ScriptVariable _variable;
         private ScriptKeyword _readOnlyKeyword;

@@ -54,7 +54,12 @@ using Scriban.Syntax;
 
 namespace Scriban.Runtime
 {
-    public abstract partial class DynamicCustomFunction
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract partial class DynamicCustomFunction
     {
 ");
             _writer.Write(@"

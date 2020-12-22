@@ -7,7 +7,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// An identifier (which is not a <see cref="ScriptVariable"/>)
     /// </summary>
-    public partial class ScriptIdentifier : ScriptVerbatim
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptIdentifier : ScriptVerbatim
     {
         public ScriptIdentifier()
         {

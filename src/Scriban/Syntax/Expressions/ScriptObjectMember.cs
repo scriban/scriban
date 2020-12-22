@@ -4,7 +4,12 @@
 
 namespace Scriban.Syntax
 {
-    public partial class ScriptObjectMember : ScriptNode
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptObjectMember : ScriptNode
     {
         private ScriptExpression _name;
         private ScriptExpression _value;

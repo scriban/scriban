@@ -14,7 +14,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("conditional expression", "<condition> ? <then_value> : <else_value>")]
-    public partial class ScriptConditionalExpression : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptConditionalExpression : ScriptExpression
     {
         private ScriptExpression _condition;
         private ScriptToken _questionToken;

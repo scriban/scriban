@@ -10,7 +10,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Can apply a transform to each element (e.g ScriptArray.Transform(...))
     /// </summary>
-    public interface IScriptTransformable
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptTransformable
     {
         Type ElementType { get; }
 

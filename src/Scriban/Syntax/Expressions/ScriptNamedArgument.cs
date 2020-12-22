@@ -5,7 +5,12 @@ using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
-    public partial class ScriptNamedArgument : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptNamedArgument : ScriptExpression
     {
         private ScriptVariable _name;
         private ScriptToken _colonToken;

@@ -8,7 +8,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("wrap statement", "wrap <function_call> ... end")]
-    public partial class ScriptWrapStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptWrapStatement : ScriptStatement
     {
         private ScriptKeyword _wrapKeyword;
         private ScriptExpression _target;

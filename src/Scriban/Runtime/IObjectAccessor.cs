@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System.Collections;
@@ -11,7 +11,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Generic interface used to access an object (either <see cref="ScriptObject"/> or .NET object), used by <see cref="TemplateContext"/> via <see cref="TemplateContext.GetMemberAccessor"/>
     /// </summary>
-    public interface IObjectAccessor
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IObjectAccessor
     {
         /// <summary>
         /// Returns true if the object has any members, <c>false</c> otherwise.

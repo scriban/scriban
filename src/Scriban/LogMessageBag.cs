@@ -15,7 +15,12 @@ namespace Scriban
     /// Contains log messages.
     /// </summary>
     [DebuggerDisplay("Count: {Count}")]
-    public class LogMessageBag : IReadOnlyList<LogMessage>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class LogMessageBag : IReadOnlyList<LogMessage>
     {
         private readonly List<LogMessage> _messages;
 

@@ -9,7 +9,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("object initializer expression", "{ member1: <expression>, member2: ... }")]
-    public partial class ScriptObjectInitializerExpression : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptObjectInitializerExpression : ScriptExpression
     {
         private ScriptToken _openBrace;
         private ScriptList<ScriptObjectMember> _members;

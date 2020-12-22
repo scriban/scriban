@@ -12,7 +12,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Interface used to text output when evaluating a template used by <see cref="TemplateContext.Output"/> and <see cref="TemplateContext.PushOutput()"/>
     /// </summary>
-    public interface IScriptOutput
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptOutput
     {
         void Write(string text, int offset, int count);
 
@@ -24,7 +29,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Extensions for <see cref="IScriptOutput"/>
     /// </summary>
-    public static partial class ScriptOutputExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static partial class ScriptOutputExtensions
     {
         public static void Write(this IScriptOutput scriptOutput, string text)
         {

@@ -4,7 +4,12 @@
 
 namespace Scriban.Parsing
 {
-    public static class TokenTypeExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class TokenTypeExtensions
     {
         public static bool HasText(this TokenType type)
         {

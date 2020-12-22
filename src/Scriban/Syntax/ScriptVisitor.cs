@@ -5,7 +5,12 @@ using System;
 
 namespace Scriban.Syntax
 {
-    public abstract partial class ScriptVisitor
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract partial class ScriptVisitor
     {
         public virtual void Visit(ScriptNode node)
         {
@@ -40,7 +45,12 @@ namespace Scriban.Syntax
         }
     }
 
-    public abstract partial class ScriptVisitor<TResult>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract partial class ScriptVisitor<TResult>
     {
         public virtual TResult Visit(ScriptNode node)
         {

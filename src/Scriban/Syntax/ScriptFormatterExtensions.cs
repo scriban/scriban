@@ -4,7 +4,12 @@
 
 namespace Scriban.Syntax
 {
-    public static class ScriptFormatterExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ScriptFormatterExtensions
     {
         public static ScriptNode Format(this ScriptNode node, ScriptFormatterOptions options)
         {

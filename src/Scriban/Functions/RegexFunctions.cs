@@ -11,7 +11,12 @@ namespace Scriban.Functions
     /// Functions exposed through `regex` builtin object.
     /// </summary>
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
-    public class RegexFunctions : ScriptObject
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class RegexFunctions : ScriptObject
     {
         /// <summary>
         /// Escapes a minimal set of characters (`\`, `*`, `+`, `?`, `|`, `{`, `[`, `(`,`)`, `^`, `$`,`.`, `#`, and white space)

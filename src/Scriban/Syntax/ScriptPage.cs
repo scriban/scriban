@@ -7,7 +7,12 @@ using System.Collections.Generic;
 
 namespace Scriban.Syntax
 {
-    public partial class ScriptPage : ScriptNode
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptPage : ScriptNode
     {
         private ScriptFrontMatter _frontMatter;
         private ScriptBlockStatement _body;

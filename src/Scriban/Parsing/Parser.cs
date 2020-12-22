@@ -15,7 +15,12 @@ namespace Scriban.Parsing
     /// <summary>
     /// The parser.
     /// </summary>
-    public partial class Parser
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class Parser
     {
         private readonly Lexer _lexer;
         private readonly bool _isLiquid;

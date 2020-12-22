@@ -6,7 +6,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("case statement", "case <expression> ... end|when|else")]
-    public partial class ScriptCaseStatement : ScriptConditionStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptCaseStatement : ScriptConditionStatement
     {
         private ScriptKeyword _caseKeyword;
         private ScriptExpression _value;

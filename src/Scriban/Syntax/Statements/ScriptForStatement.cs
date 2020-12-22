@@ -14,7 +14,12 @@ namespace Scriban.Syntax
     /// A for in loop statement.
     /// </summary>
     [ScriptSyntax("for statement", "for <variable> in <expression> ... end")]
-    public partial class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
     {
         private ScriptKeyword _forOrTableRowKeyword;
         private ScriptExpression _variable;

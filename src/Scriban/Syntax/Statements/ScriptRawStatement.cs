@@ -5,7 +5,12 @@
 namespace Scriban.Syntax
 {
     [ScriptSyntax("raw statement", "<raw_text>")]
-    public partial class ScriptRawStatement : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptRawStatement : ScriptStatement
     {
         public ScriptStringSlice Text { get; set; }
 

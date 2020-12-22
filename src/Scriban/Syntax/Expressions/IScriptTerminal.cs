@@ -9,7 +9,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// Identifies a script terminal (token, identifier, variable, literal)
     /// </summary>
-    public interface IScriptTerminal
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptTerminal
     {
         /// <summary>
         /// Trivias, can be null if <see cref="LexerOptions.KeepTrivia"/> is <c>false</c>

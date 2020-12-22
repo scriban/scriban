@@ -15,7 +15,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// Base class for a loop statement
     /// </summary>
-    public abstract partial class ScriptLoopStatementBase : ScriptStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract partial class ScriptLoopStatementBase : ScriptStatement
     {
         protected virtual void BeforeLoop(TemplateContext context)
         {

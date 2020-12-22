@@ -11,7 +11,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Output to a <see cref="StringBuilder"/>
     /// </summary>
-    public class StringBuilderOutput : IScriptOutput
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class StringBuilderOutput : IScriptOutput
     {
         [ThreadStatic] private static StringBuilder TlsBuilder;
 

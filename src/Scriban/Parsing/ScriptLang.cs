@@ -7,7 +7,12 @@ namespace Scriban.Parsing
     /// <summary>
     /// Defines the language the parser should use.
     /// </summary>
-    public enum ScriptLang
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ScriptLang
     {
         /// <summary>
         /// Default scriban language.

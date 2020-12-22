@@ -11,7 +11,12 @@ using System.Text;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("literal", "<value>")]
-    public partial class ScriptLiteral : ScriptExpression, IScriptTerminal
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptLiteral : ScriptExpression, IScriptTerminal
     {
         public ScriptLiteral()
         {
@@ -232,7 +237,12 @@ namespace Scriban.Syntax
         }
     }
 
-    public enum ScriptLiteralStringQuoteType
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ScriptLiteralStringQuoteType
     {
         DoubleQuote,
 

@@ -11,7 +11,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("function call expression", "<target_expression> <arguemnt[0]> ... <arguement[n]>")]
-    public partial class ScriptFunctionCall : ScriptExpression
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptFunctionCall : ScriptExpression
     {
         private ScriptExpression _target;
         private ScriptToken _openParent;

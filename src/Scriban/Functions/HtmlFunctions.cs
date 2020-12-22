@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
@@ -11,7 +11,12 @@ namespace Scriban.Functions
     /// <summary>
     /// Html functions available through the builtin object 'html'.
     /// </summary>
-    public class HtmlFunctions : ScriptObject
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class HtmlFunctions : ScriptObject
     {
         // From https://stackoverflow.com/a/17668453/1356325
         private const string RegexMatchHtml = @"<script.*?</script>|<!--.*?-->|<style.*?</style>|<(?:[^>=]|='[^']*'|=""[^""]*""|=[^'""][^\s>]*)*>";

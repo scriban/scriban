@@ -4,7 +4,12 @@
 
 namespace Scriban.Syntax
 {
-    public abstract class ScriptVerbatim : ScriptNode, IScriptTerminal
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract class ScriptVerbatim : ScriptNode, IScriptTerminal
     {
         protected ScriptVerbatim()
         {

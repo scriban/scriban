@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using Scriban.Parsing;
@@ -11,10 +11,15 @@ namespace Scriban.Runtime
     /// <summary>
     /// Interface used for loading a template.
     /// </summary>
-    public interface ITemplateLoader
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface ITemplateLoader
     {
         /// <summary>
-        /// Gets an absolute path for the specified include template name. Note that it is not necessarely a path on a disk, 
+        /// Gets an absolute path for the specified include template name. Note that it is not necessarely a path on a disk,
         /// but an absolute path that can be used as a dictionary key for caching)
         /// </summary>
         /// <param name="context">The current context called from</param>

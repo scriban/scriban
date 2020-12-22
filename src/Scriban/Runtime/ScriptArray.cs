@@ -21,7 +21,12 @@ namespace Scriban.Runtime
     /// <seealso cref="System.Collections.IList" />
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(ScriptArray<>.DebugListView))]
-    public class ScriptArray<T> : IList<T>, IList, IScriptObject, IScriptCustomBinaryOperation, IScriptTransformable
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptArray<T> : IList<T>, IList, IScriptObject, IScriptCustomBinaryOperation, IScriptTransformable
     {
         private List<T> _values;
         private bool _isReadOnly;
@@ -655,7 +660,12 @@ namespace Scriban.Runtime
         }
     }
 
-    public class ScriptArray : ScriptArray<object>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptArray : ScriptArray<object>
     {
         public ScriptArray()
         {

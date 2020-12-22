@@ -9,7 +9,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// Base class for a script rewriter.
     /// </summary>
-    public abstract partial class ScriptRewriter : ScriptVisitor<ScriptNode>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract partial class ScriptRewriter : ScriptVisitor<ScriptNode>
     {
         protected ScriptRewriter()
         {

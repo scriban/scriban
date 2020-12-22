@@ -6,7 +6,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public interface IScriptCustomBinaryOperation
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptCustomBinaryOperation
     {
         bool TryEvaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue, out object result);
     }

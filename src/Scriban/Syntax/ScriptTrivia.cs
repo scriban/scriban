@@ -6,7 +6,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
-    public readonly partial struct ScriptTrivia
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    readonly partial struct ScriptTrivia
     {
         public static readonly ScriptTrivia Space = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.Whitespace, (ScriptStringSlice)" ");
 

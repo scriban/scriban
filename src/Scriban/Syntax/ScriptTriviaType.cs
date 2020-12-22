@@ -4,7 +4,12 @@
 
 namespace Scriban.Syntax
 {
-    public enum ScriptTriviaType
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ScriptTriviaType
     {
         Empty = 0,
 

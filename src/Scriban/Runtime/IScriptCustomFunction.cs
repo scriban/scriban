@@ -12,7 +12,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Allows to create a custom function object.
     /// </summary>
-    public interface IScriptCustomFunction : IScriptFunctionInfo
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptCustomFunction : IScriptFunctionInfo
     {
         /// <summary>
         /// Calls the custom function object.
@@ -38,14 +43,24 @@ namespace Scriban.Runtime
     }
 
 
-    public enum ScriptVarParamKind
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ScriptVarParamKind
     {
         None,
         Direct,
         LastParameter
     }
 
-    public interface IScriptFunctionInfo
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptFunctionInfo
     {
         int RequiredParameterCount { get; }
 
@@ -59,7 +74,12 @@ namespace Scriban.Runtime
     }
 
 
-    public static class ScriptFunctionInfoExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ScriptFunctionInfoExtensions
     {
         public static bool IsParameterType<T>(this IScriptFunctionInfo functionInfo, int index)
         {
@@ -70,7 +90,12 @@ namespace Scriban.Runtime
 
 
     [DebuggerDisplay("{ParameterType} {Name}")]
-    public readonly struct ScriptParameterInfo : IEquatable<ScriptParameterInfo>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    readonly struct ScriptParameterInfo : IEquatable<ScriptParameterInfo>
     {
         public ScriptParameterInfo(Type parameterType, string name)
         {

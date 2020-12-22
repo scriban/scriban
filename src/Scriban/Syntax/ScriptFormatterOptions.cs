@@ -12,7 +12,12 @@ namespace Scriban.Syntax
     /// Options used by <see cref="ScriptFormatter"/>
     /// </summary>
     [DebuggerDisplay("Lang: {Language} Flags: {Flags}")]
-    public readonly struct ScriptFormatterOptions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    readonly struct ScriptFormatterOptions
     {
         public ScriptFormatterOptions(ScriptFormatterFlags flags)
         {

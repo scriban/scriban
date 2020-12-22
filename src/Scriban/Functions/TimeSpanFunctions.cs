@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System;
 using Scriban.Runtime;
@@ -8,14 +8,14 @@ namespace Scriban.Functions
 {
     /// <summary>
     /// A timespan object represents a time interval.
-    /// 
+    ///
     /// | Name             | Description
     /// |--------------    |-----------------
-    /// | `.days`          | Gets the number of days of this interval 
+    /// | `.days`          | Gets the number of days of this interval
     /// | `.hours`         | Gets the number of hours of this interval
     /// | `.minutes`       | Gets the number of minutes of this interval
     /// | `.seconds`       | Gets the number of seconds of this interval
-    /// | `.milliseconds`  | Gets the number of milliseconds of this interval 
+    /// | `.milliseconds`  | Gets the number of milliseconds of this interval
     /// | `.total_days`    | Gets the total number of days in fractional part
     /// | `.total_hours`   | Gets the total number of hours in fractional part
     /// | `.total_minutes` | Gets the total number of minutes in fractional part
@@ -23,7 +23,12 @@ namespace Scriban.Functions
     /// | `.total_milliseconds` | Gets the total number of milliseconds  in fractional part
     /// </summary>
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
-    public class TimeSpanFunctions : ScriptObject
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class TimeSpanFunctions : ScriptObject
     {
         /// <summary>
         /// Returns a timespan object that represents a 0 interval
@@ -130,7 +135,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Parses the specified input string into a timespan object. 
+        /// Parses the specified input string into a timespan object.
         /// </summary>
         /// <param name="text">A timespan text</param>
         /// <returns>A timespan object parsed from timespan</returns>

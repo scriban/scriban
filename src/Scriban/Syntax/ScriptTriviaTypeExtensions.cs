@@ -4,7 +4,12 @@
 
 namespace Scriban.Syntax
 {
-    public static class ScriptTriviaTypeExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ScriptTriviaTypeExtensions
     {
         public static bool IsSpace(this ScriptTriviaType triviaType)
         {

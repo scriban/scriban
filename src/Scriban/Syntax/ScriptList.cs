@@ -15,7 +15,12 @@ namespace Scriban.Syntax
     /// </summary>
     [DebuggerDisplay("Count = {Count}")]
     [DebuggerTypeProxy(typeof(ScriptListDebug))]
-    public abstract class ScriptList : ScriptNode
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract class ScriptList : ScriptNode
     {
         internal InlineList<ScriptNode> _children;
 
@@ -54,7 +59,12 @@ namespace Scriban.Syntax
     /// </summary>
     /// <typeparam name="TScriptNode">Type of the node</typeparam>
     [DebuggerTypeProxy(typeof(ScriptList<>.DebugListView)), DebuggerDisplay("Count = {Count}")]
-    public sealed class ScriptList<TScriptNode> : ScriptList, IList<TScriptNode>, IReadOnlyList<TScriptNode> where TScriptNode : ScriptNode
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    sealed class ScriptList<TScriptNode> : ScriptList, IList<TScriptNode>, IReadOnlyList<TScriptNode> where TScriptNode : ScriptNode
     {
         /// <summary>
         /// Creates an instance of <see cref="ScriptList{TScriptNode}"/>
@@ -206,7 +216,7 @@ namespace Scriban.Syntax
                 get
                 {
                     if (_index < 0) throw new InvalidOperationException("MoveNext must be called before accessing Current");
-                    return Unsafe.As<TScriptNode>(_nodes[_index]);
+                    return (TScriptNode)(_nodes[_index]);
                 }
             }
 
@@ -241,7 +251,7 @@ namespace Scriban.Syntax
 
         public new TScriptNode this[int index]
         {
-            get => Unsafe.As<TScriptNode>(_children[index]);
+            get => (TScriptNode)_children[index];
             set
             {
                 var previous = _children[index];

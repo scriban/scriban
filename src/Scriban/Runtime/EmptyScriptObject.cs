@@ -1,5 +1,5 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -11,8 +11,13 @@ namespace Scriban.Runtime
     /// <summary>
     /// The empty object (unique singleton, cannot be modified, does not contain any properties)
     /// </summary>
-    [DebuggerDisplay("<empty object>")]    
-    public sealed class EmptyScriptObject : IScriptObject
+    [DebuggerDisplay("<empty object>")]
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    sealed class EmptyScriptObject : IScriptObject
     {
         public static readonly EmptyScriptObject Default = new EmptyScriptObject();
 

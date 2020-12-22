@@ -7,7 +7,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("if statement", "if <expression> ... end|else|else if")]
-    public partial class ScriptIfStatement : ScriptConditionStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptIfStatement : ScriptConditionStatement
     {
         private ScriptExpression _condition;
         private ScriptBlockStatement _then;

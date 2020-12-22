@@ -17,6 +17,6 @@
     <PackageReference Include="NuGet.Frameworks" Version="5.8.0" />
     <PackageReference Include="NuGet.Packaging" Version="5.8.0" />
     <PackageReference Include="NuGet.ProjectModel" Version="5.8.0" />
+    <PackageReference Include="Scriban" Version="3.1.0" />
   </ItemGroup>
-
 </Project>

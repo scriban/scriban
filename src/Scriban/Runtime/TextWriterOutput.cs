@@ -11,7 +11,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Output to a <see cref="TextWriter"/>
     /// </summary>
-    public class TextWriterOutput : IScriptOutput
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class TextWriterOutput : IScriptOutput
     {
         /// <summary>
         /// Initialize a new instance of <see cref="TextWriterOutput"/> with a writer default to <see cref="StringWriter"/>

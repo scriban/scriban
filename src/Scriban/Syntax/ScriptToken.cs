@@ -10,7 +10,12 @@ namespace Scriban.Syntax
     /// <summary>
     /// A verbatim node (use for custom parsing).
     /// </summary>
-    public partial class ScriptToken : ScriptVerbatim
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptToken : ScriptVerbatim
     {
         public static ScriptToken SemiColon() => new ScriptToken(TokenType.SemiColon);
         public static ScriptToken Arroba() => new ScriptToken(TokenType.Arroba);

@@ -9,7 +9,12 @@ using Scriban.Runtime;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("function statement", "func <variable> ... end")]
-    public partial class ScriptFunction : ScriptStatement, IScriptCustomFunction
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptFunction : ScriptStatement, IScriptCustomFunction
     {
         private ScriptKeyword _funcToken;
         private ScriptNode _nameOrDoToken;

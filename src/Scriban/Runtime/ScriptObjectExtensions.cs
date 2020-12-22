@@ -15,7 +15,12 @@ namespace Scriban.Runtime
     /// <summary>
     /// Extensions attached to an <see cref="IScriptObject"/>.
     /// </summary>
-    public static class ScriptObjectExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ScriptObjectExtensions
     {
         /// <summary>
         /// Asserts that the specified script object is not readonly or throws a <see cref="ScriptRuntimeException"/>

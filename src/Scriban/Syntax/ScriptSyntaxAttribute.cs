@@ -8,7 +8,12 @@ using System.Reflection;
 namespace Scriban.Syntax
 {
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Struct)]
-    public class ScriptTypeNameAttribute : Attribute
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptTypeNameAttribute : Attribute
     {
         public ScriptTypeNameAttribute(string typeName)
         {
@@ -19,7 +24,12 @@ namespace Scriban.Syntax
     }
 
     [AttributeUsage(AttributeTargets.Class | AttributeTargets.Enum | AttributeTargets.Struct)]
-    public class ScriptSyntaxAttribute : ScriptTypeNameAttribute
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class ScriptSyntaxAttribute : ScriptTypeNameAttribute
     {
         public ScriptSyntaxAttribute(string typeName, string example) : base(typeName)
         {

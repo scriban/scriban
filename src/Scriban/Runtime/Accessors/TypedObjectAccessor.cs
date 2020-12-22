@@ -10,7 +10,12 @@ using Scriban.Parsing;
 
 namespace Scriban.Runtime.Accessors
 {
-    public class TypedObjectAccessor : IObjectAccessor
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class TypedObjectAccessor : IObjectAccessor
     {
         private readonly MemberFilterDelegate _filter;
         private readonly Type _type;

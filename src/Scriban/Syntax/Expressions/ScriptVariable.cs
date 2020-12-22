@@ -14,7 +14,12 @@ namespace Scriban.Syntax
     /// </summary>
     /// <remarks>This class is immutable as all variable object are being shared across all templates</remarks>
     [ScriptSyntax("variable", "<variable_name>")]
-    public abstract partial class ScriptVariable : ScriptExpression, IScriptVariablePath, IEquatable<ScriptVariable>, IScriptTerminal
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    abstract partial class ScriptVariable : ScriptExpression, IScriptVariablePath, IEquatable<ScriptVariable>, IScriptTerminal
     {
         private int _hashCode;
 
@@ -135,7 +140,12 @@ namespace Scriban.Syntax
         }
     }
 
-    public partial class ScriptVariableGlobal : ScriptVariable
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptVariableGlobal : ScriptVariable
     {
         public ScriptVariableGlobal(string name) : base(name, ScriptVariableScope.Global)
         {
@@ -149,14 +159,24 @@ namespace Scriban.Syntax
     }
 
 
-    public partial class ScriptVariableLocal : ScriptVariable
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptVariableLocal : ScriptVariable
     {
         public ScriptVariableLocal(string name) : base(name, ScriptVariableScope.Local)
         {
         }
     }
 
-    public partial class ScriptVariableLoop : ScriptVariable
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptVariableLoop : ScriptVariable
     {
         public ScriptVariableLoop(string name) : base(name, ScriptVariableScope.Loop)
         {

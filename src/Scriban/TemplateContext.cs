@@ -27,7 +27,12 @@ namespace Scriban
     /// <summary>
     /// The template context contains the state of the page, the model.
     /// </summary>
-    public partial class TemplateContext
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class TemplateContext
     {
         private FastStack<ScriptObject> _availableStores;
         internal FastStack<ScriptBlockStatement> BlockDelegates;
@@ -1054,7 +1059,12 @@ namespace Scriban
     /// <summary>
     /// A Liquid based <see cref="TemplateContext"/> providing the builtin functions usually available for a liquid template.
     /// </summary>
-    public class LiquidTemplateContext : TemplateContext
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    class LiquidTemplateContext : TemplateContext
     {
         public LiquidTemplateContext() : base(new LiquidBuiltinsFunctions())
         {

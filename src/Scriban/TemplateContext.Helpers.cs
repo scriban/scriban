@@ -17,7 +17,12 @@ using Scriban.Syntax;
 
 namespace Scriban
 {
-    public partial class TemplateContext : IFormatProvider
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class TemplateContext : IFormatProvider
     {
         public object GetFormat(Type formatType)
         {

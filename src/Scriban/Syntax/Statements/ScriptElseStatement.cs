@@ -6,7 +6,12 @@ using System.Collections.Generic;
 namespace Scriban.Syntax
 {
     [ScriptSyntax("else statement", "else | else if <expression> ... end|else|else if")]
-    public partial class ScriptElseStatement : ScriptConditionStatement
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptElseStatement : ScriptConditionStatement
     {
         private ScriptKeyword _elseKeyword;
         private ScriptBlockStatement _body;

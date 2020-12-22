@@ -11,7 +11,12 @@ namespace Scriban.Syntax
     /// Slice of a string
     /// </summary>
     [DebuggerDisplay("{ToString()}")]
-    public readonly struct ScriptStringSlice : IEquatable<ScriptStringSlice>, IComparable<ScriptStringSlice>, IComparable<string>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    readonly struct ScriptStringSlice : IEquatable<ScriptStringSlice>, IComparable<ScriptStringSlice>, IComparable<string>
     {
         public static readonly ScriptStringSlice Empty = new ScriptStringSlice(string.Empty);
 
@@ -200,7 +205,12 @@ namespace Scriban.Syntax
         }
     }
 
-    public static class ScriptStringSliceExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ScriptStringSliceExtensions
     {
         public static ScriptStringSlice Slice(this string text, int index)
         {

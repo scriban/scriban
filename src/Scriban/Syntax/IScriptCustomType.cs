@@ -4,7 +4,12 @@
 
 namespace Scriban.Syntax
 {
-    public interface IScriptCustomType : IScriptCustomTypeInfo, IScriptCustomBinaryOperation, IScriptCustomUnaryOperation, IScriptConvertibleTo
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IScriptCustomType : IScriptCustomTypeInfo, IScriptCustomBinaryOperation, IScriptCustomUnaryOperation, IScriptConvertibleTo
     {
     }
 }

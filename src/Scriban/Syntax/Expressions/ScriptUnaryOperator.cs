@@ -1,12 +1,17 @@
 // Copyright (c) Alexandre Mutel. All rights reserved.
-// Licensed under the BSD-Clause 2 license. 
+// Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 using System;
 
 namespace Scriban.Syntax
 {
-    public enum ScriptUnaryOperator
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    enum ScriptUnaryOperator
     {
         None,
         Not,
@@ -17,7 +22,12 @@ namespace Scriban.Syntax
         Custom
     }
 
-    public static class ScriptUnaryOperatorExtensions
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    static class ScriptUnaryOperatorExtensions
     {
         public static string ToText(this ScriptUnaryOperator op)
         {
