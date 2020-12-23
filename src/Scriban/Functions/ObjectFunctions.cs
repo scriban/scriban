@@ -378,7 +378,9 @@ namespace Scriban.Functions
         /// object
         /// ```
         /// </remarks>
+#pragma warning disable 1573
         public static string Kind(TemplateContext context, object value)
+#pragma warning restore 1573
         {
             if (value == null)
             {
@@ -386,7 +388,6 @@ namespace Scriban.Functions
             }
             return context.GetTypeName(value);
         }
-
 
         /// <summary>
         /// Gets the member's values of the specified value object.

@@ -17,20 +17,7 @@ namespace Scriban.Tests
         public const string InputFilePattern = "*.txt";
         public const string OutputEndFileExtension = ".out.txt";
 
-        public static string BaseDirectory
-        {
-            get
-            {
-#if !NETCOREAPP1_0 && !NETCOREAPP1_1
-                var assembly = Assembly.GetExecutingAssembly();
-                var codebase = new Uri(assembly.CodeBase);
-                var path = codebase.LocalPath;
-                return Path.GetDirectoryName(path);
-#else
-                return Directory.GetCurrentDirectory();
-#endif
-            }
-        }
+        public static string BaseDirectory => AppContext.BaseDirectory;
 
         public static IEnumerable ListTestFilesInFolder(string folder)
         {
