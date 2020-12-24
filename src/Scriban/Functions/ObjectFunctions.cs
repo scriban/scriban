@@ -230,7 +230,7 @@ namespace Scriban.Functions
         /// ["title", "type"]
         /// ```
         /// </remarks>
-        public new static ScriptArray Keys(TemplateContext context, object value)
+        public static ScriptArray Keys(TemplateContext context, object value)
         {
             if (value == null) return new ScriptArray();
             if (value is IDictionary dict) return new ScriptArray(dict.Keys);
@@ -402,7 +402,7 @@ namespace Scriban.Functions
         /// ["fruit", "Orange"]
         /// ```
         /// </remarks>
-        public new static ScriptArray Values(IDictionary<string, object> value)
+        public static ScriptArray Values(IDictionary<string, object> value)
         {
             return value == null ? new ScriptArray() : new ScriptArray(value.Values);
         }
