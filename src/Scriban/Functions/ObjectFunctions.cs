@@ -230,7 +230,9 @@ namespace Scriban.Functions
         /// ["title", "type"]
         /// ```
         /// </remarks>
+#pragma warning disable CS0108
         public static ScriptArray Keys(TemplateContext context, object value)
+#pragma warning restore CS0108
         {
             if (value == null) return new ScriptArray();
             if (value is IDictionary dict) return new ScriptArray(dict.Keys);
@@ -402,7 +404,9 @@ namespace Scriban.Functions
         /// ["fruit", "Orange"]
         /// ```
         /// </remarks>
+#pragma warning disable CS0108
         public static ScriptArray Values(IDictionary<string, object> value)
+#pragma warning restore CS0108
         {
             return value == null ? new ScriptArray() : new ScriptArray(value.Values);
         }
