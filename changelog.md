@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.2.2 (24 Dec 2020)
+- Add `#nullable disable` to allow embedding Scriban as sources in a project that has enabled nullable
+
 ## 3.2.1 (21 Dec 2020)
 - Fix support for Scriban package bundled with sources
 
