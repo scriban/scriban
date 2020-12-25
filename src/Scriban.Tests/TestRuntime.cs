@@ -41,6 +41,7 @@ namespace Scriban.Tests
             Assert.AreEqual("double", context.GetTypeName((double)1.5));
             Assert.AreEqual("decimal", context.GetTypeName((decimal)1.5m));
             Assert.AreEqual("bigint", context.GetTypeName(new BigInteger(1)));
+            Assert.AreEqual("enum", context.GetTypeName(ScriptLang.Default));
             Assert.AreEqual("string", context.GetTypeName("test"));
             Assert.AreEqual("range", context.GetTypeName(new ScriptRange()));
             Assert.AreEqual("array", context.GetTypeName(new ScriptArray()));
