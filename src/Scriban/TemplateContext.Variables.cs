@@ -141,12 +141,12 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Sets the target expression with the specified value.
+        /// Sets the loop variable with the specified value.
         /// </summary>
         /// <param name="variable">The loop variable to set.</param>
         /// <param name="value">The value.</param>
         /// <exception cref="System.ArgumentNullException">If target is null</exception>
-        public void SetLoopVariable(ScriptVariable variable, object value)
+        public virtual void SetLoopVariable(ScriptVariable variable, object value)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
             if (_currentLocalContext.Loops.Count == 0)
