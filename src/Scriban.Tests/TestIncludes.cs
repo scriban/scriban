@@ -13,16 +13,29 @@ namespace Scriban.Tests
 {
     public class TestIncludes
     {
-        public class Loader : ITemplateLoader
+        [Test]
+        public void TestLoopWithInclude()
+        {
+            var context = new TemplateContext()
+            {
+                TemplateLoader = new LoaderLoopWithInclude()
+            };
+            var template = Template.Parse(@"{{ for my_loop_variable in 1..3; include 'test'; end; }}");
+
+            var result = template.Render(context);
+            TextAssert.AreEqual("123", result);
+        }
+
+        public class LoaderLoopWithInclude : ITemplateLoader
         {
             public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
-                return templateName == "test" ? "test" : "nested";
+                return templateName;
             }
 
             public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
-                return templatePath == "test" ? "AA\r\nBB\r\nCC\r\n  {{include 'nested'}}{{include 'nested'}}" : "DD\r\nEE\r\nFF\r\n";
+                return "{{ my_loop_variable }}";
             }
 
             public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
@@ -31,13 +44,12 @@ namespace Scriban.Tests
             }
         }
 
-
         [Test]
         public void TestIndentedNestedIncludes()
         {
             var context = new TemplateContext
             {
-                TemplateLoader = new Loader(),
+                TemplateLoader = new LoaderIndentedNestedIncludes(),
                 IndentWithInclude = true
             };
 
@@ -70,7 +82,23 @@ namespace Scriban.Tests
 
         }
 
+        public class LoaderIndentedNestedIncludes : ITemplateLoader
+        {
+            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            {
+                return templateName == "test" ? "test" : "nested";
+            }
 
+            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                return templatePath == "test" ? "AA\r\nBB\r\nCC\r\n  {{include 'nested'}}{{include 'nested'}}" : "DD\r\nEE\r\nFF\r\n";
+            }
+
+            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                throw new System.NotImplementedException();
+            }
+        }
 
 
         [Test]

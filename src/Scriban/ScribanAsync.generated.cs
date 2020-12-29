@@ -626,10 +626,11 @@ namespace Scriban.Functions
             var previousIndent = context.CurrentIndent;
             context.CurrentIndent = indent;
             context.PushOutput();
-            context.PushLocal();
+            var previousArguments = context.GetValue(ScriptVariable.Arguments);
             try
             {
-                context.SetValue(ScriptVariable.Arguments, arguments, true);
+                context.SetValue(ScriptVariable.Arguments, arguments, true, true);
+
                 if (indent != null)
                 {
                     // We reset before and after the fact that we have a new line
@@ -643,10 +644,17 @@ namespace Scriban.Functions
             }
             finally
             {
-                context.PopLocal();
                 context.PopOutput();
                 context.CurrentIndent = previousIndent;
                 context.ExitRecursive(callerContext);
+
+                // Remove the arguments
+                context.DeleteValue(ScriptVariable.Arguments);
+                if (previousArguments != null)
+                {
+                    // Restore them if necessary
+                    context.SetValue(ScriptVariable.Arguments, previousArguments, true);
+                }
             }
 
             return result;

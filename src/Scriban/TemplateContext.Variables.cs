@@ -124,6 +124,44 @@ namespace Scriban
             }
         }
 
+
+        /// <summary>
+        /// Sets the variable with the specified value.
+        /// </summary>
+        /// <param name="variable">The variable.</param>
+        /// <param name="value">The value.</param>
+        /// <param name="asReadOnly">if set to <c>true</c> the variable set will be read-only.</param>
+        /// <param name="force">force setting the value even if it is already readonly</param>
+        /// <exception cref="System.ArgumentNullException">If variable is null</exception>
+        /// <exception cref="ScriptRuntimeException">If an existing variable is already read-only</exception>
+        public void SetValue(ScriptVariable variable, object value, bool asReadOnly, bool force)
+        {
+            if (variable == null) throw new ArgumentNullException(nameof(variable));
+            var finalStore = GetStoreForWrite(variable);
+
+            // Try to set the variable
+            if (force)
+            {
+                finalStore.Remove(variable.Name);
+                finalStore.TrySetValue(this, variable.Span, variable.Name, value, asReadOnly);
+            }
+            else if (!finalStore.TrySetValue(this, variable.Span, variable.Name, value, asReadOnly))
+            {
+                throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
+            }
+        }
+
+        /// <summary>
+        /// Deletes the variable from the current store.
+        /// </summary>
+        /// <param name="variable">The variable.</param>
+        public void DeleteValue(ScriptVariable variable)
+        {
+            if (variable == null) throw new ArgumentNullException(nameof(variable));
+            var finalStore = GetStoreForWrite(variable);
+            finalStore.Remove(variable.Name);
+        }
+
         /// <summary>
         /// Sets the variable to read only.
         /// </summary>
