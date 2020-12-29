@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.3.0 (24 Dec 2020)
+- Fix regression with include that was not propagating caller variables
+- Make TemplateContext.SetLoopVariable virtual.
+
 ## 3.2.2 (24 Dec 2020)
 - Add `#nullable disable` to allow embedding Scriban as sources in a project that has enabled nullable
 
