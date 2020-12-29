@@ -599,7 +599,7 @@ using System.Numerics;
         private static string GenerateScribanVisitors(List<ScriptNodeViewModel> nodes)
         {
             nodes.Sort((left, right) => string.Compare(left.Name, right.Name, StringComparison.Ordinal));
-            var sourceFilePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "ScribanVisitors.generated.sbn.txt"));
+            var sourceFilePath = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "ScribanVisitors.generated.sbncs"));
             var text = File.ReadAllText(sourceFilePath);
             var template = Template.Parse(text, sourceFilePath);
 
