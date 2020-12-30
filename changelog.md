@@ -1,6 +1,6 @@
 # Changelog
 
-## 3.3.0 (24 Dec 2020)
+## 3.3.0 (29 Dec 2020)
 - Fix regression with include that was not propagating caller variables
 - Make TemplateContext.SetLoopVariable virtual.
 
