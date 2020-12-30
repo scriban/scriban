@@ -105,29 +105,14 @@ namespace Scriban.Syntax
             }
         }
 
+        [Obsolete("This method has no effect and will be deleted in a future version")]
         public ScriptExpression GetScientificExpression(TemplateContext context)
         {
-            // If we are in scientific mode and we have a function which takes arguments, and is not an explicit call (e.g sin(x) rather then sin x)
-            // Then we need to rewrite the call to a proper expression.
-            if (context.UseScientific && !ExplicitCall && Arguments.Count > 0)
-            {
-                var rewrite = new ScientificFunctionCallRewriter(1 + Arguments.Count);
-                rewrite.Add(Target);
-                rewrite.AddRange(Arguments);
-                return rewrite.Rewrite(context, this);
-            }
             return this;
         }
 
         public override object Evaluate(TemplateContext context)
         {
-            // Double check if the expression can be rewritten
-            var newExpression = GetScientificExpression(context);
-            if (newExpression != this)
-            {
-                return context.Evaluate(newExpression);
-            }
-
             // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
             var targetFunction = context.Evaluate(Target, true);
 

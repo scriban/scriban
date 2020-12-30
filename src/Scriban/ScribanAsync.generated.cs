@@ -10,6 +10,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -720,148 +721,81 @@ namespace Scriban.Syntax
         /// </summary>
     internal partial class ScientificFunctionCallRewriter
     {
-        private async ValueTask<ScriptExpression> RewriteAsync(TemplateContext context, int precedence, bool expectingExpression = false)
+        private static async ValueTask FlattenBinaryExpressionsAsync(TemplateContext context, ScriptExpression expression, List<BinaryExpressionOrOperator> expressions)
         {
-            ScriptExpression leftValue = null;
-            while (_index < Count)
+            while (true)
             {
-                ScriptExpression nextExpression = this[_index];
-                // leftValue (*/^%)
-                if (nextExpression is ScriptArgumentBinary bin)
+                if (!(expression is ScriptBinaryExpression binaryExpression))
                 {
-                    if (leftValue == null)
-                    {
-                        throw new ScriptRuntimeException(nextExpression.Span, precedence == 0 ? "This operator cannot be after a function call." : "This operator cannot be applied here.");
-                    }
-
-                    // Power has higher precedence than */%
-                    var newPrecedence = Parser.GetDefaultBinaryOperatorPrecedence(bin.Operator);
-                    if (newPrecedence <= precedence) // if new operator has lower precedence than previous, exit
-                    {
-                        break;
-                    }
-
-                    var rightArgExpr = this[_index + 1];
-                    if (rightArgExpr is IScriptVariablePath)
-                    {
-                        var rightArg = await context.EvaluateAsync(rightArgExpr, true).ConfigureAwait(false);
-                        if (rightArg is IScriptCustomFunction function)
-                        {
-                            var maxArg = function.RequiredParameterCount;
-                            if (maxArg >= 1 && PrecedenceTopLevel != precedence)
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    // Skip the binary argument
-                    _index++;
-                    var rightValue = await RewriteAsync(context, newPrecedence).ConfigureAwait(false);
-                    leftValue = new ScriptBinaryExpression()
-                    { Left = leftValue, Operator = bin.Operator, OperatorToken = bin.Operator.ToToken(), Right = rightValue, };
-                    continue;
+                    expressions.Add(new BinaryExpressionOrOperator(expression, await IsFunctionCallWithAtLeastOneArgumentAsync(context, expression).ConfigureAwait(false)));
+                    return;
                 }
 
-                object result = null;
-                if (!expectingExpression && nextExpression is IScriptVariablePath)
-                {
-                    var restoreStrictVariables = context.StrictVariables;
-                    // Don't fail on trying to lookup for a variable
-                    context.StrictVariables = false;
-                    try
-                    {
-                        result = await context.EvaluateAsync(nextExpression, true).ConfigureAwait(false);
-                    }
-                    catch (ScriptRuntimeException) when (context.IgnoreExceptionsWhileRewritingScientific)
-                    {
-                        // ignore any exceptions during trial evaluating as we could try to evaluate
-                        // variable that aren't setup
-                    }
-                    finally
-                    {
-                        context.StrictVariables = restoreStrictVariables;
-                    }
-
-                    // If one argument is a function, the remaining arguments
-                    if (result is IScriptCustomFunction function)
-                    {
-                        var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
-                        if (maxArg > 0)
-                        {
-                            if (PrecedenceTopLevel == precedence || leftValue == null)
-                            {
-                                var functionCall = new ScriptFunctionCall { Target = (ScriptExpression)nextExpression.Clone(), ExplicitCall = true };
-                                _index++;
-                                var isExpectingExpression = function.IsParameterType<ScriptExpression>(0);
-                                if (_index == Count)
-                                {
-                                    throw new ScriptRuntimeException(nextExpression.Span, "The function is expecting a parameter");
-                                }
-
-                                var arg = await RewriteAsync(context, 0, isExpectingExpression).ConfigureAwait(false);
-                                functionCall.Arguments.Add(arg);
-                                if (leftValue == null)
-                                {
-                                    leftValue = functionCall;
-                                }
-                                else
-                                {
-                                    leftValue = new ScriptBinaryExpression()
-                                    { Left = leftValue, Operator = ScriptBinaryOperator.Multiply, OperatorToken = ScriptToken.Star(), Right = functionCall, };
-                                }
-
-                                continue;
-                            }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                {
-                    if (leftValue == null)
-                    {
-                        leftValue = (ScriptExpression)nextExpression.Clone();
-                        _index++;
-                    }
-                    else
-                    {
-                        int precedenceOfImplicitMultiply = result is IScriptCustomImplicitMultiplyPrecedence ? PrecedenceOfMultiply : PrecedenceOfMultiply + 1;
-                        if (precedenceOfImplicitMultiply <= precedence)
-                        {
-                            break;
-                        }
-
-                        // Implicit  the binary argument
-                        var rightValue = await RewriteAsync(context, precedenceOfImplicitMultiply).ConfigureAwait(false);
-                        if (rightValue is ScriptLiteral)
-                        {
-                            throw new ScriptRuntimeException(rightValue.Span, "Cannot use a literal on the right side of an implicit multiplication.");
-                        }
-
-                        leftValue = new ScriptBinaryExpression()
-                        { Left = leftValue, Operator = ScriptBinaryOperator.Multiply, OperatorToken = ScriptToken.Star(), Right = rightValue, };
-                    }
-                }
+                var left = (ScriptExpression)binaryExpression.Left.Clone();
+                var right = (ScriptExpression)binaryExpression.Right.Clone();
+                var token = (ScriptToken)binaryExpression.OperatorToken?.Clone();
+                await FlattenBinaryExpressionsAsync(context, left, expressions).ConfigureAwait(false);
+                expressions.Add(new BinaryExpressionOrOperator(binaryExpression.Operator, token));
+                // Iterate on right (equivalent to tail recursive call)
+                expression = right;
             }
-
-            return leftValue;
         }
 
-        public async ValueTask<ScriptExpression> RewriteAsync(TemplateContext context, ScriptNode parent)
+        private static async ValueTask<bool> IsFunctionCallWithAtLeastOneArgumentAsync(TemplateContext context, ScriptExpression expression)
         {
-            _parent = parent;
-            _index = 0;
-            var node = await RewriteAsync(context, PrecedenceTopLevel).ConfigureAwait(false);
-            if (node.Parent == null)
+            var restoreStrictVariables = context.StrictVariables;
+            // Don't fail on trying to lookup for a variable
+            context.StrictVariables = false;
+            object result = null;
+            try
             {
-                node.Parent = _parent?.Parent;
+                result = await context.EvaluateAsync(expression, true).ConfigureAwait(false);
+            }
+            catch (ScriptRuntimeException) when (context.IgnoreExceptionsWhileRewritingScientific)
+            {
+                // ignore any exceptions during trial evaluating as we could try to evaluate
+                // variable that aren't setup
+            }
+            finally
+            {
+                context.StrictVariables = restoreStrictVariables;
             }
 
-            return node;
+            // If one argument is a function, the remaining arguments
+            if (result is IScriptCustomFunction function)
+            {
+                var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
+                // We match all functions with at least one argument.
+                // If we are expecting more than one argument, let the error happen later with the function call.
+                return maxArg > 0;
+            }
+
+            return false;
+        }
+
+        public static async ValueTask<ScriptExpression> RewriteAsync(TemplateContext context, ScriptBinaryExpression binaryExpression)
+        {
+            Debug.Assert(ImplicitFunctionCallPrecedence < Parser.PrecedenceOfMultiply);
+            if (!HasImplicitBinaryExpression(binaryExpression))
+            {
+                return binaryExpression;
+            }
+
+            // TODO: use a TLS cache
+            var iterator = new BinaryExpressionIterator();
+            // a b c / d + e
+            // stack will contain:
+            // [0] a
+            // [1] implicit *
+            // [2] b
+            // [3] implicit *
+            // [4] c
+            // [5] /
+            // [6] d
+            // [7] +
+            // [8] e
+            await FlattenBinaryExpressionsAsync(context, binaryExpression, iterator).ConfigureAwait(false);
+            return ParseBinaryExpressionTree(iterator, 0);
         }
     }
 
@@ -909,6 +843,17 @@ namespace Scriban.Syntax
     {
         public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
+            // If we are in scientific mode and we have a function which takes arguments, and is not an explicit call (e.g sin(x) rather then sin * x)
+            // Then we need to rewrite the call to a proper expression.
+            if (context.UseScientific)
+            {
+                var newExpression = await ScientificFunctionCallRewriter.RewriteAsync(context, this).ConfigureAwait(false);
+                if (!ReferenceEquals(newExpression, this))
+                {
+                    return await context.EvaluateAsync(newExpression).ConfigureAwait(false);
+                }
+            }
+
             var leftValue = await context.EvaluateAsync(Left).ConfigureAwait(false);
             switch (Operator)
             {
@@ -1439,13 +1384,6 @@ namespace Scriban.Syntax
 
         public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
-            // Double check if the expression can be rewritten
-            var newExpression = await GetScientificExpressionAsync(context).ConfigureAwait(false);
-            if (newExpression != this)
-            {
-                return await context.EvaluateAsync(newExpression).ConfigureAwait(false);
-            }
-
             // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
             var targetFunction = await context.EvaluateAsync(Target, true).ConfigureAwait(false);
             // Throw an exception if the target function is null
@@ -1460,21 +1398,6 @@ namespace Scriban.Syntax
             }
 
             return await CallAsync(context, this, targetFunction, context.AllowPipeArguments, Arguments).ConfigureAwait(false);
-        }
-
-        public async ValueTask<ScriptExpression> GetScientificExpressionAsync(TemplateContext context)
-        {
-            // If we are in scientific mode and we have a function which takes arguments, and is not an explicit call (e.g sin(x) rather then sin x)
-            // Then we need to rewrite the call to a proper expression.
-            if (context.UseScientific && !ExplicitCall && Arguments.Count > 0)
-            {
-                var rewrite = new ScientificFunctionCallRewriter(1 + Arguments.Count);
-                rewrite.Add(Target);
-                rewrite.AddRange(Arguments);
-                return await rewrite.RewriteAsync(context, this).ConfigureAwait(false);
-            }
-
-            return this;
         }
 
         private static async ValueTask<ulong> ProcessArgumentsAsync(TemplateContext context, ScriptNode callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)

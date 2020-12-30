@@ -55,6 +55,17 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
+            // If we are in scientific mode and we have a function which takes arguments, and is not an explicit call (e.g sin(x) rather then sin * x)
+            // Then we need to rewrite the call to a proper expression.
+            if (context.UseScientific)
+            {
+                var newExpression = ScientificFunctionCallRewriter.Rewrite(context, this);
+                if (!ReferenceEquals(newExpression, this))
+                {
+                    return context.Evaluate(newExpression);
+                }
+            }
+
             var leftValue = context.Evaluate(Left);
 
             switch (Operator)
@@ -99,7 +110,7 @@ namespace Scriban.Syntax
             }
             else
             {
-                printer.Write(Operator.ToText());
+                printer.ExpectSpace();
             }
 
             if (Operator == ScriptBinaryOperator.Substract)
