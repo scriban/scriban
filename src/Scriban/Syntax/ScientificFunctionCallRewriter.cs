@@ -5,6 +5,8 @@
 #nullable disable
 
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 using Scriban.Parsing;
 using Scriban.Runtime;
 
@@ -14,187 +16,261 @@ namespace Scriban.Syntax
     /// Used to rewrite a function call expression at evaluation time based
     /// on the arguments required by a function. Used by scientific mode scripting.
     /// </summary>
-    internal partial class ScientificFunctionCallRewriter : List<ScriptExpression>
+    internal partial class ScientificFunctionCallRewriter
     {
-        private static readonly int PrecedenceOfMultiply = Parser.GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator.Multiply);
-        private static readonly int PrecedenceTopLevel = PrecedenceOfMultiply - 1;
-        private int _index;
-        private ScriptNode _parent;
+        /// <summary>
+        /// The precedence of an implicit function call is between Add (+) and Multiply (*) operator
+        /// </summary>
+        private const int ImplicitFunctionCallPrecedence = Parser.PrecedenceOfAdd + 1;
 
-        public ScientificFunctionCallRewriter()
+        public static ScriptExpression Rewrite(TemplateContext context, ScriptBinaryExpression binaryExpression)
         {
-        }
+            Debug.Assert(ImplicitFunctionCallPrecedence < Parser.PrecedenceOfMultiply);
 
-        public ScientificFunctionCallRewriter(int capacity) : base(capacity)
-        {
-        }
-
-        public ScriptExpression Rewrite(TemplateContext context, ScriptNode parent)
-        {
-            _parent = parent;
-            _index = 0;
-            var node = Rewrite(context, PrecedenceTopLevel);
-            if (node.Parent == null)
+            if (!HasImplicitBinaryExpression(binaryExpression))
             {
-                node.Parent = _parent?.Parent;
+                return binaryExpression;
             }
-            return node;
+
+            // TODO: use a TLS cache
+            var iterator = new BinaryExpressionIterator();
+            // a b c / d + e
+            // stack will contain:
+            // [0] a
+            // [1] implicit *
+            // [2] b
+            // [3] implicit *
+            // [4] c
+            // [5] /
+            // [6] d
+            // [7] +
+            // [8] e
+            FlattenBinaryExpressions(context, binaryExpression, iterator);
+
+            return ParseBinaryExpressionTree(iterator, 0);
         }
 
-        private ScriptExpression Rewrite(TemplateContext context, int precedence, bool expectingExpression = false)
+        private static bool HasImplicitBinaryExpression(ScriptExpression expression)
         {
-            ScriptExpression leftValue = null;
-
-            while (_index < Count)
+            if (expression is ScriptBinaryExpression binaryExpression)
             {
-                ScriptExpression nextExpression = this[_index];
-
-                // leftValue (*/^%)
-                if (nextExpression is ScriptArgumentBinary bin)
+                if (binaryExpression.OperatorToken == null && binaryExpression.Operator == ScriptBinaryOperator.Multiply)
                 {
-                    if (leftValue == null)
+                    return true;
+                }
+
+                return HasImplicitBinaryExpression(binaryExpression.Left) || HasImplicitBinaryExpression(binaryExpression.Right);
+            }
+            return false;
+        }
+        
+        private static void FlattenBinaryExpressions(TemplateContext context, ScriptExpression expression, List<BinaryExpressionOrOperator> expressions)
+        {
+            while (true)
+            {
+                if (!(expression is ScriptBinaryExpression binaryExpression))
+                {
+                    expressions.Add(new BinaryExpressionOrOperator(expression, IsFunctionCallWithAtLeastOneArgument(context, expression)));
+                    return;
+                }
+
+                var left = (ScriptExpression)binaryExpression.Left.Clone();
+                var right = (ScriptExpression)binaryExpression.Right.Clone();
+                var token = (ScriptToken)binaryExpression.OperatorToken?.Clone();
+                FlattenBinaryExpressions(context, left, expressions);
+
+                expressions.Add(new BinaryExpressionOrOperator(binaryExpression.Operator, token));
+
+                // Iterate on right (equivalent to tail recursive call)
+                expression = right;
+            }
+        }
+        
+        private static ScriptExpression ParseBinaryExpressionTree(BinaryExpressionIterator it, int precedence)
+        {
+            ScriptExpression leftOperand = null;
+            while (it.HasCurrent)
+            {
+                var op = it.Current;
+                var nextOperand = op.Expression;
+
+                if (nextOperand == null)
+                {
+                    var newPrecedence = Parser.GetDefaultBinaryOperatorPrecedence(op.Operator);
+
+                    // Probe if the next argument is a function call
+                    if (it.HasNext && it.PeekNext().IsFunctionCallWithOneArgument)
                     {
-                        throw new ScriptRuntimeException(nextExpression.Span, precedence == 0 ? "This operator cannot be after a function call." : "This operator cannot be applied here.");
+                        // If it is a function call, use its precedence
+                        newPrecedence = newPrecedence < ImplicitFunctionCallPrecedence ? newPrecedence : ImplicitFunctionCallPrecedence;
                     }
-
-                    // Power has higher precedence than */%
-                    var newPrecedence = Parser.GetDefaultBinaryOperatorPrecedence(bin.Operator);
-
-                    if (newPrecedence <= precedence) // if new operator has lower precedence than previous, exit
+                    
+                    if (newPrecedence <= precedence)
                     {
                         break;
                     }
 
-                    var rightArgExpr = this[_index + 1];
-                    if (rightArgExpr is IScriptVariablePath)
+                    it.MoveNext(); // Skip operator
+
+                    var binary = new ScriptBinaryExpression
                     {
-                        var rightArg = context.Evaluate(rightArgExpr, true);
-                        if (rightArg is IScriptCustomFunction function)
+                        Left = leftOperand,
+                        Operator = op.Operator,
+                        OperatorToken = op.OperatorToken ?? ScriptToken.Star(), // Force an explicit token so that we don't enter an infinite loop when formatting an expression
+                        Span =
                         {
-                            var maxArg = function.RequiredParameterCount;
-                            if (maxArg >= 1 && PrecedenceTopLevel != precedence)
-                            {
-                                break;
-                            }
-                        }
-                    }
-
-                    // Skip the binary argument
-                    _index++;
-                    var rightValue = Rewrite(context, newPrecedence);
-
-                    leftValue = new ScriptBinaryExpression()
-                    {
-                        Left = leftValue,
-                        Operator = bin.Operator,
-                        OperatorToken = bin.Operator.ToToken(),
-                        Right = rightValue,
+                            Start = leftOperand.Span.Start
+                        },
                     };
-                    continue;
+
+                    binary.Right = ParseBinaryExpressionTree(it, newPrecedence);
+                    binary.Span.End = binary.Right.Span.End;
+                    leftOperand = binary;
                 }
-
-                object result = null;
-                if (!expectingExpression && nextExpression is IScriptVariablePath)
+                else
                 {
-                    var restoreStrictVariables = context.StrictVariables;
-
-                    // Don't fail on trying to lookup for a variable
-                    context.StrictVariables = false;
-                    try
+                    if (op.IsFunctionCallWithOneArgument)
                     {
-                        result = context.Evaluate(nextExpression, true);
-                    }
-                    catch (ScriptRuntimeException) when (context.IgnoreExceptionsWhileRewritingScientific)
-                    {
-                        // ignore any exceptions during trial evaluating as we could try to evaluate
-                        // variable that aren't setup
-                    }
-                    finally
-                    {
-                        context.StrictVariables = restoreStrictVariables;
-                    }
-
-                    // If one argument is a function, the remaining arguments
-                    if (result is IScriptCustomFunction function)
-                    {
-                        var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
-
-                        if (maxArg > 0)
+                        var functionCall = new ScriptFunctionCall
                         {
-                            if (PrecedenceTopLevel == precedence || leftValue == null)
+                            Target = nextOperand,
+                            ExplicitCall = true,
+                            Span =
                             {
-                                var functionCall = new ScriptFunctionCall { Target = (ScriptExpression)nextExpression.Clone(), ExplicitCall = true };
-                                _index++;
-
-                                var isExpectingExpression = function.IsParameterType<ScriptExpression>(0);
-
-                                if (_index == Count)
-                                {
-                                    throw new ScriptRuntimeException(nextExpression.Span, "The function is expecting a parameter");
-                                }
-
-                                var arg = Rewrite(context, 0, isExpectingExpression);
-
-                                functionCall.Arguments.Add(arg);
-
-                                if (leftValue == null)
-                                {
-                                    leftValue = functionCall;
-                                }
-                                else
-                                {
-                                    leftValue = new ScriptBinaryExpression()
-                                    {
-                                        Left = leftValue,
-                                        Operator = ScriptBinaryOperator.Multiply,
-                                        OperatorToken = ScriptToken.Star(),
-                                        Right = functionCall,
-                                    };
-                                }
-                                continue;
+                                Start = nextOperand.Span.Start
                             }
-                            else
-                            {
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                {
-                    if (leftValue == null)
-                    {
-                        leftValue = (ScriptExpression)nextExpression.Clone();
-                        _index++;
-                    }
-                    else
-                    {
-                        int precedenceOfImplicitMultiply = result is IScriptCustomImplicitMultiplyPrecedence ? PrecedenceOfMultiply : PrecedenceOfMultiply + 1;
-
-                        if (precedenceOfImplicitMultiply <= precedence)
-                        {
-                            break;
-                        }
-                        // Implicit  the binary argument
-                        var rightValue = Rewrite(context, precedenceOfImplicitMultiply);
-
-                        if (rightValue is ScriptLiteral)
-                        {
-                            throw new ScriptRuntimeException(rightValue.Span, "Cannot use a literal on the right side of an implicit multiplication.");
-                        }
-
-                        leftValue = new ScriptBinaryExpression()
-                        {
-                            Left = leftValue,
-                            Operator = ScriptBinaryOperator.Multiply,
-                            OperatorToken = ScriptToken.Star(),
-                            Right = rightValue,
                         };
+
+                        // Skip the function and move to the operator
+                        if (!it.MoveNext())
+                        {
+                            throw new ScriptRuntimeException(nextOperand.Span, $"The function is expecting at least one argument");
+                        }
+
+                        // We are expecting only an implicit multiply. Anything else is invalid.
+                        if (it.Current.Expression == null && (it.Current.Operator != ScriptBinaryOperator.Multiply || it.Current.OperatorToken != null))
+                        {
+                            throw new ScriptRuntimeException(nextOperand.Span, $"The function expecting one argument cannot be followed by the operator {it.Current.OperatorToken?.ToString() ?? it.Current.Operator.ToText()}");
+                        }
+
+                        // Skip the operator
+                        if (!it.MoveNext())
+                        {
+                            throw new ScriptRuntimeException(nextOperand.Span, $"The function is expecting at least one argument");
+                        }
+
+                        var argExpression = ParseBinaryExpressionTree(it, ImplicitFunctionCallPrecedence);
+                        functionCall.Arguments.Add(argExpression);
+                        functionCall.Span.End = argExpression.Span.End;
+
+                        leftOperand = functionCall;
+                        continue;
                     }
+
+                    leftOperand = nextOperand;
+                    it.MoveNext();
                 }
             }
 
-            return leftValue;
+            return leftOperand;
+        }
+
+        private static bool IsFunctionCallWithAtLeastOneArgument(TemplateContext context, ScriptExpression expression)
+        {
+            var restoreStrictVariables = context.StrictVariables;
+
+            // Don't fail on trying to lookup for a variable
+            context.StrictVariables = false;
+            object result = null;
+            try
+            {
+                result = context.Evaluate(expression, true);
+            }
+            catch (ScriptRuntimeException) when (context.IgnoreExceptionsWhileRewritingScientific)
+            {
+                // ignore any exceptions during trial evaluating as we could try to evaluate
+                // variable that aren't setup
+            }
+            finally
+            {
+                context.StrictVariables = restoreStrictVariables;
+            }
+
+            // If one argument is a function, the remaining arguments
+            if (result is IScriptCustomFunction function)
+            {
+                var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
+                // We match all functions with at least one argument.
+                // If we are expecting more than one argument, let the error happen later with the function call.
+                return maxArg > 0;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Stores a list of binary expressions to rewrite.
+        /// </summary>
+        [DebuggerDisplay("Count = {Count}, Current = {Index} : {Current}")]
+        private class BinaryExpressionIterator : List<BinaryExpressionOrOperator>
+        {
+            public int Index { get; set; }
+
+            public BinaryExpressionOrOperator Current => Index < Count ? this[Index] : default;
+
+            public bool HasCurrent => Index < Count;
+
+            public bool HasNext => Index + 1 < Count;
+
+            public bool MoveNext()
+            {
+                Index++;
+                return HasCurrent;
+            }
+
+            public BinaryExpressionOrOperator PeekNext()
+            {
+                return this[Index + 1];
+            }
+
+        }
+
+        /// <summary>
+        /// A binary expression part to rewrite. It is either:
+        /// - An "terminal" expression
+        /// - An operator (`*`, `+`...)
+        /// </summary>
+        [DebuggerDisplay("{" + nameof(ToDebuggerDisplay) + "(),nq}")]
+        private readonly struct BinaryExpressionOrOperator
+        {
+            public BinaryExpressionOrOperator(ScriptExpression expression, bool isFunctionCallWithOneArgument)
+            {
+                Expression = expression;
+                Operator = 0;
+                OperatorToken = null;
+                IsFunctionCallWithOneArgument = isFunctionCallWithOneArgument;
+            }
+
+            public BinaryExpressionOrOperator(ScriptBinaryOperator @operator, ScriptToken operatorToken)
+            {
+                Expression = null;
+                Operator = @operator;
+                OperatorToken = operatorToken;
+                IsFunctionCallWithOneArgument = false;
+            }
+
+            public readonly ScriptExpression Expression;
+
+            public readonly ScriptBinaryOperator Operator;
+
+            public readonly ScriptToken OperatorToken;
+
+            public readonly bool IsFunctionCallWithOneArgument;
+
+            private string ToDebuggerDisplay()
+            {
+                return Expression != null ? Expression.ToString() : OperatorToken?.ToString() ?? $"`{Operator.ToText()}`";
+            }
         }
     }
 }

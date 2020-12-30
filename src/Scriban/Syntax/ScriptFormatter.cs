@@ -117,6 +117,15 @@ namespace Scriban.Syntax
 
         public override ScriptNode Visit(ScriptBinaryExpression node)
         {
+            if (_isScientific)
+            {
+                var newNode = ScientificFunctionCallRewriter.Rewrite(_context, node);
+                if (newNode != node)
+                {
+                    return Visit((ScriptNode)newNode);
+                }
+            }
+
             var binaryExpression = (ScriptBinaryExpression) base.Visit((ScriptBinaryExpression)node);
 
             // We don't surround range with spaces
@@ -175,15 +184,6 @@ namespace Scriban.Syntax
 
         public override ScriptNode Visit(ScriptFunctionCall node)
         {
-            if (_isScientific && !node.ExplicitCall)
-            {
-                var newNode = node.GetScientificExpression(_context);
-                if (newNode != node)
-                {
-                    return Visit((ScriptNode) newNode);
-                }
-            }
-
             var functionCall = (ScriptFunctionCall)base.Visit(node);
 
             // Make sure that we have always a parenthesis for function calls

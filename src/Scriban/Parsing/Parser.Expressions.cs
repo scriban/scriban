@@ -25,7 +25,8 @@ namespace Scriban.Parsing
 
         public int ExpressionLevel => _expressionLevel;
 
-        private static readonly int PrecedenceOfMultiply = GetDefaultBinaryOperatorPrecedence(ScriptBinaryOperator.Multiply);
+        internal const int PrecedenceOfAdd = 100;
+        internal const int PrecedenceOfMultiply = 110;
 
         private bool TryBinaryOperator(out ScriptBinaryOperator binaryOperator, out int precedence)
         {
@@ -348,78 +349,12 @@ namespace Scriban.Parsing
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
                         if (newPrecedence <= precedence)
                         {
-                            if (_isScientific)
+                            if (enteringPrecedence == 0)
                             {
-                                if (functionCall != null)
-                                {
-                                    // if we were in the middle of a function call and the new operator
-                                    // doesn't have the same associativity (/*%^) we will transform
-                                    // the pending call into a left operand and let the current operator (eg +)
-                                    // to work on it. Example: cos 2x + 1
-                                    // functionCall: cos 2
-                                    // leftOperand: x
-                                    // binaryOperatorType: Add
-                                    if (newPrecedence < precedence)
-                                    {
-                                        functionCall.AddArgument(leftOperand);
-                                        leftOperand = functionCall;
-                                        functionCall = null;
-                                    }
-                                    precedence = newPrecedence;
-                                }
-                                else
-                                {
-                                    if (enteringPrecedence == 0)
-                                    {
-                                        precedence = enteringPrecedence;
-                                        continue;
-                                    }
-                                    break;
-                                }
+                                precedence = enteringPrecedence;
+                                continue;
                             }
-                            else
-                            {
-                                if (enteringPrecedence == 0)
-                                {
-                                    precedence = enteringPrecedence;
-                                    continue;
-                                }
-                                break;
-                            }
-                        }
-
-                        // In scientific mode, with a pending function call, we can't detect how
-                        // operations of similar precedence (*/%^) are going to behave until
-                        // we resolve the functions (to detect if they take a parameter or not)
-                        // In fact case, we need create a ScriptArgumentBinary for the operator
-                        // and push it as an argument of the function call:
-                        // expression to parse: cos 2x * cos 2x
-                        // function call will be => cos(2, x, *, cos, 2, x)
-                        // which is incorrect so we will rewrite it to cos(2 * x) * cos(2 * x)
-                        if (_isScientific && (functionCall != null || newPrecedence >= PrecedenceOfMultiply))
-                        {
-                            // Store %*/^ in a pseudo function call
-                            if (functionCall == null)
-                            {
-                                functionCall = Open<ScriptFunctionCall>();
-                                functionCall.Target = leftOperand;
-                                functionCall.Span = leftOperand.Span;
-                            }
-                            else
-                            {
-                                functionCall.AddArgument(leftOperand);
-                            }
-
-                            var binaryArgument = Open<ScriptArgumentBinary>();
-                            binaryArgument.Operator = binaryOperatorType;
-                            binaryArgument.OperatorToken = ParseToken(Current.Type);
-                            Close(binaryArgument);
-
-                            functionCall.AddArgument(binaryArgument);
-
-                            precedence = newPrecedence;
-
-                            goto parseExpression;
+                            break;
                         }
 
                         // We fake entering an expression here to limit the number of expression
@@ -587,10 +522,27 @@ namespace Scriban.Parsing
 
                                 if (newPrecedence <= precedence)
                                 {
+                                    if (enteringPrecedence == 0)
+                                    {
+                                        precedence = enteringPrecedence;
+                                        continue;
+                                    }
+
                                     break;
                                 }
 
-                                precedence = newPrecedence;
+                                // We fake entering an expression here to limit the number of expression
+                                EnterExpression();
+                                var binaryExpression = Open<ScriptBinaryExpression>();
+                                binaryExpression.Span = leftOperand.Span;
+                                binaryExpression.Left = leftOperand;
+                                // OperatorToken = null // implicit multiply operator
+                                binaryExpression.Operator = ScriptBinaryOperator.Multiply;
+                                binaryExpression.Right = ExpectAndParseExpression(binaryExpression, functionCall ?? parentExpression, newPrecedence,
+                                    $"Expecting an <expression> to the right of the operator instead of `{GetAsText(Current)}`");
+                                leftOperand = Close(binaryExpression);
+
+                                continue;
                             }
 
                             var pendingFunctionCall = functionCall;
@@ -1207,14 +1159,14 @@ namespace Scriban.Parsing
 
                 case ScriptBinaryOperator.Add:
                 case ScriptBinaryOperator.Substract:
-                    return 100;
+                    return PrecedenceOfAdd;
                 case ScriptBinaryOperator.Multiply:
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
                 case ScriptBinaryOperator.ShiftLeft:
                 case ScriptBinaryOperator.ShiftRight:
-                    return 110;
+                    return PrecedenceOfMultiply;
                 case ScriptBinaryOperator.Power:
                     return 120;
                 case ScriptBinaryOperator.RangeInclude:

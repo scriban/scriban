@@ -84,6 +84,20 @@ namespace Scriban.Tests
         }
 
         [TestCase("1-2", -1, "1 - 2")]
+        [TestCase("abs 5", 5, "abs(5)")]
+        [TestCase("2 abs 5", 10, "2 * abs(5)")]
+        [TestCase("abs 5^2", 25, "abs(5 ^ 2)")]
+        [TestCase("abs 5^2*3", 75, "abs((5 ^ 2) * 3)")]
+        [TestCase("abs 5^2*3 - 1", 74, "abs((5 ^ 2) * 3) - 1")]
+        [TestCase("abs 5^2*3 + 1", 76, "abs((5 ^ 2) * 3) + 1")]
+        [TestCase("2 abs 5^2*3 + 1", 151, "2 * abs((5 ^ 2) * 3) + 1")]
+        [TestCase("abs 4 abs 3 abs 2", 24, "abs(4) * abs(3) * abs(2)")]
+        [TestCase("abs 4 * abs 3 * abs 2", 24, "abs(4) * abs(3) * abs(2)")]
+        [TestCase("abs 4 + abs 3 * abs 2", 10, "abs(4) + abs(3) * abs(2)")]
+        [TestCase("abs 4 * abs 3 + abs 2", 14, "abs(4) * abs(3) + abs(2)")]
+        [TestCase("1 + abs 4 * abs 3", 13, "1 + abs(4) * abs(3)")]
+        [TestCase("abs 4 * abs 3 + 1", 13, "abs(4) * abs(3) + 1")]
+        [TestCase("abs 10 / abs 2 + 1", 6, "(abs(10) / abs(2)) + 1")]
         [TestCase("-5|>math.abs", 5, "-5 |> math.abs")]
         [TestCase("-5*2|>math.abs", 10, "-5 * 2 |> math.abs")]
         [TestCase("2x", 2, "2 * x")]
@@ -92,6 +106,7 @@ namespace Scriban.Tests
         [TestCase("10x * y + 3y + 1 + 2", 29, "10 * x * y + 3 * y + 1 + 2")]
         [TestCase("2 y math.abs z * 5 // 2 + 1 + z", 91, "2 * y * math.abs((z * 5) // 2) + 1 + z")] // 2 * 2 * abs(-10) * 5 / 2 + 1 + (-10) = 91
         [TestCase("2 y math.abs z * 5 // 2 + 1 * 3 + z + 17", 110, "2 * y * math.abs((z * 5) // 2) + 1 * 3 + z + 17")] // 2 * 2 * abs(-10) * 5 / 2 + 3 + (-10) + 17 = 110
+        [TestCase("2^11 - 2^5 + 2^2", 2020, "(2 ^ 11) - (2 ^ 5) + (2 ^ 2)")]
         [TestCase("2^3^4", 4096, "(2 ^ 3) ^ 4")]
         [TestCase("3y^2 + 3x", 15, "3 * (y ^ 2) + 3 * x")]
         [TestCase("1 + 2 + 3x + 4y + z", 4, "1 + 2 + 3 * x + 4 * y + z")]
@@ -173,6 +188,7 @@ namespace Scriban.Tests
             context.CurrentGlobal.SetValue("y", 2, false);
             context.CurrentGlobal.SetValue("z", -10, false);
             context.CurrentGlobal.SetValue("ff", 4, false);
+            context.CurrentGlobal.SetValue("abs", ((ScriptObject)context.BuiltinObject["math"])["abs"], false);
 
             var result = template.Evaluate(context);
             Assert.AreEqual(value, result);
@@ -182,7 +198,7 @@ namespace Scriban.Tests
 
             var reformat = template.Page.Format(new ScriptFormatterOptions(context, ScriptLang.Scientific, ScriptFormatterFlags.ExplicitClean));
             var exprAsString = reformat.ToString();
-            Assert.AreEqual(exprAsString, scriptReformat, "Format string don't match");
+            Assert.AreEqual(scriptReformat, exprAsString, "Format string don't match");
         }
 
         [Test]

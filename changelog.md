@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.1 (30 Dec 2020)
+- Fix operator precedence issue with implicit function calls in scientific language mode.
+
 ## 3.3.0 (24 Dec 2020)
 - Fix regression with include that was not propagating caller variables
 - Make TemplateContext.SetLoopVariable virtual.
