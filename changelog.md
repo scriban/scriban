@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.3.2 (30 Dec 2020)
+- Fix implicit function calls which take ScriptExpression as an argument.
+
 ## 3.3.1 (30 Dec 2020)
 - Fix operator precedence issue with implicit function calls in scientific language mode.
 

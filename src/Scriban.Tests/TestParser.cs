@@ -77,6 +77,43 @@ namespace Scriban.Tests
         }
 
         [Test]
+
+        public void TestScientificWithFunctionExpression()
+        {
+            var context = new TemplateContext();
+            context.BuiltinObject.SetValue("clear", DelegateCustomFunction.CreateFunc<ScriptExpression, string>(FunctionClear), false);
+            context.BuiltinObject.SetValue("history", DelegateCustomFunction.Create<object>(FunctionHistory), false);
+
+            var template = Template.Parse("clear history", lexerOptions: new LexerOptions()
+            {
+                Lang = ScriptLang.Scientific,
+                Mode = ScriptMode.ScriptOnly
+            });
+
+            var test = template.Render(context);
+            Assert.AreEqual("history", test);
+
+            template = Template.Parse("clear history * 5", lexerOptions: new LexerOptions()
+            {
+                Lang = ScriptLang.Scientific,
+                Mode = ScriptMode.ScriptOnly
+            });
+            test = template.Render(context);
+            Assert.AreEqual("history*5", test);
+        }
+        
+        private static string FunctionClear(ScriptExpression what = null)
+        {
+            return what?.ToString();
+        }
+        
+        private static void FunctionHistory(object line = null)
+        {
+        }
+
+        
+
+        [Test]
         public void TestLiquidInvalidStringEscape()
         {
             var template = Template.ParseLiquid(@"{%""\u""");

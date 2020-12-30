@@ -47,7 +47,7 @@ namespace Scriban.Syntax
             // [8] e
             FlattenBinaryExpressions(context, binaryExpression, iterator);
 
-            return ParseBinaryExpressionTree(iterator, 0);
+            return ParseBinaryExpressionTree(iterator, 0, false);
         }
 
         private static bool HasImplicitBinaryExpression(ScriptExpression expression)
@@ -70,7 +70,7 @@ namespace Scriban.Syntax
             {
                 if (!(expression is ScriptBinaryExpression binaryExpression))
                 {
-                    expressions.Add(new BinaryExpressionOrOperator(expression, IsFunctionCallWithAtLeastOneArgument(context, expression)));
+                    expressions.Add(new BinaryExpressionOrOperator(expression, GetFunctionCallKind(context, expression)));
                     return;
                 }
 
@@ -86,7 +86,7 @@ namespace Scriban.Syntax
             }
         }
         
-        private static ScriptExpression ParseBinaryExpressionTree(BinaryExpressionIterator it, int precedence)
+        private static ScriptExpression ParseBinaryExpressionTree(BinaryExpressionIterator it, int precedence, bool isExpectingExpression)
         {
             ScriptExpression leftOperand = null;
             while (it.HasCurrent)
@@ -99,7 +99,7 @@ namespace Scriban.Syntax
                     var newPrecedence = Parser.GetDefaultBinaryOperatorPrecedence(op.Operator);
 
                     // Probe if the next argument is a function call
-                    if (it.HasNext && it.PeekNext().IsFunctionCallWithOneArgument)
+                    if (!isExpectingExpression && it.HasNext && it.PeekNext().CallKind != FunctionCallKind.None)
                     {
                         // If it is a function call, use its precedence
                         newPrecedence = newPrecedence < ImplicitFunctionCallPrecedence ? newPrecedence : ImplicitFunctionCallPrecedence;
@@ -123,13 +123,13 @@ namespace Scriban.Syntax
                         },
                     };
 
-                    binary.Right = ParseBinaryExpressionTree(it, newPrecedence);
+                    binary.Right = ParseBinaryExpressionTree(it, newPrecedence, isExpectingExpression);
                     binary.Span.End = binary.Right.Span.End;
                     leftOperand = binary;
                 }
                 else
                 {
-                    if (op.IsFunctionCallWithOneArgument)
+                    if (!isExpectingExpression && op.CallKind != FunctionCallKind.None)
                     {
                         var functionCall = new ScriptFunctionCall
                         {
@@ -159,7 +159,7 @@ namespace Scriban.Syntax
                             throw new ScriptRuntimeException(nextOperand.Span, $"The function is expecting at least one argument");
                         }
 
-                        var argExpression = ParseBinaryExpressionTree(it, ImplicitFunctionCallPrecedence);
+                        var argExpression = ParseBinaryExpressionTree(it, ImplicitFunctionCallPrecedence, op.CallKind == FunctionCallKind.Expression);
                         functionCall.Arguments.Add(argExpression);
                         functionCall.Span.End = argExpression.Span.End;
 
@@ -175,7 +175,7 @@ namespace Scriban.Syntax
             return leftOperand;
         }
 
-        private static bool IsFunctionCallWithAtLeastOneArgument(TemplateContext context, ScriptExpression expression)
+        private static FunctionCallKind GetFunctionCallKind(TemplateContext context, ScriptExpression expression)
         {
             var restoreStrictVariables = context.StrictVariables;
 
@@ -202,10 +202,14 @@ namespace Scriban.Syntax
                 var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
                 // We match all functions with at least one argument.
                 // If we are expecting more than one argument, let the error happen later with the function call.
-                return maxArg > 0;
+                if (maxArg > 0)
+                {
+                    var isExpectingExpression = function.IsParameterType<ScriptExpression>(0);
+                    return isExpectingExpression ? FunctionCallKind.Expression : FunctionCallKind.Regular;
+                }
             }
 
-            return false;
+            return FunctionCallKind.None;
         }
 
         /// <summary>
@@ -243,12 +247,12 @@ namespace Scriban.Syntax
         [DebuggerDisplay("{" + nameof(ToDebuggerDisplay) + "(),nq}")]
         private readonly struct BinaryExpressionOrOperator
         {
-            public BinaryExpressionOrOperator(ScriptExpression expression, bool isFunctionCallWithOneArgument)
+            public BinaryExpressionOrOperator(ScriptExpression expression, FunctionCallKind kind)
             {
                 Expression = expression;
                 Operator = 0;
                 OperatorToken = null;
-                IsFunctionCallWithOneArgument = isFunctionCallWithOneArgument;
+                CallKind = kind;
             }
 
             public BinaryExpressionOrOperator(ScriptBinaryOperator @operator, ScriptToken operatorToken)
@@ -256,7 +260,7 @@ namespace Scriban.Syntax
                 Expression = null;
                 Operator = @operator;
                 OperatorToken = operatorToken;
-                IsFunctionCallWithOneArgument = false;
+                CallKind = FunctionCallKind.None;
             }
 
             public readonly ScriptExpression Expression;
@@ -265,12 +269,19 @@ namespace Scriban.Syntax
 
             public readonly ScriptToken OperatorToken;
 
-            public readonly bool IsFunctionCallWithOneArgument;
+            public readonly FunctionCallKind CallKind;
 
             private string ToDebuggerDisplay()
             {
-                return Expression != null ? Expression.ToString() : OperatorToken?.ToString() ?? $"`{Operator.ToText()}`";
+                return Expression != null ? Expression.ToString() : OperatorToken?.ToString() ?? $"`{Operator.ToText()}` - CallKind = {CallKind}";
             }
+        }
+
+        private enum FunctionCallKind
+        {
+            None,
+            Regular,
+            Expression
         }
     }
 }

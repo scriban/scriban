@@ -727,7 +727,7 @@ namespace Scriban.Syntax
             {
                 if (!(expression is ScriptBinaryExpression binaryExpression))
                 {
-                    expressions.Add(new BinaryExpressionOrOperator(expression, await IsFunctionCallWithAtLeastOneArgumentAsync(context, expression).ConfigureAwait(false)));
+                    expressions.Add(new BinaryExpressionOrOperator(expression, await GetFunctionCallKindAsync(context, expression).ConfigureAwait(false)));
                     return;
                 }
 
@@ -741,7 +741,7 @@ namespace Scriban.Syntax
             }
         }
 
-        private static async ValueTask<bool> IsFunctionCallWithAtLeastOneArgumentAsync(TemplateContext context, ScriptExpression expression)
+        private static async ValueTask<FunctionCallKind> GetFunctionCallKindAsync(TemplateContext context, ScriptExpression expression)
         {
             var restoreStrictVariables = context.StrictVariables;
             // Don't fail on trying to lookup for a variable
@@ -767,10 +767,14 @@ namespace Scriban.Syntax
                 var maxArg = function.RequiredParameterCount != 0 ? function.RequiredParameterCount : function.ParameterCount > 0 ? 1 : 0;
                 // We match all functions with at least one argument.
                 // If we are expecting more than one argument, let the error happen later with the function call.
-                return maxArg > 0;
+                if (maxArg > 0)
+                {
+                    var isExpectingExpression = function.IsParameterType<ScriptExpression>(0);
+                    return isExpectingExpression ? FunctionCallKind.Expression : FunctionCallKind.Regular;
+                }
             }
 
-            return false;
+            return FunctionCallKind.None;
         }
 
         public static async ValueTask<ScriptExpression> RewriteAsync(TemplateContext context, ScriptBinaryExpression binaryExpression)
@@ -795,7 +799,7 @@ namespace Scriban.Syntax
             // [7] +
             // [8] e
             await FlattenBinaryExpressionsAsync(context, binaryExpression, iterator).ConfigureAwait(false);
-            return ParseBinaryExpressionTree(iterator, 0);
+            return ParseBinaryExpressionTree(iterator, 0, false);
         }
     }
 
