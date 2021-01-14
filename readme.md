@@ -160,7 +160,8 @@ This software is released under the [BSD-Clause 2 license](https://opensource.or
 * [Fluid](https://github.com/sebastienros/fluid/) .NET liquid templating engine
 * [Nustache](https://github.com/jdiamond/Nustache): Logic-less templates for .NET
 * [Handlebars.Net](https://github.com/rexm/Handlebars.Net): .NET port of handlebars.js
-
+* [Textrude](https://github.com/NeilMacMullen/Textrude): UI and CLI tools to turn CSV/JSON/YAML models into code using Scriban templates
+  
 ## Online Demo
 
 * (https://scribanonline.azurewebsites.net/): ASP.NET Core Sample.
