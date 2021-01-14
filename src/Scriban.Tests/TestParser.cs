@@ -322,6 +322,19 @@ raw
             AssertRoundtrip(text);
         }
 
+        /// <summary>
+        /// Regression test for issue-295
+        /// </summary>
+        [Test]
+        public void ShouldNotThrowWithTrailingColon()
+        {
+            //this particular input string is required to tickle the original bug
+            var text = @"{{T ""m"" b:";
+            var context = new TemplateContext();
+            context.PushGlobal(new ScriptObject());
+            Assert.DoesNotThrow(() => Template.Parse(text));
+        }
+
         [Test]
         public void TestDateNow()
         {
