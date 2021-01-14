@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.3 (14 Jan 2021)
+- Fix NullReferenceException with malformed input (#293)
+- Fix include operation failing when strictVariables set (#300)
+- Fix internals of Scriban.DelegateCodeGen
+
 ## 3.3.2 (30 Dec 2020)
 - Fix implicit function calls which take ScriptExpression as an argument.
 
