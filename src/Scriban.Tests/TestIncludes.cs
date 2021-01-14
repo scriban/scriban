@@ -13,6 +13,34 @@ namespace Scriban.Tests
 {
     public class TestIncludes
     {
+
+        internal class DummyLoader : ITemplateLoader
+        {
+            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+                => templateName;
+
+            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+                => "some text";
+
+            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+                => ValueTask.FromResult(Load(context, callerSpan, templatePath));
+        }
+
+        [Test]
+        public void IncludeShouldNotThrowWhenStrictVariablesSet()
+        {
+            var text = @"{{include 'testfile'}}";
+            var context = new TemplateContext { TemplateLoader = new DummyLoader() };
+            //NOTE - setting strict variables causes the test to fail
+            context.StrictVariables = true;
+            var compiledTemplate = Template.Parse(text);
+            context.PushGlobal(new ScriptObject());
+
+            var result = compiledTemplate.Render(context);
+            Assert.AreEqual(result,"some text");
+        }
+
+
         [Test]
         public void TestLoopWithInclude()
         {
