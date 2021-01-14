@@ -16,14 +16,14 @@ namespace Scriban.DelegateCodeGen
     {
         private readonly AssemblyDefinition _assemblyDefinition;
 
-        private readonly Dictionary<string, MethodDefinition> _methods;
+        private readonly Dictionary<string, List<MethodDefinition>> _methods;
 
         private TextWriter _writer;
 
         public Program()
         {
             _assemblyDefinition = AssemblyDefinition.ReadAssembly(@"..\..\..\..\Scriban\bin\Debug\netstandard2.0\Scriban.dll");
-            _methods = new Dictionary<string, MethodDefinition>();
+            _methods = new Dictionary<string, List<MethodDefinition>>();
         }
 
         public void Run()
@@ -68,11 +68,12 @@ namespace Scriban.Runtime
 ");
             foreach (var keyPair in _methods.OrderBy(s => s.Key))
             {
-                var method = keyPair.Value;
-                var name = "Function" + GetSignature(method, SignatureMode.Name);
-
-                var methodName = method.Name;
-                _writer.WriteLine($@"            BuiltinFunctionDelegates.Add(typeof({method.DeclaringType.FullName}).GetMethod(nameof({method.DeclaringType.FullName}.{methodName}), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new {name}(method));");
+                foreach (var method in keyPair.Value)
+                {
+                    var name = "Function" + GetSignature(method, SignatureMode.Name);
+                    var methodName = method.Name;
+                    _writer.WriteLine($@"            BuiltinFunctionDelegates.Add(typeof({method.DeclaringType.FullName}).GetMethod(nameof({method.DeclaringType.FullName}.{methodName}), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new {name}(method));");
+                }
             }
             _writer.Write(@"
         }
@@ -80,7 +81,7 @@ namespace Scriban.Runtime
 
             foreach (var keyPair in _methods.OrderBy(s => s.Key))
             {
-                DumpMethod(keyPair.Key, keyPair.Value);
+                DumpMethod(keyPair.Key, keyPair.Value.First());
             }
 
             _writer.WriteLine(@"
@@ -197,8 +198,9 @@ namespace Scriban.Runtime
                 var signature = GetSignature(method, SignatureMode.Verbose);
                 if (!_methods.ContainsKey(signature))
                 {
-                    _methods.Add(signature, method);
+                    _methods.Add(signature, new List<MethodDefinition>());
                 }
+                _methods[signature].Add(method);
             }
         }
 

@@ -246,6 +246,10 @@ namespace Scriban.Runtime
             {
                 if (method != null && otherMethod != null && method.ReturnType == otherMethod.ReturnType && method.IsStatic == otherMethod.IsStatic)
                 {
+                    if (method.DeclaringType.FullName != otherMethod.DeclaringType.FullName)
+                        return false;
+                    if (method.Name != otherMethod.Name)
+                        return false;
                     var parameters = method.GetParameters();
                     var otherParameters = otherMethod.GetParameters();
                     var length = parameters.Length;
