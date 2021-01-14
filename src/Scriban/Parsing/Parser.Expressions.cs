@@ -484,7 +484,11 @@ namespace Scriban.Parsing
                                     parameter.ColonToken = ScriptToken.Colon();
                                     ExpectAndParseTokenTo(parameter.ColonToken, TokenType.Colon);
                                     parameter.Value = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.BasicExpression);
-                                    parameter.Span.End = parameter.Value.Span.End;
+                                    // Certain patterns of malformed input (see issue-295) can cause the expression parser to return null
+                                    // at this point.  In that case, leave the span empty
+                                    if (parameter.Value != null)
+                                        parameter.Span.End = parameter.Value.Span.End;
+                                   
                                 }
 
                                 if (functionCall != null)
