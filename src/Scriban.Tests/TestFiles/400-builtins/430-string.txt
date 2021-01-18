@@ -64,6 +64,11 @@ hmac_sha256: {{ "test" | string.hmac_sha256 "secret" }}
 "tota" | string.contains "ta": {{ "tota" | string.contains "ta" }}
 null | string.contains "ta": {{ null | string.contains "ta" }}
 "tota" | string.contains null: {{ "tota" | string.contains null }}
+"" | string.empty : {{ "" | string.empty }}
+"tota" | string.empty : {{ "tota" | string.empty }}
+"" | string.whitespace : {{ "" | string.whitespace }}
+"  " | string.whitespace : {{ "  " | string.whitespace }}
+"tota" | string.whitespace : {{ "tota" | string.whitespace }}
 "tota" | string.starts_with "ta": {{ "tota" | string.starts_with "ta" }}
 "tota" | string.starts_with "to": {{ "tota" | string.starts_with "to" }}
 null | string.starts_with "ta": {{ null | string.starts_with "ta" }}
