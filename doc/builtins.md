@@ -2311,6 +2311,66 @@ true
 ```
 
 [:top:](#builtins)
+### `string.empty`
+
+```
+string.empty <text>
+```
+
+#### Description
+
+ Returns a boolean indicating whether the input string is an empty string.
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+ if `text` is an empty string
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "" | string.empty }}
+```
+> **output**
+```html
+true
+```
+
+[:top:](#builtins)
+### `string.whitespace`
+
+```
+string.whitespace <text>
+```
+
+#### Description
+
+ Returns a boolean indicating whether the input string is empty or contains only whitespace characters.
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+ if `text` is empty string or contains only whitespace characters
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "  " | string.whitespace }}
+```
+> **output**
+```html
+true
+```
+
+[:top:](#builtins)
 ### `string.downcase`
 
 ```

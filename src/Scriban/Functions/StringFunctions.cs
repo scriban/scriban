@@ -228,6 +228,42 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Returns a boolean indicating whether the input string is an empty string.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns><c>true</c> if `text` is an empty string</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "" | string.empty }}
+        /// ```
+        /// ```html
+        /// true
+        /// ```
+        /// </remarks>
+        public static bool Empty(string text)
+        {
+            return string.IsNullOrEmpty(text);
+        }
+
+        /// <summary>
+        /// Returns a boolean indicating whether the input string is empty or contains only whitespace characters.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns><c>true</c> if `text` is empty string or contains only whitespace characters</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "" | string.whitespace }}
+        /// ```
+        /// ```html
+        /// true
+        /// ```
+        /// </remarks>
+        public static bool Whitespace(string text)
+        {
+            return string.IsNullOrWhiteSpace(text);
+        }
+
+        /// <summary>
         /// Converts the string to lower case.
         /// </summary>
         /// <param name="text">The input string</param>

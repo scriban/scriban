@@ -64,6 +64,11 @@ hmac_sha256: 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
 "tota" | string.contains "ta": true
 null | string.contains "ta": false
 "tota" | string.contains null: false
+"" | string.empty : true
+"tota" | string.empty : false
+"" | string.whitespace : true
+"  " | string.whitespace : true
+"tota" | string.whitespace : false
 "tota" | string.starts_with "ta": false
 "tota" | string.starts_with "to": true
 null | string.starts_with "ta": false

@@ -39,6 +39,7 @@ List of all the builtin <string> functions:
  capitalizewords
  contains
  downcase
+ empty
  ends_with
  escape
  handleize
@@ -71,6 +72,7 @@ List of all the builtin <string> functions:
  truncate
  truncatewords
  upcase
+ whitespace
 
 List of all the builtin <date> functions:
  add_days
