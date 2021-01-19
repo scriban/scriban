@@ -74,6 +74,9 @@ namespace Scriban.Benchmarks
             });
         }
 
+        // FluidParser instance is meant to be global
+        private static readonly Fluid.FluidParser FluidParser = new Fluid.FluidParser();
+
         protected const string TextTemplateDotLiquid = @"
 <ul id='products'>
   {% for product in products %}
@@ -167,12 +170,16 @@ namespace Scriban.Benchmarks
         }
 
         [Benchmark(Description = "Fluid - Parser")]
-        public Fluid.FluidTemplate TestFluid()
+        public Fluid.IFluidTemplate TestFluid()
         {
-            Fluid.FluidTemplate template;
-            if (!Fluid.FluidTemplate.TryParse(TextTemplateDotLiquid, out template))
+            static void ThrowError()
             {
                 throw new InvalidOperationException("Fluid template not parsed");
+            }
+
+            if (!Fluid.FluidParserExtensions.TryParse(FluidParser, TextTemplateDotLiquid, out var template))
+            {
+                ThrowError();
             }
             return template;
         }
@@ -191,7 +198,7 @@ namespace Scriban.Benchmarks
         private readonly Nustache.Core.Template _nustacheTemplate;
         private readonly Func<object, string> _handlebarsTemplate;
         private readonly Cottle.Documents.SimpleDocument _cottleTemplate;
-        private readonly Fluid.FluidTemplate _fluidTemplate;
+        private readonly Fluid.IFluidTemplate _fluidTemplate;
 
         private const string Lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
 
@@ -326,7 +333,7 @@ namespace Scriban.Benchmarks
         public string TestFluid()
         {
             var templateContext = new Fluid.TemplateContext();
-            templateContext.SetValue("products", _dotLiquidProducts);
+            templateContext.SetValue("products", _products);
             // DotLiquid forces to rework the original List<Product> into a custom object, which is not the same behavior as Scriban (easier somewhat because no late binding)
             return Fluid.FluidTemplateExtensions.Render(_fluidTemplate, templateContext);
         }
