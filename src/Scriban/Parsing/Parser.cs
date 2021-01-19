@@ -165,7 +165,7 @@ namespace Scriban.Parsing
                 }
             }
 
-            return !HasErrors ? page : null;
+            return page;
         }
 
         private void PushTokenToTrivia()
