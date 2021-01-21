@@ -12,6 +12,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using DotLiquid.Tests.Tags;
+using Newtonsoft.Json.Linq;
 using NUnit.Framework;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -606,6 +607,17 @@ end
         {
             AssertTemplate(output, input);
         }
+
+
+        [Test]
+        public void EnsureThatItemWithIndexePropertyDoesNotThrow()
+        {
+            var obj = JObject.Parse("{\"name\":\"steve\"}");
+          
+            var template = Template.Parse("Hi {{name}}");
+            Assert.DoesNotThrow(()=>template.Render(obj));
+        }
+
 
         private static void TestFile(string inputName)
         {
