@@ -344,6 +344,25 @@ namespace Scriban.Functions
             ReleaseBuilder(builder);
             return result;
         }
+        
+        /// <summary>
+        /// Return a string literal enclosed with double quotes of the input string.
+        /// </summary>
+        /// <param name="text">The string to return a literal from.</param>
+        /// <returns>The literal of a string.</returns>
+        /// <remarks>
+        /// If the input string has non printable characters or they need contain a double quote, they will be escaped.
+        /// ```scriban-html
+        /// {{ 'Hello\n"World"' | string.literal }}
+        /// ```
+        /// ```html
+        /// "Hello\n\"World\""
+        /// ```
+        /// </remarks>
+        public static string Literal(string text)
+        {
+            return text == null ? null : $"\"{Escape(text)}\"";
+        }
 
         /// <summary>
         /// Removes any whitespace characters on the **left** side of the input string.

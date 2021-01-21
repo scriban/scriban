@@ -61,3 +61,4 @@ null | array.concat null:
 null | array.compact:
 products | array.sort "title" | array.map "title": ["Apple", "Banana", "Computer", "Mobile Phone", "Orange", "Sofa", "Table"]
 5 | array.sort: [5]
+[1, 2, 3] | array.join ", " @(do; ret $0 + "x"; end): "1", "2", "3"

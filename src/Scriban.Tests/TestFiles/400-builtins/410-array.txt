@@ -77,3 +77,4 @@ null | array.concat null:{{ null | array.concat null }}
 null | array.compact:{{ null | array.compact }}
 products | array.sort "title" | array.map "title": {{ products | array.sort "title" | array.map "title" | array.uniq }}
 5 | array.sort: {{ 5 | array.sort }}
+[1, 2, 3] | array.join ", " @(do; ret $0 + "x"; end): {{ [1, 2, 3] | array.join ", " @string.literal }}

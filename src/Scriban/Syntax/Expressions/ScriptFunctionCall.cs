@@ -314,6 +314,112 @@ namespace Scriban.Syntax
             return result;
         }
 
+        /// <summary>
+        /// Call a custom function with the already resolved parameters.
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="callerContext"></param>
+        /// <param name="function"></param>
+        /// <param name="arguments"></param>
+        /// <returns></returns>
+        public static object Call(TemplateContext context, ScriptNode callerContext, IScriptCustomFunction function, ScriptArray arguments)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
+            if (function == null) throw new ArgumentNullException(nameof(function));
+            if (arguments == null) throw new ArgumentNullException(nameof(arguments));
+
+            var parameterCount = function.ParameterCount;
+
+            var argumentValues = new ScriptArray();
+            var span = callerContext.Span;
+            // Fast path if we don't have complicated parameters to handle (direct call, same amount of arguments than expected parameters)
+            if (function.VarParamKind == ScriptVarParamKind.None && parameterCount == arguments.Count)
+            {
+                for (int i = 0; i < parameterCount; i++)
+                {
+                    var arg = arguments[i];
+                    var paramType = function.GetParameterInfo(i).ParameterType;
+                    var value = context.ToObject(span, arg, paramType);
+                    argumentValues.Add(value);
+                }
+            }
+            else
+            {
+                // Otherwise we need to do a slow path
+                ulong argMask = 0;
+                foreach (var arg in arguments)
+                {
+                    int index = argumentValues.Count;
+                    {
+                        var paramType = function.GetParameterInfo(index).ParameterType;
+                        var value = context.ToObject(span, arg, paramType);
+                        SetArgumentValue(index, value, function, ref argMask, argumentValues, parameterCount);
+                    }
+                }
+
+                FillRemainingOptionalArguments(ref argMask, argumentValues.Count, parameterCount - 1, function, argumentValues);
+
+                int requiredParameterCount = function.RequiredParameterCount;
+
+                // Check the required number of arguments
+                var requiredMask = (1U << requiredParameterCount) - 1;
+                argMask = argMask & requiredMask;
+
+                // Create a span after the caller for missing arguments
+                var afterCallerSpan = callerContext.Span;
+                afterCallerSpan.Start = afterCallerSpan.End.NextColumn();
+                afterCallerSpan.End = afterCallerSpan.End.NextColumn();
+
+                if (argMask != requiredMask)
+                {
+                    int argCount = 0;
+                    while (argMask != 0)
+                    {
+                        if ((argMask & 1) != 0) argCount++;
+                        argMask = argMask >> 1;
+                    }
+
+                    throw new ScriptRuntimeException(afterCallerSpan, $"Invalid number of arguments `{argCount}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
+                }
+            }
+
+            object result = null;
+            context.EnterFunction(callerContext);
+            try
+            {
+                result = function.Invoke(context, callerContext, argumentValues, null);
+            }
+            catch (ArgumentException ex)
+            {
+                // Slow path to detect the argument index from the name if we can
+                var index = GetParameterIndexByName(function, ex.ParamName);
+                if (index >= 0 && arguments != null && index < arguments.Count)
+                {
+                    throw new ScriptRuntimeException(span, ex.Message);
+                }
+
+                throw;
+            }
+            catch (ScriptArgumentException ex)
+            {
+                var index = ex.ArgumentIndex;
+                if (index >= 0 && arguments != null && index < arguments.Count)
+                {
+                    throw new ScriptRuntimeException(span, ex.Message);
+                }
+
+                throw;
+            }
+            finally
+            {
+                context.ExitFunction(callerContext);
+            }
+
+            return result;
+        }
+
+
         private static ulong ProcessArguments(TemplateContext context, ScriptNode callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
         {
             ulong argMask = 0;

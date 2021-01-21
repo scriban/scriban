@@ -23,6 +23,7 @@ Array functions available through the object 'array' in scriban.
 - [`array.compact`](#arraycompact)
 - [`array.concat`](#arrayconcat)
 - [`array.cycle`](#arraycycle)
+- [`array.each`](#arrayeach)
 - [`array.first`](#arrayfirst)
 - [`array.insert_at`](#arrayinsert_at)
 - [`array.join`](#arrayjoin)
@@ -200,6 +201,37 @@ one
 If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
 
 [:top:](#builtins)
+### `array.each`
+
+```
+array.each <list> <function>
+```
+
+#### Description
+
+Applies the specified function to each element of the input.
+
+#### Arguments
+
+- `list`: An input list
+- `function`: The function to apply to each item in the list
+
+#### Returns
+
+Returns a list with each item being transformed by the function.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ [" a", " 5", "6 "] | array.each @string.strip }}
+```
+> **output**
+```html
+["a", "5", "6"]
+```
+
+[:top:](#builtins)
 ### `array.first`
 
 ```
@@ -265,7 +297,7 @@ A new list with the element inserted.
 ### `array.join`
 
 ```
-array.join <list> <delimiter>
+array.join <list> <delimiter> <function>?
 ```
 
 #### Description
@@ -276,6 +308,7 @@ Joins the element of a list separated by a delimiter string and return the conca
 
 - `list`: The input list
 - `delimiter`: The delimiter string to use to separate elements in the output string
+- `function`: An optional function that will receive the string representation of the item to join and can transform the text before joining.
 
 #### Returns
 
@@ -2123,9 +2156,12 @@ String functions available through the builtin object 'string`.
 - [`string.capitalize`](#stringcapitalize)
 - [`string.capitalizewords`](#stringcapitalizewords)
 - [`string.contains`](#stringcontains)
+- [`string.empty`](#stringempty)
+- [`string.whitespace`](#stringwhitespace)
 - [`string.downcase`](#stringdowncase)
 - [`string.ends_with`](#stringends_with)
 - [`string.handleize`](#stringhandleize)
+- [`string.literal`](#stringliteral)
 - [`string.lstrip`](#stringlstrip)
 - [`string.pluralize`](#stringpluralize)
 - [`string.prepend`](#stringprepend)
@@ -2319,7 +2355,7 @@ string.empty <text>
 
 #### Description
 
- Returns a boolean indicating whether the input string is an empty string.
+Returns a boolean indicating whether the input string is an empty string.
 
 #### Arguments
 
@@ -2349,7 +2385,7 @@ string.whitespace <text>
 
 #### Description
 
- Returns a boolean indicating whether the input string is empty or contains only whitespace characters.
+Returns a boolean indicating whether the input string is empty or contains only whitespace characters.
 
 #### Arguments
 
@@ -2363,7 +2399,7 @@ string.whitespace <text>
 
 > **input**
 ```scriban-html
-{{ "  " | string.whitespace }}
+{{ "" | string.whitespace }}
 ```
 > **output**
 ```html
@@ -2459,6 +2495,37 @@ A url handle
 > **output**
 ```html
 100-m-ms
+```
+
+[:top:](#builtins)
+### `string.literal`
+
+```
+string.literal <text>
+```
+
+#### Description
+
+Return a string literal enclosed with double quotes of the input string.
+
+#### Arguments
+
+- `text`: The string to return a literal from.
+
+#### Returns
+
+The literal of a string.
+
+#### Examples
+
+If the input string has non printable characters or they need contain a double quote, they will be escaped.
+> **input**
+```scriban-html
+{{ 'Hello\n"World"' | string.literal }}
+```
+> **output**
+```html
+"Hello\n\"World\""
 ```
 
 [:top:](#builtins)

@@ -5,6 +5,7 @@ List of all the builtin <array> functions:
  concat
  contains
  cycle
+ each
  first
  insert_at
  join
@@ -45,6 +46,7 @@ List of all the builtin <string> functions:
  handleize
  hmac_sha1
  hmac_sha256
+ literal
  lstrip
  md5
  pad_left

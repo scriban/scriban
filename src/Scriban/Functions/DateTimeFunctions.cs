@@ -127,7 +127,7 @@ namespace Scriban.Functions
         /// {{ date.now.year }}
         /// ```
         /// ```html
-        /// 2020
+        /// 2021
         /// ```
         /// </remarks>
         public static DateTime Now() => DateTime.Now;

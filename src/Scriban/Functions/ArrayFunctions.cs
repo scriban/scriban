@@ -164,6 +164,49 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Applies the specified function to each element of the input.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">An input list</param>
+        /// <param name="function">The function to apply to each item in the list</param>
+        /// <returns>Returns a list with each item being transformed by the function.</returns>
+        /// <returns></returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [" a", " 5", "6 "] | array.each @string.strip }}
+        /// ```
+        /// ```html
+        /// ["a", "5", "6"]
+        /// ```
+        /// </remarks>
+        public static ScriptRange Each(TemplateContext context, SourceSpan span, IEnumerable list, object function)
+        {
+            if (list == null) return null;
+            if (function == null) return new ScriptRange(list);
+            
+            var scriptingFunction = function as IScriptCustomFunction;
+            if (scriptingFunction == null)
+            {
+                throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
+            }
+
+            return new ScriptRange(EachInternal(context, span, list, scriptingFunction, scriptingFunction.GetParameterInfo(0).ParameterType));
+        }
+
+        private static IEnumerable EachInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
+        {
+            var arg = new ScriptArray(1);
+            foreach (var item in list)
+            {
+                var itemToTransform = context.ToObject(span, item, destType);
+                arg[0] = itemToTransform;
+                var itemTransformed = ScriptFunctionCall.Call(context, context.CurrentNode, function, arg);
+                yield return itemTransformed;
+            }
+        }
+
+        /// <summary>
         /// Returns the first element of the input `list`.
         /// </summary>
         /// <param name="list">The input list</param>
@@ -239,6 +282,7 @@ namespace Scriban.Functions
         /// <param name="span">The source span</param>
         /// <param name="list">The input list</param>
         /// <param name="delimiter">The delimiter string to use to separate elements in the output string</param>
+        /// <param name="function">An optional function that will receive the string representation of the item to join and can transform the text before joining.</param>
         /// <returns>A new list with the element inserted.</returns>
         /// <remarks>
         /// ```scriban-html
@@ -248,22 +292,38 @@ namespace Scriban.Functions
         /// 1|2|3
         /// ```
         /// </remarks>
-        public static string Join(TemplateContext context, SourceSpan span, IEnumerable list, string delimiter)
+        public static string Join(TemplateContext context, SourceSpan span, IEnumerable list, string delimiter, object function = null)
         {
             if (list == null)
             {
                 return string.Empty;
             }
 
+            var scriptingFunction = function as IScriptCustomFunction;
+            if (function != null && scriptingFunction == null)
+            {
+                throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
+            }
+
             var text = new StringBuilder();
             bool afterFirst = false;
+            var arg = new ScriptArray(1);
             foreach (var obj in list)
             {
                 if (afterFirst)
                 {
                     text.Append(delimiter);
                 }
-                text.Append(context.ObjectToString(obj));
+
+                var item = context.ObjectToString(obj);
+                if (scriptingFunction != null)
+                {
+                    arg[0] = item;
+                    var result = ScriptFunctionCall.Call(context, context.CurrentNode, scriptingFunction, arg);
+                    item = context.ObjectToString(result);
+                }
+
+                text.Append(item);
                 afterFirst = true;
             }
             return text.ToString();
