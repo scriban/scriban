@@ -284,7 +284,8 @@ namespace Scriban.Runtime
                             }
                             else
                             {
-                                scriptObj.SetValue(newPropertyName, property.GetValue(obj), false);
+                                if (property.GetIndexParameters().Length==0)
+                                    scriptObj.SetValue(newPropertyName, property.GetValue(obj), false);
                             }
                         }
                     }
