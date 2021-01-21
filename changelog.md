@@ -1,5 +1,12 @@
 # Changelog
 
+## 3.4.0 (21 Jan 2021)
+- Add string.whitespace and string.empty (#307)
+- `Template.Parse` is not returning a partial AST even in case of a parser error (#308)
+- Add string.literal function
+- Add array.each function
+- Change array.join to take an optional formatting function
+
 ## 3.3.3 (14 Jan 2021)
 - Fix NullReferenceException with malformed input (#293)
 - Fix include operation failing when strictVariables set (#300)
