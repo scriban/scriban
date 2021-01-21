@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
 using DotLiquid;
+using HandlebarsDotNet;
 using Scriban.Functions;
 using Scriban.Runtime;
 
@@ -70,7 +71,7 @@ namespace Scriban.Benchmarks
             // Due to issue https://github.com/rexm/Handlebars.Net/issues/105 cannot do the same as others, so
             // working around this here
             HandlebarsDotNet.Handlebars.RegisterHelper("truncate", (output, options, context, arguments) => {
-                output.Write(Scriban.Functions.StringFunctions.Truncate(context["description"], 15));
+                output.Write(Scriban.Functions.StringFunctions.Truncate((string)context["description"], 15));
             });
         }
 
@@ -158,7 +159,7 @@ namespace Scriban.Benchmarks
         }
 
         [Benchmark(Description = "Handlebars.NET - Parser")]
-        public Func<object, string> TestHandlebars()
+        public HandlebarsTemplate<object, object> TestHandlebars()
         {
             return HandlebarsDotNet.Handlebars.Compile(TextTemplateMustache);
         }
@@ -196,7 +197,7 @@ namespace Scriban.Benchmarks
         private readonly Stubble.Core.Settings.RendererSettings _stubbleSettings;
         private readonly Stubble.Core.Tokens.MustacheTemplate _stubbleTemplate;
         private readonly Nustache.Core.Template _nustacheTemplate;
-        private readonly Func<object, string> _handlebarsTemplate;
+        private readonly HandlebarsTemplate<object, object> _handlebarsTemplate;
         private readonly Cottle.Documents.SimpleDocument _cottleTemplate;
         private readonly Fluid.IFluidTemplate _fluidTemplate;
 
