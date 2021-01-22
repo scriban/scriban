@@ -69,7 +69,6 @@ namespace Scriban.Functions
             return Concat(list1, list2);
         }
 
-
         /// <summary>
         /// Removes any non-null values from the input list.
         /// </summary>
@@ -181,11 +180,8 @@ namespace Scriban.Functions
         /// </remarks>
         public static ScriptRange Each(TemplateContext context, SourceSpan span, IEnumerable list, object function)
         {
-            return ApplyFunction(context, span, list, function, EachInternal);
+            return ApplyFunction(context, span, list, function, EachProcessor);
         }
-
-
-      
         private static IEnumerable EachInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
         {
             var arg = new ScriptArray(1);
@@ -198,6 +194,8 @@ namespace Scriban.Functions
             }
         }
 
+        static readonly ListProcessor EachProcessor = EachInternal;
+
         /// <summary>
         /// Filters the input list according the supplied filter function.
         /// </summary>
@@ -208,8 +206,7 @@ namespace Scriban.Functions
         /// <returns>Returns a new list which contains only those elements which match the filter function.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{func large(x) ; ret x>=100 ; end}}
-        /// {{ [1, 200, 3,400] | array.each @large }}
+        /// {{ [1, 200, 3,400] | array.each @(do;ret $0>=100 ; end)}}
         /// ```
         /// ```html
         /// [200, 400]
@@ -217,9 +214,11 @@ namespace Scriban.Functions
         /// </remarks>
         public static ScriptRange Filter(TemplateContext context, SourceSpan span, IEnumerable list, object function)
         {
-            return ApplyFunction(context, span, list, function, FilterInternal);
+            return ApplyFunction(context, span, list, function, FilterProcessor);
         }
-        private static IEnumerable FilterInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
+
+    
+        static IEnumerable FilterInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType) 
         {
             var arg = new ScriptArray(1);
             foreach (var item in list)
@@ -227,11 +226,12 @@ namespace Scriban.Functions
                 var itemToTransform = context.ToObject(span, item, destType);
                 arg[0] = itemToTransform;
                 var itemTransformed = ScriptFunctionCall.Call(context, context.CurrentNode, function, arg);
-                if (itemTransformed is Boolean b && b)
+                if (context.ToBool(span,itemTransformed))
                     yield return itemToTransform;
             }
         }
 
+        private static readonly ListProcessor FilterProcessor = FilterInternal;
 
         /// <summary>
         /// Returns the first element of the input `list`.
@@ -672,6 +672,11 @@ namespace Scriban.Functions
             return false;
         }
 
+        /// <summary>
+        /// Delegate type for function used to process a list
+        /// </summary>
+        private delegate IEnumerable ListProcessor(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType);
+
 
         /// <summary>
         /// Attempts to apply a Scriban function to a list and returns the results as a ScriptRange
@@ -680,7 +685,7 @@ namespace Scriban.Functions
         /// Encapsulates a common approach to parameter checking for any method that will take a Scriban function and apply it to a list
         /// </remarks>
         private static ScriptRange ApplyFunction(TemplateContext context, SourceSpan span, IEnumerable list, object function,
-            Func<TemplateContext, SourceSpan, IEnumerable, IScriptCustomFunction, Type, IEnumerable> impl)
+            ListProcessor impl)
         {
             if (list == null) return null;
             if (function == null) return new ScriptRange(list);
