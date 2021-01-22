@@ -6,6 +6,7 @@ List of all the builtin <array> functions:
  contains
  cycle
  each
+ filter
  first
  insert_at
  join

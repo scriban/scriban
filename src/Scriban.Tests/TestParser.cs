@@ -608,6 +608,16 @@ end
             AssertTemplate(output, input);
         }
 
+        [Test]
+        public void TestArrayFilter()
+        {
+            var script = @"{{func large(p) ;  ret p >=100; end}}
+    {{[1, 200 , 3,400] | array.filter @large}}
+";
+            var template = Template.Parse(script);
+            var result = template.Render();
+            Assert.AreEqual(result.Trim(), @"[200, 400]");
+        }
 
         [Test]
         public void EnsureThatItemWithIndexePropertyDoesNotThrow()
