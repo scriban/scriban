@@ -617,7 +617,11 @@ end
             var template = Template.Parse("Hi {{name}}");
             Assert.DoesNotThrow(()=>template.Render(obj));
         }
-
+        [Test]
+        public void EnsureMalformedFunctionDoesNotThrow()
+        {
+            Assert.DoesNotThrow(() =>Template.Parse("{{ func (t("));
+        }
 
         private static void TestFile(string inputName)
         {

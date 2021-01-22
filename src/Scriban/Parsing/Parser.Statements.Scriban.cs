@@ -259,6 +259,8 @@ namespace Scriban.Parsing
                             var arg = ExpectAndParseVariable(scriptFunction);
                             if (!(arg is ScriptVariableGlobal))
                             {
+                                if (arg == null)
+                                    break;
                                 LogError(arg.Span, "Expecting only a simple name parameter for a function");
                             }
 
