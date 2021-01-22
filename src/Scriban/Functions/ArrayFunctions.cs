@@ -196,10 +196,29 @@ namespace Scriban.Functions
                 var itemTransformed = ScriptFunctionCall.Call(context, context.CurrentNode, function, arg);
                 yield return itemTransformed;
             }
-
-            return new ScriptRange(EachInternal(context, span, list, scriptingFunction, scriptingFunction.GetParameterInfo(0).ParameterType));
         }
 
+        /// <summary>
+        /// Filters the input list according the supplied filter function.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">An input list</param>
+        /// <param name="function">The function used to test each elemement of the list</param>
+        /// <returns>Returns a new list which contains only those elements which match the filter function.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{func large(x) ; ret x>=100 ; end}}
+        /// {{ [1, 200, 3,400] | array.each @large }}
+        /// ```
+        /// ```html
+        /// [200, 400]
+        /// ```
+        /// </remarks>
+        public static ScriptRange Filter(TemplateContext context, SourceSpan span, IEnumerable list, object function)
+        {
+            return ApplyFunction(context, span, list, function, FilterInternal);
+        }
         private static IEnumerable FilterInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
         {
             var arg = new ScriptArray(1);
