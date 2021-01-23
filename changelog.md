@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.4.1 (23 Jan 2021)
+- Fix to ensure that attempting to render object with indexed property does not cause crash (#312)
+- Fix to ensure badly formed function declarations do not break parser
+- Fix array.each/join stopping evaluation of following statements after using a function
+- Add array.filter function (#316)
+
 ## 3.4.0 (21 Jan 2021)
 - Add string.whitespace and string.empty (#307)
 - `Template.Parse` is not returning a partial AST even in case of a parser error (#308)
