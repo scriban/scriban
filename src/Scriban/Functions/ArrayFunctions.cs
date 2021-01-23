@@ -69,7 +69,6 @@ namespace Scriban.Functions
             return Concat(list1, list2);
         }
 
-
         /// <summary>
         /// Removes any non-null values from the input list.
         /// </summary>
@@ -171,7 +170,6 @@ namespace Scriban.Functions
         /// <param name="list">An input list</param>
         /// <param name="function">The function to apply to each item in the list</param>
         /// <returns>Returns a list with each item being transformed by the function.</returns>
-        /// <returns></returns>
         /// <remarks>
         /// ```scriban-html
         /// {{ [" a", " 5", "6 "] | array.each @string.strip }}
@@ -182,18 +180,8 @@ namespace Scriban.Functions
         /// </remarks>
         public static ScriptRange Each(TemplateContext context, SourceSpan span, IEnumerable list, object function)
         {
-            if (list == null) return null;
-            if (function == null) return new ScriptRange(list);
-            
-            var scriptingFunction = function as IScriptCustomFunction;
-            if (scriptingFunction == null)
-            {
-                throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
-            }
-
-            return new ScriptRange(EachInternal(context, span, list, scriptingFunction, scriptingFunction.GetParameterInfo(0).ParameterType));
+            return ApplyFunction(context, span, list, function, EachProcessor);
         }
-
         private static IEnumerable EachInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
         {
             var arg = new ScriptArray(1);
@@ -205,6 +193,45 @@ namespace Scriban.Functions
                 yield return itemTransformed;
             }
         }
+
+        private static readonly ListProcessor EachProcessor = EachInternal;
+
+        /// <summary>
+        /// Filters the input list according the supplied filter function.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">An input list</param>
+        /// <param name="function">The function used to test each elemement of the list</param>
+        /// <returns>Returns a new list which contains only those elements which match the filter function.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{["", "200", "","400"] | array.filter @string.empty}}
+        /// ```
+        /// ```html
+        /// ["", ""]
+        /// ```
+        /// </remarks>
+        public static ScriptRange Filter(TemplateContext context, SourceSpan span, IEnumerable list, object function)
+        {
+            return ApplyFunction(context, span, list, function, FilterProcessor);
+        }
+
+    
+        static IEnumerable FilterInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType) 
+        {
+            var arg = new ScriptArray(1);
+            foreach (var item in list)
+            {
+                var itemToTransform = context.ToObject(span, item, destType);
+                arg[0] = itemToTransform;
+                var itemTransformed = ScriptFunctionCall.Call(context, context.CurrentNode, function, arg);
+                if (context.ToBool(span,itemTransformed))
+                    yield return itemToTransform;
+            }
+        }
+
+        private static readonly ListProcessor FilterProcessor = FilterInternal;
 
         /// <summary>
         /// Returns the first element of the input `list`.
@@ -643,6 +670,33 @@ namespace Scriban.Functions
             foreach (var element in list)
                 if (element == item || (element != null && element.Equals(item))) return true;
             return false;
+        }
+
+        /// <summary>
+        /// Delegate type for function used to process a list
+        /// </summary>
+        private delegate IEnumerable ListProcessor(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType);
+
+
+        /// <summary>
+        /// Attempts to apply a Scriban function to a list and returns the results as a ScriptRange
+        /// </summary>
+        /// <remarks>
+        /// Encapsulates a common approach to parameter checking for any method that will take a Scriban function and apply it to a list
+        /// </remarks>
+        private static ScriptRange ApplyFunction(TemplateContext context, SourceSpan span, IEnumerable list, object function,
+            ListProcessor impl)
+        {
+            if (list == null) return null;
+            if (function == null) return new ScriptRange(list);
+
+            var scriptingFunction = function as IScriptCustomFunction;
+            if (scriptingFunction == null)
+            {
+                throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
+            }
+
+            return new ScriptRange(impl(context, span, list, scriptingFunction, scriptingFunction.GetParameterInfo(0).ParameterType));
         }
 
         private class CycleKey : IEquatable<CycleKey>
