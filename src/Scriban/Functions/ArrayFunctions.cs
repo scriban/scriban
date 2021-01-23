@@ -194,7 +194,7 @@ namespace Scriban.Functions
             }
         }
 
-        static readonly ListProcessor EachProcessor = EachInternal;
+        private static readonly ListProcessor EachProcessor = EachInternal;
 
         /// <summary>
         /// Filters the input list according the supplied filter function.
@@ -206,11 +206,10 @@ namespace Scriban.Functions
         /// <returns>Returns a new list which contains only those elements which match the filter function.</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ [1, 200, 3,400] | array.each @(do;ret $0>=100 ; end)}}
+        /// [1, 200, 3,400] | array.filter @(do;ret $0 >= 100 ; end)}}
         /// ```
         /// ```html
-        /// [200, 400]
-        /// ```
+        /// [200, 400]```
         /// </remarks>
         public static ScriptRange Filter(TemplateContext context, SourceSpan span, IEnumerable list, object function)
         {

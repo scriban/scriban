@@ -256,12 +256,11 @@ Returns a new list which contains only those elements which match the filter fun
 
 > **input**
 ```scriban-html
-{{ [1, 200, 3,400] | array.each @(do;ret $0>=100 ; end)}}
+[1, 200, 3,400] | array.filter @(do;ret $0 >= 100 ; end)}}
 ```
 > **output**
 ```html
-[200, 400]
-```
+[200, 400]```
 
 [:top:](#builtins)
 ### `array.first`
