@@ -114,6 +114,7 @@ This document describes the various built-in functions available in scriban.
             {
                 var type = member.Info as Type;
                 var methodInfo = member.Info as MethodInfo;
+               
 
                 if (type != null && IsBuiltinType(type, out string shortName))
                 {
@@ -137,7 +138,7 @@ This document describes the various built-in functions available in scriban.
                     // Write the toc
                     _writerToc.WriteLine($"- [`{shortName}` functions](#{shortName}-functions)");
                 }
-                else if (methodInfo != null && IsBuiltinType(methodInfo.DeclaringType, out shortName))
+                else if (methodInfo != null && IsBuiltinType(methodInfo.DeclaringType, out shortName)  && methodInfo.IsPublic)
                 {
                     var methodShortName = StandardMemberRenamer.Default(methodInfo);
 

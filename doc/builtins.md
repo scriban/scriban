@@ -24,6 +24,7 @@ Array functions available through the object 'array' in scriban.
 - [`array.concat`](#arrayconcat)
 - [`array.cycle`](#arraycycle)
 - [`array.each`](#arrayeach)
+- [`array.filter`](#arrayfilter)
 - [`array.first`](#arrayfirst)
 - [`array.insert_at`](#arrayinsert_at)
 - [`array.join`](#arrayjoin)
@@ -229,6 +230,37 @@ Returns a list with each item being transformed by the function.
 > **output**
 ```html
 ["a", "5", "6"]
+```
+
+[:top:](#builtins)
+### `array.filter`
+
+```
+array.filter <list> <function>
+```
+
+#### Description
+
+Filters the input list according the supplied filter function.
+
+#### Arguments
+
+- `list`: An input list
+- `function`: The function used to test each elemement of the list
+
+#### Returns
+
+Returns a new list which contains only those elements which match the filter function.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ [1, 200, 3,400] | array.each @(do;ret $0>=100 ; end)}}
+```
+> **output**
+```html
+[200, 400]
 ```
 
 [:top:](#builtins)
