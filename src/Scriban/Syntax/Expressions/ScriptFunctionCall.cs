@@ -416,9 +416,10 @@ namespace Scriban.Syntax
                 context.ExitFunction(callerContext);
             }
 
+            // Restore the flow state to none
+            context.FlowState = ScriptFlowState.None;
             return result;
         }
-
 
         private static ulong ProcessArguments(TemplateContext context, ScriptNode callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
         {

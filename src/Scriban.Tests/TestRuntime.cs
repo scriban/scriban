@@ -183,6 +183,19 @@ hello4: {hello: ""hello4""}".Replace("\r\n", "\n"), result);
         }
 
         [Test]
+        public void TestFunctionArrayEachAndFunctionCall()
+        {
+            var template = Template.Parse(@"{{
+func f; ret $0 + 1; end
+[1, 2, 3] | array.each @f
+}} EOL");
+
+            var result = template.Render();
+
+            TextAssert.AreEqual("[2, 3, 4] EOL", result);
+        }
+
+        [Test]
 
         public void TestLoopVariable()
         {
