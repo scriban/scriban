@@ -245,7 +245,7 @@ namespace Scriban.Parsing
                         else
                         {
                             LogError(nextToken, $"Invalid token `{nextToken.Type}`. The dot operator is expected to be followed by a plain identifier");
-                            return null;
+                            return leftOperand;
                         }
                         continue;
                     }
