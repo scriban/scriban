@@ -325,9 +325,11 @@ namespace Scriban.Syntax
         public static object Call(TemplateContext context, ScriptNode callerContext, IScriptCustomFunction function, ScriptArray arguments)
         {
             if (context == null) throw new ArgumentNullException(nameof(context));
-            if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (function == null) throw new ArgumentNullException(nameof(function));
             if (arguments == null) throw new ArgumentNullException(nameof(arguments));
+            //this can happen if we're calling an anonymous function from the top level
+            if (callerContext == null)
+                callerContext = new ScriptAnonymousFunction();
 
             var parameterCount = function.ParameterCount;
 

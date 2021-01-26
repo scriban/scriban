@@ -4,6 +4,7 @@
 
 #nullable disable
 
+using Scriban.Runtime;
 using System.Collections.Generic;
 
 namespace Scriban.Syntax
@@ -39,6 +40,9 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             var result = context.Evaluate(Expression);
+            //ensure that deferred array interators are evaluated before we lose context
+            if (result is ScriptRange range)
+                result = new ScriptArray(range);
             context.FlowState = ScriptFlowState.Return;
             return result;
         }

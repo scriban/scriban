@@ -266,7 +266,7 @@ namespace Scriban
 
             if (IsInLoop)
             {
-                var count = _currentLocalContext.Loops.Count;
+                var count = _currentLocalContext.Loops.Count;	               
                 var items = _currentLocalContext.Loops.Items;
                 for (int i = count - 1; i >= 0; i--)
                 {
