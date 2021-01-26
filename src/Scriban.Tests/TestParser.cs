@@ -78,6 +78,21 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void TestEvaluateProcessing()
+        {
+            {
+                var result = Template.Parse("{{['', '200', '','400'] | array.filter @string.strip}}").Evaluate(new TemplateContext());
+
+                Assert.AreEqual(new[] { "", "200", "", "400" }, result);
+            }
+            {
+                var result = Template.Parse("{{['', '200', '','400'] | array.filter @string.empty}}").Evaluate(new TemplateContext());
+
+                Assert.AreEqual(new[] { "", "" }, result);
+            }
+        }
+
+        [Test]
 
         public void TestScientificWithFunctionExpression()
         {

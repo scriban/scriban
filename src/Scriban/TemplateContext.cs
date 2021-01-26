@@ -746,7 +746,7 @@ namespace Scriban
             }
             finally
             {
-                CurrentNode = previousNode;
+                CurrentNode = previousNode ?? CurrentNode;
                 _getOrSetValueLevel = previousLevel;
                 _isFunctionCallDisabled = previousFunctionCallState;
             }
