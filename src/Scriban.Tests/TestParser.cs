@@ -630,6 +630,25 @@ end
         {
             Assert.DoesNotThrow(() =>Template.Parse("{{ func (t("));
         }
+        [Test]
+        public void ArrayIteratorHasAccessToContext()
+        {
+
+            var templateString = @"{{-
+func call_array(p)
+  ret  [1,2,3] | array.filter @(do;ret p;end)
+end
+
+#This fails: parameter is not found at line 14 when calling into array iterator
+call_array true -}}
+";
+
+            var template = Template.Parse(templateString);
+            var context = new TemplateContext();
+            var result = template.Render(context);
+            Assert.AreEqual(result, "[1, 2, 3]");
+        }
+
 
         private static void TestFile(string inputName)
         {
