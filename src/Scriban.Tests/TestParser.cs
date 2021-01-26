@@ -638,8 +638,6 @@ end
 func call_array(p)
   ret  [1,2,3] | array.filter @(do;ret p;end)
 end
-
-#This fails: parameter is not found at line 14 when calling into array iterator
 call_array true -}}
 ";
 
