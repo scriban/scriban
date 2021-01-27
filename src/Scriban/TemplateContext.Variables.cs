@@ -266,13 +266,20 @@ namespace Scriban
 
             if (IsInLoop)
             {
-                var count = _currentLocalContext.Loops.Count;
-                var items = _currentLocalContext.Loops.Items;
-                for (int i = count - 1; i >= 0; i--)
+                //seach back through the stack of contexts in case we are
+                //looking for a loop variable from with a local function invocation
+                var contextStack = _localContexts;
+                for (int contextIndex = contextStack.Count - 1; contextIndex >= 0; contextIndex--)
                 {
-                    if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
+                    var context = contextStack.Items[contextIndex];
+                    var count = context.Loops.Count;
+                    var items = context.Loops.Items;
+                    for (int i = count - 1; i >= 0; i--)
                     {
-                        return value;
+                        if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
+                        {
+                            return value;
+                        }
                     }
                 }
             }

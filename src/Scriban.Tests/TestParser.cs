@@ -648,6 +648,29 @@ call_array true -}}
         }
 
 
+        [Test]
+        public void ArrayIteratorHasAccessToContextLoop()
+        {
+
+            var templateString = @"{{-
+
+for a in [99]
+   fn=@(do;ret a;end)
+  fn  
+end
+-}}
+";
+
+            var template = Template.Parse(templateString);
+            var context = new TemplateContext();
+            context.StrictVariables = true;
+            var result = template.Render(context);
+            Assert.AreEqual(result, "99");
+        }
+
+
+
+
         private static void TestFile(string inputName)
         {
             var filename = Path.GetFileName(inputName);
