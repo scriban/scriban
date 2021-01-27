@@ -638,37 +638,77 @@ end
 func call_array(p)
   ret  [1,2,3] | array.filter @(do;ret p;end)
 end
-call_array true -}}
-";
+call_array true -}}";
 
             var template = Template.Parse(templateString);
-            var context = new TemplateContext();
-            var result = template.Render(context);
-            Assert.AreEqual(result, "[1, 2, 3]");
+            Assert.AreEqual("[1, 2, 3]",template.Render());
         }
 
 
         [Test]
-        public void ArrayIteratorHasAccessToContextLoop()
+        public void LocalFunctionHasAccessToForLoopControlVariable()
         {
-
             var templateString = @"{{-
-
 for a in [99]
    fn=@(do;ret a;end)
   fn  
 end
--}}
-";
-
+-}}";
             var template = Template.Parse(templateString);
-            var context = new TemplateContext();
-            context.StrictVariables = true;
-            var result = template.Render(context);
-            Assert.AreEqual(result, "99");
+            Assert.AreEqual("99", template.Render());
+        }
+
+        [Test]
+        public void RetLocalFunctionHasAccessToForLoopControlVariable()
+        {
+            var templateString = @"{{-
+for a in [99]
+   fn=@(do;ret a;end)
+  ret fn  
+end
+-}}";
+            var template = Template.Parse(templateString);
+            Assert.AreEqual("99", template.Render());
         }
 
 
+        [Test]
+        public void ArrayIteratorHasAccessToLoopControlVariable()
+        {
+            var templateString = @"{{-
+for a in [99]
+   fn=@(do;ret a;end)
+   ret [1,2,3] | array.each @fn 
+end
+-}}";
+            var template = Template.Parse(templateString);
+            Assert.AreEqual( "[99, 99, 99]", template.Render());
+        }
+
+        [Test]
+        public void RetArrayIteratorHasAccessToLoopControlVariable()
+        {
+            var templateString = @"{{-
+for a in [99]
+   fn=@(do;ret a;end)
+   [1,2,3] | array.each @fn 
+end
+-}}";
+            var template = Template.Parse(templateString);
+            Assert.AreEqual("[99, 99, 99]", template.Render());
+        }
+
+        [Test]
+        public void TopLevelAnonymousFunctionCanAccessGloba()
+        {
+            var templateString = @"{{-
+a=99
+   fn=@(do;ret a;end)
+   fn
+-}}";
+            var template = Template.Parse(templateString);
+            Assert.AreEqual("99", template.Render());
+        }
 
 
         private static void TestFile(string inputName)
