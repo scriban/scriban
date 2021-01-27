@@ -711,6 +711,22 @@ a=99
         }
 
 
+        [Test]
+        public void TestEvaluateProcessing()
+        {
+            {
+                var result = Template.Parse("{{['', '200', '','400'] | array.filter @string.strip}}").Evaluate(new TemplateContext());
+
+                Assert.AreEqual(new[] { "", "200", "", "400" }, result);
+            }
+            {
+                var result = Template.Parse("{{['', '200', '','400'] | array.filter @string.empty}}").Evaluate(new TemplateContext());
+
+                Assert.AreEqual(new[] { "", "" }, result);
+            }
+        }
+
+
         private static void TestFile(string inputName)
         {
             var filename = Path.GetFileName(inputName);
