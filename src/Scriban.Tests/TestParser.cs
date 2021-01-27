@@ -644,60 +644,7 @@ call_array true -}}";
             Assert.AreEqual("[1, 2, 3]",template.Render());
         }
 
-
-        [Test]
-        public void LocalFunctionHasAccessToForLoopControlVariable()
-        {
-            var templateString = @"{{-
-for a in [99]
-   fn=@(do;ret a;end)
-  fn  
-end
--}}";
-            var template = Template.Parse(templateString);
-            Assert.AreEqual("99", template.Render());
-        }
-
-        [Test]
-        public void RetLocalFunctionHasAccessToForLoopControlVariable()
-        {
-            var templateString = @"{{-
-for a in [99]
-   fn=@(do;ret a;end)
-  ret fn  
-end
--}}";
-            var template = Template.Parse(templateString);
-            Assert.AreEqual("99", template.Render());
-        }
-
-
-        [Test]
-        public void ArrayIteratorHasAccessToLoopControlVariable()
-        {
-            var templateString = @"{{-
-for a in [99]
-   fn=@(do;ret a;end)
-   ret [1,2,3] | array.each @fn 
-end
--}}";
-            var template = Template.Parse(templateString);
-            Assert.AreEqual( "[99, 99, 99]", template.Render());
-        }
-
-        [Test]
-        public void RetArrayIteratorHasAccessToLoopControlVariable()
-        {
-            var templateString = @"{{-
-for a in [99]
-   fn=@(do;ret a;end)
-   [1,2,3] | array.each @fn 
-end
--}}";
-            var template = Template.Parse(templateString);
-            Assert.AreEqual("[99, 99, 99]", template.Render());
-        }
-
+      
         [Test]
         public void TopLevelAnonymousFunctionCanAccessGloba()
         {
@@ -709,7 +656,6 @@ a=99
             var template = Template.Parse(templateString);
             Assert.AreEqual("99", template.Render());
         }
-
 
         [Test]
         public void TestEvaluateProcessing()
