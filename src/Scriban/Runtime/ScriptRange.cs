@@ -576,7 +576,7 @@ namespace Scriban.Runtime
 
         void IList.Remove(object value)
         {
-            throw new NotImplementedException();
+            Remove(value);
         }
 
         public void RemoveAt(int index)
