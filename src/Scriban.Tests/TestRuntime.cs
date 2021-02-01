@@ -23,6 +23,17 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TesterFilterEvaluation()
+        {
+            var result = Template.Parse("{{['', '200', '','400'] | array.filter @string.empty}}").Evaluate(new TemplateContext());
+            Assert.IsInstanceOf<ScriptArray>(result);
+            var array = (ScriptArray) result;
+            Assert.AreEqual(2, array.Count);
+            Assert.AreEqual("", array[0]);
+            Assert.AreEqual("", array[1]);
+        }
+
+        [Test]
         public void TestGetTypeName()
         {
             var context = new TemplateContext();
@@ -84,6 +95,17 @@ hello4: {{ hello4 }}";
 hello2: [""hello2""]
 hello3: {hello: ""hello3""}
 hello4: {hello: ""hello4""}".Replace("\r\n", "\n"), result);
+        }
+
+        [Test]
+        public void TestForEach()
+        {
+            var template = Template.Parse(@"{{ [1,2,3] | array.each do
+ret $0 + 4
+end
+}}");
+            var result = template.Render();
+            Assert.AreEqual("[5, 6, 7]", result);
         }
 
         [Test]
