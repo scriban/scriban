@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.4.2 (1 Feb 2021)
+- Fix evaluation when an enumeration is returned (#324) 
+- Improve returned AST when an valid part of member expression (#318)
+- Implement missing Collection interface methods for ScriptArray (#326)
+
 ## 3.4.1 (23 Jan 2021)
 - Fix to ensure that attempting to render object with indexed property does not cause crash (#312)
 - Fix to ensure badly formed function declarations do not break parser
