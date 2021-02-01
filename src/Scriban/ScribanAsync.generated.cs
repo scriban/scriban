@@ -225,7 +225,16 @@ namespace Scriban
                 CurrentNode = scriptNode;
                 _getOrSetValueLevel = 0;
                 _isFunctionCallDisabled = aliasReturnedFunction;
-                return await scriptNode.EvaluateAsync(this).ConfigureAwait(false);
+                var result = await scriptNode.EvaluateAsync(this).ConfigureAwait(false);
+
+                // If we are at a top-level evaluation and the result is an enumeration
+                // force it's evaluation within the current context
+                if (previousNode == null && result is IEnumerable it)
+                {
+                    result = new ScriptArray(it);
+                }
+
+                return result;
             }
             catch (ScriptRuntimeException ex) when (this.RenderRuntimeException != null)
             {
@@ -1208,7 +1217,13 @@ namespace Scriban.Syntax
                     context.SetValue(ScriptVariable.BlockDelegate, blockStatement, true);
                 }
 
-                return await context.EvaluateAsync(Body).ConfigureAwait(false);
+                var result = await context.EvaluateAsync(Body).ConfigureAwait(false);
+                //if the result of the evaluation was a ScriptRange that depended on local variables
+                //then we need to force the deferred enumerable inside the range to be evaluated right now
+                //before we pop the variables out of the context!
+                if (result is ScriptRange range)
+                    result = new ScriptArray(range);
+                return result;
             }
             finally
             {
@@ -1487,6 +1502,8 @@ namespace Scriban.Syntax
                 context.ExitFunction(callerContext);
             }
 
+            // Restore the flow state to none
+            context.FlowState = ScriptFlowState.None;
             return result;
         }
 
@@ -2073,6 +2090,9 @@ namespace Scriban.Syntax
         public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             var result = await context.EvaluateAsync(Expression).ConfigureAwait(false);
+            //ensure that deferred array interators are evaluated before we lose context
+            if (result is ScriptRange range)
+                result = new ScriptArray(range);
             context.FlowState = ScriptFlowState.Return;
             return result;
         }

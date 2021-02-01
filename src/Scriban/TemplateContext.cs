@@ -729,7 +729,16 @@ namespace Scriban
                 CurrentNode = scriptNode;
                 _getOrSetValueLevel = 0;
                 _isFunctionCallDisabled = aliasReturnedFunction;
-                return scriptNode.Evaluate(this);
+                var result = scriptNode.Evaluate(this);
+
+                // If we are at a top-level evaluation and the result is an enumeration
+                // force it's evaluation within the current context
+                if (previousNode == null && result is IEnumerable it)
+                {
+                    result = new ScriptArray(it);
+                }
+
+                return result;
             }
             catch (ScriptRuntimeException ex) when (this.RenderRuntimeException != null)
             {

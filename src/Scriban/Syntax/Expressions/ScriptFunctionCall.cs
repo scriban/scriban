@@ -328,7 +328,6 @@ namespace Scriban.Syntax
             if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
             if (function == null) throw new ArgumentNullException(nameof(function));
             if (arguments == null) throw new ArgumentNullException(nameof(arguments));
-
             var parameterCount = function.ParameterCount;
 
             var argumentValues = new ScriptArray();
