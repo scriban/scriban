@@ -430,9 +430,10 @@ namespace Scriban.Runtime
 
         public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
         {
-            var list = Store.Select(item => new KeyValuePair<string, object>(item.Key, item.Value.Value))
-                    .ToList();
-            return list.GetEnumerator();
+            foreach (var item in Store)
+            {
+                yield return new KeyValuePair<string, object>(item.Key, item.Value.Value);
+            }
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -477,29 +478,41 @@ namespace Scriban.Runtime
             return !(obj is string || typeInfo.IsPrimitive || typeInfo == typeof(decimal) || typeInfo.IsEnum || typeInfo.IsArray);
         }
 
-        // Methods for ICollection<KeyValuePair<string, object>> that we don't care to implement
-
         void ICollection<KeyValuePair<string, object>>.Add(KeyValuePair<string, object> item)
         {
-            throw new NotImplementedException();
+            Add(item.Key, item.Value);
         }
 
         bool ICollection<KeyValuePair<string, object>>.Contains(KeyValuePair<string, object> item)
         {
-            throw new NotImplementedException();
+            return Store.TryGetValue(item.Key, out var value) && value.Equals(item.Value);
         }
 
         void ICollection<KeyValuePair<string, object>>.CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
         {
-            throw new NotImplementedException();
+            if (array == null)
+                throw new ArgumentNullException(nameof(array));
+            if (arrayIndex > array.Length)
+                throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "The arrayIndex parameter is larger than the array's length.");
+            if (array.Length - arrayIndex < Count)
+                throw new ArgumentException("The array is too small to fit.", nameof(array));
+            var count = Count;
+            var store = Store;
+            foreach (var pair in Store)
+                array[arrayIndex++] = new KeyValuePair<string, object>(pair.Key, pair.Value.Value);
         }
 
         bool ICollection<KeyValuePair<string, object>>.Remove(KeyValuePair<string, object> item)
         {
-            throw new NotImplementedException();
+            if (Store.TryGetValue(item.Key, out var value) && value.Equals(item.Value))
+            {
+                Remove(item.Key);
+                return true;
+            }
+            return false;
         }
 
-        bool ICollection<KeyValuePair<string, object>>.IsReadOnly => false;
+        bool ICollection<KeyValuePair<string, object>>.IsReadOnly => IsReadOnly;
 
         internal struct InternalValue
         {
