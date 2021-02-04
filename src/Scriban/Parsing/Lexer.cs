@@ -1690,8 +1690,6 @@ namespace Scriban.Parsing
             }
         }
 
-    
-
         IEnumerator<Token> IEnumerable<Token>.GetEnumerator()
         {
             return GetEnumerator();

@@ -908,7 +908,7 @@ The pipe operator `|` can also be used to pipe the result of an expression to a 
 
 > Notice that when a function receives the result of a pipe call (e.g `date.to_string` in the example above), it is passed as the **first argument of the call**. This is valid for both .NET custom functions as well as for Scriban integrated functions.
 
-Pipes can also be chained across multiple lines.  
+Pipes are *greedy* with respect to whitespace.  This allow them to be chained across multiple lines:  
 
 ```
 {{-
