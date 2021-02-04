@@ -822,18 +822,14 @@ namespace Scriban.Parsing
                         NextChar();
                         break;
                     }
-                    else if (c == '-')
+                    else
                     {
-                        // theoretically someone could have constructed an expression like
-                        // `123|-math.plus 1` so lookahead to ensure we really are just consuming whitespace
-                        if (char.IsWhiteSpace(PeekChar()))
-                        {
-                            //consume the '-' then the following whitespace
-                            NextChar(); 
-                            ConsumeWhitespace(false, ref _token.End); 
-                            _token = new Token(TokenType.PipeOverLineBreak, start, _position);
-                            break;
-                        }
+                       if (IsRemainderOfLineWhitespace())
+                       {
+                           ConsumeWhitespace(false, ref _token.End);
+                           _token = new Token(TokenType.PipeOverLineBreak, start, _position);
+                           break;
+                       }
                     }
 
                     _token = new Token(TokenType.VerticalBar, start, start);
@@ -1209,6 +1205,36 @@ namespace Scriban.Parsing
                 NextChar();
             }
             return start != _position;
+        }
+
+        /// <summary>
+        /// Returns true if the remainder of the line is whitespace
+        /// </summary>
+        private bool IsRemainderOfLineWhitespace()
+        {
+            //we need to be careful - there is some global state which NextChar will trash
+            //so save it here and restore it before exiting
+            var savedC = c;
+            var savedPosition = _position;
+
+
+            var lineFeedWasSeen = false;
+
+            while (char.IsWhiteSpace(c))
+            {
+                if (IsNewLine(c))
+                {
+                    lineFeedWasSeen = true;
+                    break;
+                }
+                NextChar();
+            }
+
+            //move everything back to where it was before we called this method
+            _position = savedPosition;
+            c = savedC;
+            return lineFeedWasSeen;
+            
         }
 
         private static bool IsNewLine(char c)
@@ -1663,6 +1689,8 @@ namespace Scriban.Parsing
                 c = '\0';
             }
         }
+
+    
 
         IEnumerator<Token> IEnumerable<Token>.GetEnumerator()
         {
