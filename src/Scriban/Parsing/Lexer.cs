@@ -822,15 +822,6 @@ namespace Scriban.Parsing
                         NextChar();
                         break;
                     }
-                    else
-                    {
-                       if (IsRemainderOfLineWhitespace())
-                       {
-                           ConsumeWhitespace(false, ref _token.End);
-                           _token = new Token(TokenType.VerticalBar, start, _position);
-                           break;
-                       }
-                    }
 
                     _token = new Token(TokenType.VerticalBar, start, start);
                     break;
@@ -1205,36 +1196,6 @@ namespace Scriban.Parsing
                 NextChar();
             }
             return start != _position;
-        }
-
-        /// <summary>
-        /// Returns true if the remainder of the line is whitespace
-        /// </summary>
-        private bool IsRemainderOfLineWhitespace()
-        {
-            //we need to be careful - there is some global state which NextChar will trash
-            //so save it here and restore it before exiting
-            var savedC = c;
-            var savedPosition = _position;
-
-
-            var lineFeedWasSeen = false;
-
-            while (char.IsWhiteSpace(c))
-            {
-                if (IsNewLine(c))
-                {
-                    lineFeedWasSeen = true;
-                    break;
-                }
-                NextChar();
-            }
-
-            //move everything back to where it was before we called this method
-            _position = savedPosition;
-            c = savedC;
-            return lineFeedWasSeen;
-            
         }
 
         private static bool IsNewLine(char c)

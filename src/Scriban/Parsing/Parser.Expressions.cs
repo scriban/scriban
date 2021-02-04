@@ -660,9 +660,10 @@ namespace Scriban.Parsing
                             pipeCall.Span.Start = leftOperand.Span.Start;
                         }
                         pipeCall.From = leftOperand;
-
+						//Allow pipes to span lines
+                        _allowNewLineLevel++;
                         pipeCall.PipeToken = ParseToken(Current.Type); // skip | or |>
-
+                        _allowNewLineLevel--;
                         // unit test: 310-func-pipe-error1.txt
                         pipeCall.To = ExpectAndParseExpression(pipeCall);
                         return Close(pipeCall);
