@@ -646,7 +646,7 @@ call_array true -}}";
 
       
         [Test]
-        public void TopLevelAnonymousFunctionCanAccessGloba()
+        public void TopLevelAnonymousFunctionCanAccessGlobal()
         {
             var templateString = @"{{-
 a=99
@@ -656,6 +656,38 @@ a=99
             var template = Template.Parse(templateString);
             Assert.AreEqual("99", template.Render());
         }
+
+        [Test]
+        public void TestMultiLinePipeWorksAsExpected()
+        {
+            var script = @"{{""text""  |-    
+            string.append ""END"" |-
+                string.prepend ""START""}}";
+            var template = Template.Parse(script);
+            var result = template.Render();
+            Assert.AreEqual(@"STARTtextEND", result);
+        }
+
+        [Test]
+        public void MultiLinePipeDoesNotSnarfWhitespaceInTextMode()
+        {
+            var script = @"""text""  |-
+            string.append ""END"" |-
+                string.prepend ""START""";
+            var template = Template.Parse(script);
+            var result = template.Render();
+            Assert.AreEqual(script, result);
+        }
+		
+		[Test]
+        public void NestledMinusIsNotInterpretedAsMultiLinePipe()
+        {
+            var script = @"{{123|-math.plus 1}}";
+            var template = Template.Parse(script);
+            var result = template.Render();
+            Assert.AreEqual("-124", result);
+        }
+
 
         [Test]
         public void TestEvaluateProcessing()

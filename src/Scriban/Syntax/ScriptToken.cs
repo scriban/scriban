@@ -24,6 +24,7 @@ namespace Scriban.Syntax
         public static ScriptToken Colon() => new ScriptToken(TokenType.Colon);
         public static ScriptToken Equal() => new ScriptToken(TokenType.Equal);
         public static ScriptToken Pipe() => new ScriptToken(TokenType.VerticalBar);
+        public static ScriptToken PipeOverLineBreak() => new ScriptToken(TokenType.PipeOverLineBreak);
         public static ScriptToken PipeGreater() => new ScriptToken(TokenType.PipeGreater);
         public static ScriptToken Exclamation() => new ScriptToken(TokenType.Exclamation);
         public static ScriptToken DoubleAmp() => new ScriptToken(TokenType.DoubleAmp);

@@ -822,6 +822,19 @@ namespace Scriban.Parsing
                         NextChar();
                         break;
                     }
+                    else if (c == '-')
+                    {
+                        // theoretically someone could have constructed an expression like
+                        // `123|-math.plus 1` so lookahead to ensure we really are just consuming whitespace
+                        if (char.IsWhiteSpace(PeekChar()))
+                        {
+                            //consume the '-' then the following whitespace
+                            NextChar(); 
+                            ConsumeWhitespace(false, ref _token.End); 
+                            _token = new Token(TokenType.PipeOverLineBreak, start, _position);
+                            break;
+                        }
+                    }
 
                     _token = new Token(TokenType.VerticalBar, start, start);
                     break;

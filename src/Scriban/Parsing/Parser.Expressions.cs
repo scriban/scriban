@@ -638,7 +638,15 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (_isScientific && Current.Type == TokenType.PipeGreater || !_isScientific && (Current.Type == TokenType.VerticalBar || Current.Type == TokenType.PipeGreater))
+                    if (
+                            (_isScientific &&
+                              Current.Type == TokenType.PipeGreater)
+                            ||
+                             (!_isScientific &&
+                                    Current.Type == TokenType.VerticalBar) ||
+                                    Current.Type == TokenType.PipeGreater ||
+                                    Current.Type == TokenType.PipeOverLineBreak
+                       )
                     {
                         if (functionCall != null)
                         {

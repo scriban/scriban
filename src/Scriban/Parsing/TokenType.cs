@@ -110,6 +110,9 @@ namespace Scriban.Parsing
 
         /// <summary>Token "|"</summary>
         VerticalBar, // |
+        
+        /// <summary>Token "|- followed by whitespace and/or line-feeds"</summary>
+        PipeOverLineBreak, // |-\s+
 
         /// <summary>Token "|>"</summary>
         PipeGreater, // |>

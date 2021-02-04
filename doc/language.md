@@ -906,6 +906,18 @@ The pipe operator `|` can also be used to pipe the result of an expression to a 
 
 > Notice that when a function receives the result of a pipe call (e.g `date.to_string` in the example above), it is passed as the **first argument of the call**. This is valid for both .NET custom functions as well as for Scriban integrated functions.
 
+Pipes can be chained across multiple lines using the `|-` operator; this causes all whitespace and linefeeds following the operator to be ignored.  For example: 
+
+```
+{{-
+"text"                        |-
+      string.append "END"     |-
+      string.prepend "START"
+-}}
+```
+      
+will output `STARTtextEND`
+
 #### Named arguments
 
 When passing multiple arguments to an existing .NET function, you may want to use named arguments.
