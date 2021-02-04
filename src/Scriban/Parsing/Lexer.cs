@@ -827,7 +827,7 @@ namespace Scriban.Parsing
                        if (IsRemainderOfLineWhitespace())
                        {
                            ConsumeWhitespace(false, ref _token.End);
-                           _token = new Token(TokenType.PipeOverLineBreak, start, _position);
+                           _token = new Token(TokenType.VerticalBar, start, _position);
                            break;
                        }
                     }

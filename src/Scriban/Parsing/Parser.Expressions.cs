@@ -644,8 +644,7 @@ namespace Scriban.Parsing
                             ||
                              (!_isScientific &&
                                     Current.Type == TokenType.VerticalBar) ||
-                                    Current.Type == TokenType.PipeGreater ||
-                                    Current.Type == TokenType.PipeOverLineBreak
+                                    Current.Type == TokenType.PipeGreater 
                        )
                     {
                         if (functionCall != null)
