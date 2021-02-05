@@ -631,17 +631,7 @@ end
             Assert.DoesNotThrow(() =>Template.Parse("{{ func (t("));
         }
        
-        [Test]
-        public void TopLevelAnonymousFunctionCanAccessGloba()
-        {
-            var templateString = @"{{-
-a=99
-   fn=@(do;ret a;end)
-   fn
--}}";
-            var template = Template.Parse(templateString);
-            Assert.AreEqual("99", template.Render());
-        }
+     
 		
         [Test]
         public void TestEvaluateProcessing()
