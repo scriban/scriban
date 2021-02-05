@@ -630,21 +630,7 @@ end
         {
             Assert.DoesNotThrow(() =>Template.Parse("{{ func (t("));
         }
-        [Test]
-        public void ArrayIteratorHasAccessToContext()
-        {
-
-            var templateString = @"{{-
-func call_array(p)
-  ret  [1,2,3] | array.filter @(do;ret p;end)
-end
-call_array true -}}";
-
-            var template = Template.Parse(templateString);
-            Assert.AreEqual("[1, 2, 3]",template.Render());
-        }
-
-      
+       
         [Test]
         public void TopLevelAnonymousFunctionCanAccessGloba()
         {
@@ -656,28 +642,6 @@ a=99
             var template = Template.Parse(templateString);
             Assert.AreEqual("99", template.Render());
         }
-        [Test]
-        public void TestMultiLinePipe()
-        {
-            var script = @"{{""text""  |
-            string.append ""END"" |
-                string.prepend ""START""}}";
-            var template = Template.Parse(script);
-            var result = template.Render();
-            Assert.AreEqual(@"STARTtextEND", result);
-        }
-
-        [Test]
-        public void TestMultiLinePipeInText()
-        {
-            var script = @"""text""  |
-            string.append ""END"" |
-                string.prepend ""START""";
-            var template = Template.Parse(script);
-            var result = template.Render();
-            Assert.AreEqual(script, result);
-        }
-		
 		
         [Test]
         public void TestEvaluateProcessing()

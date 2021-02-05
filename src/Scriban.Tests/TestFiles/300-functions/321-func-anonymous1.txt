@@ -1,0 +1,5 @@
+{{-
+func call_array(p)
+  ret  [1,2,3] | array.filter @(do;ret p;end)
+end
+call_array true -}}
