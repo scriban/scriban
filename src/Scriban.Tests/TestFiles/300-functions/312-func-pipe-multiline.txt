@@ -1,0 +1,8 @@
+a |
+b
+===
+{{
+"test" |
+string.append "a" |
+string.prepend "b"
+}}

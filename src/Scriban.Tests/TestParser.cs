@@ -630,33 +630,9 @@ end
         {
             Assert.DoesNotThrow(() =>Template.Parse("{{ func (t("));
         }
-        [Test]
-        public void ArrayIteratorHasAccessToContext()
-        {
-
-            var templateString = @"{{-
-func call_array(p)
-  ret  [1,2,3] | array.filter @(do;ret p;end)
-end
-call_array true -}}";
-
-            var template = Template.Parse(templateString);
-            Assert.AreEqual("[1, 2, 3]",template.Render());
-        }
-
-      
-        [Test]
-        public void TopLevelAnonymousFunctionCanAccessGloba()
-        {
-            var templateString = @"{{-
-a=99
-   fn=@(do;ret a;end)
-   fn
--}}";
-            var template = Template.Parse(templateString);
-            Assert.AreEqual("99", template.Render());
-        }
-
+       
+     
+		
         [Test]
         public void TestEvaluateProcessing()
         {

@@ -638,7 +638,14 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (_isScientific && Current.Type == TokenType.PipeGreater || !_isScientific && (Current.Type == TokenType.VerticalBar || Current.Type == TokenType.PipeGreater))
+                    if (
+                            (_isScientific &&
+                              Current.Type == TokenType.PipeGreater)
+                            ||
+                             (!_isScientific &&
+                                    Current.Type == TokenType.VerticalBar) ||
+                                    Current.Type == TokenType.PipeGreater 
+                       )
                     {
                         if (functionCall != null)
                         {
@@ -653,9 +660,10 @@ namespace Scriban.Parsing
                             pipeCall.Span.Start = leftOperand.Span.Start;
                         }
                         pipeCall.From = leftOperand;
-
+						  //Allow pipes to span lines
+                        _allowNewLineLevel++;
                         pipeCall.PipeToken = ParseToken(Current.Type); // skip | or |>
-
+                        _allowNewLineLevel--;
                         // unit test: 310-func-pipe-error1.txt
                         pipeCall.To = ExpectAndParseExpression(pipeCall);
                         return Close(pipeCall);
