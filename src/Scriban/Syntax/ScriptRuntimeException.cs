@@ -38,6 +38,11 @@ namespace Scriban.Syntax
                 return new LogMessage(ParserMessageType.Error, Span, base.Message).ToString();
             }
         }
+        public static bool EnableDisplayInnerException
+        {
+            get;
+            set;
+        }
 
         /// <summary>
         /// Provides the exception message without the source span prefix.
@@ -51,11 +56,15 @@ namespace Scriban.Syntax
         }
 
         public override string ToString()
-        {
+        { 
+            if (ScriptRuntimeException.EnableDisplayInnerException && InnerException != null)
+            {
+                return base.ToString();
+            }
+
             return Message;
         }
     }
-
 #if SCRIBAN_PUBLIC
     public
 #else
