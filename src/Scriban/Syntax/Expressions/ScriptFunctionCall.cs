@@ -444,23 +444,20 @@ namespace Scriban.Syntax
 
                     index = GetParameterIndexByName(function, argName);
                     // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
-                    if (scriptFunction != null)
+                    if (function.VarParamKind != ScriptVarParamKind.None)
                     {
-                        if (function.VarParamKind != ScriptVarParamKind.None)
+                        if (index >= 0)
                         {
-                            if (index >= 0)
-                            {
-                            }
-                            // We can't add an argument that is "size" for array
-                            else if (argumentValues.CanWrite(argName))
-                            {
-                                argumentValues.TrySetValue(context, callerContext.Span, argName, context.Evaluate(namedArg), false);
-                                continue;
-                            }
-                            else
-                            {
-                                throw new ScriptRuntimeException(argument.Span, $"Cannot pass argument {argName} to function. This name is not supported by this function.");
-                            }
+                        }
+                        // We can't add an argument that is "size" for array
+                        else if (argumentValues.CanWrite(argName))
+                        {
+                            argumentValues.TrySetValue(context, callerContext.Span, argName, context.Evaluate(namedArg), false);
+                            continue;
+                        }
+                        else
+                        {
+                            throw new ScriptRuntimeException(argument.Span, $"Cannot pass argument {argName} to function. This name is not supported by this function.");
                         }
                     }
 

@@ -56,6 +56,9 @@ namespace Scriban.Tests
                 case "nested_templates_with_indent":
                     return "  {{ include 'multilines'}}";
 
+                case "named_arguments":
+                    return "{{ $.this_arg }}";
+
                 default:
                     return templatePath;
             }
