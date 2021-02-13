@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.5.0 (13 Feb 2021)
+- Add EnableDisplayInnerException for ScriptRuntimeException (#329)
+- Add support for multi-line pipes
+- Fix named arguments for include
+
 ## 3.4.2 (1 Feb 2021)
 - Fix evaluation when an enumeration is returned (#324) 
 - Improve returned AST when an valid part of member expression (#318)
