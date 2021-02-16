@@ -30,8 +30,10 @@ List of all the builtin <math> functions:
  minus
  modulo
  plus
+ random
  round
  times
+ uuid
 
 List of all the builtin <string> functions:
  append

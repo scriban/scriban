@@ -1212,6 +1212,8 @@ Math functions available through the object 'math' in scriban.
 - [`math.plus`](#mathplus)
 - [`math.round`](#mathround)
 - [`math.times`](#mathtimes)
+- [`math.uuid`](#mathuuid)
+- [`math.random`](#mathrandom)
 
 [:top:](#builtins)
 ### `math.abs`
@@ -1564,6 +1566,66 @@ The results of the multiplication: `value` * `with`
 > **output**
 ```html
 6
+```
+
+[:top:](#builtins)
+### `math.uuid`
+
+```
+math.uuid
+```
+
+#### Description
+
+Creates a new UUID
+
+#### Arguments
+
+
+#### Returns
+
+The created UUID, ex. 2dc55d50-3f6c-446a-87d0-a5a4eed23269
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ math.uuid }}
+```
+> **output**
+```html
+1c0a4aa8-680e-4bd6-95e9-cdbec45ef057
+```
+
+[:top:](#builtins)
+### `math.random`
+
+```
+math.random <minValue> <maxValue>
+```
+
+#### Description
+
+Creates a random number
+
+#### Arguments
+
+- `minValue`: The inclusive lower bound of the random number returned
+- `maxValue`: The exclusive upper bound of the random number returned. maxValue must be greater than or equal to minValue.
+
+#### Returns
+
+A random number greater or equal to minValue and less than maxValue
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ math.random 1 10 }}
+```
+> **output**
+```html
+7
 ```
 [:top:](#builtins)
 
