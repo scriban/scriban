@@ -25,6 +25,8 @@ namespace Scriban.Functions
 #endif
     partial class MathFunctions : ScriptObject
     {
+        private const string RandomTagKey = "random";
+
         /// <summary>
         /// Returns the absolute value of a specified number.
         /// </summary>
@@ -334,6 +336,57 @@ namespace Scriban.Functions
         public static object Times(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Multiply, value, with);
+        }
+
+        /// <summary>
+        /// Creates a new UUID
+        /// </summary>
+        /// <returns>The created UUID, ex. 2dc55d50-3f6c-446a-87d0-a5a4eed23269</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ math.uuid }}
+        /// ```
+        /// ```html
+        /// 1c0a4aa8-680e-4bd6-95e9-cdbec45ef057
+        /// ```
+        /// </remarks>
+        public static string Uuid()
+        {
+            return Guid.NewGuid().ToString();
+        }
+
+        /// <summary>
+        /// Creates a random number
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="minValue">The inclusive lower bound of the random number returned</param>
+        /// <param name="maxValue">The exclusive upper bound of the random number returned. maxValue must be greater than or equal to minValue.</param>
+        /// <returns>A random number greater or equal to minValue and less than maxValue</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ math.random 1 10 }}
+        /// ```
+        /// ```html
+        /// 7
+        /// ```
+        /// </remarks>
+        public static object Random(TemplateContext context, SourceSpan span, int minValue, int maxValue)
+        {
+            if (minValue > maxValue)
+            {
+                throw new ScriptRuntimeException(span, "minValue must be greater than maxValue");
+            }
+
+            var currentTags = context.Tags;
+            if (!currentTags.TryGetValue(RandomTagKey, out var randomObject))
+            {
+                randomObject = new Random();
+                currentTags.Add(RandomTagKey, randomObject);
+            }
+
+            var random = (Random)randomObject;
+            return random.Next(minValue, maxValue);
         }
     }
 }

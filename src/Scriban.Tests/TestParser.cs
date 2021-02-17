@@ -581,6 +581,12 @@ end
         [TestCaseSource("ListBuiltinFunctionTests", new object[] { "math" })]
         public static void Doc_math(string inputName, string input, string output)
         {
+            // Skip these functions, since their output not deterministic
+            if (input.Contains("math.uuid") || input.Contains("math.random"))
+            {
+                return;
+            }
+
             AssertTemplate(output, input);
         }
 
