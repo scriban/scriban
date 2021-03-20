@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.6.0 (20 Mar 2021)
+- Add `math.uuid` and `math.random` functions
+
 ## 3.5.0 (13 Feb 2021)
 - Add EnableDisplayInnerException for ScriptRuntimeException (#329)
 - Add support for multi-line pipes
