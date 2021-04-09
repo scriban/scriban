@@ -1247,13 +1247,13 @@ namespace Scriban.Parsing
             }
         }
 
-        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static bool IsFirstIdentifierLetter(char c)
         {
             return c == '_' || char.IsLetter(c);
         }
 
-        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsIdentifierLetter(char c)
         {
             return IsFirstIdentifierLetter(c) || char.IsDigit(c) || (_isLiquid && c ==  '-');
@@ -1618,7 +1618,7 @@ namespace Scriban.Parsing
             _token = new Token(isMulti ? TokenType.CommentMulti : TokenType.Comment, start, end);
         }
 
-        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private char PeekChar(int count = 1)
         {
             var offset = _position.Offset + count;
@@ -1626,7 +1626,7 @@ namespace Scriban.Parsing
             return offset >= 0 && offset < _textLength ? Text[offset] : '\0';
         }
 
-        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private void NextChar()
         {
             _position.Offset++;
