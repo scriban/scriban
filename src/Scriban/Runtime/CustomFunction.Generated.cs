@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 02/17/2021 08:23:57 by Scriban.DelegateCodeGen
+// This file was automatically generated - 04/12/2021 12:44:54 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -88,8 +88,8 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Truncatewords), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_int_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.PadLeft), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_int(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.PadRight), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_int(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.ReplaceFirst), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string_string_bool___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Replace), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string_string(method));
-            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.ReplaceFirst), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Append), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Prepend), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Remove), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string(method));
@@ -992,6 +992,31 @@ namespace Scriban.Runtime
                 var arg1 = (int)arguments[1];
 
                 return _delegate(arg0, arg1);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: string (string, string, string, bool = ...)
+        /// </summary>
+        private partial class Functionstring_string_string_string_bool___Opt : DynamicCustomFunction
+        {
+            private delegate string InternalDelegate(string arg0, string arg1, string arg2, bool arg3);
+
+            private readonly InternalDelegate _delegate;
+
+            public Functionstring_string_string_string_bool___Opt(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (string)arguments[0];
+                var arg1 = (string)arguments[1];
+                var arg2 = (string)arguments[2];
+                var arg3 = (bool)arguments[3];
+
+                return _delegate(arg0, arg1, arg2, arg3);
             }
         }
 

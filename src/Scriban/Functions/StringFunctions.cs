@@ -498,6 +498,7 @@ namespace Scriban.Functions
         /// <param name="text">The input string</param>
         /// <param name="match">The substring to find in the `text` string</param>
         /// <param name="replace">The substring used to replace the string matched by `match` in the input `text`</param>
+        /// <param name="fromEnd">if true start match from end</param>
         /// <returns>The input string replaced</returns>
         /// <remarks>
         /// ```scriban-html
@@ -507,7 +508,7 @@ namespace Scriban.Functions
         /// Hello, buddy. Goodbye, world.
         /// ```
         /// </remarks>
-        public static string ReplaceFirst(string text, string match, string replace)
+        public static string ReplaceFirst(string text, string match, string replace, bool fromEnd = false)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -520,7 +521,10 @@ namespace Scriban.Functions
             }
             replace = replace ?? string.Empty;
 
-            var indexOfMatch = text.IndexOf(match, StringComparison.OrdinalIgnoreCase);
+            var indexOfMatch = fromEnd
+                ? text.LastIndexOf(match, StringComparison.OrdinalIgnoreCase)
+                : text.IndexOf(match, StringComparison.OrdinalIgnoreCase);
+                
             if (indexOfMatch < 0)
             {
                 return text;
