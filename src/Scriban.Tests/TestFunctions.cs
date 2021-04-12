@@ -43,6 +43,50 @@ namespace Scriban.Tests
             {
                 TestParser.AssertTemplate("text(1,17) : error : Invalid number of arguments `0` passed to `string.slice1` while expecting `2` arguments", "{{ string.slice1 }}");
             }
+
+            [Test]
+            [TestCaseSource(nameof(TestReplaceFirstArguments))]
+            public void TestReplaceFirst(string source, string match, string replace, bool fromend, string expected)
+            {
+                var script = @"{{source | string.replace_first  match replace fromend}}";
+                var template = Template.Parse(script);
+                var result = template.Render(new
+                {
+                    Source = source,
+                    Match = match,
+                    Replace = replace,
+                    Fromend = fromend,
+                });
+                Assert.AreEqual(result, expected);
+            }
+
+            static readonly object[] TestReplaceFirstArguments =
+            {
+                // Replace from start
+                new object [] {
+                    "Hello, world. Goodbye, world.",    // source
+                    "world",                            // match
+                    "buddy",                            // replace
+                    false,                              // fromEnd
+                    "Hello, buddy. Goodbye, world.",    // expected
+                },
+                // Replace from end
+                new object [] {
+                    "Hello, world. Goodbye, world.",    // source
+                    "world",                            // match
+                    "buddy",                            // replace
+                    true,                               // fromEnd
+                    "Hello, world. Goodbye, buddy.",    // expected
+                },
+                // notghing to replace
+                new object [] {
+                    "Hello, world. Goodbye, world.",    // source
+                    "xxxx",                             // match
+                    "buddy",                            // replace
+                    false,                              // fromEnd
+                    "Hello, world. Goodbye, world.",    // expected
+                },
+            };
         }
 
         public class Math
