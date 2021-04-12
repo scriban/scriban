@@ -2261,6 +2261,7 @@ String functions available through the builtin object 'string`.
 - [`string.prepend`](#stringprepend)
 - [`string.remove`](#stringremove)
 - [`string.remove_first`](#stringremove_first)
+- [`string.remove_last`](#stringremove_last)
 - [`string.replace`](#stringreplace)
 - [`string.replace_first`](#stringreplace_first)
 - [`string.rstrip`](#stringrstrip)
@@ -2779,6 +2780,37 @@ Hello, . Goodbye, world.
 ```
 
 [:top:](#builtins)
+### `string.remove_last`
+
+```
+string.remove_last <text> <remove>
+```
+
+#### Description
+
+Removes the last occurrence of a substring from a string.
+
+#### Arguments
+
+- `text`: The input string
+- `remove`: The last occurence of substring to remove from the `text` string
+
+#### Returns
+
+The input string with the first occurence of a substring removed
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "Hello, world. Goodbye, world." | string.remove_first "world" }}
+```
+> **output**
+```html
+Hello, world. Goodbye, .
+```
+
+[:top:](#builtins)
 ### `string.replace`
 
 ```
@@ -2814,7 +2846,7 @@ Hello, buddy. Goodbye, buddy.
 ### `string.replace_first`
 
 ```
-string.replace_first <text> <match> <replace>
+string.replace_first <text> <match> <replace> <fromEnd: False>?
 ```
 
 #### Description
@@ -2826,6 +2858,7 @@ Replaces the first occurrence of a string with a substring.
 - `text`: The input string
 - `match`: The substring to find in the `text` string
 - `replace`: The substring used to replace the string matched by `match` in the input `text`
+- `fromEnd`: if true start match from end.
 
 #### Returns
 
