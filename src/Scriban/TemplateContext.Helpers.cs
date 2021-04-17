@@ -96,6 +96,8 @@ namespace Scriban
             try
             {
                 _objectToStringLevel++;
+                if (ObjectRecursionLimit != 0 && _objectToStringLevel > ObjectRecursionLimit)
+                    throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
                 var result = ObjectToStringImpl(value, shouldEscapeString);
                 if (LimitToString > 0 && _objectToStringLevel  == 1 && result != null && result.Length >= LimitToString)
                 {
