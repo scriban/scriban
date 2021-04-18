@@ -2803,7 +2803,7 @@ The input string with the first occurence of a substring removed
 
 > **input**
 ```scriban-html
-{{ "Hello, world. Goodbye, world." | string.remove_first "world" }}
+{{ "Hello, world. Goodbye, world." | string.remove_last "world" }}
 ```
 > **output**
 ```html
@@ -2858,7 +2858,7 @@ Replaces the first occurrence of a string with a substring.
 - `text`: The input string
 - `match`: The substring to find in the `text` string
 - `replace`: The substring used to replace the string matched by `match` in the input `text`
-- `fromEnd`: if true start match from end.
+- `fromEnd`: if true start match from end
 
 #### Returns
 
