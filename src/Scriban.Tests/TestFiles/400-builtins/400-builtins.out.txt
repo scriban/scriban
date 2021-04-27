@@ -58,6 +58,7 @@ List of all the builtin <string> functions:
  prepend
  remove
  remove_first
+ remove_last
  replace
  replace_first
  rstrip
