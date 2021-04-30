@@ -738,8 +738,11 @@ namespace Scriban
                 var result = scriptNode.Evaluate(this);
 
                 // If we are at a top-level evaluation and the result is an enumeration
-                // force it's evaluation within the current context
-                if (previousNode == null && result is IEnumerable it)
+                // force its evaluation within the current context
+                if (previousNode == null
+                    &&  result is IEnumerable it
+                    && !(result is string) 
+                    )
                 {
                     result = new ScriptArray(it);
                 }

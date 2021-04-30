@@ -636,9 +636,19 @@ end
         {
             Assert.DoesNotThrow(() =>Template.Parse("{{ func (t("));
         }
-       
-     
-        
+
+        [Test]
+        public void Regression_336()
+        {
+            var so = new Scriban.Runtime.ScriptObject();
+            so.SetValue("X", "TEST", false);
+            var evaluated = Template.Parse("{{X}}").Evaluate(new TemplateContext(so));
+            //important - test type since ScriptArray can be cast to string implicitly
+            Assert.AreEqual(typeof(string), evaluated.GetType());
+            Assert.AreEqual("TEST", evaluated);
+
+        }
+
         [Test]
         public void TestEvaluateProcessing()
         {
