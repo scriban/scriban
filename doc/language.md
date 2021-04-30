@@ -179,7 +179,7 @@ Scriban provides **two modes** for controlling whitespace:
     ``` 
     > **output**
     ```html
-    This is a <foo> a text
+    This is a <foo> text
     ```
     
   * Strip on the right:  
@@ -285,7 +285,7 @@ Scriban supports two types of strings:
   
   > **output**
   ```html 
-  [this, is, a, test]
+  [this, is, a, text]
   ``` 
 
 [:top:](#language)
