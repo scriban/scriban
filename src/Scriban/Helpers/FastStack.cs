@@ -42,7 +42,7 @@ namespace Scriban.Helpers
             _size = 0;
         }
 
-        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Peek()
         {
             if (_size == 0)
@@ -55,7 +55,7 @@ namespace Scriban.Helpers
 
         // Pops an item from the top of the stack. If the stack is empty, Pop
         // throws an InvalidOperationException.
-        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public T Pop()
         {
             if (_size == 0)
@@ -69,7 +69,7 @@ namespace Scriban.Helpers
         }
 
         // Pushes an item to the top of the stack.
-        [MethodImpl(MethodImplOptionsPortable.AggressiveInlining)]
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Push(T item)
         {
             if (_size == _array.Length)

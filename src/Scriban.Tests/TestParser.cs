@@ -649,7 +649,6 @@ end
 
         }
 
-
         [Test]
         public void TestEvaluateProcessing()
         {
@@ -665,6 +664,21 @@ end
             }
         }
 
+        [Test]
+        public void EnsureStackOverflowCanBeAvoidedForSelfReferentialObjectGraphs()
+        {
+            var script = @"{{
+m ={a:0}
+m.a =m
+m
+}}";
+            var template = Template.Parse(script);
+            var context = new TemplateContext
+            {
+                ObjectRecursionLimit = 100
+            };
+            Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+        }
 
         private static void TestFile(string inputName)
         {
