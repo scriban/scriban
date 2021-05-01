@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.7.0 (1 May 2021)
+- Add `TemplateContext.ObjectRecursionLimit` to protect against recursion limits (#340)
+- Add `string.remove_last` function (#339)
+- Fix evaluation of string (#342)
+
 ## 3.6.0 (20 Mar 2021)
 - Add `math.uuid` and `math.random` functions
 
