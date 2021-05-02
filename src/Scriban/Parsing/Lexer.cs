@@ -806,6 +806,13 @@ namespace Scriban.Parsing
                         break;
                     }
 
+                    if (c == '!')
+                    {
+                        _token = new Token(TokenType.QuestionExclamation, start, _position);
+                        NextChar();
+                        break;
+                    }
+
                     _token = new Token(TokenType.Question, start, start);
                     break;
                 case '|':

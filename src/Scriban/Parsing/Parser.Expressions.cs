@@ -46,6 +46,7 @@ namespace Scriban.Parsing
                 case TokenType.DoubleLessThan: binaryOperator = ScriptBinaryOperator.ShiftLeft; break;
                 case TokenType.DoubleGreaterThan: binaryOperator = ScriptBinaryOperator.ShiftRight; break;
                 case TokenType.DoubleQuestion: binaryOperator = ScriptBinaryOperator.EmptyCoalescing; break;
+                case TokenType.QuestionExclamation: binaryOperator = ScriptBinaryOperator.NotEmptyCoalescing; break;
                 case TokenType.DoubleAmp: binaryOperator = ScriptBinaryOperator.And; break;
                 case TokenType.DoubleVerticalBar: binaryOperator = ScriptBinaryOperator.Or; break;
                 case TokenType.DoubleEqual: binaryOperator = ScriptBinaryOperator.CompareEqual; break;
@@ -1132,6 +1133,7 @@ namespace Scriban.Parsing
             switch (op)
             {
                 case ScriptBinaryOperator.EmptyCoalescing:
+                case ScriptBinaryOperator.NotEmptyCoalescing:
                     return 20;
                 case ScriptBinaryOperator.Or:
                     return 30;

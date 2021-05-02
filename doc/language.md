@@ -43,7 +43,7 @@ The language rules are the same in a pure scripting context.
   - [8.5 Conditional expressions](#85-conditional-expressions)
   - [8.6 Unary expressions](#86-unary-expressions)
   - [8.7 Range expressions](#87-range-expressions)
-  - [8.8 The null-coalescing operator <code>??</code>](#88-the-null-coalescing-operator-)
+  - [8.8 The null-coalescing operators <code>??</code>, <code>?!</code>](#88-the-null-coalescing-operator-)
   - [8.9 Function call expression](#89-function-call-expression)
     - [Named arguments](#named-arguments)
 - [9 Statements](#9-statements)
@@ -889,9 +889,11 @@ The evaluated `left` and `right` expressions must resolve to an integer at runti
 | `left..right`   | Returns an iterator between `left` and `right` with a step of 1, including `right`. e.g: `1..5` iterates from 1 to 5
 | `left..<right`  | Returns an iterator between `left` and `right` with a step of 1, excluding `right`. e.g: `1..<5` iterates from 1 to 4
 
-### 8.8 The null-coalescing operator `??` 
+### 8.8 The null-coalescing operators `??`, `?!` 
 
 The operator `left ?? right` can be used to return the `right` value if `left` is null.
+
+The operator `left ?! right` can be used to return the `right` value if `left` is not null.
 
 [:top:](#language)
 ### 8.9 Function call expression

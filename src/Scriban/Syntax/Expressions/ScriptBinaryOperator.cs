@@ -21,6 +21,11 @@ namespace Scriban.Syntax
         /// </summary>
         EmptyCoalescing,
 
+        /// <summary>
+        /// The not empty coalescing operator ?!
+        /// </summary>
+        NotEmptyCoalescing,
+
         Or,
 
         And,
@@ -115,6 +120,8 @@ namespace Scriban.Syntax
                     return TokenType.DoubleVerticalBar;
                 case ScriptBinaryOperator.EmptyCoalescing:
                     return TokenType.DoubleQuestion;
+                case ScriptBinaryOperator.NotEmptyCoalescing:
+                    return TokenType.QuestionExclamation;
                 case ScriptBinaryOperator.ShiftLeft:
                     return TokenType.DoubleLessThan;
                 case ScriptBinaryOperator.ShiftRight:
@@ -170,6 +177,8 @@ namespace Scriban.Syntax
                     return "||";
                 case ScriptBinaryOperator.EmptyCoalescing:
                     return "??";
+                case ScriptBinaryOperator.NotEmptyCoalescing:
+                    return "?!";
                 case ScriptBinaryOperator.ShiftLeft:
                     return "<<";
                 case ScriptBinaryOperator.ShiftRight:

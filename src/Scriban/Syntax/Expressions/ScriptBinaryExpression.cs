@@ -138,6 +138,11 @@ namespace Scriban.Syntax
                 return leftValue ?? rightValue;
             }
 
+            if (op == ScriptBinaryOperator.NotEmptyCoalescing)
+            {
+                return leftValue != null ? rightValue : leftValue;
+            }
+
             switch (op)
             {
                 case ScriptBinaryOperator.LiquidHasKey:
