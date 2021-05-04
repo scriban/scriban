@@ -552,11 +552,12 @@ namespace Scriban.Tests
                 {"&", TokenType.Amp},
                 {"&&", TokenType.DoubleAmp},
                 {"??", TokenType.DoubleQuestion},
+                {"?!", TokenType.QuestionExclamation},
                 {"||", TokenType.DoubleVerticalBar},
                 {"..", TokenType.DoubleDot},
                 {"..<", TokenType.DoubleDotLess},
             });
-            //{ "{", TokenType.OpenBrace}, // We cannot test them individualy here as they are used in the lexer to match braces and better handle closing code }}
+            //{ "{", TokenType.OpenBrace}, // We cannot test them individually here as they are used in the lexer to match braces and better handle closing code }}
             //{ "}", TokenType.CloseBrace},
         }
 
