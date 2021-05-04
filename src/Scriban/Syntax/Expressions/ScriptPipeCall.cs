@@ -69,20 +69,13 @@ namespace Scriban.Syntax
 
                 return result;
             }
-            catch (ScriptRuntimeException sre) when (sre.OriginalMessage.StartsWith("Invalid target function"))
-            {
-                newPipe = false; 
-                context.ClearPipeArguments();
-                throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
-            }
             catch
             {
                 // If we have an exception clear all the pipe froms
                 newPipe = false; // Don't try to clear the pipe
-                context.ClearPipeArguments();                
+                context.ClearPipeArguments();
                 throw;
             }
-          
             finally
             {
                 if (newPipe)

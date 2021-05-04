@@ -178,9 +178,18 @@ namespace Scriban.Syntax
             var scriptFunction = functionObject as ScriptFunction;
             var function = functionObject as IScriptCustomFunction;
 
+            var isPipeCall = processPipeArguments && context.CurrentPipeArguments != null && context.CurrentPipeArguments.Count > 0;
+
             if (function == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({context.GetTypeName(functionObject)})");
+                if ((isPipeCall) && (callerContext is ScriptFunctionCall funcCall))
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Pipe expression destination `{funcCall.Target}` is not a valid function ");
+                }
+                else
+                {
+                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({context.GetTypeName(functionObject)})");
+                }
             }
 
             if (function.ParameterCount >= MaximumParameterCount)
@@ -201,7 +210,7 @@ namespace Scriban.Syntax
             List<ScriptExpression> allArgumentsWithPipe = null;
 
             // Handle pipe arguments here
-            if (processPipeArguments && context.CurrentPipeArguments != null && context.CurrentPipeArguments.Count > 0)
+            if (isPipeCall)
             {
                 var argCount = Math.Max(function.RequiredParameterCount, 1 + (arguments?.Count ?? 0));
                 allArgumentsWithPipe = context.GetOrCreateListOfScriptExpressions(argCount);
