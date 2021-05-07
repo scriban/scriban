@@ -8,6 +8,10 @@ using Scriban.Parsing;
 
 namespace Scriban.Runtime
 {
+    /// <summary>
+    /// Generic interface used to access an indexer, used by <see cref="TemplateContext"/> via <see cref="TemplateContext.GetListAccessor"/>
+    /// This is _not_ used for IDictionary, IList, etc.
+    /// </summary>
     public interface IItemAccessor
     {
         /// <summary>

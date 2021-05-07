@@ -130,11 +130,17 @@ namespace Scriban.Syntax
             {
                 var accessor = context.GetMemberAccessor(targetObject);
                 var indexAsString = context.ObjectToString(index);
+
+                object itemIndex = null;
                 var itemAccessor = accessor as IItemAccessor;
+                if (!(itemAccessor?.ItemType is null))
+                {
+                    itemIndex = context.ToObject(Index.Span, index, itemAccessor.ItemType);
+                }
 
                 if (setter)
                 {
-                    var itemSuccess = itemAccessor?.ItemType == index?.GetType() && itemAccessor.TrySetItem(context, Index.Span, targetObject, index, valueToSet);
+                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor.TrySetItem(context, Index.Span, targetObject, itemIndex, valueToSet);
                     if (itemSuccess is false &&
                         !accessor.TrySetValue(context, Index.Span, targetObject, indexAsString, valueToSet))
                     {
@@ -143,7 +149,7 @@ namespace Scriban.Syntax
                 }
                 else
                 {
-                    var itemSuccess = itemAccessor?.ItemType == index?.GetType() && itemAccessor.TryGetItem(context, Index.Span, targetObject, index, out value);
+                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor.TryGetItem(context, Index.Span, targetObject, itemIndex, out value);
                     if (itemSuccess is false &&
                         !accessor.TryGetValue(context, Index.Span, targetObject, indexAsString, out value))
                     {
