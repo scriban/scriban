@@ -639,6 +639,15 @@ namespace Scriban.Parsing
                         break;
                     }
 
+                    if ((!_isScientific) && (leftOperand is ScriptVariableGlobal) && (parentNode is ScriptPipeCall) && (functionCall == null))
+                    {
+                        // only valid option for pipceCall.To is a function call, but when a function invocation does not have any arguments it is recognized as global variable here we fix that
+                        var funcCall = Open<ScriptFunctionCall>();
+                        funcCall.Target = leftOperand;
+                        funcCall.Span = leftOperand.Span;
+                        leftOperand = funcCall;
+                    }
+
                     if (
                             (_isScientific &&
                               Current.Type == TokenType.PipeGreater)
