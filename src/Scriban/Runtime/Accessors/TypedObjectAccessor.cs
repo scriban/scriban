@@ -18,12 +18,13 @@ namespace Scriban.Runtime.Accessors
 #else
     internal
 #endif
-    class TypedObjectAccessor : IObjectAccessor
+    class TypedObjectAccessor : IObjectAccessor, IItemAccessor
     {
         private readonly MemberFilterDelegate _filter;
         private readonly Type _type;
         private readonly MemberRenamerDelegate _renamer;
         private readonly Dictionary<string, MemberInfo> _members;
+        private PropertyInfo _indexer;
 
         public TypedObjectAccessor(Type targetType, MemberFilterDelegate filter, MemberRenamerDelegate renamer)
         {
@@ -33,6 +34,8 @@ namespace Scriban.Runtime.Accessors
             _members = new Dictionary<string, MemberInfo>();
             PrepareMembers();
         }
+
+        public Type ItemType { get; private set; }
 
         public int GetMemberCount(TemplateContext context, SourceSpan span, object target)
         {
@@ -67,6 +70,28 @@ namespace Scriban.Runtime.Accessors
                 return true;
             }
             return false;
+        }
+
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        {
+            if (this._indexer is null)
+            {
+                value = default;
+                return false;
+            }
+            value = this._indexer.GetValue(target, new []{index});
+            return true;
+        }
+
+
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        {
+            if (this._indexer is null)
+            {
+                return false;
+            }
+            this._indexer.SetValue(target, value, new []{index});
+            return true;
         }
 
         public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
@@ -122,15 +147,24 @@ namespace Scriban.Runtime.Accessors
                     var getMethod = property.GetMethod;
                     if (keep && property.CanRead && !getMethod.IsStatic && getMethod.IsPublic && (_filter == null || _filter(property)))
                     {
-                        var newPropertyName = Rename(property);
-                        if (string.IsNullOrEmpty(newPropertyName))
+                        var indexParameters = property.GetIndexParameters();
+                        if (indexParameters.Length > 0)
                         {
-                            newPropertyName = property.Name;
+                            ItemType = property.PropertyType;
+                            _indexer = property;
                         }
-
-                        if (!_members.ContainsKey(newPropertyName))
+                        else
                         {
-                            _members.Add(newPropertyName, property);
+                            var newPropertyName = Rename(property);
+                            if (string.IsNullOrEmpty(newPropertyName))
+                            {
+                                newPropertyName = property.Name;
+                            }
+
+                            if (!_members.ContainsKey(newPropertyName))
+                            {
+                                _members.Add(newPropertyName, property);
+                            }
                         }
                     }
                 }
