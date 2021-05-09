@@ -1047,6 +1047,55 @@ Tax: {{ 7 | match_tax }}";
         }
 
         [Test]
+        public void TestItemIndexerOnNET_String_Getter()
+        {
+            var expected = "One";
+            var key = "alpha";
+            var myobject = new ClassWithItemIndexerString
+            {
+                [key] = expected
+            };
+            var result = Template.Parse($"{{{{obj['{key}']}}}}").Render(new ScriptObject() {{"obj", myobject}});
+            Assert.AreEqual(expected, result);
+        }
+        [Test]
+        public void TestItemIndexerOnNET_String_Setter()
+        {
+            var expected = "One";
+            var key = "alpha";
+            var myobject = new ClassWithItemIndexerString
+            {
+                [key] = "Initial"
+            };
+            _ = Template.Parse($"{{{{obj['{key}'] = '{expected}'}}}}").Render(new ScriptObject() {{"obj", myobject}});
+            Assert.AreEqual(expected, myobject[key]);
+        }
+        [Test]
+        public void TestItemIndexerOnNET_Integer_Getter()
+        {
+            var expected = "One";
+            var key = 5;
+            var myobject = new ClassWithItemIndexerInteger()
+            {
+                [key] = expected
+            };
+            var result = Template.Parse($"{{{{obj[{key}]}}}}").Render(new ScriptObject() {{"obj", myobject}});
+            Assert.AreEqual(expected, result);
+        }
+        [Test]
+        public void TestItemIndexerOnNET_Integer_Setter()
+        {
+            var expected = "One";
+            var key = 5;
+            var myobject = new ClassWithItemIndexerInteger
+            {
+                [key] = "Initial"
+            };
+            _ = Template.Parse($"{{{{obj[{key}] = '{expected}'}}}}").Render(new ScriptObject() {{"obj", myobject}});
+            Assert.AreEqual(expected, myobject[key]);
+        }
+
+        [Test]
         public void TestCaseInsensitiveLookupOnScriptObject()
         {
             var obj = new ScriptObject(StringComparer.OrdinalIgnoreCase);
@@ -1117,6 +1166,45 @@ Tax: {{ 7 | match_tax }}";
             public static string Tester(string text, int? value = null)
             {
                 return value.HasValue ? text + " Value: " + value.Value : text;
+            }
+        }
+
+        public class ClassWithItemIndexerString
+        {
+            private readonly Dictionary<string, string> _dictionary = new Dictionary<string, string>();
+            public string this[string key]
+            {
+                get => _dictionary.GetValueOrDefault(key) ?? string.Empty;
+                set
+                {
+                    if (this._dictionary.ContainsKey(key))
+                    {
+                        this._dictionary[key] = value;
+                    }
+                    else
+                    {
+                        this._dictionary.Add(key, value);
+                    }
+                }
+            }
+        }
+        public class ClassWithItemIndexerInteger
+        {
+            private readonly Dictionary<int, string> _dictionary = new Dictionary<int, string>();
+            public string this[int key]
+            {
+                get => _dictionary.GetValueOrDefault(key) ?? string.Empty;
+                set
+                {
+                    if (this._dictionary.ContainsKey(key))
+                    {
+                        this._dictionary[key] = value;
+                    }
+                    else
+                    {
+                        this._dictionary.Add(key, value);
+                    }
+                }
             }
         }
     }
