@@ -150,7 +150,7 @@ namespace Scriban.Runtime.Accessors
                         var indexParameters = property.GetIndexParameters();
                         if (indexParameters.Length > 0)
                         {
-                            ItemType = property.PropertyType;
+                            ItemType = indexParameters[0].ParameterType;
                             _indexer = property;
                         }
                         else
