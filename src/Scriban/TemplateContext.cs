@@ -241,11 +241,13 @@ namespace Scriban
 
         /// <summary>
         /// A loop limit that can be used at runtime to limit the number of loops. Default is 1000.
+        /// Set to 0 to disable checking loop limit.
         /// </summary>
         public int LoopLimit { get; set; }
 
         /// <summary>
         /// A function recursive limit count used at runtime to limit the number of recursive calls. Default is 100
+        /// Set to 0 to disable checking recursive call limit.
         /// </summary>
         public int RecursiveLimit { get; set; }
 
@@ -323,6 +325,7 @@ namespace Scriban
 
         /// <summary>
         /// Timeout used for any regexp that might be used by a builtin function. Default is 10s.
+        /// Set to <see cref="System.Text.RegularExpressions.Regex.InfiniteMatchTimeout"/> to disable regexp timeouts
         /// </summary>
         public TimeSpan RegexTimeOut { get; set; }
 
@@ -741,7 +744,7 @@ namespace Scriban
                 // force its evaluation within the current context
                 if (previousNode == null
                     &&  result is IEnumerable it
-                    && !(result is string) 
+                    && !(result is string)
                     )
                 {
                     result = new ScriptArray(it);
@@ -852,7 +855,7 @@ namespace Scriban
             }
 
             _callDepth++;
-            if (_callDepth > RecursiveLimit)
+            if (RecursiveLimit != 0 && _callDepth > RecursiveLimit)
             {
                 throw new ScriptRuntimeException(node.Span, $"Exceeding number of recursive depth limit `{RecursiveLimit}` for node: `{node}`"); // unit test: 305-func-error2.txt
             }
@@ -936,7 +939,7 @@ namespace Scriban
             Debug.Assert(_loops.Count > 0);
 
             _loopStep++;
-            if (_loopStep > LoopLimit)
+            if (LoopLimit != 0 && _loopStep > LoopLimit)
             {
                 var currentLoopStatement = _loops.Peek();
 
