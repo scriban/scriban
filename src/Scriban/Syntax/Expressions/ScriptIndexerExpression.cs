@@ -140,7 +140,7 @@ namespace Scriban.Syntax
 
                 if (setter)
                 {
-                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor.TrySetItem(context, Index.Span, targetObject, itemIndex, valueToSet);
+                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor?.TrySetItem(context, Index.Span, targetObject, itemIndex, valueToSet) is true;
                     if (itemSuccess is false &&
                         !accessor.TrySetValue(context, Index.Span, targetObject, indexAsString, valueToSet))
                     {
@@ -149,7 +149,7 @@ namespace Scriban.Syntax
                 }
                 else
                 {
-                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor.TryGetItem(context, Index.Span, targetObject, itemIndex, out value);
+                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor?.TryGetItem(context, Index.Span, targetObject, itemIndex, out value) is true;
                     if (itemSuccess is false &&
                         !accessor.TryGetValue(context, Index.Span, targetObject, indexAsString, out value))
                     {
