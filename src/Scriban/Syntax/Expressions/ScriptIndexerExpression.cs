@@ -131,16 +131,27 @@ namespace Scriban.Syntax
                 var accessor = context.GetMemberAccessor(targetObject);
                 var indexAsString = context.ObjectToString(index);
 
+                object itemIndex = null;
+                var itemAccessor = accessor as IItemAccessor;
+                if (!(itemAccessor?.ItemType is null))
+                {
+                    itemIndex = context.ToObject(Index.Span, index, itemAccessor.ItemType);
+                }
+
                 if (setter)
                 {
-                    if (!accessor.TrySetValue(context, Index.Span, targetObject, indexAsString, valueToSet))
+                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor?.TrySetItem(context, Index.Span, targetObject, itemIndex, valueToSet) is true;
+                    if (itemSuccess is false &&
+                        !accessor.TrySetValue(context, Index.Span, targetObject, indexAsString, valueToSet))
                     {
                         throw new ScriptRuntimeException(Index.Span, $"Cannot set a value for the readonly member `{indexAsString}` in the indexer: {Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
                     }
                 }
                 else
                 {
-                    if (!accessor.TryGetValue(context, Index.Span, targetObject, indexAsString, out value))
+                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor?.TryGetItem(context, Index.Span, targetObject, itemIndex, out value) is true;
+                    if (itemSuccess is false &&
+                        !accessor.TryGetValue(context, Index.Span, targetObject, indexAsString, out value))
                     {
                         var result = context.TryGetMember?.Invoke(context, Index.Span, targetObject, indexAsString, out value) ?? false;
                         if (!context.EnableRelaxedMemberAccess && !result)
