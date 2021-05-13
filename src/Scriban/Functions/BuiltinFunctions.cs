@@ -31,6 +31,7 @@ namespace Scriban.Functions
             {
                 SetValue("array", new ArrayFunctions(), true);
                 SetValue("empty", EmptyScriptObject.Default, true);
+                SetValue("blank", EmptyScriptObject.Default, true);
                 SetValue("include", new IncludeFunction(), true);
                 SetValue(DateTimeFunctions.DateVariable.Name, new DateTimeFunctions(), true);
                 SetValue("html", new HtmlFunctions(), true);

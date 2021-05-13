@@ -215,7 +215,8 @@ namespace Scriban.Parsing
                         {
                             var dotToken = ParseToken(Current.Type);
 
-                            if (GetAsText(Current) == "empty" && PeekToken().Type == TokenType.Question)
+                            var currentAsText = GetAsText(Current);
+                            if ((currentAsText == "empty" || currentAsText == "blank") && PeekToken().Type == TokenType.Question)
                             {
                                 var memberExpression = Open<ScriptIsEmptyExpression>();
                                 memberExpression.Span = leftOperand.Span;
@@ -489,7 +490,7 @@ namespace Scriban.Parsing
                                     // at this point.  In that case, leave the span empty
                                     if (parameter.Value != null)
                                         parameter.Span.End = parameter.Value.Span.End;
-                                   
+
                                 }
 
                                 if (functionCall != null)
@@ -654,7 +655,7 @@ namespace Scriban.Parsing
                             ||
                              (!_isScientific &&
                                     Current.Type == TokenType.VerticalBar) ||
-                                    Current.Type == TokenType.PipeGreater 
+                                    Current.Type == TokenType.PipeGreater
                        )
                     {
                         if (functionCall != null)
