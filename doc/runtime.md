@@ -945,9 +945,9 @@ context.PopCulture();
 
 The `TemplateContext` provides a few properties to control the runtime and make it safer. You can tweak the following properties:
 
-- `LoopLimit` (default is `1000`): If a script performs a loop over 1000 iteration, the runtime will throw a `ScriptRuntimeException`
-- `RecursiveLimit` (default is `100`): If a script performs a recursive call over 100 depth, the runtime will throw a `ScriptRuntimeException`
+- `LoopLimit` (default is `1000`): If a script performs a loop over 1000 iteration, the runtime will throw a `ScriptRuntimeException`.  Set to 0 to disable loop limits.
+- `RecursiveLimit` (default is `100`): If a script performs a recursive call over 100 depth, the runtime will throw a `ScriptRuntimeException`.  Set to 0 to disable recursion limits.
 - `StrictVariables` (default is `false`): If set to `true`, any variables that were not found during variable resolution will throw a `ScriptRuntimeException`
-- `RegexTimeOut` (default is `10s`): If a builtin function is using a regular expression that is taking more than 10s to complete, the runtime will throw an exception
+- `RegexTimeOut` (default is `10s`): If a builtin function is using a regular expression that is taking more than 10s to complete, the runtime will throw an exception.  Set to `System.Text.RegularExpressions.Regex.InfiniteMatchTimeout` to disable regular expression timeouts.
 
 [:top:](#runtime)
