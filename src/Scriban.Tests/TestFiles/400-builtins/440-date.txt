@@ -5,6 +5,7 @@
 {{ null | date.parse }}
 {{ null | date.to_string '%g' }}
 {{ x = date.parse '2016/01/05 21:22:23.024' -}}
+{{ y = date.parse '2016/01/05 21:22:23.000' -}}
 {{ x.year }}
 {{ x.month }}
 {{ x.day }}
@@ -25,6 +26,7 @@
 {{ x | date.to_string '%g%k' }}
 {{ x | date.to_string '%g%l' }}
 {{ x | date.to_string '%g%L' }}
+{{ y | date.to_string '%g%L' }}
 {{ x | date.to_string '%g%m' }}
 {{ x | date.to_string '%g%M' }}
 {{ x | date.to_string '%g%n' }}

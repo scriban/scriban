@@ -73,7 +73,7 @@ namespace Scriban.Functions
             { 'j', (dateTime, cultureInfo) => dateTime.DayOfYear.ToString("D3", cultureInfo) },
             { 'k', (dateTime, cultureInfo) => dateTime.ToString("%H", cultureInfo).PadLeft(2, ' ') },
             { 'l', (dateTime, cultureInfo) => dateTime.ToString("%h", cultureInfo).PadLeft(2, ' ') },
-            { 'L', (dateTime, cultureInfo) => dateTime.ToString("FFF", cultureInfo) },
+            { 'L', (dateTime, cultureInfo) => dateTime.ToString("fff", cultureInfo) },
             { 'm', (dateTime, cultureInfo) => dateTime.ToString("MM", cultureInfo) },
             { 'M', (dateTime, cultureInfo) => dateTime.ToString("mm", cultureInfo) },
             { 'n', (dateTime, cultureInfo) => "\n" },
