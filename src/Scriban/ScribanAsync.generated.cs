@@ -844,9 +844,29 @@ namespace Scriban.Syntax
     {
         public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
-            var valueObject = await context.EvaluateAsync(Value).ConfigureAwait(false);
+            var valueObject = EqualToken.TokenType == TokenType.Equal ? await context.EvaluateAsync(Value).ConfigureAwait(false) : await GetValueToSetAsync(context).ConfigureAwait(false);
             await context.SetValueAsync(Target, valueObject).ConfigureAwait(false);
             return null;
+        }
+
+        private async ValueTask<object> GetValueToSetAsync(TemplateContext context)
+        {
+            var right = await context.EvaluateAsync(Value).ConfigureAwait(false);
+            var left = await context.EvaluateAsync(Target).ConfigureAwait(false);
+            var op = this.EqualToken.TokenType switch
+            {
+                TokenType.PlusEqual => ScriptBinaryOperator.Add,
+                TokenType.MinusEqual => ScriptBinaryOperator.Substract,
+                TokenType.AsteriskEqual => ScriptBinaryOperator.Multiply,
+                TokenType.DivideEqual => ScriptBinaryOperator.Divide,
+                TokenType.DoubleDivideEqual => ScriptBinaryOperator.DivideRound,
+                TokenType.PercentEqual => ScriptBinaryOperator.Modulus,
+                _ => throw new NotImplementedException()
+            }
+
+            ;
+            var returnValue = ScriptBinaryExpression.Evaluate(context, this.Span, op, left, right);
+            return returnValue;
         }
     }
 

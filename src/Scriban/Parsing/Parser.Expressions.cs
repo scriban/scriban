@@ -322,45 +322,43 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (Current.Type == TokenType.Equal)
+                    if (Current.Type == TokenType.Equal && leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out ScriptFunction declaration))
                     {
-                        if (leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out ScriptFunction declaration))
+                        if (_expressionLevel > 1 || !allowAssignment)
                         {
-                            if (_expressionLevel > 1 || !allowAssignment)
-                            {
-                                LogError(leftOperand, $"Creating a function is only allowed for a top level assignment");
-                            }
-
-                            declaration.EqualToken = ParseToken(TokenType.Equal); // eat equal token
-                            declaration.Body = ParseExpressionStatement();
-                            declaration.Span.End = declaration.Body.Span.End;
-                            leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
-                        }
-                        else
-                        {
-                            var assignExpression = Open<ScriptAssignExpression>();
-
-                            if (leftOperand != null)
-                            {
-                                assignExpression.Span.Start = leftOperand.Span.Start;
-                            }
-
-                            if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
-                            {
-                                // unit test: 101-assign-complex-error1.txt
-                                LogError(assignExpression, $"Expression is only allowed for a top level assignment");
-                            }
-
-                            ExpectAndParseTokenTo(assignExpression.EqualToken, TokenType.Equal);
-
-                            assignExpression.Target = TransformKeyword(leftOperand);
-
-                            // unit test: 105-assign-error3.txt
-                            assignExpression.Value = ExpectAndParseExpression(assignExpression, parentExpression);
-
-                            leftOperand = Close(assignExpression);
+                            LogError(leftOperand, $"Creating a function is only allowed for a top level assignment");
                         }
 
+                        declaration.EqualToken = ParseToken(TokenType.Equal); // eat equal token
+                        declaration.Body = ParseExpressionStatement();
+                        declaration.Span.End = declaration.Body.Span.End;
+                        leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
+                        break;
+                    }
+                    if(TryGetCompoundAssignmentOperator(out var scriptToken, out var tokenType) && !(scriptToken is null))
+                    {
+                        var assignExpression = Open<ScriptAssignExpression>();
+                        assignExpression.EqualToken = scriptToken;
+
+                        if (leftOperand != null)
+                        {
+                            assignExpression.Span.Start = leftOperand.Span.Start;
+                        }
+
+                        if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
+                        {
+                            // unit test: 101-assign-complex-error1.txt
+                            LogError(assignExpression, $"Expression is only allowed for a top level assignment");
+                        }
+
+                        ExpectAndParseTokenTo(assignExpression.EqualToken, tokenType);
+
+                        assignExpression.Target = TransformKeyword(leftOperand);
+
+                        // unit test: 105-assign-error3.txt
+                        assignExpression.Value = ExpectAndParseExpression(assignExpression, parentExpression);
+
+                        leftOperand = Close(assignExpression);
                         break;
                     }
 
@@ -1117,6 +1115,22 @@ namespace Scriban.Parsing
             return false;
         }
 
+        private bool TryGetCompoundAssignmentOperator(out ScriptToken scriptToken, out TokenType tokenType)
+        {
+            tokenType = this.Current.Type;
+            scriptToken = tokenType switch
+            {
+                TokenType.Equal => ScriptToken.Equal(),
+                TokenType.PlusEqual => ScriptToken.PlusEqual(),
+                TokenType.MinusEqual => ScriptToken.MinusEqual(),
+                TokenType.AsteriskEqual => ScriptToken.StarEqual(),
+                TokenType.DivideEqual => ScriptToken.DivideEqual(),
+                TokenType.DoubleDivideEqual => ScriptToken.DoubleDivideEqual(),
+                TokenType.PercentEqual => ScriptToken.ModulusEqual(),
+                _ => default
+            };
+            return !(scriptToken is null);
+        }
         private bool IsStartingAsUnaryExpression()
         {
             switch (Current.Type)

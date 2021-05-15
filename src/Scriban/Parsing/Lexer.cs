@@ -749,14 +749,32 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.Caret, start, start);
                     break;
                 case '*':
-                    _token = new Token(TokenType.Asterisk, start, start);
                     NextChar();
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.AsteriskEqual, start, _position);
+                        NextChar();
+                        break;
+                    }
+                    _token = new Token(TokenType.Asterisk, start, start);
                     break;
                 case '/':
                     NextChar();
                     if (c == '/')
                     {
                         _token = new Token(TokenType.DoubleDivide, start, _position);
+                        NextChar();
+                        if (c == '=')
+                        {
+                            _token = new Token(TokenType.DoubleDivideEqual, start, _position);
+                            NextChar();
+                            break;
+                        }
+                        break;
+                    }
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.DivideEqual, start, _position);
                         NextChar();
                         break;
                     }
@@ -770,6 +788,12 @@ namespace Scriban.Parsing
                         NextChar();
                         break;
                     }
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.PlusEqual, start, _position);
+                        NextChar();
+                        break;
+                    }
                     _token = new Token(TokenType.Plus, start, start);
                     break;
                 case '-':
@@ -780,11 +804,23 @@ namespace Scriban.Parsing
                         NextChar();
                         break;
                     }
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.MinusEqual, start, _position);
+                        NextChar();
+                        break;
+                    }
                     _token = new Token(TokenType.Minus, start, start);
                     break;
                 case '%':
-                    _token = new Token(TokenType.Percent, start, start);
                     NextChar();
+                    if (c == '=')
+                    {
+                        _token = new Token(TokenType.PercentEqual, start, _position);
+                        NextChar();
+                        break;
+                    }
+                    _token = new Token(TokenType.Percent, start, start);
                     break;
                 case ',':
                     _token = new Token(TokenType.Comma, start, start);
