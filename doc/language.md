@@ -48,10 +48,11 @@ The language rules are the same in a pure scripting context.
     - [Named arguments](#named-arguments)
 - [9 Statements](#9-statements)
   - [9.1 Single expression](#91-single-expression)
-  - [9.2 <code>if &lt;expression&gt;</code>, <code>else</code>, <code>else if &lt;expression&gt;</code>](#92-if-expression-else-else-if-expression)
+  - [9.2 Compound Assignment](#92-compound-assignment)
+  - [9.3 <code>if &lt;expression&gt;</code>, <code>else</code>, <code>else if &lt;expression&gt;</code>](#93-if-expression-else-else-if-expression)
     - [Truthy and Falsy](#truthy-and-falsy)
-  - [9.3 <code>case</code> and <code>when</code>](#93-case-and-when)
-  - [9.3 Loops](#93-loops)
+  - [9.4 <code>case</code> and <code>when</code>](#94-case-and-when)
+  - [9.5 Loops](#95-loops)
     - [<code>for &lt;variable&gt; in &lt;expression&gt; ... end</code>](#for-variable-in-expression--end)
       - [The <code>offset</code> parameter](#the-offset-parameter)
       - [The <code>limit</code> parameter](#the-limit-parameter)
@@ -61,13 +62,13 @@ The language rules are the same in a pure scripting context.
       - [The <code>cols</code> parameter](#the-cols-parameter)
     - [Special loop variables](#special-loop-variables)
     - [<code>break</code> and <code>continue</code>](#break-and-continue)
-  - [9.4 <code>capture &lt;variable&gt; ... end</code>](#94-capture-variable--end)
-  - [9.5 <code>readonly &lt;variable&gt;</code>](#95-readonly-variable)
-  - [9.6 <code>import &lt;variable_path&gt;</code>](#96-import-variable_path)
-  - [9.7 <code>with &lt;variable&gt; ... end</code>](#97-with-variable--end)
-  - [9.8 <code>wrap &lt;function&gt; &lt;arg1...argn&gt; ... end</code>](#98-wrap-function-arg1argn--end)
-  - [9.9 <code>include &lt;name&gt; arg1?...argn?</code>](#99-include-name-arg1argn)
-  - [9.10 <code>ret &lt;expression&gt;?</code>](#910-ret-expression)
+  - [9.6 <code>capture &lt;variable&gt; ... end</code>](#96-capture-variable--end)
+  - [9.7 <code>readonly &lt;variable&gt;</code>](#97-readonly-variable)
+  - [9.8 <code>import &lt;variable_path&gt;</code>](#98-import-variable_path)
+  - [9.9 <code>with &lt;variable&gt; ... end</code>](#99-with-variable--end)
+  - [9.10 <code>wrap &lt;function&gt; &lt;arg1...argn&gt; ... end</code>](#910-wrap-function-arg1argn--end)
+  - [9.11 <code>include &lt;name&gt; arg1?...argn?</code>](#911-include-name-arg1argn)
+  - [9.12 <code>ret &lt;expression&gt;?</code>](#912-ret-expression)
 
 [:top:](#language)
 ## 1. Blocks
@@ -876,6 +877,12 @@ The conditional expression `cond ? left : right` allow to return `left` if `cond
 | `- <expression>`    | Arithmetic negate an expression  
 | `^ <expression>`    | Expand an array passed to arguments of a function call (see function call)
 | `@ <expression>`    | Alias the result of an expression that would be evaluated if it was a function call
+| `++ <variable>`     | Increments the variable.  Expression is evaluated to the value *after* it is incremented.
+| `-- <variable>`     | Decrements the variable.  Expression is evaluated to the value *after* it is decremented.
+| `<variable> ++`     | Increments the variable.  Expression is evaluated to the value *before* it is incremented.
+| `<variable> --`     | Decrements the variable.  Expression is evaluated to the value *before* it is decremented.
+
+> *Note:* For the increment an decrement operators, the operand must be a variable, property or indexer
 
 [:top:](#language)
 ### 8.7 Range expressions
@@ -990,7 +997,25 @@ value + 1       # This is a single line expression statement followed by this co
 ```
 
 [:top:](#language)
-### 9.2 `if <expression>`, `else`, `else if <expression>`
+### 9.2 Compound Assignment
+
+The following compound assignment operators are supported for **numbers**:
+
+|Operator             | Description
+|---------------------|------------
+| `<left> += <right>` | add left to right number, and assigns the result to left
+| `<left> -= <right>` | substract right number from left, and assigns the result to left
+| `<left> *= <right>` | multiply left by right number, and assigns the result to left
+| `<left> /= <right>` | divide left by right number, and assigns the result to left
+| `<left> //= <right>`| divide left by right number and round to an integer, and assigns the result to left
+| `<left> %= <right>` | calculates the modulus of left by right, and assigns the result to left
+
+If left or right is a float and the other is an integer, the result of the operation will be a float.
+
+> *Note:* The left-hand side of the assignment statement must be a variable, property or indexer
+
+[:top:](#language)
+### 9.3 `if <expression>`, `else`, `else if <expression>`
 
 The general syntax is:
 
@@ -1030,7 +1055,7 @@ Example testing a page object:
 
 
 [:top:](#language)
-### 9.3 `case` and `when`
+### 9.4 `case` and `when`
 
 This is the equivalent of `switch` statement in C#, a selection statement that chooses a single switch section to execute from a list of candidates based on a value matching. 
 
@@ -1060,7 +1085,7 @@ Value is 5
 ```
 
 [:top:](#language)
-### 9.3 Loops
+### 9.5 Loops
 
 #### `for <variable> in <expression> ... end`
 
@@ -1252,7 +1277,7 @@ Will output:
 ```
 
 [:top:](#language)
-### 9.4 `capture <variable> ... end`
+### 9.6 `capture <variable> ... end`
 
 The `capture <variable> ... end` statement allows to capture the template output to a variable:
 
@@ -1267,7 +1292,7 @@ This is the result of a capture {{ date.now }}
 will set `myvariable = "This is the result of a capture 06 Jan 2016\n"` 
 
 [:top:](#language)
-### 9.5 `readonly <variable>`
+### 9.7 `readonly <variable>`
 
 The `readonly` statement prevents a variable for subsequent assignments:
 
@@ -1278,7 +1303,7 @@ The `readonly` statement prevents a variable for subsequent assignments:
 ```
 
 [:top:](#language)
-### 9.6 `import <variable_path>`
+### 9.8 `import <variable_path>`
 
 The `import <variable_path>` statement allows to import the members of an object as variables of the current bound: 
 
@@ -1293,7 +1318,7 @@ The `import <variable_path>` statement allows to import the members of an object
 Note that `readonly` variables won't be override. 
 
 [:top:](#language)
-### 9.7 `with <variable> ... end`
+### 9.9 `with <variable> ... end`
 
 The `with <variable> ... end` statement will open a new object context with the passed variable, all assignment will result in setting the members of the passed object. 
 
@@ -1305,7 +1330,7 @@ end
 ```
 
 [:top:](#language)
-### 9.8 `wrap <function> <arg1...argn> ... end`
+### 9.10 `wrap <function> <arg1...argn> ... end`
 
 Pass a block of statements to a function that will be able to evaluate it using the special variable `$$`
 
@@ -1336,7 +1361,7 @@ will output:
 Note that variables declared outside the `with` block are accessible within.
 
 [:top:](#language)
-### 9.9 `include <name> arg1?...argn?` 
+### 9.11 `include <name> arg1?...argn?` 
 
 The include is not a statement but actually a function that allows to parse and render the specified template name. In order to use this function, a delegate to an template loader must be setup on the [`TemplateOptions.TemplateLoader`](runtime.md#include-and-itemplateloader) property passed to the `Template.Parse` method.
  
@@ -1360,7 +1385,7 @@ This is a string with the value 2 modified
 ```  
 
 [:top:](#language)
-### 9.10 `ret <expression>?`
+### 9.12 `ret <expression>?`
 
 The return statement is used to early exit from a top-level/include page or a function.
 
