@@ -168,8 +168,14 @@ namespace Scriban.Parsing
         /// <summary>Token "+"</summary>
         Plus,
 
+        /// <summary>Token "++"</summary>
+        DoublePlus,
+
         /// <summary>Token "-"</summary>
         Minus,
+
+        /// <summary>Token "--"</summary>
+        DoubleMinus,
 
         /// <summary>Token "%"</summary>
         Percent,

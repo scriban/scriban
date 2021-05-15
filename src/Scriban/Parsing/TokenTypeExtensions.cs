@@ -53,6 +53,8 @@ namespace Scriban.Parsing
                 TokenType.Asterisk => "*",
                 TokenType.Plus => "+",
                 TokenType.Minus => "-",
+                TokenType.DoublePlus => "++",
+                TokenType.DoubleMinus => "--",
                 TokenType.Percent => "%",
                 TokenType.DoubleLessThan => "<<",
                 TokenType.DoubleGreaterThan => ">>",

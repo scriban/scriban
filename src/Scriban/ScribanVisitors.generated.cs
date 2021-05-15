@@ -476,6 +476,29 @@ namespace Scriban.Syntax
 #else
     internal
 #endif
+    partial class ScriptIncrementDecrementExpression
+    {
+        public override int ChildrenCount => 2;
+
+        protected override ScriptNode GetChildrenImpl(int index)
+        {
+            return index switch
+            {
+                0 => OperatorToken,
+                1 => Right,
+                _ => null
+            };
+        }
+
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+    }
+
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
     partial class ScriptIndexerExpression
     {
         public override int ChildrenCount => 4;
@@ -1207,6 +1230,13 @@ namespace Scriban.Syntax
             return new ScriptImportStatement() { ImportKeyword = newImportKeyword, Expression = newExpression };
         }
 
+        public override ScriptNode Visit(ScriptIncrementDecrementExpression node)
+        {
+            var newOperatorToken = (ScriptToken)Visit((ScriptNode)node.OperatorToken);
+            var newRight = (ScriptExpression)Visit((ScriptNode)node.Right);
+            return new ScriptIncrementDecrementExpression() { OperatorToken = newOperatorToken, Right = newRight, Operator = node.Operator, Post = node.Post };
+        }
+
         public override ScriptNode Visit(ScriptIndexerExpression node)
         {
             var newTarget = (ScriptExpression)Visit((ScriptNode)node.Target);
@@ -1416,6 +1446,7 @@ namespace Scriban.Syntax
         public virtual void Visit(ScriptIdentifier node) => DefaultVisit(node);
         public virtual void Visit(ScriptIfStatement node) => DefaultVisit(node);
         public virtual void Visit(ScriptImportStatement node) => DefaultVisit(node);
+        public virtual void Visit(ScriptIncrementDecrementExpression node) => DefaultVisit(node);
         public virtual void Visit(ScriptIndexerExpression node) => DefaultVisit(node);
         public virtual void Visit(ScriptIsEmptyExpression node) => DefaultVisit(node);
         public virtual void Visit(ScriptKeyword node) => DefaultVisit(node);
@@ -1474,6 +1505,7 @@ namespace Scriban.Syntax
         public virtual TResult Visit(ScriptIdentifier node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptIfStatement node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptImportStatement node) => DefaultVisit(node);
+        public virtual TResult Visit(ScriptIncrementDecrementExpression node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptIndexerExpression node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptIsEmptyExpression node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptKeyword node) => DefaultVisit(node);

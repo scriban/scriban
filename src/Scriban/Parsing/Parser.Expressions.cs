@@ -173,6 +173,10 @@ namespace Scriban.Parsing
                     case TokenType.OpenBracket:
                         leftOperand = ParseArrayInitializer();
                         break;
+                    case TokenType.DoublePlus:
+                    case TokenType.DoubleMinus:
+                        leftOperand = ParseIncrementDecrementExpression();
+                        break;
                     default:
                         if (IsStartingAsUnaryExpression())
                         {
@@ -249,6 +253,24 @@ namespace Scriban.Parsing
                             return leftOperand;
                         }
                         continue;
+                    }
+
+                    if (Current.Type == TokenType.DoublePlus || Current.Type == TokenType.DoubleMinus)
+                    {
+                        var op = Current;
+                        if (!(leftOperand is IScriptVariablePath))
+                        {
+                            LogError($"The operand of an increment or decrement operator must be a variable, property or indexer");
+                        }
+                        var unaryExpression = new ScriptIncrementDecrementExpression
+                        {
+                            Right = leftOperand,
+                            Span = leftOperand.Span,
+                            OperatorToken = this.ParseToken(op.Type),
+                            Operator = op.Type == TokenType.DoublePlus ? ScriptUnaryOperator.Increment : ScriptUnaryOperator.Decrement,
+                            Post = true
+                        };
+                        leftOperand = unaryExpression;
                     }
 
                     // If we have a bracket but left operand is a (variable || member || indexer), then we consider next as an indexer
@@ -489,7 +511,7 @@ namespace Scriban.Parsing
                                     // at this point.  In that case, leave the span empty
                                     if (parameter.Value != null)
                                         parameter.Span.End = parameter.Value.Span.End;
-                                   
+
                                 }
 
                                 if (functionCall != null)
@@ -645,7 +667,7 @@ namespace Scriban.Parsing
                             ||
                              (!_isScientific &&
                                     Current.Type == TokenType.VerticalBar) ||
-                                    Current.Type == TokenType.PipeGreater 
+                                    Current.Type == TokenType.PipeGreater
                        )
                     {
                         if (functionCall != null)
@@ -930,6 +952,33 @@ namespace Scriban.Parsing
             return existingKeyword;
         }
 
+        private ScriptExpression ParseIncrementDecrementExpression()
+        {
+            // Parse the operator as verbatim text
+            var unaryTokenType = Current.Type;
+            var expression = Open<ScriptIncrementDecrementExpression>();
+            expression.OperatorToken = ParseToken(unaryTokenType);
+            switch (unaryTokenType)
+            {
+                case TokenType.DoublePlus:
+                    expression.Operator = ScriptUnaryOperator.Increment;
+                    break;
+                case TokenType.DoubleMinus:
+                    expression.Operator = ScriptUnaryOperator.Decrement;
+                    break;
+                default:
+                    LogError($"Unexpected token `{unaryTokenType}` for unary expression");
+                    break;
+            }
+            var newPrecedence = GetDefaultUnaryOperatorPrecedence(expression.Operator);
+            expression.Right = ExpectAndParseExpression(expression, null, newPrecedence);
+            if (!(expression.Right is IScriptVariablePath))
+            {
+                LogError($"The operand of an increment or decrement operator must be a variable, property or indexer");
+            }
+            return Close(expression);
+        }
+
         private ScriptExpression ParseUnaryExpression()
         {
             // unit test: 113-unary.txt
@@ -1076,6 +1125,8 @@ namespace Scriban.Parsing
                 case TokenType.Minus:
                 case TokenType.Plus:
                 case TokenType.Arroba:
+                case TokenType.DoublePlus:
+                case TokenType.DoubleMinus:
                     return true;
 
                 case TokenType.Caret:
@@ -1201,6 +1252,10 @@ namespace Scriban.Parsing
                 case ScriptUnaryOperator.FunctionAlias:
                 case ScriptUnaryOperator.FunctionParametersExpand:
                     return 200;
+                case ScriptUnaryOperator.Decrement:
+                case ScriptUnaryOperator.Increment:
+                    // Increment and decrement are "primary expressions" in C#, higher precedence than unary operators
+                    return 210;
                 default:
                     return 0;
             }

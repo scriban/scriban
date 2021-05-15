@@ -763,12 +763,24 @@ namespace Scriban.Parsing
                     _token = new Token(TokenType.Divide, start, start);
                     break;
                 case '+':
-                    _token = new Token(TokenType.Plus, start, start);
                     NextChar();
+                    if (c == '+')
+                    {
+                        _token = new Token(TokenType.DoublePlus, start, _position);
+                        NextChar();
+                        break;
+                    }
+                    _token = new Token(TokenType.Plus, start, start);
                     break;
                 case '-':
-                    _token = new Token(TokenType.Minus, start, start);
                     NextChar();
+                    if (c == '-')
+                    {
+                        _token = new Token(TokenType.DoubleMinus, start, _position);
+                        NextChar();
+                        break;
+                    }
+                    _token = new Token(TokenType.Minus, start, start);
                     break;
                 case '%':
                     _token = new Token(TokenType.Percent, start, start);
