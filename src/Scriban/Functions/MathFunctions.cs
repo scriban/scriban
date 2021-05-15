@@ -249,7 +249,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static object Minus(TemplateContext context, SourceSpan span, object value, object with)
         {
-            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Substract, value, with);
+            return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Subtract, value, with);
         }
 
         /// <summary>
