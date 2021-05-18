@@ -358,7 +358,7 @@ namespace Scriban.Parsing
             var binaryExpression = Open<ScriptBinaryExpression>();
             binaryExpression.Left = ExpectAndParseVariable(incdecStatement);
             binaryExpression.Right = new ScriptLiteral() {Span = binaryExpression.Span, Value = 1};
-            binaryExpression.Operator = isDec ? ScriptBinaryOperator.Substract : ScriptBinaryOperator.Add;
+            binaryExpression.Operator = isDec ? ScriptBinaryOperator.Subtract : ScriptBinaryOperator.Add;
             ExpectEndOfStatement();
 
             incdecStatement.Expression = binaryExpression;

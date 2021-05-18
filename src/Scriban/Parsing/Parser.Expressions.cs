@@ -41,7 +41,7 @@ namespace Scriban.Parsing
                 case TokenType.Divide: binaryOperator = ScriptBinaryOperator.Divide; break;
                 case TokenType.DoubleDivide: binaryOperator = ScriptBinaryOperator.DivideRound; break;
                 case TokenType.Plus: binaryOperator = ScriptBinaryOperator.Add; break;
-                case TokenType.Minus: binaryOperator = ScriptBinaryOperator.Substract; break;
+                case TokenType.Minus: binaryOperator = ScriptBinaryOperator.Subtract; break;
                 case TokenType.Percent: binaryOperator = ScriptBinaryOperator.Modulus; break;
                 case TokenType.DoubleLessThan: binaryOperator = ScriptBinaryOperator.ShiftLeft; break;
                 case TokenType.DoubleGreaterThan: binaryOperator = ScriptBinaryOperator.ShiftRight; break;
@@ -1247,7 +1247,7 @@ namespace Scriban.Parsing
                     return 90;
 
                 case ScriptBinaryOperator.Add:
-                case ScriptBinaryOperator.Substract:
+                case ScriptBinaryOperator.Subtract:
                     return PrecedenceOfAdd;
                 case ScriptBinaryOperator.Multiply:
                 case ScriptBinaryOperator.Divide:
