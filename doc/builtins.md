@@ -2024,6 +2024,10 @@ A list with the member values of the input object
 
 Functions exposed through `regex` builtin object.
 
+>*Note:* If your regular expression contains backslashes (` \ `), you will need to do one of the following:
+>- Anywhere you would use a ` \ `, use two.  For example: `"\d+\.\d+"` becomes `"\\d+\\.\\d+"`
+>- Use [verbatim strings](language.md#31-strings).  For example: `"\d+\.\d+"` becomes `` `\d+\.\d+` ``
+
 - [`regex.escape`](#regexescape)
 - [`regex.match`](#regexmatch)
 - [`regex.matches`](#regexmatches)
