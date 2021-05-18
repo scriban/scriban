@@ -173,6 +173,10 @@ namespace Scriban.Parsing
                     case TokenType.OpenBracket:
                         leftOperand = ParseArrayInitializer();
                         break;
+                    case TokenType.DoublePlus:
+                    case TokenType.DoubleMinus:
+                        leftOperand = ParseIncrementDecrementExpression();
+                        break;
                     default:
                         if (IsStartingAsUnaryExpression())
                         {
@@ -252,6 +256,24 @@ namespace Scriban.Parsing
                         continue;
                     }
 
+                    if (Current.Type == TokenType.DoublePlus || Current.Type == TokenType.DoubleMinus)
+                    {
+                        var op = Current;
+                        if (!(leftOperand is IScriptVariablePath))
+                        {
+                            LogError($"The operand of an increment or decrement operator must be a variable, property or indexer");
+                        }
+                        var unaryExpression = new ScriptIncrementDecrementExpression
+                        {
+                            Right = leftOperand,
+                            Span = leftOperand.Span,
+                            OperatorToken = this.ParseToken(op.Type),
+                            Operator = op.Type == TokenType.DoublePlus ? ScriptUnaryOperator.Increment : ScriptUnaryOperator.Decrement,
+                            Post = true
+                        };
+                        leftOperand = unaryExpression;
+                    }
+
                     // If we have a bracket but left operand is a (variable || member || indexer), then we consider next as an indexer
                     // unit test: 130-indexer-accessor-accept1.txt
                     if (Current.Type == TokenType.OpenBracket && (leftOperand is IScriptVariablePath || leftOperand is ScriptLiteral || leftOperand is ScriptFunctionCall) && !IsPreviousCharWhitespace())
@@ -301,45 +323,43 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (Current.Type == TokenType.Equal)
+                    if (Current.Type == TokenType.Equal && leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out ScriptFunction declaration))
                     {
-                        if (leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out ScriptFunction declaration))
+                        if (_expressionLevel > 1 || !allowAssignment)
                         {
-                            if (_expressionLevel > 1 || !allowAssignment)
-                            {
-                                LogError(leftOperand, $"Creating a function is only allowed for a top level assignment");
-                            }
-
-                            declaration.EqualToken = ParseToken(TokenType.Equal); // eat equal token
-                            declaration.Body = ParseExpressionStatement();
-                            declaration.Span.End = declaration.Body.Span.End;
-                            leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
-                        }
-                        else
-                        {
-                            var assignExpression = Open<ScriptAssignExpression>();
-
-                            if (leftOperand != null)
-                            {
-                                assignExpression.Span.Start = leftOperand.Span.Start;
-                            }
-
-                            if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
-                            {
-                                // unit test: 101-assign-complex-error1.txt
-                                LogError(assignExpression, $"Expression is only allowed for a top level assignment");
-                            }
-
-                            ExpectAndParseTokenTo(assignExpression.EqualToken, TokenType.Equal);
-
-                            assignExpression.Target = TransformKeyword(leftOperand);
-
-                            // unit test: 105-assign-error3.txt
-                            assignExpression.Value = ExpectAndParseExpression(assignExpression, parentExpression);
-
-                            leftOperand = Close(assignExpression);
+                            LogError(leftOperand, $"Creating a function is only allowed for a top level assignment");
                         }
 
+                        declaration.EqualToken = ParseToken(TokenType.Equal); // eat equal token
+                        declaration.Body = ParseExpressionStatement();
+                        declaration.Span.End = declaration.Body.Span.End;
+                        leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
+                        break;
+                    }
+                    if(TryGetCompoundAssignmentOperator(out var scriptToken, out var tokenType) && !(scriptToken is null))
+                    {
+                        var assignExpression = Open<ScriptAssignExpression>();
+                        assignExpression.EqualToken = scriptToken;
+
+                        if (leftOperand != null)
+                        {
+                            assignExpression.Span.Start = leftOperand.Span.Start;
+                        }
+
+                        if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
+                        {
+                            // unit test: 101-assign-complex-error1.txt
+                            LogError(assignExpression, $"Expression is only allowed for a top level assignment");
+                        }
+
+                        ExpectAndParseTokenTo(assignExpression.EqualToken, tokenType);
+
+                        assignExpression.Target = TransformKeyword(leftOperand);
+
+                        // unit test: 105-assign-error3.txt
+                        assignExpression.Value = ExpectAndParseExpression(assignExpression, parentExpression);
+
+                        leftOperand = Close(assignExpression);
                         break;
                     }
 
@@ -940,6 +960,33 @@ namespace Scriban.Parsing
             return existingKeyword;
         }
 
+        private ScriptExpression ParseIncrementDecrementExpression()
+        {
+            // Parse the operator as verbatim text
+            var unaryTokenType = Current.Type;
+            var expression = Open<ScriptIncrementDecrementExpression>();
+            expression.OperatorToken = ParseToken(unaryTokenType);
+            switch (unaryTokenType)
+            {
+                case TokenType.DoublePlus:
+                    expression.Operator = ScriptUnaryOperator.Increment;
+                    break;
+                case TokenType.DoubleMinus:
+                    expression.Operator = ScriptUnaryOperator.Decrement;
+                    break;
+                default:
+                    LogError($"Unexpected token `{unaryTokenType}` for unary expression");
+                    break;
+            }
+            var newPrecedence = GetDefaultUnaryOperatorPrecedence(expression.Operator);
+            expression.Right = ExpectAndParseExpression(expression, null, newPrecedence);
+            if (!(expression.Right is IScriptVariablePath))
+            {
+                LogError($"The operand of an increment or decrement operator must be a variable, property or indexer");
+            }
+            return Close(expression);
+        }
+
         private ScriptExpression ParseUnaryExpression()
         {
             // unit test: 113-unary.txt
@@ -1078,6 +1125,22 @@ namespace Scriban.Parsing
             return false;
         }
 
+        private bool TryGetCompoundAssignmentOperator(out ScriptToken scriptToken, out TokenType tokenType)
+        {
+            tokenType = this.Current.Type;
+            scriptToken = tokenType switch
+            {
+                TokenType.Equal => ScriptToken.Equal(),
+                TokenType.PlusEqual => ScriptToken.PlusEqual(),
+                TokenType.MinusEqual => ScriptToken.MinusEqual(),
+                TokenType.AsteriskEqual => ScriptToken.StarEqual(),
+                TokenType.DivideEqual => ScriptToken.DivideEqual(),
+                TokenType.DoubleDivideEqual => ScriptToken.DoubleDivideEqual(),
+                TokenType.PercentEqual => ScriptToken.ModulusEqual(),
+                _ => default
+            };
+            return !(scriptToken is null);
+        }
         private bool IsStartingAsUnaryExpression()
         {
             switch (Current.Type)
@@ -1086,6 +1149,8 @@ namespace Scriban.Parsing
                 case TokenType.Minus:
                 case TokenType.Plus:
                 case TokenType.Arroba:
+                case TokenType.DoublePlus:
+                case TokenType.DoubleMinus:
                     return true;
 
                 case TokenType.Caret:
@@ -1211,6 +1276,10 @@ namespace Scriban.Parsing
                 case ScriptUnaryOperator.FunctionAlias:
                 case ScriptUnaryOperator.FunctionParametersExpand:
                     return 200;
+                case ScriptUnaryOperator.Decrement:
+                case ScriptUnaryOperator.Increment:
+                    // Increment and decrement are "primary expressions" in C#, higher precedence than unary operators
+                    return 210;
                 default:
                     return 0;
             }

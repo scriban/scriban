@@ -228,8 +228,11 @@ namespace Scriban
                 var result = await scriptNode.EvaluateAsync(this).ConfigureAwait(false);
 
                 // If we are at a top-level evaluation and the result is an enumeration
-                // force it's evaluation within the current context
-                if (previousNode == null && result is IEnumerable it)
+                // force its evaluation within the current context
+                if (previousNode == null
+                    && result is IEnumerable it
+                    && !(result is string)
+                    )
                 {
                     result = new ScriptArray(it);
                 }
@@ -841,9 +844,29 @@ namespace Scriban.Syntax
     {
         public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
-            var valueObject = await context.EvaluateAsync(Value).ConfigureAwait(false);
+            var valueObject = EqualToken.TokenType == TokenType.Equal ? await context.EvaluateAsync(Value).ConfigureAwait(false) : await GetValueToSetAsync(context).ConfigureAwait(false);
             await context.SetValueAsync(Target, valueObject).ConfigureAwait(false);
             return null;
+        }
+
+        private async ValueTask<object> GetValueToSetAsync(TemplateContext context)
+        {
+            var right = await context.EvaluateAsync(Value).ConfigureAwait(false);
+            var left = await context.EvaluateAsync(Target).ConfigureAwait(false);
+            var op = this.EqualToken.TokenType switch
+            {
+                TokenType.PlusEqual => ScriptBinaryOperator.Add,
+                TokenType.MinusEqual => ScriptBinaryOperator.Substract,
+                TokenType.AsteriskEqual => ScriptBinaryOperator.Multiply,
+                TokenType.DivideEqual => ScriptBinaryOperator.Divide,
+                TokenType.DoubleDivideEqual => ScriptBinaryOperator.DivideRound,
+                TokenType.PercentEqual => ScriptBinaryOperator.Modulus,
+                _ => throw new NotImplementedException()
+            }
+
+            ;
+            var returnValue = ScriptBinaryExpression.Evaluate(context, this.Span, op, left, right);
+            return returnValue;
         }
     }
 
@@ -1546,23 +1569,20 @@ namespace Scriban.Syntax
 
                     index = GetParameterIndexByName(function, argName);
                     // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
-                    if (scriptFunction != null)
+                    if (function.VarParamKind != ScriptVarParamKind.None)
                     {
-                        if (function.VarParamKind != ScriptVarParamKind.None)
+                        if (index >= 0)
                         {
-                            if (index >= 0)
-                            {
-                            }
-                            // We can't add an argument that is "size" for array
-                            else if (argumentValues.CanWrite(argName))
-                            {
-                                argumentValues.TrySetValue(context, callerContext.Span, argName, await context.EvaluateAsync(namedArg).ConfigureAwait(false), false);
-                                continue;
-                            }
-                            else
-                            {
-                                throw new ScriptRuntimeException(argument.Span, $"Cannot pass argument {argName} to function. This name is not supported by this function.");
-                            }
+                        }
+                        // We can't add an argument that is "size" for array
+                        else if (argumentValues.CanWrite(argName))
+                        {
+                            argumentValues.TrySetValue(context, callerContext.Span, argName, await context.EvaluateAsync(namedArg).ConfigureAwait(false), false);
+                            continue;
+                        }
+                        else
+                        {
+                            throw new ScriptRuntimeException(argument.Span, $"Cannot pass argument {argName} to function. This name is not supported by this function.");
                         }
                     }
 
@@ -1642,6 +1662,23 @@ namespace Scriban.Syntax
 
             context.Import(Expression.Span, value);
             return null;
+        }
+    }
+
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptIncrementDecrementExpression
+    {
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
+        {
+            var increment = this.Operator == ScriptUnaryOperator.Increment ? 1 : -1;
+            var value = Evaluate(context, this.Right.Span, ScriptUnaryOperator.Plus, await context.EvaluateAsync(this.Right).ConfigureAwait(false));
+            var incrementedValue = ScriptBinaryExpression.Evaluate(context, this.Right.Span, ScriptBinaryOperator.Add, value, increment);
+            await context.SetValueAsync(Right, incrementedValue).ConfigureAwait(false);
+            return Post ? value : incrementedValue;
         }
     }
 

@@ -159,20 +159,44 @@ namespace Scriban.Parsing
         /// <summary>Token "/"</summary>
         Divide,
 
+        /// <summary>Token "/="</summary>
+        DivideEqual,
+
         /// <summary>Token "//"</summary>
         DoubleDivide,
+
+        /// <summary>Token "//="</summary>
+        DoubleDivideEqual,
 
         /// <summary>Token "*"</summary>
         Asterisk,
 
+        /// <summary>Token "*="</summary>
+        AsteriskEqual,
+
         /// <summary>Token "+"</summary>
         Plus,
+
+        /// <summary>Token "++"</summary>
+        PlusEqual,
+
+        /// <summary>Token "++"</summary>
+        DoublePlus,
 
         /// <summary>Token "-"</summary>
         Minus,
 
+        /// <summary>Token "-="</summary>
+        MinusEqual,
+
+        /// <summary>Token "--"</summary>
+        DoubleMinus,
+
         /// <summary>Token "%"</summary>
         Percent,
+
+        /// <summary>Token "%="</summary>
+        PercentEqual,
 
         /// <summary>Token "&lt;&lt;"</summary>
         DoubleLessThan,

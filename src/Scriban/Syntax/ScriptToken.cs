@@ -39,11 +39,17 @@ namespace Scriban.Syntax
         public static ScriptToken CompareLessOrEqual() => new ScriptToken(TokenType.LessEqual);
         public static ScriptToken CompareGreaterOrEqual() => new ScriptToken(TokenType.GreaterEqual);
         public static ScriptToken Divide() => new ScriptToken(TokenType.Divide);
+        public static ScriptToken DivideEqual() => new ScriptToken(TokenType.DivideEqual);
         public static ScriptToken DoubleDivide() => new ScriptToken(TokenType.DoubleDivide);
+        public static ScriptToken DoubleDivideEqual() => new ScriptToken(TokenType.DoubleDivideEqual);
         public static ScriptToken Star() => new ScriptToken(TokenType.Asterisk);
+        public static ScriptToken StarEqual() => new ScriptToken(TokenType.AsteriskEqual);
         public static ScriptToken Plus() => new ScriptToken(TokenType.Plus);
+        public static ScriptToken PlusEqual() => new ScriptToken(TokenType.PlusEqual);
         public static ScriptToken Minus() => new ScriptToken(TokenType.Minus);
+        public static ScriptToken MinusEqual() => new ScriptToken(TokenType.MinusEqual);
         public static ScriptToken Modulus() => new ScriptToken(TokenType.Percent);
+        public static ScriptToken ModulusEqual() => new ScriptToken(TokenType.PercentEqual);
         public static ScriptToken DoubleLess() => new ScriptToken(TokenType.DoubleLessThan);
         public static ScriptToken DoubleGreater() => new ScriptToken(TokenType.DoubleGreaterThan);
         public static ScriptToken Comma() => new ScriptToken(TokenType.Comma);

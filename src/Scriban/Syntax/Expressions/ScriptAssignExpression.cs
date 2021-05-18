@@ -4,8 +4,10 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
 using System.IO;
+using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
@@ -46,9 +48,28 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
-            var valueObject = context.Evaluate(Value);
+            var valueObject = EqualToken.TokenType == TokenType.Equal
+                ? context.Evaluate(Value)
+                : GetValueToSet(context);
             context.SetValue(Target, valueObject);
             return null;
+        }
+
+        private object GetValueToSet(TemplateContext context)
+        {
+            var right = context.Evaluate(Value);
+            var left = context.Evaluate(Target);
+            var op = this.EqualToken.TokenType switch
+            {
+                TokenType.PlusEqual => ScriptBinaryOperator.Add,
+                TokenType.MinusEqual => ScriptBinaryOperator.Substract,
+                TokenType.AsteriskEqual => ScriptBinaryOperator.Multiply,
+                TokenType.DivideEqual => ScriptBinaryOperator.Divide,
+                TokenType.DoubleDivideEqual => ScriptBinaryOperator.DivideRound,
+                TokenType.PercentEqual => ScriptBinaryOperator.Modulus,
+                _ => throw new ScriptRuntimeException(context.CurrentSpan, $"Operator {this.EqualToken} is not a valid compound assignment operator"),
+            };
+            return ScriptBinaryExpression.Evaluate(context, this.Span, op, left, right);
         }
 
         public override bool CanHaveLeadingTrivia()

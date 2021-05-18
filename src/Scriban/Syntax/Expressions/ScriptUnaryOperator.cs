@@ -19,7 +19,9 @@ namespace Scriban.Syntax
         Plus,
         FunctionAlias,
         FunctionParametersExpand,
-        Custom
+        Increment,
+        Decrement,
+        Custom,
     }
 
 #if SCRIBAN_PUBLIC
@@ -43,6 +45,10 @@ namespace Scriban.Syntax
                     return "@";
                 case ScriptUnaryOperator.FunctionParametersExpand:
                     return "^";
+                case ScriptUnaryOperator.Decrement:
+                    return "--";
+                case ScriptUnaryOperator.Increment:
+                    return "++";
                 default:
                     throw new ArgumentOutOfRangeException(nameof(op));
             }
