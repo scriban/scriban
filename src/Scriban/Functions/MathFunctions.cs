@@ -232,13 +232,13 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Substracts from the input value the `with` value
+        /// Subtracts from the input value the `with` value
         /// </summary>
         /// <param name="context">The template context</param>
         /// <param name="span">The source span</param>
         /// <param name="value">The input value</param>
-        /// <param name="with">The with value to substract from `value`</param>
-        /// <returns>The results of the substraction: `value` - `with`</returns>
+        /// <param name="with">The with value to subtract from `value`</param>
+        /// <returns>The results of the subtraction: `value` - `with`</returns>
         /// <remarks>
         /// ```scriban-html
         /// {{ 255 | math.minus 5}}

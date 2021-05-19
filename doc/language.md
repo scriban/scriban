@@ -813,7 +813,7 @@ The following binary operators are supported for **numbers**:
 |Operator            | Description
 |--------------------|------------
 | `<left> + <right>` | add left to right number 
-| `<left> - <right>` | substract right number from left
+| `<left> - <right>` | subtract right number from left
 | `<left> * <right>` | multiply left by right number
 | `<left> / <right>` | divide left by right number
 | `<left> // <right>`| divide left by right number and round to an integer
@@ -1004,7 +1004,7 @@ The following compound assignment operators are supported for **numbers**:
 |Operator             | Description
 |---------------------|------------
 | `<left> += <right>` | add left to right number, and assigns the result to left
-| `<left> -= <right>` | substract right number from left, and assigns the result to left
+| `<left> -= <right>` | subtract right number from left, and assigns the result to left
 | `<left> *= <right>` | multiply left by right number, and assigns the result to left
 | `<left> /= <right>` | divide left by right number, and assigns the result to left
 | `<left> //= <right>`| divide left by right number and round to an integer, and assigns the result to left

@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 04/12/2021 12:44:54 by Scriban.DelegateCodeGen
+// This file was automatically generated - 05/19/2021 09:51:04 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 

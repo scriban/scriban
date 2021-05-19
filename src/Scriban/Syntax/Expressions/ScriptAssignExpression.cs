@@ -62,7 +62,7 @@ namespace Scriban.Syntax
             var op = this.EqualToken.TokenType switch
             {
                 TokenType.PlusEqual => ScriptBinaryOperator.Add,
-                TokenType.MinusEqual => ScriptBinaryOperator.Substract,
+                TokenType.MinusEqual => ScriptBinaryOperator.Subtract,
                 TokenType.AsteriskEqual => ScriptBinaryOperator.Multiply,
                 TokenType.DivideEqual => ScriptBinaryOperator.Divide,
                 TokenType.DoubleDivideEqual => ScriptBinaryOperator.DivideRound,
