@@ -31,7 +31,7 @@ namespace Scriban.Functions
     /// [:top:](#builtins)
     /// #### Binary operations
     ///
-    /// The substract operation `date1 - date2`: Substract `date2` from `date1` and return a timespan internal object (see timespan object below).
+    /// The subtract operation `date1 - date2`: Subtract `date2` from `date1` and return a timespan internal object (see timespan object below).
     ///
     /// Other comparison operators(`==`, `!=`, `&lt;=`, `&gt;=`, `&lt;`, `&gt;`) are also working with date objects.
     ///

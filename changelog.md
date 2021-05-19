@@ -64,7 +64,7 @@
 - Fix unary minus operator missing in Liquid
 
 ## 3.0.6 (6 Dec 2020)
-- Fix substraction in scientific mode when no whitespace was involved (e.g `1-2`) reslting in an implicit multiplication (1 * -2).
+- Fix subtraction in scientific mode when no whitespace was involved (e.g `1-2`) reslting in an implicit multiplication (1 * -2).
 
 ## 3.0.5 (1 Dec 2020)
 - Fix indentation for nested includes when using TemplateContext.IndentWithInclude

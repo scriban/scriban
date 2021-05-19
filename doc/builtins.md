@@ -706,7 +706,7 @@ A datetime object represents an instant in time, expressed as a date and time of
 [:top:](#builtins)
 #### Binary operations
 
-The substract operation `date1 - date2`: Substract `date2` from `date1` and return a timespan internal object (see timespan object below).
+The subtract operation `date1 - date2`: Subtract `date2` from `date1` and return a timespan internal object (see timespan object below).
 
 Other comparison operators(`==`, `!=`, `<=`, `>=`, `<`, `>`) are also working with date objects.
 
@@ -1418,16 +1418,16 @@ math.minus <value> <with>
 
 #### Description
 
-Substracts from the input value the `with` value
+Subtracts from the input value the `with` value
 
 #### Arguments
 
 - `value`: The input value
-- `with`: The with value to substract from `value`
+- `with`: The with value to subtract from `value`
 
 #### Returns
 
-The results of the substraction: `value` - `with`
+The results of the subtraction: `value` - `with`
 
 #### Examples
 
