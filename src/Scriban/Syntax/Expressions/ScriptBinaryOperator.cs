@@ -55,6 +55,9 @@ namespace Scriban.Syntax
         Add,
         Subtract,
 
+        [Obsolete]
+        Substract = Subtract,
+
         Multiply,
         Divide,
         DivideRound,
@@ -68,6 +71,10 @@ namespace Scriban.Syntax
         RangeExclude,
 
         Custom,
+
+
+
+
     }
 
 #if SCRIBAN_PUBLIC
