@@ -429,12 +429,12 @@ namespace Scriban.Parsing
                         // Parse ?
                         ExpectAndParseTokenTo(conditionalExpression.QuestionToken, TokenType.Question);
 
-                        conditionalExpression.ThenValue = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.DefaultNoNamedArgument);
+                        conditionalExpression.ThenValue = ExpectAndParseExpression(conditionalExpression, mode: ParseExpressionMode.DefaultNoNamedArgument);
 
                         // Parse :
                         ExpectAndParseTokenTo(conditionalExpression.ColonToken, TokenType.Colon);
 
-                        conditionalExpression.ElseValue = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.DefaultNoNamedArgument);
+                        conditionalExpression.ElseValue = ExpectAndParseExpression(conditionalExpression, mode: ParseExpressionMode.DefaultNoNamedArgument);
 
                         Close(conditionalExpression);
                         leftOperand = conditionalExpression;
@@ -658,6 +658,15 @@ namespace Scriban.Parsing
                     if (enteringPrecedence > 0)
                     {
                         break;
+                    }
+
+                    if ((!_isScientific) && (leftOperand is ScriptVariableGlobal) && (parentNode is ScriptPipeCall) && (functionCall == null))
+                    {
+                        // only valid option for pipceCall.To is a function call, but when a function invocation does not have any arguments it is recognized as global variable here we fix that
+                        var funcCall = Open<ScriptFunctionCall>();
+                        funcCall.Target = leftOperand;
+                        funcCall.Span = leftOperand.Span;
+                        leftOperand = funcCall;
                     }
 
                     if (

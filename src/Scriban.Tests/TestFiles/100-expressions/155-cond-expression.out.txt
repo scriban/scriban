@@ -10,3 +10,4 @@ false ? true ? 1 : 2 : 3 => 3
 x = {}; x.test = true == true ? true ? 1 : 2 : 3; x.test => 1
 x = {}; x.test = true == true ? false ? 1 : 2 : 3; x.test => 2
 x = {}; x.test = false == true ? true ? 1 : 2 : 3; x.test => 3
+x = '3'; '1' | string.contains '2' ? '' : x => 3
