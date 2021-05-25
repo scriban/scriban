@@ -1,5 +1,15 @@
 # Changelog
 
+## 3.8.0 (25 May 2021)
+- Add special assignment operators like `x += 1` (#353)
+- Add `blank` alias to `empty` (#347)
+- Add support for .NET indexers (#346)
+- Fix parsing of function call AST in case of a no-arg function call with a pipe (#344)
+- Add support for opposite of null-coalescing operator `?!`
+- Allow to disable safe runtime checks if `TemplateContext.LoopLimit` or `RecurseLimit` are equal to `0`
+- Fix issue with `%L` date formatter to not drop 0 milliseconds (#349)  
+- Rename ScriptBinaryOperator.Substract to Subtract
+
 ## 3.7.0 (1 May 2021)
 - Add `TemplateContext.ObjectRecursionLimit` to protect against recursion limits (#340)
 - Add `string.remove_last` function (#339)
