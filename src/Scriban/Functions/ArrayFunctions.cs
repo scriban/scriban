@@ -182,14 +182,14 @@ namespace Scriban.Functions
         {
             return ApplyFunction(context, span, list, function, EachProcessor);
         }
-        private static IEnumerable EachInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
+        private static IEnumerable EachInternal(TemplateContext context, ScriptNode callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
         {
             var arg = new ScriptArray(1);
             foreach (var item in list)
             {
                 var itemToTransform = context.ToObject(span, item, destType);
                 arg[0] = itemToTransform;
-                var itemTransformed = ScriptFunctionCall.Call(context, context.CurrentNode, function, arg);
+                var itemTransformed = ScriptFunctionCall.Call(context, callerContext, function, arg);
                 yield return itemTransformed;
             }
         }
@@ -217,15 +217,15 @@ namespace Scriban.Functions
             return ApplyFunction(context, span, list, function, FilterProcessor);
         }
 
-    
-        static IEnumerable FilterInternal(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType) 
+
+        static IEnumerable FilterInternal(TemplateContext context, ScriptNode callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
         {
             var arg = new ScriptArray(1);
             foreach (var item in list)
             {
                 var itemToTransform = context.ToObject(span, item, destType);
                 arg[0] = itemToTransform;
-                var itemTransformed = ScriptFunctionCall.Call(context, context.CurrentNode, function, arg);
+                var itemTransformed = ScriptFunctionCall.Call(context, callerContext, function, arg);
                 if (context.ToBool(span,itemTransformed))
                     yield return itemToTransform;
             }
@@ -675,7 +675,7 @@ namespace Scriban.Functions
         /// <summary>
         /// Delegate type for function used to process a list
         /// </summary>
-        private delegate IEnumerable ListProcessor(TemplateContext context, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType);
+        private delegate IEnumerable ListProcessor(TemplateContext context, ScriptNode callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType);
 
 
         /// <summary>
@@ -696,7 +696,9 @@ namespace Scriban.Functions
                 throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
             }
 
-            return new ScriptRange(impl(context, span, list, scriptingFunction, scriptingFunction.GetParameterInfo(0).ParameterType));
+            var callerContext = context.CurrentNode;
+
+            return new ScriptRange(impl(context, callerContext, span, list, scriptingFunction, scriptingFunction.GetParameterInfo(0).ParameterType));
         }
 
         private class CycleKey : IEquatable<CycleKey>

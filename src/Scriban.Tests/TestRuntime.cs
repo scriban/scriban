@@ -26,8 +26,8 @@ namespace Scriban.Tests
         public void TesterFilterEvaluation()
         {
             var result = Template.Parse("{{['', '200', '','400'] | array.filter @string.empty}}").Evaluate(new TemplateContext());
-            Assert.IsInstanceOf<ScriptArray>(result);
-            var array = (ScriptArray) result;
+            Assert.IsInstanceOf<ScriptRange>(result);
+            var array = (ScriptRange) result;
             Assert.AreEqual(2, array.Count);
             Assert.AreEqual("", array[0]);
             Assert.AreEqual("", array[1]);

@@ -226,11 +226,6 @@ namespace Scriban.Syntax
                 }
 
                 var result = context.Evaluate(Body);
-                //if the result of the evaluation was a ScriptRange that depended on local variables
-                //then we need to force the deferred enumerable inside the range to be evaluated right now
-                //before we pop the variables out of the context!
-                if (result is ScriptRange range)
-                    result = new ScriptArray(range);
                 return result;
             }
             finally
