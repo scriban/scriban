@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.8.1 (25 May 2021)
+- Fix regression with ternary operator (#360)
+
 ## 3.8.0 (25 May 2021)
 - Add special assignment operators like `x += 1` (#353)
 - Add `blank` alias to `empty` (#347)
