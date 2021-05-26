@@ -12,7 +12,12 @@ namespace Scriban.Runtime
     /// Generic interface used to access an indexer, used by <see cref="TemplateContext"/> via <see cref="TemplateContext.GetListAccessor"/>
     /// This is _not_ used for IDictionary, IList, etc.
     /// </summary>
-    public interface IItemAccessor
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    interface IItemAccessor
     {
         /// <summary>
         /// Tries to get the member value for the specified target object.
