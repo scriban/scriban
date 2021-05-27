@@ -1,5 +1,8 @@
 # Changelog
 
+## 3.8.2 (27 May 2021)
+- Fix regession with new interface `IItemAccessor` not compatible with source distribution (#363)
+
 ## 3.8.1 (25 May 2021)
 - Fix regression with ternary operator (#360)
 
