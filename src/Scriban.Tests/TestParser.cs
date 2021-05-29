@@ -560,6 +560,12 @@ end
             TestFile(inputName);
         }
 
+        [TestCaseSource("ListTestFiles", new object[] { "600-ast" })]
+        public static void A600_ast(string inputName)
+        {
+            TestFile(inputName, true);
+        }
+
         [TestCaseSource("ListBuiltinFunctionTests", new object[] { "array" })]
         public static void Doc_array(string inputName, string input, string output)
         {
@@ -680,7 +686,7 @@ m
             Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
         }
 
-        private static void TestFile(string inputName)
+        private static void TestFile(string inputName, bool testASTInstead = false)
         {
             var filename = Path.GetFileName(inputName);
             var isSupportingExactRoundtrip = !NotSupportingExactRoundtrip.Contains(filename);
@@ -700,7 +706,7 @@ m
                 lang = ScriptLang.Scientific;
             }
 
-            AssertTemplate(expectedOutputText, inputText, lang, false, isSupportingExactRoundtrip, expectParsingErrorForRountrip: filename == "513-liquid-statement-for.variables.txt");
+            AssertTemplate(expectedOutputText, inputText, lang, false, isSupportingExactRoundtrip, expectParsingErrorForRountrip: filename == "513-liquid-statement-for.variables.txt", testASTInstead : testASTInstead);
         }
 
         private void AssertRoundtrip(string inputText, bool isLiquid = false)
@@ -722,7 +728,7 @@ m
             "470-html.txt"
         };
 
-        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false, bool supportRoundTrip = true)
+        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false, bool supportRoundTrip = true, bool testASTInstead = false)
         {
             bool isLiquid = lang == ScriptLang.Liquid;
 
@@ -885,6 +891,14 @@ m
                             }
                         }
                     }
+
+                    if (testASTInstead)
+                    {
+                        var astVisualizer = new ASTVisualizer();
+                        template.Page.Accept(astVisualizer);
+                        result = astVisualizer.output.ToString();
+                        resultAsync = result;
+                    }
                 }
 
                 var testContext = isRoundtrip ? "Roundtrip - " : String.Empty;
@@ -1035,6 +1049,27 @@ m
         public static IEnumerable ListTestFiles(string folder)
         {
             return ListTestFilesInFolder(folder);
+        }
+
+
+        class ASTVisualizer : ScriptVisitor
+        {
+            int deepCounter;
+            public StringBuilder output { get; } = new StringBuilder();            
+
+            protected override void DefaultVisit(ScriptNode node)
+            {
+                bool isTerminal = (node is IScriptTerminal);
+                string padding = new string(' ', deepCounter * 2); 
+                string value = node.ToString();
+                string type = node.GetType().Name;
+                string offset = $" ({node.Span.Start.Offset} - {node.Span.End.Offset}) ";
+
+                output.Append(padding + type + offset + (isTerminal ? $" [{value}]\n" : "\n"));
+                deepCounter++;
+                base.DefaultVisit(node);
+                deepCounter--;
+            }
         }
     }
 }

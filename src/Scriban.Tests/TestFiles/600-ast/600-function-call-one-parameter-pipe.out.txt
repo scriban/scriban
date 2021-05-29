@@ -1,0 +1,13 @@
+ScriptPage (0 - 17) 
+  ScriptBlockStatement (0 - 17) 
+    ScriptEscapeStatement (0 - 1)  [{{]
+    ScriptExpressionStatement (3 - 14) 
+      ScriptPipeCall (3 - 14) 
+        ScriptLiteral (3 - 3)  [1]
+        ScriptToken (5 - 5)  [|]
+        ScriptFunctionCall (7 - 14) 
+          ScriptMemberExpression (7 - 14) 
+            ScriptVariableGlobal (7 - 10)  [math]
+            ScriptToken (11 - 11)  [.]
+            ScriptVariableGlobal (12 - 14)  [abs]
+    ScriptEscapeStatement (16 - 17)  [}}]
