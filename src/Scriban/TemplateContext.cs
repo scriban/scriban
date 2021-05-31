@@ -319,6 +319,26 @@ namespace Scriban
         internal ScriptPipeArguments CurrentPipeArguments => _currentPipeArguments;
 
         /// <summary>
+        /// Gets the number of <see cref="PushGlobal"/> that are pushed to this context.
+        /// </summary>
+        public int GlobalCount => _globalStores.Count;
+
+        /// <summary>
+        /// Gets the number of <see cref="PushOutput()"/> that are pushed to this context.
+        /// </summary>
+        public int OutputCount => _outputs.Count;
+        
+        /// <summary>
+        /// Gets the number of <see cref="PushCulture"/> that are pushed to this context.
+        /// </summary>
+        public int CultureCount => _cultures.Count;
+
+        /// <summary>
+        /// Gets the number of <see cref="PushSourceFile"/> that are pushed to this context.
+        /// </summary>
+        public int SourceFileCount => _sourceFiles.Count;
+
+        /// <summary>
         /// Gets or sets the internal state of control flow.
         /// </summary>
         internal ScriptFlowState FlowState { get; set; }
@@ -781,6 +801,44 @@ namespace Scriban
                 _memberAccessors.Add(type, accessor);
             }
             return accessor;
+        }
+
+        /// <summary>
+        /// This method is reset-ing correctly this instance so that
+        /// it can be reused safely on the same thread for another run.
+        /// </summary>
+        /// <remarks>
+        /// - Removes any pending output expect the top level one.
+        /// - This methods clears the top level output (which is a guaranteed to be <see cref="StringBuilderOutput"/>).
+        /// - Remove all global stored pushed via <see cref="PushGlobal"/> expect the builtin top level one.
+        /// - Remove all cultures pushed via <see cref="PushCulture"/>.
+        /// - Remove all source files pushed via <see cref="PushSourceFile"/>.
+        /// </remarks>
+        public virtual void Reset()
+        {
+            // We need to leave one output
+            while (OutputCount > 1)
+            {
+                PopOutput();
+            }
+            // Clear the output
+            ((StringBuilderOutput)Output).Builder.Length = 0;
+
+            // We need to keep the builtins
+            while (GlobalCount > 1)
+            {
+                PopGlobal();
+            }
+
+            while (CultureCount > 0)
+            {
+                PopCulture();
+            }
+
+            while (SourceFileCount > 0)
+            {
+                PopSourceFile();
+            }
         }
 
         /// <summary>
