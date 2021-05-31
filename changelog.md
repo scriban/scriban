@@ -1,5 +1,9 @@
 # Changelog
 
+## 3.9.0 (31 May 2021)
+- Improve AST to generate a function call when a pipecall is used with a parameterless function
+- Add `TemplateContext.Reset` method to allow to cleanup the state of the `TemplateContext` 
+
 ## 3.8.2 (27 May 2021)
 - Fix regession with new interface `IItemAccessor` not compatible with source distribution (#363)
 
