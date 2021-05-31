@@ -429,12 +429,12 @@ namespace Scriban.Parsing
                         // Parse ?
                         ExpectAndParseTokenTo(conditionalExpression.QuestionToken, TokenType.Question);
 
-                        conditionalExpression.ThenValue = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.DefaultNoNamedArgument);
+                        conditionalExpression.ThenValue = ExpectAndParseExpression(conditionalExpression, mode: ParseExpressionMode.DefaultNoNamedArgument);
 
                         // Parse :
                         ExpectAndParseTokenTo(conditionalExpression.ColonToken, TokenType.Colon);
 
-                        conditionalExpression.ElseValue = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.DefaultNoNamedArgument);
+                        conditionalExpression.ElseValue = ExpectAndParseExpression(conditionalExpression, mode: ParseExpressionMode.DefaultNoNamedArgument);
 
                         Close(conditionalExpression);
                         leftOperand = conditionalExpression;
@@ -658,6 +658,18 @@ namespace Scriban.Parsing
                     if (enteringPrecedence > 0)
                     {
                         break;
+                    }
+
+                    if ((!_isScientific) && (parentNode is ScriptPipeCall) // after a pipe call we expect to see a function call
+                                         && (functionCall == null)         // but when function is not followed by any parameter e.g. '1 | math.abs', above code does not create function call,
+                                                                           // here we fix that by creating function call, but only when leftOperand is e.g. '1 | abs' or '1 | math.abs' 
+                                         && (leftOperand is IScriptVariablePath) // we need that restriction since leftOperand can be of other type e.g. binary expression '"123" | string.to_int + 1'
+                        )
+                    {                       
+                        var funcCall = Open<ScriptFunctionCall>();
+                        funcCall.Target = leftOperand;
+                        funcCall.Span = leftOperand.Span;
+                        leftOperand = funcCall;
                     }
 
                     if (
