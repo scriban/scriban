@@ -69,5 +69,19 @@ namespace Scriban.Runtime.Accessors
         {
             return false;
         }
+
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool HasIndexer => false;
+
+        public Type IndexType => null;
     }
 }

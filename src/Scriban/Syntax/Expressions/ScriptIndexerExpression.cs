@@ -129,34 +129,47 @@ namespace Scriban.Syntax
             if (targetObject is IDictionary || (targetObject is IScriptObject && (listAccessor == null || index is string)) || listAccessor == null)
             {
                 var accessor = context.GetMemberAccessor(targetObject);
-                var indexAsString = context.ObjectToString(index);
 
-                object itemIndex = null;
-                var itemAccessor = accessor as IItemAccessor;
-                if (!(itemAccessor?.ItemType is null))
+                if (accessor.HasIndexer)
                 {
-                    itemIndex = context.ToObject(Index.Span, index, itemAccessor.ItemType);
-                }
-
-                if (setter)
-                {
-                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor?.TrySetItem(context, Index.Span, targetObject, itemIndex, valueToSet) is true;
-                    if (itemSuccess is false &&
-                        !accessor.TrySetValue(context, Index.Span, targetObject, indexAsString, valueToSet))
+                    var itemIndex = context.ToObject(Index.Span, index, accessor.IndexType);
+                    if (setter)
                     {
-                        throw new ScriptRuntimeException(Index.Span, $"Cannot set a value for the readonly member `{indexAsString}` in the indexer: {Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
+                        if (!accessor.TrySetItem(context, Index.Span, targetObject, itemIndex, valueToSet))
+                        {
+                            throw new ScriptRuntimeException(Index.Span, $"Cannot set a value for the readonly member `{itemIndex}` in the indexer: {Target}['{itemIndex}']");
+
+                        }
+                    }
+                    else
+                    {
+                        var result = accessor.TryGetItem(context, Index.Span, targetObject, itemIndex, out value);
+                        if (!context.EnableRelaxedMemberAccess && !result)
+                        {
+                            throw new ScriptRuntimeException(Index.Span, $"Cannot access target `{Target}` with an indexer: {Index}");
+                        }
                     }
                 }
                 else
                 {
-                    var itemSuccess = itemAccessor?.ItemType == itemIndex?.GetType() && itemAccessor?.TryGetItem(context, Index.Span, targetObject, itemIndex, out value) is true;
-                    if (itemSuccess is false &&
-                        !accessor.TryGetValue(context, Index.Span, targetObject, indexAsString, out value))
+                    var indexAsString = context.ObjectToString(index);
+
+                    if (setter)
                     {
-                        var result = context.TryGetMember?.Invoke(context, Index.Span, targetObject, indexAsString, out value) ?? false;
-                        if (!context.EnableRelaxedMemberAccess && !result)
+                        if (!accessor.TrySetValue(context, Index.Span, targetObject, indexAsString, valueToSet))
                         {
-                            throw new ScriptRuntimeException(Index.Span, $"Cannot access target `{Target}` with an indexer: {Index}");
+                            throw new ScriptRuntimeException(Index.Span, $"Cannot set a value for the readonly member `{indexAsString}` in the indexer: {Target}['{indexAsString}']"); // unit test: 130-indexer-accessor-error3.txt
+                        }
+                    }
+                    else
+                    {
+                        if (!accessor.TryGetValue(context, Index.Span, targetObject, indexAsString, out value))
+                        {
+                            var result = context.TryGetMember?.Invoke(context, Index.Span, targetObject, indexAsString, out value) ?? false;
+                            if (!context.EnableRelaxedMemberAccess && !result)
+                            {
+                                throw new ScriptRuntimeException(Index.Span, $"Cannot access target `{Target}` with an indexer: {Index}");
+                            }
                         }
                     }
                 }

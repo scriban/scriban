@@ -2,6 +2,9 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+#nullable disable
+
+using System;
 using System.Collections.Generic;
 using Scriban.Parsing;
 
@@ -40,5 +43,19 @@ namespace Scriban.Runtime.Accessors
         {
             return ((IScriptObject)target).TrySetValue(context, span, member, value, false);
         }
+
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        {
+            throw new NotImplementedException();
+        }
+
+        public bool HasIndexer => false;
+
+        public Type IndexType => null;
     }
 }

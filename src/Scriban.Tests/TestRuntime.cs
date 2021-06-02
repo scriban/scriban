@@ -23,6 +23,21 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestDictionaryInt()
+        {
+            int MyInt = 1;
+            Dictionary<int, string> MyDict = new();
+            MyDict.Add(MyInt, "hello");
+
+            string templateTxt = "{{ MyDict[MyInt] }}";
+
+            Template template = Template.Parse(templateTxt);
+            var result = template.Render(new { MyDict, MyInt }, member => member.Name);
+
+            Assert.AreEqual("hello", result);
+        }
+
+        [Test]
         public void TesterFilterEvaluation()
         {
             var result = Template.Parse("{{['', '200', '','400'] | array.filter @string.empty}}").Evaluate(new TemplateContext());

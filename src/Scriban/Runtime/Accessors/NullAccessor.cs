@@ -4,6 +4,7 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
 using Scriban.Parsing;
 
@@ -43,5 +44,20 @@ namespace Scriban.Runtime.Accessors
         {
             return false;
         }
+
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        {
+            value = null;
+            return false;
+        }
+
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        {
+            return false;
+        }
+
+        public bool HasIndexer => false;
+
+        public Type IndexType => null;
     }
 }

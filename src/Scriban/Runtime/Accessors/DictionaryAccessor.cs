@@ -36,16 +36,19 @@ namespace Scriban.Runtime.Accessors
                 return true;
             }
 
-            if (target is IDictionary)
-            {
-                accessor = Default;
-                return true;
-            }
-
             var type = target.GetType();
             var dictionaryType = type.GetBaseOrInterface(typeof(IDictionary<,>));
-            accessor = null;
-            if (dictionaryType == null) return false;
+            if (dictionaryType == null)
+            {
+                if (target is IDictionary)
+                {
+                    accessor = Default;
+                    return true;
+                }
+
+                accessor = null;
+                return false;
+            }
             var keyType = dictionaryType.GetGenericArguments()[0];
             var valueType = dictionaryType.GetGenericArguments()[1];
 
@@ -88,6 +91,27 @@ namespace Scriban.Runtime.Accessors
             ((IDictionary) target)[member] = value;
             return true;
         }
+
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        {
+            value = null;
+            if (((IDictionary) target).Contains(index))
+            {
+                value = ((IDictionary)target)[index];
+                return true;
+            }
+            return false;
+        }
+
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        {
+            ((IDictionary) target)[index] = value;
+            return true;
+        }
+
+        public bool HasIndexer => true;
+
+        public Type IndexType => typeof(object);
     }
 
     class DictionaryStringObjectAccessor : GenericDictionaryAccessor<string, object>
@@ -137,5 +161,26 @@ namespace Scriban.Runtime.Accessors
         {
             return (TKey)context.ToObject(new SourceSpan(), member, typeof(TKey));
         }
+
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        {
+            if (((IDictionary<TKey, TValue>) target).TryGetValue((TKey) index, out var typedValue))
+            {
+                value = typedValue;
+                return true;
+            }
+            value = null;
+            return false;
+        }
+
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        {
+            ((IDictionary<TKey, TValue>) value)[(TKey)index] = (TValue)value;
+            return true;
+        }
+
+        public bool HasIndexer => true;
+
+        public Type IndexType => typeof(TKey);
     }
 }
