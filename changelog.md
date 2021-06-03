@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.0.1 (3 June 2021)
+- Fix ternary operator with binary expression (#355)
+
 ## 4.0.0 (2 June 2021)
 - Remove `IItemAccessor` and merge features into `IObjectAccessor`.
 - Add support for non-string indexers for regular dictionaries (#364)
