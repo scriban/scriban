@@ -11,3 +11,4 @@ x = {}; x.test = true == true ? true ? 1 : 2 : 3; x.test => {{ x = {}; x.test = 
 x = {}; x.test = true == true ? false ? 1 : 2 : 3; x.test => {{ x = {}; x.test = true == true ? false ? 1 : 2 : 3; x.test }}
 x = {}; x.test = false == true ? true ? 1 : 2 : 3; x.test => {{ x = {}; x.test = false == true ? true ? 1 : 2 : 3; x.test }}
 x = '3'; '1' | string.contains '2' ? '' : x => {{x = '3'; '1' | string.contains '2' ? '' : x}}
+true ? 1 + 2 + 3 : 4 => {{ true ? 1 + 2 + 3 : 4 }}

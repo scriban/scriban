@@ -398,7 +398,8 @@ namespace Scriban.Parsing
                         // unit test: 110-binary-simple-error1.txt
                         binaryExpression.Right = ExpectAndParseExpression(binaryExpression,
                             functionCall ?? parentExpression, newPrecedence,
-                            $"Expecting an <expression> to the right of the operator instead of `{GetAsText(Current)}`");
+                            $"Expecting an <expression> to the right of the operator instead of `{GetAsText(Current)}`",
+                            mode); // propagate the mode in case we are in DefaultNoNamedArgument (so that the colon in 1 + 2 + 3 : will be correctly skipped)
                         leftOperand = Close(binaryExpression);
 
                         continue;
@@ -662,10 +663,10 @@ namespace Scriban.Parsing
 
                     if ((!_isScientific) && (parentNode is ScriptPipeCall) // after a pipe call we expect to see a function call
                                          && (functionCall == null)         // but when function is not followed by any parameter e.g. '1 | math.abs', above code does not create function call,
-                                                                           // here we fix that by creating function call, but only when leftOperand is e.g. '1 | abs' or '1 | math.abs' 
+                                                                           // here we fix that by creating function call, but only when leftOperand is e.g. '1 | abs' or '1 | math.abs'
                                          && (leftOperand is IScriptVariablePath) // we need that restriction since leftOperand can be of other type e.g. binary expression '"123" | string.to_int + 1'
                         )
-                    {                       
+                    {
                         var funcCall = Open<ScriptFunctionCall>();
                         funcCall.Target = leftOperand;
                         funcCall.Span = leftOperand.Span;
