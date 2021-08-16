@@ -8,9 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
-using Scriban.Helpers;
 using Scriban.Parsing;
-using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
 
 namespace Scriban.Runtime
@@ -45,6 +43,8 @@ namespace Scriban.Runtime
         /// <param name="obj">The object.</param>
         /// <param name="filter">Optional member filterer</param>
         /// <param name="renamer">Optional renamer</param>
+        /// <param name="fieldSetter">Optional setter</param>
+        /// <param name="propertySetter">Optional setter</param>
         /// <remarks>
         /// <ul>
         /// <li>If <paramref name="obj"/> is a <see cref="System.Type"/>, this method will import only the static field/properties of the specified object.</li>
@@ -52,7 +52,7 @@ namespace Scriban.Runtime
         /// <li>If <paramref name="obj"/> is a plain object, this method will import the public fields/properties of the specified object into the <see cref="ScriptObject"/>.</li>
         /// </ul>
         /// </remarks>
-        public static void Import(this IScriptObject script, object obj, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
+        public static void Import(this IScriptObject script, object obj, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null, FieldValueSetterDelegate fieldSetter = null, PropertyValueSetterDelegate propertySetter = null)
         {
             if (obj is IScriptObject)
             {
@@ -68,7 +68,7 @@ namespace Scriban.Runtime
                 return;
             }
 
-            script.Import(obj, ScriptMemberImportFlags.All, filter, renamer);
+            script.Import(obj, ScriptMemberImportFlags.All, filter, renamer, fieldSetter, propertySetter);
         }
 
         public static bool TryGetValue(this IScriptObject @this, string key, out object value)
@@ -159,7 +159,7 @@ namespace Scriban.Runtime
         /// <param name="exportName">Name of the member name replacement. If null, use the default renamer will be used.</param>
         public static void ImportMember(this IScriptObject script, object obj, string memberName, string exportName = null)
         {
-            script.Import(obj, ScriptMemberImportFlags.All, member => member.Name == memberName, exportName != null ? name => exportName: (MemberRenamerDelegate)null);
+            script.Import(obj, ScriptMemberImportFlags.All, member => member.Name == memberName, exportName != null ? name => exportName : (MemberRenamerDelegate)null);
         }
 
 
@@ -171,8 +171,10 @@ namespace Scriban.Runtime
         /// <param name="flags">The import flags.</param>
         /// <param name="filter">A filter applied on each member</param>
         /// <param name="renamer">The member renamer.</param>
+        /// <param name="fieldSetter">Optional setter</param>
+        /// <param name="propertySetter">Optional setter</param>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
-        public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
+        public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null, FieldValueSetterDelegate fieldSetter = null, PropertyValueSetterDelegate propertySetter = null)
         {
             if (obj == null)
             {
@@ -197,6 +199,8 @@ namespace Scriban.Runtime
             }
 
             renamer = renamer ?? StandardMemberRenamer.Default;
+            fieldSetter = fieldSetter ?? StandardFieldValueSetter.Default;
+            propertySetter = propertySetter ?? StandardPropertyValueSetter.Default;
 
             var typeToImports = new Stack<Type>();
             while (typeInfo != null)
@@ -241,11 +245,11 @@ namespace Scriban.Runtime
                             // If field is init only or literal, it cannot be set back so we mark it as read-only
                             if (scriptObj == null)
                             {
-                                script.TrySetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                                script.TrySetValue(null, new SourceSpan(), newFieldName, fieldSetter(field, obj), field.IsInitOnly || field.IsLiteral);
                             }
                             else
                             {
-                                scriptObj.SetValue(newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                                scriptObj.SetValue(newFieldName, fieldSetter(field, obj), field.IsInitOnly || field.IsLiteral);
                             }
                         }
                     }
@@ -253,7 +257,7 @@ namespace Scriban.Runtime
 
                 if ((flags & ScriptMemberImportFlags.Property) != 0)
                 {
-                    foreach (var property in typeInfo.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public| BindingFlags.DeclaredOnly))
+                    foreach (var property in typeInfo.GetProperties(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly))
                     {
                         // Workaround with .NET Core, extension method is not working (retuning null despite doing property.GetMethod), so we need to inline it here
                         var getMethod = property.GetMethod;
@@ -280,12 +284,12 @@ namespace Scriban.Runtime
                             //script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
                             if (scriptObj == null)
                             {
-                                script.TrySetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
+                                script.TrySetValue(null, new SourceSpan(), newPropertyName, propertySetter(property, obj), false);
                             }
                             else
                             {
-                                if (property.GetIndexParameters().Length==0)
-                                    scriptObj.SetValue(newPropertyName, property.GetValue(obj), false);
+                                if (property.GetIndexParameters().Length == 0)
+                                    scriptObj.SetValue(newPropertyName, propertySetter(property, obj), false);
                             }
                         }
                     }
@@ -293,7 +297,7 @@ namespace Scriban.Runtime
 
                 if ((flags & ScriptMemberImportFlags.Method) != 0 && useStatic)
                 {
-                    foreach (var method in typeInfo.GetMethods(BindingFlags.Static | BindingFlags.Public| BindingFlags.DeclaredOnly))
+                    foreach (var method in typeInfo.GetMethods(BindingFlags.Static | BindingFlags.Public | BindingFlags.DeclaredOnly))
                     {
                         if (filter != null && !filter(method))
                         {
