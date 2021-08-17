@@ -6,11 +6,11 @@ using System.Reflection;
 namespace Scriban.Runtime
 {
     /// <summary>
-    /// Allows to rename a member.
+    /// Allows to override the property value that will be added to script object during import.
     /// </summary>
-    /// <param name="info">A member info</param>
-    /// <param name="obj">A member info</param>
-    /// <returns>The new name name of member</returns>
+    /// <param name="info">A property info</param>
+    /// <param name="obj">The object that the value should be retrieved from</param>
+    /// <returns>The retult of getting field value from the object</returns>
 #if SCRIBAN_PUBLIC
     public
 #else

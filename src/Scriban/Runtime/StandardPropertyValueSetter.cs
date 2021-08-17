@@ -7,7 +7,7 @@ using System.Reflection;
 namespace Scriban.Runtime
 {
     /// <summary>
-    /// The standard rename make a camel/pascalcase name changed by `_` and lowercase. e.g `ThisIsAnExample` becomes `this_is_an_example`.
+    /// The standard property value setter is invoking GetValue method on the PropertyInfo object and return the function result.
     /// </summary>
 #if SCRIBAN_PUBLIC
     public
@@ -18,11 +18,11 @@ namespace Scriban.Runtime
     {
         public static readonly PropertyValueSetterDelegate Default = Set;
         /// <summary>
-        /// 
+        /// Get the value of the property for the object passed
         /// </summary>
-        /// <param name="info"></param>
-        /// <param name="obj"></param>
-        /// <returns></returns>
+        /// <param name="info">The PropertyInfo</param>
+        /// <param name="obj">The object</param>
+        /// <returns>retult of GetValue method from PropertyInfo using object as parameter</returns>
         public static object? Set(PropertyInfo info, object obj) => info?.GetValue(obj);
     }
 }

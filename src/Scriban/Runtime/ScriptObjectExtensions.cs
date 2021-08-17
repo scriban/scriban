@@ -43,8 +43,8 @@ namespace Scriban.Runtime
         /// <param name="obj">The object.</param>
         /// <param name="filter">Optional member filterer</param>
         /// <param name="renamer">Optional renamer</param>
-        /// <param name="fieldSetter">Optional setter</param>
-        /// <param name="propertySetter">Optional setter</param>
+        /// <param name="fieldSetter">Optional field setter</param>
+        /// <param name="propertySetter">Optional property setter</param>
         /// <remarks>
         /// <ul>
         /// <li>If <paramref name="obj"/> is a <see cref="System.Type"/>, this method will import only the static field/properties of the specified object.</li>
@@ -171,8 +171,8 @@ namespace Scriban.Runtime
         /// <param name="flags">The import flags.</param>
         /// <param name="filter">A filter applied on each member</param>
         /// <param name="renamer">The member renamer.</param>
-        /// <param name="fieldSetter">Optional setter</param>
-        /// <param name="propertySetter">Optional setter</param>
+        /// <param name="fieldSetter">Optional field setter</param>
+        /// <param name="propertySetter">Optional property setter</param>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
         public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null, FieldValueSetterDelegate fieldSetter = null, PropertyValueSetterDelegate propertySetter = null)
         {
