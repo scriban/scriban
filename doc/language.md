@@ -902,7 +902,7 @@ The operator `left ?? right` can be used to return the `right` value if `left` i
 
 The operator `left ?! right` can be used to return the `right` value if `left` is not null.
 
-The operator `left ??= right` can be used to set the `left` value to `right` if `left` is null.
+The operator `left ??= right` can be used to set the `right` value to `left` if `left` is null.
 
 [:top:](#language)
 ### 8.9 Function call expression
