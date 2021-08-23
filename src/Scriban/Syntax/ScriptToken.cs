@@ -31,6 +31,7 @@ namespace Scriban.Syntax
         public static ScriptToken Amp() => new ScriptToken(TokenType.Amp);
         public static ScriptToken Question() => new ScriptToken(TokenType.Question);
         public static ScriptToken DoubleQuestion() => new ScriptToken(TokenType.DoubleQuestion);
+        public static ScriptToken DoubleQuestionEqual() => new ScriptToken(TokenType.DoubleQuestionEqual);
         public static ScriptToken QuestionExclamation() => new ScriptToken(TokenType.QuestionExclamation);
         public static ScriptToken CompareEqual() => new ScriptToken(TokenType.DoubleEqual);
         public static ScriptToken CompareNotEqual() => new ScriptToken(TokenType.ExclamationEqual);

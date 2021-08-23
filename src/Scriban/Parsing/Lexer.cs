@@ -842,7 +842,17 @@ namespace Scriban.Parsing
                     NextChar();
                     if (c == '?')
                     {
-                        _token = new Token(TokenType.DoubleQuestion, start, _position);
+                        var index = _position;
+                        NextChar();
+
+                        if (c == '=')
+                        {
+                            _token = new Token(TokenType.DoubleQuestionEqual, start, _position);
+                            NextChar();
+                            break;
+                        }
+
+                        _token = new Token(TokenType.DoubleQuestion, start, index);
                         NextChar();
                         break;
                     }

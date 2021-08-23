@@ -1,0 +1,11 @@
+{{ obj ??= {x: 5} }}
+number: {{ obj.x }}
+{{
+    obj2 = {a: "test"}
+    obj2 ??= {a: "test2"}
+}}
+str: {{ obj2.a }}
+plaintext: null ??= 10
+{{ obj3 ??= {a: 1, b: 2}; obj3; }}
+{{ str1 ??= "str1"; str1 }}
+{{ c ??= 6 - 6; c; }}

@@ -138,6 +138,12 @@ namespace Scriban.Syntax
                 return leftValue ?? rightValue;
             }
 
+            if (op == ScriptBinaryOperator.EmptyCoalescingAssignment)
+            {
+                leftValue ??= rightValue;
+                return leftValue;
+            }
+
             if (op == ScriptBinaryOperator.NotEmptyCoalescing)
             {
                 return leftValue != null ? rightValue : leftValue;

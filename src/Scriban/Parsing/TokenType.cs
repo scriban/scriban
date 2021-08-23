@@ -132,6 +132,9 @@ namespace Scriban.Parsing
         /// <summary>Token "??"</summary>
         DoubleQuestion,
 
+        /// <summary>Token "??="</summary>
+        DoubleQuestionEqual,
+
         /// <summary>Token "?."</summary>
         QuestionDot,
 

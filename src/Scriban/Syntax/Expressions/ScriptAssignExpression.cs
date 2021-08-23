@@ -67,6 +67,7 @@ namespace Scriban.Syntax
                 TokenType.DivideEqual => ScriptBinaryOperator.Divide,
                 TokenType.DoubleDivideEqual => ScriptBinaryOperator.DivideRound,
                 TokenType.PercentEqual => ScriptBinaryOperator.Modulus,
+                TokenType.DoubleQuestionEqual => ScriptBinaryOperator.EmptyCoalescingAssignment,
                 _ => throw new ScriptRuntimeException(context.CurrentSpan, $"Operator {this.EqualToken} is not a valid compound assignment operator"),
             };
             return ScriptBinaryExpression.Evaluate(context, this.Span, op, left, right);

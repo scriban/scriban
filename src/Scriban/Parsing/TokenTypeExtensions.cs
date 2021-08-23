@@ -42,6 +42,7 @@ namespace Scriban.Parsing
                 TokenType.QuestionDot => "?.",
                 TokenType.DoubleQuestion => "??",
                 TokenType.QuestionExclamation => "?!",
+                TokenType.DoubleQuestionEqual => "??=",
                 TokenType.DoubleEqual => "==",
                 TokenType.ExclamationEqual => "!=",
                 TokenType.Less => "<",

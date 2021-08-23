@@ -1,0 +1,8 @@
+
+number: 5
+
+str: test
+plaintext: null ??= 10
+{a: 1, b: 2}
+str1
+0
