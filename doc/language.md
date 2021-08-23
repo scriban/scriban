@@ -896,11 +896,13 @@ The evaluated `left` and `right` expressions must resolve to an integer at runti
 | `left..right`   | Returns an iterator between `left` and `right` with a step of 1, including `right`. e.g: `1..5` iterates from 1 to 5
 | `left..<right`  | Returns an iterator between `left` and `right` with a step of 1, excluding `right`. e.g: `1..<5` iterates from 1 to 4
 
-### 8.8 The null-coalescing operators `??`, `?!` 
+### 8.8 The null-coalescing operators `??`, `?!`, `??=`  
 
 The operator `left ?? right` can be used to return the `right` value if `left` is null.
 
 The operator `left ?! right` can be used to return the `right` value if `left` is not null.
+
+The operator `left ??= right` can be used to set the `left` value to `right` if `left` is null.
 
 [:top:](#language)
 ### 8.9 Function call expression
