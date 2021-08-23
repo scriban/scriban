@@ -177,7 +177,7 @@ namespace Scriban.Parsing
         /// <summary>Token "+"</summary>
         Plus,
 
-        /// <summary>Token "++"</summary>
+        /// <summary>Token "+="</summary>
         PlusEqual,
 
         /// <summary>Token "++"</summary>
