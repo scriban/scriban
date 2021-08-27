@@ -1037,7 +1037,7 @@ Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the f
 | `"%X"` |                   | Preferred representation for the time alone, no date
 | `"%y"` |  `"13"`           | Gives year without century of the time
 | `"%Y"` |  `"2013"`         | Year of the time
-| `"%Z"` |  `"IST"`          | Gives Time Zone of the time
+| `"%Z"` |  `"+05:30"`       | Gives Time Zone of the time
 | `"%%"` |  `"%"`            | Output the character `%`
 
 Note that the format is using a good part of the ruby format ([source](http://apidock.com/ruby/DateTime/strftime))
