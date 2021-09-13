@@ -95,20 +95,32 @@ namespace Scriban.Runtime.Accessors
 
         public bool HasIndexer => _indexer != null;
 
+        public static object ChangeType(object value, Type targetType)
+        {
+            if (value == null)
+                return null;
+
+            if (value.GetType() == targetType)
+                return value;
+
+            if (targetType.IsGenericType && targetType.GetGenericTypeDefinition() == typeof(Nullable<>))
+                targetType = Nullable.GetUnderlyingType(targetType);
+
+            return Convert.ChangeType(value, targetType);
+        }
+
         public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
-            MemberInfo memberAccessor;
-            if (_members.TryGetValue(member, out memberAccessor))
+            if (_members.TryGetValue(member, out MemberInfo memberAccessor))
             {
-                var fieldAccessor = memberAccessor as FieldInfo;
-                if (fieldAccessor != null)
+                if (memberAccessor is FieldInfo fieldAccessor)
                 {
-                    fieldAccessor.SetValue(target, value);
+                    fieldAccessor.SetValue(target, ChangeType(value, fieldAccessor.FieldType));
                 }
                 else
                 {
                     var propertyAccessor = (PropertyInfo)memberAccessor;
-                    propertyAccessor.SetValue(target, value);
+                    propertyAccessor.SetValue(target, ChangeType(value, propertyAccessor.PropertyType));
                 }
 
                 return true;
