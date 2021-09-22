@@ -1,5 +1,8 @@
 # Changelog
 
+## 4.0.2 (22 September 2021)
+- Fix issue with object instance conversion between different object types
+
 ## 4.0.1 (3 June 2021)
 - Fix ternary operator with binary expression (#355)
 
