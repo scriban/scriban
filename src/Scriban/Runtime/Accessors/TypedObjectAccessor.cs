@@ -97,23 +97,19 @@ namespace Scriban.Runtime.Accessors
 
         public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
-            MemberInfo memberAccessor;
-            if (_members.TryGetValue(member, out memberAccessor))
-            {
-                var fieldAccessor = memberAccessor as FieldInfo;
-                if (fieldAccessor != null)
-                {
-                    fieldAccessor.SetValue(target, value);
-                }
-                else
-                {
-                    var propertyAccessor = (PropertyInfo)memberAccessor;
-                    propertyAccessor.SetValue(target, value);
-                }
+            if (!_members.TryGetValue(member, out MemberInfo memberAccessor))
+                return false;
 
+            if (memberAccessor is FieldInfo fieldAccessor)
+            {
+                fieldAccessor.SetValue(target, context.ToObject(span, value, fieldAccessor.FieldType));
                 return true;
             }
-            return false;
+
+            var propertyAccessor = (PropertyInfo)memberAccessor;
+                propertyAccessor.SetValue(target, context.ToObject(span, value, propertyAccessor.PropertyType));
+
+            return true;
         }
 
         private void PrepareMembers()
