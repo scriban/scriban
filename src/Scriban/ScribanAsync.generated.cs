@@ -1059,11 +1059,16 @@ namespace Scriban.Syntax
         protected override async ValueTask<object> EvaluateImplAsync(TemplateContext context)
         {
             var loopIterator = await context.EvaluateAsync(Iterator).ConfigureAwait(false);
+            if (loopIterator is System.Linq.IQueryable queryable)
+            {
+                // Value is a queryable, use Linq and deferred execution
+                return await LoopQueryableAsync(context, queryable).ConfigureAwait(false);
+            }
+
             var list = loopIterator as IList;
             if (list == null)
             {
-                var iterator = loopIterator as IEnumerable;
-                if (iterator != null)
+                if (loopIterator is IEnumerable iterator)
                 {
                     list = new ScriptArray(iterator);
                 }
@@ -1166,9 +1171,104 @@ namespace Scriban.Syntax
             return null;
         }
 
+        /// <summary>
+                /// Use Linq IQueryable extension methods
+                /// </summary>
+                /// <param name = "context"></param>
+                /// <param name = "queryable"></param>
+                /// <returns></returns>
+        private async ValueTask<System.Linq.IQueryable> HandleQueryableArgumentsAsync(TemplateContext context, System.Linq.IQueryable queryable)
+        {
+            if (NamedArguments == null || NamedArguments.Count == 0)
+                return queryable;
+            var typeOfT = queryable.GetType().GetGenericArguments()[0];
+            System.Linq.IQueryable InvokeQueryableMethod(string methodName, params object[] parameters)
+            {
+                var methodInfo = typeof(System.Linq.Queryable).GetMethod(methodName);
+                methodInfo = methodInfo.MakeGenericMethod(typeOfT);
+                return (System.Linq.IQueryable)methodInfo.Invoke(null, parameters);
+            }
+
+            foreach (var option in NamedArguments)
+            {
+                switch (option.Name.Name)
+                {
+                    case "offset": // call IQueryable<T>.Skip(count) extension method
+                        {
+                            var startIndex = context.ToInt(option.Value.Span, await context.EvaluateAsync(option.Value).ConfigureAwait(false));
+                            queryable = InvokeQueryableMethod(nameof(System.Linq.Queryable.Skip), queryable, startIndex);
+                            break;
+                        }
+
+                    case "reversed": // call IQueryable<T>.Reverse() extension method
+                        {
+                            queryable = InvokeQueryableMethod(nameof(System.Linq.Queryable.Reverse), queryable);
+                            break;
+                        }
+
+                    case "limit": // call IQueryable<T>.Take(count) extension method
+                        {
+                            var limit = context.ToInt(option.Value.Span, await context.EvaluateAsync(option.Value).ConfigureAwait(false));
+                            queryable = InvokeQueryableMethod(nameof(System.Linq.Queryable.Take), queryable, limit);
+                            break;
+                        }
+
+                    default:
+                        {
+                            await ProcessArgumentAsync(context, option).ConfigureAwait(false);
+                            break;
+                        }
+                }
+            }
+
+            return queryable;
+        }
+
         protected override async ValueTask<object> LoopItemAsync(TemplateContext context, LoopState state)
         {
             return await context.EvaluateAsync(Body).ConfigureAwait(false);
+        }
+
+        /// <summary>
+                /// Loop over an IQueryable value
+                /// </summary>
+                /// <param name = "context"></param>
+                /// <param name = "queryable"></param>
+                /// <returns></returns>
+        private async ValueTask<object> LoopQueryableAsync(TemplateContext context, System.Linq.IQueryable queryable)
+        {
+            var loopResult = default(object);
+            queryable = await HandleQueryableArgumentsAsync(context, queryable).ConfigureAwait(false);
+            await BeforeLoopAsync(context).ConfigureAwait(false);
+            var loopState = CreateLoopState();
+            context.SetValue(GetLoopVariable(context), loopState);
+            var previousValue = default(object);
+            var index = 0;
+            var enteredLoop = false;
+            foreach (var value in queryable)
+            {
+                if (!context.StepLoop(this, TemplateContext.LoopType.Queryable))
+                    return default;
+                loopState.Index = index;
+                loopState.LocalIndex = index;
+                loopState.ValueChanged = index == 0 || !Equals(previousValue, value);
+                if (Variable is ScriptVariable loopVariable)
+                    context.SetLoopVariable(loopVariable, value);
+                else
+                    await context.SetValueAsync(Variable, value).ConfigureAwait(false);
+                loopResult = await LoopItemAsync(context, default).ConfigureAwait(false);
+                if (!ContinueLoop(context))
+                    break;
+                previousValue = value;
+                index++;
+            }
+
+            await AfterLoopAsync(context).ConfigureAwait(false);
+            if (SetContinue)
+                context.SetValue(ScriptVariable.Continue, index);
+            if (!enteredLoop && Else != default)
+                loopResult = await context.EvaluateAsync(Else).ConfigureAwait(false);
+            return loopResult;
         }
     }
 

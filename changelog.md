@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.1.0 (7 October 2021)
+- Add `IQueryable<T>` support in `for`-loops. 
+    - Parameter `offset:count` will be translated to `IQueryable<T>.Skip(count)`
+    - Parameter `reversed` will be translated to `IQueryable<T>.Reverse()`
+    - Parameter `limit:count` will be translated to `IQueryable<T>.Take(count)`
+    - [Special for loop variables](https://github.com/scriban/scriban/blob/master/doc/language.md#special-loop-variables) are supported with the exception of `rindex` and `last`
+    - Optional `LoopLimitQueryable`-property on `TemplateContext` object to control looplimit in case of `IQueryable<T>` (defaults to LoopLimit)
+
 ## 4.0.2 (22 September 2021)
 - Fix issue with object instance conversion between different object types
 
