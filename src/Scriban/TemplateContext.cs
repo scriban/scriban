@@ -250,7 +250,7 @@ namespace Scriban
         /// A loop limit that can be used at runtime to limit the number of loops over a IQueryable object. Defaults to LoopLimit property.
         /// Set to 0 to disable checking IQueryable loop limit.
         /// </summary>
-        public int? QueryableLoopLimit { get; set; }
+        public int? LoopLimitQueryable { get; set; }
 
         /// <summary>
         /// A function recursive limit count used at runtime to limit the number of recursive calls. Default is 100
@@ -1005,7 +1005,7 @@ namespace Scriban
             {
                 case LoopType.Queryable:
                     {
-                        loopLimit = QueryableLoopLimit.GetValueOrDefault(LoopLimit);
+                        loopLimit = LoopLimitQueryable.GetValueOrDefault(LoopLimit);
                         break;
                     }
                 default:
@@ -1018,7 +1018,7 @@ namespace Scriban
             if (loopLimit != 0 && _loopStep > loopLimit)
             {
                 var currentLoopStatement = _loops.Peek();
-                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{loopLimit}` for {loopType} loop statement."); // unit test: 215-for-statement-error1.txt
+                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{loopLimit}` for loop statement."); // unit test: 215-for-statement-error1.txt
             }
             return OnStepLoop(loop);
         }

@@ -27,7 +27,7 @@ namespace Scriban.Functions
         /// </summary>
         private class DefaultBuiltins : ScriptObject
         {
-            public DefaultBuiltins() : base(10, false)
+            public DefaultBuiltins() : base(11, false)
             {
                 SetValue("array", new ArrayFunctions(), true);
                 SetValue("empty", EmptyScriptObject.Default, true);

@@ -1177,10 +1177,10 @@ namespace Scriban.Syntax
                 /// <param name = "context"></param>
                 /// <param name = "queryable"></param>
                 /// <returns></returns>
-        private async ValueTask HandleQueryableArgumentsAsync(TemplateContext context, System.Linq.IQueryable queryable)
+        private async ValueTask<System.Linq.IQueryable> HandleQueryableArgumentsAsync(TemplateContext context, System.Linq.IQueryable queryable)
         {
             if (NamedArguments == null || NamedArguments.Count == 0)
-                return;
+                return queryable;
             var typeOfT = queryable.GetType().GetGenericArguments()[0];
             System.Linq.IQueryable InvokeQueryableMethod(string methodName, params object[] parameters)
             {
@@ -1220,6 +1220,8 @@ namespace Scriban.Syntax
                         }
                 }
             }
+
+            return queryable;
         }
 
         protected override async ValueTask<object> LoopItemAsync(TemplateContext context, LoopState state)
@@ -1236,14 +1238,20 @@ namespace Scriban.Syntax
         private async ValueTask<object> LoopQueryableAsync(TemplateContext context, System.Linq.IQueryable queryable)
         {
             var loopResult = default(object);
-            await HandleQueryableArgumentsAsync(context, queryable).ConfigureAwait(false);
+            queryable = await HandleQueryableArgumentsAsync(context, queryable).ConfigureAwait(false);
             await BeforeLoopAsync(context).ConfigureAwait(false);
+            var loopState = CreateLoopState();
+            context.SetValue(GetLoopVariable(context), loopState);
+            var previousValue = default(object);
+            var index = 0;
             var enteredLoop = false;
             foreach (var value in queryable)
             {
-                enteredLoop = true;
                 if (!context.StepLoop(this, TemplateContext.LoopType.Queryable))
-                    return null;
+                    return default;
+                loopState.Index = index;
+                loopState.LocalIndex = index;
+                loopState.ValueChanged = index == 0 || !Equals(previousValue, value);
                 if (Variable is ScriptVariable loopVariable)
                     context.SetLoopVariable(loopVariable, value);
                 else
@@ -1251,10 +1259,14 @@ namespace Scriban.Syntax
                 loopResult = await LoopItemAsync(context, default).ConfigureAwait(false);
                 if (!ContinueLoop(context))
                     break;
+                previousValue = value;
+                index++;
             }
 
             await AfterLoopAsync(context).ConfigureAwait(false);
-            if (!enteredLoop && Else != null)
+            if (SetContinue)
+                context.SetValue(ScriptVariable.Continue, index);
+            if (!enteredLoop && Else != default)
                 loopResult = await context.EvaluateAsync(Else).ConfigureAwait(false);
             return loopResult;
         }
