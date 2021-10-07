@@ -22,7 +22,7 @@ using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
 
 #if !SCRIBAN_SIGNED
-[assembly:InternalsVisibleTo("Scriban.Tests")]
+[assembly: InternalsVisibleTo("Scriban.Tests")]
 #endif
 
 namespace Scriban
@@ -244,6 +244,13 @@ namespace Scriban
         /// Set to 0 to disable checking loop limit.
         /// </summary>
         public int LoopLimit { get; set; }
+
+
+        /// <summary>
+        /// A loop limit that can be used at runtime to limit the number of loops over a IQueryable object. Defaults to LoopLimit property.
+        /// Set to 0 to disable checking IQueryable loop limit.
+        /// </summary>
+        public int? QueryableLoopLimit { get; set; }
 
         /// <summary>
         /// A function recursive limit count used at runtime to limit the number of recursive calls. Default is 100
@@ -981,16 +988,37 @@ namespace Scriban
         {
         }
 
-        internal bool StepLoop(ScriptLoopStatementBase loop)
+        internal enum LoopType
+        {
+            Default,
+            Queryable
+        }
+
+        internal bool StepLoop(ScriptLoopStatementBase loop, LoopType loopType = LoopType.Default )
         {
             Debug.Assert(_loops.Count > 0);
 
             _loopStep++;
-            if (LoopLimit != 0 && _loopStep > LoopLimit)
+
+            int loopLimit;
+            switch (loopType)
+            {
+                case LoopType.Queryable:
+                    {
+                        loopLimit = QueryableLoopLimit.GetValueOrDefault(LoopLimit);
+                        break;
+                    }
+                default:
+                    {
+                        loopLimit = LoopLimit;
+                        break;
+                    }
+            }
+
+            if (loopLimit != 0 && _loopStep > loopLimit)
             {
                 var currentLoopStatement = _loops.Peek();
-
-                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{LoopLimit}` for loop statement."); // unit test: 215-for-statement-error1.txt
+                throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{loopLimit}` for {loopType} loop statement."); // unit test: 215-for-statement-error1.txt
             }
             return OnStepLoop(loop);
         }

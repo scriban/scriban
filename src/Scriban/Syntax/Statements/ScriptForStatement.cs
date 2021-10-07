@@ -101,11 +101,17 @@ namespace Scriban.Syntax
         protected override object EvaluateImpl(TemplateContext context)
         {
             var loopIterator = context.Evaluate(Iterator);
+
+            if (loopIterator is System.Linq.IQueryable queryable)
+            {
+                // Value is a queryable, use Linq and deferred execution
+                return LoopQueryable(context, queryable); 
+            }
+
             var list = loopIterator as IList;
             if (list == null)
             {
-                var iterator = loopIterator as IEnumerable;
-                if (iterator != null)
+                if (loopIterator is IEnumerable iterator)
                 {
                     list = new ScriptArray(iterator);
                 }
@@ -211,6 +217,102 @@ namespace Scriban.Syntax
 
             return null;
         }
+
+
+
+        /// <summary>
+        /// Loop over an IQueryable value
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="queryable"></param>
+        /// <returns></returns>
+        private object LoopQueryable(TemplateContext context, System.Linq.IQueryable queryable)
+        {
+            var loopResult = default(object);
+
+            HandleQueryableArguments(context, queryable);
+
+            BeforeLoop(context);
+
+            var enteredLoop = false;
+            foreach (var value in queryable)
+            {
+                enteredLoop = true;
+
+                if (!context.StepLoop(this, TemplateContext.LoopType.Queryable))
+                    return null;
+
+                if (Variable is ScriptVariable loopVariable)
+                    context.SetLoopVariable(loopVariable, value);
+                else
+                    context.SetValue(Variable, value);
+
+                loopResult = LoopItem(context, default);
+
+                if (!ContinueLoop(context))
+                    break;
+            }
+
+            AfterLoop(context);
+
+            if (!enteredLoop && Else != null)
+                loopResult = context.Evaluate(Else);
+
+            return loopResult;
+        }
+
+        /// <summary>
+        /// Use Linq IQueryable extension methods
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="queryable"></param>
+        /// <returns></returns>
+        private void HandleQueryableArguments(TemplateContext context, System.Linq.IQueryable queryable)
+        {
+            if (NamedArguments == null || NamedArguments.Count == 0)
+                return;
+
+            var typeOfT = queryable.GetType().GetGenericArguments()[0];
+            System.Linq.IQueryable InvokeQueryableMethod(string methodName, params object[] parameters)
+            {
+                var methodInfo = typeof(System.Linq.Queryable).GetMethod(methodName);
+                methodInfo = methodInfo.MakeGenericMethod(typeOfT);
+
+                return (System.Linq.IQueryable)methodInfo.Invoke(null, parameters);
+            }
+
+            foreach (var option in NamedArguments)
+            {
+                switch (option.Name.Name)
+                {
+                    case "offset": // call IQueryable<T>.Skip(count) extension method
+                        {
+                            var startIndex = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
+
+                            queryable = InvokeQueryableMethod(nameof(System.Linq.Queryable.Skip), queryable, startIndex);
+                            break;
+                        }
+                    case "reversed": // call IQueryable<T>.Reverse() extension method
+                        {
+                            queryable = InvokeQueryableMethod(nameof(System.Linq.Queryable.Reverse), queryable);
+                            break;
+                        }
+                    case "limit": // call IQueryable<T>.Take(count) extension method
+                        {
+                            var limit = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
+
+                            queryable = InvokeQueryableMethod(nameof(System.Linq.Queryable.Take), queryable, limit);
+                            break;
+                        }
+                    default:
+                        {
+                            ProcessArgument(context, option);
+                            break;
+                        }
+                }
+            }
+        }
+
 
         public override void PrintTo(ScriptPrinter printer)
         {
