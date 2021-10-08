@@ -81,5 +81,13 @@ value3: {
 
             TextAssert.AreEqual("innerValue", result);
         }
+
+
+        [Test]
+        public void TestParameterMismatchException()
+        {
+            var context = new TemplateContext();
+            Assert.Throws<ArgumentOutOfRangeException>(() => context.CurrentGlobal.Import("type", new Func<object, string>((parameter) => ""), Array.Empty<Type>()));
+        }
     }
 }
