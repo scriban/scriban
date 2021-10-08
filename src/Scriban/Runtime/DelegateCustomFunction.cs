@@ -30,7 +30,7 @@ namespace Scriban.Runtime
             Target = del.Target;
         }
 
-        public DelegateCustomFunction(object target, MethodInfo method) : base(method)
+        public DelegateCustomFunction(object target, MethodInfo method, Type[] parameterTypes = default) : base(method, parameterTypes)
         {
             Target = target;
         }

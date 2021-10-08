@@ -329,13 +329,17 @@ namespace Scriban.Runtime
         /// <param name="script">The script object to import into</param>
         /// <param name="member">The member.</param>
         /// <param name="function">The function delegate.</param>
+        /// <param name="parameterTypes">
+        /// Optional array of parameter types in function delegate.
+        /// Use this if the delegate parameters are of type object and you want to box a value (of type specified in positional index in array) in an object.
+        /// Array length must match delegate parameter count</param>
         /// <exception cref="System.ArgumentNullException">if member or function are null</exception>
-        public static void Import(this IScriptObject script, string member, Delegate function)
+        public static void Import(this IScriptObject script, string member, Delegate function, Type[] parameterTypes = null)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));
             if (function == null) throw new ArgumentNullException(nameof(function));
 
-            script.TrySetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function.Target, function.GetMethodInfo()), true);
+            script.TrySetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function.Target, function.GetMethodInfo(), parameterTypes), true);
         }
     }
 }

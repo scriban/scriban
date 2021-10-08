@@ -398,6 +398,22 @@ namespace Scriban
                 }
             }
 
+            if (destinationType != typeof(object) && destinationType.IsClass && !destinationType.IsAbstract && value is ScriptObject scriptObject)
+            {
+                var instance = Activator.CreateInstance(destinationType);
+
+                var properties = destinationType.GetProperties();
+                foreach (var prop in properties)
+                {
+                    var member = MemberRenamer(prop);
+                    if (scriptObject.TryGetValue(this, span, member, out var propValue))
+                    {
+                        prop.SetValue(instance, ToObject(span, propValue, prop.PropertyType));
+                    }
+                }
+                return instance;
+            }
+
             // Check for inheritance
             var typeInfo = type;
 
@@ -488,5 +504,9 @@ namespace Scriban
             throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to `{GetTypeName(destinationType)}`");
         }
 
+        private bool TryConvertObjectToClass(ScriptObject sourceObject, Type destinationType, out object result)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

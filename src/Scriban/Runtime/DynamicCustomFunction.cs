@@ -49,12 +49,28 @@ namespace Scriban.Runtime
         protected readonly int _minimumRequiredParameters;
         protected readonly int _firstIndexOfUserParameters;
 
-        protected DynamicCustomFunction(MethodInfo method)
+        protected DynamicCustomFunction(MethodInfo method, Type[] parameterTypes = default)
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));
             _returnType = method.ReturnType;
 
             Parameters = method.GetParameters();
+            if (parameterTypes == default)
+            {
+                parameterTypes = new Type[Parameters.Length];
+                for (int i = 0; i < Parameters.Length; i++)
+                {
+                    parameterTypes[i] = Parameters[i].ParameterType;
+                }
+            }
+            else
+            {
+                if (parameterTypes.Length != Parameters.Length)
+                {
+                    throw new ArgumentOutOfRangeException($"Parameter type count `{parameterTypes.Length}` does not match `{method.Name}` method parameter count `{Parameters.Length}` ");
+                }
+            }
+
 #if !SCRIBAN_NO_ASYNC
             IsAwaitable = method.ReturnType.GetMethod(nameof(Task.GetAwaiter)) != null;
 #endif
@@ -63,22 +79,23 @@ namespace Scriban.Runtime
             if (Parameters.Length > 0)
             {
                 // Check if we have TemplateContext+SourceSpan as first parameters
-                if (typeof(TemplateContext).IsAssignableFrom(Parameters[0].ParameterType))
+                if (typeof(TemplateContext).IsAssignableFrom(parameterTypes[0]))
                 {
                     _hasTemplateContext = true;
                     if (Parameters.Length > 1)
                     {
-                        _hasSpan = typeof(SourceSpan).IsAssignableFrom(Parameters[1].ParameterType);
+                        _hasSpan = typeof(SourceSpan).IsAssignableFrom(parameterTypes[1]);
                     }
                 }
 
-                var lastParam = Parameters[Parameters.Length - 1];
-                if (lastParam.ParameterType.IsArray)
+                var lastParamType = parameterTypes[Parameters.Length - 1];
+                if (lastParamType.IsArray)
                 {
+                    var lastParam = Parameters[Parameters.Length - 1];
                     foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
                     {
                         _varParamKind = ScriptVarParamKind.LastParameter;
-                        _paramsElementType = lastParam.ParameterType.GetElementType();
+                        _paramsElementType = lastParamType.GetElementType();
                         _paramsIndex = Parameters.Length - 1;
                         break;
                     }
@@ -121,7 +138,7 @@ namespace Scriban.Runtime
             {
                 var realIndex = _firstIndexOfUserParameters + i;
                 var parameterInfo = Parameters[realIndex];
-                var parameterType = realIndex == Parameters.Length - 1 && _varParamKind == ScriptVarParamKind.LastParameter ? _paramsElementType : parameterInfo.ParameterType;
+                var parameterType = realIndex == Parameters.Length - 1 && _varParamKind == ScriptVarParamKind.LastParameter ? _paramsElementType : parameterTypes[realIndex];
                 _parameterInfos[i] = parameterInfo.HasDefaultValue
                     ? new ScriptParameterInfo(parameterType, parameterInfo.Name, parameterInfo.DefaultValue)
                     : new ScriptParameterInfo(parameterType, parameterInfo.Name);
@@ -199,8 +216,9 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="target">A target object - might be null</param>
         /// <param name="method">A MethodInfo</param>
+        /// <param name="parameterTypes"></param>
         /// <returns>A custom <see cref="DynamicCustomFunction"/></returns>
-        public static DynamicCustomFunction Create(object target, MethodInfo method)
+        public static DynamicCustomFunction Create(object target, MethodInfo method, Type[] parameterTypes = null)
         {
             if (method == null) throw new ArgumentNullException(nameof(method));
 
@@ -208,7 +226,7 @@ namespace Scriban.Runtime
             {
                 return newFunction(method);
             }
-            return new DelegateCustomFunction(target, method);
+            return new DelegateCustomFunction(target, method, parameterTypes);
         }
 
         /// <summary>
