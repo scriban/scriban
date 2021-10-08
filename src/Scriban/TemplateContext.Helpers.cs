@@ -503,10 +503,5 @@ namespace Scriban
 
             throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to `{GetTypeName(destinationType)}`");
         }
-
-        private bool TryConvertObjectToClass(ScriptObject sourceObject, Type destinationType, out object result)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
