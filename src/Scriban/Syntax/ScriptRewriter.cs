@@ -48,11 +48,6 @@ namespace Scriban.Syntax
             return new ScriptVariableLocal(node.BaseName);
         }
 
-        public override ScriptNode Visit(ScriptVariableLoop node)
-        {
-            return new ScriptVariableLoop(node.BaseName);
-        }
-
         protected ScriptList<TNode> VisitAll<TNode>(ScriptList<TNode> nodes)
             where TNode : ScriptNode
         {

@@ -1110,7 +1110,7 @@ namespace Scriban.Syntax
                 int i = 0;
                 await BeforeLoopAsync(context).ConfigureAwait(false);
                 var loopState = CreateLoopState();
-                context.SetValue(GetLoopVariable(context), loopState);
+                context.SetLoopVariable(GetLoopVariable(context), loopState);
                 loopState.Length = list.Count;
                 bool enteredLoop = false;
                 while (!reversed && index <= endIndex || reversed && index >= startIndex)

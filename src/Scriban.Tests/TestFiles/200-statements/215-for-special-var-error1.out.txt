@@ -1,1 +1,1 @@
-text(4,1) : error : Invalid usage of the loop variable `for` not inside a loop
+text(4,5) : error : Cannot get the member for.index for a null object.

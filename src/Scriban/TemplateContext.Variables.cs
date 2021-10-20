@@ -42,16 +42,27 @@ namespace Scriban
         internal void PushGlobalOnly(IScriptObject scriptObject)
         {
             if (scriptObject == null) throw new ArgumentNullException(nameof(scriptObject));
-            _globalStores.Push(scriptObject);
+            _globalContexts.Push(GetOrCreateGlobalContext(scriptObject));
+        }
+
+        private VariableContext GetOrCreateGlobalContext(IScriptObject globalObject)
+        {
+            if (_availableGlobalContexts.Count == 0) return new VariableContext(globalObject);
+            var globalContext = _availableGlobalContexts.Pop();
+            globalContext.LocalObject = globalObject;
+            return globalContext;
         }
 
         internal IScriptObject PopGlobalOnly()
         {
-            if (_globalStores.Count == 1)
+            if (_globalContexts.Count == 1)
             {
                 throw new InvalidOperationException("Unexpected PopGlobal() not matching a PushGlobal");
             }
-            var store = _globalStores.Pop();
+            var context = _globalContexts.Pop();
+            var store = context.LocalObject;
+            context.LocalObject = null;
+            _availableGlobalContexts.Push(context);
             return store;
         }
 
@@ -69,39 +80,12 @@ namespace Scriban
 
         public void PushLocal()
         {
-            PushVariableScope(ScriptVariableScope.Local);
+            PushVariableScope(VariableScope.Local);
         }
 
         public void PopLocal()
         {
-            PopVariableScope(ScriptVariableScope.Local);
-        }
-
-        /// <summary>
-        /// Sets the variable with the specified value.
-        /// </summary>
-        /// <param name="variable">The variable.</param>
-        /// <param name="value">The value.</param>
-        /// <exception cref="System.ArgumentNullException">If variable is null</exception>
-        /// <exception cref="ScriptRuntimeException">If an existing variable is already read-only</exception>
-        public void SetValue(ScriptVariableLoop variable, object value)
-        {
-            if (variable == null) throw new ArgumentNullException(nameof(variable));
-
-            if (_currentLocalContext.Loops.Count > 0)
-            {
-                // Try to set the variable
-                var store = _currentLocalContext.Loops.Peek();
-                if (!store.TrySetValue(this, variable.Span, variable.Name, value, false))
-                {
-                    throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
-                }
-            }
-            else
-            {
-                // unit test: 215-for-special-var-error1.txt
-                throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
-            }
+            PopVariableScope(VariableScope.Local);
         }
 
         /// <summary>
@@ -187,13 +171,15 @@ namespace Scriban
         public virtual void SetLoopVariable(ScriptVariable variable, object value)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
-            if (_currentLocalContext.Loops.Count == 0)
-            {
-                throw new InvalidOperationException("Cannot set a loop variable without a loop variable store.");
 
+            var context = variable.Scope == ScriptVariableScope.Global ? _globalContexts.Peek() : _currentLocalContext;
+
+            if (context.Loops.Count == 0)
+            {
+                throw new InvalidOperationException("Cannot set a loop global variable without a loop variable store.");
             }
 
-            var store = _currentLocalContext.Loops.Peek();
+            var store = context.Loops.Peek();
             // Try to set the variable
             if (!store.TrySetValue(this, variable.Span, variable.Name, value, false))
             {
@@ -203,7 +189,7 @@ namespace Scriban
 
         private void PushLocalContext(ScriptObject locals = null)
         {
-            var localContext = _availableLocalContexts.Count > 0 ? _availableLocalContexts.Pop() : new LocalContext(null);
+            var localContext = _availableLocalContexts.Count > 0 ? _availableLocalContexts.Pop() : new VariableContext(null);
             localContext.LocalObject = locals;
             _localContexts.Push(localContext);
             _currentLocalContext = localContext;
@@ -212,7 +198,7 @@ namespace Scriban
         private ScriptObject PopLocalContext()
         {
             var oldLocalContext = _localContexts.Pop();
-            var oldLocals = oldLocalContext.LocalObject;
+            var oldLocals = (ScriptObject)oldLocalContext.LocalObject;
             oldLocalContext.LocalObject = null;
             _availableLocalContexts.Push(oldLocalContext);
 
@@ -220,7 +206,6 @@ namespace Scriban
             _currentLocalContext = _localContexts.Peek();
             return oldLocals;
         }
-
 
         /// <summary>
         /// Gets the value for the specified variable from the current object context/scope.
@@ -264,25 +249,31 @@ namespace Scriban
             if (variable == null) throw new ArgumentNullException(nameof(variable));
             object value = null;
 
-            if (IsInLoop)
             {
-                var count = _currentLocalContext.Loops.Count;	               
-                var items = _currentLocalContext.Loops.Items;
+                var count = _globalContexts.Count;
+                var items = _globalContexts.Items;
+                var isInLoop = IsInLoop;
                 for (int i = count - 1; i >= 0; i--)
                 {
-                    if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
+                    var context = items[i];
+                    // Check loop variable first
+                    if (isInLoop)
                     {
-                        return value;
+                        var loopCount = context.Loops.Count;
+                        if (loopCount > 0)
+                        {
+                            var loopItems = context.Loops.Items;
+                            for (int j = loopCount - 1; j >= 0; j--)
+                            {
+                                if (loopItems[j].TryGetValue(this, variable.Span, variable.Name, out value))
+                                {
+                                    return value;
+                                }
+                            }
+                        }
                     }
-                }
-            }
 
-            {
-                var count = _globalStores.Count;
-                var items = _globalStores.Items;
-                for (int i = count - 1; i >= 0; i--)
-                {
-                    if (items[i].TryGetValue(this, variable.Span, variable.Name, out value))
+                    if (items[i].LocalObject.TryGetValue(this, variable.Span, variable.Name, out value))
                     {
                         return value;
                     }
@@ -314,10 +305,11 @@ namespace Scriban
                     IScriptObject storeWithVariable = null;
 
                     var name = variable.Name;
-                    int lastStoreIndex = _globalStores.Count - 1;
+                    int lastStoreIndex = _globalContexts.Count - 1;
+                    var items = _globalContexts.Items;
                     for (int i = lastStoreIndex; i >= 0; i--)
                     {
-                        var store = _globalStores.Items[i];
+                        var store = items[i].LocalObject;
                         if (storeWithVariable == null && store.Contains(name))
                         {
                             storeWithVariable = store;
@@ -333,32 +325,20 @@ namespace Scriban
                     }
 
                     // If we have a store for this variable name use it, otherwise use the first store available.
-                    finalStore = storeWithVariable ?? _globalStores.Items[lastStoreIndex];
+                    finalStore = storeWithVariable ?? items[lastStoreIndex].LocalObject;
                     break;
                 case ScriptVariableScope.Local:
                     if (_currentLocalContext.LocalObject != null)
                     {
                         finalStore = _currentLocalContext.LocalObject;
                     }
-                    else if (_globalStores.Count > 0)
+                    else if (_globalContexts.Count > 0)
                     {
-                        finalStore = _globalStores.Peek();
+                        finalStore = _globalContexts.Peek().LocalObject;
                     }
                     else
                     {
                         throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable `{variable}` in the current context");
-                    }
-
-                    break;
-                case ScriptVariableScope.Loop:
-                    if (_currentLocalContext.Loops.Count > 0)
-                    {
-                        finalStore = _currentLocalContext.Loops.Peek();
-                    }
-                    else
-                    {
-                        // unit test: 215-for-special-var-error1.txt
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
                     }
 
                     break;
@@ -380,22 +360,37 @@ namespace Scriban
         {
             var scope = variable.Scope;
 
-            var loopItems = _currentLocalContext.Loops.Items;
-
             switch (scope)
             {
                 case ScriptVariableScope.Global:
-                    for (int i = _currentLocalContext.Loops.Count - 1; i >= 0; i--)
+                {
+                    var isInLoop = IsInLoop;
+                    for (int i = _globalContexts.Count - 1; i >= 0; i--)
                     {
-                        yield return loopItems[i];
+                        var context = _globalContexts.Items[i];
+
+                        // Return loop variable first
+                        if (isInLoop)
+                        {
+                            var loopCount = context.Loops.Count;
+                            if (loopCount > 0)
+                            {
+                                var loopItems = context.Loops.Items;
+                                for (int j = loopCount - 1; j >= 0; j--)
+                                {
+                                    yield return loopItems[j];
+                                }
+                            }
+                        }
+
+                        yield return context.LocalObject;
                     }
 
-                    for (int i = _globalStores.Count - 1; i >= 0; i--)
-                    {
-                            yield return _globalStores.Items[i];
-                    }
                     break;
+                }
                 case ScriptVariableScope.Local:
+                {
+                    var loopItems = _currentLocalContext.Loops.Items;
                     for (int i = _currentLocalContext.Loops.Count - 1; i >= 0; i--)
                     {
                         yield return loopItems[i];
@@ -405,26 +400,18 @@ namespace Scriban
                     {
                         yield return _currentLocalContext.LocalObject;
                     }
-                    else if (_globalStores.Count > 0)
+                    else if (_globalContexts.Count > 0)
                     {
-                        yield return _globalStores.Peek();
+                        yield return _globalContexts.Peek().LocalObject;
                     }
                     else
                     {
                         throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the local variable `{variable}` in the current context");
                     }
+
                     break;
-                case ScriptVariableScope.Loop:
-                    if (_currentLocalContext.Loops.Count > 0)
-                    {
-                        yield return _currentLocalContext.Loops.Peek();
-                    }
-                    else
-                    {
-                        // unit test: 215-for-special-var-error1.txt
-                        throw new ScriptRuntimeException(variable.Span, $"Invalid usage of the loop variable `{variable}` not inside a loop");
-                    }
-                    break;
+                }
+
                 default:
                     throw new NotImplementedException($"Variable scope `{scope}` is not implemented");
             }
@@ -443,17 +430,19 @@ namespace Scriban
         /// Push a new <see cref="ScriptVariableScope"/> for variables
         /// </summary>
         /// <param name="scope"></param>
-        private void PushVariableScope(ScriptVariableScope scope)
+        private void PushVariableScope(VariableScope scope)
         {
-            Debug.Assert(scope != ScriptVariableScope.Global);
-            var store = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
-            if (scope == ScriptVariableScope.Local)
+            if (scope == VariableScope.Local)
             {
+                var store = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
                 PushLocalContext(store);
             }
             else
             {
-                _currentLocalContext.Loops.Push(store);
+                var localStore = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
+                var globalStore = _availableStores.Count > 0 ? _availableStores.Pop() : new ScriptObject();
+                _globalContexts.Peek().Loops.Push(globalStore);
+                _currentLocalContext.Loops.Push(localStore);
             }
         }
 
@@ -461,10 +450,9 @@ namespace Scriban
         /// Pops a previous <see cref="ScriptVariableScope"/>.
         /// </summary>
         /// <param name="scope"></param>
-        private void PopVariableScope(ScriptVariableScope scope)
+        private void PopVariableScope(VariableScope scope)
         {
-            Debug.Assert(scope != ScriptVariableScope.Global);
-            if (scope == ScriptVariableScope.Local)
+            if (scope == VariableScope.Local)
             {
                 var local = PopLocalContext();
                 local.Clear();
@@ -478,25 +466,35 @@ namespace Scriban
                     throw new InvalidOperationException("Invalid number of matching push/pop VariableScope.");
                 }
 
-                var store = _currentLocalContext.Loops.Pop();
+                var globalStore = _globalContexts.Peek().Loops.Pop();
                 // The store is cleanup once it is pushed back
-                store.Clear();
+                globalStore.Clear();
+                _availableStores.Push(globalStore);
 
-                _availableStores.Push(store);
+                var localStore = _currentLocalContext.Loops.Pop();
+                // The store is cleanup once it is pushed back
+                localStore.Clear();
+                _availableStores.Push(localStore);
             }
         }
 
-        private class LocalContext
+        private class VariableContext
         {
-            public LocalContext(ScriptObject localObject)
+            public VariableContext(IScriptObject localObject)
             {
                 LocalObject = localObject;
                 Loops = new FastStack<ScriptObject>(4);
             }
 
-            public ScriptObject LocalObject;
+            public IScriptObject LocalObject;
 
             public FastStack<ScriptObject> Loops;
+        }
+
+        private enum VariableScope
+        {
+            Local,
+            Loop,
         }
     }
 }

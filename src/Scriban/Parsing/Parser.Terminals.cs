@@ -489,7 +489,7 @@ namespace Scriban.Parsing
             {
                 if (Current.Type == TokenType.Dot)
                 {
-                    scope = ScriptVariableScope.Loop;
+                    scope = ScriptVariableScope.Global;
                     var token = PeekToken();
                     if (token.Type == TokenType.Identifier)
                     {

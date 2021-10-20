@@ -39,14 +39,14 @@ namespace Scriban
     {
         private FastStack<ScriptObject> _availableStores;
         internal FastStack<ScriptBlockStatement> BlockDelegates;
-        private FastStack<IScriptObject> _globalStores;
+        private FastStack<VariableContext> _globalContexts;
         private FastStack<CultureInfo> _cultures;
         private readonly Dictionary<Type, IListAccessor> _listAccessors;
         private FastStack<ScriptLoopStatementBase> _loops;
         private readonly Dictionary<Type, IObjectAccessor> _memberAccessors;
         private FastStack<IScriptOutput> _outputs;
-        private FastStack<LocalContext> _localContexts;
-        private LocalContext _currentLocalContext;
+        private FastStack<VariableContext> _localContexts;
+        private VariableContext _currentLocalContext;
         private IScriptOutput _output;
         private FastStack<string> _sourceFiles;
         private FastStack<object> _caseValues;
@@ -54,7 +54,8 @@ namespace Scriban
         private bool _isFunctionCallDisabled;
         private int _loopStep;
         private int _getOrSetValueLevel;
-        private FastStack<LocalContext> _availableLocalContexts;
+        private FastStack<VariableContext> _availableGlobalContexts;
+        private FastStack<VariableContext> _availableLocalContexts;
         private FastStack<ScriptPipeArguments> _availablePipeArguments;
         private FastStack<ScriptPipeArguments> _pipeArguments;
         private FastStack<List<ScriptExpression>> _availableScriptExpressionLists;
@@ -139,9 +140,10 @@ namespace Scriban
             _output = new StringBuilderOutput();
             _outputs.Push(_output);
 
-            _globalStores = new FastStack<IScriptObject>(4);
-            _availableLocalContexts = new FastStack<LocalContext>(4);
-            _localContexts = new FastStack<LocalContext>(4);
+            _globalContexts = new FastStack<VariableContext>(4);
+            _availableGlobalContexts = new FastStack<VariableContext>(4);
+            _availableLocalContexts = new FastStack<VariableContext>(4);
+            _localContexts = new FastStack<VariableContext>(4);
             _availableStores = new FastStack<ScriptObject>(4);
             _cultures = new FastStack<CultureInfo>(4);
             _caseValues = new FastStack<object>(4);
@@ -286,7 +288,7 @@ namespace Scriban
         /// <summary>
         /// Gets the current global <see cref="ScriptObject"/>.
         /// </summary>
-        public IScriptObject CurrentGlobal => _globalStores.Peek();
+        public IScriptObject CurrentGlobal => _globalContexts.Peek()?.LocalObject;
 
         /// <summary>
         /// Gets the cached templates, used by the include function.
@@ -328,7 +330,7 @@ namespace Scriban
         /// <summary>
         /// Gets the number of <see cref="PushGlobal"/> that are pushed to this context.
         /// </summary>
-        public int GlobalCount => _globalStores.Count;
+        public int GlobalCount => _globalContexts.Count;
 
         /// <summary>
         /// Gets the number of <see cref="PushOutput()"/> that are pushed to this context.
@@ -575,7 +577,7 @@ namespace Scriban
         private static readonly object TrueObject = true;
         private static readonly object FalseObject = false;
 
-        public void SetValue(ScriptVariableLoop variable, bool value)
+        public void SetValue(ScriptVariable variable, bool value)
         {
             SetValue(variable, value ? TrueObject : FalseObject);
         }
@@ -951,7 +953,7 @@ namespace Scriban
             if (loop == null) throw new ArgumentNullException(nameof(loop));
             _loops.Push(loop);
             _loopStep = 0;
-            PushVariableScope(ScriptVariableScope.Loop);
+            PushVariableScope(VariableScope.Loop);
             OnEnterLoop(loop);
         }
 
@@ -974,7 +976,7 @@ namespace Scriban
             }
             finally
             {
-                PopVariableScope(ScriptVariableScope.Loop);
+                PopVariableScope(VariableScope.Loop);
                 _loops.Pop();
                 _loopStep = 0;
             }

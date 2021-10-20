@@ -1,0 +1,14 @@
+Global variable
+{{
+func tester
+    ret x + 1
+end
+for x in [1,2,3,4]~}}
+	{{x}} => {{tester}}
+{{end}}Loop variable value after loop: {{x}}
+
+Local variable
+{{
+for $x in [1,2,3,4]~}}
+	{{$x}} => {{$x}}
+{{end}}Loop variable value after loop: {{$x}}

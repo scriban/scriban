@@ -949,20 +949,6 @@ namespace Scriban.Syntax
 #else
     internal
 #endif
-    partial class ScriptVariableLoop
-    {
-        public override int ChildrenCount => 0;
-
-        protected override ScriptNode GetChildrenImpl(int index) => null;
-        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
-        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
-    }
-
-#if SCRIBAN_PUBLIC
-    public
-#else
-    internal
-#endif
     partial class ScriptWhenStatement
     {
         public override int ChildrenCount => 4;
@@ -1469,7 +1455,6 @@ namespace Scriban.Syntax
         public virtual void Visit(ScriptUnaryExpression node) => DefaultVisit(node);
         public virtual void Visit(ScriptVariableGlobal node) => DefaultVisit(node);
         public virtual void Visit(ScriptVariableLocal node) => DefaultVisit(node);
-        public virtual void Visit(ScriptVariableLoop node) => DefaultVisit(node);
         public virtual void Visit(ScriptWhenStatement node) => DefaultVisit(node);
         public virtual void Visit(ScriptWhileStatement node) => DefaultVisit(node);
         public virtual void Visit(ScriptWithStatement node) => DefaultVisit(node);
@@ -1528,7 +1513,6 @@ namespace Scriban.Syntax
         public virtual TResult Visit(ScriptUnaryExpression node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptVariableGlobal node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptVariableLocal node) => DefaultVisit(node);
-        public virtual TResult Visit(ScriptVariableLoop node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptWhenStatement node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptWhileStatement node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptWithStatement node) => DefaultVisit(node);

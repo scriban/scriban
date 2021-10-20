@@ -28,9 +28,9 @@ namespace Scriban.Syntax
         public static readonly ScriptVariableLocal Arguments = new ScriptVariableLocal(string.Empty);
         public static readonly ScriptVariableLocal BlockDelegate = new ScriptVariableLocal("$");
         public static readonly ScriptVariableLocal Continue = new ScriptVariableLocal("continue"); // Used by liquid offset:continue
-        public static readonly ScriptVariableLoop ForObject = new ScriptVariableLoop("for");
-        public static readonly ScriptVariableLoop TablerowObject = new ScriptVariableLoop("tablerow");
-        public static readonly ScriptVariableLoop WhileObject = new ScriptVariableLoop("while");
+        public static readonly ScriptVariableGlobal ForObject = new ScriptVariableGlobal("for");
+        public static readonly ScriptVariableGlobal TablerowObject = new ScriptVariableGlobal("tablerow");
+        public static readonly ScriptVariableGlobal WhileObject = new ScriptVariableGlobal("while");
 
         protected ScriptVariable(string name, ScriptVariableScope scope)
         {
@@ -39,7 +39,6 @@ namespace Scriban.Syntax
             switch (scope)
             {
                 case ScriptVariableScope.Global:
-                case ScriptVariableScope.Loop:
                     Name = name;
                     break;
                 case ScriptVariableScope.Local:
@@ -68,8 +67,6 @@ namespace Scriban.Syntax
                     return new ScriptVariableGlobal(name);
                 case ScriptVariableScope.Local:
                     return new ScriptVariableLocal(name);
-                case ScriptVariableScope.Loop:
-                    return new ScriptVariableLoop(name);
                 default:
                     throw new InvalidOperationException($"Scope `{scope}` is not supported");
             }
@@ -172,30 +169,4 @@ namespace Scriban.Syntax
         {
         }
     }
-
-#if SCRIBAN_PUBLIC
-    public
-#else
-    internal
-#endif
-    partial class ScriptVariableLoop : ScriptVariable
-    {
-        public ScriptVariableLoop(string name) : base(name, ScriptVariableScope.Loop)
-        {
-        }
-
-        public override void PrintTo(ScriptPrinter printer)
-        {
-            if (printer.IsInWhileLoop)
-            {
-                // TODO: Not efficient
-                printer.Write(Name == "for" ? "while" : Name);
-            }
-            else
-            {
-                base.PrintTo(printer);
-            }
-        }
-    }
-
 }

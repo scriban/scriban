@@ -1,0 +1,13 @@
+Global variable
+	1 => 2
+	2 => 3
+	3 => 4
+	4 => 5
+Loop variable value after loop: 
+
+Local variable
+	1 => 1
+	2 => 2
+	3 => 3
+	4 => 4
+Loop variable value after loop: 

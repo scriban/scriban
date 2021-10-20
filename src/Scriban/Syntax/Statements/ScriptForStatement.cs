@@ -155,7 +155,7 @@ namespace Scriban.Syntax
                 BeforeLoop(context);
 
                 var loopState = CreateLoopState();
-                context.SetValue(GetLoopVariable(context), loopState);
+                context.SetLoopVariable(GetLoopVariable(context), loopState);
                 loopState.Length = list.Count;
 
                 bool enteredLoop = false;

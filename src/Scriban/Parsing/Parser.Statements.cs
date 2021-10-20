@@ -349,15 +349,6 @@ namespace Scriban.Parsing
                     LogError(forStatement, $"Expecting a variable instead of `{forStatement.Variable}`");
                 }
 
-                // A global variable used in a for should always be a loop only variable
-                if (forStatement.Variable is ScriptVariableGlobal previousVar)
-                {
-                    var loopVar = ScriptVariable.Create(previousVar.BaseName, ScriptVariableScope.Loop);
-                    loopVar.Span = previousVar.Span;
-                    loopVar.Trivias = previousVar.Trivias;
-                    forStatement.Variable = loopVar;
-                }
-
                 // in
                 if (Current.Type != TokenType.Identifier || GetAsText(Current) != "in")
                 {
@@ -506,9 +497,9 @@ namespace Scriban.Parsing
             {
                 var variableOrLiteral = ParseVariable();
                 var variable = variableOrLiteral as ScriptVariable;
-                if (variable != null && variable.Scope != ScriptVariableScope.Loop)
+                if (variable != null)
                 {
-                    return (ScriptVariable)variableOrLiteral;
+                    return variable;
                 }
                 LogError(parentNode, $"Unexpected variable `{variableOrLiteral}`");
             }
