@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.0.0 (20 Oct 2021)
+- Fix scope for variable (global vs local) (#385)
+
 ## 4.1.0 (7 October 2021)
 - Add `IQueryable<T>` support in `for`-loops. 
     - Parameter `offset:count` will be translated to `IQueryable<T>.Skip(count)`
