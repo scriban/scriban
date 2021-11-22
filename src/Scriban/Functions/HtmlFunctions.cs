@@ -108,7 +108,9 @@ namespace Scriban.Functions
             {
                 return text;
             }
+#pragma warning disable SYSLIB0013
             return Uri.EscapeUriString(text);
+#pragma warning restore SYSLIB0013
         }
     }
 }
