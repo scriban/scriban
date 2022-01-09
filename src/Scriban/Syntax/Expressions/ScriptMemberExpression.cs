@@ -118,7 +118,7 @@ namespace Scriban.Syntax
 
             if (targetObject == null)
             {
-                if (isSet || !context.EnableRelaxedMemberAccess)
+                if (isSet || (context.EnableRelaxedMemberAccess == false && DotToken.TokenType != TokenType.QuestionDot))
                 {
                     throw new ScriptRuntimeException(this.Member.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
                 }
