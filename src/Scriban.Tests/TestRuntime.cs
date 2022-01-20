@@ -924,6 +924,9 @@ Tax: {{ 7 | match_tax }}";
                 var result = Template.Parse("{{a.property_a").Render(context);
                 Assert.AreEqual("A", result);
 
+                result = Template.Parse("{{null_ref?.property_a").Render(context);
+                Assert.AreEqual(string.Empty, result);
+
                 Assert.Catch<ScriptRuntimeException>(() =>
                    Template.Parse("{{a.property_a.null_ref}}").Render(context));
 
