@@ -1,0 +1,13 @@
+{{
+variable = -5
+case variable
+    when 0
+        "Not OK"
+    when -1, -2.5
+        "Not OK"
+    when -5
+        "OK"
+    else
+        "Not OK"
+end
+}}

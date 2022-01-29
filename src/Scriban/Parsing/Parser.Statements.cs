@@ -454,13 +454,27 @@ namespace Scriban.Parsing
             // - a or b or c (liquid)
             while (true)
             {
-                if (!IsVariableOrLiteral(Current))
+                if (IsVariableOrLiteral(Current))
+                {
+                    var variableOrLiteral = ParseVariableOrLiteral();
+                    whenStatement.Values.Add(variableOrLiteral);
+                }
+                else if (Current.Type == TokenType.Minus)
+                {
+                    var negateExpression = ParseExpression(whenStatement);
+
+                    // Only allow negative numbers (integers or floats)
+                    // This conditions avoids allowing generic expressions just because they start with a Negate operator.
+                    if (negateExpression.ChildrenCount == 2
+                        && (Previous.Type == TokenType.Integer || Previous.Type == TokenType.Float))
+                    {
+                        whenStatement.Values.Add(negateExpression);
+                    }
+                }
+                else
                 {
                     break;
                 }
-
-                var variableOrLiteral = ParseVariableOrLiteral();
-                whenStatement.Values.Add(variableOrLiteral);
 
                 if (Current.Type == TokenType.Comma || (!_isLiquid && Current.Type == TokenType.DoubleVerticalBar) || (_isLiquid && GetAsText(Current) == "or"))
                 {
