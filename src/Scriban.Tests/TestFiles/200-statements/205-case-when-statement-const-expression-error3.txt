@@ -1,0 +1,12 @@
+{{
+test_value = -5
+a = 1
+case test_value
+    when a * 5 + ( 1 - 3)
+        "Not OK"
+    when (--a + 15)
+        "Not OK"
+    else
+        "Not Ok " + a
+end
+}}

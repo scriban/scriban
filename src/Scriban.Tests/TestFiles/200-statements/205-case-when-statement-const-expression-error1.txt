@@ -1,0 +1,14 @@
+{{
+test_value = -5
+a = 1
+case test_value
+    when a
+        "Not OK"
+    when test_value++
+        "lol " + test_value
+    when -5
+        test_value
+    else
+        "Not OK"
+end
+}}
