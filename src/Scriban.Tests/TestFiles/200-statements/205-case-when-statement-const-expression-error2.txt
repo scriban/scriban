@@ -1,0 +1,13 @@
+{{
+test_array = [1, 2, 3]
+test_value = -3
+index = 0
+case test_value
+    when -1 * test_array[index]
+        "Not OK"
+    when -3 * test_array[index++]
+        "Not ok"
+    else
+        "Not OK"
+end
+}}

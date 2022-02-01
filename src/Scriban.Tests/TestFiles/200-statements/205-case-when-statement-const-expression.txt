@@ -1,0 +1,79 @@
+{{
+test_value = -5
+case test_value
+    when 0 * 1
+        "Not OK, but parsable"
+    when -1, -2.5
+        "Not OK, but parsable"
+    when -5
+        "OK"
+    else
+        "Not OK"
+end
+}}
+{{
+test_value = -5
+case test_value
+    when +-+5
+        "OK"
+    else
+        "Not OK"
+end
+}}
+{{
+test_value = -5
+case test_value
+    when (10 - 15)
+        "OK"
+    else
+        "Not OK"
+end
+}}
+{{
+test_value = -3
+test_array = [1, 2, 3]
+case test_value
+    when test_array[0], test_array[1]
+        "Not OK"
+    when -test_array[2]
+        "OK"
+    else
+        "Not OK"
+end
+}}
+{{
+test_value = -3
+test_array = [1, 2, 3]
+case test_value
+    when test_array[0], test_array[1]
+        "Not OK"
+    when -1 * (test_array[0] * 3)
+        "OK"
+    else
+        "Not OK"
+end
+}}
+{{
+test_value = true
+foo = 10
+case test_value
+    when 5 > foo
+        "Not OK"
+    when 5 < foo
+        "OK"
+    else
+        "Not OK"
+end
+}}
+{{
+test_value = true
+foo = 5
+case test_value
+    when 5 > foo
+        "Not OK"
+    when 5 < foo
+        "Not OK"
+    else
+        "OK"
+end
+}}

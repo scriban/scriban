@@ -165,7 +165,7 @@ namespace Scriban.Parsing
                         leftOperand = ParseVerbatimString();
                         break;
                     case TokenType.OpenParen:
-                        leftOperand = ParseParenthesis();
+                        leftOperand = ParseParenthesis(mode);
                         break;
                     case TokenType.OpenBrace:
                         leftOperand = ParseObjectInitializer();
@@ -180,7 +180,7 @@ namespace Scriban.Parsing
                     default:
                         if (IsStartingAsUnaryExpression())
                         {
-                            leftOperand = ParseUnaryExpression();
+                            leftOperand = ParseUnaryExpression(mode);
                         }
                         break;
                 }
@@ -285,7 +285,7 @@ namespace Scriban.Parsing
                         ExpectAndParseTokenTo(indexerExpression.OpenBracket, TokenType.OpenBracket); // parse [
 
                         // unit test: 130-indexer-accessor-error5.txt
-                        indexerExpression.Index = ExpectAndParseExpression(indexerExpression, functionCall, 0, $"Expecting <index_expression> instead of `{GetAsText(Current)}`");
+                        indexerExpression.Index = ExpectAndParseExpression(indexerExpression, functionCall, 0, $"Expecting <index_expression> instead of `{GetAsText(Current)}`", mode);
 
                         if (Current.Type != TokenType.CloseBracket)
                         {
@@ -363,6 +363,11 @@ namespace Scriban.Parsing
                         break;
                     }
 
+                    if (mode == ParseExpressionMode.ConstantExpression && leftOperand is ScriptIncrementDecrementExpression)
+                    {
+                        LogError($"Unexpected non constant expression `{leftOperand}`.");
+                    }
+
                     // Handle binary operators here
                     ScriptBinaryOperator binaryOperatorType;
                     int newPrecedence;
@@ -403,6 +408,11 @@ namespace Scriban.Parsing
                         leftOperand = Close(binaryExpression);
 
                         continue;
+                    }
+
+                    if (mode == ParseExpressionMode.ConstantExpression)
+                    {
+                        break;
                     }
 
                     // Parse conditional expression
@@ -906,12 +916,12 @@ namespace Scriban.Parsing
             return Close(scriptObject);
         }
 
-        private ScriptExpression ParseParenthesis()
+        private ScriptExpression ParseParenthesis(ParseExpressionMode mode)
         {
             // unit test: 106-parenthesis.txt
             var expression = Open<ScriptNestedExpression>();
             ExpectAndParseTokenTo(expression.OpenParen, TokenType.OpenParen); // Parse (
-            expression.Expression = ExpectAndParseExpression(expression);
+            expression.Expression = ExpectAndParseExpression(expression, mode:mode);
 
             if (Current.Type == TokenType.CloseParen)
             {
@@ -991,7 +1001,7 @@ namespace Scriban.Parsing
             return Close(expression);
         }
 
-        private ScriptExpression ParseUnaryExpression()
+        private ScriptExpression ParseUnaryExpression(ParseExpressionMode parseExpressionMode)
         {
             // unit test: 113-unary.txt
             var unaryExpression = Open<ScriptUnaryExpression>();
@@ -1031,7 +1041,7 @@ namespace Scriban.Parsing
             newPrecedence = GetDefaultUnaryOperatorPrecedence(unaryExpression.Operator);
 
             // unit test: 115-unary-error1.txt
-            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence);
+            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence, mode:parseExpressionMode) ;
             return Close(unaryExpression);
         }
 
@@ -1330,6 +1340,12 @@ namespace Scriban.Parsing
             /// Only literal, unary, nested, array/object initializer, dot access, array access
             /// </summary>
             BasicExpression,
+
+            /// <summary>
+            /// BasicExpression Expressions whose value can be evaluated at compile time to a literal.
+            /// (Similar as Basic except no Increment/Decrement expressions, yes binary operations as long as sub expressions are also constant)
+            /// </summary>
+            ConstantExpression,
         }
     }
 }
