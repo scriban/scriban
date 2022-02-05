@@ -315,7 +315,17 @@ namespace Scriban.Syntax
                         {
                             var limit = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
 
+#if NET6_0_OR_GREATER
+                            var methodInfo = Array.Find(
+                                typeof(System.Linq.Queryable).GetMethods(),
+                                x => x.Name == nameof(System.Linq.Queryable.Take) && x.GetParameters()[1].ParameterType == typeof(int));
+
+                            methodInfo = methodInfo.MakeGenericMethod(typeOfT);
+
+                            queryable = (System.Linq.IQueryable)methodInfo.Invoke(null, new object[] { queryable, limit });
+#else
                             queryable = InvokeQueryableMethod(nameof(System.Linq.Queryable.Take), queryable, limit);
+#endif
                             break;
                         }
                     default:

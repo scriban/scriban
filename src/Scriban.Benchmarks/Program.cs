@@ -334,7 +334,7 @@ namespace Scriban.Benchmarks
         public string TestFluid()
         {
             var templateContext = new Fluid.TemplateContext();
-            templateContext.SetValue("products", _products);
+            templateContext.SetValue("products", Fluid.Values.FluidValue.Create(_products, templateContext.Options));
             // DotLiquid forces to rework the original List<Product> into a custom object, which is not the same behavior as Scriban (easier somewhat because no late binding)
             return Fluid.FluidTemplateExtensions.Render(_fluidTemplate, templateContext);
         }
