@@ -45,7 +45,7 @@
     <!-- git versioning -->
     <PackageReference Include="MSBuildGitHash" Version="2.0.2" PrivateAssets="All" />
     <!--Add support for sourcelink-->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.*" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
     <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />

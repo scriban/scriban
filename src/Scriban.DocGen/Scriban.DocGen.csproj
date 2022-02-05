@@ -5,9 +5,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="NuDoq">
-      <HintPath>..\..\ext\NuDoq\NuDoq.dll</HintPath>
-    </Reference>
+    <PackageReference Include="NuDoq" Version="2.0.1" />
     <ProjectReference Include="..\Scriban\Scriban.csproj" />
   </ItemGroup>
 </Project>
