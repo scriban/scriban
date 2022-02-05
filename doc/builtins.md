@@ -1767,7 +1767,7 @@ Formats an object using specified format.
 > **output**
 ```html
 00FF
-1 523,00
+1,523.00
 ```
 
 [:top:](#builtins)
