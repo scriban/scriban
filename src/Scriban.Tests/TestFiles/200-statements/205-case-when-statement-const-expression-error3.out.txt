@@ -1,1 +1,0 @@
-text(7,15) : error : Unexpected non constant expression `--a`.

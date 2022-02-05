@@ -456,7 +456,7 @@ namespace Scriban.Parsing
             {
                 if (IsStartOfExpression())
                 {
-                    var constantExpression = ParseExpression(whenStatement, mode:ParseExpressionMode.ConstantExpression, allowAssignment:false);
+                    var constantExpression = ParseExpression(whenStatement, mode:ParseExpressionMode.WhenExpression, allowAssignment:false);
                     whenStatement.Values.Add(constantExpression);
                 }
                 else

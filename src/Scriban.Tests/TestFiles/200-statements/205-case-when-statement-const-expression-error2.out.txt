@@ -1,1 +1,0 @@
-text(8,33) : error : Unexpected non constant expression `index++`.

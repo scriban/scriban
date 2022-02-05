@@ -1,1 +1,0 @@
-text(7,22) : error : Unexpected non constant expression `test_value++`.

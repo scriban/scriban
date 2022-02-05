@@ -103,6 +103,10 @@ namespace Scriban.Parsing
 
             var enteringPrecedence = precedence;
 
+            // Override the mode
+            var originalMode = mode;
+            mode = mode == ParseExpressionMode.WhenExpression ? ParseExpressionMode.Default : mode;
+
             EnterExpression();
             try
             {
@@ -165,7 +169,7 @@ namespace Scriban.Parsing
                         leftOperand = ParseVerbatimString();
                         break;
                     case TokenType.OpenParen:
-                        leftOperand = ParseParenthesis(mode);
+                        leftOperand = ParseParenthesis();
                         break;
                     case TokenType.OpenBrace:
                         leftOperand = ParseObjectInitializer();
@@ -180,7 +184,7 @@ namespace Scriban.Parsing
                     default:
                         if (IsStartingAsUnaryExpression())
                         {
-                            leftOperand = ParseUnaryExpression(mode);
+                            leftOperand = ParseUnaryExpression();
                         }
                         break;
                 }
@@ -363,16 +367,16 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (mode == ParseExpressionMode.ConstantExpression && leftOperand is ScriptIncrementDecrementExpression)
-                    {
-                        LogError($"Unexpected non constant expression `{leftOperand}`.");
-                    }
-
                     // Handle binary operators here
                     ScriptBinaryOperator binaryOperatorType;
                     int newPrecedence;
                     if (TryBinaryOperator(out binaryOperatorType, out newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
                     {
+                        if (originalMode == ParseExpressionMode.WhenExpression && binaryOperatorType == ScriptBinaryOperator.Or)
+                        {
+                            break;
+                        }
+
                         // Check precedence to see if we should "take" this operator here (Thanks TimJones for the tip code! ;)
                         if (newPrecedence <= precedence)
                         {
@@ -408,11 +412,6 @@ namespace Scriban.Parsing
                         leftOperand = Close(binaryExpression);
 
                         continue;
-                    }
-
-                    if (mode == ParseExpressionMode.ConstantExpression)
-                    {
-                        break;
                     }
 
                     // Parse conditional expression
@@ -916,12 +915,12 @@ namespace Scriban.Parsing
             return Close(scriptObject);
         }
 
-        private ScriptExpression ParseParenthesis(ParseExpressionMode mode)
+        private ScriptExpression ParseParenthesis()
         {
             // unit test: 106-parenthesis.txt
             var expression = Open<ScriptNestedExpression>();
             ExpectAndParseTokenTo(expression.OpenParen, TokenType.OpenParen); // Parse (
-            expression.Expression = ExpectAndParseExpression(expression, mode:mode);
+            expression.Expression = ExpectAndParseExpression(expression);
 
             if (Current.Type == TokenType.CloseParen)
             {
@@ -1001,7 +1000,7 @@ namespace Scriban.Parsing
             return Close(expression);
         }
 
-        private ScriptExpression ParseUnaryExpression(ParseExpressionMode parseExpressionMode)
+        private ScriptExpression ParseUnaryExpression()
         {
             // unit test: 113-unary.txt
             var unaryExpression = Open<ScriptUnaryExpression>();
@@ -1041,7 +1040,7 @@ namespace Scriban.Parsing
             newPrecedence = GetDefaultUnaryOperatorPrecedence(unaryExpression.Operator);
 
             // unit test: 115-unary-error1.txt
-            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence, mode:parseExpressionMode) ;
+            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence) ;
             return Close(unaryExpression);
         }
 
@@ -1342,10 +1341,9 @@ namespace Scriban.Parsing
             BasicExpression,
 
             /// <summary>
-            /// BasicExpression Expressions whose value can be evaluated at compile time to a literal.
-            /// (Similar as Basic except no Increment/Decrement expressions, yes binary operations as long as sub expressions are also constant)
+            /// A when expression cannot use `||`, ',' or 'or' at the top-level as they are used to separate expressions.
             /// </summary>
-            ConstantExpression,
+            WhenExpression,
         }
     }
 }
