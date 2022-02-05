@@ -454,13 +454,15 @@ namespace Scriban.Parsing
             // - a or b or c (liquid)
             while (true)
             {
-                if (!IsVariableOrLiteral(Current))
+                if (IsStartOfExpression())
+                {
+                    var constantExpression = ParseExpression(whenStatement, mode:ParseExpressionMode.WhenExpression, allowAssignment:false);
+                    whenStatement.Values.Add(constantExpression);
+                }
+                else
                 {
                     break;
                 }
-
-                var variableOrLiteral = ParseVariableOrLiteral();
-                whenStatement.Values.Add(variableOrLiteral);
 
                 if (Current.Type == TokenType.Comma || (!_isLiquid && Current.Type == TokenType.DoubleVerticalBar) || (_isLiquid && GetAsText(Current) == "or"))
                 {

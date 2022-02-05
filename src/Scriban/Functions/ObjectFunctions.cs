@@ -151,7 +151,7 @@ namespace Scriban.Functions
         /// ```
         /// ```html
         /// 00FF
-        /// 1 523,00
+        /// 1 523,00
         /// ```
         /// </remarks>
         public static string Format(TemplateContext context, SourceSpan span, object value, string format, string culture = null)
