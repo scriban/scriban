@@ -851,9 +851,7 @@ namespace Scriban.Syntax
                 TokenType.DoubleDivideEqual => ScriptBinaryOperator.DivideRound,
                 TokenType.PercentEqual => ScriptBinaryOperator.Modulus,
                 _ => throw new ScriptRuntimeException(context.CurrentSpan, $"Operator {this.EqualToken} is not a valid compound assignment operator"),
-            }
-
-            ;
+            };
             return ScriptBinaryExpression.Evaluate(context, this.Span, op, left, right);
         }
     }
@@ -1209,7 +1207,17 @@ namespace Scriban.Syntax
                     case "limit": // call IQueryable<T>.Take(count) extension method
                         {
                             var limit = context.ToInt(option.Value.Span, await context.EvaluateAsync(option.Value).ConfigureAwait(false));
+#if NET6_0_OR_GREATER
+                            var methodInfo = Array.Find(
+                                typeof(System.Linq.Queryable).GetMethods(),
+                                x => x.Name == nameof(System.Linq.Queryable.Take) && x.GetParameters()[1].ParameterType == typeof(int));
+
+                            methodInfo = methodInfo.MakeGenericMethod(typeOfT);
+
+                            queryable = (System.Linq.IQueryable)methodInfo.Invoke(null, new object[] { queryable, limit });
+#else
                             queryable = InvokeQueryableMethod(nameof(System.Linq.Queryable.Take), queryable, limit);
+#endif
                             break;
                         }
 
@@ -1987,7 +1995,7 @@ namespace Scriban.Syntax
             var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
             if (targetObject == null)
             {
-                if (isSet || !context.EnableRelaxedMemberAccess)
+                if (isSet || (context.EnableRelaxedMemberAccess == false && DotToken.TokenType != TokenType.QuestionDot))
                 {
                     throw new ScriptRuntimeException(this.Member.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
                 }
