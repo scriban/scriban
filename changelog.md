@@ -1,5 +1,10 @@
 # Changelog
 
+## 5.1.0 (5 Feb 2022)
+- Fix accessing null?.property when EnableRelaxedMemberAccess == False (#401)
+- Migrate tests to net6.0 (#410)
+- Add support for anykind of expressions in when clauses (#409)
+
 ## 5.0.0 (20 Oct 2021)
 - Fix scope for variable (global vs local) (#385)
 
