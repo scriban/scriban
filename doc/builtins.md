@@ -1762,7 +1762,7 @@ Formats an object using specified format.
 > **input**
 ```scriban-html
 {{ 255 | object.format "X4" }}
-{{ 1523 | object.format "N2" "fr-FR" }}
+{{ 1523 | object.format "N2" "en-US" }}
 ```
 > **output**
 ```html
