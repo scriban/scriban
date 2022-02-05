@@ -42,8 +42,6 @@
     </Content>
 
     <None Include="../../img/scriban.png" Pack="true" PackagePath="" />
-    <!-- git versioning -->
-    <PackageReference Include="MSBuildGitHash" Version="2.0.2" PrivateAssets="All" />
     <!--Add support for sourcelink-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.*" PrivateAssets="All" />
   </ItemGroup>
