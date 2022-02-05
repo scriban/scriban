@@ -3619,7 +3619,7 @@ string.base64_decode <text>
 #### Description
 
 Decodes a Base64-encoded string to a byte array.
-he encoding of the bytes is assumed to be UTF-8.
+The encoding of the bytes is assumed to be UTF-8.
 
 #### Arguments
 
