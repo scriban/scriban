@@ -351,7 +351,8 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Returns string representing the type of the input object. The type can be `string`, `bool`, `number`, `array`, `iterator` and `object`
+        /// Returns string representing the type of the input object. The type can be `string`, `bool`, `byte`, `sbyte`, `ushort`, `short`, `uint`, `int`,
+        /// `ulong`, `long`, `float`, `double`, `decimal`, `bigint`, `enum`, `range`, `array`, `function` and `object`
         /// </summary>
         /// <param name="value">The input object.</param>
         /// <remarks>
