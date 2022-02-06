@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.3.0 (6 Feb 2022)
+- Add support for auto-indent (#398)
+
 ## 5.2.0 (6 Feb 2022)
 - Add support for specifying custom format and culture for date.parse
 
