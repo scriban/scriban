@@ -278,11 +278,11 @@ namespace Scriban
                 {
                     if (setter)
                     {
-                        nextPath.SetValue(this, valueToSet);
+                        await nextPath.SetValueAsync(this, valueToSet).ConfigureAwait(false);
                     }
                     else
                     {
-                        value = nextPath.GetValue(this);
+                        value = await nextPath.GetValueAsync(this).ConfigureAwait(false);
                     }
                 }
                 else if (!setter)
@@ -544,7 +544,7 @@ namespace Scriban.Functions
             var previousIndent = context.CurrentIndent;
             context.CurrentIndent = null;
             context.PushOutput();
-            var previousArguments = context.GetValue(ScriptVariable.Arguments);
+            var previousArguments = await context.GetValueAsync(ScriptVariable.Arguments).ConfigureAwait(false);
             try
             {
                 context.SetValue(ScriptVariable.Arguments, arguments, true, true);
@@ -2291,6 +2291,25 @@ namespace Scriban.Syntax
         public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
             return await context.GetValueAsync((ScriptExpression)this).ConfigureAwait(false);
+        }
+
+        public virtual async ValueTask<object> GetValueAsync(TemplateContext context)
+        {
+            return await context.GetValueAsync(this).ConfigureAwait(false);
+        }
+    }
+
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptVariableGlobal
+    {
+        public override async ValueTask<object> GetValueAsync(TemplateContext context)
+        {
+            // Used a specialized overrides on contxet for ScriptVariableGlobal
+            return await context.GetValueAsync(this).ConfigureAwait(false);
         }
     }
 

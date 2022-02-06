@@ -6,6 +6,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Scriban.Syntax
 {
@@ -57,5 +58,17 @@ namespace Scriban.Syntax
         {
             return "this";
         }
+
+#if !SCRIBAN_NO_ASYNC
+        public ValueTask<object> GetValueAsync(TemplateContext context)
+        {
+            return new ValueTask<object>(context.CurrentGlobal);
+        }
+
+        public ValueTask SetValueAsync(TemplateContext context, object valueToSet)
+        {
+            throw new ScriptRuntimeException(Span, "Cannot set this variable");
+        }
+#endif
     }
 }

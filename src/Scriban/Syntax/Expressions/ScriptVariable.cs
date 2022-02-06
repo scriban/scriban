@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Scriban.Syntax
 {
@@ -88,6 +89,13 @@ namespace Scriban.Syntax
         {
             return Name;
         }
+
+#if !SCRIBAN_NO_ASYNC
+        public ValueTask SetValueAsync(TemplateContext context, object valueToSet)
+        {
+            return context.SetValueAsync(this, valueToSet);
+        }
+#endif
 
         public virtual bool Equals(ScriptVariable other)
         {

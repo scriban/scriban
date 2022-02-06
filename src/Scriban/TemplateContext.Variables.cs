@@ -13,6 +13,7 @@ using System.Linq;
 using System.Numerics;
 using System.Reflection; // Leave this as it is required by some .NET targets
 using System.Text;
+using System.Threading.Tasks;
 using Scriban.Functions;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -107,7 +108,6 @@ namespace Scriban
                 throw new ScriptRuntimeException(variable.Span, $"Cannot set value on the readonly variable `{variable}`"); // unit test: 105-assign-error2.txt
             }
         }
-
 
         /// <summary>
         /// Sets the variable with the specified value.
@@ -292,6 +292,24 @@ namespace Scriban
             CheckVariableFound(variable, found);
             return value;
         }
+
+#if !SCRIBAN_NO_ASYNC
+        public ValueTask<object> GetValueAsync(ScriptVariableGlobal variable)
+        {
+            return new ValueTask<object>(GetValue(variable));
+        }
+
+        public ValueTask<object> GetValueAsync(ScriptVariable variable)
+        {
+            return new ValueTask<object>(GetValue(variable));
+        }
+
+        public ValueTask SetValueAsync(ScriptVariable variable, object value, bool asReadOnly = false)
+        {
+            SetValue(variable, value, asReadOnly);
+            return new ValueTask();
+        }
+#endif
 
         private IScriptObject GetStoreForWrite(ScriptVariable variable)
         {

@@ -58,6 +58,7 @@ namespace Scriban.AsyncCodeGen
 
             _scriptNodeType = compilation.GetTypeByMetadataName("Scriban.Syntax.ScriptNode");
             _scriptListType = compilation.GetTypeByMetadataName("Scriban.Syntax.ScriptList");
+            var interfaceScriptVariablePath = compilation.GetTypeByMetadataName("Scriban.Syntax.IScriptVariablePath");
 
             var models = compilation.SyntaxTrees.Select(tree => compilation.GetSemanticModel(tree)).ToList();
 
@@ -76,12 +77,15 @@ namespace Scriban.AsyncCodeGen
                         var interfaceDecl = (InterfaceDeclarationSyntax) methodDeclaration.Parent;
 
                         var interfaceType = model.GetDeclaredSymbol(interfaceDecl);
-                        if (interfaceType != null && interfaceType.ContainingNamespace.Name == "Runtime" && (interfaceType.Name == "IScriptOutput" || interfaceType.Name == "IScriptCustomFunction" || (interfaceType.Name == "ITemplateLoader" && methodDeclaration.Identifier.Text == "Load")))
+                        if (interfaceType != null &&
+                            (interfaceType.ContainingNamespace.Name == "Runtime" && (interfaceType.Name == "IScriptOutput" || interfaceType.Name == "IScriptCustomFunction" || (interfaceType.Name == "ITemplateLoader" && methodDeclaration.Identifier.Text == "Load")))
+                            || interfaceScriptVariablePath.Equals(interfaceType))
                         {
                             var method = model.GetDeclaredSymbol(methodDeclaration);
 
                             // Convert only IScriptCustomFunction.Invoke
                             if (interfaceType.Name == "IScriptCustomFunction" && method.Name != "Invoke") continue;
+                            if (interfaceType.Name == "IScriptVariablePath" && method.Name == "GetFirstPath") continue;
 
                             if (visited.Add(method))
                             {
@@ -92,7 +96,18 @@ namespace Scriban.AsyncCodeGen
                     else
                     {
                         var methodModel = model.GetDeclaredSymbol(methodDeclaration);
-                        if (!methodModel.IsStatic && (methodModel.Name == "Evaluate" || methodModel.Name == "EvaluateImpl") && methodModel.Parameters.Length == 1 && methodModel.Parameters[0].Type.Name == "TemplateContext" && InheritFrom(methodModel.ReceiverType, "Syntax", "ScriptNode"))
+
+                        //var isScriptVariablePathMethod = (methodModel.Name == "GetValue" || methodModel.Name == "SetValue") && (methodModel.ImplementsInterfaceMember(interfaceScriptVariablePath) ||
+                        //                                                                                           methodModel.OverriddenMethod != null &&
+                        //                                                                                           methodModel.OverriddenMethod.ImplementsInterfaceMember(interfaceScriptVariablePath));
+
+                        var isTemplateContextGetValue = methodModel.Name == "GetValue" && methodModel.ReceiverType.Name == "TemplateContext";
+
+
+                        if (!methodModel.IsStatic && ((
+                                methodModel.Name == "Evaluate" || methodModel.Name == "EvaluateImpl") && methodModel.Parameters.Length == 1 && methodModel.Parameters[0].Type.Name == "TemplateContext" && InheritFrom(methodModel.ReceiverType, "Syntax", "ScriptNode")
+                                || isTemplateContextGetValue)
+                            )
                         {
                             while (methodModel != null)
                             {
@@ -132,7 +147,7 @@ namespace Scriban.AsyncCodeGen
                 }
 
                 var finds = await SymbolFinder.FindCallersAsync(method, solution);
-                foreach (var referencer in finds.Where(f => f.IsDirect))
+                foreach (var referencer in finds)
                 {
                     var doc  =solution.GetDocument(referencer.Locations.First().SourceTree);
                     if (doc.Project != project)
@@ -149,8 +164,10 @@ namespace Scriban.AsyncCodeGen
 
                     // Skip methods over than Evaluate for ScriptNode
                     // Skip also entirely any methods related to ScriptVisitor
-                    if (callingMethodSymbol.Name == "ToString" ||
-                            (callingMethodSymbol.OverriddenMethod != null && callingMethodSymbol.OverriddenMethod.ContainingType.Name == "ScriptNode" && callingMethodSymbol.Name != "Evaluate") ||
+                    if (
+                        callingMethodSymbol.Name == "ObjectToStringImpl" ||
+                        callingMethodSymbol.Name == "ToString" ||
+                        (callingMethodSymbol.OverriddenMethod != null && callingMethodSymbol.OverriddenMethod.ContainingType.Name == "ScriptNode" && callingMethodSymbol.Name != "Evaluate") ||
                         InheritFrom(callingMethodSymbol.ContainingType, "Syntax", "ScriptVisitor") ||
                         InheritFrom(callingMethodSymbol.ContainingType, "Runtime", "ScriptObject"))
                     {
