@@ -19,6 +19,8 @@ namespace Scriban.Tests
             Minimal
         }
 
+        public static string Normalize(string text) => text.Replace("\r\n", "\n");
+
         public static void AreEqual(string expected, string actual)
         {
             AreEqual(expected, actual, DiffStyle.Full, Console.Out);

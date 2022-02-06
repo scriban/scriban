@@ -114,7 +114,7 @@ namespace Scriban.Tests
         {
             public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
-                return templateName == "test" ? "test" : "nested";
+                return templateName;
             }
 
             public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)

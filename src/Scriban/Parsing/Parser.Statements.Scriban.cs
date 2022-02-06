@@ -23,7 +23,7 @@ namespace Scriban.Parsing
     partial class Parser
     {
 
-        private void ParseScribanStatement(string identifier, ScriptStatement parent, bool parseEndOfStatementAfterEnd, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
+        private void ParseScribanStatement(string identifier, ScriptNode parent, bool parseEndOfStatementAfterEnd, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
             var startToken = Current;
             switch (identifier)

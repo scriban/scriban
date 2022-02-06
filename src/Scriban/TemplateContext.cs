@@ -121,6 +121,7 @@ namespace Scriban
             EnableRelaxedMemberAccess = true;
             EnableRelaxedFunctionAccess = false;
             EnableRelaxedIndexerAccess = true;
+            AutoIndent = true;
             LoopLimit = 1000;
             RecursiveLimit = 100;
             LimitToString = 0;
@@ -190,11 +191,21 @@ namespace Scriban
         /// Gets a boolean if the context is being used  with liquid
         /// </summary>
         public bool IsLiquid { get; protected set; }
+        
+        /// <summary>
+        /// If sets to <c>true</c>, the include statement will maintain the indent.
+        /// </summary>
+        public bool AutoIndent { get; set; }
 
         /// <summary>
         /// If sets to <c>true</c>, the include statement will maintain the indent.
         /// </summary>
-        public bool IndentWithInclude { get; set; }
+        [Obsolete("Use AutoIndent instead. Note that AutoIndent is true by default.")]
+        public bool IndentWithInclude
+        {
+            get => AutoIndent;
+            set => AutoIndent = value;
+        }
 
         /// <summary>
         /// Gets or sets the buffer limit in characters for a ToString in a list/string. Default is 0, no limit.

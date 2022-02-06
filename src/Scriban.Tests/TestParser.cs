@@ -518,6 +518,52 @@ end
             Console.WriteLine(result);
         }
 
+        [Test]
+        public void TestIndent()
+        {
+            var input = @"{{ a_multi_line_value = ""test1\ntest2\ntest3\n"" ~}}
+   {{ a_multi_line_value }}Hello
+";
+            var template = Template.Parse(input);
+            var result = template.Render();
+            result = TextAssert.Normalize(result);
+
+            TextAssert.AreEqual(TextAssert.Normalize(@"   test1
+   test2
+   test3
+Hello
+"), result);
+        }
+
+        [Test]
+        public void TestIndentSkippedWithGreedyOnPreviousLine()
+        {
+            var input = @"{{ a_multi_line_value = ""test1\ntest2\ntest3\n"" -}}
+   {{ a_multi_line_value }}Hello
+";
+            var template = Template.Parse(input);
+            var result = template.Render();
+            result = TextAssert.Normalize(result);
+
+            TextAssert.AreEqual(TextAssert.Normalize(@"test1
+test2
+test3
+Hello
+"), result);
+        }
+
+        [Test]
+        public void TestIndent2()
+        {
+            var input = @"  {{data}}";
+            var template = Template.Parse(input);
+            var result = template.Render(new { data = "test\ntest2" });
+            result = TextAssert.Normalize(result);
+
+            TextAssert.AreEqual("  test\n  test2", result);
+        }
+
+
         [TestCaseSource("ListTestFiles", new object[] { "000-basic" })]
         public static void A000_basic(string inputName)
         {

@@ -140,7 +140,7 @@ namespace Scriban.Parsing
                     break;
             }
 
-            page.Body = ParseBlockStatement(null);
+            page.Body = ParseBlockStatement(page);
             if (page.Body != null)
             {
                 page.Span = page.Body.Span;

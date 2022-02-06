@@ -22,7 +22,7 @@ namespace Scriban.Parsing
 #endif
     partial class Parser
     {
-        private void ParseLiquidStatement(string identifier, ScriptStatement parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
+        private void ParseLiquidStatement(string identifier, ScriptNode parent, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
         {
             var startToken = Current;
             if (!_isLiquidTagSection)
@@ -305,7 +305,7 @@ namespace Scriban.Parsing
             return Close(statement);
         }
 
-        private ScriptStatement ParseLiquidExpressionStatement(ScriptStatement parent)
+        private ScriptStatement ParseLiquidExpressionStatement(ScriptNode parent)
         {
             var startToken = Current;
             CheckNotInCase(parent, startToken);

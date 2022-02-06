@@ -31,39 +31,63 @@ namespace Scriban.Syntax
 
         public override object Evaluate(TemplateContext context)
         {
+            var autoIndent = context.AutoIndent;
             object result = null;
             var statements = Statements;
-            for (int i = 0; i < statements.Count; i++)
+            string previousIndent = context.CurrentIndent;
+            string currentIndent = previousIndent;
+            try
             {
-                var statement =  statements[i];
-
-                // Throws a cancellation
-                context.CheckAbort();
-
-                if (statement.CanSkipEvaluation)
+                for (int i = 0; i < statements.Count; i++)
                 {
-                    continue;
-                }
+                    var statement = statements[i];
 
-                result = context.Evaluate(statement);
+                    // Throws a cancellation
+                    context.CheckAbort();
 
-                // Top-level assignment expression don't output anything
-                if (!statement.CanOutput)
-                {
-                    result = null;
-                }
-                else if (result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
-                {
-                    context.Write(Span, result);
-                    result = null;
-                }
+                    if (autoIndent && statement is ScriptEscapeStatement escape)
+                    {
+                        if (escape.IsEntering)
+                        {
+                            currentIndent = escape.Indent;
+                        }
+                        else if (escape.IsClosing)
+                        {
+                            currentIndent = previousIndent;
+                        }
+                    }
+                    context.CurrentIndent = currentIndent;
 
-                // If flow state is different, we need to exit this loop
-                if (context.FlowState != ScriptFlowState.None)
-                {
-                    break;
+                    if (statement.CanSkipEvaluation)
+                    {
+                        continue;
+                    }
+
+                    result = context.Evaluate(statement);
+
+                    // Top-level assignment expression don't output anything
+                    if (!statement.CanOutput)
+                    {
+                        result = null;
+                    }
+                    else if (result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
+                    {
+                        context.Write(Span, result);
+                        result = null;
+                    }
+
+                    // If flow state is different, we need to exit this loop
+                    if (context.FlowState != ScriptFlowState.None)
+                    {
+                        break;
+                    }
                 }
             }
+            finally
+            {
+                context.CurrentIndent = previousIndent;
+            }
+
             return result;
         }
 

@@ -8,11 +8,13 @@ The language rules are the same in a pure scripting context.
 
 ## Table of Contents
 
+- [Table of Contents](#table-of-contents)
 - [1. Blocks](#1-blocks)
   - [1.1 Code block](#11-code-block)
   - [1.2 Text block](#12-text-block)
   - [1.3 Escape block](#13-escape-block)
   - [1.4 Whitespace control](#14-whitespace-control)
+  - [1.5 Auto indentation](#15-auto-indentation)
 - [2 Comments](#2-comments)
 - [3 Literals](#3-literals)
   - [3.1 Strings](#31-strings)
@@ -20,13 +22,13 @@ The language rules are the same in a pure scripting context.
   - [3.3 Boolean](#33-boolean)
   - [3.4 null](#34-null)
 - [4 Variables](#4-variables)
-  - [4.1 The special variable <code>this</code>](#41-the-special-variable-this)
-  - [4.2 The special variable <code>empty</code>](#42-the-special-variable-empty)
+  - [4.1 The special variable `this`](#41-the-special-variable-this)
+  - [4.2 The special variable `empty`](#42-the-special-variable-empty)
 - [5 Objects](#5-objects)
-  - [5.1 The special property <code>empty?</code>](#51-the-special-property-empty)
+  - [5.1 The special property `empty?`](#51-the-special-property-empty)
 - [6 Arrays](#6-arrays)
   - [6.1 Array with properties](#61-array-with-properties)
-  - [6.2 The special <code>size</code> property](#62-the-special-size-property)
+  - [6.2 The special `size` property](#62-the-special-size-property)
 - [7 Functions](#7-functions)
   - [7.1 Simple functions](#71-simple-functions)
   - [7.2 Anonymous functions](#72-anonymous-functions)
@@ -43,32 +45,32 @@ The language rules are the same in a pure scripting context.
   - [8.5 Conditional expressions](#85-conditional-expressions)
   - [8.6 Unary expressions](#86-unary-expressions)
   - [8.7 Range expressions](#87-range-expressions)
-  - [8.8 The null-coalescing operators <code>??</code>, <code>?!</code>](#88-the-null-coalescing-operator-)
+  - [8.8 The null-coalescing operators `??`, `?!`](#88-the-null-coalescing-operators--)
   - [8.9 Function call expression](#89-function-call-expression)
     - [Named arguments](#named-arguments)
 - [9 Statements](#9-statements)
   - [9.1 Single expression](#91-single-expression)
   - [9.2 Compound Assignment](#92-compound-assignment)
-  - [9.3 <code>if &lt;expression&gt;</code>, <code>else</code>, <code>else if &lt;expression&gt;</code>](#93-if-expression-else-else-if-expression)
+  - [9.3 `if <expression>`, `else`, `else if <expression>`](#93-if-expression-else-else-if-expression)
     - [Truthy and Falsy](#truthy-and-falsy)
-  - [9.4 <code>case</code> and <code>when</code>](#94-case-and-when)
+  - [9.4 `case` and `when`](#94-case-and-when)
   - [9.5 Loops](#95-loops)
-    - [<code>for &lt;variable&gt; in &lt;expression&gt; ... end</code>](#for-variable-in-expression--end)
-      - [The <code>offset</code> parameter](#the-offset-parameter)
-      - [The <code>limit</code> parameter](#the-limit-parameter)
-      - [The <code>reversed</code> parameter](#the-reversed-parameter)
-    - [<code>while &lt;expression&gt; ... end</code>](#while-expression--end)
-    - [<code>tablerow &lt;variable&gt; in &lt;expression&gt; ... end</code>](#tablerow-variable-in-expression--end)
-      - [The <code>cols</code> parameter](#the-cols-parameter)
+    - [`for <variable> in <expression> ... end`](#for-variable-in-expression--end)
+      - [The `offset` parameter](#the-offset-parameter)
+      - [The `limit` parameter](#the-limit-parameter)
+      - [The `reversed` parameter](#the-reversed-parameter)
+    - [`while <expression> ... end`](#while-expression--end)
+    - [`tablerow <variable> in <expression> ... end`](#tablerow-variable-in-expression--end)
+      - [The `cols` parameter](#the-cols-parameter)
     - [Special loop variables](#special-loop-variables)
-    - [<code>break</code> and <code>continue</code>](#break-and-continue)
-  - [9.6 <code>capture &lt;variable&gt; ... end</code>](#96-capture-variable--end)
-  - [9.7 <code>readonly &lt;variable&gt;</code>](#97-readonly-variable)
-  - [9.8 <code>import &lt;variable_path&gt;</code>](#98-import-variable_path)
-  - [9.9 <code>with &lt;variable&gt; ... end</code>](#99-with-variable--end)
-  - [9.10 <code>wrap &lt;function&gt; &lt;arg1...argn&gt; ... end</code>](#910-wrap-function-arg1argn--end)
-  - [9.11 <code>include &lt;name&gt; arg1?...argn?</code>](#911-include-name-arg1argn)
-  - [9.12 <code>ret &lt;expression&gt;?</code>](#912-ret-expression)
+    - [`break` and `continue`](#break-and-continue)
+  - [9.6 `capture <variable> ... end`](#96-capture-variable--end)
+  - [9.7 `readonly <variable>`](#97-readonly-variable)
+  - [9.8 `import <variable_path>`](#98-import-variable_path)
+  - [9.9 `with <variable> ... end`](#99-with-variable--end)
+  - [9.10 `wrap <function> <arg1...argn> ... end`](#910-wrap-function-arg1argn--end)
+  - [9.11 `include <name> arg1?...argn?`](#911-include-name-arg1argn)
+  - [9.12 `ret <expression>?`](#912-ret-expression)
 
 [:top:](#language)
 ## 1. Blocks
@@ -237,6 +239,45 @@ Scriban provides **two modes** for controlling whitespace:
   ```
 
 Both mode `~` and '-' can also be used with **escape blocks** `{%%{~` or `~}%%}` or `{%%{-` or `-}%%}`
+
+[:top:](#language)
+### 1.5 Auto indentation
+
+By default, when a code enter is without a left strip (e.g `{{-` or `{{~`) and is preceded by only whitespace on the same line, the content of the block will be indented accordingly to the number of whitespace before the code enter. 
+
+> **input**
+```
+{{ a_multi_line_value = "test1\ntest2\ntest3\n" ~}}
+   {{ a_multi_line_value }}Hello
+```
+
+Notice the 3 whitespace characters `   ` before the expression `{{ a_multi_line_value }}`.
+
+> **output**
+```
+   test1
+   test2
+   test3
+Hello   
+```
+
+The output is auto-indented. This feature can be turned off on by setting `TemplateContext.AutoIndent = false`.
+
+Note that if the previous line contains a greedy right strip `-}}`, the indent will be skipped on the next code enter of the next line.
+
+> **input**
+```
+{{ a_multi_line_value = "test1\ntest2\ntest3\n" -}}
+   {{ a_multi_line_value }}Hello
+```
+
+> **output**
+```
+test1
+test2
+test3
+Hello   
+```
 
 [:top:](#language)
 ## 2 Comments

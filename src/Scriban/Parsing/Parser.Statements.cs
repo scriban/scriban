@@ -5,6 +5,7 @@
 #nullable disable
 
 using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.SymbolStore;
@@ -23,7 +24,9 @@ namespace Scriban.Parsing
 #endif
     partial class Parser
     {
-        private ScriptBlockStatement ParseBlockStatement(ScriptStatement parentStatement, bool parseEndOfStatementAfterEnd = true)
+        private ScriptBlockStatement _currentBlockStatement;
+
+        private ScriptBlockStatement ParseBlockStatement(ScriptNode parentStatement, bool parseEndOfStatementAfterEnd = true)
         {
             Debug.Assert(!(parentStatement is ScriptBlockStatement));
 
@@ -33,54 +36,63 @@ namespace Scriban.Parsing
             EnterExpression();
 
             var blockStatement = Open<ScriptBlockStatement>();
-
-            ScriptStatement statement;
-            bool hasEnd;
-            while (TryParseStatement(parentStatement, parseEndOfStatementAfterEnd, out statement, out hasEnd))
+            var previousBlockStatement = _currentBlockStatement;
+            _currentBlockStatement = blockStatement;
+            try
             {
-                // statement may be null if we have parsed an else continuation of a previous block
-                if (statement != null)
+                ScriptStatement statement;
+                bool hasEnd;
+                while (TryParseStatement(parentStatement, parseEndOfStatementAfterEnd, out statement, out hasEnd))
                 {
-                    blockStatement.Statements.Add(statement);
-                }
-                if (hasEnd)
-                {
-                    break;
-                }
-            }
-
-            // Don't emit an EOS for an end statement that doesn't expect it
-            if (!parseEndOfStatementAfterEnd && statement is ScriptEndStatement endStatement)
-            {
-                endStatement.ExpectEos = false;
-            }
-
-            if (!hasEnd)
-            {
-                // If there are any end block not matching, we have an error
-                if (_blockLevel > 1)
-                {
-                    if (_isLiquid)
+                    // statement may be null if we have parsed an else continuation of a previous block
+                    if (statement != null)
                     {
-                        var syntax = ScriptSyntaxAttribute.Get(parentStatement);
-                        LogError(parentStatement, parentStatement?.Span ?? CurrentSpan, $"The `end{syntax.TypeName}` was not found");
+                        blockStatement.Statements.Add(statement);
                     }
-                    else
+
+                    if (hasEnd)
                     {
-                        // unit test: 201-if-else-error2.txt
-                        LogError(parentStatement, GetSpanForToken(Previous), $"The <end> statement was not found");
+                        break;
                     }
                 }
+
+                // Don't emit an EOS for an end statement that doesn't expect it
+                if (!parseEndOfStatementAfterEnd && statement is ScriptEndStatement endStatement)
+                {
+                    endStatement.ExpectEos = false;
+                }
+
+                if (!hasEnd)
+                {
+                    // If there are any end block not matching, we have an error
+                    if (_blockLevel > 1)
+                    {
+                        if (_isLiquid)
+                        {
+                            var syntax = ScriptSyntaxAttribute.Get(parentStatement);
+                            LogError(parentStatement, parentStatement?.Span ?? CurrentSpan, $"The `end{syntax.TypeName}` was not found");
+                        }
+                        else
+                        {
+                            // unit test: 201-if-else-error2.txt
+                            LogError(parentStatement, GetSpanForToken(Previous), $"The <end> statement was not found");
+                        }
+                    }
+                }
+            }
+            finally
+            {
+                _currentBlockStatement = previousBlockStatement;
+                LeaveExpression();
+                _blockLevel--;
             }
 
-            LeaveExpression();
-            _blockLevel--;
 
             Blocks.Pop();
             return Close(blockStatement);
         }
 
-        private bool TryParseStatement(ScriptStatement parent, bool parseEndOfStatementAfterEnd, out ScriptStatement statement, out bool hasEnd)
+        private bool TryParseStatement(ScriptNode parent, bool parseEndOfStatementAfterEnd, out ScriptStatement statement, out bool hasEnd)
         {
             hasEnd = false;
             bool nextStatement = true;
@@ -271,6 +283,41 @@ namespace Scriban.Parsing
                 }
             }
             NextToken(); // Skip enter/exit token
+
+            // Check indent
+            if (isCodeEnter && _currentBlockStatement.Statements.Count > 0)
+            {
+                var previousStatement = _currentBlockStatement.Statements[_currentBlockStatement.Statements.Count - 1];
+                if (previousStatement is ScriptRawStatement rawStatement)
+                {
+                    string indent = null;
+
+                    var text = rawStatement.Text;
+                    for (int j = text.Length - 1; j >= 0; j--)
+                    {
+                        var c = text[j];
+                        if (c == '\n')
+                        {
+                            indent = text.Substring(j + 1);
+                            break;
+                        }
+
+                        if (!char.IsWhiteSpace(c))
+                        {
+                            break;
+                        }
+
+                        if (j == 0)
+                        {
+                            // We have a raw statement that has only white spaces
+                            // It could be the first raw statement of the document
+                            // so we continue but we handle it later
+                            indent = text.ToString();
+                        }
+                    }
+                    scriptEscapeStatement.Indent = indent;
+                }
+            }
 
             return Close(scriptEscapeStatement);
         }
@@ -483,7 +530,7 @@ namespace Scriban.Parsing
             return Close(whenStatement);
         }
 
-        private void CheckNotInCase(ScriptStatement parent, Token token)
+        private void CheckNotInCase(ScriptNode parent, Token token)
         {
             if (parent is ScriptCaseStatement)
             {

@@ -25,6 +25,8 @@ namespace Scriban.Syntax
 
         public ScriptWhitespaceMode WhitespaceMode { get; set; }
 
+        public string Indent { get; set; }
+
         public bool IsEntering { get; set; }
 
 

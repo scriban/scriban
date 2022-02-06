@@ -1144,7 +1144,7 @@ namespace Scriban.Syntax
 
         public override ScriptNode Visit(ScriptEscapeStatement node)
         {
-            return new ScriptEscapeStatement() { WhitespaceMode = node.WhitespaceMode, IsEntering = node.IsEntering, EscapeCount = node.EscapeCount };
+            return new ScriptEscapeStatement() { WhitespaceMode = node.WhitespaceMode, Indent = node.Indent, IsEntering = node.IsEntering, EscapeCount = node.EscapeCount };
         }
 
         public override ScriptNode Visit(ScriptExpressionStatement node)
