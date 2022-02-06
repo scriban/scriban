@@ -1,5 +1,12 @@
 # Changelog
 
+## 5.4.0 (6 Feb 2022)
+- Fix async when accessing variables (#382)
+- Fix doc for object.kind (#394)
+- Fix comparison between ulong and int (#395)
+- Add a notice for html.strip that it can fail/timeout in case of malformed HTML (#406)
+- Log an error instead of an exception in an invalid syntax with for/if/else (#393)
+
 ## 5.3.0 (6 Feb 2022)
 - Add support for auto-indent (#398)
 
