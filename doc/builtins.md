@@ -945,7 +945,7 @@ A new date
 ### `date.parse`
 
 ```
-date.parse <text>
+date.parse <text> <pattern>? <culture>?
 ```
 
 #### Description
@@ -955,6 +955,8 @@ Parses the specified input string to a date object.
 #### Arguments
 
 - `text`: A text representing a date.
+- `pattern`: The date format pattern. See `to_string` method about the format of a pattern.
+- `culture`: The culture used to format the datetime. Default is current culture.
 
 #### Returns
 
@@ -965,10 +967,16 @@ A date object
 > **input**
 ```scriban-html
 {{ date.parse '2016/01/05' }}
+{{ date.parse '2018--06--17' '%Y--%m--%d' }}
+{{ date.parse '2021/11/30 20:50:23Z' }}
+{{ date.parse '20/01/2022 08:32:48 +00:00' culture:'en-GB' }}
 ```
 > **output**
 ```html
 05 Jan 2016
+17 Jun 2018
+30 Nov 2021
+20 Jan 2022
 ```
 
 [:top:](#builtins)

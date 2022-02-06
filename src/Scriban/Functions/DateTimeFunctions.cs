@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -55,49 +56,49 @@ namespace Scriban.Functions
 
         // Code from DotLiquid https://github.com/dotliquid/dotliquid/blob/master/src/DotLiquid/Util/StrFTime.cs
         // Apache License, Version 2.0
-        private static readonly Dictionary<char, Func<DateTime, CultureInfo, string>> Formats = new Dictionary<char, Func<DateTime, CultureInfo, string>>
+        private static readonly Dictionary<char, (Func<DateTime, CultureInfo, string>, string)> Formats = new Dictionary<char, (Func<DateTime, CultureInfo, string>, string)>
         {
-            { 'a', (dateTime, cultureInfo) => dateTime.ToString("ddd", cultureInfo) },
-            { 'A', (dateTime, cultureInfo) => dateTime.ToString("dddd", cultureInfo) },
-            { 'b', (dateTime, cultureInfo) => dateTime.ToString("MMM", cultureInfo) },
-            { 'B', (dateTime, cultureInfo) => dateTime.ToString("MMMM", cultureInfo) },
-            { 'c', (dateTime, cultureInfo) => dateTime.ToString("ddd MMM dd HH:mm:ss yyyy", cultureInfo) },
-            { 'C', (dateTime, cultureInfo) => (dateTime.Year / 100).ToString("D2", cultureInfo) },
-            { 'd', (dateTime, cultureInfo) => dateTime.ToString("dd", cultureInfo) },
-            { 'D', (dateTime, cultureInfo) => dateTime.ToString("MM/dd/yy", cultureInfo) },
-            { 'e', (dateTime, cultureInfo) => dateTime.ToString("%d", cultureInfo).PadLeft(2, ' ') },
-            { 'F', (dateTime, cultureInfo) => dateTime.ToString("yyyy-MM-dd", cultureInfo) },
-            { 'h', (dateTime, cultureInfo) => dateTime.ToString("MMM", cultureInfo) },
-            { 'H', (dateTime, cultureInfo) => dateTime.ToString("HH", cultureInfo) },
-            { 'I', (dateTime, cultureInfo) => dateTime.ToString("hh", cultureInfo) },
-            { 'j', (dateTime, cultureInfo) => dateTime.DayOfYear.ToString("D3", cultureInfo) },
-            { 'k', (dateTime, cultureInfo) => dateTime.ToString("%H", cultureInfo).PadLeft(2, ' ') },
-            { 'l', (dateTime, cultureInfo) => dateTime.ToString("%h", cultureInfo).PadLeft(2, ' ') },
-            { 'L', (dateTime, cultureInfo) => dateTime.ToString("fff", cultureInfo) },
-            { 'm', (dateTime, cultureInfo) => dateTime.ToString("MM", cultureInfo) },
-            { 'M', (dateTime, cultureInfo) => dateTime.ToString("mm", cultureInfo) },
-            { 'n', (dateTime, cultureInfo) => "\n" },
-            { 'N', (dateTime, cultureInfo) => dateTime.ToString("fffffff00", cultureInfo) },
-            { 'p', (dateTime, cultureInfo) => dateTime.ToString("tt", cultureInfo) },
-            { 'P', (dateTime, cultureInfo) => dateTime.ToString("tt", cultureInfo).ToLowerInvariant() },
-            { 'r', (dateTime, cultureInfo) => dateTime.ToString("hh:mm:ss tt", cultureInfo) },
-            { 'R', (dateTime, cultureInfo) => dateTime.ToString("HH:mm", cultureInfo) },
-            { 's', (dateTime, cultureInfo) => ((dateTime.ToUniversalTime().Ticks - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks) / TimeSpan.TicksPerSecond).ToString(cultureInfo) },
-            { 'S', (dateTime, cultureInfo) => dateTime.ToString("ss", cultureInfo) },
-            { 't', (dateTime, cultureInfo) => "\t" },
-            { 'T', (dateTime, cultureInfo) => dateTime.ToString("HH:mm:ss", cultureInfo) },
-            { 'u', (dateTime, cultureInfo) => ((dateTime.DayOfWeek == DayOfWeek.Sunday) ? 7 : (int) dateTime.DayOfWeek).ToString(cultureInfo) },
-            { 'U', (dateTime, cultureInfo) => cultureInfo.Calendar.GetWeekOfYear(dateTime, cultureInfo.DateTimeFormat.CalendarWeekRule, DayOfWeek.Sunday).ToString("D2", cultureInfo) },
-            { 'v', (dateTime, cultureInfo) => string.Format(CultureInfo.InvariantCulture, "{0,2}-{1}-{2:D4}", dateTime.Day, dateTime.ToString("MMM", CultureInfo.InvariantCulture).ToUpper(), dateTime.Year) },
-            { 'V', (dateTime, cultureInfo) => cultureInfo.Calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday).ToString("D2", cultureInfo) },
-            { 'W', (dateTime, cultureInfo) => cultureInfo.Calendar.GetWeekOfYear(dateTime, cultureInfo.DateTimeFormat.CalendarWeekRule, DayOfWeek.Monday).ToString("D2", cultureInfo) },
-            { 'w', (dateTime, cultureInfo) => ((int) dateTime.DayOfWeek).ToString(cultureInfo) },
-            { 'x', (dateTime, cultureInfo) => dateTime.ToString("d", cultureInfo) },
-            { 'X', (dateTime, cultureInfo) => dateTime.ToString("T", cultureInfo) },
-            { 'y', (dateTime, cultureInfo) => dateTime.ToString("yy", cultureInfo) },
-            { 'Y', (dateTime, cultureInfo) => dateTime.ToString("yyyy", cultureInfo) },
-            { 'Z', (dateTime, cultureInfo) => dateTime.ToString("zzz", cultureInfo) },
-            { '%', (dateTime, cultureInfo) => "%" }
+            { 'a', ((dateTime, cultureInfo) => dateTime.ToString("ddd", cultureInfo), "ddd") },
+            { 'A', ((dateTime, cultureInfo) => dateTime.ToString("dddd", cultureInfo), "dddd") },
+            { 'b', ((dateTime, cultureInfo) => dateTime.ToString("MMM", cultureInfo), "MMM") },
+            { 'B', ((dateTime, cultureInfo) => dateTime.ToString("MMMM", cultureInfo), "MMM") },
+            { 'c', ((dateTime, cultureInfo) => dateTime.ToString("ddd MMM dd HH:mm:ss yyyy", cultureInfo), "ddd MMM dd HH:mm:ss yyyy") },
+            { 'C', ((dateTime, cultureInfo) => (dateTime.Year / 100).ToString("D2", cultureInfo), null) },
+            { 'd', ((dateTime, cultureInfo) => dateTime.ToString("dd", cultureInfo), "dd") },
+            { 'D', ((dateTime, cultureInfo) => dateTime.ToString("MM/dd/yy", cultureInfo), "MM/dd/yy") },
+            { 'e', ((dateTime, cultureInfo) => dateTime.ToString("%d", cultureInfo).PadLeft(2, ' '), "%d") },
+            { 'F', ((dateTime, cultureInfo) => dateTime.ToString("yyyy-MM-dd", cultureInfo), "yyyy-MM-dd") },
+            { 'h', ((dateTime, cultureInfo) => dateTime.ToString("MMM", cultureInfo), "MMM") },
+            { 'H', ((dateTime, cultureInfo) => dateTime.ToString("HH", cultureInfo), "HH") },
+            { 'I', ((dateTime, cultureInfo) => dateTime.ToString("hh", cultureInfo), "hh") },
+            { 'j', ((dateTime, cultureInfo) => dateTime.DayOfYear.ToString("D3", cultureInfo), null) },
+            { 'k', ((dateTime, cultureInfo) => dateTime.ToString("%H", cultureInfo).PadLeft(2, ' '), "%H") },
+            { 'l', ((dateTime, cultureInfo) => dateTime.ToString("%h", cultureInfo).PadLeft(2, ' '), "%h") },
+            { 'L', ((dateTime, cultureInfo) => dateTime.ToString("fff", cultureInfo), "fff") },
+            { 'm', ((dateTime, cultureInfo) => dateTime.ToString("MM", cultureInfo), "MM") },
+            { 'M', ((dateTime, cultureInfo) => dateTime.ToString("mm", cultureInfo), "mm") },
+            { 'n', ((dateTime, cultureInfo) => "\n", null) },
+            { 'N', ((dateTime, cultureInfo) => dateTime.ToString("fffffff00", cultureInfo), "fffffff00") },
+            { 'p', ((dateTime, cultureInfo) => dateTime.ToString("tt", cultureInfo), "tt") },
+            { 'P', ((dateTime, cultureInfo) => dateTime.ToString("tt", cultureInfo).ToLowerInvariant(), "tt") },
+            { 'r', ((dateTime, cultureInfo) => dateTime.ToString("hh:mm:ss tt", cultureInfo), "hh:mm:ss tt") },
+            { 'R', ((dateTime, cultureInfo) => dateTime.ToString("HH:mm", cultureInfo), "HH:mm") },
+            { 's', ((dateTime, cultureInfo) => ((dateTime.ToUniversalTime().Ticks - new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc).Ticks) / TimeSpan.TicksPerSecond).ToString(cultureInfo), null) },
+            { 'S', ((dateTime, cultureInfo) => dateTime.ToString("ss", cultureInfo), "ss") },
+            { 't', ((dateTime, cultureInfo) => "\t", null) },
+            { 'T', ((dateTime, cultureInfo) => dateTime.ToString("HH:mm:ss", cultureInfo), "HH:mm:ss") },
+            { 'u', ((dateTime, cultureInfo) => ((dateTime.DayOfWeek == DayOfWeek.Sunday) ? 7 : (int) dateTime.DayOfWeek).ToString(cultureInfo), null) },
+            { 'U', ((dateTime, cultureInfo) => cultureInfo.Calendar.GetWeekOfYear(dateTime, cultureInfo.DateTimeFormat.CalendarWeekRule, DayOfWeek.Sunday).ToString("D2", cultureInfo), null) },
+            { 'v', ((dateTime, cultureInfo) => string.Format(CultureInfo.InvariantCulture, "{0,2}-{1}-{2:D4}", dateTime.Day, dateTime.ToString("MMM", CultureInfo.InvariantCulture).ToUpper(), dateTime.Year), null) },
+            { 'V', ((dateTime, cultureInfo) => cultureInfo.Calendar.GetWeekOfYear(dateTime, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday).ToString("D2", cultureInfo), null) },
+            { 'W', ((dateTime, cultureInfo) => cultureInfo.Calendar.GetWeekOfYear(dateTime, cultureInfo.DateTimeFormat.CalendarWeekRule, DayOfWeek.Monday).ToString("D2", cultureInfo), null) },
+            { 'w', ((dateTime, cultureInfo) => ((int) dateTime.DayOfWeek).ToString(cultureInfo), null) },
+            { 'x', ((dateTime, cultureInfo) => dateTime.ToString("d", cultureInfo), "d") },
+            { 'X', ((dateTime, cultureInfo) => dateTime.ToString("T", cultureInfo), "T") },
+            { 'y', ((dateTime, cultureInfo) => dateTime.ToString("yy", cultureInfo), "yy") },
+            { 'Y', ((dateTime, cultureInfo) => dateTime.ToString("yyyy", cultureInfo), "yyyy") },
+            { 'Z', ((dateTime, cultureInfo) => dateTime.ToString("zzz", cultureInfo), "zzz") },
+            { '%', ((dateTime, cultureInfo) => "%", null) }
         };
 
         /// <summary>
@@ -233,32 +234,114 @@ namespace Scriban.Functions
             return date.AddMilliseconds(millis);
         }
 
+        private static readonly Regex PlusFollowedByNumberRegex = new Regex(@"\+\d");
+
         /// <summary>
         /// Parses the specified input string to a date object.
         /// </summary>
         /// <param name="context">The template context.</param>
         /// <param name="text">A text representing a date.</param>
+        /// <param name="pattern">The date format pattern. See `to_string` method about the format of a pattern.</param>
+        /// <param name="culture">The culture used to format the datetime. Default is current culture.</param>
         /// <returns>A date object</returns>
         /// <remarks>
         /// ```scriban-html
         /// {{ date.parse '2016/01/05' }}
+        /// {{ date.parse '2018--06--17' '%Y--%m--%d' }}
+        /// {{ date.parse '2021/11/30 20:50:23Z' }}
+        /// {{ date.parse '20/01/2022 08:32:48 +00:00' culture:'en-GB' }}
         /// ```
         /// ```html
         /// 05 Jan 2016
+        /// 17 Jun 2018
+        /// 30 Nov 2021
+        /// 20 Jan 2022
         /// ```
         /// </remarks>
-        public static DateTime? Parse(TemplateContext context, string text)
+        public static DateTime? Parse(TemplateContext context, string text, string pattern = null, string culture = null)
         {
             if (string.IsNullOrEmpty(text))
             {
                 return null;
             }
-            DateTime result;
-            if (DateTime.TryParse(text, context.CurrentCulture, DateTimeStyles.None, out result))
+
+            bool hasOffset = PlusFollowedByNumberRegex.IsMatch(text);
+            bool hasZ = text.TrimEnd().EndsWith("Z", StringComparison.OrdinalIgnoreCase);
+            var dateTimeStyle = hasOffset || hasZ ? DateTimeStyles.None : DateTimeStyles.AssumeLocal;
+
+            var currentCulture = (culture != null ? CultureInfo.GetCultureInfo(culture) : context.CurrentCulture) ?? context.CurrentCulture;
+            string customFormat = null;
+            if (pattern != null)
             {
-                return result;
+                var builder = new StringBuilder();
+                for (int i = 0; i < pattern.Length; i++)
+                {
+                    var c = pattern[i];
+                    if (c == '%' && (i + 1) < pattern.Length)
+                    {
+                        i++;
+                        var format = pattern[i];
+
+                        // Switch to invariant culture
+                        if (format == 'g')
+                        {
+                            currentCulture = CultureInfo.InvariantCulture;
+                            continue;
+                        }
+
+                        if (Formats.TryGetValue(format, out var formatterPair))
+                        {
+                            if (formatterPair.Item2 == null)
+                            {
+                                throw new ArgumentException($"The pattern %{format} is not supported for the parse method", nameof(pattern));
+                            }
+                            builder.Append(formatterPair.Item2);
+                        }
+                        else
+                        {
+                            builder.Append('%');
+                            builder.Append(format);
+                        }
+                    }
+                    else
+                    {
+                        builder.Append(c);
+                    }
+                }
+                customFormat = builder.ToString();
             }
-            return new DateTime();
+
+            var result = new DateTime();
+            if (customFormat != null)
+            {
+                if (hasOffset || hasZ)
+                {
+                    if (DateTimeOffset.TryParseExact(text, customFormat, currentCulture, dateTimeStyle, out var dateTimeOffset))
+                    {
+                        result = dateTimeOffset.LocalDateTime;
+                    }
+                }
+                else if (DateTime.TryParseExact(text, customFormat, currentCulture, dateTimeStyle, out result))
+                {
+                    return result;
+                }
+            }
+            else
+            {
+                if (hasOffset || hasZ)
+                {
+                    if (DateTimeOffset.TryParse(text, currentCulture, dateTimeStyle, out var dateTimeOffset))
+                    {
+                        result = dateTimeOffset.LocalDateTime;
+                    }
+                }
+                else
+                {
+                    DateTime.TryParse(text, currentCulture, dateTimeStyle, out result);
+                }
+            }
+
+            return result;
         }
 
         public override IScriptObject Clone(bool deep)
@@ -365,7 +448,6 @@ namespace Scriban.Functions
                 if (c == '%' && (i + 1) < pattern.Length)
                 {
                     i++;
-                    Func<DateTime, CultureInfo, string> formatter;
                     var format = pattern[i];
 
                     // Switch to invariant culture
@@ -375,8 +457,9 @@ namespace Scriban.Functions
                         continue;
                     }
 
-                    if (Formats.TryGetValue(format, out formatter))
+                    if (Formats.TryGetValue(format, out var formatterPair))
                     {
+                        var formatter = formatterPair.Item1;
                         builder.Append(formatter.Invoke(datetime.Value, culture));
                     }
                     else
