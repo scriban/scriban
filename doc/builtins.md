@@ -1105,6 +1105,10 @@ The input string removed with any HTML tags
 
 #### Examples
 
+Notice that the implementation of this function is using a simple regex, so it can fail escaping correctly or timeout in case of the malformed html.
+If you are looking for a secure HTML stripped, you might want to plug your own HTML function by using [AngleSharp](https://github.com/AngleSharp/AngleSharp) to
+strip these HTML tags.
+
 > **input**
 ```scriban-html
 {{ "<p>This is a paragraph</p>" | html.strip }}

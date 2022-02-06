@@ -28,6 +28,10 @@ namespace Scriban.Functions
         /// <param name="text">The input string</param>
         /// <returns>The input string removed with any HTML tags</returns>
         /// <remarks>
+        /// Notice that the implementation of this function is using a simple regex, so it can fail escaping correctly or timeout in case of the malformed html.
+        /// If you are looking for a secure HTML stripped, you might want to plug your own HTML function by using [AngleSharp](https://github.com/AngleSharp/AngleSharp) to
+        /// strip these HTML tags.
+        /// 
         /// ```scriban-html
         /// {{ "&lt;p&gt;This is a paragraph&lt;/p&gt;" | html.strip }}
         /// ```
