@@ -4,7 +4,7 @@
     <Description>Scriban is a fast, powerful, safe and lightweight scripting language and engine for .NET, which was primarily developed for text templating with a compatibility mode for parsing liquid templates.</Description>
     <Copyright>Alexandre Mutel</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <VersionPrefix>5.1.0</VersionPrefix>
+    <VersionPrefix>5.2.0</VersionPrefix>
     <LangVersion>8.0</LangVersion>
     <DefineConstants>$(DefineConstants);SCRIBAN_PUBLIC</DefineConstants>
     <!--<VersionSuffix>alpha</VersionSuffix>
@@ -15,6 +15,7 @@
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageReleaseNotes>https://github.com/lunet-io/scriban/blob/master/changelog.md</PackageReleaseNotes>
     <PackageIcon>scriban.png</PackageIcon>
+    <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
@@ -42,6 +43,7 @@
     </Content>
 
     <None Include="../../img/scriban.png" Pack="true" PackagePath="" />
+    <None Include="../../readme.md" Pack="true" PackagePath="/"/>
     <!--Add support for sourcelink-->
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.*" PrivateAssets="All" />
   </ItemGroup>

@@ -1,5 +1,8 @@
 # Changelog
 
+## 5.2.0 (6 Feb 2022)
+- Add support for specifying custom format and culture for date.parse
+
 ## 5.1.0 (5 Feb 2022)
 - Fix accessing null?.property when EnableRelaxedMemberAccess == False (#401)
 - Migrate tests to net6.0 (#410)
