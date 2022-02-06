@@ -28,6 +28,22 @@ namespace Scriban.Tests
         private const string BuiltinMarkdownDocFile = @"..\..\..\..\..\doc\builtins.md";
 
         [Test]
+        public void TestFailingError()
+        {
+            var input = @"{{ 
+  for $s in Foo
+      {{ if $s
+          false
+      else if $s
+          false
+      end
+  end 
+}}";
+            var template = Template.Parse(input);
+            Assert.True(template.HasErrors);
+        }
+
+        [Test]
         public void TestRoundtrip()
         {
             var text = "This is a text {{ code # With some comment }} and a text";

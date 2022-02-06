@@ -80,7 +80,14 @@ namespace Scriban.Parsing
                     }
                     else if (parent is ScriptForStatement forStatement)
                     {
-                        forStatement.Else = (ScriptElseStatement)nextCondition;
+                        if (nextCondition is ScriptElseStatement nextElse)
+                        {
+                            forStatement.Else = nextElse;
+                        }
+                        else
+                        {
+                            LogError(nextCondition.Span, "Invalid if/else combination within a for statement.");
+                        }
                     }
                     else
                     {
