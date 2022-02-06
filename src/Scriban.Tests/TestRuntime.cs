@@ -23,6 +23,16 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestUlong()
+        {
+            var input = @"{{if value > 0; 1; else; 2; end;}}";
+
+            var template = Template.Parse(input);
+            var result = template.Render(new { value = (ulong) 1} );
+            Assert.AreEqual("1", result);
+        }
+
+        [Test]
         public void TestDictionaryInt()
         {
             int MyInt = 1;

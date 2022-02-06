@@ -575,17 +575,16 @@ namespace Scriban.Syntax
                 return CalculateLong(op, span, leftLong, (long)rightValue);
             }
 
-
-            if (leftType == typeof(long))
+            if (leftType == typeof(ulong))
             {
-                var rightLong = (long)context.ToObject(span, rightValue, typeof(long));
-                return CalculateLong(op, span, (long)leftValue, rightLong);
+                var rightLong = (ulong)context.ToObject(span, rightValue, typeof(ulong));
+                return CalculateLong(op, span, (ulong)leftValue, rightLong);
             }
 
-            if (rightType == typeof(long))
+            if (rightType == typeof(ulong))
             {
-                var leftLong = (long)context.ToObject(span, leftValue, typeof(long));
-                return CalculateLong(op, span, leftLong, (long)rightValue);
+                var leftLong = (ulong)context.ToObject(span, leftValue, typeof(ulong));
+                return CalculateLong(op, span, leftLong, (ulong)rightValue);
             }
 
             if (leftType == typeof(int) || (leftType != null && leftType.IsEnum))
@@ -732,6 +731,11 @@ namespace Scriban.Syntax
         }
 
         private static object CalculateLong(ScriptBinaryOperator op, SourceSpan span, long left, long right)
+        {
+            return CalculateBigInteger(op, span, new BigInteger(left), new BigInteger(right));
+        }
+
+        private static object CalculateLong(ScriptBinaryOperator op, SourceSpan span, ulong left, ulong right)
         {
             return CalculateBigInteger(op, span, new BigInteger(left), new BigInteger(right));
         }

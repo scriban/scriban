@@ -274,6 +274,17 @@ namespace Scriban
                 {
                     return (int) intObj;
                 }
+
+                if (value is uint uintValue)
+                {
+                    return checked((int)uintValue);
+                }
+
+                if (value is ulong ulongValue)
+                {
+                    return checked((int)ulongValue);
+                }
+
                 return Convert.ToInt32(value, CurrentCulture);
             }
             catch (Exception ex)
