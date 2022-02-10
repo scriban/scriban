@@ -2305,6 +2305,7 @@ String functions available through the builtin object 'string`.
 - [`string.pad_right`](#stringpad_right)
 - [`string.base64_encode`](#stringbase64_encode)
 - [`string.base64_decode`](#stringbase64_decode)
+- [`string.index_of`](#stringindex_of)
 
 [:top:](#builtins)
 ### `string.escape`
@@ -3652,6 +3653,39 @@ The decoded string
 ```html
 hello
 ```
+
+[:top:](#builtins)
+### `string.index_of`
+
+```
+string.index_of <text> <search> <startIndex>? <count>? <stringComparison>?
+```
+
+#### Description
+
+Reports the zero-based index of the first occurrence of the specified string in this instance.
+The search starts at a specified character position and examines a specified number of character positions.
+
+#### Arguments
+
+- `text`: The string to search
+- `search`: The string to find the index of.
+- `startIndex`: If provided, the search starting position.
+If , search will start at the beginning of .
+- `count`: If provided, the number of character positions to examine.
+If , all character positions will be considered.
+- `stringComparison`: If provided, the comparison rules for the search.
+If , Allowed values are one of the following:
+    'CurrentCulture', 'CurrentCultureIgnoreCase', 'InvariantCulture', 'InvariantCultureIgnoreCase', 'Ordinal', 'OrdinalIgnoreCase'
+
+#### Returns
+
+The zero-based index position of the  parameter from the start of if  is found, or -1 if it is not. If value is ,
+            the return value is  (if  is not provided, the return value would be zero).
+
+#### Examples
+
+
 [:top:](#builtins)
 
 ## `timespan` functions
