@@ -161,6 +161,7 @@ This software is released under the [BSD-Clause 2 license](https://opensource.or
 * [Nustache](https://github.com/jdiamond/Nustache): Logic-less templates for .NET
 * [Handlebars.Net](https://github.com/rexm/Handlebars.Net): .NET port of handlebars.js
 * [Textrude](https://github.com/NeilMacMullen/Textrude): UI and CLI tools to turn CSV/JSON/YAML models into code using Scriban templates
+* [NTypewriter](https://github.com/NeVeSpl/NTypewriter): VS extension to turn C# code into documentation/TypeScript/anything using Scriban templates
   
 ## Online Demo
 
