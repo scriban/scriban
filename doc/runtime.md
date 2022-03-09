@@ -384,6 +384,8 @@ Also, we can see that named arguments are also working with `params` arguments.
 
 If a regular argument (not optional) is missing, the runtime will complain about the missing argument giving precise source location of the error.
 
+When last parameter is of type `object[]` or `ScriptExpression[]` it is automatically treated as if it was declared with `params` modifier.
+
 #### Accessing nested `ScriptObject`
 
 A nested ScriptObject can be accessed indirectly through another `ScriptObject`:

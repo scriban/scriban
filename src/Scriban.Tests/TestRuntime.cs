@@ -19,9 +19,33 @@ using Scriban.Syntax;
 
 namespace Scriban.Tests
 {
+    delegate string Args(object[] args);
+
     [TestFixture]
     public class TestRuntime
     {
+        [Test]
+        public void TestPars()
+        {
+            string Dump(params object[] args)
+            {
+                return "hello";
+            }
+
+            ScriptObject model = new ScriptObject();
+            ScriptObject debug = new ScriptObject();
+            Args dump = Dump;
+
+            debug.Import("dump", dump);
+            model["debug"] = debug;
+
+            var input = "{{debug.dump(10, \"hello\", [0, 1, 2])}}";
+            var template = Template.Parse(input);
+            var result = template.Render(model);
+
+            Assert.AreEqual("hello", result);
+        }
+
         [Test]
         public void TestUlong()
         {

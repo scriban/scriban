@@ -75,12 +75,21 @@ namespace Scriban.Runtime
                 var lastParam = Parameters[Parameters.Length - 1];
                 if (lastParam.ParameterType.IsArray)
                 {
-                    foreach (var param in lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false))
+                    if (lastParam.ParameterType == typeof(object[]) || lastParam.ParameterType == typeof(ScriptExpression[]))
                     {
                         _varParamKind = ScriptVarParamKind.LastParameter;
                         _paramsElementType = lastParam.ParameterType.GetElementType();
                         _paramsIndex = Parameters.Length - 1;
-                        break;
+                    }
+                    else
+                    {
+                        var paramAttrs = lastParam.GetCustomAttributes(typeof(ParamArrayAttribute), false);
+                        if (paramAttrs.Length > 0)
+                        {
+                            _varParamKind = ScriptVarParamKind.LastParameter;
+                            _paramsElementType = lastParam.ParameterType.GetElementType();
+                            _paramsIndex = Parameters.Length - 1;
+                        }
                     }
                 }
             }
