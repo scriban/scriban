@@ -324,7 +324,8 @@ namespace Scriban
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
 
             // Make sure that we are using the underlying type of a a Nullable type
-            destinationType = Nullable.GetUnderlyingType(destinationType) ?? destinationType;
+            bool isNullable;
+            (isNullable, destinationType) = GetNullableInfo(destinationType);
 
             var type = value?.GetType();
 
@@ -332,6 +333,11 @@ namespace Scriban
             if (destinationType == type)
             {
                 return value;
+            }
+
+            if (isNullable && value is null)
+            {
+                return null;
             }
 
             if (destinationType == typeof(string))
@@ -497,6 +503,13 @@ namespace Scriban
             }
 
             throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to `{GetTypeName(destinationType)}`");
+
+            static (bool IsNullable, Type DestinationType) GetNullableInfo(Type destinationType)
+            {
+                destinationType = destinationType ?? throw new ArgumentNullException(nameof(destinationType));
+                var underlyingType = Nullable.GetUnderlyingType(destinationType);
+                return underlyingType is null ? (false, destinationType) : (true, underlyingType);
+            }
         }
 
     }

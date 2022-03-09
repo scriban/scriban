@@ -49,6 +49,7 @@ List of all the builtin <string> functions:
  handleize
  hmac_sha1
  hmac_sha256
+ index_of
  literal
  lstrip
  md5

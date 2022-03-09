@@ -344,7 +344,7 @@ namespace Scriban.Functions
             ReleaseBuilder(builder);
             return result;
         }
-        
+
         /// <summary>
         /// Return a string literal enclosed with double quotes of the input string.
         /// </summary>
@@ -543,7 +543,7 @@ namespace Scriban.Functions
             var indexOfMatch = fromEnd
                 ? text.LastIndexOf(match, StringComparison.OrdinalIgnoreCase)
                 : text.IndexOf(match, StringComparison.OrdinalIgnoreCase);
-                
+
             if (indexOfMatch < 0)
             {
                 return text;
@@ -1175,5 +1175,50 @@ namespace Scriban.Functions
             var decoded = Convert.FromBase64String(text ?? string.Empty);
             return Encoding.UTF8.GetString(decoded);
         }
+
+
+        /// <summary>
+        /// Reports the zero-based index of the first occurrence of the specified string in this instance.
+        /// The search starts at a specified character position and examines a specified number of character positions.
+        /// </summary>
+        /// <param name="text">The string to search</param>
+        /// <param name="search">The string to find the index of.</param>
+        /// <param name="startIndex">
+        /// If provided, the search starting position.
+        /// If <see langword="null"/>, search will start at the beginning of <paramref name="text"/>.
+        /// </param>
+        /// <param name="count">
+        /// If provided, the number of character positions to examine.
+        /// If <see langword="null"/>, all character positions will be considered.
+        /// </param>
+        /// <param name="stringComparison">
+        /// If provided, the comparison rules for the search.
+        /// If <see langword="null"/>, <see cref="StringComparison.CurrentCulture"/>
+        /// Allowed values are one of the following:
+        ///     'CurrentCulture', 'CurrentCultureIgnoreCase', 'InvariantCulture', 'InvariantCultureIgnoreCase', 'Ordinal', 'OrdinalIgnoreCase'
+        /// </param>
+        /// <returns>
+        /// The zero-based index position of the <paramref name="search"/> parameter from the start of <paramref name="text"/>
+        /// if <paramref name="search"/> is found, or -1 if it is not. If value is <see cref="String.Empty"/>,
+        /// the return value is <paramref name="startIndex"/> (if <paramref name="startIndex"/> is not provided, the return value would be zero).
+        /// </returns>
+        public static int IndexOf(string text, string search, int? startIndex = null, int? count = null, string stringComparison = null)
+        {
+            text = text ?? throw new ArgumentNullException(nameof(text));
+            search = search ?? throw new ArgumentNullException(nameof(search));
+            var comparison = GetComparison(stringComparison, StringComparison.CurrentCulture, throwExceptions: true);
+            var start = startIndex ?? 0;
+            var ct = count ?? text.Length - start;
+            return text.IndexOf(search, start, ct, comparison);
+        }
+
+        private static StringComparison GetComparison(string stringComparison, StringComparison defaultValue, bool throwExceptions)
+            => (Value: stringComparison, Throw: throwExceptions) switch
+        {
+            (Value: null, Throw: _) => defaultValue,
+            (Value: _, Throw: _) when Enum.TryParse<StringComparison>(stringComparison, out var value) => value,
+            (Value: _, Throw: true) => throw new ArgumentException($"'{stringComparison}' is not a valid {nameof(stringComparison)}", nameof(stringComparison)),
+            (Value: _, Throw: false) => defaultValue
+        };
     }
 }
