@@ -75,7 +75,7 @@ namespace Scriban.Runtime
                 var lastParam = Parameters[Parameters.Length - 1];
                 if (lastParam.ParameterType.IsArray)
                 {
-                    if (lastParam.ParameterType == typeof(object[]))
+                    if (lastParam.ParameterType == typeof(object[]) || lastParam.ParameterType == typeof(ScriptExpression[]))
                     {
                         _varParamKind = ScriptVarParamKind.LastParameter;
                         _paramsElementType = lastParam.ParameterType.GetElementType();
