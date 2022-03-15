@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29613.14
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32210.238
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Scriban", "Scriban\Scriban.csproj", "{8A58A7E2-627C-4F41-933F-5AC92ADFAB48}"
 EndProject
@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{061866E2
 		..\.editorconfig = ..\.editorconfig
 		..\changelog.md = ..\changelog.md
 		..\.github\workflows\CI.yml = ..\.github\workflows\CI.yml
+		dotnet-releaser.toml = dotnet-releaser.toml
 		global.json = global.json
 		..\doc\language.md = ..\doc\language.md
 		..\license.txt = ..\license.txt
