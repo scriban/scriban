@@ -1,8 +1,5 @@
 name: ci
 
-env:
-  PROJECT_NAME: Scriban
-
 on:
   push:
     paths-ignore:

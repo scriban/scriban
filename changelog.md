@@ -1,5 +1,7 @@
 # Changelog
 
+> This changelog is no longer used for newer version. Please visits https://github.com/scriban/scriban/releases
+
 ## 5.4.0 (6 Feb 2022)
 - Fix async when accessing variables (#382)
 - Fix doc for object.kind (#394)
