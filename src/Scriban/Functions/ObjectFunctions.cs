@@ -411,14 +411,18 @@ namespace Scriban.Functions
 #pragma warning restore CS0108
         {
             if (value == null) return new ScriptArray();
-            if (value is ScriptObject scriptObj) return new ScriptArray(scriptObj.Values);
-            if (value is IDictionary dict) return new ScriptArray(dict.Values);
             if (value is IDictionary<string, object> dictStringObject) return new ScriptArray(dictStringObject.Values);
             // Don't try to return values of a custom function
             if (value is IScriptCustomFunction) return new ScriptArray();
 
             var accessor = context.GetMemberAccessor(value);
-            return new ScriptArray(accessor.GetMembers(context, context.CurrentSpan, value));
+            var scriptArray = new ScriptArray();
+            foreach(var member in accessor.GetMembers(context, context.CurrentSpan, value))
+            {
+                _ = accessor.TryGetValue(context, context.CurrentSpan, value, member, out var memberValue);
+                scriptArray.Add(memberValue);
+            }
+            return scriptArray;
         }
     }
 }
