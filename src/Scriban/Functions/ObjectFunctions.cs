@@ -395,6 +395,7 @@ namespace Scriban.Functions
         /// <summary>
         /// Gets the member's values of the specified value object.
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="value">The input object.</param>
         /// <returns>A list with the member values of the input object</returns>
         /// <remarks>
@@ -406,10 +407,18 @@ namespace Scriban.Functions
         /// ```
         /// </remarks>
 #pragma warning disable CS0108
-        public static ScriptArray Values(IDictionary<string, object> value)
+        public static ScriptArray Values(TemplateContext context, object value)
 #pragma warning restore CS0108
         {
-            return value == null ? new ScriptArray() : new ScriptArray(value.Values);
+            if (value == null) return new ScriptArray();
+            if (value is ScriptObject scriptObj) return new ScriptArray(scriptObj.Values);
+            if (value is IDictionary dict) return new ScriptArray(dict.Values);
+            if (value is IDictionary<string, object> dictStringObject) return new ScriptArray(dictStringObject.Values);
+            // Don't try to return values of a custom function
+            if (value is IScriptCustomFunction) return new ScriptArray();
+
+            var accessor = context.GetMemberAccessor(value);
+            return new ScriptArray(accessor.GetMembers(context, context.CurrentSpan, value));
         }
     }
 }
