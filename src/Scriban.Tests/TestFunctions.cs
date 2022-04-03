@@ -31,6 +31,32 @@ namespace Scriban.Tests
             {
                 TestParser.AssertTemplate("true", "{{ [1,2] || array.sort }}");
             }
+
+            [Test]
+            public void TestContains()
+            {
+                var mixed = new object[] { "hi", 1, TestEnum.First };
+                Assert.True(ArrayFunctions.Contains(mixed, "hi"));
+                Assert.True(ArrayFunctions.Contains(mixed, 1));
+                Assert.True(ArrayFunctions.Contains(mixed, TestEnum.First));
+                Assert.True(ArrayFunctions.Contains(mixed, "First"));
+                Assert.True(ArrayFunctions.Contains(mixed, 100));
+                TestParser.AssertTemplate("true", "{{ value | array.contains 'First' }}", model: new ObjectModel { Value = mixed });
+                TestParser.AssertTemplate("true", "{{ value | array.contains 100 }}", model: new ObjectModel { Value = mixed });
+                TestParser.AssertTemplate("false", "{{ value | array.contains 'Second' }}", model: new ObjectModel { Value = mixed });
+                TestParser.AssertTemplate("false", "{{ value | array.contains 101 }}", model: new ObjectModel { Value = mixed });
+                TestParser.AssertTemplate("false", "{{ value | array.contains 'Third' }}", model: new ObjectModel { Value = mixed });
+            }
+            class ObjectModel
+            {
+                public object[] Value { get; set; }
+            }
+
+            enum TestEnum : int
+            {
+                First = 100,
+                Second = 101
+            }
         }
 
         public class Strings
@@ -68,7 +94,7 @@ namespace Scriban.Tests
             public void TestIndexOf(IndexOfTestCase testCase)
             {
                 testCase = testCase ?? throw new ArgumentNullException(nameof(testCase));
-                var args = new []
+                var args = new[]
                 {
                     (Name: "text", Value: MakeString(testCase.Text)),
                     (Name: "search", Value: MakeString(testCase.Search)),
@@ -124,7 +150,7 @@ namespace Scriban.Tests
                     true,                               // fromEnd
                     "Hello, world. Goodbye, buddy.",    // expected
                 },
-                // notghing to replace
+                // nothing to replace
                 new object [] {
                     "Hello, world. Goodbye, world.",    // source
                     "xxxx",                             // match
