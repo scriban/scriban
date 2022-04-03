@@ -149,7 +149,7 @@ namespace Scriban.Tests
                     true,                               // fromEnd
                     "Hello, world. Goodbye, buddy.",    // expected
                 },
-                // notghing to replace
+                // nothing to replace
                 new object [] {
                     "Hello, world. Goodbye, world.",    // source
                     "xxxx",                             // match
