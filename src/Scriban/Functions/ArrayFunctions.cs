@@ -677,23 +677,15 @@ namespace Scriban.Functions
             return false;
         }
 
-        static string fd = $@"C:\Users\cliff\src\scriban\tmp\{Guid.NewGuid()}.log";
-
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         static bool CompareEnum(Enum e, object item)
         {
-            if (item is string s)
+            try
             {
-                return e.ToString().Equals(s, StringComparison.Ordinal);
+                if (item is string s) return Enum.Parse(e.GetType(), s)?.Equals(e) ?? false;
+                return Enum.ToObject(e.GetType(), item)?.Equals(e) ?? false;
             }
-            else
-            {
-                try
-                {
-                    return Enum.ToObject(e.GetType(), item).Equals(e);
-                }
-                catch { return false; }
-            }
+            catch { return false; }
         }
 
         /// <summary>
