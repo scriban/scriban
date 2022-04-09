@@ -59,7 +59,7 @@ namespace Scriban.Syntax
 
         protected override object LoopItem(TemplateContext context, LoopState state)
         {
-            var localIndex = state.LocalIndex;
+            var localIndex = state.Index;
 
             var columnIndex = localIndex % _columnsCount;
 

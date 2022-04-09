@@ -66,7 +66,6 @@ namespace Scriban.Syntax
                 }
 
                 loopState.Index = index++;
-                loopState.LocalIndex = index;
                 loopState.IsLast = false;
 
                 result = LoopItem(context, loopState);

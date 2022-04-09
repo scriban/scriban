@@ -417,7 +417,7 @@ namespace Scriban
         public string CurrentIndent { get; set; }
 
         /// <summary>
-        /// Indicates if we are in a looop
+        /// Indicates if we are in a loop
         /// </summary>
         /// <value>
         ///   <c>true</c> if [in loop]; otherwise, <c>false</c>.

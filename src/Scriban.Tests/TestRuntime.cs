@@ -25,6 +25,29 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestLoop()
+        {
+
+            var template = Template.Parse(@"{{
+my_function(x) = x * i
+result = 0
+for i in [1,2,3,4]
+    result = result + (my_function 10)
+end
+}}Result: {{ result }}
+");
+            var result = template.Render();
+
+
+
+
+        }
+
+
+
+
+
+        [Test]
         public void TestPars()
         {
             string Dump(params object[] args)

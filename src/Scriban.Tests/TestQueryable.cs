@@ -105,7 +105,7 @@ end
 }}");
             var result = template.Render(context);
 
-            TextAssert.AreEqual("", result);
+            TextAssert.AreEqual("43210", result);
         }
 
 
@@ -139,7 +139,7 @@ end
             var result = template.Render(context);
 
             // last will always be false with iqueryable
-            TextAssert.AreEqual("falsefalsefalsefalsefalse", result);
+            TextAssert.AreEqual("falsefalsefalsefalsetrue", result);
         }
 
 
