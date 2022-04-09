@@ -242,6 +242,12 @@ namespace Scriban.Parsing
                                 memberExpression.DotToken = dotToken;
                                 memberExpression.Target = leftOperand;
 
+                                // We parse left associated, so we need to propagate the ?. if it is nested
+                                if (leftOperand is ScriptMemberExpression nestedMemberExpression && nestedMemberExpression.DotToken.TokenType == TokenType.QuestionDot)
+                                {
+                                    dotToken.TokenType = TokenType.QuestionDot;
+                                }
+
                                 var member = ParseVariable();
                                 if (!(member is ScriptVariable))
                                 {

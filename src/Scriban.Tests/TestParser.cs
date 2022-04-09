@@ -28,6 +28,15 @@ namespace Scriban.Tests
         private const string BuiltinMarkdownDocFile = @"..\..\..\..\..\doc\builtins.md";
 
         [Test]
+        public void TestMemberDot()
+        {
+            var input = @"{{ a?.b.c }}";
+            var template = Template.Parse(input);
+            var result = template.Render();
+            Assert.AreEqual("", result);
+        }
+
+        [Test]
         public void TestFailingError()
         {
             var input = @"{{ 
