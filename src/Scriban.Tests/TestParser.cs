@@ -417,8 +417,53 @@ variable + 1
             TextAssert.AreEqual("This is after the frontmatter: yes\n2", pageResult);
         }
 
+        [Test]
+        public void TestFrontMatterExtensions_WithAssignExpression()
+        {
+            var options = new LexerOptions { Mode = ScriptMode.FrontMatterAndContent };
+            var input = @"+++
+variable = 1
+name = 'yes'
++++
+TEMPLATE";
+            input = input.Replace("\r\n", "\n");
+            var template = ParseTemplate(input, options);
 
+            var dictionary = template.Page.FrontMatter.GetValues();
 
+            // Make sure the dictionary has 2 values
+            Assert.AreEqual(2, dictionary.Count);
+            // Make sure variable = "1"
+            Assert.True(dictionary.ContainsKey("variable"));
+            Assert.AreEqual("1", dictionary["variable"]);
+            // Make sure name = "yes"
+            Assert.True(dictionary.ContainsKey("name"));
+            Assert.AreEqual("yes", dictionary["name"]);
+        }
+
+        [Test]
+        public void TestFrontMatterExtensions_WithNamedArgument()
+        {
+            var options = new LexerOptions { Mode = ScriptMode.FrontMatterAndContent };
+            var input = @"+++
+variable: 1
+name: 'yes'
++++
+TEMPLATE";
+            input = input.Replace("\r\n", "\n");
+            var template = ParseTemplate(input, options);
+
+            var dictionary = template.Page.FrontMatter.GetValues();
+
+            // Make sure the dictionary has 2 values
+            Assert.AreEqual(2, dictionary.Count);
+            // Make sure variable = "1"
+            Assert.True(dictionary.ContainsKey("variable"));
+            Assert.AreEqual("1", dictionary["variable"]);
+            // Make sure name = "yes"
+            Assert.True(dictionary.ContainsKey("name"));
+            Assert.AreEqual("yes", dictionary["name"]);
+        }
 
         [Test]
         public void TestFrontMatterOnly()
