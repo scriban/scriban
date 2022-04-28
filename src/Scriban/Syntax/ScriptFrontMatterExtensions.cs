@@ -11,17 +11,13 @@ namespace Scriban.Syntax
     {
         public static Dictionary<string, string> GetValues(this ScriptFrontMatter frontMatter) =>
             frontMatter.Statements.Statements.Cast<ScriptExpressionStatement>()
-                       .Aggregate(new List<KeyValuePair<string, string>>(), (list, statement) =>
-                       {
-                           list.AddRange(statement.Expression switch
+                       .Aggregate(new Dictionary<string, string>(), (dictionary, statement) =>
+                           dictionary.Concat(statement.Expression switch
                            {
                                ScriptAssignExpression x => x.GetValues(),
                                ScriptNamedArgument x => x.GetValues(),
-                               _ => new Dictionary<string, string>()
-                           });
-                           return list;
-                       })
-                       .ToDictionary(x => x.Key, x => x.Value);
+                               _ => new Dictionary<string, string>(),
+                           }).ToDictionary(x => x.Key, x => x.Value));
 
         private static IEnumerable<KeyValuePair<string, string>> GetValues(this ScriptAssignExpression expression)
         {
@@ -33,8 +29,8 @@ namespace Scriban.Syntax
         private static IEnumerable<KeyValuePair<string, string>> GetValues(this ScriptNamedArgument expression)
         {
             var key = expression.Name.Name;
-            var value = ((ScriptLiteral)expression.Value).Value.ToString();
-            yield return new KeyValuePair<string, string>(key, value ?? string.Empty);
+            var value = ((ScriptLiteral)expression.Value).Value.ToString() ?? string.Empty;
+            yield return new KeyValuePair<string, string>(key, value);
         }
     }
 }
