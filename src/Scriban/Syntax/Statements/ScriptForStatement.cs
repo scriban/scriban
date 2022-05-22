@@ -161,10 +161,10 @@ namespace Scriban.Syntax
 
                 var loopState = CreateLoopState();
                 context.SetLoopVariable(GetLoopVariable(context), loopState);
-                loopState.SetEnumerable(list);
+                var it = list.GetEnumerator();
+                loopState.SetEnumerable(list, it);
 
                 bool enteredLoop = false;
-                var it = list.GetEnumerator();
                 if (it.MoveNext())
                 {
                     enteredLoop = true;
@@ -175,11 +175,11 @@ namespace Scriban.Syntax
                             return null;
                         }
 
+                        loopState.ResetLast();
+
                         // We update on next run on previous value (in order to handle last)
                         var value = it.Current;
-                        bool isLast = !it.MoveNext();
                         loopState.Index = index;
-                        loopState.IsLast = isLast;
                         loopState.ValueChanged = isFirst || !Equals(previousValue, value);
 
                         if (Variable is ScriptVariable loopVariable)
@@ -192,6 +192,8 @@ namespace Scriban.Syntax
                         }
 
                         loopResult = LoopItem(context, loopState);
+
+                        var isLast = loopState.MoveNextAndIsLast();
                         if (!ContinueLoop(context) || isLast)
                         {
                             break;

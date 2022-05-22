@@ -1051,9 +1051,9 @@ namespace Scriban.Syntax
                 await BeforeLoopAsync(context).ConfigureAwait(false);
                 var loopState = CreateLoopState();
                 context.SetLoopVariable(GetLoopVariable(context), loopState);
-                loopState.SetEnumerable(list);
-                bool enteredLoop = false;
                 var it = list.GetEnumerator();
+                loopState.SetEnumerable(list, it);
+                bool enteredLoop = false;
                 if (it.MoveNext())
                 {
                     enteredLoop = true;
@@ -1064,11 +1064,10 @@ namespace Scriban.Syntax
                             return null;
                         }
 
+                        loopState.ResetLast();
                         // We update on next run on previous value (in order to handle last)
                         var value = it.Current;
-                        bool isLast = !it.MoveNext();
                         loopState.Index = index;
-                        loopState.IsLast = isLast;
                         loopState.ValueChanged = isFirst || !Equals(previousValue, value);
                         if (Variable is ScriptVariable loopVariable)
                         {
@@ -1080,6 +1079,7 @@ namespace Scriban.Syntax
                         }
 
                         loopResult = await LoopItemAsync(context, loopState).ConfigureAwait(false);
+                        var isLast = loopState.MoveNextAndIsLast();
                         if (!ContinueLoop(context) || isLast)
                         {
                             break;
@@ -2263,7 +2263,6 @@ namespace Scriban.Syntax
                 }
 
                 loopState.Index = index++;
-                loopState.IsLast = false;
                 result = await LoopItemAsync(context, loopState).ConfigureAwait(false);
                 if (!ContinueLoop(context))
                 {

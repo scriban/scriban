@@ -4,6 +4,7 @@
 
 #nullable disable
 
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -106,10 +107,14 @@ namespace Scriban.Syntax
             private int _length;
             private object _lengthObject;
             private IEnumerable _list;
+            private IEnumerator _it;
+            private bool _isLast;
+            private bool _isLastTaken;
 
-            public void SetEnumerable(IEnumerable list)
+            public void SetEnumerable(IEnumerable list, IEnumerator it)
             {
                 _list = list;
+                _it = it;
             }
 
             public int Index { get; set; }
@@ -122,7 +127,20 @@ namespace Scriban.Syntax
 
             public bool ValueChanged { get; set; }
 
-            public bool IsLast { get; set; }
+            public void ResetLast() => _isLastTaken = false;
+
+            public bool MoveNextAndIsLast()
+            {
+                if (_it is null) return false;
+
+                if (!_isLastTaken)
+                {
+                    _isLast = !_it.MoveNext();
+                    _isLastTaken = true;
+                }
+
+                return _isLast;
+            }
 
             public int Length
             {
@@ -187,7 +205,7 @@ namespace Scriban.Syntax
                         value = IsOdd ? BoxHelper.TrueObject : BoxHelper.FalseObject;
                         return true;
                     case "last":
-                        value = IsLast ? BoxHelper.TrueObject : BoxHelper.FalseObject;
+                        value = MoveNextAndIsLast() ? BoxHelper.TrueObject : BoxHelper.FalseObject;
                         return true;
                     case "changed":
                         value = ValueChanged ? BoxHelper.TrueObject : BoxHelper.FalseObject;
