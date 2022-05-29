@@ -292,13 +292,16 @@ namespace Scriban.Parsing
                 {
                     string indent = null;
 
-                    var text = rawStatement.Text;
-                    for (int j = text.Length - 1; j >= 0; j--)
+                    // Iterate on the original string to detect \n
+                    var slice = rawStatement.Text;
+                    var text = slice.FullText;
+                    var end = slice.Index + slice.Length - 1;
+                    for (int j = end; j >= 0; j--)
                     {
                         var c = text[j];
                         if (c == '\n')
                         {
-                            indent = text.Substring(j + 1);
+                            indent = text.Substring(j + 1, end - j);
                             break;
                         }
 
@@ -312,7 +315,7 @@ namespace Scriban.Parsing
                             // We have a raw statement that has only white spaces
                             // It could be the first raw statement of the document
                             // so we continue but we handle it later
-                            indent = text.ToString();
+                            indent = text.Substring(0, end + 1);
                         }
                     }
                     scriptEscapeStatement.Indent = indent;

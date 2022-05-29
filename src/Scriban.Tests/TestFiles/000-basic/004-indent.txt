@@ -1,0 +1,13 @@
+[
+  {{~ for i in 1..2 ~}}
+  [
+    {{~ for j in 1..3 ~}}
+    {{~ if true ~}}
+    Lorem ipsum dolor {{"sit"}} {{"amet"}}.
+    {{~ else ~}}
+    Ut enim ad minim veniam.
+    {{~ end ~}}
+    {{~ end ~}}
+  ]
+  {{~ end ~}}
+]
