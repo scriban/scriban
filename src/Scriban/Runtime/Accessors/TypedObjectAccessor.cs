@@ -26,12 +26,16 @@ namespace Scriban.Runtime.Accessors
         private readonly Dictionary<string, MemberInfo> _members;
         private PropertyInfo _indexer;
 
-        public TypedObjectAccessor(Type targetType, MemberFilterDelegate filter, MemberRenamerDelegate renamer)
+        public TypedObjectAccessor(Type targetType, MemberFilterDelegate filter, MemberRenamerDelegate renamer) : this(targetType, null, filter, renamer)
+        {
+        }
+
+        public TypedObjectAccessor(Type targetType, IEqualityComparer<string> keyComparer, MemberFilterDelegate filter, MemberRenamerDelegate renamer)
         {
             _type = targetType ?? throw new ArgumentNullException(nameof(targetType));
             _filter = filter;
             _renamer = renamer ?? StandardMemberRenamer.Default;
-            _members = new Dictionary<string, MemberInfo>();
+            _members = new Dictionary<string, MemberInfo>(keyComparer);
             PrepareMembers();
         }
 
@@ -65,7 +69,7 @@ namespace Scriban.Runtime.Accessors
                     return true;
                 }
 
-                var propertyAccessor = (PropertyInfo) memberAccessor;
+                var propertyAccessor = (PropertyInfo)memberAccessor;
                 value = propertyAccessor.GetValue(target);
                 return true;
             }
@@ -79,7 +83,7 @@ namespace Scriban.Runtime.Accessors
                 value = default;
                 return false;
             }
-            value = this._indexer.GetValue(target, new []{index});
+            value = this._indexer.GetValue(target, new[] { index });
             return true;
         }
 
@@ -89,7 +93,7 @@ namespace Scriban.Runtime.Accessors
             {
                 return false;
             }
-            _indexer.SetValue(target, value, new []{index});
+            _indexer.SetValue(target, value, new[] { index });
             return true;
         }
 
@@ -107,7 +111,7 @@ namespace Scriban.Runtime.Accessors
             }
 
             var propertyAccessor = (PropertyInfo)memberAccessor;
-                propertyAccessor.SetValue(target, context.ToObject(span, value, propertyAccessor.PropertyType));
+            propertyAccessor.SetValue(target, context.ToObject(span, value, propertyAccessor.PropertyType));
 
             return true;
         }
