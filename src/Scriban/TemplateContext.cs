@@ -63,6 +63,7 @@ namespace Scriban
         private FastStack<Dictionary<object, object>> _availableTags;
         private ScriptPipeArguments _currentPipeArguments;
         private bool _previousTextWasNewLine;
+        private readonly IEqualityComparer<string> _keyComparer;
 
         internal bool AllowPipeArguments => _getOrSetValueLevel <= 1;
 
@@ -104,7 +105,7 @@ namespace Scriban
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Scriban.TemplateContext" /> class.
         /// </summary>
-        public TemplateContext() : this(null)
+        public TemplateContext() : this(null, null)
         {
         }
 
@@ -112,7 +113,24 @@ namespace Scriban
         /// Initializes a new instance of the <see cref="TemplateContext" /> class.
         /// </summary>
         /// <param name="builtin">The builtin object used to expose builtin functions, default is <see cref="GetDefaultBuiltinObject"/>.</param>
-        public TemplateContext(ScriptObject builtin)
+        public TemplateContext(ScriptObject builtin) : this(builtin, null)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateContext" /> class.
+        /// </summary>
+        /// <param name="keyComparer">Comparer to use when looking up members</param>
+        public TemplateContext(IEqualityComparer<string> keyComparer) : this(null, keyComparer)
+        {
+        }
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TemplateContext" /> class.
+        /// </summary>
+        /// <param name="builtin">The builtin object used to expose builtin functions, default is <see cref="GetDefaultBuiltinObject"/>.</param>
+        /// <param name="keyComparer">Comparer to use when looking up members</param>
+        public TemplateContext(ScriptObject builtin, IEqualityComparer<string> keyComparer)
         {
             BuiltinObject = builtin ?? GetDefaultBuiltinObject();
             EnableOutput = true;
@@ -125,7 +143,7 @@ namespace Scriban
             LoopLimit = 1000;
             RecursiveLimit = 100;
             LimitToString = 0;
-            ObjectRecursionLimit=0;
+            ObjectRecursionLimit = 0;
             MemberRenamer = StandardMemberRenamer.Default;
 
             RegexTimeOut = TimeSpan.FromSeconds(10);
@@ -163,6 +181,9 @@ namespace Scriban
             _pipeArguments = new FastStack<ScriptPipeArguments>(4);
             _availableScriptExpressionLists = new FastStack<List<ScriptExpression>>(4);
             _availableReflectionArguments = new object[ScriptFunctionCall.MaximumParameterCount + 1][];
+
+            _keyComparer = keyComparer;
+
             for (int i = 0; i < _availableReflectionArguments.Length; i++)
             {
                 _availableReflectionArguments[i] = new object[i];
@@ -191,7 +212,7 @@ namespace Scriban
         /// Gets a boolean if the context is being used  with liquid
         /// </summary>
         public bool IsLiquid { get; protected set; }
-        
+
         /// <summary>
         /// If sets to <c>true</c>, the include statement will maintain the indent.
         /// </summary>
@@ -347,7 +368,7 @@ namespace Scriban
         /// Gets the number of <see cref="PushOutput()"/> that are pushed to this context.
         /// </summary>
         public int OutputCount => _outputs.Count;
-        
+
         /// <summary>
         /// Gets the number of <see cref="PushCulture"/> that are pushed to this context.
         /// </summary>
@@ -481,7 +502,7 @@ namespace Scriban
 
         internal List<ScriptExpression> GetOrCreateListOfScriptExpressions(int capacity)
         {
-            var list  = _availableScriptExpressionLists.Count > 0 ? _availableScriptExpressionLists.Pop() : new List<ScriptExpression>();
+            var list = _availableScriptExpressionLists.Count > 0 ? _availableScriptExpressionLists.Pop() : new List<ScriptExpression>();
             if (capacity > list.Capacity) list.Capacity = capacity;
             return list;
         }
@@ -499,13 +520,13 @@ namespace Scriban
             // Don't try to allocate more than we can allocate
             if (length >= _availableReflectionArguments.Length) return new object[length];
 
-           var reflectionArguments =  _availableReflectionArguments[length] ?? new object[length];
-           if (length > 0)
-           {
-               _availableReflectionArguments[length] = (object[])reflectionArguments[0];
-               reflectionArguments[0] = null;
-           }
-           return reflectionArguments;
+            var reflectionArguments = _availableReflectionArguments[length] ?? new object[length];
+            if (length > 0)
+            {
+                _availableReflectionArguments[length] = (object[])reflectionArguments[0];
+                reflectionArguments[0] = null;
+            }
+            return reflectionArguments;
         }
 
         internal void ReleaseReflectionArguments(object[] reflectionArguments)
@@ -895,7 +916,7 @@ namespace Scriban
             }
             else
             {
-                accessor = new TypedObjectAccessor(type, MemberFilter, MemberRenamer);
+                accessor = new TypedObjectAccessor(type, _keyComparer, MemberFilter, MemberRenamer);
             }
             return accessor;
         }
@@ -1007,7 +1028,7 @@ namespace Scriban
             Queryable
         }
 
-        internal bool StepLoop(ScriptLoopStatementBase loop, LoopType loopType = LoopType.Default )
+        internal bool StepLoop(ScriptLoopStatementBase loop, LoopType loopType = LoopType.Default)
         {
             Debug.Assert(_loops.Count > 0);
 
@@ -1099,7 +1120,7 @@ namespace Scriban
                     throw new ScriptRuntimeException(targetExpression.Span, $"Unsupported target expression for assignment."); // unit test: 105-assign-error1.txt
                 }
             }
-            catch (Exception readonlyException) when(_getOrSetValueLevel == 1 && !(readonlyException is ScriptRuntimeException))
+            catch (Exception readonlyException) when (_getOrSetValueLevel == 1 && !(readonlyException is ScriptRuntimeException))
             {
                 throw new ScriptRuntimeException(targetExpression.Span, $"Unexpected exception while accessing target expression: {readonlyException.Message}", readonlyException);
             }
@@ -1186,8 +1207,8 @@ namespace Scriban
             EnableBreakAndContinueAsReturnOutsideLoop = true;
             EnableRelaxedTargetAccess = true;
 
-            TemplateLoaderLexerOptions = new LexerOptions() {Lang = ScriptLang.Liquid};
-            TemplateLoaderParserOptions = new ParserOptions() {LiquidFunctionsToScriban = true};
+            TemplateLoaderLexerOptions = new LexerOptions() { Lang = ScriptLang.Liquid };
+            TemplateLoaderParserOptions = new ParserOptions() { LiquidFunctionsToScriban = true };
             IsLiquid = true;
         }
     }
