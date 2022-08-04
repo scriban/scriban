@@ -1111,7 +1111,7 @@ This is the equivalent of `switch` statement in C#, a selection statement that c
     x = 5
     case x
       when 1, 2, 3
-          "Value is 1 or 2 or 3
+          "Value is 1 or 2 or 3"
       when 5
           "Value is 5"
       else
