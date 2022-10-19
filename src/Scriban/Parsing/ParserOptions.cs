@@ -29,5 +29,11 @@ namespace Scriban.Parsing
         /// If the number cannot be represented to a decimal, it will fall back to a double.
         /// </summary>
         public bool ParseFloatAsDecimal { get; set; }
+
+        /// <summary>
+        /// <c>true</c> to return a parse error if an end statement does not correspond to a block (e.g. if-end, while-end, etc.).
+        /// Default is <c>false</c>: an end statement that is not part of a block is allowed, but will prematurely end the parsing.
+        /// </summary>
+        public bool EnforceEndStatementMustMatchBlockBegin { get; set; }
     }
 }

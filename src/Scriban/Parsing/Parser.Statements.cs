@@ -52,6 +52,18 @@ namespace Scriban.Parsing
 
                     if (hasEnd)
                     {
+                        if (_blockLevel == 1 && Options.EnforceEndStatementMustMatchBlockBegin)
+                        {
+                            if (_isLiquid)
+                            {
+                                var syntax = ScriptSyntaxAttribute.Get(parentStatement);
+                                LogError(parentStatement, parentStatement?.Span ?? CurrentSpan, $"Found <end> statement `end{syntax.TypeName}` without a corresponding beginning of a block");
+                            }
+                            else
+                            {
+                                LogError(parentStatement, GetSpanForToken(Previous), $"Found <end> statement without a corresponding beginning of a block");
+                            }
+                        }
                         break;
                     }
                 }
