@@ -52,7 +52,7 @@ namespace Scriban.Parsing
 
                     if (hasEnd)
                     {
-                        if (_blockLevel == 1 && Options.EnforceEndStatementMustMatchBlockBegin)
+                        if (_blockLevel == 1)
                         {
                             if (_isLiquid)
                             {
