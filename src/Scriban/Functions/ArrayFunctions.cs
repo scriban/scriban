@@ -71,7 +71,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Removes any non-null values from the input list.
+        /// Removes any null values from the input list.
         /// </summary>
         /// <param name="list">An input list</param>
         /// <returns>Returns a list with null value removed</returns>

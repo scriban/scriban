@@ -110,7 +110,7 @@ array.compact <list>
 
 #### Description
 
-Removes any non-null values from the input list.
+Removes any null values from the input list.
 
 #### Arguments
 
