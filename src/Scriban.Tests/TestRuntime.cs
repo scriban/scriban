@@ -24,6 +24,23 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+
+        [Test]
+        public void TestEval()
+        {
+            var input = @"{{ x = object.eval '1 + 1' }}";
+            var template = Template.Parse(input);
+            var context = new TemplateContext();
+            var result = template.Render(context);
+            Assert.AreEqual("", result);
+            Assert.AreEqual(2, ((ScriptObject)context.CurrentGlobal)["x"]);
+
+            input = @"{{ x = object.eval '+' }}";
+            template = Template.Parse(input);
+            context = new TemplateContext();
+            Assert.Throws<ScriptRuntimeException>( () => template.Render(context));
+        }
+
         [Test]
         public void TestEnumerator()
         {

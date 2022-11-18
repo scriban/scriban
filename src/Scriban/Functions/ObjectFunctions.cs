@@ -70,7 +70,13 @@ namespace Scriban.Functions
                 try
                 {
                     var template = Template.Parse(templateStr, lexerOptions: new LexerOptions() { Lang = context.Language, Mode = ScriptMode.ScriptOnly });
-                    return context.Evaluate(template.Page);
+                    if (template.HasErrors)
+                    {
+                        throw new ScriptRuntimeException(span, template.Messages.ToString());
+                    }
+
+                    var result = template.Page.Body.Statements.Count == 1 ? context.Evaluate(template.Page.Body.Statements[0]) : context.Evaluate(template.Page);
+                    return result;
                 }
                 catch (Exception ex)
                 {
