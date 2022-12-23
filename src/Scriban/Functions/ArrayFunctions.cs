@@ -668,6 +668,11 @@ namespace Scriban.Functions
         /// </remarks>
         public static bool Contains(IEnumerable list, object item)
         {
+            if (list == null)
+            {
+                return false;
+            }
+
             foreach (var element in list)
             {
                 if (element == item || (element != null && element.Equals(item))) return true;
