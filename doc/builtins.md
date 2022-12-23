@@ -665,16 +665,16 @@ array.contains <list> <item>
 
 #### Description
 
-Returns if an `list` contains an specifique element
+Returns if a `list` contains a specific `item`.
 
 #### Arguments
 
-- `list`: the input list
-- `item`: the input item
+- `list`: The input list
+- `item`: The input item
 
 #### Returns
 
-**true** if element is in `list`; otherwise **false**
+**true** if `item` is in `list`; otherwise **false**
 
 #### Examples
 

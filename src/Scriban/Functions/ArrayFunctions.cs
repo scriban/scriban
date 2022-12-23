@@ -653,11 +653,11 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Returns if an `list` contains an specifique element
+        /// Returns if a `list` contains a specific `item`.
         /// </summary>
-        /// <param name="list">the input list</param>
-        /// <param name="item">the input item</param>
-        /// <returns>**true** if element is in `list`; otherwise **false**</returns>
+        /// <param name="list">The input list</param>
+        /// <param name="item">The input item</param>
+        /// <returns>**true** if `item` is in `list`; otherwise **false**</returns>
         /// <remarks>
         /// ```scriban-html
         /// {{ [1, 2, 3, 4] | array.contains 4 }}
