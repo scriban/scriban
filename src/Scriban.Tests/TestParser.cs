@@ -98,8 +98,9 @@ namespace Scriban.Tests
         {
             var template = Template.ParseLiquid("{%endunless");
             Assert.True(template.HasErrors);
-            Assert.AreEqual(1, template.Messages.Count);
+            Assert.AreEqual(2, template.Messages.Count);
             Assert.AreEqual("<input>(1,3) : error : Unable to find a pending `unless` for this `endunless`", template.Messages[0].ToString());
+            StringAssert.StartsWith("<input>(1,1) : error : Error while parsing ScriptPage: Found <end> statement `endScriptPage` without a corresponding beginning of a block", template.Messages[1].ToString());
         }
 
         [Test]
@@ -755,6 +756,18 @@ m
                 ObjectRecursionLimit = 100
             };
             Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+        }
+
+        [TestCase(@"ab{{end}}c")]  // no blocks
+        [TestCase(@"a{{if true}}b{{end}}{{end}}c")]  // one-level block
+        [TestCase(@"a{{if true}}{{for i in 0..1}}b{{end}}{{end}}{{end}}c")]  // two-level block (nested)
+        public void TestUnmatchedEndStatementCausesError(string templateText)
+        {
+            var template = Template.Parse(templateText);
+            Assert.True(template.HasErrors);
+
+            Assert.AreEqual(1, template.Messages.Count);
+            StringAssert.Contains("Found <end> statement without a corresponding beginning of a block", template.Messages[0].ToString());
         }
 
         private static void TestFile(string inputName, bool testASTInstead = false)
