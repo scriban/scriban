@@ -41,11 +41,16 @@ namespace Scriban.Tests
                 Assert.True(ArrayFunctions.Contains(mixed, TestEnum.First));
                 Assert.True(ArrayFunctions.Contains(mixed, "First"));
                 Assert.True(ArrayFunctions.Contains(mixed, 100));
+                Assert.False(ArrayFunctions.Contains(mixed, TestEnum.Second));
+                Assert.False(ArrayFunctions.Contains(mixed, 101));
+                Assert.False(ArrayFunctions.Contains(mixed, "Third"));
+                Assert.False(ArrayFunctions.Contains(null, 1));
                 TestParser.AssertTemplate("true", "{{ value | array.contains 'First' }}", model: new ObjectModel { Value = mixed });
                 TestParser.AssertTemplate("true", "{{ value | array.contains 100 }}", model: new ObjectModel { Value = mixed });
                 TestParser.AssertTemplate("false", "{{ value | array.contains 'Second' }}", model: new ObjectModel { Value = mixed });
                 TestParser.AssertTemplate("false", "{{ value | array.contains 101 }}", model: new ObjectModel { Value = mixed });
                 TestParser.AssertTemplate("false", "{{ value | array.contains 'Third' }}", model: new ObjectModel { Value = mixed });
+                TestParser.AssertTemplate("false", "{{ null | array.contains 100 }}");
             }
             class ObjectModel
             {
