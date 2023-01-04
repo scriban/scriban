@@ -100,7 +100,7 @@ namespace Scriban.Tests
             Assert.True(template.HasErrors);
             Assert.AreEqual(2, template.Messages.Count);
             Assert.AreEqual("<input>(1,3) : error : Unable to find a pending `unless` for this `endunless`", template.Messages[0].ToString());
-            StringAssert.StartsWith("<input>(1,1) : error : Error while parsing ScriptPage: Found <end> statement `endScriptPage` without a corresponding beginning of a block", template.Messages[1].ToString());
+            StringAssert.StartsWith("<input>(1,11) : error : Error while parsing ScriptPage: Found <end> statement `endScriptPage` without a corresponding beginning of a block", template.Messages[1].ToString());
         }
 
         [Test]

@@ -54,14 +54,15 @@ namespace Scriban.Parsing
                     {
                         if (_blockLevel == 1)
                         {
+                            var span = new SourceSpan(_lexer.SourcePath, Previous.End, Previous.End);
                             if (_isLiquid)
                             {
                                 var syntax = ScriptSyntaxAttribute.Get(parentStatement);
-                                LogError(parentStatement, parentStatement?.Span ?? CurrentSpan, $"Found <end> statement `end{syntax.TypeName}` without a corresponding beginning of a block");
+                                LogError(parentStatement, span, $"Found <end> statement `end{syntax.TypeName}` without a corresponding beginning of a block");
                             }
                             else
                             {
-                                LogError(parentStatement, GetSpanForToken(Previous), $"Found <end> statement without a corresponding beginning of a block");
+                                LogError(parentStatement, span, $"Found <end> statement without a corresponding beginning of a block");
                             }
                         }
                         break;
