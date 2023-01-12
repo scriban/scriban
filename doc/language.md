@@ -104,9 +104,9 @@ A scriban code block may contain:
     {{if !name; name = "default"; end; name }}
     ```
 
-Inside a code block, except for the EOL after each statement, white spaces characters are not affecting the parsing. There is only one case where whitespace is used to disambiguate between an array indexer and an array initializer. 
+In a code block, white space characters have no impact on parsing, with the exception of the end-of-line character following each statement. The only exception is when white space is used to distinguish between an array indexer and an array initializer. 
 
-Also, if a statement is an expression (but not an assignment expression), the result of the expression will be output to the rendering output of the template:
+Additionally, when a statement is an expression (but not an assignment expression), the result of the expression will be displayed in the template's output:
 
 > **input**
 ```scriban-html
@@ -138,7 +138,7 @@ You can still use a plain string with an EOL inside a code block `"\n"` or you c
 [:top:](#language)
 ### 1.2 Text block
 
-Otherwise, any text is considered as a **text block** and simply output as is
+Otherwise, any text is treated as a **text block** and is outputted without modification.
 
 ```
 Hello this is {{ name }}, welcome to scriban!
@@ -156,13 +156,14 @@ For example the following escape:
 > **input**: `{%{Hello this is {{ name }}}%}`   
 > **output**: `Hello this is {{ name }}` 
 
-Any escape block can be also escaped by increasing the number of `%` in the starting and ending block:
+If you want to escape an escape block, you can increase the number of % in the starting and ending block:
 > **input**: `{%%{This is an escaped block: }%} here}%%}`
 > **output**: `This is an escaped block: }%} here`
 
 This allow effectively to nest escape blocks and still be able to escape them.
 
-Hence a starting escape block `{%%%%{` will required an ending `}%%%%}`
+This allows for effective nesting of escape blocks and the ability to escape them.
+For example, a starting escape block {%%%%{ will require an ending }%%%%}"
 
 [:top:](#language)
 ### 1.4 Whitespace control
@@ -436,7 +437,7 @@ b.x
 [:top:](#language)
 ### 4.2 The special variable `empty`
 
-The `empty` variable represents simply an empty object. It is mainly relevant to be compatible with liquid, by providing a way to compare an object with the `empty` object to check if it is empty or not:
+The empty variable represents an empty object and is primarily used for compatibility with Liquid templates. It provides a way to compare an object with the empty variable to determine if it is empty or not:
 
 > **input**
 ```scriban-html
@@ -457,7 +458,7 @@ false
 
 Scriban supports javascript like objects `{...}`
 
-An object can be initialized empty :
+An object can be initialized empty:
 
 `{{ myobject = {} }}` 
 
@@ -480,7 +481,7 @@ An object can be initialized with some members over multiple lines:
 }}
 ```
 
-Members of an object can be accessed:
+Members of an object can be accessed using dot notation or square bracket notation:
 
 `{{ myobject.member1 }}` also equivalent to `{{ myobject["member1"] }}`
 
@@ -530,7 +531,7 @@ false
 [:top:](#language)
 ## 6 Arrays
 
-An array can be initialized empty :
+An array can be initialized empty:
 
 `{{ myarray = [] }}` 
 
@@ -622,7 +623,7 @@ a.size
 [:top:](#language)
 ## 7 Functions
 
-Scriban allows to define 4 kind of functions:
+Scriban allows for the definition of four different types of functions:
 
 - Simple functions
 - Anonymous functions
@@ -631,7 +632,7 @@ Scriban allows to define 4 kind of functions:
 
 ### 7.1 Simple functions
 
-The following declares a function `sub` that uses its first argument and subtract from it the second argument:
+The following declares a function `sub` that takes two arguments, `a` and `b`, and subtracts the value of `b` from `a`:
 
 ``` 
 {{func sub
@@ -1164,7 +1165,7 @@ Allows to start the iteration of the loop at the specified zero-based index:
 
 ##### The `limit` parameter
 
-Allows to limit the iteration of the loop for the specified count
+Limits the iteration of the loop to a specified count:
 
 > **input**
 ```scriban-html
@@ -1180,7 +1181,7 @@ Allows to limit the iteration of the loop for the specified count
 
 ##### The `reversed` parameter
 
-Allows to reverse the iteration on the elements
+Reverses the iteration of the elements:
 
 > **input**
 ```scriban-html
@@ -1211,7 +1212,7 @@ Like the `if` statement, the `expression` is evaluated to a boolean.
 This function generates HTML rows compatible with an HTML table. Must be wrapped in an opening `<table>` and closing `</table>` HTML tags.
 
 This statement is mainly for compatibility reason with the liquid `tablerow` tag.
-It has overall the same syntax as a `for` statement (supporting the same parameters).
+It uses similar syntax to a `for` statement (supporting the same parameters).
 
 ```
 {{tablerow <variable> in <expression>}} 
@@ -1404,7 +1405,7 @@ Note that variables declared outside the `with` block are accessible within.
 [:top:](#language)
 ### 9.11 `include <name> arg1?...argn?` 
 
-The include is not a statement but actually a function that allows to parse and render the specified template name. In order to use this function, a delegate to an template loader must be setup on the [`TemplateOptions.TemplateLoader`](runtime.md#include-and-itemplateloader) property passed to the `Template.Parse` method.
+`include` is not a statement but rather a function that allows you to parse and render a specified template. To use this function, a delegate to a template loader must be setup on the [`TemplateOptions.TemplateLoader`](runtime.md#include-and-itemplateloader) property passed to the `Template.Parse` method.
  
 ```
 include 'myinclude.html'
@@ -1432,7 +1433,7 @@ The return statement is used to early exit from a top-level/include page or a fu
 
 ```
 This is a text
-{{~  ret ~}}
+{{~ ret ~}}
 This text will not appear
 ```
 
