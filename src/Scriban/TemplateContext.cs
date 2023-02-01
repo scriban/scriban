@@ -763,6 +763,7 @@ namespace Scriban
                 }
                 else
                 {
+                    _previousTextWasNewLine = count > 0 && text[startIndex + count - 1] == '\n';
                     Output.Write(text, startIndex, count);
                 }
             }
