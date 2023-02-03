@@ -26,6 +26,15 @@ namespace Scriban.Tests
     {
 
         [Test]
+        public void TestLazy()
+        {
+            var input = @"{{ value }}";
+            var template = Template.Parse(input);
+            var result = template.Render(new { value = new ScriptLazy<int>(() => 1)});
+            Assert.AreEqual("1", result);
+        }
+
+        [Test]
         public void TestEval()
         {
             var input = @"{{ x = object.eval '1 + 1' }}";
