@@ -617,6 +617,43 @@ Normal Text
 
             TextAssert.AreEqual("b\nNormal Text\n    indented text\n", result);
         }
+
+        [Test]
+        public void TestIndent5()
+        {
+            var input = @"{{~ for test in  ['A', 'B'] ~}}
+  {{ test}}
+{{~ end ~}}
+{{~ for test in  ['A', 'B'] ~}}
+  {{ test}}
+{{~ end ~}}
+{{~ for test in  ['A', 'B'] ~}}
+  {{ test}}
+{{~ end ~}}
+{{~ for test in  ['A', 'B'] ~}}
+  {{ test}}
+{{~ end ~}}
+
+{{~ for test in  ['A', 'B'] ~}}
+  {{ test}}
+{{~ end ~}}
+{{~ for test in  ['A', 'B'] ~}}
+  {{ test}}
+{{~ end ~}}
+{{~ for test in  ['A', 'B'] ~}}
+  {{ test}}
+{{~ end ~}}
+{{~ for test in  ['A', 'B'] ~}}
+  {{ test}}
+{{~ end ~}}
+";
+            var template = Template.Parse(input);
+            var result = template.Render();
+            result = TextAssert.Normalize(result);
+
+            TextAssert.AreEqual("  A\n  B\n  A\n  B\n  A\n  B\n  A\n  B\n\n  A\n  B\n  A\n  B\n  A\n  B\n  A\n  B\n", result);
+        }
+
         [TestCaseSource("ListTestFiles", new object[] { "000-basic" })]
         public static void A000_basic(string inputName)
         {
