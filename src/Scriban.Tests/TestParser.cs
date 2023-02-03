@@ -589,6 +589,20 @@ Hello
             TextAssert.AreEqual("  test\n  test2", result);
         }
 
+        [Test]
+        public void TestIndent3()
+        {
+            var input = @"a
+{{~ if true ~}}
+b
+{{~ end ~}}
+ {{'c'}}";
+            var template = Template.Parse(input);
+            var result = template.Render();
+            result = TextAssert.Normalize(result);
+
+            TextAssert.AreEqual("a\nb\n c", result);
+        }
 
         [TestCaseSource("ListTestFiles", new object[] { "000-basic" })]
         public static void A000_basic(string inputName)
