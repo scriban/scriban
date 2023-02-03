@@ -604,6 +604,19 @@ b
             TextAssert.AreEqual("a\nb\n c", result);
         }
 
+        [Test]
+        public void TestIndent4()
+        {
+            var input = @"{{ ""b"" }}
+Normal Text
+    {{ ""indented text"" }}
+";
+            var template = Template.Parse(input);
+            var result = template.Render();
+            result = TextAssert.Normalize(result);
+
+            TextAssert.AreEqual("b\nNormal Text\n    indented text\n", result);
+        }
         [TestCaseSource("ListTestFiles", new object[] { "000-basic" })]
         public static void A000_basic(string inputName)
         {
