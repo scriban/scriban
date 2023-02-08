@@ -111,7 +111,7 @@ Additionally, when a statement is an expression (but not an assignment expressio
 > **input**
 ```scriban-html
 {{
-  x = "5"   # This assignment will not output anything
+  x = 5     # This assignment will not output anything
   x         # This expression will print 5
   x + 1     # This expression will print 6
 }}
@@ -125,7 +125,7 @@ You can still use a plain string with an EOL inside a code block `"\n"` or you c
 
 > **input**
 ```scriban-html
-{{ x = "5" }}
+{{ x = 5 }}
 {{ x }}
 {{ x + 1 }}
 ```
