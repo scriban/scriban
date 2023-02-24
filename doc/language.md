@@ -1151,7 +1151,7 @@ Allows to start the iteration of the loop at the specified zero-based index:
 
 > **input**
 ```scriban-html
-{{~ for $i in 4..9 offset:2 ~}}
+{{~ for $i in 4..9 | array.offset:2 ~}}
  {{ $i }}
 {{~ end ~}}
 ```
@@ -1169,7 +1169,7 @@ Limits the iteration of the loop to a specified count:
 
 > **input**
 ```scriban-html
-{{~ for $i in 4..9 limit:2 ~}}
+{{~ for $i in 4..9 | array.limit:2 ~}}
  {{ $i }}
 {{~ end ~}}
 ```
@@ -1185,7 +1185,7 @@ Reverses the iteration of the elements:
 
 > **input**
 ```scriban-html
-{{~ for $i in 1..3 reversed ~}}
+{{~ for $i in 1..3 | array.reversed ~}}
  {{ $i }}
 {{~ end ~}}
 ```
