@@ -61,7 +61,7 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
   
 ## Features
 
-- Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly. Check the [benchmarks](https://github.com/scriban/scriban/blob/master/doc/benchmarks.md) for more details.
+- Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly.
 - Powered by a Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than regex based parsers.
   - Precise source code location (path, column and line) for error reporting
   - **Write an AST to a script textual representation**, with [`Template.ToText`](https://github.com/scriban/scriban/blob/master/doc/runtime.md#ast-to-text), allowing to manipulate scripts in memory and re-save them to the disk, useful for **roundtrip script update scenarios**
@@ -145,10 +145,6 @@ If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, in order to co
 > NOTE: In this mode, all Scriban types are marked as `internal`.
 > 
 > You should see a Scriban folder and empty subfolders in your project. This is an issue with Visual Studio 2019 16.8.x (and before) and it will be fixed in VS 2019 16.9+
-
-## Benchmarks
-
-**Scriban is blazing fast**! For more details, you can check the [benchmarks document](https://github.com/scriban/scriban/blob/master/doc/benchmarks.md).
 
 ## License
 
