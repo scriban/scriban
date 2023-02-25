@@ -393,6 +393,10 @@ namespace Scriban
                 }
                 else
                 {
+                    if (count > 0)
+                    {
+                        _previousTextWasNewLine = text[startIndex + count - 1] == '\n';
+                    }
                     await Output.WriteAsync(text, startIndex, count, CancellationToken).ConfigureAwait(false);
                 }
             }

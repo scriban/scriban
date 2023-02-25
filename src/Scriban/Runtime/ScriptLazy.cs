@@ -39,9 +39,11 @@ namespace Scriban.Runtime
             return _lazy.Value;
         }
 
+#if !SCRIBAN_NO_ASYNC
         public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
         {
             return new ValueTask<object>(_lazy.Value);
         }
+#endif
     }
 }
