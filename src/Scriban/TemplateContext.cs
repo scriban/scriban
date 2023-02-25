@@ -151,7 +151,11 @@ namespace Scriban
             TemplateLoaderParserOptions = new ParserOptions();
             TemplateLoaderLexerOptions = LexerOptions.Default;
 
+#pragma warning disable RS1035 // Do not use APIs banned for analyzers - https://github.com/dotnet/linker/issues/3197 / https://github.com/dotnet/roslyn-analyzers/issues/6467
+#pragma warning disable RS1036
             NewLine = Environment.NewLine;
+#pragma warning restore RS1036
+#pragma warning restore RS1035
 
             Language = ScriptLang.Default;
 
