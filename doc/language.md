@@ -210,8 +210,8 @@ Scriban provides **two modes** for controlling whitespace:
     ```
 
 - The **non greedy mode** using the character `~`
-  - Using a `{{~` will remove any **whitespace before** but will **stop on the first newline without including it**
-  - Using a `~}}` will remove any **whitespace after including the first newline** but will stop after
+  - Using a `{{~` will remove any **preceeding whitespace** until it reaches a **non whitespace character such as a newline or letter**
+  - Using a `~}}` will remove any **following whitespace including the first newline** until it reaches a **non whitespace character or a second newline**
 
   This mode is very convenient when you want to use only a scriban statement on a line, but want that line to be completely 
   removed from the output, but to keep spaces before and after this line intact.
