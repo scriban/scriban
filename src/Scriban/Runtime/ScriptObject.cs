@@ -85,7 +85,8 @@ namespace Scriban.Runtime
 
         void IDictionary.Add(object key, object value)
         {
-            ((IDictionary) Store).Add(key, value);
+            this.AssertNotReadOnly();
+            Store.Add((string) key, new InternalValue(value));
         }
 
         /// <summary>
@@ -144,8 +145,24 @@ namespace Scriban.Runtime
 
         object IDictionary.this[object key]
         {
-            get { return ((IDictionary) Store)[key]; }
-            set { ((IDictionary) Store)[key] = value; }
+            get
+            {
+                var str = key as string ?? key.ToString();
+                return Store[str].Value;
+            }
+            set
+            {
+                this.AssertNotReadOnly();
+                var str = key as string ?? key.ToString();
+                if (Store.TryGetValue(str, out var previousValue))
+                {
+                    Store[str] = new InternalValue(value, previousValue.IsReadOnly);
+                }
+                else
+                {
+                    Store[str] = new InternalValue(value);
+                }
+            }
         }
 
         public IEnumerable<string> GetMembers()

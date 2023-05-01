@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license. See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
@@ -9,7 +10,6 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -24,6 +24,15 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+        [Test]
+        public void TestScriptObjectAsDictionary()
+        {
+            var model = (IDictionary)(new ScriptObject());
+            model.Add("name", "John");
+            model.Add("age", 20);
+            Assert.AreEqual("John", model["name"]);
+            Assert.AreEqual(20, model["age"]);
+        }
 
         [Test]
         public void TestLazy()
