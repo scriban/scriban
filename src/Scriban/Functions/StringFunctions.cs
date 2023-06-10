@@ -306,6 +306,25 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Returns a boolean indicating whether the input string is equal to specified string 'value'. Comparison is case insensitive.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="value">The string to compare</param>
+        /// <returns><c>true</c> if `text` is equal to string `value`, ignoring case</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Scriban" | string.ends_with "SCRIBAN" }}
+        /// ```
+        /// ```html
+        /// true
+        /// ```
+        /// </remarks>
+        public static bool EqualsIgnoreCase(string text, string value)
+        {
+            return text?.Equals(value, StringComparison.InvariantCultureIgnoreCase) ?? false;
+        }
+
+        /// <summary>
         /// Returns a url handle from the input string.
         /// </summary>
         /// <param name="text">The input string</param>

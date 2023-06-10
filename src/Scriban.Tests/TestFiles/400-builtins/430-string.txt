@@ -84,3 +84,5 @@ Test Convert from string to numbers:
 "123.2" | string.to_double + 1: {{ "123.2" | string.to_double + 1 }}
 {{ "hello" | string.pad_right 10 }}world
 hello{{ "world" | string.pad_left 10 }}
+Is "Scriban" equal to "SCRIBAN": {{ "Scriban" | string.equals_ignore_case "SCRIBAN" }}
+Is "Scriban" equal to "Liquid": {{ "Scriban" | string.equals_ignore_case "Liquid" }}
