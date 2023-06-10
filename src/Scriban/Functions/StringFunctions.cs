@@ -313,7 +313,7 @@ namespace Scriban.Functions
         /// <returns><c>true</c> if `text` is equal to string `value`, ignoring case</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "Scriban" | string.ends_with "SCRIBAN" }}
+        /// {{ "Scriban" | string.equals_ignore_case "SCRIBAN" }}
         /// ```
         /// ```html
         /// true
