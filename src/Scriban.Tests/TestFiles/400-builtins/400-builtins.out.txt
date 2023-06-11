@@ -45,6 +45,7 @@ List of all the builtin <string> functions:
  downcase
  empty
  ends_with
+ equals_ignore_case
  escape
  handleize
  hmac_sha1

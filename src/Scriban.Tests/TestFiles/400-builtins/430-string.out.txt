@@ -84,3 +84,5 @@ Test Convert from string to numbers:
 "123.2" | string.to_double + 1: 124.2
 hello     world
 hello     world
+Is "Scriban" equal to "SCRIBAN": true
+Is "Scriban" equal to "Liquid": false
