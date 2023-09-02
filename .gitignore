@@ -220,3 +220,6 @@ _Pvt_Extensions
 
 # Remove artifacts produced by dotnet-releaser
 artifacts-dotnet-releaser/
+
+# ranger-turtle's notes
+notes.txt

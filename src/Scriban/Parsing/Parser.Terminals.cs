@@ -46,6 +46,11 @@ namespace Scriban.Parsing
                 case TokenType.String:
                     literal = ParseString();
                     break;
+                case TokenType.BeginInterpString:
+                case TokenType.ContinuationInterpString:
+                case TokenType.EndingInterpString:
+                    literal = ParseInterpolatedString();
+                    break;
                 case TokenType.ImplicitString:
                     literal = ParseImplicitString();
                     break;
@@ -311,6 +316,10 @@ namespace Scriban.Parsing
                     ? ScriptLiteralStringQuoteType.SimpleQuote
                     : ScriptLiteralStringQuoteType.DoubleQuote;
 
+            // I had had to do so because of the printer who needs to know that even pure strings may have leading '$' sign
+            if (Current.Start.Offset - 1 > 0 && _lexer.Text[Current.Start.Offset - 1] == '$')
+                literal.Interpolated = true;
+
             var end = Current.End.Offset;
             for (int i = Current.Start.Offset + 1; i < end; i++)
             {
@@ -390,6 +399,125 @@ namespace Scriban.Parsing
                     builder.Append(c);
                 }
             }
+            literal.Value = builder.ToString();
+
+            NextToken();
+            return Close(literal);
+        }
+
+        private ScriptLiteral ParseInterpolatedString()
+        {
+            var literal = Open<ScriptLiteral>();
+            var text = _lexer.Text;
+            var builder = new StringBuilder(Current.End.Offset - Current.Start.Offset - 1);
+
+            char stringQuoteTypeChar = _lexer.Text[Current.Start.Offset + 1];
+            int begin;
+            if (Current.Type == TokenType.BeginInterpString)
+            {
+                _interpolatedNestedStringChars.Push(stringQuoteTypeChar);
+                begin = Current.Start.Offset + 2;
+            }
+            else
+            {
+                if (Current.Type == TokenType.EndingInterpString)
+                {
+                    stringQuoteTypeChar = _interpolatedNestedStringChars.Pop();
+                }
+                begin = Current.Start.Offset + 1;
+            }
+            literal.StringQuoteType =
+                stringQuoteTypeChar == '\''
+                    ? ScriptLiteralStringQuoteType.SimpleQuote
+                    : ScriptLiteralStringQuoteType.DoubleQuote;
+
+            literal.StringTokenType = Current.Type;
+
+            literal.Interpolated = true;
+
+            var end = Current.End.Offset;
+            for (int i = begin; i < end; i++)
+            {
+                var c = text[i];
+                // Handle escape characters
+                if (text[i] == '\\')
+                {
+                    i++;
+                    switch (text[i])
+                    {
+                        case '0':
+                            builder.Append((char)0);
+                            break;
+                        case '\n':
+                            break;
+                        case '\r':
+                            i++; // skip next \n that was validated by the lexer
+                            break;
+                        case '\'':
+                            builder.Append('\'');
+                            break;
+                        case '"':
+                            builder.Append('"');
+                            break;
+                        case '\\':
+                            builder.Append('\\');
+                            break;
+                        case '{':
+                            builder.Append('{');
+                            break;
+                        case 'b':
+                            builder.Append('\b');
+                            break;
+                        case 'f':
+                            builder.Append('\f');
+                            break;
+                        case 'n':
+                            builder.Append('\n');
+                            break;
+                        case 'r':
+                            builder.Append('\r');
+                            break;
+                        case 't':
+                            builder.Append('\t');
+                            break;
+                        case 'v':
+                            builder.Append('\v');
+                            break;
+                        case 'u':
+                            {
+                                i++;
+                                int value = 0;
+                                if (i < text.Length) value = text[i++].HexToInt();
+                                if (i < text.Length) value = (value << 4) | text[i++].HexToInt();
+                                if (i < text.Length) value = (value << 4) | text[i++].HexToInt();
+                                if (i < text.Length) value = (value << 4) | text[i].HexToInt();
+
+                                // Is it correct?
+                                builder.Append(ConvertFromUtf32(value));
+                                break;
+                            }
+                        case 'x':
+                            {
+                                i++;
+                                int value = 0;
+                                if (i < text.Length) value = text[i++].HexToInt();
+                                if (i < text.Length) value = (value << 4) | text[i].HexToInt();
+                                builder.Append((char)value);
+                                break;
+                            }
+
+                        default:
+                            // This should not happen as the lexer is supposed to prevent this
+                            LogError($"Unexpected escape character `{text[i]}` in string");
+                            break;
+                    }
+                }
+                else
+                {
+                    builder.Append(c);
+                }
+            }
+
             literal.Value = builder.ToString();
 
             NextToken();
@@ -696,6 +824,9 @@ namespace Scriban.Parsing
                 case TokenType.BinaryInteger:
                 case TokenType.Float:
                 case TokenType.String:
+                case TokenType.BeginInterpString:
+                case TokenType.ContinuationInterpString:
+                case TokenType.EndingInterpString:
                 case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
                     return true;

@@ -4,6 +4,7 @@
 
 #nullable disable
 
+using Scriban.Parsing;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -34,6 +35,8 @@ namespace Scriban.Syntax
         public object Value { get; set; }
 
         public ScriptLiteralStringQuoteType StringQuoteType { get; set; }
+        public TokenType StringTokenType { get; set; } = TokenType.String;
+        public bool Interpolated { get; set; }
 
         public override object Evaluate(TemplateContext context)
         {
@@ -93,7 +96,7 @@ namespace Scriban.Syntax
             var type = Value.GetType();
             if (type == typeof(string))
             {
-                printer.Write(ToLiteral(StringQuoteType, (string) Value));
+                printer.Write(ToLiteral(StringQuoteType, StringTokenType, Interpolated, (string) Value));
             }
             else if (type == typeof(bool))
             {
@@ -147,7 +150,12 @@ namespace Scriban.Syntax
             }
             else if (type == typeof(char))
             {
-                printer.Write(ToLiteral(ScriptLiteralStringQuoteType.SimpleQuote, Value.ToString()));
+                printer.Write(ToLiteral(
+                    ScriptLiteralStringQuoteType.SimpleQuote,
+                    StringTokenType,
+                    Interpolated,
+                    Value.ToString())
+                );
             }
             else
             {
@@ -155,7 +163,7 @@ namespace Scriban.Syntax
             }
         }
 
-        private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, string input)
+        private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, TokenType stringTokenType, bool interpolated, string input)
         {
             char quote;
             switch (quoteType)
@@ -174,7 +182,15 @@ namespace Scriban.Syntax
             }
 
             var literal = new StringBuilder(input.Length + 2);
-            literal.Append(quote);
+
+            if (interpolated)
+            {
+                literal.Capacity = input.Length + 3;
+                literal.Append('$');
+            }
+
+            char firstChar = stringTokenType == TokenType.BeginInterpString || stringTokenType == TokenType.String ? quote : '}';
+            literal.Append(firstChar);
 
             if (quoteType == ScriptLiteralStringQuoteType.Verbatim)
             {
@@ -213,7 +229,8 @@ namespace Scriban.Syntax
                     }
                 }
             }
-            literal.Append(quote);
+            char lastChar = stringTokenType == TokenType.EndingInterpString || stringTokenType == TokenType.String ? quote : '{';
+            literal.Append(lastChar);
             return literal.ToString();
         }
 

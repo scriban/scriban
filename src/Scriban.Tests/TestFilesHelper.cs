@@ -42,6 +42,7 @@ namespace Scriban.Tests
             {
                 "000-basic",
                 "010-literals",
+                "020-interpolation",
                 "100-expressions",
                 "200-statements",
                 "300-functions",

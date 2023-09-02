@@ -45,6 +45,9 @@ namespace Scriban.Parsing
         private readonly Queue<ScriptStatement> _pendingStatements;
         private IScriptTerminal _lastTerminalWithTrivias;
 
+        private Stack<char> _interpolatedNestedStringChars;
+        
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
         /// </summary>
@@ -68,6 +71,8 @@ namespace Scriban.Parsing
             _pendingStatements = new Queue<ScriptStatement>(2);
             Blocks = new Stack<ScriptNode>();
 
+            _interpolatedNestedStringChars = new Stack<char>();
+
             // Initialize the iterator
             _tokenIt = lexer.GetEnumerator();
             NextToken();
@@ -85,6 +90,8 @@ namespace Scriban.Parsing
         private Token Current => _token;
 
         private Token Previous => _previousToken;
+
+        private bool AnyInterpolation => _interpolatedNestedStringChars.Count > 0;
 
         public SourceSpan CurrentSpan => GetSpanForToken(Current);
 

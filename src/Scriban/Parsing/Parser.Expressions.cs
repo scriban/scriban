@@ -57,6 +57,8 @@ namespace Scriban.Parsing
                 case TokenType.LessEqual: binaryOperator = ScriptBinaryOperator.CompareLessOrEqual; break;
                 case TokenType.DoubleDot: binaryOperator = ScriptBinaryOperator.RangeInclude; break;
                 case TokenType.DoubleDotLess: binaryOperator = ScriptBinaryOperator.RangeExclude; break;
+                case TokenType.OpenInterpBrace: binaryOperator = ScriptBinaryOperator.InterpBegin; break;
+                case TokenType.CloseInterpBrace: binaryOperator = ScriptBinaryOperator.InterpEnd; break;
                 default:
                     if (_isScientific)
                     {
@@ -87,6 +89,10 @@ namespace Scriban.Parsing
                     return ParseVariable();
                 case TokenType.String:
                     return ParseString();
+                case TokenType.BeginInterpString:
+                case TokenType.ContinuationInterpString:
+                case TokenType.EndingInterpString:
+                    return ParseInterpolatedString();
                 case TokenType.VerbatimString:
                     return ParseVerbatimString();
                 default:
@@ -165,6 +171,11 @@ namespace Scriban.Parsing
                     case TokenType.ImplicitString:
                         leftOperand = ParseImplicitString();
                         break;
+                    case TokenType.BeginInterpString:
+                    case TokenType.ContinuationInterpString:
+                    case TokenType.EndingInterpString:
+                        leftOperand = ParseInterpolatedString();
+                        break;
                     case TokenType.VerbatimString:
                         leftOperand = ParseVerbatimString();
                         break;
@@ -173,6 +184,9 @@ namespace Scriban.Parsing
                         break;
                     case TokenType.OpenBrace:
                         leftOperand = ParseObjectInitializer();
+                        break;
+                    case TokenType.OpenInterpBrace:
+                        leftOperand = ParseInterpolatedExpression();
                         break;
                     case TokenType.OpenBracket:
                         leftOperand = ParseArrayInitializer();
@@ -823,7 +837,7 @@ namespace Scriban.Parsing
                     break;
                 }
 
-                if (!expectingEndOfInitializer && (Current.Type == TokenType.Identifier || Current.Type == TokenType.String))
+                if (!expectingEndOfInitializer && (Current.Type == TokenType.Identifier || Current.Type.IsStringToken()))
                 {
                     var positionBefore = Current;
 
@@ -939,6 +953,26 @@ namespace Scriban.Parsing
             }
             return Close(expression);
         }
+
+        private ScriptExpression ParseInterpolatedExpression()
+        {
+            // unit test: //TODO do unit error test
+            var expression = Open<ScriptInterpolatedExpression>();
+            ExpectAndParseTokenTo(expression.OpenBrace, TokenType.OpenInterpBrace); // Parse {
+            expression.Expression = ExpectAndParseExpression(expression);
+
+            if (Current.Type == TokenType.CloseParen)
+            {
+                ExpectAndParseTokenTo(expression.CloseBrace, TokenType.CloseInterpBrace); // Parse }
+            }
+            else
+            {
+                // unit test: //TODO do unit error test
+                LogError(Current, $"Invalid token `{GetAsText(Current)}`. Expecting a closing `}}`.");
+            }
+            return Close(expression);
+        }
+
 
         private ScriptToken ParseToken(TokenType tokenType)
         {
@@ -1133,6 +1167,9 @@ namespace Scriban.Parsing
                 case TokenType.BinaryInteger:
                 case TokenType.Float:
                 case TokenType.String:
+                case TokenType.BeginInterpString:
+                case TokenType.ContinuationInterpString:
+                case TokenType.EndingInterpString:
                 case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
                 case TokenType.OpenParen:
@@ -1234,6 +1271,9 @@ namespace Scriban.Parsing
         {
             switch (op)
             {
+                case ScriptBinaryOperator.InterpBegin:
+                case ScriptBinaryOperator.InterpEnd:
+                    return 10;
                 case ScriptBinaryOperator.EmptyCoalescing:
                 case ScriptBinaryOperator.NotEmptyCoalescing:
                     return 20;

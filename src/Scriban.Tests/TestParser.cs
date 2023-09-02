@@ -666,6 +666,12 @@ Normal Text
             TestFile(inputName);
         }
 
+        [TestCaseSource("ListTestFiles", new object[] { "020-interpolation" })]
+        public static void A010_interpolation(string inputName)
+        {
+            TestFile(inputName);
+        }
+
         [TestCaseSource("ListTestFiles", new object[] { "100-expressions" })]
         public static void A100_expressions(string inputName)
         {

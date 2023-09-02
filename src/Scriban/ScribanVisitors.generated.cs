@@ -1248,7 +1248,7 @@ namespace Scriban.Syntax
 
         public override ScriptNode Visit(ScriptLiteral node)
         {
-            return new ScriptLiteral() { Value = node.Value, StringQuoteType = node.StringQuoteType };
+            return new ScriptLiteral() { Value = node.Value, StringQuoteType = node.StringQuoteType, Interpolated = node.Interpolated, StringTokenType = node.StringTokenType };
         }
 
         public override ScriptNode Visit(ScriptMemberExpression node)
