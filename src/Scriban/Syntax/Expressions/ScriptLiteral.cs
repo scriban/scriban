@@ -183,7 +183,7 @@ namespace Scriban.Syntax
 
             var literal = new StringBuilder(input.Length + 2);
 
-            if (interpolated)
+            if (interpolated && stringTokenType != TokenType.ContinuationInterpString && stringTokenType != TokenType.EndingInterpString)
             {
                 literal.Capacity = input.Length + 3;
                 literal.Append('$');

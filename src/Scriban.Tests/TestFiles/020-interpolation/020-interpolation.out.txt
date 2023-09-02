@@ -1,1 +1,7 @@
+Scriban 5.8 can interpolate strings now
+Nested interpolation: 23new string
+UPPERCASE: 14
+UPPERCASE: 14
+Little more complex example: 2 Scriban 5
+Interpolation at the beginning: 4 is 4
 Pure string

@@ -1,1 +1,7 @@
+{{ $"Scriban {4 + 1}.8 can interpolate strings now" }}
+{{ $"Nested interpolation: {23 + "new string"}" }}
+{{ $"Uppercase: {4 + 10}" | string.upcase }}
+{{ string.upcase $"Uppercase: {4 + 10}" }}
+{{ $'Little more complex example: {2 + " " + string.capitalize $"scriban {5}"}' }}
+Interpolation at the beginning: {{ $"{math.times 2 2} is 4" }}
 {{ $"Pure string" }}
