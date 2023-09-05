@@ -525,7 +525,7 @@ namespace Scriban.Parsing
             }
 
             // Check for either }} or ( %} if liquid active)
-            if (PeekChar(start) != (_isLiquidTagBlock? '%' : '}'))
+            if (PeekChar(start) != (_isLiquidTagBlock? '%' : '}') || AnyInterpolationOpen)
             {
                 return false;
             }
@@ -712,7 +712,8 @@ namespace Scriban.Parsing
             }
             if (_interpJustOpened)
             {
-                _token = new Token(TokenType.OpenInterpBrace, new TextPosition(_position.Offset - 1, _position.Line, _position.Column - 1), _position);
+                TextPosition positionOfToken = new TextPosition(_position.Offset - 1, _position.Line, _position.Column - 1);
+                _token = new Token(TokenType.OpenInterpBrace, positionOfToken, positionOfToken);
                 _interpJustOpened = false;
                 return hasTokens;
             }
@@ -1071,7 +1072,6 @@ namespace Scriban.Parsing
                     char nextChar = PeekChar(1); //Used for checking if the dollar is before the string
                     if (specialIdentifier &&  (nextChar == '"' || nextChar == '\''))
                     {
-                        NextChar(); //Skip '$'
                         ReadInterpolatedString();
                         break;
                     }
@@ -1663,10 +1663,15 @@ namespace Scriban.Parsing
             var start = _position;
             var end = _position;
             char startChar = c;
-            bool readingInterpolation = !(c == '"' || c == '\'');
+            bool readingInterpolation = !(c == '"' || c == '\'' || c == '$');
             if (readingInterpolation)
             {
                 startChar = _openingStringChars.Peek();
+            }
+            if (startChar == '$')
+            {
+                NextChar();
+                startChar = c;
             }
             NextChar(); // Skip ", ', { or }
             while (true)
@@ -1764,7 +1769,6 @@ namespace Scriban.Parsing
                     // if interpolation is starting
                     if (!readingInterpolation)
                     {
-                        start = new TextPosition(start.Offset - 1, start.Line, start.Column - 1); //For '$' inclusion
                         _token = new Token(TokenType.BeginInterpString, start, end);
                         _openingStringChars.Push(startChar);
                     }
@@ -1796,8 +1800,8 @@ namespace Scriban.Parsing
             }
             else
             {
-                //string is revealed to be ordinary string and '$' symbol is discarded
-                _token = new Token(TokenType.String, start, end);
+                start = new TextPosition(start.Offset, start.Line, start.Column);
+                _token = new Token(TokenType.InterpString, start, end);
             }
         }
 

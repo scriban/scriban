@@ -63,34 +63,37 @@ namespace Scriban.Functions
                     switch (c)
                     {
                         case '"':
-                            appendText = "\\\"";
+                            appendText = @"\""";
                             break;
                         case '\\':
-                            appendText = "\\\\";
+                            appendText = @"\\";
                             break;
+                        /*case '{':
+                            appendText = @"\{";
+                            break;*/
                         case '\a':
-                            appendText = "\\a";
+                            appendText = @"\a";
                             break;
                         case '\b':
-                            appendText = "\\b";
+                            appendText = @"\b";
                             break;
                         case '\t':
-                            appendText = "\\t";
+                            appendText = @"\t";
                             break;
                         case '\r':
-                            appendText = "\\r";
+                            appendText = @"\r";
                             break;
                         case '\v':
-                            appendText = "\\v";
+                            appendText = @"\v";
                             break;
                         case '\f':
-                            appendText = "\\f";
+                            appendText = @"\f";
                             break;
                         case '\n':
-                            appendText = "\\n";
+                            appendText = @"\n";
                             break;
                         default:
-                            appendText = $"\\x{(int)c:x2}";
+                            appendText = @$"\x{(int)c:x2}";
                             break;
                     }
 

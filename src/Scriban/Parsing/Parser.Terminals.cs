@@ -49,6 +49,7 @@ namespace Scriban.Parsing
                 case TokenType.BeginInterpString:
                 case TokenType.ContinuationInterpString:
                 case TokenType.EndingInterpString:
+                case TokenType.InterpString:
                     literal = ParseInterpolatedString();
                     break;
                 case TokenType.ImplicitString:
@@ -316,10 +317,6 @@ namespace Scriban.Parsing
                     ? ScriptLiteralStringQuoteType.SimpleQuote
                     : ScriptLiteralStringQuoteType.DoubleQuote;
 
-            // I had had to do so because of the printer who needs to know that even pure strings may have leading '$' sign
-            if (Current.Start.Offset - 1 > 0 && _lexer.Text[Current.Start.Offset - 1] == '$')
-                literal.Interpolated = true;
-
             var end = Current.End.Offset;
             for (int i = Current.Start.Offset + 1; i < end; i++)
             {
@@ -411,12 +408,15 @@ namespace Scriban.Parsing
             var text = _lexer.Text;
             var builder = new StringBuilder(Current.End.Offset - Current.Start.Offset - 1);
 
-            char stringQuoteTypeChar = _lexer.Text[Current.Start.Offset + 1];
-            int begin;
-            if (Current.Type == TokenType.BeginInterpString)
+            int begin = Current.Start.Offset + 1;
+            char stringQuoteTypeChar = _lexer.Text[begin];
+            if (Current.Type == TokenType.BeginInterpString || Current.Type == TokenType.InterpString)
             {
-                _interpolatedNestedStringChars.Push(stringQuoteTypeChar);
-                begin = Current.Start.Offset + 2;
+                if (Current.Type == TokenType.BeginInterpString)
+                {
+                    _interpolatedNestedStringChars.Push(stringQuoteTypeChar);
+                }
+                begin++;
             }
             else
             {
@@ -424,7 +424,6 @@ namespace Scriban.Parsing
                 {
                     stringQuoteTypeChar = _interpolatedNestedStringChars.Pop();
                 }
-                begin = Current.Start.Offset + 1;
             }
             literal.StringQuoteType =
                 stringQuoteTypeChar == '\''
@@ -432,8 +431,6 @@ namespace Scriban.Parsing
                     : ScriptLiteralStringQuoteType.DoubleQuote;
 
             literal.StringTokenType = Current.Type;
-
-            literal.Interpolated = true;
 
             var end = Current.End.Offset;
             for (int i = begin; i < end; i++)
@@ -827,6 +824,7 @@ namespace Scriban.Parsing
                 case TokenType.BeginInterpString:
                 case TokenType.ContinuationInterpString:
                 case TokenType.EndingInterpString:
+                case TokenType.InterpString:
                 case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
                     return true;

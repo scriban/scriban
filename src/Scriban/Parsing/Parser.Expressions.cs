@@ -92,6 +92,7 @@ namespace Scriban.Parsing
                 case TokenType.BeginInterpString:
                 case TokenType.ContinuationInterpString:
                 case TokenType.EndingInterpString:
+                case TokenType.InterpString:
                     return ParseInterpolatedString();
                 case TokenType.VerbatimString:
                     return ParseVerbatimString();
@@ -174,6 +175,7 @@ namespace Scriban.Parsing
                     case TokenType.BeginInterpString:
                     case TokenType.ContinuationInterpString:
                     case TokenType.EndingInterpString:
+                    case TokenType.InterpString:
                         leftOperand = ParseInterpolatedString();
                         break;
                     case TokenType.VerbatimString:
@@ -424,10 +426,23 @@ namespace Scriban.Parsing
                             binaryExpression.OperatorToken.Value = binaryOperatorType.ToText();
                         }
 
-                        // unit test: 110-binary-simple-error1.txt
+                        string message;
+                        if (binaryOperatorType == ScriptBinaryOperator.InterpBegin)
+                        {
+                            message = $"Expecting an <expression> to the right of `{{` instead of `{GetAsText(Current)}`";
+                        }
+                        else if (binaryOperatorType == ScriptBinaryOperator.InterpEnd)
+                        {
+                            message = $"Expecting a string continuation to the right of `}}` instead of `{GetAsText(Current)}`";
+                        }
+                        else
+                        {
+                            message = $"Expecting an <expression> to the right of the operator instead of `{GetAsText(Current)}`";
+                        }
+                        // unit tests: 110-binary-simple-error1.txt and 010-interpolation-error-2.txt
                         binaryExpression.Right = ExpectAndParseExpression(binaryExpression,
                             functionCall ?? parentExpression, newPrecedence,
-                            $"Expecting an <expression> to the right of the operator instead of `{GetAsText(Current)}`",
+                            message,
                             mode); // propagate the mode in case we are in DefaultNoNamedArgument (so that the colon in 1 + 2 + 3 : will be correctly skipped)
                         leftOperand = Close(binaryExpression);
 
@@ -1170,6 +1185,7 @@ namespace Scriban.Parsing
                 case TokenType.BeginInterpString:
                 case TokenType.ContinuationInterpString:
                 case TokenType.EndingInterpString:
+                case TokenType.InterpString:
                 case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
                 case TokenType.OpenParen:

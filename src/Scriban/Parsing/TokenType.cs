@@ -81,6 +81,11 @@ namespace Scriban.Parsing
         String,
 
         /// <summary>
+        /// An interpolated string without interpolated expressions
+        /// </summary>
+        InterpString,
+
+        /// <summary>
         /// An interpolated string at the beginning
         /// </summary>
         BeginInterpString,

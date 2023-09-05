@@ -77,8 +77,8 @@ namespace Scriban.Parsing
                 TokenType.CloseBrace => "}",
                 TokenType.OpenBracket => "[",
                 TokenType.CloseBracket => "]",
-                TokenType.OpenInterpBrace => "",
-                TokenType.CloseInterpBrace => "",
+                TokenType.OpenInterpBrace => string.Empty,
+                TokenType.CloseInterpBrace => string.Empty,
                 _ => null
             };
         }
@@ -86,6 +86,10 @@ namespace Scriban.Parsing
         //TODO Pattern matching from C# 7.0 could be used but permission from monsieur Mutel is needed...
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsStringToken(this TokenType token) =>
-            token == TokenType.String || token == TokenType.BeginInterpString || token == TokenType.ContinuationInterpString || token == TokenType.EndingInterpString;
+            token == TokenType.String || token == TokenType.InterpString || token == TokenType.BeginInterpString || token == TokenType.ContinuationInterpString || token == TokenType.EndingInterpString;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInterpolationStringToken(this TokenType token) =>
+            token == TokenType.InterpString || token == TokenType.BeginInterpString || token == TokenType.ContinuationInterpString || token == TokenType.EndingInterpString;
     }
 }

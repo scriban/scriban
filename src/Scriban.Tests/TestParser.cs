@@ -667,7 +667,7 @@ Normal Text
         }
 
         [TestCaseSource("ListTestFiles", new object[] { "020-interpolation" })]
-        public static void A010_interpolation(string inputName)
+        public static void A020_interpolation(string inputName)
         {
             TestFile(inputName);
         }

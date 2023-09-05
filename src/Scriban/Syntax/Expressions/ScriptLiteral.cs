@@ -36,8 +36,6 @@ namespace Scriban.Syntax
 
         public ScriptLiteralStringQuoteType StringQuoteType { get; set; }
         public TokenType StringTokenType { get; set; } = TokenType.String;
-        public bool Interpolated { get; set; }
-
         public override object Evaluate(TemplateContext context)
         {
             return Value;
@@ -96,7 +94,7 @@ namespace Scriban.Syntax
             var type = Value.GetType();
             if (type == typeof(string))
             {
-                printer.Write(ToLiteral(StringQuoteType, StringTokenType, Interpolated, (string) Value));
+                printer.Write(ToLiteral(StringQuoteType, StringTokenType, (string) Value));
             }
             else if (type == typeof(bool))
             {
@@ -153,7 +151,6 @@ namespace Scriban.Syntax
                 printer.Write(ToLiteral(
                     ScriptLiteralStringQuoteType.SimpleQuote,
                     StringTokenType,
-                    Interpolated,
                     Value.ToString())
                 );
             }
@@ -163,7 +160,7 @@ namespace Scriban.Syntax
             }
         }
 
-        private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, TokenType stringTokenType, bool interpolated, string input)
+        private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, TokenType stringTokenType, string input)
         {
             char quote;
             switch (quoteType)
@@ -183,13 +180,13 @@ namespace Scriban.Syntax
 
             var literal = new StringBuilder(input.Length + 2);
 
-            if (interpolated && stringTokenType != TokenType.ContinuationInterpString && stringTokenType != TokenType.EndingInterpString)
+            if (stringTokenType == TokenType.BeginInterpString || stringTokenType == TokenType.InterpString)
             {
                 literal.Capacity = input.Length + 3;
                 literal.Append('$');
             }
 
-            char firstChar = stringTokenType == TokenType.BeginInterpString || stringTokenType == TokenType.String ? quote : '}';
+            char firstChar = stringTokenType == TokenType.BeginInterpString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpString ? quote : '}';
             literal.Append(firstChar);
 
             if (quoteType == ScriptLiteralStringQuoteType.Verbatim)
@@ -211,6 +208,7 @@ namespace Scriban.Syntax
                         case '\r': literal.Append(@"\r"); break;
                         case '\t': literal.Append(@"\t"); break;
                         case '\v': literal.Append(@"\v"); break;
+                        case '{' when stringTokenType.IsInterpolationStringToken(): literal.Append(@"\{"); break;
                         default:
                             if (c == quote)
                             {
@@ -229,7 +227,7 @@ namespace Scriban.Syntax
                     }
                 }
             }
-            char lastChar = stringTokenType == TokenType.EndingInterpString || stringTokenType == TokenType.String ? quote : '{';
+            char lastChar = stringTokenType == TokenType.EndingInterpString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpString ? quote : '{';
             literal.Append(lastChar);
             return literal.ToString();
         }
