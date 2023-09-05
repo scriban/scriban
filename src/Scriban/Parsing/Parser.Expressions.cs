@@ -362,7 +362,7 @@ namespace Scriban.Parsing
                         leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
                         break;
                     }
-                    if(TryGetCompoundAssignmentOperator(out var scriptToken, out var tokenType) && !(scriptToken is null))
+                    if (TryGetCompoundAssignmentOperator(out var scriptToken, out var tokenType) && !(scriptToken is null))
                     {
                         var assignExpression = Open<ScriptAssignExpression>();
                         assignExpression.EqualToken = scriptToken;
@@ -971,20 +971,10 @@ namespace Scriban.Parsing
 
         private ScriptExpression ParseInterpolatedExpression()
         {
-            // unit test: //TODO do unit error test
             var expression = Open<ScriptInterpolatedExpression>();
             ExpectAndParseTokenTo(expression.OpenBrace, TokenType.OpenInterpBrace); // Parse {
-            expression.Expression = ExpectAndParseExpression(expression);
-
-            if (Current.Type == TokenType.CloseParen)
-            {
-                ExpectAndParseTokenTo(expression.CloseBrace, TokenType.CloseInterpBrace); // Parse }
-            }
-            else
-            {
-                // unit test: //TODO do unit error test
-                LogError(Current, $"Invalid token `{GetAsText(Current)}`. Expecting a closing `}}`.");
-            }
+            expression.Expression = ExpectAndParseExpression(expression, newPrecedence: 10);
+            // newPrecedence is set to 10 to support directly nested ternary expressions
             return Close(expression);
         }
 

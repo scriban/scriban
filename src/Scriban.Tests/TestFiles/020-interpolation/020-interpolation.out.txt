@@ -27,3 +27,7 @@ Interpolation of the strings
 Another interpolation of the strings
 Yet another interpolation of the strings
 Really complex interpolated expression: 33.
+Scriban yes 5 can interpolate strings now
+yes 5
+no
+Unary: -2
