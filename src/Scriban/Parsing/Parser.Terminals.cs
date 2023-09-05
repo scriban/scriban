@@ -46,6 +46,12 @@ namespace Scriban.Parsing
                 case TokenType.String:
                     literal = ParseString();
                     break;
+                case TokenType.BeginInterpString:
+                case TokenType.ContinuationInterpString:
+                case TokenType.EndingInterpString:
+                case TokenType.InterpString:
+                    literal = ParseInterpolatedString();
+                    break;
                 case TokenType.ImplicitString:
                     literal = ParseImplicitString();
                     break;
@@ -396,6 +402,125 @@ namespace Scriban.Parsing
             return Close(literal);
         }
 
+        private ScriptLiteral ParseInterpolatedString()
+        {
+            var literal = Open<ScriptLiteral>();
+            var text = _lexer.Text;
+            var builder = new StringBuilder(Current.End.Offset - Current.Start.Offset - 1);
+
+            int begin = Current.Start.Offset + 1;
+            char stringQuoteTypeChar = _lexer.Text[begin];
+            if (Current.Type == TokenType.BeginInterpString || Current.Type == TokenType.InterpString)
+            {
+                if (Current.Type == TokenType.BeginInterpString)
+                {
+                    _interpolatedNestedStringChars.Push(stringQuoteTypeChar);
+                }
+                begin++;
+            }
+            else
+            {
+                if (Current.Type == TokenType.EndingInterpString)
+                {
+                    stringQuoteTypeChar = _interpolatedNestedStringChars.Pop();
+                }
+            }
+            literal.StringQuoteType =
+                stringQuoteTypeChar == '\''
+                    ? ScriptLiteralStringQuoteType.SimpleQuote
+                    : ScriptLiteralStringQuoteType.DoubleQuote;
+
+            literal.StringTokenType = Current.Type;
+
+            var end = Current.End.Offset;
+            for (int i = begin; i < end; i++)
+            {
+                var c = text[i];
+                // Handle escape characters
+                if (text[i] == '\\')
+                {
+                    i++;
+                    switch (text[i])
+                    {
+                        case '0':
+                            builder.Append((char)0);
+                            break;
+                        case '\n':
+                            break;
+                        case '\r':
+                            i++; // skip next \n that was validated by the lexer
+                            break;
+                        case '\'':
+                            builder.Append('\'');
+                            break;
+                        case '"':
+                            builder.Append('"');
+                            break;
+                        case '\\':
+                            builder.Append('\\');
+                            break;
+                        case '{':
+                            builder.Append('{');
+                            break;
+                        case 'b':
+                            builder.Append('\b');
+                            break;
+                        case 'f':
+                            builder.Append('\f');
+                            break;
+                        case 'n':
+                            builder.Append('\n');
+                            break;
+                        case 'r':
+                            builder.Append('\r');
+                            break;
+                        case 't':
+                            builder.Append('\t');
+                            break;
+                        case 'v':
+                            builder.Append('\v');
+                            break;
+                        case 'u':
+                            {
+                                i++;
+                                int value = 0;
+                                if (i < text.Length) value = text[i++].HexToInt();
+                                if (i < text.Length) value = (value << 4) | text[i++].HexToInt();
+                                if (i < text.Length) value = (value << 4) | text[i++].HexToInt();
+                                if (i < text.Length) value = (value << 4) | text[i].HexToInt();
+
+                                // Is it correct?
+                                builder.Append(ConvertFromUtf32(value));
+                                break;
+                            }
+                        case 'x':
+                            {
+                                i++;
+                                int value = 0;
+                                if (i < text.Length) value = text[i++].HexToInt();
+                                if (i < text.Length) value = (value << 4) | text[i].HexToInt();
+                                builder.Append((char)value);
+                                break;
+                            }
+
+                        default:
+                            // This should not happen as the lexer is supposed to prevent this
+                            LogError($"Unexpected escape character `{text[i]}` in string");
+                            break;
+                    }
+                }
+                else
+                {
+                    builder.Append(c);
+                }
+            }
+
+            literal.Value = builder.ToString();
+
+            NextToken();
+            return Close(literal);
+        }
+
         private ScriptExpression ParseVariable()
         {
             var currentToken = Current;
@@ -696,6 +821,10 @@ namespace Scriban.Parsing
                 case TokenType.BinaryInteger:
                 case TokenType.Float:
                 case TokenType.String:
+                case TokenType.BeginInterpString:
+                case TokenType.ContinuationInterpString:
+                case TokenType.EndingInterpString:
+                case TokenType.InterpString:
                 case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
                     return true;

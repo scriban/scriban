@@ -9,8 +9,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using Scriban.Helpers;
+using Scriban.Syntax;
 
 namespace Scriban.Parsing
 {
@@ -35,6 +37,12 @@ namespace Scriban.Parsing
         private int _escapeRawCharCount;
         private bool _isExpectingFrontMatter;
         private readonly bool _isLiquid;
+
+        // String interpolation-related data
+        private readonly Stack<char> _openingStringChars;
+        private bool _interpJustOpened;
+        private bool _interpJustClosed;
+        private bool AnyInterpolationOpen => _openingStringChars.Count > 0;
 
         private readonly char _stripWhiteSpaceFullSpecialChar;
         private readonly char _stripWhiteSpaceRestrictedSpecialChar;
@@ -87,6 +95,8 @@ namespace Scriban.Parsing
             _isLiquid = Options.Lang == ScriptLang.Liquid;
             _stripWhiteSpaceFullSpecialChar = '-';
             _stripWhiteSpaceRestrictedSpecialChar = '~';
+
+            _openingStringChars = new Stack<char>();
         }
 
         /// <summary>
@@ -515,7 +525,7 @@ namespace Scriban.Parsing
             }
 
             // Check for either }} or ( %} if liquid active)
-            if (PeekChar(start) != (_isLiquidTagBlock? '%' : '}'))
+            if (PeekChar(start) != (_isLiquidTagBlock? '%' : '}') || AnyInterpolationOpen)
             {
                 return false;
             }
@@ -699,6 +709,19 @@ namespace Scriban.Parsing
             if (TryMatchCustomToken(start))
             {
                 return true;
+            }
+            if (_interpJustOpened)
+            {
+                TextPosition positionOfToken = new TextPosition(_position.Offset - 1, _position.Line, _position.Column - 1);
+                _token = new Token(TokenType.OpenInterpBrace, positionOfToken, positionOfToken);
+                _interpJustOpened = false;
+                return hasTokens;
+            }
+            else if (_interpJustClosed)
+            {
+                _interpJustClosed = false;
+                ReadInterpolatedString();
+                return hasTokens;
             }
 
             switch (c)
@@ -982,27 +1005,36 @@ namespace Scriban.Parsing
                     NextChar();
                     break;
                 case '}':
-                    if (_openBraceCount > 0)
+                    if (AnyInterpolationOpen)
                     {
-                        // We match first brace open/close
-                        _openBraceCount--;
-                        _token = new Token(TokenType.CloseBrace, _position, _position);
-                        NextChar();
+                        _interpJustClosed = true;
+                        _token = new Token(TokenType.CloseInterpBrace, _position, _position);
+                        break;
                     }
                     else
                     {
-                        if (Options.Mode != ScriptMode.ScriptOnly && IsCodeExit())
+                        if (_openBraceCount > 0)
                         {
-                            // We have no tokens for this ReadCode
-                            hasTokens = false;
+                            // We match first brace open/close
+                            _openBraceCount--;
+                            _token = new Token(TokenType.CloseBrace, _position, _position);
+                            NextChar();
                         }
                         else
                         {
-                            // Else we have a close brace but it is invalid
-                            AddError("Unexpected } while no matching {", _position, _position);
-                            // Remove the previous error token to still output a valid token
-                            _token = new Token(TokenType.CloseBrace, _position, _position);
-                            NextChar();
+                            if (Options.Mode != ScriptMode.ScriptOnly && IsCodeExit())
+                            {
+                                // We have no tokens for this ReadCode
+                                hasTokens = false;
+                            }
+                            else
+                            {
+                                // Else we have a close brace but it is invalid
+                                AddError("Unexpected } while no matching {", _position, _position);
+                                // Remove the previous error token to still output a valid token
+                                _token = new Token(TokenType.CloseBrace, _position, _position);
+                                NextChar();
+                            }
                         }
                     }
                     break;
@@ -1037,7 +1069,13 @@ namespace Scriban.Parsing
                     }
 
                     bool specialIdentifier = c == '$';
-                    if (IsFirstIdentifierLetter(c) || specialIdentifier)
+                    char nextChar = PeekChar(1); //Used for checking if the dollar is before the string
+                    if (specialIdentifier &&  (nextChar == '"' || nextChar == '\''))
+                    {
+                        ReadInterpolatedString();
+                        break;
+                    }
+                    else if (IsFirstIdentifierLetter(c) || specialIdentifier)
                     {
                         ReadIdentifier(specialIdentifier);
                         break;
@@ -1618,6 +1656,153 @@ namespace Scriban.Parsing
             }
 
             _token = new Token(TokenType.VerbatimString, start, end);
+        }
+
+        private void ReadInterpolatedString()
+        {
+            var start = _position;
+            var end = _position;
+            char startChar = c;
+            bool readingInterpolation = !(c == '"' || c == '\'' || c == '$');
+            if (readingInterpolation)
+            {
+                startChar = _openingStringChars.Peek();
+            }
+            if (startChar == '$')
+            {
+                NextChar();
+                startChar = c;
+            }
+            NextChar(); // Skip ", ', { or }
+            while (true)
+            {
+                if (c == '\\')
+                {
+                    end = _position;
+                    NextChar();
+                    // 0 ' " \ b f n r t v u0000-uFFFF x00-xFF
+                    switch (c)
+                    {
+                        case '\n':
+                            end = _position;
+                            NextChar();
+                            continue;
+                        case '\r':
+                            end = _position;
+                            NextChar();
+                            if (c == '\n')
+                            {
+                                end = _position;
+                                NextChar();
+                            }
+                            continue;
+                        case '0':
+                        case '\'':
+                        case '"':
+                        case '\\':
+                        case '{':
+                        case 'b':
+                        case 'f':
+                        case 'n':
+                        case 'r':
+                        case 't':
+                        case 'v':
+                            end = _position;
+                            NextChar();
+                            continue;
+                        case 'u':
+                            end = _position;
+                            NextChar();
+                            // Must be followed 4 hex numbers (0000-FFFF)
+                            if (c.IsHex()) // 1
+                            {
+                                end = _position;
+                                NextChar();
+                                if (c.IsHex()) // 2
+                                {
+                                    end = _position;
+                                    NextChar();
+                                    if (c.IsHex()) // 3
+                                    {
+                                        end = _position;
+                                        NextChar();
+                                        if (c.IsHex()) // 4
+                                        {
+                                            end = _position;
+                                            NextChar();
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+                            AddError($"Unexpected hex number `{c}` following `\\u`. Expecting `\\u0000` to `\\uffff`.", _position, _position);
+                            break;
+                        case 'x':
+                            end = _position;
+                            NextChar();
+                            // Must be followed 2 hex numbers (00-FF)
+                            if (c.IsHex())
+                            {
+                                end = _position;
+                                NextChar();
+                                if (c.IsHex())
+                                {
+                                    end = _position;
+                                    NextChar();
+                                    continue;
+                                }
+                            }
+                            AddError($"Unexpected hex number `{c}` following `\\x`. Expecting `\\x00` to `\\xff`", _position, _position);
+                            break;
+
+                    }
+                    AddError($"Unexpected escape character `{c}` in string. Only 0 ' \\ \" b f n r t v u0000-uFFFF x00-xFF are allowed", _position, _position);
+                }
+                else if (c == '\0')
+                {
+                    AddError($"Unexpected end of file while parsing a string not terminated by a {startChar}", end, end);
+                    return;
+                }
+                else if (c == '{') //If interpolation beginning is read
+                {
+                    end = _position;
+                    // if interpolation is starting
+                    if (!readingInterpolation)
+                    {
+                        _token = new Token(TokenType.BeginInterpString, start, end);
+                        _openingStringChars.Push(startChar);
+                    }
+                    else
+                    {
+                        _token = new Token(TokenType.ContinuationInterpString, start, end);
+                    }
+                    NextChar();
+                    _interpJustOpened = true;
+                    return;
+                }
+                else if (c == startChar)
+                {
+                    end = _position;
+                    NextChar();
+                    break;
+                }
+                else
+                {
+                    end = _position;
+                    NextChar();
+                }
+            }
+
+            if (readingInterpolation)
+            {
+                _ = _openingStringChars.Pop();
+                _token = new Token(TokenType.EndingInterpString, start, end);
+            }
+            else
+            {
+                start = new TextPosition(start.Offset, start.Line, start.Column);
+                _token = new Token(TokenType.InterpString, start, end);
+            }
         }
 
         private void ReadComment()

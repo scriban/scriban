@@ -1,8 +1,10 @@
-﻿// Copyright (c) Alexandre Mutel. All rights reserved.
+// Copyright (c) Alexandre Mutel. All rights reserved.
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
 #nullable disable
+
+using System.Runtime.CompilerServices;
 
 namespace Scriban.Parsing
 {
@@ -75,8 +77,19 @@ namespace Scriban.Parsing
                 TokenType.CloseBrace => "}",
                 TokenType.OpenBracket => "[",
                 TokenType.CloseBracket => "]",
+                TokenType.OpenInterpBrace => string.Empty,
+                TokenType.CloseInterpBrace => string.Empty,
                 _ => null
             };
         }
+
+        //TODO Pattern matching from C# 7.0 could be used but permission from monsieur Mutel is needed...
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsStringToken(this TokenType token) =>
+            token == TokenType.String || token == TokenType.InterpString || token == TokenType.BeginInterpString || token == TokenType.ContinuationInterpString || token == TokenType.EndingInterpString;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        public static bool IsInterpolationStringToken(this TokenType token) =>
+            token == TokenType.InterpString || token == TokenType.BeginInterpString || token == TokenType.ContinuationInterpString || token == TokenType.EndingInterpString;
     }
 }

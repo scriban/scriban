@@ -1,0 +1,33 @@
+{{ $"Scriban {4 + 1}.8 can interpolate strings now" }}
+{{ $"Nested interpolation: {23 + "new string"}" }}
+{{ $"Uppercase: {4 + 10}" | string.upcase }}
+{{ string.upcase $"Uppercase: {4 + 10}" }}
+{{ $'Little more complex example: {2 + " " + string.capitalize $"scriban {5}"}' }}
+Interpolation at the beginning: {{ $"{math.times 2 2} is 4" }}
+{{ $"Pure string" }}
+{{ $'Another pure string' }}
+{{ $"{2} {2 * 4} {"string"}" }}
+{{ $'{3} {3 * 6} {"string"}' }}
+{{ $"{4} {8 * 7.5} {'string'}" }}
+{{ $"{11 * 9} bottles"}}
+{{ $"\{ is Curly Brace"}}
+{{ $'\{ is Curly Brace'}}
+{{ $"\{{4 * 4}}" }}
+{{ $'\{{7 * 7}}' }}
+{{ $"\{6 * 6}" }}
+{{ $'Interp 1: {$"Interp {2}: {$'Interp {3}'}"}' }}
+{{ $"{$'Interp 1: {$"Interp {2}: {$'Interp {3}'}"}'}" }}
+{{ $"{$'Interp 1: {$"Concat " + 2 + $": {$'Interp {3}'}"}'}" }}
+{{ $"{$'{$"Interp {1}:"} Interp {2}:'} Interp {3}" }}
+{{ $"{$'{$"Concat " + 1 + ":"} Interp {2}:'} Interp {3}" }}
+{{ $"{2 / 2}. Interpolation " + "2. Concatenation" }}
+{{ "1. Concatenation " + $"{4 / 2}. Interpolation" }}
+{{ "1. Concatenation " + $"{4 / 2}. Interpolation " + "3. Concatenation" }}
+{{ $"Interpolation" + $" of the " + $"strings"  }}
+{{ $"Another interpolation" + " of the " + $"strings" }}
+{{ "Yet another interpolation" + $" of the " + "strings" }}
+{{ $"Really complex interpolated expression: {2 * (4 + 3 + math.round 9.4) + (5 / (2 + 3))}" + "." }}
+{{ $"Scriban {( true ? $"yes {4 + 1}" : "no " + 4 )} can interpolate strings now" }}
+{{ true ? $"yes {4 + 1}" : "no" }}
+{{ false ? $"yes {4 + 1}" : $"no" }}
+{{ $"Unary: {-2}" }}

@@ -210,7 +210,12 @@ namespace Scriban.Parsing
                                 else
                                 {
                                     nextStatement = false;
-                                    LogError($"Unexpected token {GetAsText(Current)}");
+                                    string message;
+                                    if (AnyInterpolation)
+                                        message = "Opened interpolated expression not closed on the same line.";
+                                    else
+                                        message = $"Unexpected token {GetAsText(Current)}";
+                                    LogError(message);
                                 }
                                 break;
                         }

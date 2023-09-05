@@ -1,0 +1,33 @@
+Scriban 5.8 can interpolate strings now
+Nested interpolation: 23new string
+UPPERCASE: 14
+UPPERCASE: 14
+Little more complex example: 2 Scriban 5
+Interpolation at the beginning: 4 is 4
+Pure string
+Another pure string
+2 8 string
+3 18 string
+4 60 string
+99 bottles
+{ is Curly Brace
+{ is Curly Brace
+{16}
+{49}
+{6 * 6}
+Interp 1: Interp 2: Interp 3
+Interp 1: Interp 2: Interp 3
+Interp 1: Concat 2: Interp 3
+Interp 1: Interp 2: Interp 3
+Concat 1: Interp 2: Interp 3
+1. Interpolation 2. Concatenation
+1. Concatenation 2. Interpolation
+1. Concatenation 2. Interpolation 3. Concatenation
+Interpolation of the strings
+Another interpolation of the strings
+Yet another interpolation of the strings
+Really complex interpolated expression: 33.
+Scriban yes 5 can interpolate strings now
+yes 5
+no
+Unary: -2

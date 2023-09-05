@@ -57,6 +57,8 @@ namespace Scriban.Parsing
                 case TokenType.LessEqual: binaryOperator = ScriptBinaryOperator.CompareLessOrEqual; break;
                 case TokenType.DoubleDot: binaryOperator = ScriptBinaryOperator.RangeInclude; break;
                 case TokenType.DoubleDotLess: binaryOperator = ScriptBinaryOperator.RangeExclude; break;
+                case TokenType.OpenInterpBrace: binaryOperator = ScriptBinaryOperator.InterpBegin; break;
+                case TokenType.CloseInterpBrace: binaryOperator = ScriptBinaryOperator.InterpEnd; break;
                 default:
                     if (_isScientific)
                     {
@@ -87,6 +89,11 @@ namespace Scriban.Parsing
                     return ParseVariable();
                 case TokenType.String:
                     return ParseString();
+                case TokenType.BeginInterpString:
+                case TokenType.ContinuationInterpString:
+                case TokenType.EndingInterpString:
+                case TokenType.InterpString:
+                    return ParseInterpolatedString();
                 case TokenType.VerbatimString:
                     return ParseVerbatimString();
                 default:
@@ -165,6 +172,12 @@ namespace Scriban.Parsing
                     case TokenType.ImplicitString:
                         leftOperand = ParseImplicitString();
                         break;
+                    case TokenType.BeginInterpString:
+                    case TokenType.ContinuationInterpString:
+                    case TokenType.EndingInterpString:
+                    case TokenType.InterpString:
+                        leftOperand = ParseInterpolatedString();
+                        break;
                     case TokenType.VerbatimString:
                         leftOperand = ParseVerbatimString();
                         break;
@@ -173,6 +186,9 @@ namespace Scriban.Parsing
                         break;
                     case TokenType.OpenBrace:
                         leftOperand = ParseObjectInitializer();
+                        break;
+                    case TokenType.OpenInterpBrace:
+                        leftOperand = ParseInterpolatedExpression();
                         break;
                     case TokenType.OpenBracket:
                         leftOperand = ParseArrayInitializer();
@@ -346,7 +362,7 @@ namespace Scriban.Parsing
                         leftOperand = new ScriptExpressionAsStatement(declaration) {Span = declaration.Span};
                         break;
                     }
-                    if(TryGetCompoundAssignmentOperator(out var scriptToken, out var tokenType) && !(scriptToken is null))
+                    if (TryGetCompoundAssignmentOperator(out var scriptToken, out var tokenType) && !(scriptToken is null))
                     {
                         var assignExpression = Open<ScriptAssignExpression>();
                         assignExpression.EqualToken = scriptToken;
@@ -410,10 +426,23 @@ namespace Scriban.Parsing
                             binaryExpression.OperatorToken.Value = binaryOperatorType.ToText();
                         }
 
-                        // unit test: 110-binary-simple-error1.txt
+                        string message;
+                        if (binaryOperatorType == ScriptBinaryOperator.InterpBegin)
+                        {
+                            message = $"Expecting an <expression> to the right of `{{` instead of `{GetAsText(Current)}`";
+                        }
+                        else if (binaryOperatorType == ScriptBinaryOperator.InterpEnd)
+                        {
+                            message = $"Expecting a string continuation to the right of `}}` instead of `{GetAsText(Current)}`";
+                        }
+                        else
+                        {
+                            message = $"Expecting an <expression> to the right of the operator instead of `{GetAsText(Current)}`";
+                        }
+                        // unit tests: 110-binary-simple-error1.txt and 010-interpolation-error-2.txt
                         binaryExpression.Right = ExpectAndParseExpression(binaryExpression,
                             functionCall ?? parentExpression, newPrecedence,
-                            $"Expecting an <expression> to the right of the operator instead of `{GetAsText(Current)}`",
+                            message,
                             mode); // propagate the mode in case we are in DefaultNoNamedArgument (so that the colon in 1 + 2 + 3 : will be correctly skipped)
                         leftOperand = Close(binaryExpression);
 
@@ -823,7 +852,7 @@ namespace Scriban.Parsing
                     break;
                 }
 
-                if (!expectingEndOfInitializer && (Current.Type == TokenType.Identifier || Current.Type == TokenType.String))
+                if (!expectingEndOfInitializer && (Current.Type == TokenType.Identifier || Current.Type.IsStringToken()))
                 {
                     var positionBefore = Current;
 
@@ -939,6 +968,16 @@ namespace Scriban.Parsing
             }
             return Close(expression);
         }
+
+        private ScriptExpression ParseInterpolatedExpression()
+        {
+            var expression = Open<ScriptInterpolatedExpression>();
+            ExpectAndParseTokenTo(expression.OpenBrace, TokenType.OpenInterpBrace); // Parse {
+            expression.Expression = ExpectAndParseExpression(expression, newPrecedence: 10);
+            // newPrecedence is set to 10 to support directly nested ternary expressions
+            return Close(expression);
+        }
+
 
         private ScriptToken ParseToken(TokenType tokenType)
         {
@@ -1133,6 +1172,10 @@ namespace Scriban.Parsing
                 case TokenType.BinaryInteger:
                 case TokenType.Float:
                 case TokenType.String:
+                case TokenType.BeginInterpString:
+                case TokenType.ContinuationInterpString:
+                case TokenType.EndingInterpString:
+                case TokenType.InterpString:
                 case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
                 case TokenType.OpenParen:
@@ -1234,6 +1277,9 @@ namespace Scriban.Parsing
         {
             switch (op)
             {
+                case ScriptBinaryOperator.InterpBegin:
+                case ScriptBinaryOperator.InterpEnd:
+                    return 10;
                 case ScriptBinaryOperator.EmptyCoalescing:
                 case ScriptBinaryOperator.NotEmptyCoalescing:
                     return 20;

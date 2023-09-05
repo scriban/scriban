@@ -54,17 +54,17 @@ namespace Scriban.Runtime
         /// </remarks>
         public static void Import(this IScriptObject script, object obj, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
         {
-            if (obj is IScriptObject)
+            if (obj is IScriptObject scriptObj)
             {
                 // TODO: Add support for filter, member renamer
-                script.Import((IScriptObject)obj);
+                script.Import(scriptObj);
                 return;
             }
 
-            if (obj is IDictionary)
+            if (obj is IDictionary dictionary)
             {
                 // TODO: Add support for filter, member renamer
-                script.ImportDictionary((IDictionary)obj);
+                script.ImportDictionary(dictionary);
                 return;
             }
 
