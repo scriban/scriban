@@ -731,15 +731,15 @@ single line
             Assert.AreEqual(new List<Token>
             {
                 new Token(TokenType.CodeEnter, new TextPosition(0, 0, 0), new TextPosition(1, 0, 1)),
-                new Token(TokenType.BeginInterpString, new TextPosition(3, 0, 3), new TextPosition(11, 0, 11)),
-                new Token(TokenType.OpenInterpBrace, new TextPosition(11, 0, 11), new TextPosition(11, 0, 11)),
+                new Token(TokenType.BeginInterpolatedString, new TextPosition(3, 0, 3), new TextPosition(11, 0, 11)),
+                new Token(TokenType.OpenInterpolatedBrace, new TextPosition(11, 0, 11), new TextPosition(11, 0, 11)),
                 new Token(TokenType.Integer, new TextPosition(12, 0, 12), new TextPosition(12, 0, 12)),
-                new Token(TokenType.CloseInterpBrace, new TextPosition(13, 0, 13), new TextPosition(13, 0, 13)),
-                new Token(TokenType.ContinuationInterpString, new TextPosition(13, 0, 13), new TextPosition(22, 0, 22)),
-                new Token(TokenType.OpenInterpBrace, new TextPosition(22, 0, 22), new TextPosition(22, 0, 22)),
+                new Token(TokenType.CloseInterpolatedBrace, new TextPosition(13, 0, 13), new TextPosition(13, 0, 13)),
+                new Token(TokenType.ContinuationInterpolatedString, new TextPosition(13, 0, 13), new TextPosition(22, 0, 22)),
+                new Token(TokenType.OpenInterpolatedBrace, new TextPosition(22, 0, 22), new TextPosition(22, 0, 22)),
                 new Token(TokenType.Integer, new TextPosition(23, 0, 23), new TextPosition(23, 0, 23)),
-                new Token(TokenType.CloseInterpBrace, new TextPosition(24, 0, 24), new TextPosition(24, 0, 24)),
-                new Token(TokenType.EndingInterpString, new TextPosition(24, 0, 24), new TextPosition(29, 0, 29)),
+                new Token(TokenType.CloseInterpolatedBrace, new TextPosition(24, 0, 24), new TextPosition(24, 0, 24)),
+                new Token(TokenType.EndingInterpolatedString, new TextPosition(24, 0, 24), new TextPosition(29, 0, 29)),
                 new Token(TokenType.CodeExit, new TextPosition(31, 0, 31), new TextPosition(32, 0, 32)),
                 Token.Eof
             }, tokens);

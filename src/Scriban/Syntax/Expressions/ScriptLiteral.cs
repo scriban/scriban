@@ -33,9 +33,11 @@ namespace Scriban.Syntax
         public ScriptTrivias Trivias { get; set; }
 
         public object Value { get; set; }
-
+        
         public ScriptLiteralStringQuoteType StringQuoteType { get; set; }
+
         public TokenType StringTokenType { get; set; } = TokenType.String;
+
         public override object Evaluate(TemplateContext context)
         {
             return Value;
@@ -180,13 +182,13 @@ namespace Scriban.Syntax
 
             var literal = new StringBuilder(input.Length + 2);
 
-            if (stringTokenType == TokenType.BeginInterpString || stringTokenType == TokenType.InterpString)
+            if (stringTokenType == TokenType.BeginInterpolatedString || stringTokenType == TokenType.InterpolatedString)
             {
                 literal.Capacity = input.Length + 3;
                 literal.Append('$');
             }
 
-            char firstChar = stringTokenType == TokenType.BeginInterpString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpString ? quote : '}';
+            char firstChar = stringTokenType == TokenType.BeginInterpolatedString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpolatedString ? quote : '}';
             literal.Append(firstChar);
 
             if (quoteType == ScriptLiteralStringQuoteType.Verbatim)
@@ -227,7 +229,7 @@ namespace Scriban.Syntax
                     }
                 }
             }
-            char lastChar = stringTokenType == TokenType.EndingInterpString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpString ? quote : '{';
+            char lastChar = stringTokenType == TokenType.EndingInterpolatedString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpolatedString ? quote : '{';
             literal.Append(lastChar);
             return literal.ToString();
         }

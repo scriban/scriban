@@ -46,10 +46,10 @@ namespace Scriban.Parsing
                 case TokenType.String:
                     literal = ParseString();
                     break;
-                case TokenType.BeginInterpString:
-                case TokenType.ContinuationInterpString:
-                case TokenType.EndingInterpString:
-                case TokenType.InterpString:
+                case TokenType.BeginInterpolatedString:
+                case TokenType.ContinuationInterpolatedString:
+                case TokenType.EndingInterpolatedString:
+                case TokenType.InterpolatedString:
                     literal = ParseInterpolatedString();
                     break;
                 case TokenType.ImplicitString:
@@ -410,9 +410,9 @@ namespace Scriban.Parsing
 
             int begin = Current.Start.Offset + 1;
             char stringQuoteTypeChar = _lexer.Text[begin];
-            if (Current.Type == TokenType.BeginInterpString || Current.Type == TokenType.InterpString)
+            if (Current.Type == TokenType.BeginInterpolatedString || Current.Type == TokenType.InterpolatedString)
             {
-                if (Current.Type == TokenType.BeginInterpString)
+                if (Current.Type == TokenType.BeginInterpolatedString)
                 {
                     _interpolatedNestedStringChars.Push(stringQuoteTypeChar);
                 }
@@ -420,7 +420,7 @@ namespace Scriban.Parsing
             }
             else
             {
-                if (Current.Type == TokenType.EndingInterpString)
+                if (Current.Type == TokenType.EndingInterpolatedString)
                 {
                     stringQuoteTypeChar = _interpolatedNestedStringChars.Pop();
                 }
@@ -821,10 +821,10 @@ namespace Scriban.Parsing
                 case TokenType.BinaryInteger:
                 case TokenType.Float:
                 case TokenType.String:
-                case TokenType.BeginInterpString:
-                case TokenType.ContinuationInterpString:
-                case TokenType.EndingInterpString:
-                case TokenType.InterpString:
+                case TokenType.BeginInterpolatedString:
+                case TokenType.ContinuationInterpolatedString:
+                case TokenType.EndingInterpolatedString:
+                case TokenType.InterpolatedString:
                 case TokenType.ImplicitString:
                 case TokenType.VerbatimString:
                     return true;

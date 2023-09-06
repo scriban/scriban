@@ -70,14 +70,10 @@ namespace Scriban.Syntax
         RangeInclude,
         RangeExclude,
 
-        InterpBegin,
-        InterpEnd,
+        OpenInterpolated,
+        CloseInterpolated,
 
         Custom,
-
-
-
-
     }
 
 #if SCRIBAN_PUBLIC
@@ -142,10 +138,10 @@ namespace Scriban.Syntax
                     return TokenType.Amp;
                 case ScriptBinaryOperator.BinaryOr:
                     return TokenType.VerticalBar;
-                case ScriptBinaryOperator.InterpBegin:
-                    return TokenType.OpenInterpBrace;
-                case ScriptBinaryOperator.InterpEnd:
-                    return TokenType.CloseInterpBrace;
+                case ScriptBinaryOperator.OpenInterpolated:
+                    return TokenType.OpenInterpolatedBrace;
+                case ScriptBinaryOperator.CloseInterpolated:
+                    return TokenType.CloseInterpolatedBrace;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(op));
             }
@@ -197,9 +193,9 @@ namespace Scriban.Syntax
                     return "<<";
                 case ScriptBinaryOperator.ShiftRight:
                     return ">>";
-                case ScriptBinaryOperator.InterpBegin:
+                case ScriptBinaryOperator.OpenInterpolated:
                     return "{";
-                case ScriptBinaryOperator.InterpEnd:
+                case ScriptBinaryOperator.CloseInterpolated:
                     return "}";
 
                 case ScriptBinaryOperator.LiquidContains:

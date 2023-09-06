@@ -187,8 +187,8 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.LiquidContains:
                 case ScriptBinaryOperator.LiquidStartsWith:
                 case ScriptBinaryOperator.LiquidEndsWith:
-                case ScriptBinaryOperator.InterpBegin:
-                case ScriptBinaryOperator.InterpEnd:
+                case ScriptBinaryOperator.OpenInterpolated:
+                case ScriptBinaryOperator.CloseInterpolated:
                     try
                     {
                         if (leftValue is string || rightValue is string || leftValue is char || rightValue is char)
@@ -301,8 +301,8 @@ namespace Scriban.Syntax
             switch (op)
             {
                 case ScriptBinaryOperator.Add:
-                case ScriptBinaryOperator.InterpBegin:
-                case ScriptBinaryOperator.InterpEnd:
+                case ScriptBinaryOperator.OpenInterpolated:
+                case ScriptBinaryOperator.CloseInterpolated:
                     return context.ObjectToString(left) + context.ObjectToString(right);
                 case ScriptBinaryOperator.Multiply:
 
@@ -466,8 +466,8 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.Modulus:
                     case ScriptBinaryOperator.RangeInclude:
                     case ScriptBinaryOperator.RangeExclude:
-                    case ScriptBinaryOperator.InterpBegin:
-                    case ScriptBinaryOperator.InterpEnd:
+                    case ScriptBinaryOperator.OpenInterpolated:
+                    case ScriptBinaryOperator.CloseInterpolated:
                         if (context.UseScientific) throw new ScriptRuntimeException(span, $"Both left and right expressions are null. Cannot perform this operation on null values.");
                         return null;
                     case ScriptBinaryOperator.LiquidContains:
@@ -510,8 +510,8 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.Modulus:
                     case ScriptBinaryOperator.RangeInclude:
                     case ScriptBinaryOperator.RangeExclude:
-                    case ScriptBinaryOperator.InterpBegin:
-                    case ScriptBinaryOperator.InterpEnd:
+                    case ScriptBinaryOperator.OpenInterpolated:
+                    case ScriptBinaryOperator.CloseInterpolated:
                         if (context.UseScientific) throw new ScriptRuntimeException(span, $"The {(leftValue == null ? "left" : "right")} expression is null. Cannot perform this operation on a null value.");
 
                         return null;

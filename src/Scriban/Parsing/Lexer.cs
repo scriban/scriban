@@ -713,7 +713,7 @@ namespace Scriban.Parsing
             if (_interpJustOpened)
             {
                 TextPosition positionOfToken = new TextPosition(_position.Offset - 1, _position.Line, _position.Column - 1);
-                _token = new Token(TokenType.OpenInterpBrace, positionOfToken, positionOfToken);
+                _token = new Token(TokenType.OpenInterpolatedBrace, positionOfToken, positionOfToken);
                 _interpJustOpened = false;
                 return hasTokens;
             }
@@ -1008,7 +1008,7 @@ namespace Scriban.Parsing
                     if (AnyInterpolationOpen)
                     {
                         _interpJustClosed = true;
-                        _token = new Token(TokenType.CloseInterpBrace, _position, _position);
+                        _token = new Token(TokenType.CloseInterpolatedBrace, _position, _position);
                         break;
                     }
                     else
@@ -1769,12 +1769,12 @@ namespace Scriban.Parsing
                     // if interpolation is starting
                     if (!readingInterpolation)
                     {
-                        _token = new Token(TokenType.BeginInterpString, start, end);
+                        _token = new Token(TokenType.BeginInterpolatedString, start, end);
                         _openingStringChars.Push(startChar);
                     }
                     else
                     {
-                        _token = new Token(TokenType.ContinuationInterpString, start, end);
+                        _token = new Token(TokenType.ContinuationInterpolatedString, start, end);
                     }
                     NextChar();
                     _interpJustOpened = true;
@@ -1796,12 +1796,12 @@ namespace Scriban.Parsing
             if (readingInterpolation)
             {
                 _ = _openingStringChars.Pop();
-                _token = new Token(TokenType.EndingInterpString, start, end);
+                _token = new Token(TokenType.EndingInterpolatedString, start, end);
             }
             else
             {
                 start = new TextPosition(start.Offset, start.Line, start.Column);
-                _token = new Token(TokenType.InterpString, start, end);
+                _token = new Token(TokenType.InterpolatedString, start, end);
             }
         }
 

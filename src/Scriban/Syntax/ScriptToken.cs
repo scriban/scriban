@@ -63,8 +63,8 @@ namespace Scriban.Syntax
         public static ScriptToken CloseBrace() => new ScriptToken(TokenType.CloseBrace);
         public static ScriptToken OpenBracket() => new ScriptToken(TokenType.OpenBracket);
         public static ScriptToken CloseBracket() => new ScriptToken(TokenType.CloseBracket);
-        public static ScriptToken OpenInterpBrace() => new ScriptToken(TokenType.OpenInterpBrace);
-        public static ScriptToken CloseInterpBrace() => new ScriptToken(TokenType.CloseInterpBrace);
+        public static ScriptToken OpenInterpBrace() => new ScriptToken(TokenType.OpenInterpolatedBrace);
+        public static ScriptToken CloseInterpBrace() => new ScriptToken(TokenType.CloseInterpolatedBrace);
 
         public ScriptToken()
         {

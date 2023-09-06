@@ -81,24 +81,24 @@ namespace Scriban.Parsing
         String,
 
         /// <summary>
-        /// An interpolated string without interpolated expressions
+        /// An interpolated string without interpolated expressions (e.g $"This is a string with no interpolated expressions")
         /// </summary>
-        InterpString,
+        InterpolatedString,
 
         /// <summary>
-        /// An interpolated string at the beginning
+        /// An interpolated string at the beginning (e.g $"This is a string with { )
         /// </summary>
-        BeginInterpString,
+        BeginInterpolatedString,
 
         /// <summary>
-        /// An interpolated string at the middle
+        /// An interpolated string at the middle (e.g } a continuation string { )
         /// </summary>
-        ContinuationInterpString,
+        ContinuationInterpolatedString,
 
         /// <summary>
-        /// An interpolated string at the end
+        /// An interpolated string at the end (e.g } a ending of an interpolated string" )
         /// </summary>
-        EndingInterpString,
+        EndingInterpolatedString,
 
         /// <summary>
         /// An implicit string with quotes
@@ -257,11 +257,11 @@ namespace Scriban.Parsing
         /// <summary>Token "]"</summary>
         CloseBracket,
 
-        /// <summary>Token "#{"</summary>
-        OpenInterpBrace,
+        /// <summary>Token "{"</summary>
+        OpenInterpolatedBrace,
 
         /// <summary>Token "}"</summary>
-        CloseInterpBrace,
+        CloseInterpolatedBrace,
 
         /// <summary>
         /// Custom token
