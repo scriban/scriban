@@ -325,12 +325,21 @@ Scriban supports two types of strings:
   ```scriban-html
   {{ "this is a text" | regex.split `\s+` }}
   ``` 
-  
   > **output**
   ```html 
   [this, is, a, text]
   ``` 
 
+- **Interpolated strings** starting with a `$` enclosed by double quotes `$"..."` or simple quotes `$'...'`.
+  > **input**
+  ```scriban-html
+  {{ $"this is an interpolated string with an expression {1 + 2} and a substring {"Hello"}" }}
+  ``` 
+  > **output**
+  ```html 
+  this is an interpolated string with an expression 3 and a substring Hello
+  ``` 
+  
 [:top:](#language)
 ### 3.2 Numbers
 
