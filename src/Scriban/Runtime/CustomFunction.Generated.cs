@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 05/19/2021 09:51:04 by Scriban.DelegateCodeGen
+// This file was automatically generated - 09/06/2023 18:19:00 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -76,6 +76,7 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.ToFloat), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionobject_TemplateContext_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.ToDouble), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionobject_TemplateContext_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Keys), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionScriptArray_TemplateContext_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Values), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionScriptArray_TemplateContext_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.RegexFunctions).GetMethod(nameof(Scriban.Functions.RegexFunctions.Match), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionScriptArray_TemplateContext_string_string_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.RegexFunctions).GetMethod(nameof(Scriban.Functions.RegexFunctions.Matches), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionScriptArray_TemplateContext_string_string_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.RegexFunctions).GetMethod(nameof(Scriban.Functions.RegexFunctions.Split), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionScriptArray_TemplateContext_string_string_string___Opt(method));
