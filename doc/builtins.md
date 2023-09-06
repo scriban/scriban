@@ -2271,6 +2271,7 @@ String functions available through the builtin object 'string`.
 - [`string.whitespace`](#stringwhitespace)
 - [`string.downcase`](#stringdowncase)
 - [`string.ends_with`](#stringends_with)
+- [`string.equals_ignore_case`](#stringequals_ignore_case)
 - [`string.handleize`](#stringhandleize)
 - [`string.literal`](#stringliteral)
 - [`string.lstrip`](#stringlstrip)
@@ -2574,6 +2575,37 @@ Returns a boolean indicating whether the input string ends with the specified st
 > **input**
 ```scriban-html
 {{ "This is easy" | string.ends_with "easy" }}
+```
+> **output**
+```html
+true
+```
+
+[:top:](#builtins)
+### `string.equals_ignore_case`
+
+```
+string.equals_ignore_case <text> <value>
+```
+
+#### Description
+
+Returns a boolean indicating whether the input string is equal to specified string 'value'. Comparison is case insensitive.
+
+#### Arguments
+
+- `text`: The input string
+- `value`: The string to compare
+
+#### Returns
+
+ if `text` is equal to string `value`, ignoring case
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "Scriban" | string.equals_ignore_case "SCRIBAN" }}
 ```
 > **output**
 ```html
