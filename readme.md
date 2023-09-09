@@ -4,6 +4,8 @@
 
 Scriban is a fast, powerful, safe and lightweight scripting language and engine for .NET, which was primarily developed for text templating with a compatibility mode for parsing `liquid` templates.
 
+Today, not only Scriban can be used in text templating scenarios, but also can be integrated as a **general scripting engine**: For example, Scriban is at the core of the scripting engine for [kalk](https://github.com/xoofx/kalk), a command line calculator application for developers.
+
 ```C#
 // Parse a scriban template
 var template = Template.Parse("Hello {{name}}!");
@@ -61,6 +63,7 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
   
 ## Features
 
+- An **extensible sandbox execution model**: You have the full control about which Scripting objects (and so properties and methods) are accessible from Scriban templates.
 - Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly.
 - Powered by a Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than regex based parsers.
   - Precise source code location (path, column and line) for error reporting
