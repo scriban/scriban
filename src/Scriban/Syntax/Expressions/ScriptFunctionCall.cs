@@ -66,12 +66,12 @@ namespace Scriban.Syntax
         {
             function = null;
             if (!ExplicitCall) return false;
-            if (!(Target is ScriptVariableGlobal name)) return false;
+            if (Target is not ScriptVariableGlobal name) return false;
             if (OpenParent == null || CloseParen == null) return false;
 
             foreach(var arg in Arguments)
             {
-                if (!(arg is ScriptVariableGlobal)) return false;
+                if (arg is not ScriptVariableGlobal) return false;
             }
 
 
@@ -176,13 +176,12 @@ namespace Scriban.Syntax
                 throw new ScriptRuntimeException(callerContext.Span, $"The target function `{callerContext}` is null");
             }
             var scriptFunction = functionObject as ScriptFunction;
-            var function = functionObject as IScriptCustomFunction;
 
             var isPipeCall = processPipeArguments && context.CurrentPipeArguments != null && context.CurrentPipeArguments.Count > 0;
 
-            if (function == null)
+            if (functionObject is not IScriptCustomFunction function)
             {
-                if ((isPipeCall) && (callerContext is ScriptFunctionCall funcCall))
+                if (isPipeCall && (callerContext is ScriptFunctionCall funcCall))
                 {
                     throw new ScriptRuntimeException(callerContext.Span, $"Pipe expression destination `{funcCall.Target}` is not a valid function ");
                 }
@@ -229,7 +228,6 @@ namespace Scriban.Syntax
                 argumentValues = new ScriptArray(arguments?.Count ?? 0);
             }
 
-            var needLocal = !(function is ScriptFunction func && func.HasParameters);
             object result = null;
             try
             {
@@ -252,7 +250,7 @@ namespace Scriban.Syntax
 
                 // Check the required number of arguments
                 var requiredMask = (1U << requiredParameterCount) - 1;
-                argMask = argMask & requiredMask;
+                argMask &= requiredMask;
 
                 // Create a span after the caller for missing arguments
                 var afterCallerSpan = callerContext.Span;
@@ -265,7 +263,7 @@ namespace Scriban.Syntax
                     while (argMask != 0)
                     {
                         if ((argMask & 1) != 0) argCount++;
-                        argMask = argMask >> 1;
+                        argMask >>= 1;
                     }
                     throw new ScriptRuntimeException(afterCallerSpan, $"Invalid number of arguments `{argCount}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
                 }
@@ -372,7 +370,7 @@ namespace Scriban.Syntax
 
                 // Check the required number of arguments
                 var requiredMask = (1U << requiredParameterCount) - 1;
-                argMask = argMask & requiredMask;
+                argMask &= requiredMask;
 
                 // Create a span after the caller for missing arguments
                 var afterCallerSpan = callerContext.Span;
@@ -385,7 +383,7 @@ namespace Scriban.Syntax
                     while (argMask != 0)
                     {
                         if ((argMask & 1) != 0) argCount++;
-                        argMask = argMask >> 1;
+                        argMask >>= 1;
                     }
 
                     throw new ScriptRuntimeException(afterCallerSpan, $"Invalid number of arguments `{argCount}` passed to `{callerContext}` while expecting `{requiredParameterCount}` arguments");
@@ -445,12 +443,7 @@ namespace Scriban.Syntax
                 var namedArg = argument as ScriptNamedArgument;
                 if (namedArg != null)
                 {
-                    var argName = namedArg.Name?.Name;
-                    if (argName == null)
-                    {
-                        throw new ScriptRuntimeException(argument.Span, "Invalid null argument name");
-                    }
-
+                    var argName = (namedArg.Name?.Name) ?? throw new ScriptRuntimeException(argument.Span, "Invalid null argument name");
                     index = GetParameterIndexByName(function, argName);
                     // In case of a ScriptFunction, we write the named argument into the ScriptArray directly
                     if (function.VarParamKind != ScriptVarParamKind.None)
@@ -486,10 +479,9 @@ namespace Scriban.Syntax
                 }
 
                 // Handle parameters expansion for a function call when the operator ^ is used
-                if (argument is ScriptUnaryExpression unaryExpression && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand && !(value is ScriptExpression))
+                if (argument is ScriptUnaryExpression unaryExpression && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand && value is not ScriptExpression)
                 {
-                    var valueEnumerator = value as IEnumerable;
-                    if (valueEnumerator != null)
+                    if (value is IEnumerable valueEnumerator)
                     {
                         foreach (var subValue in valueEnumerator)
                         {

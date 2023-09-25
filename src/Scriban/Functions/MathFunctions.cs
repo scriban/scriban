@@ -51,33 +51,22 @@ namespace Scriban.Functions
                 return null;
             }
 
-            if (value is int)
+            switch (value)
             {
-                return Math.Abs((int) value);
-            }
-            if (value is float)
-            {
-                return Math.Abs((float)value);
-            }
-            if (value is double)
-            {
-                return Math.Abs((double)value);
-            }
-            if (value is sbyte)
-            {
-                return Math.Abs((sbyte)value);
-            }
-            if (value is short)
-            {
-                return Math.Abs((short)value);
-            }
-            if (value is long)
-            {
-                return Math.Abs((long)value);
-            }
-            if (value is decimal)
-            {
-                return Math.Abs((decimal)value);
+                case int @int:
+                    return Math.Abs(@int);
+                case float @float:
+                    return Math.Abs(@float);
+                case double @double:
+                    return Math.Abs(@double);
+                case sbyte shortByte:
+                    return Math.Abs(shortByte);
+                case short shortInt:
+                    return Math.Abs(shortInt);
+                case long longInt:
+                    return Math.Abs(longInt);
+                case decimal @decimal:
+                    return Math.Abs(@decimal);
             }
 
             // If it is a primitive it is already unsigned
@@ -136,13 +125,12 @@ namespace Scriban.Functions
             // If the divisor is an integer, return a an integer
             if (divisor is int)
             {
-                if (result is double)
+                switch (result)
                 {
-                    return (int) Math.Floor((double) result);
-                }
-                if (result is float)
-                {
-                    return (int) Math.Floor((float) result);
+                    case double @double:
+                        return (int)Math.Floor(@double);
+                    case float @float:
+                        return (int)Math.Floor(@float);
                 }
             }
             return result;
@@ -191,9 +179,8 @@ namespace Scriban.Functions
             {
                 return string.Empty;
             }
-            format = format ?? string.Empty;
-            var formattable = value as IFormattable;
-            if (!IsNumber(value) || formattable == null)
+            format ??= string.Empty;
+            if (!IsNumber(value) || value is not IFormattable formattable)
             {
                 throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable number");
             }
@@ -218,17 +205,17 @@ namespace Scriban.Functions
         public static bool IsNumber(object value)
         {
             return value is sbyte
-                   || value is byte
-                   || value is short
-                   || value is ushort
-                   || value is int
-                   || value is uint
-                   || value is long
-                   || value is ulong
-                   || value is float
-                   || value is double
-                   || value is decimal
-                   || value is BigInteger;
+                   or byte
+                   or short
+                   or ushort
+                   or int
+                   or uint
+                   or long
+                   or ulong
+                   or float
+                   or double
+                   or decimal
+                   or BigInteger;
         }
 
         /// <summary>

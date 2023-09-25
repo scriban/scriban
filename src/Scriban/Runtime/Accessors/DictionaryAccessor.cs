@@ -20,7 +20,7 @@ namespace Scriban.Runtime.Accessors
 #endif
     sealed partial class DictionaryAccessor : IObjectAccessor
     {
-        public static readonly DictionaryAccessor Default = new DictionaryAccessor();
+        public static readonly DictionaryAccessor Default = new();
 
         private DictionaryAccessor()
         {
@@ -116,7 +116,7 @@ namespace Scriban.Runtime.Accessors
 
     class DictionaryStringObjectAccessor : GenericDictionaryAccessor<string, object>
     {
-        public readonly static DictionaryStringObjectAccessor Default = new DictionaryStringObjectAccessor();
+        public readonly static DictionaryStringObjectAccessor Default = new();
     }
 
     class GenericDictionaryAccessor<TKey, TValue> : IObjectAccessor
@@ -145,8 +145,7 @@ namespace Scriban.Runtime.Accessors
 
         public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
         {
-            TValue tvalue;
-            var result = ((IDictionary<TKey, TValue>) target).TryGetValue(TransformToKey(context, member), out tvalue);
+            var result = ((IDictionary<TKey, TValue>)target).TryGetValue(TransformToKey(context, member), out TValue tvalue);
             value = tvalue;
             return result;
         }

@@ -83,7 +83,7 @@ namespace Scriban.Syntax
                     {
                         if (context.UseScientific)
                         {
-                            if (!(value is bool))
+                            if (value is not bool)
                             {
                                 throw new ScriptRuntimeException(span, $"Expecting a boolean instead of {context.GetTypeName(value)} value: {value}");
                             }
@@ -102,34 +102,16 @@ namespace Scriban.Syntax
 
                         if (value != null)
                         {
-                            if (value is int)
+                            return value switch
                             {
-                                return negate ? -((int)value) : value;
-                            }
-                            else if (value is double)
-                            {
-                                return negate ? -((double)value) : value;
-                            }
-                            else if (value is float)
-                            {
-                                return negate ? -((float)value) : value;
-                            }
-                            else if (value is long)
-                            {
-                                return negate ? -((long)value) : value;
-                            }
-                            else if (value is decimal)
-                            {
-                                return negate ? -((decimal)value) : value;
-                            }
-                            else if (value is BigInteger)
-                            {
-                                return negate ? -((BigInteger)value) : value;
-                            }
-                            else
-                            {
-                                throw new ScriptRuntimeException(span, $"Unexpected value `{value} / Type: {context.GetTypeName(value)}`. Cannot negate(-)/positive(+) a non-numeric value");
-                            }
+                                int @int => negate ? -@int : value,
+                                double @double => negate ? -@double : value,
+                                float @float => negate ? -@float : value,
+                                long longInt => negate ? -longInt : value,
+                                decimal @decimal => negate ? -@decimal : value,
+                                BigInteger bigInteger => negate ? -bigInteger : value,
+                                _ => throw new ScriptRuntimeException(span, $"Unexpected value `{value} / Type: {context.GetTypeName(value)}`. Cannot negate(-)/positive(+) a non-numeric value")
+                            };
                         }
                     }
                     break;

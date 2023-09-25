@@ -43,7 +43,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static object Default(object value, object @default)
         {
-            return value == null || (value is string && string.IsNullOrEmpty((string)value)) ? @default : value;
+            return value == null || (value is string str && string.IsNullOrEmpty(str)) ? @default : value;
         }
 
         /// <summary>
@@ -166,8 +166,8 @@ namespace Scriban.Functions
             {
                 return string.Empty;
             }
-            format = format ?? string.Empty;
-            if (!(value is IFormattable formattable))
+            format ??= string.Empty;
+            if (value is not IFormattable formattable)
             {
                 throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable object");
             }
@@ -240,12 +240,19 @@ namespace Scriban.Functions
         public static ScriptArray Keys(TemplateContext context, object value)
 #pragma warning restore CS0108
         {
-            if (value == null) return new ScriptArray();
-            if (value is IDictionary dict) return new ScriptArray(dict.Keys);
-            if (value is IDictionary<string, object> dictStringObject) return new ScriptArray(dictStringObject.Keys);
-            if (value is IScriptObject scriptObj) return new ScriptArray(scriptObj.GetMembers());
-            // Don't try to return members of a custom function
-            if (value is IScriptCustomFunction) return new ScriptArray();
+            switch (value)
+            {
+                case null:
+                    return new ScriptArray();
+                case IDictionary dict:
+                    return new ScriptArray(dict.Keys);
+                case IDictionary<string, object> dictStringObject:
+                    return new ScriptArray(dictStringObject.Keys);
+                case IScriptObject scriptObj:
+                    return new ScriptArray(scriptObj.GetMembers());
+                case IScriptCustomFunction:
+                    return new ScriptArray();
+            }
 
             var accessor = context.GetMemberAccessor(value);
             return new ScriptArray(accessor.GetMembers(context, context.CurrentSpan, value));
@@ -269,14 +276,14 @@ namespace Scriban.Functions
         /// </remarks>
         public static int Size(object value)
         {
-            if (value is string)
+            if (value is string str)
             {
-                return StringFunctions.Size((string) value);
+                return StringFunctions.Size(str);
             }
 
-            if (value is IEnumerable)
+            if (value is IEnumerable enumerable)
             {
-                return ArrayFunctions.Size((IEnumerable) value);
+                return ArrayFunctions.Size(enumerable);
             }
 
             // Should we throw an exception?

@@ -478,8 +478,7 @@ namespace Scriban.Runtime
 
         private int AddImpl(object item)
         {
-            var list = _values as IList;
-            if (list == null)
+            if (_values is not IList list)
             {
                 _values = list = new ScriptArray(_values);
             }
@@ -514,8 +513,7 @@ namespace Scriban.Runtime
 
         public bool Remove(object item)
         {
-            var list = _values as IList;
-            if (list == null)
+            if (_values is not IList list)
             {
                 _values = list = new ScriptArray(_values);
             }
@@ -565,8 +563,7 @@ namespace Scriban.Runtime
 
         public void Insert(int index, object item)
         {
-            var list = _values as IList;
-            if (list == null)
+            if (_values is not IList list)
             {
                 _values = list = new ScriptArray(_values);
             }
@@ -581,8 +578,7 @@ namespace Scriban.Runtime
 
         public void RemoveAt(int index)
         {
-            var list = _values as IList;
-            if (list == null)
+            if (_values is not IList list)
             {
                 _values = list = new ScriptArray(_values);
             }
@@ -601,8 +597,7 @@ namespace Scriban.Runtime
 
             set
             {
-                var list = _values as IList;
-                if (list == null)
+                if (_values is not IList list)
                 {
                     _values = list = new ScriptArray(_values);
                 }

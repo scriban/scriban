@@ -390,9 +390,7 @@ namespace Scriban.Parsing
                     }
 
                     // Handle binary operators here
-                    ScriptBinaryOperator binaryOperatorType;
-                    int newPrecedence;
-                    if (TryBinaryOperator(out binaryOperatorType, out newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
+                    if (TryBinaryOperator(out ScriptBinaryOperator binaryOperatorType, out int newPrecedence) || (_isLiquid && TryLiquidBinaryOperator(out binaryOperatorType, out newPrecedence)))
                     {
                         if (originalMode == ParseExpressionMode.WhenExpression && binaryOperatorType == ScriptBinaryOperator.Or)
                         {
@@ -1092,7 +1090,7 @@ namespace Scriban.Parsing
         private ScriptExpression TransformKeyword(ScriptExpression leftOperand)
         {
             // In case we are in liquid and we are assigning to a scriban keyword, we escape the variable with a nested expression
-            if (_isLiquid && leftOperand is IScriptVariablePath && IsScribanKeyword(((IScriptVariablePath) leftOperand).GetFirstPath()) && !(leftOperand is ScriptNestedExpression))
+            if (_isLiquid && leftOperand is IScriptVariablePath scriptVariablePath && IsScribanKeyword(scriptVariablePath.GetFirstPath()) && !(leftOperand is ScriptNestedExpression))
             {
                 var nestedExpression = ScriptNestedExpression.Wrap(leftOperand, _isKeepTrivia);
                 return nestedExpression;
@@ -1104,13 +1102,11 @@ namespace Scriban.Parsing
         private void TransformLiquidFunctionCallToScriban(ScriptFunctionCall functionCall)
         {
             var liquidTarget = functionCall.Target as ScriptVariable;
-            string targetName;
-            string memberName;
             // In case of cycle we transform it to array.cycle at runtime
-            if (liquidTarget != null && LiquidBuiltinsFunctions.TryLiquidToScriban(liquidTarget.Name, out targetName, out memberName))
+            if (liquidTarget != null && LiquidBuiltinsFunctions.TryLiquidToScriban(liquidTarget.Name, out string targetName, out string memberName))
             {
-                var targetVariable = new ScriptVariableGlobal(targetName) {Span = liquidTarget.Span};
-                var memberVariable = new ScriptVariableGlobal(memberName) {Span = liquidTarget.Span};
+                var targetVariable = new ScriptVariableGlobal(targetName) { Span = liquidTarget.Span };
+                var memberVariable = new ScriptVariableGlobal(memberName) { Span = liquidTarget.Span };
 
                 var arrayCycle = new ScriptMemberExpression
                 {

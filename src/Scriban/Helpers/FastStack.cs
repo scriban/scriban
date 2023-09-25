@@ -64,7 +64,7 @@ namespace Scriban.Helpers
             }
 
             T item = _array[--_size];
-            _array[_size] = default(T);     // Free memory quicker.
+            _array[_size] = default;     // Free memory quicker.
             return item;
         }
 

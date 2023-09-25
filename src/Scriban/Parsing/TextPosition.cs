@@ -15,7 +15,7 @@ namespace Scriban.Parsing
 #endif
     struct TextPosition : IEquatable<TextPosition>
     {
-        public static readonly TextPosition Eof = new TextPosition(-1, -1, -1);
+        public static readonly TextPosition Eof = new(-1, -1, -1);
 
         public TextPosition(int offset, int line, int column)
         {
@@ -57,8 +57,8 @@ namespace Scriban.Parsing
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            return obj is TextPosition && Equals((TextPosition) obj);
+            if (obj is null) return false;
+            return obj is TextPosition position && Equals(position);
         }
 
         public override int GetHashCode()

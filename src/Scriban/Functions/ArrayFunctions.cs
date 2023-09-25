@@ -143,9 +143,8 @@ namespace Scriban.Functions
             // So we allow to have multiple cycle running in the same loop
             var cycleKey = new CycleKey(strGroup);
 
-            object cycleValue;
             var currentTags = context.Tags;
-            if (!currentTags.TryGetValue(cycleKey, out cycleValue) || !(cycleValue is int))
+            if (!currentTags.TryGetValue(cycleKey, out object cycleValue) || !(cycleValue is int))
             {
                 cycleValue = 0;
             }
@@ -254,8 +253,7 @@ namespace Scriban.Functions
                 return null;
             }
 
-            var realList = list as IList;
-            if (realList != null)
+            if (list is IList realList)
             {
                 return realList.Count > 0 ? realList[0] : null;
             }
@@ -377,8 +375,7 @@ namespace Scriban.Functions
                 return null;
             }
 
-            var readList = list as IList;
-            if (readList != null)
+            if (list is IList readList)
             {
                 return readList.Count > 0 ? readList[readList.Count - 1] : null;
             }
@@ -550,8 +547,7 @@ namespace Scriban.Functions
             {
                 return 0;
             }
-            var collection = list as ICollection;
-            if (collection != null)
+            if (list is ICollection collection)
             {
                 return collection.Count;
             }
@@ -594,8 +590,7 @@ namespace Scriban.Functions
                 return new ScriptRange();
             }
 
-            var enumerable = list as IEnumerable;
-            if (enumerable == null)
+            if (!(list is IEnumerable enumerable))
             {
                 return new ScriptArray(1) { list };
             }
@@ -615,14 +610,12 @@ namespace Scriban.Functions
                     var leftAccessor = context.GetMemberAccessor(a);
                     var rightAccessor = context.GetMemberAccessor(b);
 
-                    object leftValue = null;
-                    object rightValue = null;
-                    if (!leftAccessor.TryGetValue(context, span, a, member, out leftValue))
+                    if (!leftAccessor.TryGetValue(context, span, a, member, out object leftValue))
                     {
                         context.TryGetMember?.Invoke(context, span, a, member, out leftValue);
                     }
 
-                    if (!rightAccessor.TryGetValue(context, span, b, member, out rightValue))
+                    if (!rightAccessor.TryGetValue(context, span, b, member, out object rightValue))
                     {
                         context.TryGetMember?.Invoke(context, span, b, member, out rightValue);
                     }
@@ -711,8 +704,7 @@ namespace Scriban.Functions
             if (list == null) return null;
             if (function == null) return new ScriptRange(list);
 
-            var scriptingFunction = function as IScriptCustomFunction;
-            if (scriptingFunction == null)
+            if (!(function is IScriptCustomFunction scriptingFunction))
             {
                 throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
             }
@@ -748,7 +740,7 @@ namespace Scriban.Functions
 
             public override int GetHashCode()
             {
-                return (Group != null ? Group.GetHashCode() : 0);
+                return Group != null ? Group.GetHashCode() : 0;
             }
 
             public override string ToString()

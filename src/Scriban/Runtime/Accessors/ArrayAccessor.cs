@@ -17,7 +17,7 @@ namespace Scriban.Runtime.Accessors
 #endif
     class ArrayAccessor : IListAccessor, IObjectAccessor
     {
-        public static ArrayAccessor Default = new ArrayAccessor();
+        public static ArrayAccessor Default = new();
 
         private ArrayAccessor()
         {

@@ -9,27 +9,26 @@ namespace Scriban.Parsing
     {
         public static bool IsHex(this char c)
         {
-            return (c >= '0' && c <= '9') ||
-                   (c >= 'a' && c <= 'f') ||
-                   (c >= 'A' && c <= 'F');
+            return c is
+                   >= '0' and <= '9' or
+                   >= 'a' and <= 'f' or
+                   >= 'A' and <= 'F';
         }
 
         public static int HexToInt(this char c)
         {
-            if (c >= '0' && c <= '9')
+            switch (c)
             {
-                return c - '0';
+                case >= '0' and <= '9':
+                    return c - '0';
+                case >= 'a' and <= 'f':
+                    return c - 'a' + 10;
+                case >= 'A' and <= 'F':
+                    return c - 'A' + 10;
+                default:
+                    // Don't throw an exception as we are checking and logging an error if IsHex is false already
+                    return 0;
             }
-            if (c >= 'a' && c <= 'f')
-            {
-                return c - 'a' + 10;
-            }
-            if (c >= 'A' && c <= 'F')
-            {
-                return c - 'A' + 10;
-            }
-            // Don't throw an exception as we are checking and logging an error if IsHex is false already
-            return 0;
         }
     }
 }

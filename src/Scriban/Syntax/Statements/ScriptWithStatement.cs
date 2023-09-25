@@ -47,7 +47,7 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             var target = context.GetValue(Name);
-            if (!(target is IScriptObject))
+            if (target is not IScriptObject)
             {
                 var targetName = target?.GetType().Name ?? "null";
                 throw new ScriptRuntimeException(Name.Span, $"Invalid target property `{Name}` used for [with] statement. Must be a ScriptObject instead of `{targetName}`");

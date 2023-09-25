@@ -47,11 +47,10 @@ namespace Scriban.Syntax
         public override object Evaluate(TemplateContext context)
         {
             // Check that the Target is actually a function
-            var functionCall = Target as ScriptFunctionCall;
-            if (functionCall == null)
+            if (Target is not ScriptFunctionCall functionCall)
             {
                 var parameterLessFunction = context.Evaluate(Target, true);
-                if (!(parameterLessFunction is IScriptCustomFunction))
+                if (parameterLessFunction is not IScriptCustomFunction)
                 {
                     var targetPrettyName = ScriptSyntaxAttribute.Get(Target);
                     throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyName.TypeName}`");

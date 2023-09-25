@@ -33,12 +33,12 @@ namespace Scriban.Liquid2Scriban
                 {
                     relaxedInclude = true;
                 }
-                else if (arg.IndexOf("**") >= 0)
+                else if (arg.Contains("**", StringComparison.CurrentCulture))
                 {
                     var index = arg.IndexOf("**");
-                    var previousdir = arg.Substring(0, index);
-                    var pattern = arg.Substring(index + 1);
-                    if (pattern.Contains("/") || pattern.Contains("\\"))
+                    var previousdir = arg[..index];
+                    var pattern = arg[(index + 1)..];
+                    if (pattern.Contains('/') || pattern.Contains('\\'))
                     {
                         Console.WriteLine($"Error the pattern: `{pattern}` cannot contain /, \\");
                         Environment.Exit(1);
@@ -50,12 +50,12 @@ namespace Scriban.Liquid2Scriban
                         files.Add(Path.Combine(rootDir, file));
                     }
                 }
-                else if (arg.IndexOf("*") >= 0)
+                else if (arg.Contains('*', StringComparison.CurrentCulture))
                 {
                     var index = arg.IndexOf("*");
-                    var previousdir = arg.Substring(0, index);
-                    var pattern = arg.Substring(index);
-                    if (pattern.Contains("/") || pattern.Contains("\\"))
+                    var previousdir = arg[..index];
+                    var pattern = arg[index..];
+                    if (pattern.Contains('/') || pattern.Contains('\\'))
                     {
                         Console.WriteLine($"Error the pattern: `{pattern}` cannot contain /, \\");
                         Environment.Exit(1);
@@ -87,14 +87,7 @@ namespace Scriban.Liquid2Scriban
                 {
                     var scriban = template.ToText();
                     var extension = Path.GetExtension(file);
-                    if (!string.IsNullOrEmpty(extension))
-                    {
-                        extension = ".sbn" + extension.Substring(1);
-                    }
-                    else
-                    {
-                        extension = ".sbn";
-                    }
+                    extension = !string.IsNullOrEmpty(extension) ? ".sbn" + extension[1..] : ".sbn";
                     var outputFile = Path.ChangeExtension(file, extension);
                     File.WriteAllText(outputFile, scriban);
 

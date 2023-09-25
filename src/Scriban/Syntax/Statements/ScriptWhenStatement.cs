@@ -63,7 +63,7 @@ namespace Scriban.Syntax
             {
                 var whenValue = context.Evaluate(value);
                 var result = ScriptBinaryExpression.Evaluate(context, Span, ScriptBinaryOperator.CompareEqual, caseValue, whenValue);
-                if (result is bool && (bool) result)
+                if (result is bool boolResult && boolResult)
                 {
                     return context.Evaluate(Body);
                 }

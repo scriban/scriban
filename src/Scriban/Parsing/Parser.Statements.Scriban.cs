@@ -264,7 +264,7 @@ namespace Scriban.Parsing
                         {
                             var parameter = Open<ScriptParameter>();
                             var arg = ExpectAndParseVariable(scriptFunction);
-                            if (!(arg is ScriptVariableGlobal))
+                            if (arg is not ScriptVariableGlobal)
                             {
                                 if (arg == null)
                                     break;
@@ -432,8 +432,7 @@ namespace Scriban.Parsing
             // In case of parsing a front matter, we don't want to include any \r\n after the end of the front-matter
             // So we manipulate back the syntax tree for the expected raw statement (if any), otherwise we can early
             // exit.
-            var rawStatement = page.Body.Statements.FirstOrDefault() as ScriptRawStatement;
-            if (rawStatement == null)
+            if (page.Body.Statements.FirstOrDefault() is not ScriptRawStatement rawStatement)
             {
                 return;
             }
@@ -442,28 +441,27 @@ namespace Scriban.Parsing
 
         private static bool IsScribanKeyword(string text)
         {
-            switch (text)
+            return text switch
             {
-                case "if":
-                case "else":
-                case "end":
-                case "for":
-                case "case":
-                case "when":
-                case "while":
-                case "break":
-                case "continue":
-                case "func":
-                case "import":
-                case "readonly":
-                case "with":
-                case "capture":
-                case "ret":
-                case "wrap":
-                case "do":
-                    return true;
-            }
-            return false;
+                "if" or
+                "else" or
+                "end" or
+                "for" or
+                "case" or
+                "when" or
+                "while" or
+                "break" or
+                "continue" or
+                "func" or
+                "import" or
+                "readonly" or
+                "with" or
+                "capture" or
+                "ret" or
+                "wrap" or
+                "do" => true,
+                _ => false,
+            };
         }
     }
 }

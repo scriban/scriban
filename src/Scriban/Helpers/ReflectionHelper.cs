@@ -5,14 +5,12 @@
 #nullable disable
 
 using System;
-using System.Collections.Generic;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Scriban.Runtime;
 using Scriban.Syntax;
-using Enum = System.Enum;
 
 namespace Scriban.Helpers
 {

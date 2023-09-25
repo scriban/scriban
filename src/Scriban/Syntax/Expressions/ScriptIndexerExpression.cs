@@ -68,8 +68,8 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(Target);
-            var isSpecialArgumentsArray = Equals(Target, ScriptVariable.Arguments) && Index is ScriptLiteral &&
-                                          ((ScriptLiteral) Index).IsPositiveInteger();
+            var isSpecialArgumentsArray = Equals(Target, ScriptVariable.Arguments) && Index is ScriptLiteral literal &&
+                                          literal.IsPositiveInteger();
             if (!isSpecialArgumentsArray)
             {
                 printer.Write(OpenBracket);

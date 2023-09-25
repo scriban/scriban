@@ -164,21 +164,20 @@ namespace Scriban.Syntax
 
             public virtual bool Contains(string member)
             {
-                switch (member)
+                return member switch
                 {
-                    case "index":
-                    case "index0":
-                    case "first":
-                    case "even":
-                    case "odd":
-                    case "last":
-                    case "length":
-                    case "rindex":
-                    case "rindex0":
-                    case "changed":
-                        return true;
-                }
-                return false;
+                    "index" or
+                    "index0" or
+                    "first" or
+                    "even" or
+                    "odd" or
+                    "last" or
+                    "length" or
+                    "rindex" or
+                    "rindex0" or
+                    "changed" => true,
+                    _ => false,
+                };
             }
 
             public bool IsReadOnly { get; set; }

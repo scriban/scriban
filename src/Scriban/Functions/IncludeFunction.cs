@@ -46,12 +46,8 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template name cannot be null or empty");
             }
 
-            var templateLoader = context.TemplateLoader;
-            if (templateLoader == null)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.TemplateLoader");
-            }
-
+            var templateLoader = context.TemplateLoader
+                ?? throw new ScriptRuntimeException(callerContext.Span, $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.TemplateLoader");
             string templatePath;
 
             try
@@ -68,9 +64,8 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
             }
 
-            Template template;
 
-            if (!context.CachedTemplates.TryGetValue(templatePath, out template))
+            if (!context.CachedTemplates.TryGetValue(templatePath, out Template template))
             {
 
                 string templateText;

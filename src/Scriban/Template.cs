@@ -217,7 +217,7 @@ namespace Scriban
         /// </summary>
         /// <param name="options">The rendering options</param>
         /// <returns>The template converted back to a textual representation of the template</returns>
-        public string ToText(ScriptPrinterOptions options = default(ScriptPrinterOptions))
+        public string ToText(ScriptPrinterOptions options = default)
         {
             CheckErrors();
             var writer = new TextWriterOutput();

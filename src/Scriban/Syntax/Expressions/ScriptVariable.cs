@@ -26,12 +26,12 @@ namespace Scriban.Syntax
     {
         private int _hashCode;
 
-        public static readonly ScriptVariableLocal Arguments = new ScriptVariableLocal(string.Empty);
-        public static readonly ScriptVariableLocal BlockDelegate = new ScriptVariableLocal("$");
-        public static readonly ScriptVariableLocal Continue = new ScriptVariableLocal("continue"); // Used by liquid offset:continue
-        public static readonly ScriptVariableGlobal ForObject = new ScriptVariableGlobal("for");
-        public static readonly ScriptVariableGlobal TablerowObject = new ScriptVariableGlobal("tablerow");
-        public static readonly ScriptVariableGlobal WhileObject = new ScriptVariableGlobal("while");
+        public static readonly ScriptVariableLocal Arguments = new(string.Empty);
+        public static readonly ScriptVariableLocal BlockDelegate = new("$");
+        public static readonly ScriptVariableLocal Continue = new("continue"); // Used by liquid offset:continue
+        public static readonly ScriptVariableGlobal ForObject = new("for");
+        public static readonly ScriptVariableGlobal TablerowObject = new("tablerow");
+        public static readonly ScriptVariableGlobal WhileObject = new("while");
 
         protected ScriptVariable(string name, ScriptVariableScope scope)
         {
@@ -62,15 +62,12 @@ namespace Scriban.Syntax
         /// <returns>The script variable</returns>
         public static ScriptVariable Create(string name, ScriptVariableScope scope)
         {
-            switch (scope)
+            return scope switch
             {
-                case ScriptVariableScope.Global:
-                    return new ScriptVariableGlobal(name);
-                case ScriptVariableScope.Local:
-                    return new ScriptVariableLocal(name);
-                default:
-                    throw new InvalidOperationException($"Scope `{scope}` is not supported");
-            }
+                ScriptVariableScope.Global => new ScriptVariableGlobal(name),
+                ScriptVariableScope.Local => new ScriptVariableLocal(name),
+                _ => throw new InvalidOperationException($"Scope `{scope}` is not supported"),
+            };
         }
 
         public string BaseName { get; }
@@ -108,7 +105,7 @@ namespace Scriban.Syntax
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            return obj is ScriptVariable && Equals((ScriptVariable) obj);
+            return obj is ScriptVariable scriptVariable && Equals(scriptVariable);
         }
 
         public override int GetHashCode()

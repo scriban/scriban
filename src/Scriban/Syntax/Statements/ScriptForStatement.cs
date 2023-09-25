@@ -99,9 +99,8 @@ namespace Scriban.Syntax
         protected override object EvaluateImpl(TemplateContext context)
         {
             var loopIterator = context.Evaluate(Iterator);
-            var list = loopIterator as IEnumerable;
 
-            if (list != null)
+            if (loopIterator is IEnumerable list)
             {
                 object loopResult = null;
                 object previousValue = null;

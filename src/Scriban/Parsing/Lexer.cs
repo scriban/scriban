@@ -69,10 +69,7 @@ namespace Scriban.Parsing
 
             // Setup options
             var localOptions = options ?? LexerOptions.Default;
-            if (localOptions.FrontMatterMarker == null)
-            {
-                localOptions.FrontMatterMarker = LexerOptions.DefaultFrontMatterMarker;
-            }
+            localOptions.FrontMatterMarker ??= LexerOptions.DefaultFrontMatterMarker;
             Options = localOptions;
 
             _tryMatchCustomToken = Options.TryMatchCustomToken;
@@ -166,8 +163,7 @@ namespace Scriban.Parsing
                 {
                     if (_blockType == BlockType.Raw)
                     {
-                        TokenType whiteSpaceMode;
-                        if (IsCodeEnterOrEscape(out whiteSpaceMode))
+                        if (IsCodeEnterOrEscape(out _))
                         {
                             ReadCodeEnterOrEscape();
                             return true;
@@ -712,7 +708,7 @@ namespace Scriban.Parsing
             }
             if (_interpJustOpened)
             {
-                TextPosition positionOfToken = new TextPosition(_position.Offset - 1, _position.Line, _position.Column - 1);
+                TextPosition positionOfToken = new(_position.Offset - 1, _position.Line, _position.Column - 1);
                 _token = new Token(TokenType.OpenInterpBrace, positionOfToken, positionOfToken);
                 _interpJustOpened = false;
                 return hasTokens;
@@ -1904,10 +1900,7 @@ namespace Scriban.Parsing
         private void AddError(string message, TextPosition start, TextPosition end)
         {
             _token = new Token(TokenType.Invalid, start, end);
-            if (_errors == null)
-            {
-                _errors = new List<LogMessage>();
-            }
+            _errors ??= new List<LogMessage>();
             _errors.Add(new LogMessage(ParserMessageType.Error, new SourceSpan(SourcePath, start, end), message));
         }
 
@@ -1921,7 +1914,7 @@ namespace Scriban.Parsing
 
         private static bool IsWhitespace(char c)
         {
-            return c == ' ' || c == '\t';
+            return c is ' ' or '\t';
         }
 
         /// <summary>

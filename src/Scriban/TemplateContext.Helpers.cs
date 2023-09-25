@@ -65,12 +65,11 @@ namespace Scriban
                 return null;
             }
 
-            if (value is IList)
+            if (value is IList list)
             {
-                return (IList) value;
+                return list;
             }
-            var iterator = value as IEnumerable;
-            if (iterator == null)
+            if (value is not IEnumerable iterator)
             {
                 throw new ScriptRuntimeException(span, $"Unexpected list value. Expecting an array, list or iterator. Unable to convert to a list.");
             }

@@ -55,10 +55,7 @@ namespace Scriban.Runtime
         /// <returns></returns>
         public static StringBuilderOutput GetThreadInstance()
         {
-            if (TlsBuilder == null)
-            {
-                TlsBuilder = new StringBuilder();
-            }
+            TlsBuilder ??= new StringBuilder();
             TlsBuilder.Length = 0;
             return new StringBuilderOutput(TlsBuilder);
         }

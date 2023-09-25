@@ -83,13 +83,12 @@ namespace Scriban.Parsing
             };
         }
 
-        //TODO Pattern matching from C# 7.0 could be used but permission from monsieur Mutel is needed...
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsStringToken(this TokenType token) =>
-            token == TokenType.String || token == TokenType.InterpString || token == TokenType.BeginInterpString || token == TokenType.ContinuationInterpString || token == TokenType.EndingInterpString;
+            token is TokenType.String or TokenType.InterpString or TokenType.BeginInterpString or TokenType.ContinuationInterpString or TokenType.EndingInterpString;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public static bool IsInterpolationStringToken(this TokenType token) =>
-            token == TokenType.InterpString || token == TokenType.BeginInterpString || token == TokenType.ContinuationInterpString || token == TokenType.EndingInterpString;
+            token is TokenType.InterpString or TokenType.BeginInterpString or TokenType.ContinuationInterpString or TokenType.EndingInterpString;
     }
 }

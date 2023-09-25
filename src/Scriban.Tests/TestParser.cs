@@ -492,8 +492,7 @@ name = 'yes'
             Assert.AreEqual(string.Empty, outputStr);
 
             var global = context.CurrentGlobal;
-            object value;
-            Assert.True(global.TryGetValue("name", out value));
+            Assert.True(global.TryGetValue("name", out object value));
             Assert.AreEqual("yes", value);
 
             Assert.True(global.TryGetValue("variable", out value));
@@ -873,7 +872,7 @@ m
         /// <summary>
         /// Lists of the tests that don't support exact byte-to-byte roundtrip (due to reformatting...etc.)
         /// </summary>
-        private static readonly HashSet<string> NotSupportingExactRoundtrip = new HashSet<string>()
+        private static readonly HashSet<string> NotSupportingExactRoundtrip = new()
         {
             "003-whitespaces.txt",
             "010-literals.txt",
@@ -1050,7 +1049,7 @@ m
                     {
                         var astVisualizer = new ASTVisualizer();
                         template.Page.Accept(astVisualizer);
-                        result = astVisualizer.output.ToString();
+                        result = astVisualizer.Output.ToString();
                         resultAsync = result;
                     }
                 }
@@ -1209,17 +1208,17 @@ m
         class ASTVisualizer : ScriptVisitor
         {
             int deepCounter;
-            public StringBuilder output { get; } = new StringBuilder();            
+            public StringBuilder Output { get; } = new StringBuilder();            
 
             protected override void DefaultVisit(ScriptNode node)
             {
                 bool isTerminal = (node is IScriptTerminal);
-                string padding = new string(' ', deepCounter * 2); 
+                string padding = new(' ', deepCounter * 2); 
                 string value = node.ToString();
                 string type = node.GetType().Name;
                 string offset = $" ({node.Span.Start.Offset} - {node.Span.End.Offset}) ";
 
-                output.Append(padding + type + offset + (isTerminal ? $" [{value}]\n" : "\n"));
+                Output.Append(padding + type + offset + (isTerminal ? $" [{value}]\n" : "\n"));
                 deepCounter++;
                 base.DefaultVisit(node);
                 deepCounter--;

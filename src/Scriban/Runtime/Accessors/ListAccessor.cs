@@ -18,7 +18,7 @@ namespace Scriban.Runtime.Accessors
 #endif
     class ListAccessor : IListAccessor, IObjectAccessor
     {
-        public static ListAccessor Default = new ListAccessor();
+        public static ListAccessor Default = new();
 
         private ListAccessor()
         {
@@ -80,9 +80,9 @@ namespace Scriban.Runtime.Accessors
                 value = GetLength(context, span, target);
                 return true;
             }
-            if (target is IScriptObject)
+            if (target is IScriptObject scriptObject)
             {
-                return (((IScriptObject) target)).TryGetValue(context, span, member, out value);
+                return scriptObject.TryGetValue(context, span, member, out value);
             }
 
             value = null;
@@ -95,21 +95,21 @@ namespace Scriban.Runtime.Accessors
             {
                 return false;
             }
-            if (target is IScriptObject)
+            if (target is IScriptObject scriptObject)
             {
-                return (((IScriptObject)target)).TrySetValue(context, span, member, value, false);
+                return scriptObject.TrySetValue(context, span, member, value, false);
             }
             return false;
         }
 
         public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
 
         public bool HasIndexer => false;

@@ -82,8 +82,7 @@ namespace Scriban.Syntax
 
             var memberName = this.Member.Name;
 
-            object value;
-            if (!accessor.TryGetValue(context, Member.Span, targetObject, memberName, out value))
+            if (!accessor.TryGetValue(context, Member.Span, targetObject, memberName, out object value))
             {
                 var result = context.TryGetMember?.Invoke(context, Member.Span, targetObject, memberName, out value);
                 if (!context.EnableRelaxedMemberAccess && (!result.HasValue || !result.Value))

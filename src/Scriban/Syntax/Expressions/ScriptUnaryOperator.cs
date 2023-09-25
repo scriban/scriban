@@ -33,25 +33,17 @@ namespace Scriban.Syntax
     {
         public static string ToText(this ScriptUnaryOperator op)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptUnaryOperator.Not:
-                    return "!";
-                case ScriptUnaryOperator.Negate:
-                    return "-";
-                case ScriptUnaryOperator.Plus:
-                    return "+";
-                case ScriptUnaryOperator.FunctionAlias:
-                    return "@";
-                case ScriptUnaryOperator.FunctionParametersExpand:
-                    return "^";
-                case ScriptUnaryOperator.Decrement:
-                    return "--";
-                case ScriptUnaryOperator.Increment:
-                    return "++";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(op));
-            }
+                ScriptUnaryOperator.Not => "!",
+                ScriptUnaryOperator.Negate => "-",
+                ScriptUnaryOperator.Plus => "+",
+                ScriptUnaryOperator.FunctionAlias => "@",
+                ScriptUnaryOperator.FunctionParametersExpand => "^",
+                ScriptUnaryOperator.Decrement => "--",
+                ScriptUnaryOperator.Increment => "++",
+                _ => throw new ArgumentOutOfRangeException(nameof(op)),
+            };
         }
     }
 }

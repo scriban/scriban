@@ -311,32 +311,15 @@ namespace Scriban.Parsing
 
         private void PushTrivia(Token token)
         {
-            ScriptTriviaType type;
-            switch (token.Type)
+            var type = token.Type switch
             {
-                case TokenType.Comment:
-                    type = ScriptTriviaType.Comment;
-                    break;
-
-                case TokenType.CommentMulti:
-                    type = ScriptTriviaType.CommentMulti;
-                    break;
-
-                case TokenType.Whitespace:
-                    type = ScriptTriviaType.Whitespace;
-                    break;
-
-                case TokenType.WhitespaceFull:
-                    type = ScriptTriviaType.WhitespaceFull;
-                    break;
-
-                case TokenType.NewLine:
-                    type = ScriptTriviaType.NewLine;
-                    break;
-                default:
-                    throw new InvalidOperationException($"Token type `{token.Type}` not supported by trivia");
-            }
-
+                TokenType.Comment => ScriptTriviaType.Comment,
+                TokenType.CommentMulti => ScriptTriviaType.CommentMulti,
+                TokenType.Whitespace => ScriptTriviaType.Whitespace,
+                TokenType.WhitespaceFull => ScriptTriviaType.WhitespaceFull,
+                TokenType.NewLine => ScriptTriviaType.NewLine,
+                _ => throw new InvalidOperationException($"Token type `{token.Type}` not supported by trivia"),
+            };
             var trivia = new ScriptTrivia(GetSpanForToken(token), type,  GetAsStringSlice(token));
             _trivias.Add(trivia);
         }

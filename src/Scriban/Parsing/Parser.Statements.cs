@@ -28,7 +28,7 @@ namespace Scriban.Parsing
 
         private ScriptBlockStatement ParseBlockStatement(ScriptNode parentStatement, bool parseEndOfStatementAfterEnd = true)
         {
-            Debug.Assert(!(parentStatement is ScriptBlockStatement));
+            Debug.Assert(parentStatement is not ScriptBlockStatement);
 
             Blocks.Push(parentStatement);
 
@@ -412,7 +412,7 @@ namespace Scriban.Parsing
 
             if (forStatement.Variable != null)
             {
-                if (!(forStatement.Variable is IScriptVariablePath))
+                if (forStatement.Variable is not IScriptVariablePath)
                 {
                     LogError(forStatement, $"Expecting a variable instead of `{forStatement.Variable}`");
                 }
@@ -618,15 +618,15 @@ namespace Scriban.Parsing
 
         private static bool ExpectStatementEnd(ScriptNode scriptNode)
         {
-            return (scriptNode is ScriptIfStatement && !((ScriptIfStatement)scriptNode).IsElseIf)
-                   || scriptNode is ScriptForStatement
-                   || scriptNode is ScriptCaptureStatement
-                   || scriptNode is ScriptWithStatement
-                   || scriptNode is ScriptWhileStatement
-                   || scriptNode is ScriptWrapStatement
-                   || scriptNode is ScriptCaseStatement
-                   || scriptNode is ScriptFunction
-                   || scriptNode is ScriptAnonymousFunction;
+            return (scriptNode is ScriptIfStatement statement && !statement.IsElseIf) ||
+                   (scriptNode is ScriptForStatement
+                   or ScriptCaptureStatement
+                   or ScriptWithStatement
+                   or ScriptWhileStatement
+                   or ScriptWrapStatement
+                   or ScriptCaseStatement
+                   or ScriptFunction
+                   or ScriptAnonymousFunction);
         }
 
         /// <summary>

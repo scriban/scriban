@@ -146,23 +146,17 @@ namespace Scriban.Syntax
             switch (op)
             {
                 case ScriptBinaryOperator.LiquidHasKey:
-                {
-                    var leftDict = leftValue as IDictionary<string, object>;
-                    if (leftDict != null)
+                    if (leftValue is IDictionary<string, object> leftDict)
                     {
                         return ObjectFunctions.HasKey(leftDict, context.ObjectToString(rightValue));
                     }
-                }
                     break;
 
                 case ScriptBinaryOperator.LiquidHasValue:
-                {
-                    var leftDict = leftValue as IDictionary<string, object>;
-                    if (leftDict != null)
+                    if (leftValue is IDictionary<string, object> secondLeftDict)
                     {
-                        return ObjectFunctions.HasValue(leftDict, context.ObjectToString(rightValue));
+                        return ObjectFunctions.HasValue(secondLeftDict, context.ObjectToString(rightValue));
                     }
-                }
                     break;
 
                 case ScriptBinaryOperator.CompareEqual:
@@ -224,7 +218,7 @@ namespace Scriban.Syntax
                             return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                     }
-                    catch (Exception ex) when(!(ex is ScriptRuntimeException))
+                    catch (Exception ex) when (ex is not ScriptRuntimeException)
                     {
                         throw new ScriptRuntimeException(span, ex.Message);
                     }
@@ -242,58 +236,56 @@ namespace Scriban.Syntax
             // If both are empty, we return false or empty
             if (leftIsEmptyObject && rightIsEmptyObject)
             {
-                switch (op)
+                return op switch
                 {
-                    case ScriptBinaryOperator.CompareEqual:
-                    case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    case ScriptBinaryOperator.CompareLessOrEqual:
-                        return true;
-                    case ScriptBinaryOperator.CompareNotEqual:
-                    case ScriptBinaryOperator.CompareGreater:
-                    case ScriptBinaryOperator.CompareLess:
-                    case ScriptBinaryOperator.LiquidContains:
-                    case ScriptBinaryOperator.LiquidStartsWith:
-                    case ScriptBinaryOperator.LiquidEndsWith:
-                        return false;
-                }
-                return EmptyScriptObject.Default;
+                    ScriptBinaryOperator.CompareEqual or
+                    ScriptBinaryOperator.CompareGreaterOrEqual or
+                    ScriptBinaryOperator.CompareLessOrEqual
+                    => true,
+                    ScriptBinaryOperator.CompareNotEqual or
+                    ScriptBinaryOperator.CompareGreater or
+                    ScriptBinaryOperator.CompareLess or
+                    ScriptBinaryOperator.LiquidContains or
+                    ScriptBinaryOperator.LiquidStartsWith or
+                    ScriptBinaryOperator.LiquidEndsWith
+                    => false,
+                    _ => EmptyScriptObject.Default,
+                };
             }
 
             var against = leftIsEmptyObject ? rightValue : leftValue;
             var againstEmpty = context.IsEmpty(span, against);
 
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.CompareEqual:
-                    return againstEmpty;
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return againstEmpty is bool ? !(bool)againstEmpty : againstEmpty;
-                case ScriptBinaryOperator.CompareGreater:
-                case ScriptBinaryOperator.CompareLess:
-                    return false;
-                case ScriptBinaryOperator.CompareGreaterOrEqual:
-                case ScriptBinaryOperator.CompareLessOrEqual:
-                    return againstEmpty;
-                case ScriptBinaryOperator.Add:
-                case ScriptBinaryOperator.Subtract:
-                case ScriptBinaryOperator.Multiply:
-                case ScriptBinaryOperator.Power:
-                case ScriptBinaryOperator.BinaryOr:
-                case ScriptBinaryOperator.BinaryAnd:
-                case ScriptBinaryOperator.Divide:
-                case ScriptBinaryOperator.DivideRound:
-                case ScriptBinaryOperator.Modulus:
-                case ScriptBinaryOperator.RangeInclude:
-                case ScriptBinaryOperator.RangeExclude:
-                    return EmptyScriptObject.Default;
+                ScriptBinaryOperator.CompareEqual => againstEmpty,
+                ScriptBinaryOperator.CompareNotEqual => againstEmpty is bool @bool ? !@bool : againstEmpty,
+                ScriptBinaryOperator.CompareGreater or
+                ScriptBinaryOperator.CompareLess => false,
+                ScriptBinaryOperator.CompareGreaterOrEqual or
+                ScriptBinaryOperator.CompareLessOrEqual
+                => againstEmpty,
 
-                case ScriptBinaryOperator.LiquidContains:
-                case ScriptBinaryOperator.LiquidStartsWith:
-                case ScriptBinaryOperator.LiquidEndsWith:
-                    return false;
-            }
+                ScriptBinaryOperator.Add or
+                ScriptBinaryOperator.Subtract or
+                ScriptBinaryOperator.Multiply or
+                ScriptBinaryOperator.Power or
+                ScriptBinaryOperator.BinaryOr or
+                ScriptBinaryOperator.BinaryAnd or
+                ScriptBinaryOperator.Divide or
+                ScriptBinaryOperator.DivideRound or
+                ScriptBinaryOperator.Modulus or
+                ScriptBinaryOperator.RangeInclude or
+                ScriptBinaryOperator.RangeExclude
+                => EmptyScriptObject.Default,
 
-            throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{(leftIsEmptyObject ? "empty" : leftValue)}` / `{(rightIsEmptyObject ? "empty" : rightValue)}`");
+                ScriptBinaryOperator.LiquidContains or
+                ScriptBinaryOperator.LiquidStartsWith or
+                ScriptBinaryOperator.LiquidEndsWith
+                => false,
+
+                _ => throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{(leftIsEmptyObject ? "empty" : leftValue)}` / `{(rightIsEmptyObject ? "empty" : rightValue)}`"),
+            };
         }
 
         private static object CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object left, SourceSpan rightSpan, object right)
@@ -309,9 +301,7 @@ namespace Scriban.Syntax
                     var spanMultiplier = rightSpan;
                     if (right is string)
                     {
-                        var temp = left;
-                        left = right;
-                        right = temp;
+                        (right, left) = (left, right);
                         spanMultiplier = leftSpan;
                     }
 
@@ -812,185 +802,114 @@ namespace Scriban.Syntax
 
         private static object CalculateDouble(ScriptBinaryOperator op, SourceSpan span, double left, double right)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.Add:
-                    return left + right;
-                case ScriptBinaryOperator.Subtract:
-                    return left - right;
-                case ScriptBinaryOperator.Multiply:
-                    return left * right;
-                case ScriptBinaryOperator.Divide:
-                    return left / right;
-                case ScriptBinaryOperator.DivideRound:
-                    return Math.Round(left / right);
-
-                case ScriptBinaryOperator.ShiftLeft:
-                    return left * Math.Pow(2, right);
-
-                case ScriptBinaryOperator.ShiftRight:
-                    return left / Math.Pow(2, right);
-
-                case ScriptBinaryOperator.Power:
-                    return Math.Pow(left, right);
-
-                case ScriptBinaryOperator.Modulus:
-                    return left % right;
-                case ScriptBinaryOperator.CompareEqual:
-                    return left == right;
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return left != right;
-                case ScriptBinaryOperator.CompareGreater:
-                    return left > right;
-                case ScriptBinaryOperator.CompareLess:
-                    return left < right;
-                case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return left >= right;
-                case ScriptBinaryOperator.CompareLessOrEqual:
-                    return left <= right;
-            }
-            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for double<->double");
+                ScriptBinaryOperator.Add => left + right,
+                ScriptBinaryOperator.Subtract => left - right,
+                ScriptBinaryOperator.Multiply => left * right,
+                ScriptBinaryOperator.Divide => left / right,
+                ScriptBinaryOperator.DivideRound => Math.Round(left / right),
+                ScriptBinaryOperator.ShiftLeft => left * Math.Pow(2, right),
+                ScriptBinaryOperator.ShiftRight => left / Math.Pow(2, right),
+                ScriptBinaryOperator.Power => Math.Pow(left, right),
+                ScriptBinaryOperator.Modulus => left % right,
+                ScriptBinaryOperator.CompareEqual => left == right,
+                ScriptBinaryOperator.CompareNotEqual => left != right,
+                ScriptBinaryOperator.CompareGreater => left > right,
+                ScriptBinaryOperator.CompareLess => left < right,
+                ScriptBinaryOperator.CompareGreaterOrEqual => left >= right,
+                ScriptBinaryOperator.CompareLessOrEqual => left <= right,
+                _ => throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for double<->double"),
+            };
         }
 
         private static object CalculateDecimal(ScriptBinaryOperator op, SourceSpan span, decimal left, decimal right)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.Add:
-                    return left + right;
-                case ScriptBinaryOperator.Subtract:
-                    return left - right;
-                case ScriptBinaryOperator.Multiply:
-                    return left * right;
-                case ScriptBinaryOperator.Divide:
-                    return left / right;
-                case ScriptBinaryOperator.DivideRound:
-                    return Math.Round(left / right);
-
-                case ScriptBinaryOperator.ShiftLeft:
-                    return left * (decimal) Math.Pow(2, (double) right);
-                case ScriptBinaryOperator.ShiftRight:
-                    return left / (decimal) Math.Pow(2, (double) right);
-
-                case ScriptBinaryOperator.Power:
-                    return (decimal)Math.Pow((double)left, (double)right);
-
-                case ScriptBinaryOperator.Modulus:
-                    return left % right;
-                case ScriptBinaryOperator.CompareEqual:
-                    return left == right;
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return left != right;
-                case ScriptBinaryOperator.CompareGreater:
-                    return left > right;
-                case ScriptBinaryOperator.CompareLess:
-                    return left < right;
-                case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return left >= right;
-                case ScriptBinaryOperator.CompareLessOrEqual:
-                    return left <= right;
-            }
-            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for decimal<->decimal");
+                ScriptBinaryOperator.Add => left + right,
+                ScriptBinaryOperator.Subtract => left - right,
+                ScriptBinaryOperator.Multiply => left * right,
+                ScriptBinaryOperator.Divide => left / right,
+                ScriptBinaryOperator.DivideRound => Math.Round(left / right),
+                ScriptBinaryOperator.ShiftLeft => left * (decimal)Math.Pow(2, (double)right),
+                ScriptBinaryOperator.ShiftRight => left / (decimal)Math.Pow(2, (double)right),
+                ScriptBinaryOperator.Power => (decimal)Math.Pow((double)left, (double)right),
+                ScriptBinaryOperator.Modulus => left % right,
+                ScriptBinaryOperator.CompareEqual => left == right,
+                ScriptBinaryOperator.CompareNotEqual => left != right,
+                ScriptBinaryOperator.CompareGreater => left > right,
+                ScriptBinaryOperator.CompareLess => left < right,
+                ScriptBinaryOperator.CompareGreaterOrEqual => left >= right,
+                ScriptBinaryOperator.CompareLessOrEqual => left <= right,
+                _ => throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for decimal<->decimal"),
+            };
         }
 
         private static object CalculateFloat(ScriptBinaryOperator op, SourceSpan span, float left, float right)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.Add:
-                    return left + right;
-                case ScriptBinaryOperator.Subtract:
-                    return left - right;
-                case ScriptBinaryOperator.Multiply:
-                    return left * right;
-                case ScriptBinaryOperator.Divide:
-                    return (float)left / right;
-                case ScriptBinaryOperator.DivideRound:
-                    return (float)(int)(left / right);
+                ScriptBinaryOperator.Add => left + right,
+                ScriptBinaryOperator.Subtract => left - right,
+                ScriptBinaryOperator.Multiply => left * right,
+                ScriptBinaryOperator.Divide => left / right,
+                ScriptBinaryOperator.DivideRound => (float)(int)(left / right),
 #if NETSTANDARD2_1
-                case ScriptBinaryOperator.Power:
-                    return MathF.Pow(left, right);
+                ScriptBinaryOperator.Power => MathF.Pow(left, right),
 #else
-                case ScriptBinaryOperator.Power:
-                    return (float)Math.Pow(left, right);
+                ScriptBinaryOperator.Power => (float)Math.Pow(left, right),
 #endif
-
 #if NETSTANDARD2_1
-                case ScriptBinaryOperator.ShiftLeft:
-                    return left * (float)MathF.Pow(2.0f, right);
-
-                case ScriptBinaryOperator.ShiftRight:
-                    return left / (float)MathF.Pow(2.0f, right);
+                ScriptBinaryOperator.ShiftLeft => left * (float)MathF.Pow(2.0f, right),
+                ScriptBinaryOperator.ShiftRight => left / (float)MathF.Pow(2.0f, right),
 #else
-                case ScriptBinaryOperator.ShiftLeft:
-                    return left * (float)Math.Pow(2, right);
-
-                case ScriptBinaryOperator.ShiftRight:
-                    return left / (float)Math.Pow(2, right);
+                ScriptBinaryOperator.ShiftLeft => left * (float)Math.Pow(2, right),
+                ScriptBinaryOperator.ShiftRight => left / (float)Math.Pow(2, right),
 #endif
-
-                case ScriptBinaryOperator.Modulus:
-                    return left % right;
-                case ScriptBinaryOperator.CompareEqual:
-                    return left == right;
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return left != right;
-                case ScriptBinaryOperator.CompareGreater:
-                    return left > right;
-                case ScriptBinaryOperator.CompareLess:
-                    return left < right;
-                case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return left >= right;
-                case ScriptBinaryOperator.CompareLessOrEqual:
-                    return left <= right;
-            }
-            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for float<->float");
+                ScriptBinaryOperator.Modulus => left % right,
+                ScriptBinaryOperator.CompareEqual => left == right,
+                ScriptBinaryOperator.CompareNotEqual => left != right,
+                ScriptBinaryOperator.CompareGreater => left > right,
+                ScriptBinaryOperator.CompareLess => left < right,
+                ScriptBinaryOperator.CompareGreaterOrEqual => left >= right,
+                ScriptBinaryOperator.CompareLessOrEqual => left <= right,
+                _ => throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for float<->float")
+            };
         }
 
         private static object CalculateDateTime(ScriptBinaryOperator op, SourceSpan span, DateTime left, DateTime right)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.Subtract:
-                    return left - right;
-                case ScriptBinaryOperator.CompareEqual:
-                    return left == right;
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return left != right;
-                case ScriptBinaryOperator.CompareLess:
-                    return left < right;
-                case ScriptBinaryOperator.CompareLessOrEqual:
-                    return left <= right;
-                case ScriptBinaryOperator.CompareGreater:
-                    return left > right;
-                case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return left >= right;
-            }
-
-            throw new ScriptRuntimeException(span, $"The operator `{op}` is not supported for DateTime");
+                ScriptBinaryOperator.Subtract => left - right,
+                ScriptBinaryOperator.CompareEqual => left == right,
+                ScriptBinaryOperator.CompareNotEqual => left != right,
+                ScriptBinaryOperator.CompareLess => left < right,
+                ScriptBinaryOperator.CompareLessOrEqual => left <= right,
+                ScriptBinaryOperator.CompareGreater => left > right,
+                ScriptBinaryOperator.CompareGreaterOrEqual => left >= right,
+                _ => throw new ScriptRuntimeException(span, $"The operator `{op}` is not supported for DateTime"),
+            };
         }
 
         private static object CalculateDateTime(ScriptBinaryOperator op, SourceSpan span, DateTime left, TimeSpan right)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.Add:
-                    return left + right;
-            }
-
-            throw new ScriptRuntimeException(span, $"The operator `{op}` is not supported for between <DateTime> and <TimeSpan>");
+                ScriptBinaryOperator.Add => (object)(left + right),
+                _ => throw new ScriptRuntimeException(span, $"The operator `{op}` is not supported for between <DateTime> and <TimeSpan>"),
+            };
         }
 
         private static object CalculateBool(ScriptBinaryOperator op, SourceSpan span, bool left, bool right)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.CompareEqual:
-                    return left == right;
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return left != right;
-            }
-            throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not valid for bool<->bool");
+                ScriptBinaryOperator.CompareEqual => left == right,
+                ScriptBinaryOperator.CompareNotEqual => (object)(left != right),
+                _ => throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not valid for bool<->bool"),
+            };
         }
     }
 }

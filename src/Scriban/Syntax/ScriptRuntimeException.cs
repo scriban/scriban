@@ -38,11 +38,7 @@ namespace Scriban.Syntax
                 return new LogMessage(ParserMessageType.Error, Span, base.Message).ToString();
             }
         }
-        public static bool EnableDisplayInnerException
-        {
-            get;
-            set;
-        }
+        public static bool EnableDisplayInnerException { get; set; }
 
         /// <summary>
         /// Provides the exception message without the source span prefix.
@@ -98,8 +94,7 @@ namespace Scriban.Syntax
 
         public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages, Exception innerException) : base(span, message, innerException)
         {
-            if (parserMessages == null) throw new ArgumentNullException(nameof(parserMessages));
-            ParserMessages = parserMessages;
+            ParserMessages = parserMessages ?? throw new ArgumentNullException(nameof(parserMessages));
         }
 
         public LogMessageBag ParserMessages { get; }

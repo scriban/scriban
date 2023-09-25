@@ -48,7 +48,7 @@ namespace Scriban.Helpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Ensure()
         {
-            if (Items == null) Items = Array.Empty<T>();
+            Items ??= Array.Empty<T>();
         }
 
         public bool IsReadOnly => false;
@@ -191,7 +191,7 @@ namespace Scriban.Helpers
             {
                 Array.Copy(Items, index + 1, Items, index, Count - index);
             }
-            Items[Count] = default(T);
+            Items[Count] = default;
             return item;
         }
 
@@ -250,7 +250,7 @@ namespace Scriban.Helpers
             {
                 this.list = list;
                 index = 0;
-                current = default(T);
+                current = default;
             }
 
             public T Current => current;
@@ -276,14 +276,14 @@ namespace Scriban.Helpers
             private bool MoveNextRare()
             {
                 index = list.Count + 1;
-                current = default(T);
+                current = default;
                 return false;
             }
 
             void IEnumerator.Reset()
             {
                 index = 0;
-                current = default(T);
+                current = default;
             }
         }
 

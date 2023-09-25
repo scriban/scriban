@@ -31,7 +31,7 @@ namespace Scriban.Functions
         private static StringBuilder GetTempStringBuilder()
         {
             var builder = _tlsBuilder;
-            if (builder == null) builder = _tlsBuilder = new StringBuilder(1024);
+            builder ??= _tlsBuilder = new StringBuilder(1024);
             return builder;
         }
 
@@ -57,46 +57,21 @@ namespace Scriban.Functions
             for (int i = 0; i < text.Length; i++)
             {
                 var c = text[i];
-                if (c < 32 || c == '"' || c == '\\')
+                if (c < ' ' || c is '"' or '\\')
                 {
-                    string appendText;
-                    switch (c)
+                    string appendText = c switch
                     {
-                        case '"':
-                            appendText = @"\""";
-                            break;
-                        case '\\':
-                            appendText = @"\\";
-                            break;
-                        /*case '{':
-                            appendText = @"\{";
-                            break;*/
-                        case '\a':
-                            appendText = @"\a";
-                            break;
-                        case '\b':
-                            appendText = @"\b";
-                            break;
-                        case '\t':
-                            appendText = @"\t";
-                            break;
-                        case '\r':
-                            appendText = @"\r";
-                            break;
-                        case '\v':
-                            appendText = @"\v";
-                            break;
-                        case '\f':
-                            appendText = @"\f";
-                            break;
-                        case '\n':
-                            appendText = @"\n";
-                            break;
-                        default:
-                            appendText = @$"\x{(int)c:x2}";
-                            break;
-                    }
-
+                        '"' => @"\""",
+                        '\\' => @"\\",
+                        '\a' => @"\a",
+                        '\b' => @"\b",
+                        '\t' => @"\t",
+                        '\r' => @"\r",
+                        '\v' => @"\v",
+                        '\f' => @"\f",
+                        '\n' => @"\n",
+                        _ => @$"\x{(int)c:x2}",
+                    };
                     if (builder == null)
                     {
                         builder = new StringBuilder(text.Length + 10);
@@ -105,10 +80,10 @@ namespace Scriban.Functions
 
                     builder.Append(appendText);
                 }
-                else if (builder != null)
+                // TODO: could be more optimized by adding range
+                else
                 {
-                    // TODO: could be more optimized by adding range
-                    builder.Append(c);
+                    builder?.Append(c);
                 }
             }
 
@@ -527,8 +502,8 @@ namespace Scriban.Functions
                 return string.Empty;
             }
 
-            match = match ?? string.Empty;
-            replace = replace ?? string.Empty;
+            match ??= string.Empty;
+            replace ??= string.Empty;
 
             return text.Replace(match, replace);
         }
@@ -560,7 +535,7 @@ namespace Scriban.Functions
             {
                 return text;
             }
-            replace = replace ?? string.Empty;
+            replace ??= string.Empty;
 
             var indexOfMatch = fromEnd
                 ? text.LastIndexOf(match, StringComparison.OrdinalIgnoreCase)
@@ -649,7 +624,7 @@ namespace Scriban.Functions
 
             if (start < 0)
             {
-                start = start + text.Length;
+                start += text.Length;
             }
 
             if (!length.HasValue)
@@ -663,7 +638,7 @@ namespace Scriban.Functions
                 {
                     return string.Empty;
                 }
-                length = length + start;
+                length += start;
                 start = 0;
             }
 
@@ -706,12 +681,12 @@ namespace Scriban.Functions
 
             if (start < 0)
             {
-                start = start + text.Length;
+                start += text.Length;
             }
 
             if (start < 0)
             {
-                length = length + start;
+                length += start;
                 start = 0;
             }
 
@@ -914,7 +889,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Truncate(string text, int length, string ellipsis = null)
         {
-            ellipsis = ellipsis ?? "...";
+            ellipsis ??= "...";
             if (string.IsNullOrEmpty(text))
             {
                 return string.Empty;
@@ -1012,11 +987,9 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Md5(string text)
         {
-            text = text ?? string.Empty;
-            using (var md5 = System.Security.Cryptography.MD5.Create())
-            {
-                return Hash(md5, text);
-            }
+            text ??= string.Empty;
+            using var md5 = System.Security.Cryptography.MD5.Create();
+            return Hash(md5, text);
         }
 
         /// <summary>
@@ -1034,10 +1007,8 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Sha1(string text)
         {
-            using (var sha1 = System.Security.Cryptography.SHA1.Create())
-            {
-                return Hash(sha1, text);
-            }
+            using var sha1 = System.Security.Cryptography.SHA1.Create();
+            return Hash(sha1, text);
         }
 
         /// <summary>
@@ -1055,10 +1026,8 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Sha256(string text)
         {
-            using (var sha256 = System.Security.Cryptography.SHA256.Create())
-            {
-                return Hash(sha256, text);
-            }
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+            return Hash(sha256, text);
         }
 
         /// <summary>
@@ -1077,10 +1046,8 @@ namespace Scriban.Functions
         /// </remarks>
         public static string HmacSha1(string text, string secretKey)
         {
-            using (var hsha1 = new System.Security.Cryptography.HMACSHA1(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
-            {
-                return Hash(hsha1, text);
-            }
+            using var hsha1 = new System.Security.Cryptography.HMACSHA1(Encoding.UTF8.GetBytes(secretKey ?? string.Empty));
+            return Hash(hsha1, text);
         }
 
         /// <summary>
@@ -1099,15 +1066,13 @@ namespace Scriban.Functions
         /// </remarks>
         public static string HmacSha256(string text, string secretKey)
         {
-            using (var hsha256 = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
-            {
-                return Hash(hsha256, text);
-            }
+            using var hsha256 = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secretKey ?? string.Empty));
+            return Hash(hsha256, text);
         }
 
         private static string Hash(System.Security.Cryptography.HashAlgorithm algo, string text)
         {
-            text = text ?? string.Empty;
+            text ??= string.Empty;
             var bytes = Encoding.UTF8.GetBytes(text);
             var hash = algo.ComputeHash(bytes);
             var sb = GetTempStringBuilder();

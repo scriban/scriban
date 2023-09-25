@@ -136,11 +136,9 @@ namespace Scriban.Runtime
         /// <exception cref="ArgumentException">Expecting ScriptObject or ScriptArray instance</exception>
         public static ScriptObject GetScriptObject(this IScriptObject @this)
         {
-            var script = @this as ScriptObject;
-            if (script == null)
+            if (@this is not ScriptObject script)
             {
-                var scriptArray = @this as ScriptArray;
-                if (scriptArray == null)
+                if (@this is not ScriptArray scriptArray)
                 {
                     throw new ArgumentException("Expecting ScriptObject or ScriptArray instance", nameof(@this));
                 }
@@ -196,7 +194,7 @@ namespace Scriban.Runtime
                 useInstance = true;
             }
 
-            renamer = renamer ?? StandardMemberRenamer.Default;
+            renamer ??= StandardMemberRenamer.Default;
 
             var typeToImports = new Stack<Type>();
             while (typeInfo != null)

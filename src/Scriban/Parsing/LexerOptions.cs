@@ -18,7 +18,7 @@ namespace Scriban.Parsing
         /// <summary>
         /// Default <see cref="LexerOptions"/>
         /// </summary>
-        public static readonly LexerOptions Default = new LexerOptions()
+        public static readonly LexerOptions Default = new()
         {
             FrontMatterMarker = DefaultFrontMatterMarker
         };

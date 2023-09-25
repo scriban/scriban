@@ -162,22 +162,13 @@ namespace Scriban.Syntax
 
         private static string ToLiteral(ScriptLiteralStringQuoteType quoteType, TokenType stringTokenType, string input)
         {
-            char quote;
-            switch (quoteType)
+            var quote = quoteType switch
             {
-                case ScriptLiteralStringQuoteType.DoubleQuote:
-                    quote = '"';
-                    break;
-                case ScriptLiteralStringQuoteType.SimpleQuote:
-                    quote = '\'';
-                    break;
-                case ScriptLiteralStringQuoteType.Verbatim:
-                    quote = '`';
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(quoteType));
-            }
-
+                ScriptLiteralStringQuoteType.DoubleQuote => '"',
+                ScriptLiteralStringQuoteType.SimpleQuote => '\'',
+                ScriptLiteralStringQuoteType.Verbatim => '`',
+                _ => throw new ArgumentOutOfRangeException(nameof(quoteType)),
+            };
             var literal = new StringBuilder(input.Length + 2);
 
             if (stringTokenType == TokenType.BeginInterpString || stringTokenType == TokenType.InterpString)

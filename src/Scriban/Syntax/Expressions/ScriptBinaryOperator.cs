@@ -94,133 +94,74 @@ namespace Scriban.Syntax
 
       public static TokenType ToTokenType(this ScriptBinaryOperator op)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.Add:
-                    return TokenType.Plus;
-                case ScriptBinaryOperator.Subtract:
-                    return TokenType.Minus;
-                case ScriptBinaryOperator.Divide:
-                    return TokenType.Divide;
-                case ScriptBinaryOperator.DivideRound:
-                    return TokenType.DoubleDivide;
-                case ScriptBinaryOperator.Multiply:
-                    return TokenType.Asterisk;
-                case ScriptBinaryOperator.Modulus:
-                    return TokenType.Percent;
-                case ScriptBinaryOperator.RangeInclude:
-                    return TokenType.DoubleDot;
-                case ScriptBinaryOperator.RangeExclude:
-                    return TokenType.DoubleDotLess;
-                case ScriptBinaryOperator.CompareEqual:
-                    return TokenType.DoubleEqual;
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return TokenType.ExclamationEqual;
-                case ScriptBinaryOperator.CompareLessOrEqual:
-                    return TokenType.LessEqual;
-                case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return TokenType.GreaterEqual;
-                case ScriptBinaryOperator.CompareLess:
-                    return TokenType.Less;
-                case ScriptBinaryOperator.CompareGreater:
-                    return TokenType.Greater;
-                case ScriptBinaryOperator.And:
-                    return TokenType.DoubleAmp;
-                case ScriptBinaryOperator.Or:
-                    return TokenType.DoubleVerticalBar;
-                case ScriptBinaryOperator.EmptyCoalescing:
-                    return TokenType.DoubleQuestion;
-                case ScriptBinaryOperator.NotEmptyCoalescing:
-                    return TokenType.QuestionExclamation;
-                case ScriptBinaryOperator.ShiftLeft:
-                    return TokenType.DoubleLessThan;
-                case ScriptBinaryOperator.ShiftRight:
-                    return TokenType.DoubleGreaterThan;
-                case ScriptBinaryOperator.Power:
-                    return TokenType.Caret;
-                case ScriptBinaryOperator.BinaryAnd:
-                    return TokenType.Amp;
-                case ScriptBinaryOperator.BinaryOr:
-                    return TokenType.VerticalBar;
-                case ScriptBinaryOperator.InterpBegin:
-                    return TokenType.OpenInterpBrace;
-                case ScriptBinaryOperator.InterpEnd:
-                    return TokenType.CloseInterpBrace;
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(op));
-            }
+                ScriptBinaryOperator.Add => TokenType.Plus,
+                ScriptBinaryOperator.Subtract => TokenType.Minus,
+                ScriptBinaryOperator.Divide => TokenType.Divide,
+                ScriptBinaryOperator.DivideRound => TokenType.DoubleDivide,
+                ScriptBinaryOperator.Multiply => TokenType.Asterisk,
+                ScriptBinaryOperator.Modulus => TokenType.Percent,
+                ScriptBinaryOperator.RangeInclude => TokenType.DoubleDot,
+                ScriptBinaryOperator.RangeExclude => TokenType.DoubleDotLess,
+                ScriptBinaryOperator.CompareEqual => TokenType.DoubleEqual,
+                ScriptBinaryOperator.CompareNotEqual => TokenType.ExclamationEqual,
+                ScriptBinaryOperator.CompareLessOrEqual => TokenType.LessEqual,
+                ScriptBinaryOperator.CompareGreaterOrEqual => TokenType.GreaterEqual,
+                ScriptBinaryOperator.CompareLess => TokenType.Less,
+                ScriptBinaryOperator.CompareGreater => TokenType.Greater,
+                ScriptBinaryOperator.And => TokenType.DoubleAmp,
+                ScriptBinaryOperator.Or => TokenType.DoubleVerticalBar,
+                ScriptBinaryOperator.EmptyCoalescing => TokenType.DoubleQuestion,
+                ScriptBinaryOperator.NotEmptyCoalescing => TokenType.QuestionExclamation,
+                ScriptBinaryOperator.ShiftLeft => TokenType.DoubleLessThan,
+                ScriptBinaryOperator.ShiftRight => TokenType.DoubleGreaterThan,
+                ScriptBinaryOperator.Power => TokenType.Caret,
+                ScriptBinaryOperator.BinaryAnd => TokenType.Amp,
+                ScriptBinaryOperator.BinaryOr => TokenType.VerticalBar,
+                ScriptBinaryOperator.InterpBegin => TokenType.OpenInterpBrace,
+                ScriptBinaryOperator.InterpEnd => TokenType.CloseInterpBrace,
+                _ => throw new ArgumentOutOfRangeException(nameof(op)),
+            };
         }
 
 
         public static string ToText(this ScriptBinaryOperator op)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.Add:
-                    return "+";
-                case ScriptBinaryOperator.Subtract:
-                    // The subtract operator requires to be separated by space
-                    return "-";
-                case ScriptBinaryOperator.Divide:
-                    return "/";
-                case ScriptBinaryOperator.DivideRound:
-                    return "//";
-                case ScriptBinaryOperator.Multiply:
-                    return "*";
-                case ScriptBinaryOperator.Modulus:
-                    return "%";
-                case ScriptBinaryOperator.RangeInclude:
-                    return "..";
-                case ScriptBinaryOperator.RangeExclude:
-                    return "..<";
-                case ScriptBinaryOperator.CompareEqual:
-                    return "==";
-                case ScriptBinaryOperator.CompareNotEqual:
-                    return "!=";
-                case ScriptBinaryOperator.CompareLessOrEqual:
-                    return "<=";
-                case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return ">=";
-                case ScriptBinaryOperator.CompareLess:
-                    return "<";
-                case ScriptBinaryOperator.CompareGreater:
-                    return ">";
-                case ScriptBinaryOperator.And:
-                    return "&&";
-                case ScriptBinaryOperator.Or:
-                    return "||";
-                case ScriptBinaryOperator.EmptyCoalescing:
-                    return "??";
-                case ScriptBinaryOperator.NotEmptyCoalescing:
-                    return "?!";
-                case ScriptBinaryOperator.ShiftLeft:
-                    return "<<";
-                case ScriptBinaryOperator.ShiftRight:
-                    return ">>";
-                case ScriptBinaryOperator.InterpBegin:
-                    return "{";
-                case ScriptBinaryOperator.InterpEnd:
-                    return "}";
-
-                case ScriptBinaryOperator.LiquidContains:
-                    return "| string.contains ";
-                case ScriptBinaryOperator.LiquidStartsWith:
-                    return "| string.starts_with ";
-                case ScriptBinaryOperator.LiquidEndsWith:
-                    return "| string.ends_with ";
-                case ScriptBinaryOperator.LiquidHasKey:
-                    return "| object.has_key ";
-                case ScriptBinaryOperator.LiquidHasValue:
-                    return "| object.has_value ";
-                case ScriptBinaryOperator.Power:
-                    return "^";
-                case ScriptBinaryOperator.BinaryAnd:
-                    return "&";
-                case ScriptBinaryOperator.BinaryOr:
-                    return "|";
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(op));
-            }
+                ScriptBinaryOperator.Add => "+",
+                ScriptBinaryOperator.Subtract => "-",// The subtract operator requires to be separated by space
+                ScriptBinaryOperator.Divide => "/",
+                ScriptBinaryOperator.DivideRound => "//",
+                ScriptBinaryOperator.Multiply => "*",
+                ScriptBinaryOperator.Modulus => "%",
+                ScriptBinaryOperator.RangeInclude => "..",
+                ScriptBinaryOperator.RangeExclude => "..<",
+                ScriptBinaryOperator.CompareEqual => "==",
+                ScriptBinaryOperator.CompareNotEqual => "!=",
+                ScriptBinaryOperator.CompareLessOrEqual => "<=",
+                ScriptBinaryOperator.CompareGreaterOrEqual => ">=",
+                ScriptBinaryOperator.CompareLess => "<",
+                ScriptBinaryOperator.CompareGreater => ">",
+                ScriptBinaryOperator.And => "&&",
+                ScriptBinaryOperator.Or => "||",
+                ScriptBinaryOperator.EmptyCoalescing => "??",
+                ScriptBinaryOperator.NotEmptyCoalescing => "?!",
+                ScriptBinaryOperator.ShiftLeft => "<<",
+                ScriptBinaryOperator.ShiftRight => ">>",
+                ScriptBinaryOperator.InterpBegin => "{",
+                ScriptBinaryOperator.InterpEnd => "}",
+                ScriptBinaryOperator.LiquidContains => "| string.contains ",
+                ScriptBinaryOperator.LiquidStartsWith => "| string.starts_with ",
+                ScriptBinaryOperator.LiquidEndsWith => "| string.ends_with ",
+                ScriptBinaryOperator.LiquidHasKey => "| object.has_key ",
+                ScriptBinaryOperator.LiquidHasValue => "| object.has_value ",
+                ScriptBinaryOperator.Power => "^",
+                ScriptBinaryOperator.BinaryAnd => "&",
+                ScriptBinaryOperator.BinaryOr => "|",
+                _ => throw new ArgumentOutOfRangeException(nameof(op)),
+            };
         }
     }
 }

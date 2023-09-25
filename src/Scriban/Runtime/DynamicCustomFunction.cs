@@ -25,7 +25,7 @@ namespace Scriban.Runtime
 #endif
     abstract partial class DynamicCustomFunction : IScriptCustomFunction
     {
-        private static readonly Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>> BuiltinFunctionDelegates = new Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>>(MethodComparer.Default);
+        private static readonly Dictionary<MethodInfo, Func<MethodInfo, DynamicCustomFunction>> BuiltinFunctionDelegates = new(MethodComparer.Default);
 
         /// <summary>
         /// Gets the reflection method associated to this dynamic call.
@@ -130,14 +130,12 @@ namespace Scriban.Runtime
 #if !SCRIBAN_NO_ASYNC
         protected async ValueTask<object> ConfigureAwait(object result)
         {
-            switch (result)
+            return result switch
             {
-                case Task<object> taskObj:
-                    return await taskObj.ConfigureAwait(false);
-                case Task<string> taskStr:
-                    return await taskStr.ConfigureAwait(false);
-            }
-            return await (dynamic)result;
+                Task<object> taskObj => await taskObj.ConfigureAwait(false),
+                Task<string> taskStr => await taskStr.ConfigureAwait(false),
+                _ => await (dynamic)result,
+            };
         }
 #endif
 
@@ -239,7 +237,7 @@ namespace Scriban.Runtime
 
         private class MethodComparer : IEqualityComparer<MethodInfo>
         {
-            public static readonly MethodComparer Default = new MethodComparer();
+            public static readonly MethodComparer Default = new();
 
             public bool Equals(MethodInfo method, MethodInfo otherMethod)
             {

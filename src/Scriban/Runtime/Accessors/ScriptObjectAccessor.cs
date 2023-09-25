@@ -21,27 +21,27 @@ namespace Scriban.Runtime.Accessors
 
         public int GetMemberCount(TemplateContext context, SourceSpan span, object target)
         {
-            return ((IScriptObject) target).Count;
+            return (target as IScriptObject).Count;
         }
 
         public IEnumerable<string> GetMembers(TemplateContext context, SourceSpan span, object target)
         {
-            return ((IScriptObject) target).GetMembers();
+            return (target as IScriptObject).GetMembers();
         }
 
         public bool HasMember(TemplateContext context, SourceSpan span, object target, string member)
         {
-            return ((IScriptObject)target).Contains(member);
+            return (target as IScriptObject).Contains(member);
         }
 
         public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
         {
-            return ((IScriptObject)target).TryGetValue(context, span, member, out value);
+            return (target as IScriptObject).TryGetValue(context, span, member, out value);
         }
 
         public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
         {
-            return ((IScriptObject)target).TrySetValue(context, span, member, value, false);
+            return (target as IScriptObject).TrySetValue(context, span, member, value, false);
         }
 
         public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)

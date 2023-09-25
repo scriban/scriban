@@ -10,7 +10,7 @@ namespace Scriban.Runtime.Accessors
 {
     class PrimitiveAccessor : IObjectAccessor, IListAccessor
     {
-        public static readonly PrimitiveAccessor Default = new PrimitiveAccessor();
+        public static readonly PrimitiveAccessor Default = new();
 
         private PrimitiveAccessor()
         {

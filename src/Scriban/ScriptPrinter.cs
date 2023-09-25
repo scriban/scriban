@@ -32,7 +32,7 @@ namespace Scriban
         private bool _hasComma;
         private FastStack<bool> _isWhileLoop;
 
-        public ScriptPrinter(IScriptOutput output, ScriptPrinterOptions options = default(ScriptPrinterOptions))
+        public ScriptPrinter(IScriptOutput output, ScriptPrinterOptions options = default)
         {
             _isWhileLoop = new FastStack<bool>(4);
             Options = options;
@@ -42,7 +42,7 @@ namespace Scriban
             }
 
             _isScriptOnly = options.Mode == ScriptMode.ScriptOnly;
-            _isInCode = _isScriptOnly || (options.Mode == ScriptMode.FrontMatterOnly || options.Mode == ScriptMode.FrontMatterAndContent);
+            _isInCode = _isScriptOnly || (options.Mode is ScriptMode.FrontMatterOnly or ScriptMode.FrontMatterAndContent);
             _output = output;
             _hasEndOfStatement = true; // We start as if we were on a new line
         }

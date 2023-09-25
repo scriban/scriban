@@ -71,10 +71,9 @@ namespace Scriban.Parsing
 
             var text = GetAsText(Current);
             var c = text[text.Length - 1];
-            if (c == 'f' || c == 'F')
+            if (c is 'f' or 'F')
             {
-                float floatResult;
-                if (float.TryParse(text.Substring(0, text.Length - 1), NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+                if (float.TryParse(text.Substring(0, text.Length - 1), NumberStyles.Float, CultureInfo.InvariantCulture, out float floatResult))
                 {
                     literal.Value = floatResult;
                 }
@@ -85,15 +84,14 @@ namespace Scriban.Parsing
             }
             else
             {
-                var explicitDecimal = c == 'm' || c == 'M';
+                var explicitDecimal = c is 'm' or 'M';
                 if ((Options.ParseFloatAsDecimal || explicitDecimal) && decimal.TryParse(explicitDecimal ? text.Substring(0, text.Length - 1) : text, NumberStyles.Float, CultureInfo.InvariantCulture, out var decimalResult))
                 {
                     literal.Value = decimalResult;
                 }
                 else
                 {
-                    double floatResult;
-                    if (double.TryParse(c == 'd' || c == 'D' ? text.Substring(0, text.Length-1) : text, NumberStyles.Float, CultureInfo.InvariantCulture, out floatResult))
+                    if (double.TryParse(c is 'd' or 'D' ? text.Substring(0, text.Length - 1) : text, NumberStyles.Float, CultureInfo.InvariantCulture, out double floatResult))
                     {
                         literal.Value = floatResult;
                     }
@@ -123,8 +121,7 @@ namespace Scriban.Parsing
             var literal = Open<ScriptLiteral>();
 
             var text = GetAsText(Current).Replace("_", string.Empty);
-            long result;
-            if (!long.TryParse(text, NumberStyles.Integer|NumberStyles.AllowExponent, CultureInfo.InvariantCulture, out result))
+            if (!long.TryParse(text, NumberStyles.Integer | NumberStyles.AllowExponent, CultureInfo.InvariantCulture, out long result))
             {
                 bool isValid = false;
 
@@ -143,7 +140,7 @@ namespace Scriban.Parsing
 
                 if (result >= int.MinValue && result <= int.MaxValue)
                 {
-                    literal.Value = (int) result;
+                    literal.Value = (int)result;
                 }
                 else
                 {
@@ -166,9 +163,8 @@ namespace Scriban.Parsing
                 text = text.Substring(0, text.Length - 1);
                 isUnsigned = true;
             }
-            ulong tempResult;
 
-            if (!ulong.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out tempResult))
+            if (!ulong.TryParse(text, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out ulong tempResult))
             {
                 bool isValid = false;
 
@@ -187,14 +183,7 @@ namespace Scriban.Parsing
             {
                 if (tempResult <= uint.MaxValue)
                 {
-                    if (isUnsigned)
-                    {
-                        literal.Value = (long)(uint)tempResult;
-                    }
-                    else
-                    {
-                        literal.Value = unchecked((int)(uint)tempResult);
-                    }
+                    literal.Value = isUnsigned ? (long)(uint)tempResult : (object)(int)(uint)tempResult;
                 }
                 else
                 {
@@ -203,10 +192,7 @@ namespace Scriban.Parsing
                         literal.Value = new BigInteger(tempResult);
                     }
 
-                    if (literal.Value == null)
-                    {
-                        literal.Value = unchecked((long)tempResult);
-                    }
+                    literal.Value ??= unchecked((long)tempResult);
                 }
             }
 
@@ -291,10 +277,7 @@ namespace Scriban.Parsing
                         literal.Value = number;
                     }
 
-                    if (literal.Value == null)
-                    {
-                        literal.Value = unchecked((long) (ulong) number);
-                    }
+                    literal.Value ??= unchecked((long) (ulong) number);
                 }
                 else
                 {
@@ -578,14 +561,13 @@ namespace Scriban.Parsing
                 text = text.Substring(1);
 
                 // Convert $0, $1... $n variable into $[0] $[1]...$[n] variables
-                int index;
-                if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out index))
+                if (int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out int index))
                 {
                     var target = new ScriptVariableLocal(ScriptVariable.Arguments.BaseName)
                     {
                         Span = currentSpan
                     };
-                    var indexLiteral = new ScriptLiteral() {Span = currentSpan, Value = index};
+                    var indexLiteral = new ScriptLiteral() { Span = currentSpan, Value = index };
 
                     var indexerExpression = new ScriptIndexerExpression
                     {
@@ -703,7 +685,7 @@ namespace Scriban.Parsing
 
             // A liquid variable can have `-` in its identifier
             // If this is the case, we need to translate it to `this["this"]` instead
-            if (_isLiquid && text.IndexOf('-') >= 0)
+            if (_isLiquid && text.Contains("-"))
             {
                 var target = new ScriptThisExpression()
                 {
@@ -772,10 +754,7 @@ namespace Scriban.Parsing
                 {
                     break;
                 }
-                if (builder == null)
-                {
-                    builder = new StringBuilder(endOffset - startOffset + 1);
-                }
+                builder ??= new StringBuilder(endOffset - startOffset + 1);
                 builder.Append(text.Substring(offset, nextOffset - offset + 1));
                 // Skip the escape ``
                 offset = nextOffset + 2;
@@ -812,24 +791,23 @@ namespace Scriban.Parsing
 
         private static bool IsVariableOrLiteral(Token token)
         {
-            switch (token.Type)
+            return token.Type switch
             {
-                case TokenType.Identifier:
-                case TokenType.IdentifierSpecial:
-                case TokenType.Integer:
-                case TokenType.HexaInteger:
-                case TokenType.BinaryInteger:
-                case TokenType.Float:
-                case TokenType.String:
-                case TokenType.BeginInterpString:
-                case TokenType.ContinuationInterpString:
-                case TokenType.EndingInterpString:
-                case TokenType.InterpString:
-                case TokenType.ImplicitString:
-                case TokenType.VerbatimString:
-                    return true;
-            }
-            return false;
+                TokenType.Identifier or
+                TokenType.IdentifierSpecial or
+                TokenType.Integer or
+                TokenType.HexaInteger or
+                TokenType.BinaryInteger or
+                TokenType.Float or
+                TokenType.String or
+                TokenType.BeginInterpString or
+                TokenType.ContinuationInterpString or
+                TokenType.EndingInterpString or
+                TokenType.InterpString or
+                TokenType.ImplicitString or
+                TokenType.VerbatimString => true,
+                _ => false,
+            };
         }
     }
 }

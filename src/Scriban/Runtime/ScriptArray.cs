@@ -111,9 +111,8 @@ namespace Scriban.Runtime
                 foreach (var value in _values)
                 {
                     var fromValue = value;
-                    if (value is IScriptObject)
+                    if (value is IScriptObject fromObject)
                     {
-                        var fromObject = (IScriptObject)value;
                         fromValue = (T)fromObject.Clone(true);
                     }
                     array._values.Add(fromValue);
@@ -139,7 +138,7 @@ namespace Scriban.Runtime
             return array;
         }
 
-        public ScriptObject ScriptObject => _script ?? (_script = new ScriptObject() { IsReadOnly = IsReadOnly});
+        public ScriptObject ScriptObject => _script ??= new ScriptObject() { IsReadOnly = IsReadOnly};
 
         public int Count => _values.Count;
 
@@ -535,8 +534,10 @@ namespace Scriban.Runtime
                 }
 
                 case ScriptBinaryOperator.ShiftLeft:
-                    var newLeft = new ScriptArray<T>(leftArray);
-                    newLeft.Add(typeof(T) == typeof(object) ? (T)rightValue : context.ToObject<T>(rightSpan, rightValue));
+                    var newLeft = new ScriptArray<T>(leftArray)
+                    {
+                        typeof(T) == typeof(object) ? (T)rightValue : context.ToObject<T>(rightSpan, rightValue)
+                    };
                     result = newLeft;
                     return true;
 
@@ -555,12 +556,11 @@ namespace Scriban.Runtime
             var rightArray = rightValue as ScriptArray<T>;
             if (rightArray == null)
             {
-                var list = rightValue as IList;
-                if (list != null)
+                if (rightValue is IList list)
                 {
                     rightArray = new ScriptArray<T>(list);
                 }
-                else if (rightValue is IEnumerable enumerable && !(rightValue is string))
+                else if (rightValue is IEnumerable enumerable && rightValue is not string)
                 {
                     rightArray = new ScriptArray<T>(enumerable);
                 }

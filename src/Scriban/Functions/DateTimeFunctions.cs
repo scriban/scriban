@@ -482,15 +482,12 @@ namespace Scriban.Functions
         {
             // If we access `date` without any parameter, it calls by default the "parse" function
             // otherwise it is the 'date' object itself
-            switch (arguments.Count)
+            return arguments.Count switch
             {
-                case 0:
-                    return this;
-                case 1:
-                    return Parse(context, context.ObjectToString(arguments[0]));
-                default:
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{arguments.Count}` for `date` object/function.");
-            }
+                0 => this,
+                1 => Parse(context, context.ObjectToString(arguments[0])),
+                _ => throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{arguments.Count}` for `date` object/function."),
+            };
         }
 
         public int RequiredParameterCount => 0;

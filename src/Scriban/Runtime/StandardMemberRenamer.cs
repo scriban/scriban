@@ -42,7 +42,7 @@ namespace Scriban.Runtime
                 {
                     if (i > 0 && !previousUpper)
                     {
-                        builder.Append("_");
+                        builder.Append('_');
                     }
                     builder.Append(char.ToLowerInvariant(c));
                     previousUpper = true;

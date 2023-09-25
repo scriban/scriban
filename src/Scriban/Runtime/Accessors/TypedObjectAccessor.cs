@@ -59,8 +59,7 @@ namespace Scriban.Runtime.Accessors
         public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
         {
             value = null;
-            MemberInfo memberAccessor;
-            if (_members.TryGetValue(member, out memberAccessor))
+            if (_members.TryGetValue(member, out MemberInfo memberAccessor))
             {
                 var fieldAccessor = memberAccessor as FieldInfo;
                 if (fieldAccessor != null)

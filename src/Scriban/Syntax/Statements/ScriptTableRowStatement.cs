@@ -103,15 +103,11 @@ namespace Scriban.Syntax
             {
                 if (!base.Contains(member))
                 {
-                    switch (member)
+                    return member switch
                     {
-                        case "col":
-                        case "col0":
-                        case "col_first":
-                        case "col_last":
-                            return true;
-                    }
-                    return false;
+                        "col" or "col0" or "col_first" or "col_last" => true,
+                        _ => false,
+                    };
                 }
                 return true;
             }

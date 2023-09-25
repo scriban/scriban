@@ -25,7 +25,7 @@ namespace Scriban.Syntax
             set
             {
                 ParentToThis(ref _expression, value);
-                CanOutput = !(value is ScriptAssignExpression);
+                CanOutput = value is not ScriptAssignExpression;
             }
         }
 
@@ -33,8 +33,7 @@ namespace Scriban.Syntax
         {
             var result = context.Evaluate(Expression);
             // This code is necessary for wrap to work
-            var codeDelegate = result as ScriptNode;
-            if (codeDelegate != null)
+            if (result is ScriptNode codeDelegate)
             {
                 return context.Evaluate(codeDelegate);
             }

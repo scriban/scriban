@@ -311,19 +311,18 @@ namespace Scriban.Syntax
 
         private static bool HasSimilarPrecedenceThanMultiply(ScriptBinaryOperator op)
         {
-            switch (op)
+            return op switch
             {
-                case ScriptBinaryOperator.Multiply:
-                case ScriptBinaryOperator.Divide:
-                case ScriptBinaryOperator.DivideRound:
-                case ScriptBinaryOperator.Modulus:
-                case ScriptBinaryOperator.ShiftLeft:
-                case ScriptBinaryOperator.ShiftRight:
-                case ScriptBinaryOperator.Power:
-                    return true;
-            }
-
-            return false;
+                ScriptBinaryOperator.Multiply or
+                ScriptBinaryOperator.Divide or
+                ScriptBinaryOperator.DivideRound or
+                ScriptBinaryOperator.Modulus or
+                ScriptBinaryOperator.ShiftLeft or
+                ScriptBinaryOperator.ShiftRight or
+                ScriptBinaryOperator.Power
+                => true,
+                _ => false,
+            };
         }
 
         private class CompressWhitespacesVisitor : ScriptVisitor

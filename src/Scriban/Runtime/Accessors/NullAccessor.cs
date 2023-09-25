@@ -17,7 +17,7 @@ namespace Scriban.Runtime.Accessors
 #endif
     class NullAccessor : IObjectAccessor
     {
-        public static readonly NullAccessor Default = new NullAccessor();
+        public static readonly NullAccessor Default = new();
 
         public int GetMemberCount(TemplateContext context, SourceSpan span, object target)
         {

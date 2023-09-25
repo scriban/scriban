@@ -18,7 +18,7 @@ namespace Scriban.Runtime.Accessors
 #endif
     class StringAccessor : IListAccessor, IObjectAccessor
     {
-        public static StringAccessor Default = new StringAccessor();
+        public static StringAccessor Default = new();
 
         private StringAccessor()
         {
@@ -26,12 +26,12 @@ namespace Scriban.Runtime.Accessors
 
         public int GetLength(TemplateContext context, SourceSpan span, object target)
         {
-            return ((string)target).Length;
+            return (target as string).Length;
         }
 
         public object GetValue(TemplateContext context, SourceSpan span, object target, int index)
         {
-            return ((string)target)[index].ToString();
+            return (target as string)[index].ToString();
         }
 
         public void SetValue(TemplateContext context, SourceSpan span, object target, int index, object value)

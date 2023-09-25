@@ -20,7 +20,7 @@ namespace Scriban.Syntax
 #endif
     readonly struct ScriptStringSlice : IEquatable<ScriptStringSlice>, IComparable<ScriptStringSlice>, IComparable<string>
     {
-        public static readonly ScriptStringSlice Empty = new ScriptStringSlice(string.Empty);
+        public static readonly ScriptStringSlice Empty = new(string.Empty);
 
         public ScriptStringSlice(string fullText)
         {
@@ -158,7 +158,7 @@ namespace Scriban.Syntax
             return textComparison != 0 ?  textComparison < 0 ? -1 : 1 : Length.CompareTo(other.Length);
         }
 
-        public static explicit operator ScriptStringSlice(string text) => new ScriptStringSlice(text);
+        public static explicit operator ScriptStringSlice(string text) => new(text);
 
         public static explicit operator string(ScriptStringSlice slice) => slice.ToString();
 

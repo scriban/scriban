@@ -13,11 +13,11 @@ namespace Scriban.Syntax
 #endif
     readonly partial struct ScriptTrivia
     {
-        public static readonly ScriptTrivia Space = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.Whitespace, (ScriptStringSlice)" ");
+        public static readonly ScriptTrivia Space = new(new SourceSpan(), ScriptTriviaType.Whitespace, (ScriptStringSlice)" ");
 
-        public static readonly ScriptTrivia Comma = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.Comma, (ScriptStringSlice)",");
+        public static readonly ScriptTrivia Comma = new(new SourceSpan(), ScriptTriviaType.Comma, (ScriptStringSlice)",");
 
-        public static readonly ScriptTrivia SemiColon = new ScriptTrivia(new SourceSpan(), ScriptTriviaType.SemiColon, (ScriptStringSlice)";");
+        public static readonly ScriptTrivia SemiColon = new(new SourceSpan(), ScriptTriviaType.SemiColon, (ScriptStringSlice)";");
 
         public ScriptTrivia(SourceSpan span, ScriptTriviaType type, ScriptStringSlice text)
         {
@@ -61,16 +61,13 @@ namespace Scriban.Syntax
 
         public override string ToString()
         {
-            switch (Type)
+            return Type switch
             {
-                case ScriptTriviaType.Empty:
-                    return string.Empty;
-                case ScriptTriviaType.Comma:
-                    return ",";
-                case ScriptTriviaType.SemiColon:
-                    return ";";
-            }
-            return (string)Text;
+                ScriptTriviaType.Empty => string.Empty,
+                ScriptTriviaType.Comma => ",",
+                ScriptTriviaType.SemiColon => ";",
+                _ => (string)Text,
+            };
         }
     }
 }

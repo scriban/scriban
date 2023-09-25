@@ -22,7 +22,7 @@ namespace Scriban.Runtime
 #endif
     sealed class EmptyScriptObject : IScriptObject
     {
-        public static readonly EmptyScriptObject Default = new EmptyScriptObject();
+        public static readonly EmptyScriptObject Default = new();
 
         private EmptyScriptObject()
         {

@@ -21,7 +21,7 @@ namespace Scriban.Parsing
 #endif
     struct Token : IEquatable<Token>
     {
-        public static readonly Token Eof = new Token(TokenType.Eof, TextPosition.Eof, TextPosition.Eof);
+        public static readonly Token Eof = new(TokenType.Eof, TextPosition.Eof, TextPosition.Eof);
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Token"/> struct.
@@ -89,8 +89,8 @@ namespace Scriban.Parsing
 
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            return obj is Token && Equals((Token) obj);
+            if (obj is null) return false;
+            return obj is Token token && Equals(token);
         }
 
         public override int GetHashCode()

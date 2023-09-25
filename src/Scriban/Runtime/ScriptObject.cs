@@ -192,8 +192,7 @@ namespace Scriban.Runtime
         /// <returns><c>true</c> if the value was retrieved</returns>
         public virtual bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
         {
-            InternalValue internalValue;
-            var result = Store.TryGetValue(member, out internalValue);
+            var result = Store.TryGetValue(member, out InternalValue internalValue);
             value = internalValue.Value;
             return result;
         }
@@ -215,7 +214,7 @@ namespace Scriban.Runtime
             {
                 return defaultValue;
             }
-            if (!(obj is T))
+            if (obj is not T)
             {
                 obj = defaultValue;
                 this[name] = obj;
@@ -233,8 +232,7 @@ namespace Scriban.Runtime
             get
             {
                 if (key == null) throw new ArgumentNullException(nameof(key));
-                object value;
-                TryGetValue(null, new SourceSpan(), key, out value);
+                TryGetValue(null, new SourceSpan(), key, out object value);
                 return value;
             }
             set
@@ -268,8 +266,7 @@ namespace Scriban.Runtime
         /// <returns><c>true</c> if the specified member is read-only</returns>
         public virtual bool CanWrite(string member)
         {
-            InternalValue internalValue;
-            Store.TryGetValue(member, out internalValue);
+            Store.TryGetValue(member, out InternalValue internalValue);
             return !internalValue.IsReadOnly;
         }
 
@@ -323,8 +320,7 @@ namespace Scriban.Runtime
         public virtual void SetReadOnly(string member, bool readOnly)
         {
             this.AssertNotReadOnly();
-            InternalValue internalValue;
-            if (Store.TryGetValue(member, out internalValue))
+            if (Store.TryGetValue(member, out InternalValue internalValue))
             {
                 internalValue.IsReadOnly = readOnly;
                 Store[member] = internalValue;
@@ -350,7 +346,7 @@ namespace Scriban.Runtime
         {
             var context = formatProvider as TemplateContext;
             var result = new StringBuilder();
-            result.Append("{");
+            result.Append('{');
             bool isFirst = true;
             foreach (var item in this)
             {
@@ -385,7 +381,7 @@ namespace Scriban.Runtime
                 }
                 isFirst = false;
             }
-            result.Append("}");
+            result.Append('}');
             return result.ToString();
         }
 
@@ -421,14 +417,12 @@ namespace Scriban.Runtime
                 foreach (var keyPair in Store)
                 {
                     var value = keyPair.Value.Value;
-                    if (value is ScriptObject)
+                    if (value is ScriptObject fromObject)
                     {
-                        var fromObject = (ScriptObject) value;
                         value = fromObject.Clone(true);
                     }
-                    else if (value is ScriptArray)
+                    else if (value is ScriptArray fromArray)
                     {
-                        var fromArray = (ScriptArray)value;
                         value = fromArray.Clone(true);
                     }
                     toObject.Store[keyPair.Key] = new InternalValue(value, keyPair.Value.IsReadOnly);
@@ -513,8 +507,6 @@ namespace Scriban.Runtime
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "The arrayIndex parameter is larger than the array's length.");
             if (array.Length - arrayIndex < Count)
                 throw new ArgumentException("The array is too small to fit.", nameof(array));
-            var count = Count;
-            var store = Store;
             foreach (var pair in Store)
                 array[arrayIndex++] = new KeyValuePair<string, object>(pair.Key, pair.Value.Value);
         }
