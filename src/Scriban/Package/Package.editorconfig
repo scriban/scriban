@@ -1,0 +1,13 @@
+[*.cs]
+# Mark code as excluded and generated
+# NB: This disables regular analyzers by default
+exclude = true
+generated_code = true
+
+# Disable any active Roslyn analyzers
+dotnet_analyzer_diagnostic.severity = none
+
+# These are security analyzers and must be manually disabled
+dotnet_diagnostic.CA5350.severity = none
+dotnet_diagnostic.CA5351.severity = none
+dotnet_diagnostic.CA5394.severity = none

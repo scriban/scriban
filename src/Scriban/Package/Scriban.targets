@@ -1,5 +1,6 @@
 <Project>
   <ItemGroup Condition="'$(PackageScribanIncludeSource)' == 'true'">
+    <EditorConfigFiles Include="$(MSBuildThisFileDirectory)../src/Scriban/.editorconfig" />
     <Compile Include="$(MSBuildThisFileDirectory)../src/**/*.cs" Visible="false"/>
   </ItemGroup>
 </Project>
