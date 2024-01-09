@@ -31,6 +31,11 @@
       <PackagePath>build\</PackagePath>
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </Content>
+    <Content Include="Package\Package.editorconfig">
+      <Pack>true</Pack>
+      <PackagePath>src\Scriban\.editorconfig</PackagePath>
+      <PackageCopyToOutput>true</PackageCopyToOutput>
+    </Content>
     <Content Include="**\*.cs" Exclude="**\obj\**;**\bin\**" Visible="false">
       <Pack>true</Pack>
       <PackagePath>src\Scriban\</PackagePath>
