@@ -25,25 +25,25 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Pack sources in the nuget packages -->
-    <None Remove="Package\Scriban.*"/>
+    <None Remove="$(MSBuildThisFileDirectory)Package\Scriban.*"/>
     <Content Include="Package\Scriban.*">
       <Pack>true</Pack>
       <PackagePath>build\</PackagePath>
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </Content>
-    <Content Include="Package\Package.editorconfig">
+    <Content Include="$(MSBuildThisFileDirectory)Package\Package.editorconfig">
       <Pack>true</Pack>
       <PackagePath>src\Scriban\.editorconfig</PackagePath>
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </Content>
-    <Content Include="**\*.cs" Exclude="**\obj\**;**\bin\**" Visible="false">
+    <Content Include="$(MSBuildThisFileDirectory)**\*.cs" Exclude="$(MSBuildThisFileDirectory)**\obj\**;$(MSBuildThisFileDirectory)**\bin\**" Visible="false">
       <Pack>true</Pack>
       <PackagePath>src\Scriban\</PackagePath>
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </Content>
 
-    <None Include="../../img/scriban.png" Pack="true" PackagePath="" />
-    <None Include="../../readme.md" Pack="true" PackagePath="/"/>
+    <None Include="$(MSBuildThisFileDirectory)../../img/scriban.png" Pack="true" PackagePath="" />
+    <None Include="$(MSBuildThisFileDirectory)../../readme.md" Pack="true" PackagePath="/"/>
 
     <PackageReference Include="MinVer" Version="4.3.0">
       <PrivateAssets>all</PrivateAssets>
