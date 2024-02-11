@@ -228,6 +228,36 @@ A `ScriptObject` is mainly an extended version of a `IDictionary<string, object>
 
 Note that any `IDictionary<string, object>` put as a property will be accessible as well.
 
+#### Imports System.Text.Json.JsonElement
+
+A `ScriptObject` or `ScriptArray` can import `JsonElement`.
+
+```C#
+  // objects with ScriptObject
+  JsonElement json = JsonSerializer.Deserialize<JsonElement>("""{ "foo": "bar" }""");
+  var model = ScriptObject.From(json);
+
+  // arrays with ScriptArray
+  JsonElement json = JsonSerializer.Deserialize<JsonElement>("""[1, 2, 3]""");
+  var model = ScriptArray.From(json);
+
+  // import to an existing object
+  var model = new ScriptObject();
+  model.Import(jsonElement);
+
+  // add to an existing object
+  var model = new ScriptObject();
+  model.Add("foo", jsonElement);
+
+  // render using JsonElement directly
+  JsonElement model = JsonSerializer.Deserialize<JsonElement>("""{ "foo": "bar" }""");
+  var template = Template.Parse("foo: `{{foo}}`");
+  var result = template.Render(model);
+  // Prints: foo: `bar`
+```
+
+**Note**: JsonElement is also supported in properties of custom classes and structs.
+
 #### Imports a .NET delegate
 
 Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
