@@ -13,6 +13,10 @@ using Scriban.Parsing;
 using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
 
+#if NET
+using System.Text.Json;
+#endif
+
 namespace Scriban.Runtime
 {
     /// <summary>
@@ -39,7 +43,7 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
-        /// Imports the specified object intto this <see cref="ScriptObject"/> context. See remarks.
+        /// Imports the specified object into this <see cref="ScriptObject"/> context. See remarks.
         /// </summary>
         /// <param name="script">The script object to import into</param>
         /// <param name="obj">The object.</param>
@@ -68,8 +72,61 @@ namespace Scriban.Runtime
                 return;
             }
 
+#if NET
+            if (obj is JsonElement json) {
+                script.Import(json);
+            }
+            else {
+                script.Import(obj, ScriptMemberImportFlags.All, filter, renamer);
+            }
+#else
             script.Import(obj, ScriptMemberImportFlags.All, filter, renamer);
+#endif
         }
+
+#if NET
+#nullable enable
+        public static void Import(this IScriptObject script, JsonElement json)
+        {
+            if (json.ValueKind is JsonValueKind.Object && script is ScriptObject)
+            {
+                script.AddJsonObject(json);
+            }
+            else if (json.ValueKind is JsonValueKind.Array && script is ScriptArray array)
+            {
+                array.AddJsonArray(json);
+            }
+            else if (json.ValueKind is JsonValueKind.Null || json.ValueKind is JsonValueKind.Undefined)
+            {
+                return;
+            }
+            else
+            {
+                throw new ArgumentOutOfRangeException($"Unsupported object type `{json.ValueKind}`. Expecting Json {(script is ScriptObject ? "Object" : "Array")}.");
+            }
+        }
+
+        internal static IScriptObject AddJsonObject(this IScriptObject obj, JsonElement json)
+        {
+            foreach (var property in json.EnumerateObject())
+            {
+                obj.SetValue(property.Name, property.Value.ToScriban(), false);
+            }
+
+            return obj;
+        }
+
+        internal static ScriptArray AddJsonArray(this ScriptArray array, JsonElement json)
+        {
+            foreach (var value in json.EnumerateArray())
+            {
+                array.Add(value.ToScriban());
+            }
+
+            return array;
+        }
+#nullable disable
+#endif
 
         public static bool TryGetValue(this IScriptObject @this, string key, out object value)
         {

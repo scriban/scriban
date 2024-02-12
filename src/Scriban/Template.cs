@@ -10,6 +10,10 @@ using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
 
+#if NET
+using System.Text.Json;
+#endif
+
 namespace Scriban
 {
     /// <summary>
@@ -211,6 +215,21 @@ namespace Scriban
             context.PushGlobal(scriptObject);
             return Render(context);
         }
+
+#if NET
+        /// <summary>
+        /// Renders this template using the specified JSON object.
+        /// </summary>
+        /// <param name="model">The JSON object.</param>
+        /// <returns>A rendering result as a string </returns>
+        public string Render(JsonElement model)
+        {
+            var scriptObject = ScriptObject.From(model);
+            var context = LexerOptions.Lang == ScriptLang.Liquid ? new LiquidTemplateContext() : new TemplateContext();
+            context.PushGlobal(scriptObject);
+            return Render(context);
+        }
+#endif
 
         /// <summary>
         /// Converts back this template to a textual representation. This is the inverse of <see cref="Parse"/>.
