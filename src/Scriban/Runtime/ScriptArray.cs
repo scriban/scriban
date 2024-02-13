@@ -15,10 +15,6 @@ using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Syntax;
 
-#if NET
-using System.Text.Json;
-#endif
-
 namespace Scriban.Runtime
 {
     /// <summary>
@@ -361,13 +357,6 @@ namespace Scriban.Runtime
             return ScriptObject.TrySetValue(context, span, member, value, readOnly);
         }
 
-#if NET
-        public virtual bool TrySetValue(TemplateContext context, SourceSpan span, string member, JsonElement value, bool readOnly)
-        {
-            return ScriptObject.TrySetValue(context, span, member, value, readOnly);
-        }
-#endif
-
         public virtual bool Remove(string member)
         {
             return ScriptObject.Remove(member);
@@ -696,20 +685,5 @@ namespace Scriban.Runtime
         public ScriptArray(IEnumerable values) : base(values)
         {
         }
-
-        public override void Add(object item)
-        {
-#if NET
-            item = item is JsonElement json ? json.ToScriban() : item;
-#endif
-            base.Add(item);
-        }
-
-#if NET
-        public void Add(JsonElement item)
-        {
-            base.Add(item.ToScriban());
-        }
-#endif
     }
 }

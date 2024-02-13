@@ -90,9 +90,6 @@ namespace Scriban.Runtime
         void IDictionary.Add(object key, object value)
         {
             this.AssertNotReadOnly();
-#if NET
-            value = value is JsonElement json ? json.ToScriban() : value;
-#endif
             Store.Add((string) key, new InternalValue(value));
         }
 
@@ -309,39 +306,8 @@ namespace Scriban.Runtime
 
         public void Add(string key, object value)
         {
-#if NET
-            value = value is JsonElement json ? json.ToScriban() : value;
-#endif
             Store.Add(key, new InternalValue(value, false));
         }
-
-#if NET
-        /// <summary>
-        /// Sets the value and readonly state of the specified member. This method overrides previous readonly state.
-        /// </summary>
-        /// <param name="context"></param>
-        /// <param name="span"></param>
-        /// <param name="member">The member.</param>
-        /// <param name="value">The JsonElement value.</param>
-        /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        public virtual bool TrySetValue(TemplateContext context, SourceSpan span, string member, JsonElement value, bool readOnly)
-        {
-            if (!CanWrite(member)) return false;
-            this.AssertNotReadOnly();
-            Store[member] = new InternalValue(value.ToScriban(), readOnly);
-            return true;
-        }
-
-        public void SetValue(string member, JsonElement value, bool readOnly)
-        {
-            Store[member] = new InternalValue(value.ToScriban(), readOnly);
-        }
-
-        public void Add(string key, JsonElement value)
-        {
-            Store.Add(key, new InternalValue(value.ToScriban(), false));
-        }
-#endif
 
         public bool ContainsKey(string key)
         {
@@ -551,16 +517,7 @@ namespace Scriban.Runtime
             }
 
             var typeInfo = (obj as Type ?? obj.GetType());
-            return !(
-                obj is string
-                || typeInfo.IsPrimitive
-                || typeInfo == typeof(decimal)
-                || typeInfo.IsEnum
-                || typeInfo.IsArray
-#if NET
-                || obj is JsonElement
-#endif
-            );
+            return !(obj is string || typeInfo.IsPrimitive || typeInfo == typeof(decimal) || typeInfo.IsEnum || typeInfo.IsArray);
         }
 
         void ICollection<KeyValuePair<string, object>>.Add(KeyValuePair<string, object> item)
