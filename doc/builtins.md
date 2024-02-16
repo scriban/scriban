@@ -1656,6 +1656,8 @@ Object functions available through the builtin object 'object'.
 - [`object.typeof`](#objecttypeof)
 - [`object.kind`](#objectkind)
 - [`object.values`](#objectvalues)
+- [`object.from_json`](#objectfrom_json)
+- [`object.to_json`](#objectto_json)
 
 [:top:](#builtins)
 ### `object.default`
@@ -2031,6 +2033,74 @@ A list with the member values of the input object
 ```html
 ["fruit", "Orange"]
 ```
+
+[:top:](#builtins)
+### `object.from_json`
+
+```
+object.from_json <value>
+```
+
+#### Description
+
+Converts a JSON string to a scriban value.
+
+#### Arguments
+
+- `value`: The input JSON string.
+
+#### Returns
+
+The scriban value.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{
+    obj = `{ "foo": 123 }` | object.from_json
+    obj.foo
+}}
+```
+> **output**
+```html
+123
+```
+
+[:top:](#builtins)
+### `object.to_json`
+
+```
+object.to_json <value>
+```
+
+#### Description
+
+Converts a scriban value to a JSON string.
+
+#### Arguments
+
+- `value`: The input value.
+
+#### Returns
+
+A JSON representation of the value.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ { foo: "bar", baz: [1, 2, 3] } | object.to_json }}
+{{ true | object.to_json }}
+{{ null | object.to_json }}
+```
+> **output**
+```html
+{"foo":"bar","baz":[1,2,3]}
+true
+null
+```
+
 [:top:](#builtins)
 
 ## `regex` functions

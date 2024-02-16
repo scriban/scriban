@@ -110,11 +110,13 @@ List of all the builtin <object> functions:
  eval
  eval_template
  format
+ from_json
  has_key
  has_value
  keys
  kind
  size
+ to_json
  typeof
  values
 

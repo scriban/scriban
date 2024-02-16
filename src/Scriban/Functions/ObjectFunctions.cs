@@ -8,12 +8,18 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
+using System.Text;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
+
+#if NET
+using System.Text.Json;
+#endif
 
 namespace Scriban.Functions
 {
@@ -430,5 +436,101 @@ namespace Scriban.Functions
             }
             return scriptArray;
         }
+
+#if NET
+        /// <summary>
+        /// Converts the json to a scriban value. Object, Array, string, etc.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="json">The json to deserialize.</param>
+        /// <returns>Returns the scriban value</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{
+        ///    obj = `{ "foo": 123 }` | object.from_json
+        ///    obj.foo
+        /// }}
+        /// ```
+        /// ```html
+        /// 123
+        /// ```
+        /// </remarks>
+        public static object FromJson(TemplateContext context, string json)
+        {
+            return JsonSerializer.Deserialize<JsonElement>(json).ToScriban();
+        }
+
+        /// <summary>
+        /// Converts the scriban value to JSON
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="value">The input object.</param>
+        /// <returns>A JSON representation of the value</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ { foo: "bar", baz: [1, 2, 3] } | object.to_json }}
+        /// {{ true | object.to_json }}
+        /// {{ null | object.to_json }}
+        /// ```
+        /// ```html
+        /// { "foo": "bar", "baz": [1, 2, 3] }
+        /// true
+        /// null
+        /// ```
+        /// </remarks>
+        public static string ToJson(TemplateContext context, object value)
+        {
+            if (value is IScriptCustomFunction) {
+                throw new ArgumentOutOfRangeException(nameof(value), "Can not serialize functions to JSON.");
+            }
+
+            var writerOptions = new JsonWriterOptions { Indented = false };
+
+            using var stream = new MemoryStream();
+            var writer = new Utf8JsonWriter(stream, writerOptions);
+
+            WriteValue(context, writer, value);
+            writer.Flush();
+
+            var json = Encoding.UTF8.GetString(stream.ToArray());
+            return json;
+
+            static void WriteValue(TemplateContext context, Utf8JsonWriter writer, object value)
+            {
+                var type = value?.GetType() ?? typeof(object);
+                if (
+                    value is null ||
+                    value is string ||
+                    value is bool ||
+                    type.IsPrimitiveOrDecimal()
+                )
+                {
+                    JsonSerializer.Serialize(writer, value, type);
+                }
+                else if (value is IList || type.IsArray) {
+                    writer.WriteStartArray();
+                    foreach (var x in context.ToList(context.CurrentSpan, value))
+                    {
+                        WriteValue(context, writer, x);
+                    }
+                    writer.WriteEndArray();
+                }
+                else {
+                    writer.WriteStartObject();
+                    var accessor = context.GetMemberAccessor(value);
+                    foreach (var member in accessor.GetMembers(context, context.CurrentSpan, value))
+                    {
+                        if (accessor.TryGetValue(context, context.CurrentSpan, value, member, out var memberValue))
+                        {
+                            writer.WritePropertyName(member);
+                            WriteValue(context, writer, memberValue);
+                        }
+                    }
+                    writer.WriteEndObject();
+                }
+            }
+        }
+#endif
+
     }
 }
