@@ -289,18 +289,12 @@ namespace Scriban.Runtime
         {
             if (!CanWrite(member)) return false;
             this.AssertNotReadOnly();
-#if NET
-            value = value is JsonElement json ? json.ToScriban() : value;
-#endif
             Store[member] = new InternalValue(value, readOnly);
             return true;
         }
 
         public void SetValue(string member, object value, bool readOnly)
         {
-#if NET
-            value = value is JsonElement json ? json.ToScriban() : value;
-#endif
             Store[member] = new InternalValue(value, readOnly);
         }
 

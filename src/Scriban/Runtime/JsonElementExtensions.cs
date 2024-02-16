@@ -15,8 +15,8 @@ namespace Scriban.Runtime {
         internal static object? ToScriban(this JsonElement model)
         {
             return model.ValueKind switch {
-                JsonValueKind.Array => new ScriptArray().AddJsonArray(model),
-                JsonValueKind.Object => new ScriptObject().AddJsonObject(model),
+                JsonValueKind.Array => model.CopyToScriptArray(new ScriptArray()),
+                JsonValueKind.Object => model.CopyToScriptObject(new ScriptObject()),
                 JsonValueKind.False => false,
                 JsonValueKind.True => true,
                 JsonValueKind.Null => null,
@@ -25,6 +25,24 @@ namespace Scriban.Runtime {
                 JsonValueKind.Undefined => null,
                 _ => throw new ArgumentOutOfRangeException(nameof(model), model.ValueKind, null)
             };
+        }
+
+        internal static IScriptObject CopyToScriptObject(this JsonElement json, IScriptObject obj)
+        {
+            foreach (var property in json.EnumerateObject()) {
+                obj.SetValue(property.Name, property.Value.ToScriban(), false);
+            }
+
+            return obj;
+        }
+
+        internal static ScriptArray CopyToScriptArray(this JsonElement json, ScriptArray array)
+        {
+            foreach (var value in json.EnumerateArray()) {
+                array.Add(value.ToScriban());
+            }
+
+            return array;
         }
     }
 }

@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime.Accessors;
@@ -85,16 +86,15 @@ namespace Scriban.Runtime
         }
 
 #if NET
-#nullable enable
         public static void Import(this IScriptObject script, JsonElement json)
         {
             if (json.ValueKind is JsonValueKind.Object && script is ScriptObject)
             {
-                script.AddJsonObject(json);
+                json.CopyToScriptObject(script);
             }
             else if (json.ValueKind is JsonValueKind.Array && script is ScriptArray array)
             {
-                array.AddJsonArray(json);
+                json.CopyToScriptArray(array);
             }
             else if (json.ValueKind is JsonValueKind.Null || json.ValueKind is JsonValueKind.Undefined)
             {
@@ -105,27 +105,6 @@ namespace Scriban.Runtime
                 throw new ArgumentOutOfRangeException($"Unsupported object type `{json.ValueKind}`. Expecting Json {(script is ScriptObject ? "Object" : "Array")}.");
             }
         }
-
-        internal static IScriptObject AddJsonObject(this IScriptObject obj, JsonElement json)
-        {
-            foreach (var property in json.EnumerateObject())
-            {
-                obj.SetValue(property.Name, property.Value.ToScriban(), false);
-            }
-
-            return obj;
-        }
-
-        internal static ScriptArray AddJsonArray(this ScriptArray array, JsonElement json)
-        {
-            foreach (var value in json.EnumerateArray())
-            {
-                array.Add(value.ToScriban());
-            }
-
-            return array;
-        }
-#nullable disable
 #endif
 
         public static bool TryGetValue(this IScriptObject @this, string key, out object value)
@@ -181,7 +160,7 @@ namespace Scriban.Runtime
                 }
                 var thisScript = @this.GetScriptObject();
                 AssertNotReadOnly(thisScript);
-                thisScript[member] = entry.Value;
+                thisScript[member] = ConvertValue(entry.Value);
             }
         }
 
@@ -295,14 +274,14 @@ namespace Scriban.Runtime
                                 newFieldName = field.Name;
                             }
 
-                            // If field is init only or literal, it cannot be set back so we mark it as read-only
+                            // If field is init only or literal, it cannot be set back, so we mark it as read-only
                             if (scriptObj == null)
                             {
-                                script.TrySetValue(null, new SourceSpan(), newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                                script.TrySetValue(null, new SourceSpan(), newFieldName, ConvertValue(field.GetValue(obj)), field.IsInitOnly || field.IsLiteral);
                             }
                             else
                             {
-                                scriptObj.SetValue(newFieldName, field.GetValue(obj), field.IsInitOnly || field.IsLiteral);
+                                scriptObj.SetValue(newFieldName, ConvertValue(field.GetValue(obj)), field.IsInitOnly || field.IsLiteral);
                             }
                         }
                     }
@@ -333,16 +312,16 @@ namespace Scriban.Runtime
                                 newPropertyName = property.Name;
                             }
 
-                            // Initially, we were setting readonly depending on the precense of a set method, but this is not compatible with liquid implems, so we remove readonly restriction
+                            // Initially, we were setting readonly depending on the presence of a set method, but this is not compatible with liquid implems, so we remove readonly restriction
                             //script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
                             if (scriptObj == null)
                             {
-                                script.TrySetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), false);
+                                script.TrySetValue(null, new SourceSpan(), newPropertyName, ConvertValue(property.GetValue(obj)), false);
                             }
                             else
                             {
                                 if (property.GetIndexParameters().Length==0)
-                                    scriptObj.SetValue(newPropertyName, property.GetValue(obj), false);
+                                    scriptObj.SetValue(newPropertyName, ConvertValue(property.GetValue(obj)), false);
                             }
                         }
                     }
@@ -393,6 +372,25 @@ namespace Scriban.Runtime
             if (function == null) throw new ArgumentNullException(nameof(function));
 
             script.TrySetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function.Target, function.GetMethodInfo()), true);
+        }
+
+        /// <summary>
+        /// Converts imported object to a scriban value.
+        /// Handles and converts all types that need to be converted to work in the scriban runtime.
+        /// </summary>
+        /// <param name="value">The object to import as scriban value.</param>
+        /// <returns>A scriban compatible value.</returns>
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private static object ConvertValue(object value)
+        {
+#if NET
+            return value switch {
+                JsonElement json => json.ToScriban(),
+                _ => value,
+            };
+#else
+            return value;
+#endif
         }
     }
 }
