@@ -28,19 +28,6 @@ public class TestScriptObjectJson {
     [TestCase("""{ "foo": { "bar": [{ "baz": 1 }, { "baz": 2 }, { "baz": 3 }] } }""", "{{ foo.bar[1].baz }}", "2")]
     public void ScriptObject_can_import_json_object(string json, string script, string expected)
     {
-        // Test ScriptObject.From(JsonElement)
-        {
-            var obj = JsonSerializer.Deserialize<JsonElement>(json);
-            var model = ScriptObject.From(obj);
-
-            var result = RenderHelper.Render(
-                script: script,
-                scriptObject: model
-            );
-
-            Assert.AreEqual(expected, result);
-        }
-
         // Test ScriptObject.From(object)
         {
             var obj = JsonSerializer.Deserialize<JsonElement>(json);
@@ -92,14 +79,6 @@ public class TestScriptObjectJson {
     public void ScriptObject_can_not_import_json_non_object(string json, string expected)
     {
         var obj = JsonSerializer.Deserialize<JsonElement>(json);
-
-        // Test ScriptObject.From(JsonElement)
-        {
-            var ex = Assert.Throws<ArgumentOutOfRangeException>(() => {
-                var model = ScriptObject.From(obj);
-            })!;
-            Assert.AreEqual(expected, ex.Message);
-        }
 
         // Test ScriptObject.From(object)
         {

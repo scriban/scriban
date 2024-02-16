@@ -14,10 +14,6 @@ using System.Text;
 using Scriban.Functions;
 using Scriban.Parsing;
 
-#if NET
-using System.Text.Json;
-#endif
-
 namespace Scriban.Runtime
 {
     /// <summary>
@@ -481,21 +477,6 @@ namespace Scriban.Runtime
             scriptObject.Import(obj);
             return scriptObject;
         }
-
-#if NET
-        /// <summary>
-        /// Creates a <see cref="ScriptObject"/> by importing from the specified JsonElement Object. See remarks.
-        /// </summary>
-        /// <param name="obj">The JsonElement Object.</param>
-        /// <returns>A script object</returns>
-        [ScriptMemberIgnore]
-        public static ScriptObject From(JsonElement obj)
-        {
-            var scriptObject = new ScriptObject();
-            scriptObject.Import(obj);
-            return scriptObject;
-        }
-#endif
 
         /// <summary>
         /// Determines whether the specified object is importable by the method the various Import methods.
