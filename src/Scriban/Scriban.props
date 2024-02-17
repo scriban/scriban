@@ -13,7 +13,7 @@
     <PackageReadmeFile>readme.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    <NoWarn>$(NoWarn);CS1591;NU5129</NoWarn>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <!-- This is enabled but still not used in scriban, only setup to protect embedding source to produce new warnings if the user project is using nullable -->
