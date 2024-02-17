@@ -5,23 +5,19 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using NUnit.Framework;
-using Scriban.Parsing;
 
 namespace Scriban.Tests
 {
     static class TestFilesHelper
     {
-        public const string RelativeBasePath = @"..\..\..\TestFiles";
         public const string InputFilePattern = "*.txt";
         public const string OutputEndFileExtension = ".out.txt";
 
-        public static string BaseDirectory => AppContext.BaseDirectory;
+        public static string BaseDirectory => Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "TestFiles"));
 
         public static IEnumerable ListTestFilesInFolder(string folder)
         {
-            var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
+            var baseDir = BaseDirectory;
             foreach (var file in
                 Directory.GetFiles(Path.Combine(baseDir, folder), InputFilePattern, SearchOption.AllDirectories)
                     .Where(f => !f.EndsWith(OutputEndFileExtension))
@@ -61,7 +57,7 @@ namespace Scriban.Tests
 
         public static string LoadTestFile(string inputName)
         {
-            var baseDir = Path.GetFullPath(Path.Combine(BaseDirectory, RelativeBasePath));
+            var baseDir = BaseDirectory;
             var inputFile = Path.Combine(baseDir, inputName);
             if (!File.Exists(inputFile))
                 return null;
