@@ -65,9 +65,9 @@ public class TestModelWithJsonElement {
             Data.Foo: {{ data.foo }}
             """,
             scriptObject: ScriptObject.From(model)
-        );
+        ).ReplaceLineEndings("\n");
 
-        Assert.AreEqual("Name: name\r\nData.Foo: bar", result);
+        Assert.AreEqual("Name: name\nData.Foo: bar", result);
     }
 
     [Test]
@@ -83,9 +83,9 @@ public class TestModelWithJsonElement {
             Data.Foo: {{ data.foo }}
             """,
             scriptObject: ScriptObject.From(model)
-        );
+        ).ReplaceLineEndings("\n");
 
-        Assert.AreEqual("Name: name\r\nData.Foo: bar", result);
+        Assert.AreEqual("Name: name\nData.Foo: bar", result);
     }
 
 

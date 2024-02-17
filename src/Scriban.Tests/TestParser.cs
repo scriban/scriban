@@ -25,8 +25,6 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestParser
     {
-        private const string BuiltinMarkdownDocFile = @"..\..\..\..\..\doc\builtins.md";
-
         [Test]
         public void TestMemberDot()
         {
@@ -1125,7 +1123,7 @@ m
 
         public static IEnumerable ListBuiltinFunctionTests(string functionObject)
         {
-            var builtinDocFile = Path.GetFullPath(Path.Combine(BaseDirectory, BuiltinMarkdownDocFile));
+            var builtinDocFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "doc", "builtins.md"));
             var lines = File.ReadAllLines(builtinDocFile);
 
             var matchFunctionSection = new Regex($@"^###\s+`({functionObject}\.\w+)`");
