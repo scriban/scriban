@@ -103,7 +103,7 @@ You can install the [Scriban Extension for Visual Studio Code](https://marketpla
 * See the [Built-in functions](https://github.com/scriban/scriban/blob/master/doc/builtins.md) document for the list of the built-in functions.
 * See the [Runtime](https://github.com/scriban/scriban/blob/master/doc/runtime.md) document for a description of the .NET runtime API to compile and run templates.
 * See the [Liquid support](https://github.com/scriban/scriban/blob/master/doc/liquid-support.md) document for more details about the support of liquid templates.
-* See my blog post "[Implementing a Text Templating Engine for .NET](http://xoofx.com/blog/2017/11/13/implementing-a-text-templating-language-and-engine-for-dotnet/)" for some behind the scene details.
+* See my blog post "[Implementing a Text Templating Engine for .NET](https://xoofx.github.io/blog/2017/11/13/implementing-a-text-templating-language-and-engine-for-dotnet/)" for some behind the scene details.
 
 ## Binaries
 
@@ -172,4 +172,4 @@ Adapted logo `Puzzle` by [Andrew Doane](https://thenounproject.com/andydoane/) f
 
 ## Author
 
-Alexandre Mutel aka [xoofx](http://xoofx.com).
+Alexandre Mutel aka [xoofx](https://xoofx.github.io).
