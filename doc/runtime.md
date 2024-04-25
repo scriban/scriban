@@ -615,6 +615,48 @@ For example, the following code adds a new property `myprop` to the builtin obje
 ```
 
 Because scriban allows you to define new functions directly into the language and also allow to store a function pointer by using the alias `@` operator, you can basically extend an existing object with both properties and functions.
+#### Accessing Variables anywhere in the stack from a function
+
+To access a variable at any point in the stack from a function, use `context.GetValue()`.
+
+```C#
+public virtual object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+{
+    // var1 defined in scriptObject pushed to global anywhere down the stack
+    ScriptVariableGlobal scriptVariableGlobal = new ScriptVariableGlobal("var1");
+
+    object contextObject = context.GetValue(scriptVariableGlobal);
+
+    string var1Value = "";
+    // cast to the correct type
+    if (contextObject != null) {
+        var1Value = (string)contextObject;
+    }
+
+    return $"var1 is {var1Value}";
+}
+```
+
+
+#### Accessing a variable only in the current global from a function
+
+To access a variable from _only_ the top of the global stack from a function, use `context.CurrentGlobal.TryGetValue()`.
+
+```C#
+public virtual object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+{
+    // var1 defined in scriptObject pushed to only the top level of the global stack
+    context.CurrentGlobal.TryGetValue(context, span, key, out object contextObject);
+
+    string var1Value = "";
+    // cast to the correct type
+    if (contextObject != null) {
+        var1Value = (string)contextObject;
+    }
+
+    return $"var1 is {var1Value}";
+}
+```
 
 #### The `with` statement with the stack
 
