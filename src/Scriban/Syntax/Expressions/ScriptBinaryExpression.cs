@@ -488,7 +488,7 @@ namespace Scriban.Syntax
                 switch (op)
                 {
                     case ScriptBinaryOperator.CompareEqual:
-                    return false;
+                        return false;
                     case ScriptBinaryOperator.CompareNotEqual:
                         return true;
 
