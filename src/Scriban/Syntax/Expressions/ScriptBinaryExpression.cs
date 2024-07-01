@@ -71,27 +71,27 @@ namespace Scriban.Syntax
             switch (Operator)
             {
                 case ScriptBinaryOperator.And:
-                {
-                    var leftBoolValue = context.ToBool(Left.Span, leftValue);
-                    if (!leftBoolValue) return false;
-                    var rightValue = context.Evaluate(Right);
-                    var rightBoolValue = context.ToBool(Right.Span, rightValue);
-                    return leftBoolValue && rightBoolValue;
-                }
+                    {
+                        var leftBoolValue = context.ToBool(Left.Span, leftValue);
+                        if (!leftBoolValue) return false;
+                        var rightValue = context.Evaluate(Right);
+                        var rightBoolValue = context.ToBool(Right.Span, rightValue);
+                        return leftBoolValue && rightBoolValue;
+                    }
 
                 case ScriptBinaryOperator.Or:
-                {
-                    var leftBoolValue = context.ToBool(Left.Span, leftValue);
-                    if (leftBoolValue) return true;
-                    var rightValue = context.Evaluate(Right);
-                    return context.ToBool(Right.Span, rightValue);
-                }
+                    {
+                        var leftBoolValue = context.ToBool(Left.Span, leftValue);
+                        if (leftBoolValue) return true;
+                        var rightValue = context.Evaluate(Right);
+                        return context.ToBool(Right.Span, rightValue);
+                    }
 
                 default:
-                {
-                    var rightValue = context.Evaluate(Right);
-                    return Evaluate(context, OperatorToken?.Span ?? Span , Operator, Left.Span, leftValue, Right.Span, rightValue);
-                }
+                    {
+                        var rightValue = context.Evaluate(Right);
+                        return Evaluate(context, OperatorToken?.Span ?? Span, Operator, Left.Span, leftValue, Right.Span, rightValue);
+                    }
             }
         }
 
@@ -146,23 +146,23 @@ namespace Scriban.Syntax
             switch (op)
             {
                 case ScriptBinaryOperator.LiquidHasKey:
-                {
-                    var leftDict = leftValue as IDictionary<string, object>;
-                    if (leftDict != null)
                     {
-                        return ObjectFunctions.HasKey(leftDict, context.ObjectToString(rightValue));
+                        var leftDict = leftValue as IDictionary<string, object>;
+                        if (leftDict != null)
+                        {
+                            return ObjectFunctions.HasKey(leftDict, context.ObjectToString(rightValue));
+                        }
                     }
-                }
                     break;
 
                 case ScriptBinaryOperator.LiquidHasValue:
-                {
-                    var leftDict = leftValue as IDictionary<string, object>;
-                    if (leftDict != null)
                     {
-                        return ObjectFunctions.HasValue(leftDict, context.ObjectToString(rightValue));
+                        var leftDict = leftValue as IDictionary<string, object>;
+                        if (leftDict != null)
+                        {
+                            return ObjectFunctions.HasValue(leftDict, context.ObjectToString(rightValue));
+                        }
                     }
-                }
                     break;
 
                 case ScriptBinaryOperator.CompareEqual:
@@ -191,7 +191,11 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CloseInterpolated:
                     try
                     {
-                        if (leftValue is string || rightValue is string || leftValue is char || rightValue is char)
+                        if (leftValue == null || rightValue == null)
+                        {
+                            return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
+                        }
+                        else if (leftValue is string || rightValue is string || leftValue is char || rightValue is char)
                         {
                             if (leftValue is char leftChar) leftValue = leftChar.ToString(context.CurrentCulture);
                             if (rightValue is char rightChar) rightValue = rightChar.ToString(CultureInfo.InvariantCulture);
@@ -224,7 +228,7 @@ namespace Scriban.Syntax
                             return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                     }
-                    catch (Exception ex) when(!(ex is ScriptRuntimeException))
+                    catch (Exception ex) when (!(ex is ScriptRuntimeException))
                     {
                         throw new ScriptRuntimeException(span, ex.Message);
                     }
@@ -484,7 +488,7 @@ namespace Scriban.Syntax
                 switch (op)
                 {
                     case ScriptBinaryOperator.CompareEqual:
-                    	return false;
+                        return false;
                     case ScriptBinaryOperator.CompareNotEqual:
                         return true;
 
@@ -868,9 +872,9 @@ namespace Scriban.Syntax
                     return Math.Round(left / right);
 
                 case ScriptBinaryOperator.ShiftLeft:
-                    return left * (decimal) Math.Pow(2, (double) right);
+                    return left * (decimal)Math.Pow(2, (double)right);
                 case ScriptBinaryOperator.ShiftRight:
-                    return left / (decimal) Math.Pow(2, (double) right);
+                    return left / (decimal)Math.Pow(2, (double)right);
 
                 case ScriptBinaryOperator.Power:
                     return (decimal)Math.Pow((double)left, (double)right);
