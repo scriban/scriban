@@ -90,7 +90,7 @@ namespace Scriban.Syntax
                 default:
                 {
                     var rightValue = context.Evaluate(Right);
-                    return Evaluate(context, OperatorToken?.Span ?? Span, Operator, Left.Span, leftValue, Right.Span, rightValue);
+                    return Evaluate(context, OperatorToken?.Span ?? Span , Operator, Left.Span, leftValue, Right.Span, rightValue);
                 }
             }
         }
@@ -228,7 +228,7 @@ namespace Scriban.Syntax
                             return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
                     }
-                    catch (Exception ex) when (!(ex is ScriptRuntimeException))
+                    catch (Exception ex) when(!(ex is ScriptRuntimeException))
                     {
                         throw new ScriptRuntimeException(span, ex.Message);
                     }
@@ -488,7 +488,7 @@ namespace Scriban.Syntax
                 switch (op)
                 {
                     case ScriptBinaryOperator.CompareEqual:
-                    return false;
+                        return false;
                     case ScriptBinaryOperator.CompareNotEqual:
                         return true;
 
@@ -872,9 +872,9 @@ namespace Scriban.Syntax
                     return Math.Round(left / right);
 
                 case ScriptBinaryOperator.ShiftLeft:
-                    return left * (decimal)Math.Pow(2, (double) right);
+                    return left * (decimal) Math.Pow(2, (double) right);
                 case ScriptBinaryOperator.ShiftRight:
-                    return left / (decimal)Math.Pow(2, (double) right);
+                    return left / (decimal) Math.Pow(2, (double) right);
 
                 case ScriptBinaryOperator.Power:
                     return (decimal)Math.Pow((double)left, (double)right);
