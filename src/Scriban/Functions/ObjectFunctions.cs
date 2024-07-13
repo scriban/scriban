@@ -515,6 +515,10 @@ namespace Scriban.Functions
                     }
                     writer.WriteEndArray();
                 }
+                else if (value is DateTime) {
+                    var valuestring = ((DateTime)value).ToString("O");
+                    JsonSerializer.Serialize(writer, valuestring, typeof(string));
+                }
                 else {
                     writer.WriteStartObject();
                     var accessor = context.GetMemberAccessor(value);
