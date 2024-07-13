@@ -52,3 +52,5 @@ null != null -> {{ null != null }}
 null == 1 -> {{ null == 1 }}
 1 != null -> {{ 1 != null }}
 null != 1 -> {{ null != 1 }}
+"a" == null -> {{ "a" == null }}
+null == "b" -> {{ null == "b" }}

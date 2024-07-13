@@ -191,7 +191,11 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CloseInterpolated:
                     try
                     {
-                        if (leftValue is string || rightValue is string || leftValue is char || rightValue is char)
+                        if (leftValue == null || rightValue == null)
+                        {
+                            return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
+                        }
+                        else if (leftValue is string || rightValue is string || leftValue is char || rightValue is char)
                         {
                             if (leftValue is char leftChar) leftValue = leftChar.ToString(context.CurrentCulture);
                             if (rightValue is char rightChar) rightValue = rightChar.ToString(CultureInfo.InvariantCulture);
@@ -484,7 +488,7 @@ namespace Scriban.Syntax
                 switch (op)
                 {
                     case ScriptBinaryOperator.CompareEqual:
-                    	return false;
+                        return false;
                     case ScriptBinaryOperator.CompareNotEqual:
                         return true;
 

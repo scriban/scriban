@@ -52,3 +52,5 @@ null != null -> false
 null == 1 -> false
 1 != null -> true
 null != 1 -> true
+"a" == null -> false
+null == "b" -> false
