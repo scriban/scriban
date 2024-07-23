@@ -371,22 +371,29 @@ namespace Scriban
 
                     while (index < indexEnd)
                     {
+                        var newLineIndex = text.IndexOf('\n', index);
+                        if (newLineIndex < 0 || newLineIndex >= indexEnd)
+                        {
+                            // Write indents if necessary
+                            if (_previousTextWasNewLine)
+                            {
+                                await Output.WriteAsync(CurrentIndent, 0, CurrentIndent.Length, CancellationToken).ConfigureAwait(false);
+                                _previousTextWasNewLine = false;
+                            }
+                            await Output.WriteAsync(text, index, indexEnd - index, CancellationToken).ConfigureAwait(false);
+                            break;
+                        }
+
+                        var length = newLineIndex - index;
                         // Write indents if necessary
-                        if (_previousTextWasNewLine)
+                        if (_previousTextWasNewLine && (IndentOnEmptyLines || length != 0 && (length != 1 || text[index] != '\r')))
                         {
                             await Output.WriteAsync(CurrentIndent, 0, CurrentIndent.Length, CancellationToken).ConfigureAwait(false);
                             _previousTextWasNewLine = false;
                         }
 
-                        var newLineIndex = text.IndexOf('\n', index);
-                        if (newLineIndex < 0 || newLineIndex >= indexEnd)
-                        {
-                            await Output.WriteAsync(text, index, indexEnd - index, CancellationToken).ConfigureAwait(false);
-                            break;
-                        }
-
                         // We output the new line
-                        await Output.WriteAsync(text, index, newLineIndex - index + 1, CancellationToken).ConfigureAwait(false);
+                        await Output.WriteAsync(text, index, length + 1, CancellationToken).ConfigureAwait(false);
                         index = newLineIndex + 1;
                         _previousTextWasNewLine = true;
                     }
