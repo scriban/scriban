@@ -140,6 +140,7 @@ namespace Scriban
             EnableRelaxedFunctionAccess = false;
             EnableRelaxedIndexerAccess = true;
             AutoIndent = true;
+            IndentOnEmptyLines = true;
             LoopLimit = 1000;
             RecursiveLimit = 100;
             LimitToString = 0;
@@ -221,6 +222,11 @@ namespace Scriban
         /// If sets to <c>true</c>, the include statement will maintain the indent.
         /// </summary>
         public bool AutoIndent { get; set; }
+
+        /// <summary>
+        /// If set to <c>true</c>, empty lines will maintain the indent.
+        /// </summary>
+        public bool IndentOnEmptyLines { get; set; }
 
         /// <summary>
         /// If sets to <c>true</c>, the include statement will maintain the indent.
@@ -745,22 +751,29 @@ namespace Scriban
 
                     while (index < indexEnd)
                     {
+                        var newLineIndex = text.IndexOf('\n', index);
+                        if (newLineIndex < 0 || newLineIndex >= indexEnd)
+                        {
+                            // Write indents if necessary
+                            if (_previousTextWasNewLine)
+                            {
+                                Output.Write(CurrentIndent, 0, CurrentIndent.Length);
+                                _previousTextWasNewLine = false;
+                            }
+                            Output.Write(text, index, indexEnd - index);
+                            break;
+                        }
+
+                        var length = newLineIndex - index;
                         // Write indents if necessary
-                        if (_previousTextWasNewLine)
+                        if (_previousTextWasNewLine && (IndentOnEmptyLines || length != 0 && (length != 1 || text[index] != '\r')))
                         {
                             Output.Write(CurrentIndent, 0, CurrentIndent.Length);
                             _previousTextWasNewLine = false;
                         }
 
-                        var newLineIndex = text.IndexOf('\n', index);
-                        if (newLineIndex < 0 || newLineIndex >= indexEnd)
-                        {
-                            Output.Write(text, index, indexEnd - index);
-                            break;
-                        }
-
                         // We output the new line
-                        Output.Write(text, index, newLineIndex - index + 1);
+                        Output.Write(text, index, length + 1);
                         index = newLineIndex + 1;
                         _previousTextWasNewLine = true;
                     }
