@@ -502,7 +502,8 @@ namespace Scriban.Functions
                     value is null ||
                     value is string ||
                     value is bool ||
-                    type.IsPrimitiveOrDecimal()
+                    type.IsPrimitiveOrDecimal() ||
+                    value is IFormattable // handles types like System.DateTime and 99 more types. see: https://learn.microsoft.com/en-us/dotnet/api/system.iformattable?view=net-8.0
                 )
                 {
                     JsonSerializer.Serialize(writer, value, type);
@@ -514,10 +515,6 @@ namespace Scriban.Functions
                         WriteValue(context, writer, x);
                     }
                     writer.WriteEndArray();
-                }
-                else if (value is DateTime) {
-                    var valuestring = ((DateTime)value).ToString("O");
-                    JsonSerializer.Serialize(writer, valuestring, typeof(string));
                 }
                 else {
                     writer.WriteStartObject();
