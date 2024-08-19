@@ -71,6 +71,47 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Applies an accumulator function on the list.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">An input list</param>
+        /// <param name="seed">The initial accumulator value</param>
+        /// <param name="function">The function to apply to each item in the list</param>
+        /// <returns>The transformed final accumulator value.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6, 7] | array.aggregate 5 @math.plus}}
+        /// ```
+        /// ```html
+        /// 27
+        /// ```
+        /// </remarks>
+        public static object Aggregate(TemplateContext context, SourceSpan span, IEnumerable list, object seed, object function)
+        {
+            if (list == null) return null;
+            if (function == null) return new ScriptRange(list);
+
+            var scriptingFunction = function as IScriptCustomFunction;
+            if (scriptingFunction == null)
+            {
+                throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
+            }
+
+            var callerContext = context.CurrentNode;
+
+            var currentValue = seed;
+            var arg = new ScriptArray(2);
+            foreach (var item in list)
+            {
+                arg[0] = currentValue;
+                arg[1] = context.ToObject(span, item, scriptingFunction.GetParameterInfo(0).ParameterType);
+                currentValue = ScriptFunctionCall.Call(context, callerContext, scriptingFunction, arg);
+            }
+            return currentValue;
+        }
+
+        /// <summary>
         /// Removes any null values from the input list.
         /// </summary>
         /// <param name="list">An input list</param>

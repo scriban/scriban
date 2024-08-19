@@ -20,6 +20,7 @@ Array functions available through the object 'array' in scriban.
 
 - [`array.add`](#arrayadd)
 - [`array.add_range`](#arrayadd_range)
+- [`array.aggregate`](#arrayaggregate)
 - [`array.compact`](#arraycompact)
 - [`array.concat`](#arrayconcat)
 - [`array.cycle`](#arraycycle)
@@ -99,6 +100,38 @@ The concatenation of the two input lists
 > **output**
 ```html
 [1, 2, 3, 4, 5]
+```
+
+[:top:](#builtins)
+### `array.aggregate`
+
+```
+array.aggregate <list> <seed> <function>
+```
+
+#### Description
+
+Applies an accumulator function on the list.
+
+#### Arguments
+
+- `list`: An input list
+- `seed`: The initial accumulator value
+- `function`: The function to apply to each item in the list
+
+#### Returns
+
+The transformed final accumulator value.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ [4, 5, 6, 7] | array.aggregate 5 @math.plus}}
+```
+> **output**
+```html
+27
 ```
 
 [:top:](#builtins)

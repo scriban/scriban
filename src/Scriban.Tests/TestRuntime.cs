@@ -558,6 +558,17 @@ end
         }
 
         [Test]
+        public void TestAggregate()
+        {
+            var template = Template.Parse(@"{{ ['Apple','Banana','Pear'] | array.aggregate 5 do
+ret $0 + ($1 | string.size)
+end
+}}");
+            var result = template.Render();
+            Assert.AreEqual("20", result);
+        }
+
+        [Test]
         public async Task TestAsyncAwait()
         {
             var text = @"{{ wait_and_see }}";
