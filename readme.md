@@ -166,6 +166,13 @@ This software is released under the [BSD-Clause 2 license](https://opensource.or
 
 * (https://scribanonline.azurewebsites.net/): ASP.NET Core Sample.
 
+## Sponsors
+
+Supports this project with a monthly donation and help me continue improving it. \[[Become a sponsor](https://github.com/sponsors/xoofx)\]
+
+[<img src="https://github.com/lilith.png?size=200" width="64px;" style="border-radius: 50%" alt="lilith"/>](https://github.com/lilith) Lilith River, author of [Imageflow Server, an easy on-demand
+image editing, optimization, and delivery server](https://github.com/imazen/imageflow-server)
+
 ## Credits
 
 Adapted logo `Puzzle` by [Andrew Doane](https://thenounproject.com/andydoane/) from the Noun Project
