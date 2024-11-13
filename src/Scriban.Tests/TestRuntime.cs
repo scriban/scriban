@@ -25,6 +25,26 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestAssignValToDictionary()
+        {
+            var dict = new Dictionary<string, string>();
+            dict["name"] = "bob";
+            var model = new ScriptObject();
+            model.Add("dict", dict);
+            var context = new TemplateContext();
+            context.PushGlobal(model);
+
+            var input = "{{dict.location = \"home\"}}";
+            var template = Template.Parse(input);
+            var results = template.Render(context);
+
+            input = "{{dict[\"location\"] = \"home\"}}";
+            template = Template.Parse(input);
+            results = template.Render(context);
+            // Assert.AreEqual("", results);
+        }
+
+        [Test]
         public void TestScriptObjectAsDictionary()
         {
             var model = (IDictionary)(new ScriptObject());
