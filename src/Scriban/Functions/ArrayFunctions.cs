@@ -531,6 +531,25 @@ namespace Scriban.Functions
             return ScriptRange.Reverse(list);
         }
 
+
+        public static IEnumerable Select(TemplateContext context, SourceSpan span, IEnumerable list, object function)
+        {
+            return ApplyFunction(context, span, list, function, SelectProcessor);
+        }
+        private static IEnumerable SelectInternal(TemplateContext context, ScriptNode callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
+        {
+            var arg = new ScriptArray(1);
+            foreach (var item in list)
+            {
+                var itemToTransform = context.ToObject(span, item, destType);
+                arg[0] = itemToTransform;
+                var itemTransformed = ScriptFunctionCall.Call(context, callerContext, function, arg);
+                yield return itemTransformed;
+            }
+        }
+
+        private static readonly ListProcessor SelectProcessor = SelectInternal;
+
         /// <summary>
         /// Returns the number of elements in the input `list`
         /// </summary>

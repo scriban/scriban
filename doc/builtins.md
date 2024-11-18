@@ -38,6 +38,7 @@ Array functions available through the object 'array' in scriban.
 - [`array.sort`](#arraysort)
 - [`array.uniq`](#arrayuniq)
 - [`array.contains`](#arraycontains)
+- [`array.select`](#arrayselect)
 
 [:top:](#builtins)
 ### `array.add`
@@ -686,6 +687,38 @@ Returns if a `list` contains a specific `item`.
 ```html
 true
 ```
+
+[:top:](#builtins)
+### `array.select`
+
+```
+array.select <list> <function>
+```
+
+#### Description
+
+Projects each array item into a new object shape and returns the new array, according to the supplied function.
+
+#### Arguments
+
+- `list`: An input list
+- `function`: The function used to project each elemement of the list
+
+#### Returns
+
+Returns a new list which contains each item projected using the input function.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{[{ a: 1 },{ a: 2 },{ a: 3 },] | array.select @(do; ret { new_prop: $0.a }; end)}}
+```
+> **output**
+```html
+[{new_prop: 1}, {new_prop: 2}, {new_prop: 3}]
+```
+
 [:top:](#builtins)
 
 ## `date` functions

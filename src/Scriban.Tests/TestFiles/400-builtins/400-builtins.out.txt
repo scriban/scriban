@@ -16,6 +16,7 @@ List of all the builtin <array> functions:
  offset
  remove_at
  reverse
+ select
  size
  sort
  uniq
