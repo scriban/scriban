@@ -7,7 +7,7 @@ namespace DotLiquid.Tests.Tags
     public class RawTests
     {
         [Test]
-        public void TestTagInRaw ()
+        public void TestTagInRaw()
         {
             Helper.AssertTemplateResult ("{% comment %} test {% endcomment %}",
                 "{% raw %}{% comment %} test {% endcomment %}{% endraw %}");
@@ -28,16 +28,12 @@ namespace DotLiquid.Tests.Tags
         }
 
         [Test]
-        public void TestInputFileOutputInRaw()
+        public void TestInputStringWithSourceFileOutputInRaw()
         {
-            var fileName = "test.liquid";
-            System.IO.File.WriteAllText(fileName, "{% raw %}{{ 2 | plus: 2 }} equals 4.{% endraw %}");
-            var template = Template.Parse(System.IO.File.ReadAllText(fileName), fileName);
+            var template = Template.Parse("{% raw %}{{ 2 | plus: 2 }} equals 4.{% endraw %}", "dummy.liquid");
             var result = template.Render();
 
             Assert.Equals("{{ 2 | plus: 2 }} equals 4.", result);
-
-            System.IO.File.Delete(fileName);
         }
 
         [Test]
