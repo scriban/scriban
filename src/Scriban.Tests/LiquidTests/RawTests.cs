@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using Scriban;
 
 namespace DotLiquid.Tests.Tags
 {
@@ -13,10 +14,30 @@ namespace DotLiquid.Tests.Tags
         }
 
         [Test]
-        public void TestOutputInRaw ()
+        public void TestOutputInRaw()
         {
-            Helper.AssertTemplateResult ("{{ test }}",
+            Helper.AssertTemplateResult("{{ test }}",
                 "{% raw %}{{ test }}{% endraw %}");
+        }
+
+        [Test]
+        public void TestFunctionFileOutputInRaw()
+        {
+            Helper.AssertTemplateResult("{{ 2 | plus: 2 }} equals 4.",
+                "{% raw %}{{ 2 | plus: 2 }} equals 4.{% endraw %}");
+        }
+
+        [Test]
+        public void TestInputFileOutputInRaw()
+        {
+            var fileName = "test.liquid";
+            System.IO.File.WriteAllText(fileName, "{% raw %}{{ 2 | plus: 2 }} equals 4.{% endraw %}");
+            var template = Template.Parse(System.IO.File.ReadAllText(fileName), fileName);
+            var result = template.Render();
+
+            Assert.Equals("{{ 2 | plus: 2 }} equals 4.", result);
+
+            System.IO.File.Delete(fileName);
         }
 
         [Test]
