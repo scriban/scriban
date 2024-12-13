@@ -191,6 +191,13 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CloseInterpolated:
                     try
                     {
+                        // When a string is concatenated with null, null should be treated as an empty string.
+                        if (context.EnableEmptyTextForNull && (leftValue is string || rightValue is string))
+                        {
+                            leftValue ??= "";
+                            rightValue ??= "";
+                        }
+
                         if (leftValue == null || rightValue == null)
                         {
                             return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);

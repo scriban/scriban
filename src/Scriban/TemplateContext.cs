@@ -434,6 +434,10 @@ namespace Scriban
         /// Enables the index of an indexer access to be null and return null instead of an exception. Default is <c>false</c>
         /// </summary>
         public bool EnableNullIndexer { get; set; }
+        /// <summary>
+        /// Enables the empty text to be returned when a null value is accessed. Default is <c>false</c>
+        /// </summary>
+        public bool EnableEmptyTextForNull { get; set; }
 
         /// <summary>
         /// Gets the current node being evaluated.

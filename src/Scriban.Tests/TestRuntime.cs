@@ -1290,6 +1290,23 @@ Tax: {{ 7 | match_tax }}";
             TextAssert.AreEqual("42-42-42-42", result);
         }
 
+        [Test]
+        public void String_And_Null_Concatenated_Should_Not_Null()
+        {
+            var context = new TemplateContext()
+            {
+                EnableEmptyTextForNull = true
+            };
+            var tmplExample1 = Template.Parse("{{'my name is ' + null}}");
+            var tmplExample2 = Template.Parse("{{$'my name is {null}'}}");
+
+            var result = tmplExample1.Render(context);
+            Assert.AreEqual("my name is ", result);
+
+            result = tmplExample2.Render(context);
+            Assert.AreEqual("my name is ", result);
+        }
+
         private class MyObject : MyStaticObject
         {
             public string FieldA;
