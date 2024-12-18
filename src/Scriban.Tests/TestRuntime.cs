@@ -25,6 +25,22 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void String_And_Null_Concatenated_Should_Not_Null()
+        {
+            var context = new TemplateContext()
+            {
+            };
+            var tmplExample1 = Template.Parse("{{'my name is ' + null}}");
+            var tmplExample2 = Template.Parse("{{$'my name is {null}'}}");
+
+            var result = tmplExample1.Render(context);
+            Assert.AreEqual("my name is ", result);
+
+            result = tmplExample2.Render(context);
+            Assert.AreEqual("my name is ", result);
+        }
+
+        [Test]
         public void TestAssignValToDictionary()
         {
             var dict = new Dictionary<string, string>();
