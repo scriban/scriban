@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+#nullable enable
 #if NET
 using System;
 using System.Text.Json;
