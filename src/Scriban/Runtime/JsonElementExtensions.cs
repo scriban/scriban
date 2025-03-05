@@ -3,6 +3,7 @@
 // See license.txt file in the project root for full license information.
 
 #if NET
+#nullable enable
 using System;
 using System.Text.Json;
 
