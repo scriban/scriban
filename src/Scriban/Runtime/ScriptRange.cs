@@ -479,7 +479,7 @@ namespace Scriban.Runtime
         private int AddImpl(object item)
         {
             var list = _values as IList;
-            if (list == null)
+            if (list == null || list.IsFixedSize)
             {
                 _values = list = new ScriptArray(_values);
             }
