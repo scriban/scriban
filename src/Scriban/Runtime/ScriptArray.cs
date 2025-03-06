@@ -141,6 +141,8 @@ namespace Scriban.Runtime
 
         public ScriptObject ScriptObject => _script ?? (_script = new ScriptObject() { IsReadOnly = IsReadOnly});
 
+        public T[] ToArray() => _values.ToArray();
+
         public int Count => _values.Count;
 
         public virtual T this[int index]

@@ -331,7 +331,7 @@ namespace Scriban.Parsing
                         continue;
                     }
 
-                    if (mode == ParseExpressionMode.BasicExpression)
+                    if (mode == ParseExpressionMode.BasicExpression || (parentNode is ScriptUnaryExpression parentUnaryExpression && parentUnaryExpression.Operator == ScriptUnaryOperator.FunctionAlias))
                     {
                         break;
                     }

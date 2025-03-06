@@ -164,6 +164,55 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Returns the distinct elements of the input `list`.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">An input list</param>
+        /// <param name="function">The function to apply to each item in the list that returns a boolean.</param>
+        /// <param name="args">The arguments to pass to the function</param>
+        /// <returns>A boolean indicating if one of the item in the list satisfied the function.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [" hello", " world", "20"] | array.any @string.contains "20"}}
+        /// {{ [" hello", " world", "20"] | array.any @string.contains "30"}}
+        /// ```
+        /// ```html
+        /// true
+        /// false
+        /// ```
+        /// </remarks>
+        public static bool Any(TemplateContext context, SourceSpan span, IEnumerable list, object function, params object[] args)
+        {
+            if (list == null)
+            {
+                return false;
+            }
+            if (function == null)
+            {
+                return false;
+            }
+            var scriptFunction = function as IScriptCustomFunction;
+            if (scriptFunction == null)
+            {
+                return false;
+            }
+
+            var arguments = new ScriptArray { null };
+            arguments.AddRange(args);
+            foreach (var item in list)
+            {
+                arguments[0] = item;
+                var result = ScriptFunctionCall.Call(context, context.CurrentNode, scriptFunction, arguments);
+                if (result is bool b && b)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>
         /// Applies the specified function to each element of the input.
         /// </summary>
         /// <param name="context">The template context</param>
@@ -721,7 +770,7 @@ namespace Scriban.Functions
 
             return new ScriptRange(impl(context, callerContext, span, list, scriptingFunction, scriptingFunction.GetParameterInfo(0).ParameterType));
         }
-
+        
         private class CycleKey : IEquatable<CycleKey>
         {
             public readonly string Group;

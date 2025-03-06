@@ -23,6 +23,7 @@ Array functions available through the object 'array' in scriban.
 - [`array.compact`](#arraycompact)
 - [`array.concat`](#arrayconcat)
 - [`array.cycle`](#arraycycle)
+- [`array.any`](#arrayany)
 - [`array.each`](#arrayeach)
 - [`array.filter`](#arrayfilter)
 - [`array.first`](#arrayfirst)
@@ -200,6 +201,40 @@ one
 ```
 `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template.
 If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
+
+[:top:](#builtins)
+### `array.any`
+
+```
+array.any <list> <function> <args>
+```
+
+#### Description
+
+Returns the distinct elements of the input `list`.
+
+#### Arguments
+
+- `list`: An input list
+- `function`: The function to apply to each item in the list that returns a boolean.
+- `args`: The arguments to pass to the function
+
+#### Returns
+
+A boolean indicating if one of the item in the list satisfied the function.
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ [" hello", " world", "20"] | array.any @string.contains "20"}}
+{{ [" hello", " world", "20"] | array.any @string.contains "30"}}
+```
+> **output**
+```html
+true
+false
+```
 
 [:top:](#builtins)
 ### `array.each`

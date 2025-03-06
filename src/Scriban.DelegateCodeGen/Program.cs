@@ -136,7 +136,15 @@ namespace Scriban.Runtime
                     continue;
                 }
 
-                caseArgumentsBuilder.AppendLine($"                var arg{argIndex} = ({PrettyType(type)})arguments[{argIndex}];");
+                // If it is the last parameter and it is a params array, we need to handle it differently
+                if (paramIndex + 1 == method.Parameters.Count && arg.CustomAttributes.Any(x => x.AttributeType.FullName == typeof(ParamArrayAttribute).FullName))
+                {
+                    caseArgumentsBuilder.AppendLine($"                var arg{argIndex} = ((ScriptArray)arguments[{argIndex}]).ToArray();");
+                }
+                else
+                {
+                    caseArgumentsBuilder.AppendLine($"                var arg{argIndex} = ({PrettyType(type)})arguments[{argIndex}];");
+                }
 
                 delegateCallArgs.Append($"arg{argIndex}");
                 argIndex++;
@@ -206,8 +214,10 @@ namespace Scriban.Runtime
 
         private static string GetSignature(MethodDefinition method, SignatureMode mode)
         {
+            bool asCSharp = mode != SignatureMode.Name;
+
             var text = new StringBuilder();
-            text.Append(PrettyType(method.ReturnType));
+            text.Append(PrettyType(method.ReturnType, asCSharp));
             if (mode == SignatureMode.Verbose)
             {
                 text.Append(" (");
@@ -232,7 +242,7 @@ namespace Scriban.Runtime
                     text.Append("_");
                 }
 
-                text.Append(PrettyType(parameter.ParameterType));
+                text.Append(PrettyType(parameter.ParameterType, asCSharp));
 
                 if (mode == SignatureMode.Delegate)
                 {
@@ -268,7 +278,7 @@ namespace Scriban.Runtime
             Delegate,
         }
 
-        private static string PrettyType(TypeReference typeReference)
+        private static string PrettyType(TypeReference typeReference, bool asCSharp = true)
         {
             switch (typeReference.MetadataType)
             {
@@ -300,6 +310,11 @@ namespace Scriban.Runtime
                     return "object";
                 case MetadataType.Void:
                     return "void";
+            }
+
+            if (!asCSharp && typeReference.IsArray)
+            {
+                return PrettyType(((ArrayType)typeReference).ElementType) + "Array";
             }
 
             return typeReference.Namespace.StartsWith("Scriban") || typeReference.Namespace == "System" || typeReference.Namespace == "System.Collections"

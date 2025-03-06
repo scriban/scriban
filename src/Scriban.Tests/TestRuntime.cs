@@ -25,6 +25,24 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestFunctionPointerWithPath()
+        {
+            var script = """
+                         {{ ["", "200",  "400"] | array.any @string.contains '20' }}
+                         """;
+            var template = Scriban.Template.Parse(script);
+            var result = template.Render();
+            Assert.AreEqual("true", result);
+
+            script = """
+                     {{ ["", "200",  "400"] | array.any @string.contains '50' }}
+                     """;
+            template = Scriban.Template.Parse(script);
+            result = template.Render();
+            Assert.AreEqual("false", result);
+        }
+        
+        [Test]
         public void TestPipeAndNamedArguments()
         {
             var script = """

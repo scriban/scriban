@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 03/06/2025 15:51:53 by Scriban.DelegateCodeGen
+// This file was automatically generated - 03/06/2025 18:17:54 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -31,6 +31,7 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.StartsWith), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionbool_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Empty), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionbool_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Whitespace), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionbool_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Any), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionbool_TemplateContext_SourceSpan_IEnumerable_object_objectArray(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetMethod(nameof(Scriban.Functions.DateTimeFunctions.Now), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionDateTime(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetMethod(nameof(Scriban.Functions.DateTimeFunctions.AddDays), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionDateTime_DateTime_double(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetMethod(nameof(Scriban.Functions.DateTimeFunctions.AddHours), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionDateTime_DateTime_double(method));
@@ -222,6 +223,30 @@ namespace Scriban.Runtime
                 var arg0 = (string)arguments[0];
 
                 return _delegate(arg0);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: bool (TemplateContext, SourceSpan, IEnumerable, object, Object[])
+        /// </summary>
+        private partial class Functionbool_TemplateContext_SourceSpan_IEnumerable_object_objectArray : DynamicCustomFunction
+        {
+            private delegate bool InternalDelegate(TemplateContext arg0, SourceSpan arg1, IEnumerable arg2, object arg3, Object[] arg4);
+
+            private readonly InternalDelegate _delegate;
+
+            public Functionbool_TemplateContext_SourceSpan_IEnumerable_object_objectArray(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (IEnumerable)arguments[0];
+                var arg1 = (object)arguments[1];
+                var arg2 = ((ScriptArray)arguments[2]).ToArray();
+
+                return _delegate(context, callerContext.Span, arg0, arg1, arg2);
             }
         }
 

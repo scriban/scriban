@@ -1,6 +1,7 @@
 List of all the builtin <array> functions:
  add
  add_range
+ any
  compact
  concat
  contains
