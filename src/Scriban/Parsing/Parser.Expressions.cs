@@ -569,8 +569,16 @@ namespace Scriban.Parsing
                                     functionCall = null;
                                 }
 
-                                // We don't allow anything after named parameters for IScriptNamedArgumentContainer
-                                break;
+                                // If we have a pipe, let's try to continue parsing it
+                                if (IsCurrentPipeOrExpressionContinuation())
+                                {
+                                    continue;
+                                }
+                                else
+                                {
+                                    // We don't allow anything after named parameters for IScriptNamedArgumentContainer
+                                    break;
+                                }
                             }
 
                             // Otherwise we allow to mix normal parameters within named parameters
@@ -710,14 +718,7 @@ namespace Scriban.Parsing
                         leftOperand = funcCall;
                     }
 
-                    if (
-                            (_isScientific &&
-                              Current.Type == TokenType.PipeGreater)
-                            ||
-                             (!_isScientific &&
-                                    Current.Type == TokenType.VerticalBar) ||
-                                    Current.Type == TokenType.PipeGreater
-                       )
+                    if (IsCurrentPipeOrExpressionContinuation())
                     {
                         if (functionCall != null)
                         {
@@ -760,6 +761,12 @@ namespace Scriban.Parsing
                 _expressionDepth = expressionDepthBeforeEntering;
                 _expressionLevel--;
             }
+        }
+
+        private bool IsCurrentPipeOrExpressionContinuation()
+        {
+            return (_isScientific && Current.Type == TokenType.PipeGreater)
+                   || (!_isScientific && Current.Type == TokenType.VerticalBar) || Current.Type == TokenType.PipeGreater;
         }
 
         private ScriptExpression ParseArrayInitializer()

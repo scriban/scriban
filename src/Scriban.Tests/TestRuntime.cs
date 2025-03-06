@@ -25,6 +25,18 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestPipeAndNamedArguments()
+        {
+            var script = """
+                         {{func get_values; ret [{name:'A'},{name:'B'},{name:'C'}]; end;}}4) Breaks: {{ get_values '1' two:'2' three: '3' | array.map 'name' }}
+                         """;
+            var template = Scriban.Template.Parse(script);
+            var result = template.Render();
+
+            Assert.AreEqual("4) Breaks: [\"A\", \"B\", \"C\"]", result);
+        }
+        
+        [Test]
         public void TestNullCoallescingWithStringInterpolation()
         {
             var script = """
