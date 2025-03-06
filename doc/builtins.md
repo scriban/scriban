@@ -749,7 +749,7 @@ Returns a datetime object of the current time, including the hour, minutes, seco
 ```
 > **output**
 ```html
-2024
+2025
 ```
 
 [:top:](#builtins)
@@ -2038,28 +2038,28 @@ A list with the member values of the input object
 ### `object.from_json`
 
 ```
-object.from_json <value>
+object.from_json <json>
 ```
 
 #### Description
 
-Converts a JSON string to a scriban value.
+Converts the json to a scriban value. Object, Array, string, etc.
 
 #### Arguments
 
-- `value`: The input JSON string.
+- `json`: The json to deserialize.
 
 #### Returns
 
-The scriban value.
+Returns the scriban value
 
 #### Examples
 
 > **input**
 ```scriban-html
 {{
-    obj = `{ "foo": 123 }` | object.from_json
-    obj.foo
+   obj = `{ "foo": 123 }` | object.from_json
+   obj.foo
 }}
 ```
 > **output**
@@ -2076,15 +2076,15 @@ object.to_json <value>
 
 #### Description
 
-Converts a scriban value to a JSON string.
+Converts the scriban value to JSON
 
 #### Arguments
 
-- `value`: The input value.
+- `value`: The input object.
 
 #### Returns
 
-A JSON representation of the value.
+A JSON representation of the value
 
 #### Examples
 
@@ -2100,7 +2100,6 @@ A JSON representation of the value.
 true
 null
 ```
-
 [:top:](#builtins)
 
 ## `regex` functions
