@@ -188,9 +188,11 @@ namespace Scriban.Syntax
                 literal.Append('$');
             }
 
-            char firstChar = stringTokenType == TokenType.BeginInterpolatedString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpolatedString ? quote : '}';
-            literal.Append(firstChar);
-
+            if (stringTokenType == TokenType.BeginInterpolatedString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpolatedString)
+            {
+                literal.Append(quote);
+            }
+            
             if (quoteType == ScriptLiteralStringQuoteType.Verbatim)
             {
                 literal.Append(input.Replace("`", "``"));
@@ -229,8 +231,11 @@ namespace Scriban.Syntax
                     }
                 }
             }
-            char lastChar = stringTokenType == TokenType.EndingInterpolatedString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpolatedString ? quote : '{';
-            literal.Append(lastChar);
+
+            if (stringTokenType == TokenType.EndingInterpolatedString || stringTokenType == TokenType.String || stringTokenType == TokenType.InterpolatedString)
+            {
+                literal.Append(quote);
+            }
             return literal.ToString();
         }
 

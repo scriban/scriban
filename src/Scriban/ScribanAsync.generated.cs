@@ -1774,7 +1774,7 @@ namespace Scriban.Syntax
             context.PushPipeArguments();
             try
             {
-                return await context.GetValueAsync(this).ConfigureAwait(false);
+                return await context.EvaluateAsync(Expression).ConfigureAwait(false);
             }
             finally
             {
@@ -1784,15 +1784,40 @@ namespace Scriban.Syntax
                 }
             }
         }
+    }
 
-        public async ValueTask<object> GetValueAsync(TemplateContext context)
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    partial class ScriptInterpolatedStringExpression
+    {
+        public override async ValueTask<object> EvaluateAsync(TemplateContext context)
         {
-            return await context.EvaluateAsync(Expression).ConfigureAwait(false);
-        }
+            // A nested expression will reset the pipe arguments for the group
+            context.PushPipeArguments();
+            try
+            {
+                var builder = new System.Text.StringBuilder(); // TODO: use thread local
+                foreach (var scriptExpression in Parts)
+                {
+                    var value = await context.EvaluateAsync(scriptExpression).ConfigureAwait(false);
+                    if (value != null)
+                    {
+                        builder.Append(value);
+                    }
+                }
 
-        public async ValueTask SetValueAsync(TemplateContext context, object valueToSet)
-        {
-            await context.SetValueAsync(Expression, valueToSet).ConfigureAwait(false);
+                return builder.ToString();
+            }
+            finally
+            {
+                if (context.CurrentPipeArguments != null)
+                {
+                    context.PopPipeArguments();
+                }
+            }
         }
     }
 

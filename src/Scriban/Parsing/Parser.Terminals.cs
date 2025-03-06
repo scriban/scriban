@@ -47,9 +47,6 @@ namespace Scriban.Parsing
                     literal = ParseString();
                     break;
                 case TokenType.BeginInterpolatedString:
-                case TokenType.ContinuationInterpolatedString:
-                case TokenType.EndingInterpolatedString:
-                case TokenType.InterpolatedString:
                     literal = ParseInterpolatedString();
                     break;
                 case TokenType.ImplicitString:
@@ -59,7 +56,7 @@ namespace Scriban.Parsing
                     literal = ParseVerbatimString();
                     break;
                 default:
-                    LogError(Current, "Unexpected token found `{GetAsText(Current)}` while parsing a variable or literal");
+                    LogError(Current, $"Unexpected token found `{GetAsTextForLog(Current)}` while parsing a variable or literal");
                     break;
             }
             return literal;
@@ -402,7 +399,7 @@ namespace Scriban.Parsing
             return Close(literal);
         }
 
-        private ScriptLiteral ParseInterpolatedString()
+        private ScriptLiteral ParseInterpolatedStringPart()
         {
             var literal = Open<ScriptLiteral>();
             var text = _lexer.Text;
@@ -684,7 +681,7 @@ namespace Scriban.Parsing
                     }
                     else
                     {
-                        LogError(currentToken, $"Invalid token `{GetAsText(Current)}`. The loop variable <{text}> dot must be followed by an identifier");
+                        LogError(currentToken, $"Invalid token `{GetAsTextForLog(Current)}`. The loop variable <{text}> dot must be followed by an identifier");
                     }
                 }
             }

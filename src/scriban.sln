@@ -13,6 +13,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{061866E2-005C-4D13-A338-EA464BBEC60F}"
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
+		..\.gitattributes = ..\.gitattributes
 		..\doc\builtins.md = ..\doc\builtins.md
 		..\changelog.md = ..\changelog.md
 		..\.github\workflows\CI.yml = ..\.github\workflows\CI.yml

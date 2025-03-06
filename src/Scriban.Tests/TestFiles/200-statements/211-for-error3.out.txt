@@ -1,2 +1,1 @@
-text(5,46) : error : Error while parsing for statement: Expecting <expression> instead of `
-` in: for <variable> in <expression> ... end
+text(5,46) : error : Error while parsing for statement: Expecting <expression> instead of `\n` in: for <variable> in <expression> ... end

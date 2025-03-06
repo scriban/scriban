@@ -77,8 +77,8 @@ namespace Scriban.Parsing
                 TokenType.CloseBrace => "}",
                 TokenType.OpenBracket => "[",
                 TokenType.CloseBracket => "]",
-                TokenType.OpenInterpolatedBrace => string.Empty,
-                TokenType.CloseInterpolatedBrace => string.Empty,
+                TokenType.OpenInterpolatedBrace => "{",
+                TokenType.CloseInterpolatedBrace => "}",
                 _ => null
             };
         }

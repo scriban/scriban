@@ -210,12 +210,7 @@ namespace Scriban.Parsing
                                 else
                                 {
                                     nextStatement = false;
-                                    string message;
-                                    if (AnyInterpolation)
-                                        message = "Opened interpolated expression not closed on the same line.";
-                                    else
-                                        message = $"Unexpected token {GetAsText(Current)}";
-                                    LogError(message);
+                                    LogError($"Unexpected token {GetAsTextForLog(Current)}");
                                 }
                                 break;
                         }
@@ -223,7 +218,7 @@ namespace Scriban.Parsing
                     else
                     {
                         nextStatement = false;
-                        LogError($"Unexpected token {GetAsText(Current)} while not in a code block {{ ... }}");
+                        LogError($"Unexpected token {GetAsTextForLog(Current)} while not in a code block {{ ... }}");
                         // LOG an ERROR. Don't expect any other tokens outside a code section
                     }
                     break;
@@ -421,7 +416,7 @@ namespace Scriban.Parsing
                 if (Current.Type != TokenType.Identifier || GetAsText(Current) != "in")
                 {
                     // unit test: 211-for-error2.txt
-                    LogError(forStatement, $"Expecting 'in' word instead of `{GetAsText(Current)}`");
+                    LogError(forStatement, $"Expecting 'in' word instead of `{GetAsTextForLog(Current)}`");
                 }
                 else
                 {
@@ -556,7 +551,7 @@ namespace Scriban.Parsing
             if (parent is ScriptCaseStatement)
             {
                 // 205-case-when-statement-error1.txt
-                LogError(token, $"Unexpected statement/expression `{GetAsText(token)}` in the body of a `case` statement. Only `when`/`else` are expected.");
+                LogError(token, $"Unexpected statement/expression `{GetAsTextForLog(token)}` in the body of a `case` statement. Only `when`/`else` are expected.");
             }
         }
 
@@ -575,7 +570,7 @@ namespace Scriban.Parsing
             }
             else
             {
-                LogError(parentNode, $"Expecting a variable instead of `{GetAsText(Current)}`");
+                LogError(parentNode, $"Expecting a variable instead of `{GetAsTextForLog(Current)}`");
             }
             return null;
         }
@@ -600,7 +595,7 @@ namespace Scriban.Parsing
                 return true;
             }
             // If we are not finding an end of statement, log a fatal error
-            LogError(CurrentSpan, $"Invalid token found `{GetAsText(Current)}`. Expecting <EOL>/end of line.", true);
+            LogError(CurrentSpan, $"Invalid token found `{GetAsTextForLog(Current)}`. Expecting <EOL>/end of line.", true);
             return false;
         }
 

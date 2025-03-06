@@ -31,3 +31,4 @@ Scriban yes 5 can interpolate strings now
 yes 5
 no
 Unary: -2
+Function Call: this is a text

@@ -548,6 +548,20 @@ namespace Scriban.Syntax
 #else
     internal
 #endif
+    partial class ScriptInterpolatedStringExpression
+    {
+        public override int ChildrenCount => 1;
+
+        protected override ScriptNode GetChildrenImpl(int index) => Parts;
+        public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
+    }
+
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
     partial class ScriptIsEmptyExpression
     {
         public override int ChildrenCount => 4;
@@ -1264,6 +1278,12 @@ namespace Scriban.Syntax
             return new ScriptInterpolatedExpression() { OpenBrace = newOpenBrace, Expression = newExpression, CloseBrace = newCloseBrace };
         }
 
+        public override ScriptNode Visit(ScriptInterpolatedStringExpression node)
+        {
+            var newParts = VisitAll(node.Parts);
+            return new ScriptInterpolatedStringExpression() { Parts = newParts };
+        }
+
         public override ScriptNode Visit(ScriptIsEmptyExpression node)
         {
             var newTarget = (ScriptExpression)Visit((ScriptNode)node.Target);
@@ -1467,6 +1487,7 @@ namespace Scriban.Syntax
         public virtual void Visit(ScriptIncrementDecrementExpression node) => DefaultVisit(node);
         public virtual void Visit(ScriptIndexerExpression node) => DefaultVisit(node);
         public virtual void Visit(ScriptInterpolatedExpression node) => DefaultVisit(node);
+        public virtual void Visit(ScriptInterpolatedStringExpression node) => DefaultVisit(node);
         public virtual void Visit(ScriptIsEmptyExpression node) => DefaultVisit(node);
         public virtual void Visit(ScriptKeyword node) => DefaultVisit(node);
         public virtual void Visit(ScriptLiteral node) => DefaultVisit(node);
@@ -1526,6 +1547,7 @@ namespace Scriban.Syntax
         public virtual TResult Visit(ScriptIncrementDecrementExpression node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptIndexerExpression node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptInterpolatedExpression node) => DefaultVisit(node);
+        public virtual TResult Visit(ScriptInterpolatedStringExpression node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptIsEmptyExpression node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptKeyword node) => DefaultVisit(node);
         public virtual TResult Visit(ScriptLiteral node) => DefaultVisit(node);

@@ -25,6 +25,26 @@ namespace Scriban.Tests
     public class TestRuntime
     {
         [Test]
+        public void TestNullCoallescingWithStringInterpolation()
+        {
+            var script = """
+                         {{ "hello" ?? $"{" "}world" }}
+                         """;
+
+            //var lexer = new Lexer(script);
+            //foreach (var token in lexer)
+            //{
+            //    Console.WriteLine(token);
+            //}
+            var template = Scriban.Template.Parse(script);
+            var result = template.Render();
+
+            template.Page.PrintTo(new ScriptPrinter(new TextWriterOutput(Console.Out)));
+
+            Assert.AreEqual("hello", result);
+        }
+
+        [Test]
         public void String_And_Null_Concatenated_Should_Not_Null()
         {
             var context = new TemplateContext()

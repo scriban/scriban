@@ -1,1 +1,3 @@
-text(5,1) : error : Opened interpolated expression not closed on the same line.
+text(4,18) : error : Opened interpolated expression not closed on the same line.
+text(4,18) : error : Unexpected token `\n` while parsing expression
+text(5,1) : error : Unexpected token }

@@ -31,3 +31,4 @@ Interpolation at the beginning: {{ $"{math.times 2 2} is 4" }}
 {{ true ? $"yes {4 + 1}" : "no" }}
 {{ false ? $"yes {4 + 1}" : $"no" }}
 {{ $"Unary: {-2}" }}
+{{ $"Function Call: {"this is a teeext" | regex.replace "te+xt" "text"}" }}

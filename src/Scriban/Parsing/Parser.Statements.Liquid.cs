@@ -34,7 +34,7 @@ namespace Scriban.Parsing
             if (identifier != "when" && identifier != "case" && !identifier.StartsWith("end") && parent is ScriptCaseStatement)
             {
                 // 205-case-when-statement-error1.txt
-                LogError(startToken, $"Unexpected statement/expression `{GetAsText(startToken)}` in the body of a `case` statement. Only `when`/`else` are expected.");
+                LogError(startToken, $"Unexpected statement/expression `{GetAsTextForLog(startToken)}` in the body of a `case` statement. Only `when`/`else` are expected.");
             }
 
             ScriptStatement startStatement = null;
@@ -293,7 +293,7 @@ namespace Scriban.Parsing
                 }
                 else
                 {
-                    LogError(Current, $"Unexpected token `{GetAsText(Current)}` after cycle value `{value}`. Expecting a `,`");
+                    LogError(Current, $"Unexpected token `{GetAsTextForLog(Current)}` after cycle value `{value}`. Expecting a `,`");
                     NextToken();
                     break;
                 }
@@ -329,7 +329,7 @@ namespace Scriban.Parsing
             //}
             //else if (_isLiquidTagSection)
             //{
-            //    LogError(startToken, $"Expecting the expression `{GetAsText(startToken)}` to be in an object section `{{{{ ... }}}}`");
+            //    LogError(startToken, $"Expecting the expression `{GetAsTextForLog(startToken)}` to be in an object section `{{{{ ... }}}}`");
             //}
             //else if (!(expressionStatement.Expression is IScriptVariablePath || expressionStatement.Expression is ScriptPipeCall))
             //{
@@ -454,7 +454,7 @@ namespace Scriban.Parsing
                     var variable = variableObject as ScriptVariable;
                     if (variable == null)
                     {
-                        LogError(variableToken, $"Unexpected variable name `{GetAsText(variableToken)}` found in include parameter");
+                        LogError(variableToken, $"Unexpected variable name `{GetAsTextForLog(variableToken)}` found in include parameter");
                     }
 
                     if (Current.Type == TokenType.Colon)
@@ -463,7 +463,7 @@ namespace Scriban.Parsing
                     }
                     else
                     {
-                        LogError(Current, $"Unexpected token `{GetAsText(Current)}` after variable `{variable}`. Expecting a `:`");
+                        LogError(Current, $"Unexpected token `{GetAsTextForLog(Current)}` after variable `{variable}`. Expecting a `:`");
                     }
 
                     if (block == null)

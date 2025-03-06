@@ -10,13 +10,13 @@ using System.IO;
 
 namespace Scriban.Syntax
 {
-    [ScriptSyntax("interpolated expression", "{<expression>}")]
+    [ScriptSyntax("interpolated string expression", "$\"string{<expression>}string\"")]
 #if SCRIBAN_PUBLIC
     public
 #else
     internal
 #endif
-    partial class ScriptInterpolatedExpression : ScriptExpression, IScriptVariablePath
+    partial class ScriptInterpolatedExpression : ScriptExpression
     {
         private ScriptExpression _expression;
         private ScriptToken _openBrace;
@@ -31,26 +31,6 @@ namespace Scriban.Syntax
         public ScriptInterpolatedExpression(ScriptExpression expression) : this()
         {
             Expression = expression;
-        }
-
-        public static ScriptInterpolatedExpression Wrap(ScriptExpression expression, bool transferTrivia = false)
-        {
-            if (expression == null) throw new ArgumentNullException(nameof(expression));
-            var nested = new ScriptInterpolatedExpression()
-                {
-                    Span = expression.Span,
-                    Expression = expression
-                };
-
-            if (!transferTrivia) return nested;
-
-            var firstTerminal = expression.FindFirstTerminal();
-            firstTerminal?.MoveLeadingTriviasTo(nested.OpenBrace);
-
-            var lastTerminal = expression.FindLastTerminal();
-            lastTerminal?.MoveTrailingTriviasTo(nested.CloseBrace, true);
-
-            return nested;
         }
 
         public ScriptToken OpenBrace
@@ -77,7 +57,7 @@ namespace Scriban.Syntax
             context.PushPipeArguments();
             try
             {
-                return context.GetValue(this);
+                return context.Evaluate(Expression);
             }
             finally
             {
@@ -93,20 +73,6 @@ namespace Scriban.Syntax
             printer.Write(OpenBrace);
             printer.Write(Expression);
             printer.Write(CloseBrace);
-        }
-        public object GetValue(TemplateContext context)
-        {
-            return context.Evaluate(Expression);
-        }
-
-        public void SetValue(TemplateContext context, object valueToSet)
-        {
-            context.SetValue(Expression, valueToSet);
-        }
-
-        public string GetFirstPath()
-        {
-            return (Expression as IScriptVariablePath)?.GetFirstPath();
         }
     }
 }

@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Text;
 using Scriban.Helpers;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -252,6 +253,62 @@ namespace Scriban.Parsing
         private string GetAsText(Token localToken)
         {
             return localToken.GetText(_lexer.Text);
+        }
+
+        private string GetAsTextForLog(Token localToken)
+        {
+            var text = GetAsText(localToken);
+            foreach (var c in text)
+            {
+                if (char.IsControl(c))
+                {
+                    StringBuilder builder = new StringBuilder(text.Length);
+                    foreach (var d in text)
+                    {
+                        if (char.IsControl(d))
+                        {
+                            switch (d)
+                            {
+                                case '\n':
+                                    builder.Append("\\n");
+                                    break;
+                                case '\r':
+                                    builder.Append("\\r");
+                                    break;
+                                case '\t':
+                                    builder.Append("\\t");
+                                    break;
+                                case '\v':
+                                    builder.Append("\\v");
+                                    break;
+                                case '\f':
+                                    builder.Append("\\f");
+                                    break;
+                                case '\b':
+                                    builder.Append("\\b");
+                                    break;
+                                case '\a':
+                                    builder.Append("\\a");
+                                    break;
+                                case '\0':
+                                    builder.Append("\\0");
+                                    break;
+                                default:
+                                    builder.Append($"\\u{(int)d:x4}");
+                                    break;
+                            }
+                        }
+                        else
+                        {
+                            builder.Append(d);
+                        }
+                    }
+                    // Escape all control / non-visible characters by using their unicode representation
+                    return builder.ToString();
+                }
+            }
+
+            return text;
         }
 
         private bool MatchText(Token localToken, string text)
