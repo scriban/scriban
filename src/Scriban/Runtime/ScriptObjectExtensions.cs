@@ -12,7 +12,7 @@ using System.Runtime.CompilerServices;
 using Scriban.Parsing;
 using Scriban.Syntax;
 
-#if NET
+#if NET7_0_OR_GREATER
 using System.Text.Json;
 #endif
 
@@ -71,7 +71,7 @@ namespace Scriban.Runtime
                 return;
             }
 
-#if NET
+#if NET7_0_OR_GREATER
             if (obj is JsonElement json) {
                 script.Import(json);
             }
@@ -83,7 +83,7 @@ namespace Scriban.Runtime
 #endif
         }
 
-#if NET
+#if NET7_0_OR_GREATER
         public static void Import(this IScriptObject script, JsonElement json)
         {
             if (json.ValueKind is JsonValueKind.Object && script is ScriptObject)
@@ -381,7 +381,7 @@ namespace Scriban.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static object ConvertValue(object value)
         {
-#if NET
+#if NET7_0_OR_GREATER
             return value switch {
                 JsonElement json => json.ToScriban(),
                 _ => value,
