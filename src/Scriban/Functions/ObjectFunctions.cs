@@ -473,7 +473,7 @@ namespace Scriban.Functions
         /// {{ null | object.to_json }}
         /// ```
         /// ```html
-        /// { "foo": "bar", "baz": [1, 2, 3] }
+        /// {"foo":"bar","baz":[1,2,3]}
         /// true
         /// null
         /// ```

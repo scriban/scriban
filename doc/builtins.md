@@ -2096,7 +2096,7 @@ A JSON representation of the value
 ```
 > **output**
 ```html
-{ "foo": "bar", "baz": [1, 2, 3] }
+{"foo":"bar","baz":[1,2,3]}
 true
 null
 ```
