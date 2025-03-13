@@ -68,39 +68,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
             }
 
-            Template template;
-
-            if (!context.CachedTemplates.TryGetValue(templatePath, out template))
-            {
-
-                string templateText;
-                try
-                {
-                    templateText = templateLoader.Load(context, callerContext.Span, templatePath);
-                }
-                catch (Exception ex) when (!(ex is ScriptRuntimeException))
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while loading the include `{templateName}` from path `{templatePath}`", ex);
-                }
-
-                if (templateText == null)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"The result of including `{templateName}->{templatePath}` cannot be null");
-                }
-
-                // Clone parser options
-                var parserOptions = context.TemplateLoaderParserOptions;
-                var lexerOptions = context.TemplateLoaderLexerOptions;
-                template = Template.Parse(templateText, templatePath, parserOptions, lexerOptions);
-
-                // If the template has any errors, throw an exception
-                if (template.HasErrors)
-                {
-                    throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template `{templateName}` from `{templatePath}`", template.Messages);
-                }
-
-                context.CachedTemplates.Add(templatePath, template);
-            }
+            Template template = context.GetOrCreateTemplate(templatePath, callerContext);
 
             // Make sure that we cannot recursively include a template
             object result = null;

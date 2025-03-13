@@ -1203,9 +1203,49 @@ namespace Scriban
             return null;
         }
 
-        internal void ResetPreviousNewLine()
+        public void ResetPreviousNewLine()
         {
             _previousTextWasNewLine = false;
+        }
+
+        public Template GetOrCreateTemplate(string templatePath, ScriptNode callerContext)
+        {
+            if (!CachedTemplates.TryGetValue(templatePath, out var template))
+            {
+                template = CreateTemplate(templatePath, callerContext);
+                CachedTemplates[templatePath] = template;
+            }
+            return template;
+        }
+
+        protected virtual Template CreateTemplate(string templatePath, ScriptNode callerContext)
+        {
+            string templateText;
+            try
+            {
+                templateText = TemplateLoader.Load(this, callerContext.Span, templatePath);
+            }
+            catch (Exception ex) when (!(ex is ScriptRuntimeException))
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while creating template from path `{templatePath}`", ex);
+            }
+
+            if (templateText == null)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"The result of including `{templatePath}` cannot be null");
+            }
+
+            var template = Template.Parse(templateText, templatePath, TemplateLoaderParserOptions, TemplateLoaderLexerOptions);
+
+            // If the template has any errors, throw an exception
+            if (template.HasErrors)
+            {
+                throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template `{templatePath}`", template.Messages);
+            }
+
+            CachedTemplates.Add(templatePath, template);
+
+            return template;
         }
     }
 
