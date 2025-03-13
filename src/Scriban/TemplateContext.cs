@@ -1208,17 +1208,17 @@ namespace Scriban
             _previousTextWasNewLine = false;
         }
 
-        public Template GetOrProcessTemplate(string templatePath, ScriptNode callerContext)
+        public Template GetOrCreateTemplate(string templatePath, ScriptNode callerContext)
         {
             if (!CachedTemplates.TryGetValue(templatePath, out var template))
             {
-                template = ProcessTemplate(templatePath, callerContext);
+                template = CreateTemplate(templatePath, callerContext);
                 CachedTemplates[templatePath] = template;
             }
             return template;
         }
 
-        protected virtual Template ProcessTemplate(string templatePath, ScriptNode callerContext)
+        protected virtual Template CreateTemplate(string templatePath, ScriptNode callerContext)
         {
             string templateText;
             try

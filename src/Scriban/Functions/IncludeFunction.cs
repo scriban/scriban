@@ -68,7 +68,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
             }
 
-            Template template = context.GetOrProcessTemplate(templatePath, callerContext);
+            Template template = context.GetOrCreateTemplate(templatePath, callerContext);
 
             // Make sure that we cannot recursively include a template
             object result = null;
