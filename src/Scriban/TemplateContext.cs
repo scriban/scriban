@@ -1203,7 +1203,7 @@ namespace Scriban
             return null;
         }
 
-        internal void ResetPreviousNewLine()
+        public void ResetPreviousNewLine()
         {
             _previousTextWasNewLine = false;
         }
