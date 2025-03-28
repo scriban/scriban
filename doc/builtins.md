@@ -3722,7 +3722,7 @@ The `SHA-512` hash of the input string using a hash message authentication code 
 
 > **input**
 ```scriban-html
-{{ "test" | string.hmac_sha2512 "secret" }}
+{{ "test" | string.hmac_sha512 "secret" }}
 ```
 > **output**
 ```html

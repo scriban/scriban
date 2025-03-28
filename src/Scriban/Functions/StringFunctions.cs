@@ -1134,7 +1134,7 @@ namespace Scriban.Functions
         /// <returns>The `SHA-512` hash of the input string using a hash message authentication code (HMAC)</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "test" | string.hmac_sha2512 "secret" }}
+        /// {{ "test" | string.hmac_sha512 "secret" }}
         /// ```
         /// ```html
         /// f8a4f0a209167bc192a1bffaa01ecdb09e06c57f96530d92ec9ccea0090d290e55071306d6b654f26ae0c8721f7e48a2d7130b881151f2cec8d61d941a6be88a
