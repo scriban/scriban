@@ -3627,7 +3627,7 @@ The `sha512` hash of the input string
 
 #### Examples
 
-> **input**
+> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.sha512%20%7D%7D&model={})
 ```scriban-html
 {{ "test" | string.sha512 }}
 ```
@@ -3720,7 +3720,7 @@ The `SHA-512` hash of the input string using a hash message authentication code 
 
 #### Examples
 
-> **input**
+> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.hmac_sha512%20%22secret%22%20%7D%7D&model={})
 ```scriban-html
 {{ "test" | string.hmac_sha512 "secret" }}
 ```
