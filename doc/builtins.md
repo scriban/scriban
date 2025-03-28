@@ -2404,8 +2404,10 @@ String functions available through the builtin object 'string`.
 - [`string.md5`](#stringmd5)
 - [`string.sha1`](#stringsha1)
 - [`string.sha256`](#stringsha256)
+- [`string.sha512`](#stringsha512)
 - [`string.hmac_sha1`](#stringhmac_sha1)
 - [`string.hmac_sha256`](#stringhmac_sha256)
+- [`string.hmac_sha512`](#stringhmac_sha512)
 - [`string.pad_left`](#stringpad_left)
 - [`string.pad_right`](#stringpad_right)
 - [`string.base64_encode`](#stringbase64_encode)
@@ -3605,6 +3607,36 @@ The `sha256` hash of the input string
 ```
 
 [:top:](#builtins)
+### `string.sha512`
+
+```
+string.sha512 <text>
+```
+
+#### Description
+
+Computes the `sha512` hash of the input string
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+The `sha512` hash of the input string
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "test" | string.sha512 }}
+```
+> **output**
+```html
+ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff
+```
+
+[:top:](#builtins)
 ### `string.hmac_sha1`
 
 ```
@@ -3664,6 +3696,37 @@ The `SHA-256` hash of the input string using a hash message authentication code 
 > **output**
 ```html
 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
+```
+
+[:top:](#builtins)
+### `string.hmac_sha512`
+
+```
+string.hmac_sha512 <text> <secretKey>
+```
+
+#### Description
+
+Converts a string into a SHA-512 hash using a hash message authentication code (HMAC). Pass the secret key for the message as a parameter to the function.
+
+#### Arguments
+
+- `text`: The input string
+- `secretKey`: The secret key
+
+#### Returns
+
+The `SHA-512` hash of the input string using a hash message authentication code (HMAC)
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "test" | string.hmac_sha2512 "secret" }}
+```
+> **output**
+```html
+f8a4f0a209167bc192a1bffaa01ecdb09e06c57f96530d92ec9ccea0090d290e55071306d6b654f26ae0c8721f7e48a2d7130b881151f2cec8d61d941a6be88a
 ```
 
 [:top:](#builtins)
