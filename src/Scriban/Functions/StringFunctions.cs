@@ -1062,6 +1062,27 @@ namespace Scriban.Functions
         }
 
         /// <summary>
+        /// Computes the `sha512` hash of the input string
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The `sha512` hash of the input string</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "test" | string.sha512 }}
+        /// ```
+        /// ```html
+        /// ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff
+        /// ```
+        /// </remarks>
+        public static string Sha512(string text)
+        {
+            using (var sha512 = System.Security.Cryptography.SHA512.Create())
+            {
+                return Hash(sha512, text);
+            }
+        }
+
+        /// <summary>
         /// Converts a string into a SHA-1 hash using a hash message authentication code (HMAC). Pass the secret key for the message as a parameter to the function.
         /// </summary>
         /// <param name="text">The input string</param>
@@ -1102,6 +1123,28 @@ namespace Scriban.Functions
             using (var hsha256 = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
             {
                 return Hash(hsha256, text);
+            }
+        }
+
+        /// <summary>
+        /// Converts a string into a SHA-512 hash using a hash message authentication code (HMAC). Pass the secret key for the message as a parameter to the function.
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <param name="secretKey">The secret key</param>
+        /// <returns>The `SHA-512` hash of the input string using a hash message authentication code (HMAC)</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "test" | string.hmac_sha512 "secret" }}
+        /// ```
+        /// ```html
+        /// f8a4f0a209167bc192a1bffaa01ecdb09e06c57f96530d92ec9ccea0090d290e55071306d6b654f26ae0c8721f7e48a2d7130b881151f2cec8d61d941a6be88a
+        /// ```
+        /// </remarks>
+        public static string HmacSha512(string text, string secretKey)
+        {
+            using (var hsha512 = new System.Security.Cryptography.HMACSHA512(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
+            {
+                return Hash(hsha512, text);
             }
         }
 

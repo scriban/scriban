@@ -51,6 +51,7 @@ List of all the builtin <string> functions:
  handleize
  hmac_sha1
  hmac_sha256
+ hmac_sha512
  index_of
  literal
  lstrip
@@ -67,6 +68,7 @@ List of all the builtin <string> functions:
  rstrip
  sha1
  sha256
+ sha512
  size
  slice
  slice1
