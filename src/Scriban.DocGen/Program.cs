@@ -114,7 +114,7 @@ This document describes the various built-in functions available in scriban.
             {
                 var type = member.Info as Type;
                 var methodInfo = member.Info as MethodInfo;
-               
+
 
                 if (type != null && IsBuiltinType(type, out string shortName))
                 {
@@ -146,7 +146,7 @@ This document describes the various built-in functions available in scriban.
 
                     // Write the toc
                     classWriter.Head.WriteLine($"- [`{shortName}.{methodShortName}`](#{shortName}{methodShortName})");
-                    
+
                     _writer = classWriter.Body;
                     _writer.WriteLine();
                     _writer.WriteLine("[:top:](#builtins)");
@@ -269,9 +269,24 @@ This document describes the various built-in functions available in scriban.
                 var content = text.Content;
 
                 content = content.Replace("```scriban-html", "> **input**\r\n```scriban-html");
+                content = AddTryOutLink(content);
                 content = content.Replace("```html", "> **output**\r\n```html");
 
                 _writer.Write(content);
+            }
+
+            private static string AddTryOutLink(string content)
+            {
+                const string startText = "\r\n```scriban-html\n";
+                var startIx = content.IndexOf(startText, StringComparison.Ordinal);
+                if (startIx == -1) return content;
+
+                const string endText = "\n```";
+                var enxIx = content.IndexOf(endText, startIx + startText.Length, StringComparison.Ordinal);
+
+                var template = content.Substring(startIx + startText.Length, enxIx - startIx - startText.Length);
+                var link = $"https://scribanonline.azurewebsites.net/?template={Uri.EscapeDataString(template)}&model={{}}";
+                return content.Replace("> **input**", $"> **input** [:fast_forward: Try out]({link})");
             }
 
             public override void VisitPara(Para para)
