@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using NuDoq;
 using Scriban.Functions;
 using Scriban.Parsing;
@@ -277,16 +279,19 @@ This document describes the various built-in functions available in scriban.
 
             private static string AddTryOutLink(string content)
             {
-                const string startText = "\r\n```scriban-html\n";
-                var startIx = content.IndexOf(startText, StringComparison.Ordinal);
-                if (startIx == -1) return content;
+                const string inputText = "> **input**";
+                if (!content.Contains(inputText)) return content;
 
-                const string endText = "\n```";
-                var enxIx = content.IndexOf(endText, startIx + startText.Length, StringComparison.Ordinal);
+                var regex = new Regex(@"```scriban\-html\n([\S\s]*?)\n```", RegexOptions.Multiline);
+                var matches = regex.Matches(content);
+                foreach (Match match in matches)
+                {
+                    var template = match.Groups[1].Value;
+                    var link = $"https://scribanonline.azurewebsites.net/?template={Uri.EscapeDataString(template)}&model={{}}";
+                    content = content.Replace($"{inputText}\r\n{match.Value}", $"{inputText} [:fast_forward: Try out]({link})\r\n{match.Value}");
+                }
 
-                var template = content.Substring(startIx + startText.Length, enxIx - startIx - startText.Length);
-                var link = $"https://scribanonline.azurewebsites.net/?template={Uri.EscapeDataString(template)}&model={{}}";
-                return content.Replace("> **input**", $"> **input** [:fast_forward: Try out]({link})");
+                return content;
             }
 
             public override void VisitPara(Para para)

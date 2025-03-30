@@ -548,7 +548,7 @@ A new list with the element removed. If index is negative, remove at the end of 
 [4, 5, 7, 8]
 ```
 If the `index` is negative, removes at the end of the list (notice that we need to put -1 in parenthesis to avoid confusing the parser with a binary `-` operation):
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%2C%208%5D%20%7C%20array.remove_at%202%20%7D%7D&model={})
+> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%2C%208%5D%20%7C%20array.remove_at%20%28-1%29%20%7D%7D&model={})
 ```scriban-html
 {{ [4, 5, 6, 7, 8] | array.remove_at (-1) }}
 ```
@@ -649,7 +649,7 @@ Sorts by element's value:
 [2, 6, 10]
 ```
 Sorts by elements member's value:
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B10%2C%202%2C%206%5D%20%7C%20array.sort%20%7D%7D&model={})
+> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%0Aproducts%20%3D%20%5B%7Btitle%3A%20%22orange%22%2C%20type%3A%20%22fruit%22%7D%2C%20%7Btitle%3A%20%22computer%22%2C%20type%3A%20%22electronics%22%7D%2C%20%7Btitle%3A%20%22sofa%22%2C%20type%3A%20%22furniture%22%7D%5D%0Aproducts%20%7C%20array.sort%20%22title%22%20%7C%20array.map%20%22title%22%0A%7D%7D&model={})
 ```scriban-html
 {{
 products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
