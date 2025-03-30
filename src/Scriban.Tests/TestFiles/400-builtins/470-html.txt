@@ -13,3 +13,6 @@ if (i < 5) {
 //]]>
 </script> and noscript" | html.strip }}
 null | html.strip: {{ null | html.strip}}
+{{ "hi\nthere" | html.newline_to_br }}
+{{ "Hello
+world" | html.newline_to_br }}

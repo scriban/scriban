@@ -31,7 +31,7 @@ namespace Scriban.Functions
         /// Notice that the implementation of this function is using a simple regex, so it can fail escaping correctly or timeout in case of the malformed html.
         /// If you are looking for a secure HTML stripped, you might want to plug your own HTML function by using [AngleSharp](https://github.com/AngleSharp/AngleSharp) to
         /// strip these HTML tags.
-        /// 
+        ///
         /// ```scriban-html
         /// {{ "&lt;p&gt;This is a paragraph&lt;/p&gt;" | html.strip }}
         /// ```
@@ -70,6 +70,31 @@ namespace Scriban.Functions
             }
             return System.Net.WebUtility.HtmlEncode(text);
         }
+
+        /// <summary>
+        /// Inserts an HTML line break (`&lt;br /&gt;` in front of each newline (`\n`) in a string
+        /// </summary>
+        /// <param name="text">The input string</param>
+        /// <returns>The input string with HTML line breaks</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Hello\nworld" | html.newline_to_br }}
+        /// ```
+        /// ```html
+        /// Hello&lt;br /&gt;
+        /// world
+        /// ```
+        /// </remarks>
+        public static string NewlineToBr(string text)
+        {
+            if (string.IsNullOrEmpty(text))
+            {
+                return text;
+            }
+
+            return text.Replace("\n", "<br />\n");
+        }
+
 
         /// <summary>
         /// Converts any URL-unsafe characters in a string into percent-encoded characters.
