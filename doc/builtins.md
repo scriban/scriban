@@ -1205,7 +1205,7 @@ The input string with HTML line breaks
 
 #### Examples
 
-> **input**
+> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hello%5Cnworld%22%20%7C%20html.newline_to_br%20%7D%7D&model={})
 ```scriban-html
 {{ "Hello\nworld" | html.newline_to_br }}
 ```
