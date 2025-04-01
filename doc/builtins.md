@@ -1116,6 +1116,7 @@ Html functions available through the builtin object 'html'.
 
 - [`html.strip`](#htmlstrip)
 - [`html.escape`](#htmlescape)
+- [`html.newline_to_br`](#htmlnewline_to_br)
 - [`html.url_encode`](#htmlurl_encode)
 - [`html.url_escape`](#htmlurl_escape)
 
@@ -1181,6 +1182,37 @@ The input string removed with any HTML tags
 > **output**
 ```html
 &lt;p&gt;This is a paragraph&lt;/p&gt;
+```
+
+[:top:](#builtins)
+### `html.newline_to_br`
+
+```
+html.newline_to_br <text>
+```
+
+#### Description
+
+Inserts an HTML line break (`<br />` in front of each newline (`\n`) in a string
+
+#### Arguments
+
+- `text`: The input string
+
+#### Returns
+
+The input string with HTML line breaks
+
+#### Examples
+
+> **input**
+```scriban-html
+{{ "Hello\nworld" | html.newline_to_br }}
+```
+> **output**
+```html
+Hello<br />
+world
 ```
 
 [:top:](#builtins)

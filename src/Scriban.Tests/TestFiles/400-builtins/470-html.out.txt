@@ -6,3 +6,7 @@ john%40liquid.com
  and test 
  and noscript
 null | html.strip: 
+hi<br />
+there
+Hello<br />
+world
