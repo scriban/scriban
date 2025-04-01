@@ -133,6 +133,7 @@ List of all the builtin <regex> functions:
 
 List of all the builtin <html> functions:
  escape
+ newline_to_br
  strip
  url_encode
  url_escape
