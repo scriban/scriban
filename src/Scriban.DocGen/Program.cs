@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
+using System.Text.RegularExpressions;
 using NuDoq;
 using Scriban.Functions;
 using Scriban.Parsing;
@@ -114,7 +116,7 @@ This document describes the various built-in functions available in scriban.
             {
                 var type = member.Info as Type;
                 var methodInfo = member.Info as MethodInfo;
-               
+
 
                 if (type != null && IsBuiltinType(type, out string shortName))
                 {
@@ -146,7 +148,7 @@ This document describes the various built-in functions available in scriban.
 
                     // Write the toc
                     classWriter.Head.WriteLine($"- [`{shortName}.{methodShortName}`](#{shortName}{methodShortName})");
-                    
+
                     _writer = classWriter.Body;
                     _writer.WriteLine();
                     _writer.WriteLine("[:top:](#builtins)");
@@ -269,9 +271,27 @@ This document describes the various built-in functions available in scriban.
                 var content = text.Content;
 
                 content = content.Replace("```scriban-html", "> **input**\r\n```scriban-html");
+                content = AddTryOutLink(content);
                 content = content.Replace("```html", "> **output**\r\n```html");
 
                 _writer.Write(content);
+            }
+
+            private static string AddTryOutLink(string content)
+            {
+                const string inputText = "> **input**";
+                if (!content.Contains(inputText)) return content;
+
+                var regex = new Regex(@"```scriban\-html\n([\S\s]*?)\n```", RegexOptions.Multiline);
+                var matches = regex.Matches(content);
+                foreach (Match match in matches)
+                {
+                    var template = match.Groups[1].Value;
+                    var link = $"https://scribanonline.azurewebsites.net/?template={Uri.EscapeDataString(template)}&model={{}}";
+                    content = content.Replace($"{inputText}\r\n{match.Value}", $"{inputText} [:fast_forward: Try out]({link})\r\n{match.Value}");
+                }
+
+                return content;
             }
 
             public override void VisitPara(Para para)
