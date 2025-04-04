@@ -33,6 +33,7 @@ namespace Scriban.Functions
                 SetValue("empty", EmptyScriptObject.Default, true);
                 SetValue("blank", EmptyScriptObject.Default, true);
                 SetValue("include", new IncludeFunction(), true);
+                SetValue("include_join", new IncludeJoinFunction(), true);
                 SetValue(DateTimeFunctions.DateVariable.Name, new DateTimeFunctions(), true);
                 SetValue("html", new HtmlFunctions(), true);
                 SetValue("math", new MathFunctions(), true);

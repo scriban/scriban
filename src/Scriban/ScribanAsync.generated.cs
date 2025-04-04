@@ -14,6 +14,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Scriban.Helpers;
@@ -21,6 +22,7 @@ using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
 using System.Numerics;
+using System.Linq;
 namespace Scriban
 {
     /// <summary>
@@ -457,6 +459,86 @@ namespace Scriban
             await WriteAsync(NewLine).ConfigureAwait(false);
             return this;
         }
+        
+        public async Task<Template> GetOrCreateTemplateAsync(string templatePath, ScriptNode callerContext)
+        {
+            if (!CachedTemplates.TryGetValue(templatePath, out var template))
+            {
+                template = await CreateTemplateAsync(templatePath, callerContext);
+                CachedTemplates[templatePath] = template;
+            }
+            return template;
+        }
+
+        protected virtual async Task<Template> CreateTemplateAsync(string templatePath, ScriptNode callerContext)
+        {
+            string templateText;
+            try
+            {
+                templateText = await TemplateLoader.LoadAsync(this, callerContext.Span, templatePath);
+            }
+            catch (Exception ex) when (!(ex is ScriptRuntimeException))
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while creating template from path `{templatePath}`", ex);
+            }
+
+            if (templateText == null)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"The result of including `{templatePath}` cannot be null");
+            }
+
+            var template = Template.Parse(templateText, templatePath, TemplateLoaderParserOptions, TemplateLoaderLexerOptions);
+
+            // If the template has any errors, throw an exception
+            if (template.HasErrors)
+            {
+                throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template `{templatePath}`", template.Messages);
+            }
+
+            CachedTemplates.Add(templatePath, template);
+
+            return template;
+        }
+
+        public async Task<string> RenderTemplateAsync(Template template, ScriptArray arguments, ScriptNode callerContext)
+        {
+            // Make sure that we cannot recursively include a template
+            string result = null;
+            EnterRecursive(callerContext);
+            var previousIndent = CurrentIndent;
+            CurrentIndent = null;
+            PushOutput();
+            var previousArguments = await GetValueAsync(ScriptVariable.Arguments);
+            try
+            {
+                SetValue(ScriptVariable.Arguments, arguments, true, true);
+                if (previousIndent != null)
+                {
+                    // We reset before and after the fact that we have a new line
+                    ResetPreviousNewLine();
+                }
+                result = await template.RenderAsync(this);
+                if (previousIndent != null)
+                {
+                    ResetPreviousNewLine();
+                }
+            }
+            finally
+            {
+                PopOutput();
+                CurrentIndent = previousIndent;
+                ExitRecursive(callerContext);
+
+                // Remove the arguments
+                DeleteValue(ScriptVariable.Arguments);
+                if (previousArguments != null)
+                {
+                    // Restore them if necessary
+                    SetValue(ScriptVariable.Arguments, previousArguments, true);
+                }
+            }
+            return result;
+        }
     }
 }
 
@@ -481,110 +563,85 @@ namespace Scriban.Functions
             }
 
             var templateName = context.ObjectToString(arguments[0]);
+            var templatePath = context.GetTemplatePathFromName(templateName, callerContext);
+            // liquid compatibility
+            if (templatePath == null) return null;
+            Template template = await context.GetOrCreateTemplateAsync(templatePath, callerContext);
 
-            // If template name is empty, throw an exception
-            if (string.IsNullOrEmpty(templateName))
+            return await context.RenderTemplateAsync(template, arguments, callerContext).ConfigureAwait(false);
+        }
+    }
+
+    /// <summary>
+    /// The include function available through the function 'include' in scriban.
+    /// </summary>
+#if SCRIBAN_PUBLIC
+    public
+#else
+    internal
+#endif
+    sealed partial class IncludeJoinFunction
+    {
+
+        public async ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        {
+            if (arguments.Count < 2)
             {
-                // In a liquid template context, we let an include to continue without failing
-                if (context is LiquidTemplateContext)
-                {
-                    return null;
-                }
-                throw new ScriptRuntimeException(callerContext.Span, $"Include template name cannot be null or empty");
+                throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the separator and components to include for the <include_join> function.");
             }
 
-            var templateLoader = context.TemplateLoader;
-            if (templateLoader == null)
+            var templateNames = 
+                (arguments[0] as ScriptArray)?.Select(x => context.ObjectToString(x)).ToArray() 
+                ?? (arguments[0] as IEnumerable<string>)?.ToArray();
+
+            if (templateNames == null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.TemplateLoader");
+                return string.Empty;
             }
 
-            string templatePath;
+            var separator = await RenderComponentAsync(context, callerContext, arguments, context.ObjectToString(arguments[1]) ?? string.Empty);
+            var start = await RenderComponentAsync(context, callerContext, arguments, arguments.Count >= 2 ? context.ObjectToString(arguments[2]) : string.Empty);
+            var end = await RenderComponentAsync(context, callerContext, arguments, arguments.Count >= 3 ? context.ObjectToString(arguments[3]) : string.Empty);
 
-            try
+            var sb = new StringBuilder();
+            if (!string.IsNullOrEmpty(start))
             {
-                templatePath = templateLoader.GetPath(context, callerContext.Span, templateName);
+                sb.Append(start);
             }
-            catch (Exception ex) when (!(ex is ScriptRuntimeException))
+            for (int i = 0; i < templateNames.Length; ++i)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while getting the path for the include name `{templateName}`", ex);
-            }
-            // If template path is empty (probably because template doesn't exist), throw an exception
-            if (templatePath == null)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
-            }
+                var templateName = templateNames[i];
+                var templatePath = context.GetTemplatePathFromName(templateName, callerContext);
+                
+                // liquid compatibility
+                if (templatePath == null) continue;
 
-            Template template;
+                Template template = await context.GetOrCreateTemplateAsync(templatePath, callerContext);
 
-            if (!context.CachedTemplates.TryGetValue(templatePath, out template))
-            {
+                sb.Append(await context.RenderTemplateAsync(template, arguments, callerContext));
 
-                string templateText;
-                try
+                if (!string.IsNullOrEmpty(separator) && i < templateNames.Length - 1)
                 {
-                    templateText = await templateLoader.LoadAsync(context, callerContext.Span, templatePath).ConfigureAwait(false);
+                    sb.Append(separator);
                 }
-                catch (Exception ex) when (!(ex is ScriptRuntimeException))
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while loading the include `{templateName}` from path `{templatePath}`", ex);
-                }
-
-                if (templateText == null)
-                {
-                    throw new ScriptRuntimeException(callerContext.Span, $"The result of including `{templateName}->{templatePath}` cannot be null");
-                }
-
-                // Clone parser options
-                var parserOptions = context.TemplateLoaderParserOptions;
-                var lexerOptions = context.TemplateLoaderLexerOptions;
-                template = Template.Parse(templateText, templatePath, parserOptions, lexerOptions);
-
-                // If the template has any errors, throw an exception
-                if (template.HasErrors)
-                {
-                    throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template `{templateName}` from `{templatePath}`", template.Messages);
-                }
-
-                context.CachedTemplates.Add(templatePath, template);
             }
 
-            // Make sure that we cannot recursively include a template
-            object result = null;
-            context.EnterRecursive(callerContext);
-            var previousIndent = context.CurrentIndent;
-            context.CurrentIndent = null;
-            context.PushOutput();
-            var previousArguments = await context.GetValueAsync(ScriptVariable.Arguments).ConfigureAwait(false);
-            try
+            if (!string.IsNullOrEmpty(end))
             {
-                context.SetValue(ScriptVariable.Arguments, arguments, true, true);
-                if (previousIndent != null)
-                {
-                    // We reset before and after the fact that we have a new line
-                    context.ResetPreviousNewLine();
-                }
-                result = await template.RenderAsync(context).ConfigureAwait(false);
-                if (previousIndent != null)
-                {
-                    context.ResetPreviousNewLine();
-                }
+                sb.Append(end);
             }
-            finally
-            {
-                context.PopOutput();
-                context.CurrentIndent = previousIndent;
-                context.ExitRecursive(callerContext);
 
-                // Remove the arguments
-                context.DeleteValue(ScriptVariable.Arguments);
-                if (previousArguments != null)
-                {
-                    // Restore them if necessary
-                    context.SetValue(ScriptVariable.Arguments, previousArguments, true);
-                }
-            }
-            return result;
+            return sb.ToString();
+        }
+
+        private async Task<string> RenderComponentAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, string component)
+        {
+            if (!component.StartsWith("tpl:"))
+                return component;
+
+            var path = context.GetTemplatePathFromName(component.Substring(4), callerContext);
+            var template = await context.GetOrCreateTemplateAsync(path, callerContext);
+            return await context.RenderTemplateAsync(template, arguments, callerContext); 
         }
     }
 }
