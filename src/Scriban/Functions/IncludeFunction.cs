@@ -34,78 +34,13 @@ namespace Scriban.Functions
             }
 
             var templateName = context.ObjectToString(arguments[0]);
-
-            // If template name is empty, throw an exception
-            if (string.IsNullOrEmpty(templateName))
-            {
-                // In a liquid template context, we let an include to continue without failing
-                if (context is LiquidTemplateContext)
-                {
-                    return null;
-                }
-                throw new ScriptRuntimeException(callerContext.Span, $"Include template name cannot be null or empty");
-            }
-
-            var templateLoader = context.TemplateLoader;
-            if (templateLoader == null)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.TemplateLoader");
-            }
-
-            string templatePath;
-
-            try
-            {
-                templatePath = templateLoader.GetPath(context, callerContext.Span, templateName);
-            }
-            catch (Exception ex) when (!(ex is ScriptRuntimeException))
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while getting the path for the include name `{templateName}`", ex);
-            }
-            // If template path is empty (probably because template doesn't exist), throw an exception
-            if (templatePath == null)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
-            }
+            var templatePath = context.GetTemplatePathFromName(templateName, callerContext);
+            // liquid compatibility
+            if (templatePath == null) return null;
 
             Template template = context.GetOrCreateTemplate(templatePath, callerContext);
 
-            // Make sure that we cannot recursively include a template
-            object result = null;
-            context.EnterRecursive(callerContext);
-            var previousIndent = context.CurrentIndent;
-            context.CurrentIndent = null;
-            context.PushOutput();
-            var previousArguments = context.GetValue(ScriptVariable.Arguments);
-            try
-            {
-                context.SetValue(ScriptVariable.Arguments, arguments, true, true);
-                if (previousIndent != null)
-                {
-                    // We reset before and after the fact that we have a new line
-                    context.ResetPreviousNewLine();
-                }
-                result = template.Render(context);
-                if (previousIndent != null)
-                {
-                    context.ResetPreviousNewLine();
-                }
-            }
-            finally
-            {
-                context.PopOutput();
-                context.CurrentIndent = previousIndent;
-                context.ExitRecursive(callerContext);
-
-                // Remove the arguments
-                context.DeleteValue(ScriptVariable.Arguments);
-                if (previousArguments != null)
-                {
-                    // Restore them if necessary
-                    context.SetValue(ScriptVariable.Arguments, previousArguments, true);
-                }
-            }
-            return result;
+            return context.RenderTemplate(template, arguments, callerContext);
         }
 
         public int RequiredParameterCount => 1;

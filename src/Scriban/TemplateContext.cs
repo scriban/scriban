@@ -14,6 +14,7 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 using Scriban.Functions;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -1208,6 +1209,43 @@ namespace Scriban
             _previousTextWasNewLine = false;
         }
 
+        public virtual string GetTemplatePathFromName(string templateName, ScriptNode callerContext)
+        {
+            // If template name is empty, throw an exception
+            if (string.IsNullOrEmpty(templateName))
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Include template name cannot be null or empty");
+            }
+
+            return ConvertTemplateNameToPath(templateName, callerContext);
+        }
+
+        protected string ConvertTemplateNameToPath(string templateName, ScriptNode callerContext)
+        {
+            if (TemplateLoader == null)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.TemplateLoader");
+            }
+
+            string templatePath;
+
+            try
+            {
+                templatePath = TemplateLoader.GetPath(this, callerContext.Span, templateName);
+            }
+            catch (Exception ex) when (!(ex is ScriptRuntimeException))
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while getting the path for the include name `{templateName}`", ex);
+            }
+            // If template path is empty (probably because template doesn't exist), throw an exception
+            if (templatePath == null)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
+            }
+
+            return templatePath;
+        }
+
         public Template GetOrCreateTemplate(string templatePath, ScriptNode callerContext)
         {
             if (!CachedTemplates.TryGetValue(templatePath, out var template))
@@ -1247,6 +1285,46 @@ namespace Scriban
 
             return template;
         }
+    
+        public string RenderTemplate(Template template, ScriptArray arguments, ScriptNode callerContext)
+        {
+            // Make sure that we cannot recursively include a template
+            string result = null;
+            EnterRecursive(callerContext);
+            var previousIndent = CurrentIndent;
+            CurrentIndent = null;
+            PushOutput();
+            var previousArguments = GetValue(ScriptVariable.Arguments);
+            try
+            {
+                SetValue(ScriptVariable.Arguments, arguments, true, true);
+                if (previousIndent != null)
+                {
+                    // We reset before and after the fact that we have a new line
+                    ResetPreviousNewLine();
+                }
+                result = template.Render(this);
+                if (previousIndent != null)
+                {
+                    ResetPreviousNewLine();
+                }
+            }
+            finally
+            {
+                PopOutput();
+                CurrentIndent = previousIndent;
+                ExitRecursive(callerContext);
+
+                // Remove the arguments
+                DeleteValue(ScriptVariable.Arguments);
+                if (previousArguments != null)
+                {
+                    // Restore them if necessary
+                    SetValue(ScriptVariable.Arguments, previousArguments, true);
+                }
+            }
+            return result;
+        }
     }
 
     /// <summary>
@@ -1270,6 +1348,17 @@ namespace Scriban
             TemplateLoaderLexerOptions = new LexerOptions() { Lang = ScriptLang.Liquid };
             TemplateLoaderParserOptions = new ParserOptions() { LiquidFunctionsToScriban = true };
             IsLiquid = true;
+        }
+
+        public override string GetTemplatePathFromName(string templateName, ScriptNode callerContext)
+        {
+            // If template name is empty, throw an exception
+            if (string.IsNullOrEmpty(templateName))
+            {
+                return null;
+            }
+
+            return ConvertTemplateNameToPath(templateName, callerContext);
         }
     }
 }
