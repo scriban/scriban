@@ -12,6 +12,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
@@ -22,7 +23,6 @@ using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
 using System.Numerics;
-using System.Linq;
 namespace Scriban
 {
     /// <summary>
@@ -209,6 +209,36 @@ namespace Scriban
     partial class TemplateContext
     {
 
+        protected virtual async ValueTask<Template> CreateTemplateAsync(string templatePath, ScriptNode callerContext)
+        {
+            string templateText;
+            try
+            {
+                templateText = await TemplateLoader.LoadAsync(this, callerContext.Span, templatePath).ConfigureAwait(false);
+            }
+            catch (Exception ex) when (!(ex is ScriptRuntimeException))
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while creating template from path `{templatePath}`", ex);
+            }
+
+            if (templateText == null)
+            {
+                throw new ScriptRuntimeException(callerContext.Span, $"The result of including `{templatePath}` cannot be null");
+            }
+
+            var template = Template.Parse(templateText, templatePath, TemplateLoaderParserOptions, TemplateLoaderLexerOptions);
+
+            // If the template has any errors, throw an exception
+            if (template.HasErrors)
+            {
+                throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template `{templatePath}`", template.Messages);
+            }
+
+            CachedTemplates.Add(templatePath, template);
+
+            return template;
+        }
+
         /// <summary>
         /// Evaluates the specified script node.
         /// </summary>
@@ -260,6 +290,16 @@ namespace Scriban
         public async ValueTask<object> EvaluateAsync(ScriptNode scriptNode)
         {
             return await EvaluateAsync(scriptNode, false).ConfigureAwait(false);
+        }
+
+        public async ValueTask<Template> GetOrCreateTemplateAsync(string templatePath, ScriptNode callerContext)
+        {
+            if (!CachedTemplates.TryGetValue(templatePath, out var template))
+            {
+                template = await CreateTemplateAsync(templatePath, callerContext).ConfigureAwait(false);
+                CachedTemplates[templatePath] = template;
+            }
+            return template;
         }
 
 
@@ -333,6 +373,46 @@ namespace Scriban
                 CurrentNode = previousNode;
                 _getOrSetValueLevel--;
             }
+        }
+
+        public async ValueTask<string> RenderTemplateAsync(Template template, ScriptArray arguments, ScriptNode callerContext)
+        {
+            // Make sure that we cannot recursively include a template
+            string result = null;
+            EnterRecursive(callerContext);
+            var previousIndent = CurrentIndent;
+            CurrentIndent = null;
+            PushOutput();
+            var previousArguments = await GetValueAsync(ScriptVariable.Arguments).ConfigureAwait(false);
+            try
+            {
+                SetValue(ScriptVariable.Arguments, arguments, true, true);
+                if (previousIndent != null)
+                {
+                    // We reset before and after the fact that we have a new line
+                    ResetPreviousNewLine();
+                }
+                result = await template.RenderAsync(this).ConfigureAwait(false);
+                if (previousIndent != null)
+                {
+                    ResetPreviousNewLine();
+                }
+            }
+            finally
+            {
+                PopOutput();
+                CurrentIndent = previousIndent;
+                ExitRecursive(callerContext);
+
+                // Remove the arguments
+                DeleteValue(ScriptVariable.Arguments);
+                if (previousArguments != null)
+                {
+                    // Restore them if necessary
+                    SetValue(ScriptVariable.Arguments, previousArguments, true);
+                }
+            }
+            return result;
         }
 
         /// <summary>
@@ -459,86 +539,6 @@ namespace Scriban
             await WriteAsync(NewLine).ConfigureAwait(false);
             return this;
         }
-        
-        public async Task<Template> GetOrCreateTemplateAsync(string templatePath, ScriptNode callerContext)
-        {
-            if (!CachedTemplates.TryGetValue(templatePath, out var template))
-            {
-                template = await CreateTemplateAsync(templatePath, callerContext);
-                CachedTemplates[templatePath] = template;
-            }
-            return template;
-        }
-
-        protected virtual async Task<Template> CreateTemplateAsync(string templatePath, ScriptNode callerContext)
-        {
-            string templateText;
-            try
-            {
-                templateText = await TemplateLoader.LoadAsync(this, callerContext.Span, templatePath);
-            }
-            catch (Exception ex) when (!(ex is ScriptRuntimeException))
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while creating template from path `{templatePath}`", ex);
-            }
-
-            if (templateText == null)
-            {
-                throw new ScriptRuntimeException(callerContext.Span, $"The result of including `{templatePath}` cannot be null");
-            }
-
-            var template = Template.Parse(templateText, templatePath, TemplateLoaderParserOptions, TemplateLoaderLexerOptions);
-
-            // If the template has any errors, throw an exception
-            if (template.HasErrors)
-            {
-                throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template `{templatePath}`", template.Messages);
-            }
-
-            CachedTemplates.Add(templatePath, template);
-
-            return template;
-        }
-
-        public async Task<string> RenderTemplateAsync(Template template, ScriptArray arguments, ScriptNode callerContext)
-        {
-            // Make sure that we cannot recursively include a template
-            string result = null;
-            EnterRecursive(callerContext);
-            var previousIndent = CurrentIndent;
-            CurrentIndent = null;
-            PushOutput();
-            var previousArguments = await GetValueAsync(ScriptVariable.Arguments);
-            try
-            {
-                SetValue(ScriptVariable.Arguments, arguments, true, true);
-                if (previousIndent != null)
-                {
-                    // We reset before and after the fact that we have a new line
-                    ResetPreviousNewLine();
-                }
-                result = await template.RenderAsync(this);
-                if (previousIndent != null)
-                {
-                    ResetPreviousNewLine();
-                }
-            }
-            finally
-            {
-                PopOutput();
-                CurrentIndent = previousIndent;
-                ExitRecursive(callerContext);
-
-                // Remove the arguments
-                DeleteValue(ScriptVariable.Arguments);
-                if (previousArguments != null)
-                {
-                    // Restore them if necessary
-                    SetValue(ScriptVariable.Arguments, previousArguments, true);
-                }
-            }
-            return result;
-        }
     }
 }
 
@@ -566,14 +566,14 @@ namespace Scriban.Functions
             var templatePath = context.GetTemplatePathFromName(templateName, callerContext);
             // liquid compatibility
             if (templatePath == null) return null;
-            Template template = await context.GetOrCreateTemplateAsync(templatePath, callerContext);
+
+            Template template = await context.GetOrCreateTemplateAsync(templatePath, callerContext).ConfigureAwait(false);
 
             return await context.RenderTemplateAsync(template, arguments, callerContext).ConfigureAwait(false);
         }
     }
-
     /// <summary>
-    /// The include function available through the function 'include' in scriban.
+    /// The include join function available through the function 'include_join' in scriban.
     /// </summary>
 #if SCRIBAN_PUBLIC
     public
@@ -590,8 +590,8 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the separator and components to include for the <include_join> function.");
             }
 
-            var templateNames = 
-                (arguments[0] as ScriptArray)?.Select(x => context.ObjectToString(x)).ToArray() 
+            var templateNames =
+                (arguments[0] as ScriptArray)?.Select(x => context.ObjectToString(x)).ToArray()
                 ?? (arguments[0] as IEnumerable<string>)?.ToArray();
 
             if (templateNames == null)
@@ -599,9 +599,9 @@ namespace Scriban.Functions
                 return string.Empty;
             }
 
-            var separator = await RenderComponentAsync(context, callerContext, arguments, context.ObjectToString(arguments[1]) ?? string.Empty);
-            var start = await RenderComponentAsync(context, callerContext, arguments, arguments.Count >= 2 ? context.ObjectToString(arguments[2]) : string.Empty);
-            var end = await RenderComponentAsync(context, callerContext, arguments, arguments.Count >= 3 ? context.ObjectToString(arguments[3]) : string.Empty);
+            var separator = await RenderComponentAsync(context, callerContext, arguments, context.ObjectToString(arguments[1]) ?? string.Empty).ConfigureAwait(false);
+            var start = await RenderComponentAsync(context, callerContext, arguments, arguments.Count >= 2 ? context.ObjectToString(arguments[2]) : string.Empty).ConfigureAwait(false);
+            var end = await RenderComponentAsync(context, callerContext, arguments, arguments.Count >= 3 ? context.ObjectToString(arguments[3]) : string.Empty).ConfigureAwait(false);
 
             var sb = new StringBuilder();
             if (!string.IsNullOrEmpty(start))
@@ -612,13 +612,13 @@ namespace Scriban.Functions
             {
                 var templateName = templateNames[i];
                 var templatePath = context.GetTemplatePathFromName(templateName, callerContext);
-                
+
                 // liquid compatibility
                 if (templatePath == null) continue;
 
-                Template template = await context.GetOrCreateTemplateAsync(templatePath, callerContext);
+                Template template = await context.GetOrCreateTemplateAsync(templatePath, callerContext).ConfigureAwait(false);
 
-                sb.Append(await context.RenderTemplateAsync(template, arguments, callerContext));
+                sb.Append(await context.RenderTemplateAsync(template, arguments, callerContext).ConfigureAwait(false));
 
                 if (!string.IsNullOrEmpty(separator) && i < templateNames.Length - 1)
                 {
@@ -634,14 +634,14 @@ namespace Scriban.Functions
             return sb.ToString();
         }
 
-        private async Task<string> RenderComponentAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, string component)
+        private async ValueTask<string> RenderComponentAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, string component)
         {
             if (!component.StartsWith("tpl:"))
                 return component;
 
             var path = context.GetTemplatePathFromName(component.Substring(4), callerContext);
-            var template = await context.GetOrCreateTemplateAsync(path, callerContext);
-            return await context.RenderTemplateAsync(template, arguments, callerContext); 
+            var template = await context.GetOrCreateTemplateAsync(path, callerContext).ConfigureAwait(false);
+            return await context.RenderTemplateAsync(template, arguments, callerContext).ConfigureAwait(false);
         }
     }
 }
