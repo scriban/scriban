@@ -3,8 +3,10 @@
 // See license.txt file in the project root for full license information.
 
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using Scriban.Functions;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -317,6 +319,37 @@ Test2
             Console.WriteLine(exception);
             var expectedString = "Include template path is null";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
+        }
+
+        
+        [Test]
+        public void TestIncludeJoin()
+        {
+            var template = Template.Parse("{{ include_join ['first', 'second', 'third'] ' ' 'begin ' ' end' }}");
+            var context = new TemplateContext() { TemplateLoader = new DummyLoader() };
+            var expectedString = "begin some text some text some text end";
+            Assert.AreEqual(expectedString, template.Render(context));
+        }
+
+        
+        [Test]
+        public void TestIncludeJoinwithParams()
+        {
+            var template = Template.Parse("{{ include_join joinTemplateNames ' ' 'begin ' ' end' }}");
+            var scriptObject = new BuiltinFunctions();
+            scriptObject.SetValue("joinTemplateNames", new List<string>() {"first", "second", "third"}, false);
+            var context = new TemplateContext(scriptObject) { TemplateLoader = new DummyLoader() };
+            var expectedString = "begin some text some text some text end";
+            Assert.AreEqual(expectedString, template.Render(context));
+        }
+
+        [Test]
+        public void TestIncludeJoinWithTemplateDelimiters()
+        {
+            var template = Template.Parse("{{ include_join ['first', 'second', 'third'] 'tpl: ' 'tpl:begin ' 'tpl: end' }}");
+            var context = new TemplateContext() { TemplateLoader = new DummyLoader() };
+            var expectedString = "some textsome textsome textsome textsome textsome textsome text";
+            Assert.AreEqual(expectedString, template.Render(context));
         }
     }
 }
