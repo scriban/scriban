@@ -69,7 +69,7 @@ The language rules are the same in a pure scripting context.
   - [9.8 `import <variable_path>`](#98-import-variable_path)
   - [9.9 `with <variable> ... end`](#99-with-variable--end)
   - [9.10 `wrap <function> <arg1...argn> ... end`](#910-wrap-function-arg1argn--end)
-  - [9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> [<begin> <end>]`](#911-include-name-arg1argn)
+  - [9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> <begin?> <end?>`](#911-include-name-arg1argn)
   - [9.12 `ret <expression>?`](#912-ret-expression)
 
 [:top:](#language)
@@ -1412,7 +1412,7 @@ will output:
 Note that variables declared outside the `with` block are accessible within.
 
 [:top:](#language)
-### 9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> [<begin> <end>]`
+### 9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> <begin?> <end?>`
 
 `include` is not a statement but rather a function that allows you to parse and render a specified template. To use this function, a delegate to a template loader must be setup on the [`TemplateOptions.TemplateLoader`](runtime.md#include-and-itemplateloader) property passed to the `Template.Parse` method.
  
