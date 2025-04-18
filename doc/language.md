@@ -1443,14 +1443,14 @@ usage exemple 1
 include_join ['myinclude1.html', 'myinclude2.html', 'myinclude3.html'] '<br/>' 'tpl:begin.html' 'tpl:end.html'  
 ```
 
-This would input all templates separated by an html new line and the whole result would be prefixed with begin.html template and suffixed by end.html template.
+This would outputput all templates separated by an html new line and the whole result would be prefixed with begin.html template and suffixed by end.html template.
 
 usage exemple 2
 
 ```
 include_join ['myinclude1.html', 'myinclude2.html', 'myinclude3.html'] 'tpl:separator.html' '<div>' '</div>'  
 ```
-This would input all templates separated by the template separator.html encapsulated in a div block.
+This would output all templates separated by the template separator.html encapsulated in a div block.
 
 Note
 
