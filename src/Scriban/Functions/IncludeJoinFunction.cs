@@ -45,8 +45,8 @@ namespace Scriban.Functions
             }
 
             var separator = RenderComponent(context, callerContext, arguments, context.ObjectToString(arguments[1]) ?? string.Empty);
-            var start = RenderComponent(context, callerContext, arguments, arguments.Count >= 2 ? context.ObjectToString(arguments[2]) : string.Empty);
-            var end = RenderComponent(context, callerContext, arguments, arguments.Count >= 3 ? context.ObjectToString(arguments[3]) : string.Empty);
+            var start = RenderComponent(context, callerContext, arguments, arguments.Count > 2 ? context.ObjectToString(arguments[2]) : string.Empty);
+            var end = RenderComponent(context, callerContext, arguments, arguments.Count > 3 ? context.ObjectToString(arguments[3]) : string.Empty);
 
             var sb = new StringBuilder();
             if (!string.IsNullOrEmpty(start))

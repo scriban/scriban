@@ -69,7 +69,7 @@ The language rules are the same in a pure scripting context.
   - [9.8 `import <variable_path>`](#98-import-variable_path)
   - [9.9 `with <variable> ... end`](#99-with-variable--end)
   - [9.10 `wrap <function> <arg1...argn> ... end`](#910-wrap-function-arg1argn--end)
-  - [9.11 `include <name> arg1?...argn?`](#911-include-name-arg1argn)
+  - [9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> [<begin> <end>]`](#911-include-name-arg1argn)
   - [9.12 `ret <expression>?`](#912-ret-expression)
 
 [:top:](#language)
@@ -1412,7 +1412,7 @@ will output:
 Note that variables declared outside the `with` block are accessible within.
 
 [:top:](#language)
-### 9.11 `include <name> arg1?...argn?` 
+### 9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> [<begin> <end>]`
 
 `include` is not a statement but rather a function that allows you to parse and render a specified template. To use this function, a delegate to a template loader must be setup on the [`TemplateOptions.TemplateLoader`](runtime.md#include-and-itemplateloader) property passed to the `Template.Parse` method.
  
@@ -1434,6 +1434,28 @@ will output:
 This is a string with the value 1
 This is a string with the value 2 modified
 ```  
+
+`include_join` also exists to allow rendering multiple templates with a separator and begin/end delimiters. This function has the same requirement as `include`. The separator and begin/end delimiters also support templates by prefixing their name with `tpl:`
+
+usage exemple 1
+
+```
+include_join ['myinclude1.html', 'myinclude2.html', 'myinclude3.html'] '<br/>' 'tpl:begin.html' 'tpl:end.html'  
+```
+
+This would input all templates separated by an html new line and the whole result would be prefixed with begin.html template and suffixed by end.html template.
+
+usage exemple 2
+
+```
+include_join ['myinclude1.html', 'myinclude2.html', 'myinclude3.html'] 'tpl:separator.html' '<div>' '</div>'  
+```
+This would input all templates separated by the template separator.html encapsulated in a div block.
+
+Note
+
+If the result of the separated templates is empty, the prefix and suffix will not be output.
+The result of this function can also be stored in a variable.
 
 [:top:](#language)
 ### 9.12 `ret <expression>?`
