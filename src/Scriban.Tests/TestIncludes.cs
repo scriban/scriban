@@ -321,19 +321,26 @@ Test2
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
         }
 
-        
         [Test]
         public void TestIncludeJoin()
+        {
+            var template = Template.Parse("{{ include_join ['first', 'second', 'third'] ' ' }}");
+            var context = new TemplateContext() { TemplateLoader = new DummyLoader() };
+            var expectedString = "some text some text some text";
+            Assert.AreEqual(expectedString, template.Render(context));
+        }
+
+        [Test]
+        public void TestIncludeJoinWithOptionalParams()
         {
             var template = Template.Parse("{{ include_join ['first', 'second', 'third'] ' ' 'begin ' ' end' }}");
             var context = new TemplateContext() { TemplateLoader = new DummyLoader() };
             var expectedString = "begin some text some text some text end";
             Assert.AreEqual(expectedString, template.Render(context));
         }
-
         
         [Test]
-        public void TestIncludeJoinwithParams()
+        public void TestIncludeJoinWithParams()
         {
             var template = Template.Parse("{{ include_join joinTemplateNames ' ' 'begin ' ' end' }}");
             var scriptObject = new BuiltinFunctions();

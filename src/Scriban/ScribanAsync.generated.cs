@@ -600,8 +600,8 @@ namespace Scriban.Functions
             }
 
             var separator = await RenderComponentAsync(context, callerContext, arguments, context.ObjectToString(arguments[1]) ?? string.Empty).ConfigureAwait(false);
-            var start = await RenderComponentAsync(context, callerContext, arguments, arguments.Count >= 2 ? context.ObjectToString(arguments[2]) : string.Empty).ConfigureAwait(false);
-            var end = await RenderComponentAsync(context, callerContext, arguments, arguments.Count >= 3 ? context.ObjectToString(arguments[3]) : string.Empty).ConfigureAwait(false);
+            var start = await RenderComponentAsync(context, callerContext, arguments, arguments.Count > 2 ? context.ObjectToString(arguments[2]) : string.Empty).ConfigureAwait(false);
+            var end = await RenderComponentAsync(context, callerContext, arguments, arguments.Count > 3 ? context.ObjectToString(arguments[3]) : string.Empty).ConfigureAwait(false);
 
             var sb = new StringBuilder();
             if (!string.IsNullOrEmpty(start))
