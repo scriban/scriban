@@ -53,7 +53,7 @@ namespace Scriban
         private FastStack<object> _caseValues;
         private int _callDepth;
         private bool _isFunctionCallDisabled;
-        private int _loopStep;
+        private FastStack<int> _loopSteps;
         private int _getOrSetValueLevel;
         private FastStack<VariableContext> _availableGlobalContexts;
         private FastStack<VariableContext> _availableLocalContexts;
@@ -180,6 +180,7 @@ namespace Scriban
             _memberAccessors = new Dictionary<Type, IObjectAccessor>();
             _listAccessors = new Dictionary<Type, IListAccessor>();
             _loops = new FastStack<ScriptLoopStatementBase>(4);
+            _loopSteps = new FastStack<int>(4);
 
             BlockDelegates = new FastStack<ScriptBlockStatement>(4);
 
@@ -1005,7 +1006,7 @@ namespace Scriban
         {
             if (loop == null) throw new ArgumentNullException(nameof(loop));
             _loops.Push(loop);
-            _loopStep = 0;
+            _loopSteps.Push(0);
             PushVariableScope(VariableScope.Loop);
             OnEnterLoop(loop);
         }
@@ -1031,7 +1032,7 @@ namespace Scriban
             {
                 PopVariableScope(VariableScope.Loop);
                 _loops.Pop();
-                _loopStep = 0;
+                _loopSteps.Pop();
             }
         }
 
@@ -1052,8 +1053,11 @@ namespace Scriban
         internal bool StepLoop(ScriptLoopStatementBase loop, LoopType loopType = LoopType.Default)
         {
             Debug.Assert(_loops.Count > 0);
+            Debug.Assert(_loopSteps.Count > 0);
 
-            _loopStep++;
+            // Increment the current loop's step counter
+            var currentStepCount = _loopSteps.Pop() + 1;
+            _loopSteps.Push(currentStepCount);
 
             int loopLimit;
             switch (loopType)
@@ -1070,7 +1074,7 @@ namespace Scriban
                     }
             }
 
-            if (loopLimit != 0 && _loopStep > loopLimit)
+            if (loopLimit != 0 && currentStepCount > loopLimit)
             {
                 var currentLoopStatement = _loops.Peek();
                 throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{loopLimit}` for loop statement."); // unit test: 215-for-statement-error1.txt
