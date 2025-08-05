@@ -39,8 +39,7 @@ var result = template.Render(new { Products = this.ProductList });
 
 Scriban can also be used in pure scripting context without templating (`{{` and `}}`) and can help you to create your own small DSL.
 
-> **NOTICE**
->
+> [!NOTE]
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](https://github.com/scriban/scriban/blob/master/doc/runtime.md#member-renamer) delegate
 
@@ -119,7 +118,8 @@ Also the [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet 
 
 Starting with Scriban 3.2.1+, the package comes with source included so that you can internalize your usage of Scriban into your project. This can be useful in an environment where you can't easily consume NuGet references (e.g Roslyn Source Generators).
 
-> WARNING: Currently, the Scriban sources are not set as readonly, so you should not modify Scriban sources in that mode as it will modify the sources for other projects using Scriban on your machine. Use this feature at your own risks!
+> [!WARNING]
+>  Currently, the Scriban sources are not set as readonly, so you should not modify Scriban sources in that mode as it will modify the sources for other projects using Scriban on your machine. Use this feature at your own risks!
 
 In order to activate this feature you need to:
 
@@ -145,8 +145,9 @@ If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, in order to co
 </ItemGroup>
 ```
 
-> NOTE: In this mode, all Scriban types are marked as `internal`.
-> 
+> [!NOTE]
+> In this mode, all Scriban types are marked as `internal`.
+>
 > You should see a Scriban folder and empty subfolders in your project. This is an issue with Visual Studio 2019 16.8.x (and before) and it will be fixed in VS 2019 16.9+
 
 ## License
