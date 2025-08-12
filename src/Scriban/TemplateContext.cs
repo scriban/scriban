@@ -61,7 +61,6 @@ namespace Scriban
         private FastStack<ScriptPipeArguments> _pipeArguments;
         private FastStack<List<ScriptExpression>> _availableScriptExpressionLists;
         private object[][] _availableReflectionArguments;
-        private FastStack<Dictionary<object, object>> _availableTags;
         private ScriptPipeArguments _currentPipeArguments;
         private bool _previousTextWasNewLine;
         private readonly IEqualityComparer<string> _keyComparer;
@@ -172,8 +171,6 @@ namespace Scriban
             _availableStores = new FastStack<ScriptObject>(4);
             _cultures = new FastStack<CultureInfo>(4);
             _caseValues = new FastStack<object>(4);
-
-            _availableTags = new FastStack<Dictionary<object, object>>(4);
 
             _sourceFiles = new FastStack<string>(4);
 
