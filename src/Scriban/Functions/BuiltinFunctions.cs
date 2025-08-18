@@ -17,7 +17,7 @@ namespace Scriban.Functions
         /// </summary>
         internal static readonly ScriptObject Default = new DefaultBuiltins();
 
-        public BuiltinFunctions() : base(10)
+        public BuiltinFunctions() : base(12)
         {
             ((ScriptObject)Default.Clone(true)).CopyTo(this);
         }
@@ -27,7 +27,7 @@ namespace Scriban.Functions
         /// </summary>
         private class DefaultBuiltins : ScriptObject
         {
-            public DefaultBuiltins() : base(11, false)
+            public DefaultBuiltins() : base(12, false)
             {
                 SetValue("array", new ArrayFunctions(), true);
                 SetValue("empty", EmptyScriptObject.Default, true);
