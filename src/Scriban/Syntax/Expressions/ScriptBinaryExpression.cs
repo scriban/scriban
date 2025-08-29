@@ -603,6 +603,18 @@ namespace Scriban.Syntax
                 return CalculateInt(op, span, leftInt, (int)rightValue);
             }
 
+            if (leftType == typeof(uint))
+            {
+                var rightLong = (uint)context.ToObject(span, rightValue, typeof(uint));
+                return CalculateBigInteger(op, span, (uint)leftValue, rightLong);
+            }
+
+            if (rightType == typeof(uint))
+            {
+                var leftLong = (uint)context.ToObject(span, leftValue, typeof(uint));
+                return CalculateBigInteger(op, span, leftLong, (uint)rightValue);
+            }
+
             if (leftType == typeof(bool))
             {
                 var rightBool = (bool)context.ToObject(span, rightValue, typeof(bool));
