@@ -41,7 +41,7 @@ namespace Scriban.Tests
             result = template.Render();
             Assert.AreEqual("false", result);
         }
-        
+
         [Test]
         public void TestPipeAndNamedArguments()
         {
@@ -53,7 +53,7 @@ namespace Scriban.Tests
 
             Assert.AreEqual("4) Breaks: [\"A\", \"B\", \"C\"]", result);
         }
-        
+
         [Test]
         public void TestNullCoallescingWithStringInterpolation()
         {
@@ -237,6 +237,16 @@ end
 
             var template = Template.Parse(input);
             var result = template.Render(new { value = (ulong)1 });
+            Assert.AreEqual("1", result);
+        }
+
+        [Test]
+        public void TestUint()
+        {
+            var input = @"{{if value > 0; 1; else; 2; end;}}";
+
+            var template = Template.Parse(input);
+            var result = template.Render(new { value = (uint)1 });
             Assert.AreEqual("1", result);
         }
 
