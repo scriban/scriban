@@ -2396,7 +2396,8 @@ namespace Scriban.Syntax
                 {
                     break;
                 }
-            };
+            }
+            ;
             await AfterLoopAsync(context).ConfigureAwait(false);
             return result;
         }
