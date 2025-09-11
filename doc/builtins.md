@@ -1193,7 +1193,7 @@ html.newline_to_br <text>
 
 #### Description
 
-Inserts an HTML line break (`<br />` in front of each newline (`\n`) in a string
+Inserts an HTML line break (`<br />` in front of each newline (`\r\n`, `\r`, `\n`) in a string
 
 #### Arguments
 

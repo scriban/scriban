@@ -282,11 +282,11 @@ This document describes the various built-in functions available in scriban.
                 const string inputText = "> **input**";
                 if (!content.Contains(inputText)) return content;
 
-                var regex = new Regex(@"```scriban\-html\n([\S\s]*?)\n```", RegexOptions.Multiline);
+                var regex = new Regex(@"```scriban\-html(?:\r\n|\r|\n)([\S\s]*?)(?:\r\n|\r|\n)```", RegexOptions.Multiline);
                 var matches = regex.Matches(content);
                 foreach (Match match in matches)
                 {
-                    var template = match.Groups[1].Value;
+                    var template = match.Groups[1].Value.ReplaceLineEndings("\n");
                     var link = $"https://scribanonline.azurewebsites.net/?template={Uri.EscapeDataString(template)}&model={{}}";
                     content = content.Replace($"{inputText}\r\n{match.Value}", $"{inputText} [:fast_forward: Try out]({link})\r\n{match.Value}");
                 }
