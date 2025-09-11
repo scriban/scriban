@@ -71,8 +71,10 @@ namespace Scriban.Functions
             return System.Net.WebUtility.HtmlEncode(text);
         }
 
+        private static readonly Regex _matchNewLine = new Regex(@"\r\n|\r|\n");
+
         /// <summary>
-        /// Inserts an HTML line break (`&lt;br /&gt;` in front of each newline (`\n`) in a string
+        /// Inserts an HTML line break (`&lt;br /&gt;` in front of each newline (`\r\n`, `\r`, `\n`) in a string
         /// </summary>
         /// <param name="text">The input string</param>
         /// <returns>The input string with HTML line breaks</returns>
@@ -92,7 +94,7 @@ namespace Scriban.Functions
                 return text;
             }
 
-            return text.Replace("\n", "<br />\n");
+            return _matchNewLine.Replace(text, "<br />$0");
         }
 
 

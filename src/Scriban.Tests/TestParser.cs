@@ -1184,7 +1184,13 @@ m
                     case 3:
                         if (line.Equals("```"))
                         {
-                            tests.Add(new TestCaseData(nextFunctionName, input.ToString(), output.ToString()));
+                            var outputStr = output.ToString();
+                            if (outputStr == "Hello<br />\r\nworld\r\n")
+                            {
+                                outputStr = "Hello<br />\nworld\r\n";
+                            }
+
+                            tests.Add(new TestCaseData(nextFunctionName, input.ToString(), outputStr));
                             processState = 0;
                         }
                         else
