@@ -1365,6 +1365,144 @@ Tax: {{ 7 | match_tax }}";
             var result = Template.Parse("{{UPPERCASED.lowercased}}-{{uppercased.LOWERCASED}}-{{UPPERCASED.LOWERCASED}}-{{uppercased.lowercased}}").Render(context);
             TextAssert.AreEqual("42-42-42-42", result);
         }
+        [Test]
+        public void TestNestedLoopLimit()
+        {
+            // Test that nested loops properly enforce LoopLimit per loop level
+            var context = new TemplateContext
+            {
+                LoopLimit = 2
+            };
+
+            // Create a template with nested loops where inner loop exceeds the limit
+            var template = Template.Parse(@"{{
+for i in 1..2
+  for j in 1..3
+    i + j
+  end
+end
+}}");
+
+            // This should throw because the inner loop has 3 iterations, exceeding limit of 2
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `2` for loop statement"));
+        }
+
+        [Test]
+        public void TestNestedLoopLimitSimple()
+        {
+            // Simple test to verify the fix works
+            var context = new TemplateContext
+            {
+                LoopLimit = 3
+            };
+
+            // Create a template where inner loop exceeds limit
+            var template = Template.Parse(@"{{
+for i in 1..4
+  for j in 1..2
+    i + j
+  end
+end
+}}");
+
+            // This should throw because inner loop has 4 iterations > limit of 3
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `3` for loop statement"));
+        }
+
+        [Test]
+        public void TestNestedLoopLimitInnerLoopExceeds()
+        {
+            // Test that inner loop properly enforces LoopLimit
+            var context = new TemplateContext
+            {
+                LoopLimit = 8
+            };
+
+            // Create a template where the inner loop alone exceeds the limit
+            var template = Template.Parse(@"{{
+for i in 1..2
+  for j in 1..6
+    i + j
+  end
+end
+}}");
+
+            // This should throw because the inner loop has 6 iterations, exceeding limit of 4
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `8` for loop statement"));
+        }
+
+        [Test]
+        public void TestNestedLoopLimitWithinBounds()
+        {
+            // Test that nested loops work correctly when within limits
+            var context = new TemplateContext
+            {
+                LoopLimit = 14
+            };
+
+            // Create a template with nested loops that should NOT exceed the limit
+            var template = Template.Parse(@"{{
+for i in 1..2
+  for j in 1..6
+    i + j
+  end
+end
+}}");
+
+            var result = template.Render(context);
+            Assert.That(result, Does.Contain("2")); // Should contain some output
+        }
+
+        [Test]
+        public void TestTripleNestedLoopLimit()
+        {
+            // Test that triple nested loops properly enforce LoopLimit per loop level
+            var context = new TemplateContext
+            {
+                LoopLimit = 8
+            };
+
+            // Create a template with triple nested loops where innermost loop exceeds the limit
+            var template = Template.Parse(@"{{
+for i in 1..2
+  for j in 1..2
+    for k in 1..3
+      i + j + k
+    end
+  end
+end
+}}");
+
+            // This should throw because the innermost loop has 3 iterations, exceeding limit of 8
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `8` for loop statement"));
+        }
+
+        [Test]
+        public void TestNestedLoopLimitIndependentCounters()
+        {
+            // Test that each loop level has independent counters
+            var context = new TemplateContext
+            {
+                LoopLimit = 3
+            };
+
+            // Create a template where outer loop is within limit but inner loop exceeds
+            var template = Template.Parse(@"{{
+for i in 1..2
+  for j in 1..5
+    i + j
+  end
+end
+}}");
+
+            // This should throw on the inner loop (5 iterations > 3 limit)
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `3` for loop statement"));
+        }
 
         private class MyObject : MyStaticObject
         {

@@ -1002,7 +1002,6 @@ namespace Scriban
         {
             if (loop == null) throw new ArgumentNullException(nameof(loop));
             _loops.Push(loop);
-            _loopStep = 0;
             PushVariableScope(VariableScope.Loop);
             OnEnterLoop(loop);
         }
@@ -1028,7 +1027,10 @@ namespace Scriban
             {
                 PopVariableScope(VariableScope.Loop);
                 _loops.Pop();
-                _loopStep = 0;
+                if (!IsInLoop)
+                {
+                    _loopStep = 0;
+                }
             }
         }
 
