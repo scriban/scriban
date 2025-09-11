@@ -591,6 +591,18 @@ namespace Scriban.Syntax
                 return CalculateLong(op, span, leftLong, (ulong)rightValue);
             }
 
+            if (leftType == typeof(uint))
+            {
+                var rightLong = (uint)context.ToObject(span, rightValue, typeof(uint));
+                return CalculateLong(op, span, (uint)leftValue, rightLong);
+            }
+
+            if (rightType == typeof(uint))
+            {
+                var leftLong = (uint)context.ToObject(span, leftValue, typeof(uint));
+                return CalculateLong(op, span, leftLong, (uint)rightValue);
+            }
+
             if (leftType == typeof(int) || (leftType != null && leftType.IsEnum))
             {
                 var rightInt = (int)context.ToObject(span, rightValue, typeof(int));
@@ -602,19 +614,7 @@ namespace Scriban.Syntax
                 var leftInt = (int)context.ToObject(span, leftValue, typeof(int));
                 return CalculateInt(op, span, leftInt, (int)rightValue);
             }
-
-            if (leftType == typeof(uint))
-            {
-                var rightLong = (uint)context.ToObject(span, rightValue, typeof(uint));
-                return CalculateBigInteger(op, span, (uint)leftValue, rightLong);
-            }
-
-            if (rightType == typeof(uint))
-            {
-                var leftLong = (uint)context.ToObject(span, leftValue, typeof(uint));
-                return CalculateBigInteger(op, span, leftLong, (uint)rightValue);
-            }
-
+            
             if (leftType == typeof(bool))
             {
                 var rightBool = (bool)context.ToObject(span, rightValue, typeof(bool));

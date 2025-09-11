@@ -243,11 +243,11 @@ end
         [Test]
         public void TestUint()
         {
-            var input = @"{{if value > 0; 1; else; 2; end;}}";
+            var input = @"{{ 1 + value }}";
 
             var template = Template.Parse(input);
-            var result = template.Render(new { value = (uint)1 });
-            Assert.AreEqual("1", result);
+            var result = template.Render(new { value = uint.MaxValue });
+            Assert.AreEqual("4294967296", result);
         }
 
         [Test]
