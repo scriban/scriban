@@ -1288,11 +1288,12 @@ namespace Scriban
         /// <summary>
         /// Promotes named arguments in a script function call to local variables within the current context.
         /// </summary>
-        private void PromoteScriptNamedArguments(ScriptNode scriptNode)
+        private IReadOnlyList<ScriptVariable> PromoteScriptNamedArguments(ScriptNode scriptNode)
         {
+            var newVariables = new List<ScriptVariable>();
             if (!(scriptNode is ScriptFunctionCall sfc))
             {
-                return;
+                return Array.Empty<ScriptVariable>();
             }
 
             foreach (var item in sfc.Arguments)
@@ -1304,7 +1305,9 @@ namespace Scriban
                 // add a local variable for each named argument
                 var newLocalVariable = ScriptVariable.Create(sna.Name.Name, ScriptVariableScope.Local);
                 SetValue(variable: newLocalVariable, value: sna.Value, asReadOnly: true, force: true);
+                newVariables.Add(newLocalVariable);
             }
+            return newVariables.ToArray();
         }
 
         public string RenderTemplate(Template template, ScriptArray arguments, ScriptNode callerContext)
@@ -1316,10 +1319,11 @@ namespace Scriban
             CurrentIndent = null;
             PushOutput();
             var previousArguments = GetValue(ScriptVariable.Arguments);
+            IReadOnlyList<ScriptVariable> promotedVariables = Array.Empty<ScriptVariable>();
             try
             {
                 SetValue(ScriptVariable.Arguments, arguments, true, true);
-                PromoteScriptNamedArguments(callerContext);
+                promotedVariables = PromoteScriptNamedArguments(callerContext);
                 if (previousIndent != null)
                 {
                     // We reset before and after the fact that we have a new line
@@ -1339,6 +1343,11 @@ namespace Scriban
 
                 // Remove the arguments
                 DeleteValue(ScriptVariable.Arguments);
+                // Remove any promoted variables
+                foreach (var v in promotedVariables)
+                {
+                    DeleteValue(v);
+                }
                 if (previousArguments != null)
                 {
                     // Restore them if necessary
