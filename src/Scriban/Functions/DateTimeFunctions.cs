@@ -236,14 +236,61 @@ namespace Scriban.Functions
 
         private static readonly Regex PlusFollowedByNumberRegex = new Regex(@"\+\d");
 
+        private static string ParseCustomFormat(CultureInfo culture, string pattern, out CultureInfo cultureOverride)
+        {
+            cultureOverride = culture;
+            if (pattern == null)
+            {
+                return null;
+            }
+
+            var builder = new StringBuilder();
+            for (int i = 0; i < pattern.Length; i++)
+            {
+                var c = pattern[i];
+                if (c == '%' && (i + 1) < pattern.Length)
+                {
+                    i++;
+                    var format = pattern[i];
+
+                    // Switch to invariant culture
+                    if (format == 'g')
+                    {
+                        cultureOverride = CultureInfo.InvariantCulture;
+                        continue;
+                    }
+
+                    if (Formats.TryGetValue(format, out var formatterPair))
+                    {
+                        if (formatterPair.Item2 == null)
+                        {
+                            throw new ArgumentException($"The pattern %{format} is not supported for the parse method", nameof(pattern));
+                        }
+                        builder.Append(formatterPair.Item2);
+                    }
+                    else
+                    {
+                        builder.Append('%');
+                        builder.Append(format);
+                    }
+                }
+                else
+                {
+                    builder.Append(c);
+                }
+            }
+            return builder.ToString();
+        }
+
         /// <summary>
-        /// Parses the specified input string to a date object.
+        /// Parses the specified input string to a date object or a formatted string.
         /// </summary>
         /// <param name="context">The template context.</param>
         /// <param name="text">A text representing a date.</param>
-        /// <param name="pattern">The date format pattern. See `to_string` method about the format of a pattern.</param>
+        /// <param name="inputPattern">The date format pattern. See `to_string` method about the format of a pattern.</param>
         /// <param name="culture">The culture used to format the datetime. Default is current culture.</param>
-        /// <returns>A date object</returns>
+        /// <param name="outputPattern">The output format of the date. If null, returns a date object. See `to_string` method about the format of a pattern.</param>
+        /// <returns>A date object or a formatted string</returns>
         /// <remarks>
         /// ```scriban-html
         /// {{ date.parse '2016/01/05' }}
@@ -258,7 +305,7 @@ namespace Scriban.Functions
         /// 20 Jan 2022
         /// ```
         /// </remarks>
-        public static DateTime? Parse(TemplateContext context, string text, string pattern = null, string culture = null)
+        public static object Parse(TemplateContext context, string text, string inputPattern = null, string culture = null, string outputPattern = null )
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -269,79 +316,50 @@ namespace Scriban.Functions
             bool hasZ = text.TrimEnd().EndsWith("Z", StringComparison.OrdinalIgnoreCase);
             var dateTimeStyle = hasOffset || hasZ ? DateTimeStyles.None : DateTimeStyles.AssumeLocal;
 
-            var currentCulture = (culture != null ? CultureInfo.GetCultureInfo(culture) : context.CurrentCulture) ?? context.CurrentCulture;
-            string customFormat = null;
-            if (pattern != null)
-            {
-                var builder = new StringBuilder();
-                for (int i = 0; i < pattern.Length; i++)
-                {
-                    var c = pattern[i];
-                    if (c == '%' && (i + 1) < pattern.Length)
-                    {
-                        i++;
-                        var format = pattern[i];
-
-                        // Switch to invariant culture
-                        if (format == 'g')
-                        {
-                            currentCulture = CultureInfo.InvariantCulture;
-                            continue;
-                        }
-
-                        if (Formats.TryGetValue(format, out var formatterPair))
-                        {
-                            if (formatterPair.Item2 == null)
-                            {
-                                throw new ArgumentException($"The pattern %{format} is not supported for the parse method", nameof(pattern));
-                            }
-                            builder.Append(formatterPair.Item2);
-                        }
-                        else
-                        {
-                            builder.Append('%');
-                            builder.Append(format);
-                        }
-                    }
-                    else
-                    {
-                        builder.Append(c);
-                    }
-                }
-                customFormat = builder.ToString();
-            }
-
-            var result = new DateTime();
-            if (customFormat != null)
+            var defaultCulture = (culture != null ? CultureInfo.GetCultureInfo(culture) : context.CurrentCulture) ?? context.CurrentCulture;
+            string inputCustomFormat = ParseCustomFormat(defaultCulture, inputPattern, out var inputCulture);
+            string outputCustomFormat = ParseCustomFormat(defaultCulture, outputPattern, out var outputCulture);
+            var resultDateTime = new DateTime();
+            if (inputCustomFormat != null)
             {
                 if (hasOffset || hasZ)
                 {
-                    if (DateTimeOffset.TryParseExact(text, customFormat, currentCulture, dateTimeStyle, out var dateTimeOffset))
+                    if (DateTimeOffset.TryParseExact(text, inputCustomFormat, inputCulture, dateTimeStyle, out var dateTimeOffset))
                     {
-                        result = dateTimeOffset.LocalDateTime;
+                        resultDateTime = dateTimeOffset.LocalDateTime;
                     }
                 }
-                else if (DateTime.TryParseExact(text, customFormat, currentCulture, dateTimeStyle, out result))
+                else if (DateTime.TryParseExact(text, inputCustomFormat, inputCulture, dateTimeStyle, out resultDateTime))
                 {
-                    return result;
+                    
                 }
             }
             else
             {
                 if (hasOffset || hasZ)
                 {
-                    if (DateTimeOffset.TryParse(text, currentCulture, dateTimeStyle, out var dateTimeOffset))
+                    if (DateTimeOffset.TryParse(text, inputCulture, dateTimeStyle, out var dateTimeOffset))
                     {
-                        result = dateTimeOffset.LocalDateTime;
+                        resultDateTime = dateTimeOffset.LocalDateTime;
                     }
                 }
                 else
                 {
-                    DateTime.TryParse(text, currentCulture, dateTimeStyle, out result);
+                    DateTime.TryParse(text, inputCulture, dateTimeStyle, out resultDateTime);
                 }
             }
 
-            return result;
+            if (outputPattern is null)
+            {
+                return resultDateTime;
+            }
+
+            return resultDateTime.ToString( outputCustomFormat, outputCulture);
+        }
+
+        public static object ParseWithFormattedOutput(TemplateContext context, string text, string pattern = null, string culture = null)
+        {
+            return Parse(context: context, text: text, inputPattern: null, culture: culture, outputPattern: pattern);
         }
 
         public override IScriptObject Clone(bool deep)
