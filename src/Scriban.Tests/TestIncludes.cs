@@ -161,6 +161,18 @@ This is a header
         }
 
         [Test]
+        public void TestIncludePromotedNamedArguments()
+        {
+            var template = Template.Parse(@"{{ include 'named_arguments_promoted' this_arg: 5 }}");
+            var context = new TemplateContext();
+            context.TemplateLoader = new CustomTemplateLoader();
+
+            var text = template.Render(context).Replace("\r\n", "\n");
+            var expected = @"5";
+            TextAssert.AreEqual(expected, text);
+        }
+
+        [Test]
         public void TestIndentedIncludes()
         {
             var template = Template.Parse(@"  {{ include 'header' }}
