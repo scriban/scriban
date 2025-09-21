@@ -1284,7 +1284,29 @@ namespace Scriban
 
             return template;
         }
-    
+
+        /// <summary>
+        /// Promotes named arguments in a script function call to local variables within the current context.
+        /// </summary>
+        private void PromoteScriptNamedArguments(ScriptNode scriptNode)
+        {
+            if (!(scriptNode is ScriptFunctionCall sfc))
+            {
+                return;
+            }
+
+            foreach (var item in sfc.Arguments)
+            {
+                if (!(item is ScriptNamedArgument sna))
+                {
+                    continue;
+                }
+                // add a local variable for each named argument
+                var newLocalVariable = ScriptVariable.Create(sna.Name.Name, ScriptVariableScope.Local);
+                SetValue(variable: newLocalVariable, value: sna.Value, asReadOnly: true, force: true);
+            }
+        }
+
         public string RenderTemplate(Template template, ScriptArray arguments, ScriptNode callerContext)
         {
             // Make sure that we cannot recursively include a template
@@ -1297,6 +1319,7 @@ namespace Scriban
             try
             {
                 SetValue(ScriptVariable.Arguments, arguments, true, true);
+                PromoteScriptNamedArguments(callerContext);
                 if (previousIndent != null)
                 {
                     // We reset before and after the fact that we have a new line

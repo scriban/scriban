@@ -59,6 +59,9 @@ namespace Scriban.Tests
                 case "named_arguments":
                     return "{{ $.this_arg }}";
 
+                case "named_arguments_promoted":
+                    return "{{ $this_arg }}";
+
                 default:
                     return templatePath;
             }
