@@ -49,3 +49,8 @@
 {{ x | date.to_string '%g%y' }}
 {{ x | date.to_string '%g%Y' }}
 {{ x | date.to_string '%g%%' }}
+{{ date.parse_to_string '2016/01/05' '%Y--%m--%d' }}
+{{ "March 14, 2016" | date.parse_to_string "%b %d, %y" }}
+{{ "2026-04-26" | date.parse_to_string "%Y" }}
+This page was last updated at {{ "2025-09-22 19:10:00" | date.parse_to_string "%Y-%m-%d %H:%M" }}.
+{{ "03 14, 2016" | date.parse_to_string "%b %d, %y" input_pattern: "%m %d, %Y" }}

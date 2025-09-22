@@ -51,7 +51,7 @@ namespace Scriban.Functions
                 case "compact": target = "array"; member = "compact"; return true;
                 case "concat": target = "array"; member = "concat"; return true;
                 case "cycle": target = "array"; member = "cycle"; return true;
-                case "date": target = "date"; member = "parse_with_formatted_output"; return true;
+                case "date": target = "date"; member = "parse_to_string"; return true;
                 case "default": target = "object"; member = "default"; return true;
                 case "divided_by": target = "math"; member = "divided_by"; return true;
                 case "downcase": target = "string"; member = "downcase"; return true;

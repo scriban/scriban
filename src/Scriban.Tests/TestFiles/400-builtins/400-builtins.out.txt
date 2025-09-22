@@ -97,7 +97,7 @@ List of all the builtin <date> functions:
  format
  now
  parse
- parse_with_formatted_output
+ parse_to_string
  to_string
 
 List of all the builtin <timespan> functions:

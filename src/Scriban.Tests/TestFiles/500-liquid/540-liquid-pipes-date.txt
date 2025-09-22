@@ -1,3 +1,0 @@
-{{ "March 14, 2016" | date: "%b %d, %y" }}
-{{ "1976-04-26" | date: "%Y" }}
-This page was last updated at {{ "2025-09-22 19:10:00" | date: "%Y-%m-%d %H:%M" }}.
