@@ -756,6 +756,7 @@ A `timespan` and also the added to a `datetime` object.
 - [`date.add_seconds`](#dateadd_seconds)
 - [`date.add_milliseconds`](#dateadd_milliseconds)
 - [`date.parse`](#dateparse)
+- [`date.parse_to_string`](#dateparse_to_string)
 - [`date.to_string`](#dateto_string)
 
 [:top:](#builtins)
@@ -1012,6 +1013,46 @@ A date object
 17 Jun 2018
 30 Nov 2021
 20 Jan 2022
+```
+
+[:top:](#builtins)
+### `date.parse_to_string`
+
+```
+date.parse_to_string <text> <output_pattern>? <output_culture>? <input_pattern>? <input_culture>?
+```
+
+#### Description
+
+Parses the specified input string to a formatted date string.
+
+#### Arguments
+
+- `text`: A text representing a date.
+- `output_pattern`: The output date format pattern. See `to_string` method about the format of a pattern.
+- `output_culture`: The culture used to format the datetime. Default is current culture.
+- `input_pattern`: The input date format pattern. See `to_string` method about the format of a pattern.
+- `input_culture`: The culture used to parse the input datetime. Default is current culture.
+
+#### Returns
+
+A formatted date string
+
+#### Examples
+
+> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20date.parse_to_string%20%272016%2F01%2F05%27%20%27%25Y--%25m--%25d%27%20%7D%7D%0A%7B%7B%20%2203%2014%2C%202016%22%20%7C%20date.parse_to_string%20%22%25b%20%25d%2C%20%25y%22%20input_pattern%3A%20%22%25m%20%25d%2C%20%25Y%22%20%7D%7D%0A%7B%7B%20%222025-01-01%2014%3A01%3A23%22%20%7C%20date.parse_to_string%20%22%25r%22%20input_pattern%3A%20%22%25Y-%25m-%25d%20%25k%3A%25M%3A%25S%22%20%7D%7D%0A%7B%7B%20%2203%2F01%2F2025%2014%3A01%3A23%22%20%7C%20date.parse_to_string%20%22%25F%22%20input_culture%3A%27en-US%27%20output_culture%3A%27en-GB%27%20%7D%7D&model={})
+```scriban-html
+{{ date.parse_to_string '2016/01/05' '%Y--%m--%d' }}
+{{ "03 14, 2016" | date.parse_to_string "%b %d, %y" input_pattern: "%m %d, %Y" }}
+{{ "2025-01-01 14:01:23" | date.parse_to_string "%r" input_pattern: "%Y-%m-%d %k:%M:%S" }}
+{{ "03/01/2025 14:01:23" | date.parse_to_string "%F" input_culture:'en-US' output_culture:'en-GB' }}
+```
+> **output**
+```html
+2016--01--05
+Mar 14, 16
+02:01:23 PM
+2025-03-01
 ```
 
 [:top:](#builtins)
