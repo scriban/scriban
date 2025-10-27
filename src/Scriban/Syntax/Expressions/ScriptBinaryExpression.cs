@@ -643,6 +643,10 @@ namespace Scriban.Syntax
                 return leftValue.Equals(rightValue);
             }
 
+            if (op == ScriptBinaryOperator.CompareNotEqual)
+            {
+                return !leftValue.Equals(rightValue);
+            }
             throw new ScriptRuntimeException(span, $"Unsupported types `{leftValue}/{context.GetTypeName(leftValue)}` {op.ToText()} `{rightValue}/{context.GetTypeName(rightValue)}` for binary operation");
         }
 

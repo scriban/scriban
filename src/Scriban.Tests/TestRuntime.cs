@@ -732,6 +732,15 @@ Tax: {{ 7 | match_tax }}";
         }
 
         [Test]
+        public void TestGuidDifferent()
+        {
+            var template = Template.Parse("{{ if guid1 != guid2 }}OK{{end}}");
+            var result = template.Render(new { guid1 = Guid.NewGuid(), guid2 = Guid.NewGuid() });
+
+            Assert.AreEqual("OK", result);
+        }
+        
+        [Test]
         public void TestCulture()
         {
             var number = 11232.123;
