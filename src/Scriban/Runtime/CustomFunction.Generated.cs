@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 03/06/2025 18:17:54 by Scriban.DelegateCodeGen
+// This file was automatically generated - 11/17/2025 08:03:34 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -100,7 +100,9 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.RemoveLast), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.HmacSha1), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.HmacSha256), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.HmacSha512), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.HtmlFunctions).GetMethod(nameof(Scriban.Functions.HtmlFunctions.Escape), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.HtmlFunctions).GetMethod(nameof(Scriban.Functions.HtmlFunctions.NewlineToBr), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.HtmlFunctions).GetMethod(nameof(Scriban.Functions.HtmlFunctions.UrlEncode), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.HtmlFunctions).GetMethod(nameof(Scriban.Functions.HtmlFunctions.UrlEscape), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.RegexFunctions).GetMethod(nameof(Scriban.Functions.RegexFunctions.Escape), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
@@ -119,12 +121,14 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Md5), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Sha1), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Sha256), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Sha512), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Base64Encode), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Base64Decode), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Kind), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_TemplateContext_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Join), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_TemplateContext_SourceSpan_IEnumerable_string_object___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetMethod(nameof(Scriban.Functions.MathFunctions.Format), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_TemplateContext_SourceSpan_object_string_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Format), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_TemplateContext_SourceSpan_object_string_string___Opt(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetMethod(nameof(Scriban.Functions.DateTimeFunctions.ParseToString), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_TemplateContext_string_string___Opt_string___Opt_string___Opt_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.RegexFunctions).GetMethod(nameof(Scriban.Functions.RegexFunctions.Replace), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_TemplateContext_string_string_string_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.HtmlFunctions).GetMethod(nameof(Scriban.Functions.HtmlFunctions.Strip), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new Functionstring_TemplateContext_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.TimeSpanFunctions).GetMethod(nameof(Scriban.Functions.TimeSpanFunctions.FromDays), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new FunctionTimeSpan_double(method));
@@ -1184,6 +1188,32 @@ namespace Scriban.Runtime
                 var arg2 = (string)arguments[2];
 
                 return _delegate(context, callerContext.Span, arg0, arg1, arg2);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: string (TemplateContext, string, string = ..., string = ..., string = ..., string = ...)
+        /// </summary>
+        private partial class Functionstring_TemplateContext_string_string___Opt_string___Opt_string___Opt_string___Opt : DynamicCustomFunction
+        {
+            private delegate string InternalDelegate(TemplateContext arg0, string arg1, string arg2, string arg3, string arg4, string arg5);
+
+            private readonly InternalDelegate _delegate;
+
+            public Functionstring_TemplateContext_string_string___Opt_string___Opt_string___Opt_string___Opt(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (string)arguments[0];
+                var arg1 = (string)arguments[1];
+                var arg2 = (string)arguments[2];
+                var arg3 = (string)arguments[3];
+                var arg4 = (string)arguments[4];
+
+                return _delegate(context, arg0, arg1, arg2, arg3, arg4);
             }
         }
 
