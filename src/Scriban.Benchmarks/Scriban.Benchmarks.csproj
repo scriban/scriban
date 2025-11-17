@@ -13,13 +13,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="BenchmarkDotNet" Version="0.15.2" />
-    <PackageReference Include="Cottle" Version="2.1.0" />
-    <PackageReference Include="DotLiquid" Version="2.3.197" />
-    <PackageReference Include="Fluid.Core" Version="2.25.0" />
-    <PackageReference Include="Handlebars.Net" Version="2.1.6" />
-    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" Version="6.0.36" />
-    <PackageReference Include="Nustache" Version="1.16.0.10" />
-    <PackageReference Include="Stubble.Core" Version="1.10.8" />
+    <PackageReference Include="BenchmarkDotNet" />
+    <PackageReference Include="Cottle" />
+    <PackageReference Include="DotLiquid" />
+    <PackageReference Include="Fluid.Core" />
+    <PackageReference Include="Handlebars.Net" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Language" />
+    <PackageReference Include="Nustache" />
+    <PackageReference Include="Stubble.Core" />
   </ItemGroup>
 </Project>

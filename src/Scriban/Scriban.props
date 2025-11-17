@@ -25,7 +25,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Pack sources in the nuget packages -->
-    <None Remove="$(MSBuildThisFileDirectory)Package\Scriban.*"/>
+    <None Remove="$(MSBuildThisFileDirectory)Package\Scriban.*" />
     <Content Include="Package\Scriban.*">
       <Pack>true</Pack>
       <PackagePath>build\</PackagePath>
@@ -43,18 +43,15 @@
     </Content>
 
     <None Include="$(MSBuildThisFileDirectory)../../img/scriban.png" Pack="true" PackagePath="" />
-    <None Include="$(MSBuildThisFileDirectory)../../readme.md" Pack="true" PackagePath="/"/>
+    <None Include="$(MSBuildThisFileDirectory)../../readme.md" Pack="true" PackagePath="/" />
 
-    <PackageReference Include="MinVer" Version="4.3.0">
+    <PackageReference Include="MinVer">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-
-    <!--Add support for sourcelink-->
-    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.1.*" PrivateAssets="All" />
   </ItemGroup>
   <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETStandard'">
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.0" />
+    <PackageReference Include="Microsoft.CSharp" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" />
   </ItemGroup>
 </Project>

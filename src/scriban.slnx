@@ -1,0 +1,25 @@
+<Solution>
+  <Folder Name="/Build/">
+    <File Path="../.editorconfig" />
+    <File Path="../.gitattributes" />
+    <File Path="../.github/workflows/CI.yml" />
+    <File Path="../changelog.md" />
+    <File Path="../doc/builtins.md" />
+    <File Path="../doc/language.md" />
+    <File Path="../doc/runtime.md" />
+    <File Path="../license.txt" />
+    <File Path="../readme.md" />
+    <File Path="Directory.Packages.props" />
+    <File Path="dotnet-releaser.toml" />
+    <File Path="global.json" />
+  </Folder>
+  <Project Path="liquid2scriban/liquid2scriban.csproj" />
+  <Project Path="Scriban.AsyncCodeGen/Scriban.AsyncCodeGen.csproj" />
+  <Project Path="Scriban.Benchmarks/Scriban.Benchmarks.csproj" />
+  <Project Path="Scriban.DelegateCodeGen/Scriban.DelegateCodeGen.csproj" />
+  <Project Path="Scriban.DocGen/Scriban.DocGen.csproj" />
+  <Project Path="Scriban.Tests/Scriban.Tests.csproj">
+    <BuildDependency Project="Scriban/Scriban.csproj" />
+  </Project>
+  <Project Path="Scriban/Scriban.csproj" />
+</Solution>

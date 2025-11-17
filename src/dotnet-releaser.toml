@@ -1,5 +1,5 @@
 [msbuild]
-project = ["scriban.sln", "Scriban.Signed/Scriban.Signed.csproj"]
+project = ["scriban.slnx", "Scriban.Signed/Scriban.Signed.csproj"]
 [github]
 user = "scriban"
 repo = "scriban"

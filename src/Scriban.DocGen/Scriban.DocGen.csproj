@@ -5,7 +5,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="NuDoq" Version="2.0.1" />
+    <PackageReference Include="NuDoq" />
     <ProjectReference Include="..\Scriban\Scriban.csproj" />
   </ItemGroup>
 </Project>
