@@ -77,9 +77,6 @@ namespace Scriban
             return new ScriptArray(iterator);
         }
 
-        private int _objectToStringLevel;
-        private int _currentToStringLength;
-
         /// <summary>
         /// Called whenever an objects is converted to a string. This method can be overriden.
         /// </summary>
@@ -88,38 +85,32 @@ namespace Scriban
         /// <returns>A string representing the object value</returns>
         public virtual string ObjectToString(object value, bool nested = false)
         {
-            bool shouldEscapeString = nested || _objectToStringLevel > 0;
-            if (_objectToStringLevel == 0)
+            int currentLength = 0;
+            return SafeObjectToString(value, nested ? 1 : 0, ref currentLength);
+        } 
+
+        private string SafeObjectToString(object value, int nestingLevel, ref int currentLength)
+        {
+            if (ObjectRecursionLimit != 0 && nestingLevel > ObjectRecursionLimit)
+                throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
+            var result = ObjectToStringImpl(value, nestingLevel, ref currentLength);
+            if (LimitToString > 0 && nestingLevel == 0 && result != null && result.Length >= LimitToString)
             {
-                _currentToStringLength = 0;
+                return result + "...";
             }
-            try
-            {
-                _objectToStringLevel++;
-                if (ObjectRecursionLimit != 0 && _objectToStringLevel > ObjectRecursionLimit)
-                    throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
-                var result = ObjectToStringImpl(value, shouldEscapeString);
-                if (LimitToString > 0 && _objectToStringLevel  == 1 && result != null && result.Length >= LimitToString)
-                {
-                    return result + "...";
-                }
-                return result;
-            }
-            finally
-            {
-                _objectToStringLevel--;
-            }
+            return result;
         }
 
-        private string ObjectToStringImpl(object value, bool nested)
+        private string ObjectToStringImpl(object value, int nestingLevel, ref int currentLength)
         {
-            if (LimitToString > 0 && _currentToStringLength >= LimitToString) return string.Empty;
+            if (LimitToString > 0 && currentLength >= LimitToString) return string.Empty;
 
+            bool nested = nestingLevel > 0;
             if (value is string str)
             {
-                if (LimitToString > 0 && _currentToStringLength + str.Length >= LimitToString)
+                if (LimitToString > 0 && currentLength + str.Length >= LimitToString)
                 {
-                    var index = LimitToString - _currentToStringLength;
+                    var index = LimitToString - currentLength;
                     if (index <= 0) return string.Empty;
                     str = str.Substring(0, index);
                     return nested ? $"\"{StringFunctions.Escape(str)}" : (string)value;
@@ -172,22 +163,22 @@ namespace Scriban
             {
                 var result = new StringBuilder();
                 result.Append("[");
-                _currentToStringLength++;
+                currentLength++;
                 bool isFirst = true;
                 foreach (var item in enumerable)
                 {
                     if (!isFirst)
                     {
                         result.Append(", ");
-                        _currentToStringLength += 2;
+                        currentLength += 2;
                     }
 
-                    var itemStr = ObjectToString(item);
+                    var itemStr = SafeObjectToString(item, nestingLevel + 1, ref currentLength);
                     result.Append(itemStr);
-                    if (itemStr != null) _currentToStringLength += itemStr.Length;
+                    if (itemStr != null) currentLength += itemStr.Length;
 
                     // Limit to size
-                    if (LimitToString > 0 && _currentToStringLength >= LimitToString)
+                    if (LimitToString > 0 && currentLength >= LimitToString)
                     {
                         return result.ToString();
                     }
@@ -195,7 +186,7 @@ namespace Scriban
                     isFirst = false;
                 }
                 result.Append("]");
-                _currentToStringLength += 1;
+                currentLength += 1;
                 return result.ToString();
             }
 
@@ -206,7 +197,7 @@ namespace Scriban
             {
                 var keyValuePair = new ScriptObject(2);
                 keyValuePair.Import(value, renamer: this.MemberRenamer);
-                return ObjectToString(keyValuePair);
+                return SafeObjectToString(keyValuePair, nestingLevel + 1, ref currentLength);
             }
 
             if (value is IScriptCustomFunction && !(value is ScriptFunction))
