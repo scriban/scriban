@@ -1516,13 +1516,8 @@ end
         [Test]
         public void TestObjectToStringEscapesCorrectlyWithLazyEvaluation()
         {
-            // Test that each loop level has independent counters
             var context = new TemplateContext();
-
-            // Create a template where outer loop is within limit but inner loop exceeds
             var template = Template.Parse("""{{ [["a", "b"]] | array.each @(do; ret $0 | array.join("#"); end) }}""");
-
-            // This should throw on the inner loop (5 iterations > 3 limit)
             var result = template.Render(context);
             TextAssert.AreEqual("""["a#b"]""", context.ObjectToString(result));
         }
