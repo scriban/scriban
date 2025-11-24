@@ -121,10 +121,10 @@ namespace Scriban
                     var index = LimitToString - _currentToStringLength;
                     if (index <= 0) return string.Empty;
                     str = str.Substring(0, index);
-                    return nested ? $"\"{StringFunctions.Escape(str)}" : (string)value;
+                    return nested ? $"\"{StringFunctions.Escape(str)}" : str;
                 }
 
-                return nested ? $"\"{StringFunctions.Escape(str)}\"" : (string)value;
+                return nested ? $"\"{StringFunctions.Escape(str)}\"" : str;
             }
 
             if (value == null || value == EmptyScriptObject.Default)
