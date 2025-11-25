@@ -88,7 +88,6 @@ namespace Scriban
         /// <returns>A string representing the object value</returns>
         public virtual string ObjectToString(object value, bool nested = false)
         {
-            bool shouldEscapeString = nested || _objectToStringLevel > 0;
             if (_objectToStringLevel == 0)
             {
                 _currentToStringLength = 0;
@@ -98,8 +97,8 @@ namespace Scriban
                 _objectToStringLevel++;
                 if (ObjectRecursionLimit != 0 && _objectToStringLevel > ObjectRecursionLimit)
                     throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
-                var result = ObjectToStringImpl(value, shouldEscapeString);
-                if (LimitToString > 0 && _objectToStringLevel  == 1 && result != null && result.Length >= LimitToString)
+                var result = ObjectToStringImpl(value, nested);
+                if (LimitToString > 0 && _objectToStringLevel == 1 && result != null && result.Length >= LimitToString)
                 {
                     return result + "...";
                 }
@@ -122,10 +121,10 @@ namespace Scriban
                     var index = LimitToString - _currentToStringLength;
                     if (index <= 0) return string.Empty;
                     str = str.Substring(0, index);
-                    return nested ? $"\"{StringFunctions.Escape(str)}" : (string)value;
+                    return nested ? $"\"{StringFunctions.Escape(str)}" : str;
                 }
 
-                return nested ? $"\"{StringFunctions.Escape(str)}\"" : (string) value;
+                return nested ? $"\"{StringFunctions.Escape(str)}\"" : str;
             }
 
             if (value == null || value == EmptyScriptObject.Default)
@@ -182,7 +181,7 @@ namespace Scriban
                         _currentToStringLength += 2;
                     }
 
-                    var itemStr = ObjectToString(item);
+                    var itemStr = ObjectToString(item, true);
                     result.Append(itemStr);
                     if (itemStr != null) _currentToStringLength += itemStr.Length;
 
@@ -206,7 +205,7 @@ namespace Scriban
             {
                 var keyValuePair = new ScriptObject(2);
                 keyValuePair.Import(value, renamer: this.MemberRenamer);
-                return ObjectToString(keyValuePair);
+                return ObjectToString(keyValuePair, true);
             }
 
             if (value is IScriptCustomFunction && !(value is ScriptFunction))

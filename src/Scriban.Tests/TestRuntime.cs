@@ -1513,6 +1513,15 @@ end
             Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `3` for loop statement"));
         }
 
+        [Test]
+        public void TestObjectToStringEscapesCorrectlyWithLazyEvaluation()
+        {
+            var context = new TemplateContext();
+            var template = Template.Parse("""{{ [["a", "b"]] | array.each @(do; ret $0 | array.join("#"); end) }}""");
+            var result = template.Render(context);
+            TextAssert.AreEqual("""["a#b"]""", context.ObjectToString(result));
+        }
+
         private class MyObject : MyStaticObject
         {
             public string FieldA;
