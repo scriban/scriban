@@ -4,10 +4,10 @@
     <Description>Scriban is a fast, powerful, safe and lightweight scripting language and engine for .NET, which was primarily developed for text templating with a compatibility mode for parsing liquid templates.</Description>
     <Copyright>Alexandre Mutel</Copyright>
     <NeutralLanguage>en-US</NeutralLanguage>
-    <LangVersion>8.0</LangVersion>
     <DefineConstants>$(DefineConstants);SCRIBAN_PUBLIC</DefineConstants>
     <Authors>Alexandre Mutel</Authors>
-    <TargetFrameworks>netstandard2.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
+    <LangVersion Condition="'$(TargetFramework)' == 'netstandard2.0'">8.0</LangVersion>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageIcon>scriban.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
