@@ -4,6 +4,11 @@
 
 #nullable disable
 
+using Scriban.Functions;
+using Scriban.Helpers;
+using Scriban.Parsing;
+using Scriban.Runtime;
+using Scriban.Syntax;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -14,11 +19,7 @@ using System.Numerics;
 using System.Reflection; // Leave this as it is required by some .NET targets
 using System.Text;
 using System.Threading.Tasks;
-using Scriban.Functions;
-using Scriban.Helpers;
-using Scriban.Parsing;
-using Scriban.Runtime;
-using Scriban.Syntax;
+using System.Xml.Linq;
 
 namespace Scriban
 {
@@ -319,31 +320,18 @@ namespace Scriban
             switch (scope)
             {
                 case ScriptVariableScope.Global:
-                    // In scientific we always resolve to local storage first
-                    IScriptObject storeWithVariable = null;
-
                     var name = variable.Name;
                     int lastStoreIndex = _globalContexts.Count - 1;
                     var items = _globalContexts.Items;
-                    for (int i = lastStoreIndex; i >= 0; i--)
+                    finalStore = items[lastStoreIndex].LocalObject;
+                    // We check that for upper store, we actually can write a variable with this name
+                    // otherwise we don't allow to create a variable with the same name as a readonly variable
+                    if (!finalStore.CanWrite(name))
                     {
-                        var store = items[i].LocalObject;
-                        if (storeWithVariable == null && store.Contains(name))
-                        {
-                            storeWithVariable = store;
-                        }
-
-                        // We check that for upper store, we actually can write a variable with this name
-                        // otherwise we don't allow to create a variable with the same name as a readonly variable
-                        if (!store.CanWrite(name))
-                        {
-                            var variableType = store == BuiltinObject ? "builtin " : string.Empty;
-                            throw new ScriptRuntimeException(variable.Span, $"Cannot set the {variableType}readonly variable `{variable}`");
-                        }
+                        var variableType = finalStore == BuiltinObject ? "builtin " : string.Empty;
+                        throw new ScriptRuntimeException(variable.Span, $"Cannot set the {variableType}readonly variable `{variable}`");
                     }
 
-                    // If we have a store for this variable name use it, otherwise use the first store available.
-                    finalStore = storeWithVariable ?? items[lastStoreIndex].LocalObject;
                     break;
                 case ScriptVariableScope.Local:
                     if (_currentLocalContext.LocalObject != null)
