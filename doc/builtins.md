@@ -785,7 +785,7 @@ Returns a datetime object of the current time, including the hour, minutes, seco
 ```
 > **output**
 ```html
-2025
+2026
 ```
 
 [:top:](#builtins)
