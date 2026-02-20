@@ -213,6 +213,21 @@ For more examples, see the [Getting started](docs/getting-started.md) guide.
     return;
   }
   //
+  // Read template/model from URL query parameters (e.g. ?template=...&model={})
+  var params = new URLSearchParams(window.location.search);
+  var urlTemplate = params.get("template");
+  var urlModel = params.get("model");
+  var hasUrlParams = urlTemplate !== null;
+  if (hasUrlParams) {
+    tmplEl.value = urlTemplate;
+    if (urlModel !== null) dataEl.value = urlModel;
+    section.scrollIntoView({ behavior: "smooth" });
+    // Clean URL without reloading
+    if (window.history.replaceState) {
+      window.history.replaceState(null, "", window.location.pathname);
+    }
+  }
+  //
   fetch(apiUrl + "/api/health", { method: "GET", mode: "cors" })
     .then(function (r) {
       if (!r.ok) throw new Error("HTTP " + r.status);
@@ -221,6 +236,8 @@ For more examples, see the [Getting started](docs/getting-started.md) guide.
     .then(function () {
       setStatus('<i class="bi bi-check-circle"></i> Service available', "text-success");
       enableRun();
+      // Auto-run if template was provided via URL
+      if (hasUrlParams) runTemplate();
     })
     .catch(function () {
       setStatus('<i class="bi bi-x-circle"></i> Service unavailable \u2014 try again later.', "text-danger");

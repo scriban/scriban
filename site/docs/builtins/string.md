@@ -74,7 +74,7 @@ The two strings concatenated
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hel%5Ctlo%5Cn%5C%22W%5C%5Corld%22%20%7C%20string.escape%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Hel%5Ctlo%5Cn%5C%22W%5C%5Corld%22%20%7C%20string.escape%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Hel\tlo\n\"W\\orld" | string.escape {{ "}}" }}
 ```
@@ -104,7 +104,7 @@ The two strings concatenated
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hello%22%20%7C%20string.append%20%22%20World%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Hello%22%20%7C%20string.append%20%22%20World%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Hello" | string.append " World" {{ "}}" }}
 ```
@@ -133,7 +133,7 @@ The capitalized input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.capitalize%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.capitalize%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.capitalize {{ "}}" }}
 ```
@@ -162,7 +162,7 @@ The capitalized input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22This%20is%20easy%22%20%7C%20string.capitalizewords%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22This%20is%20easy%22%20%7C%20string.capitalizewords%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "This is easy" | string.capitalizewords {{ "}}" }}
 ```
@@ -192,7 +192,7 @@ Returns a boolean indicating whether the input string contains the specified str
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22This%20is%20easy%22%20%7C%20string.contains%20%22easy%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22This%20is%20easy%22%20%7C%20string.contains%20%22easy%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "This is easy" | string.contains "easy" {{ "}}" }}
 ```
@@ -221,7 +221,7 @@ Returns a boolean indicating whether the input string is an empty string.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22%22%20%7C%20string.empty%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22%22%20%7C%20string.empty%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "" | string.empty {{ "}}" }}
 ```
@@ -250,7 +250,7 @@ Returns a boolean indicating whether the input string is empty or contains only 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22%22%20%7C%20string.whitespace%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22%22%20%7C%20string.whitespace%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "" | string.whitespace {{ "}}" }}
 ```
@@ -279,7 +279,7 @@ The input string lower case
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22TeSt%22%20%7C%20string.downcase%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22TeSt%22%20%7C%20string.downcase%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "TeSt" | string.downcase {{ "}}" }}
 ```
@@ -309,7 +309,7 @@ Returns a boolean indicating whether the input string ends with the specified st
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22This%20is%20easy%22%20%7C%20string.ends_with%20%22easy%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22This%20is%20easy%22%20%7C%20string.ends_with%20%22easy%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "This is easy" | string.ends_with "easy" {{ "}}" }}
 ```
@@ -339,7 +339,7 @@ Returns a boolean indicating whether the input string is equal to specified stri
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Scriban%22%20%7C%20string.equals_ignore_case%20%22SCRIBAN%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Scriban%22%20%7C%20string.equals_ignore_case%20%22SCRIBAN%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Scriban" | string.equals_ignore_case "SCRIBAN" {{ "}}" }}
 ```
@@ -368,7 +368,7 @@ A url handle
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%27100%25%20M%20%26%20Ms%21%21%21%27%20%7C%20string.handleize%20%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%27100%25%20M%20%26%20Ms%21%21%21%27%20%7C%20string.handleize%20%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} '100% M & Ms!!!' | string.handleize  {{ "}}" }}
 ```
@@ -398,7 +398,7 @@ The literal of a string.
 #### Examples
 
 If the input string has non printable characters or they need contain a double quote, they will be escaped.
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%27Hello%5Cn%22World%22%27%20%7C%20string.literal%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%27Hello%5Cn%22World%22%27%20%7C%20string.literal%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 'Hello\n"World"' | string.literal {{ "}}" }}
 ```
@@ -427,7 +427,7 @@ The input string without any left whitespace characters
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%27%20%20%20too%20many%20spaces%27%20%7C%20string.lstrip%20%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%27%20%20%20too%20many%20spaces%27%20%7C%20string.lstrip%20%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} '   too many spaces' | string.lstrip  {{ "}}" }}
 ```
@@ -459,7 +459,7 @@ The singular or plural string based on number
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20products.size%20%7D%7D%20%7B%7Bproducts.size%20%7C%20string.pluralize%20%27product%27%20%27products%27%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20products.size%20%7D%7D%20%7B%7Bproducts.size%20%7C%20string.pluralize%20%27product%27%20%27products%27%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} products.size {{ "}}" }} {{ "{{" }}products.size | string.pluralize 'product' 'products' {{ "}}" }}
 ```
@@ -489,7 +489,7 @@ The two strings concatenated
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22World%22%20%7C%20string.prepend%20%22Hello%20%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22World%22%20%7C%20string.prepend%20%22Hello%20%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "World" | string.prepend "Hello " {{ "}}" }}
 ```
@@ -519,7 +519,7 @@ The input string with the all occurence of a substring removed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.remove%20%22world%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.remove%20%22world%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Hello, world. Goodbye, world." | string.remove "world" {{ "}}" }}
 ```
@@ -549,7 +549,7 @@ The input string with the first occurence of a substring removed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.remove_first%20%22world%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.remove_first%20%22world%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Hello, world. Goodbye, world." | string.remove_first "world" {{ "}}" }}
 ```
@@ -579,7 +579,7 @@ The input string with the first occurence of a substring removed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.remove_last%20%22world%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.remove_last%20%22world%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Hello, world. Goodbye, world." | string.remove_last "world" {{ "}}" }}
 ```
@@ -610,7 +610,7 @@ The input string replaced
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.replace%20%22world%22%20%22buddy%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.replace%20%22world%22%20%22buddy%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Hello, world. Goodbye, world." | string.replace "world" "buddy" {{ "}}" }}
 ```
@@ -642,7 +642,7 @@ The input string replaced
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.replace_first%20%22world%22%20%22buddy%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Hello%2C%20world.%20Goodbye%2C%20world.%22%20%7C%20string.replace_first%20%22world%22%20%22buddy%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Hello, world. Goodbye, world." | string.replace_first "world" "buddy" {{ "}}" }}
 ```
@@ -671,7 +671,7 @@ The input string without any left whitespace characters
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%27%20%20%20too%20many%20spaces%20%20%20%20%20%20%20%20%20%20%20%27%20%7C%20string.rstrip%20%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%27%20%20%20too%20many%20spaces%20%20%20%20%20%20%20%20%20%20%20%27%20%7C%20string.rstrip%20%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} '   too many spaces           ' | string.rstrip  {{ "}}" }}
 ```
@@ -701,7 +701,7 @@ The length of the input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.size%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.size%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.size {{ "}}" }}
 ```
@@ -733,7 +733,7 @@ The input string sliced
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22hello%22%20%7C%20string.slice%200%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice%201%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice%201%203%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice%201%20length%3A3%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22hello%22%20%7C%20string.slice%200%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice%201%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice%201%203%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice%201%20length%3A3%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "hello" | string.slice 0 {{ "}}" }}
 {{ "{{" }} "hello" | string.slice 1 {{ "}}" }}
@@ -771,7 +771,7 @@ The input string sliced
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22hello%22%20%7C%20string.slice1%200%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice1%201%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice1%201%203%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice1%201%20length%3A%203%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22hello%22%20%7C%20string.slice1%200%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice1%201%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice1%201%203%20%7D%7D%0A%7B%7B%20%22hello%22%20%7C%20string.slice1%201%20length%3A%203%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "hello" | string.slice1 0 {{ "}}" }}
 {{ "{{" }} "hello" | string.slice1 1 {{ "}}" }}
@@ -808,7 +808,7 @@ An enumeration of the substrings
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20for%20word%20in%20%22Hi%2C%20how%20are%20you%20today%3F%22%20%7C%20string.split%20%27%20%27%20~%7D%7D%0A%7B%7B%20word%20%7D%7D%0A%7B%7B%20end%20~%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20for%20word%20in%20%22Hi%2C%20how%20are%20you%20today%3F%22%20%7C%20string.split%20%27%20%27%20~%7D%7D%0A%7B%7B%20word%20%7D%7D%0A%7B%7B%20end%20~%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} for word in "Hi, how are you today?" | string.split ' ' ~{{ "}}" }}
 {{ "{{" }} word {{ "}}" }}
@@ -844,7 +844,7 @@ Returns a boolean indicating whether the input string starts with the specified 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22This%20is%20easy%22%20%7C%20string.starts_with%20%22This%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22This%20is%20easy%22%20%7C%20string.starts_with%20%22This%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "This is easy" | string.starts_with "This" {{ "}}" }}
 ```
@@ -873,7 +873,7 @@ The input string without any left and right whitespace characters
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%27%20%20%20too%20many%20spaces%20%20%20%20%20%20%20%20%20%20%20%27%20%7C%20string.strip%20%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%27%20%20%20too%20many%20spaces%20%20%20%20%20%20%20%20%20%20%20%27%20%7C%20string.strip%20%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} '   too many spaces           ' | string.strip  {{ "}}" }}
 ```
@@ -903,7 +903,7 @@ The input string without any breaks/newlines characters
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22This%20is%20a%20string.%5Cr%5Cn%20With%20%5Cnanother%20%5Crstring%22%20%7C%20string.strip_newlines%20%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22This%20is%20a%20string.%5Cr%5Cn%20With%20%5Cnanother%20%5Crstring%22%20%7C%20string.strip_newlines%20%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "This is a string.\r\n With \nanother \rstring" | string.strip_newlines  {{ "}}" }}
 ```
@@ -932,7 +932,7 @@ A 32 bit integer or null if conversion failed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22123%22%20%7C%20string.to_int%20%2B%201%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22123%22%20%7C%20string.to_int%20%2B%201%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "123" | string.to_int + 1 {{ "}}" }}
 ```
@@ -961,7 +961,7 @@ A 64 bit integer or null if conversion failed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22123678912345678%22%20%7C%20string.to_long%20%2B%201%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22123678912345678%22%20%7C%20string.to_long%20%2B%201%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "123678912345678" | string.to_long + 1 {{ "}}" }}
 ```
@@ -990,7 +990,7 @@ A 32 bit float or null if conversion failed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22123.4%22%20%7C%20string.to_float%20%2B%201%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22123.4%22%20%7C%20string.to_float%20%2B%201%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "123.4" | string.to_float + 1 {{ "}}" }}
 ```
@@ -1019,7 +1019,7 @@ A 64 bit float or null if conversion failed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22123.4%22%20%7C%20string.to_double%20%2B%201%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22123.4%22%20%7C%20string.to_double%20%2B%201%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "123.4" | string.to_double + 1 {{ "}}" }}
 ```
@@ -1051,7 +1051,7 @@ The truncated input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22The%20cat%20came%20back%20the%20very%20next%20day%22%20%7C%20string.truncate%2013%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22The%20cat%20came%20back%20the%20very%20next%20day%22%20%7C%20string.truncate%2013%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "The cat came back the very next day" | string.truncate 13 {{ "}}" }}
 ```
@@ -1083,7 +1083,7 @@ The truncated input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22The%20cat%20came%20back%20the%20very%20next%20day%22%20%7C%20string.truncatewords%204%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22The%20cat%20came%20back%20the%20very%20next%20day%22%20%7C%20string.truncatewords%204%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "The cat came back the very next day" | string.truncatewords 4 {{ "}}" }}
 ```
@@ -1112,7 +1112,7 @@ The input string upper case
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.upcase%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.upcase%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.upcase {{ "}}" }}
 ```
@@ -1141,7 +1141,7 @@ The `md5` hash of the input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.md5%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.md5%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.md5 {{ "}}" }}
 ```
@@ -1170,7 +1170,7 @@ The `sha1` hash of the input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.sha1%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.sha1%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.sha1 {{ "}}" }}
 ```
@@ -1199,7 +1199,7 @@ The `sha256` hash of the input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.sha256%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.sha256%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.sha256 {{ "}}" }}
 ```
@@ -1228,7 +1228,7 @@ The `sha512` hash of the input string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.sha512%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.sha512%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.sha512 {{ "}}" }}
 ```
@@ -1258,7 +1258,7 @@ The `SHA-1` hash of the input string using a hash message authentication code (H
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.hmac_sha1%20%22secret%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.hmac_sha1%20%22secret%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.hmac_sha1 "secret" {{ "}}" }}
 ```
@@ -1288,7 +1288,7 @@ The `SHA-256` hash of the input string using a hash message authentication code 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.hmac_sha256%20%22secret%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.hmac_sha256%20%22secret%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.hmac_sha256 "secret" {{ "}}" }}
 ```
@@ -1318,7 +1318,7 @@ The `SHA-512` hash of the input string using a hash message authentication code 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22test%22%20%7C%20string.hmac_sha512%20%22secret%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22test%22%20%7C%20string.hmac_sha512%20%22secret%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "test" | string.hmac_sha512 "secret" {{ "}}" }}
 ```
@@ -1348,7 +1348,7 @@ The input string padded
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=hello%7B%7B%20%22world%22%20%7C%20string.pad_left%2010%20%7D%7D&model={})
+> **input** [Try out](/?template=hello%7B%7B%20%22world%22%20%7C%20string.pad_left%2010%20%7D%7D&model=%7B%7D)
 ```scriban-html
 hello{{ "{{" }} "world" | string.pad_left 10 {{ "}}" }}
 ```
@@ -1378,7 +1378,7 @@ The input string padded
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22hello%22%20%7C%20string.pad_right%2010%20%7D%7Dworld&model={})
+> **input** [Try out](/?template=%7B%7B%20%22hello%22%20%7C%20string.pad_right%2010%20%7D%7Dworld&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "hello" | string.pad_right 10 {{ "}}" }}world
 ```
@@ -1408,7 +1408,7 @@ The encoded string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22hello%22%20%7C%20string.base64_encode%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22hello%22%20%7C%20string.base64_encode%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "hello" | string.base64_encode {{ "}}" }}
 ```
@@ -1438,7 +1438,7 @@ The decoded string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22aGVsbG8%3D%22%20%7C%20string.base64_decode%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22aGVsbG8%3D%22%20%7C%20string.base64_decode%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "aGVsbG8=" | string.base64_decode {{ "}}" }}
 ```

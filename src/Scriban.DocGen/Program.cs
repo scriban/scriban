@@ -371,8 +371,8 @@ namespace Scriban.DocGen
                 foreach (Match match in matches)
                 {
                     var template = match.Groups[1].Value.ReplaceLineEndings("\n");
-                    var link = $"https://scribanonline.azurewebsites.net/?template={Uri.EscapeDataString(template)}&model={{}}";
-                    content = content.Replace($"{inputText}\r\n{match.Value}", $"{inputText} [:fast_forward: Try out]({link})\r\n{match.Value}");
+                    var link = $"/?template={Uri.EscapeDataString(template)}&model=%7B%7D";
+                    content = content.Replace($"{inputText}\r\n{match.Value}", $"{inputText} [Try out]({link})\r\n{match.Value}");
                 }
 
                 return content;

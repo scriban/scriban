@@ -36,7 +36,7 @@ Notice that the implementation of this function is using a simple regex, so it c
 If you are looking for a secure HTML stripped, you might want to plug your own HTML function by using [AngleSharp](https://github.com/AngleSharp/AngleSharp) to
 strip these HTML tags.
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22%3Cp%3EThis%20is%20a%20paragraph%3C%2Fp%3E%22%20%7C%20html.strip%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22%3Cp%3EThis%20is%20a%20paragraph%3C%2Fp%3E%22%20%7C%20html.strip%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "<p>This is a paragraph</p>" | html.strip {{ "}}" }}
 ```
@@ -65,7 +65,7 @@ The input string removed with any HTML tags
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22%3Cp%3EThis%20is%20a%20paragraph%3C%2Fp%3E%22%20%7C%20html.escape%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22%3Cp%3EThis%20is%20a%20paragraph%3C%2Fp%3E%22%20%7C%20html.escape%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "<p>This is a paragraph</p>" | html.escape {{ "}}" }}
 ```
@@ -94,7 +94,7 @@ The input string with HTML line breaks
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22Hello%5Cnworld%22%20%7C%20html.newline_to_br%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22Hello%5Cnworld%22%20%7C%20html.newline_to_br%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "Hello\nworld" | html.newline_to_br {{ "}}" }}
 ```
@@ -124,7 +124,7 @@ The input string url encoded
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22john%40liquid.com%22%20%7C%20html.url_encode%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22john%40liquid.com%22%20%7C%20html.url_encode%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "john@liquid.com" | html.url_encode {{ "}}" }}
 ```
@@ -153,7 +153,7 @@ The input string url escaped
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22%3Chello%3E%20%26%20%3Cscriban%3E%22%20%7C%20html.url_escape%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22%3Chello%3E%20%26%20%3Cscriban%3E%22%20%7C%20html.url_escape%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "<hello> & <scriban>" | html.url_escape {{ "}}" }}
 ```

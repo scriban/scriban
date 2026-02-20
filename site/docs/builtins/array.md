@@ -49,7 +49,7 @@ A new list with the value added
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20array.add%204%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20array.add%204%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [1, 2, 3] | array.add 4 {{ "}}" }}
 ```
@@ -79,7 +79,7 @@ The concatenation of the two input lists
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20array.add_range%20%5B4%2C%205%5D%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20array.add_range%20%5B4%2C%205%5D%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [1, 2, 3] | array.add_range [4, 5] {{ "}}" }}
 ```
@@ -108,7 +108,7 @@ Returns a list with null value removed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B1%2C%20null%2C%203%5D%20%7C%20array.compact%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B1%2C%20null%2C%203%5D%20%7C%20array.compact%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [1, null, 3] | array.compact {{ "}}" }}
 ```
@@ -138,7 +138,7 @@ The concatenation of the two input lists
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20array.concat%20%5B4%2C%205%5D%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20array.concat%20%5B4%2C%205%5D%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [1, 2, 3] | array.concat [4, 5] {{ "}}" }}
 ```
@@ -168,7 +168,7 @@ Returns a list with null value removed
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20array.cycle%20%5B%27one%27%2C%20%27two%27%2C%20%27three%27%5D%20%7D%7D%0A%7B%7B%20array.cycle%20%5B%27one%27%2C%20%27two%27%2C%20%27three%27%5D%20%7D%7D%0A%7B%7B%20array.cycle%20%5B%27one%27%2C%20%27two%27%2C%20%27three%27%5D%20%7D%7D%0A%7B%7B%20array.cycle%20%5B%27one%27%2C%20%27two%27%2C%20%27three%27%5D%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20array.cycle%20%5B%27one%27%2C%20%27two%27%2C%20%27three%27%5D%20%7D%7D%0A%7B%7B%20array.cycle%20%5B%27one%27%2C%20%27two%27%2C%20%27three%27%5D%20%7D%7D%0A%7B%7B%20array.cycle%20%5B%27one%27%2C%20%27two%27%2C%20%27three%27%5D%20%7D%7D%0A%7B%7B%20array.cycle%20%5B%27one%27%2C%20%27two%27%2C%20%27three%27%5D%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} array.cycle ['one', 'two', 'three'] {{ "}}" }}
 {{ "{{" }} array.cycle ['one', 'two', 'three'] {{ "}}" }}
@@ -207,7 +207,7 @@ A boolean indicating if one of the item in the list satisfied the function.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B%22%20hello%22%2C%20%22%20world%22%2C%20%2220%22%5D%20%7C%20array.any%20%40string.contains%20%2220%22%7D%7D%0A%7B%7B%20%5B%22%20hello%22%2C%20%22%20world%22%2C%20%2220%22%5D%20%7C%20array.any%20%40string.contains%20%2230%22%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B%22%20hello%22%2C%20%22%20world%22%2C%20%2220%22%5D%20%7C%20array.any%20%40string.contains%20%2220%22%7D%7D%0A%7B%7B%20%5B%22%20hello%22%2C%20%22%20world%22%2C%20%2220%22%5D%20%7C%20array.any%20%40string.contains%20%2230%22%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [" hello", " world", "20"] | array.any @string.contains "20"{{ "}}" }}
 {{ "{{" }} [" hello", " world", "20"] | array.any @string.contains "30"{{ "}}" }}
@@ -239,7 +239,7 @@ Returns a list with each item being transformed by the function.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B%22%20a%22%2C%20%22%205%22%2C%20%226%20%22%5D%20%7C%20array.each%20%40string.strip%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B%22%20a%22%2C%20%22%205%22%2C%20%226%20%22%5D%20%7C%20array.each%20%40string.strip%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [" a", " 5", "6 "] | array.each @string.strip {{ "}}" }}
 ```
@@ -269,7 +269,7 @@ Returns a new list which contains only those elements which match the filter fun
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%5B%22%22%2C%20%22200%22%2C%20%22%22%2C%22400%22%5D%20%7C%20array.filter%20%40string.empty%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%5B%22%22%2C%20%22200%22%2C%20%22%22%2C%22400%22%5D%20%7C%20array.filter%20%40string.empty%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }}["", "200", "","400"] | array.filter @string.empty{{ "}}" }}
 ```
@@ -298,7 +298,7 @@ The first element of the input `list`.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%5D%20%7C%20array.first%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B4%2C%205%2C%206%5D%20%7C%20array.first%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [4, 5, 6] | array.first {{ "}}" }}
 ```
@@ -329,7 +329,7 @@ A new list with the element inserted.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B%22a%22%2C%20%22b%22%2C%20%22c%22%5D%20%7C%20array.insert_at%202%20%22Yo%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B%22a%22%2C%20%22b%22%2C%20%22c%22%5D%20%7C%20array.insert_at%202%20%22Yo%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} ["a", "b", "c"] | array.insert_at 2 "Yo" {{ "}}" }}
 ```
@@ -360,7 +360,7 @@ A new list with the element inserted.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20array.join%20%22%7C%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20array.join%20%22%7C%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [1, 2, 3] | array.join "|" {{ "}}" }}
 ```
@@ -389,7 +389,7 @@ The last element of the input `list`.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%5D%20%7C%20array.last%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B4%2C%205%2C%206%5D%20%7C%20array.last%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [4, 5, 6] | array.last {{ "}}" }}
 ```
@@ -419,7 +419,7 @@ Returns a limited number of elments from the input list
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%5D%20%7C%20array.limit%202%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B4%2C%205%2C%206%5D%20%7C%20array.limit%202%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [4, 5, 6] | array.limit 2 {{ "}}" }}
 ```
@@ -449,7 +449,7 @@ Accepts an array element's attribute as a parameter and creates an array out of 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%0Aproducts%20%3D%20%5B%7Btitle%3A%20%22orange%22%2C%20type%3A%20%22fruit%22%7D%2C%20%7Btitle%3A%20%22computer%22%2C%20type%3A%20%22electronics%22%7D%2C%20%7Btitle%3A%20%22sofa%22%2C%20type%3A%20%22furniture%22%7D%5D%0Aproducts%20%7C%20array.map%20%22type%22%20%7C%20array.uniq%20%7C%20array.sort%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%0Aproducts%20%3D%20%5B%7Btitle%3A%20%22orange%22%2C%20type%3A%20%22fruit%22%7D%2C%20%7Btitle%3A%20%22computer%22%2C%20type%3A%20%22electronics%22%7D%2C%20%7Btitle%3A%20%22sofa%22%2C%20type%3A%20%22furniture%22%7D%5D%0Aproducts%20%7C%20array.map%20%22type%22%20%7C%20array.uniq%20%7C%20array.sort%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }}
 products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
@@ -481,7 +481,7 @@ Returns the remaining of the list after the specified offset
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%2C%208%5D%20%7C%20array.offset%202%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%2C%208%5D%20%7C%20array.offset%202%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [4, 5, 6, 7, 8] | array.offset 2 {{ "}}" }}
 ```
@@ -511,7 +511,7 @@ A new list with the element removed. If index is negative, remove at the end of 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%2C%208%5D%20%7C%20array.remove_at%202%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%2C%208%5D%20%7C%20array.remove_at%202%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [4, 5, 6, 7, 8] | array.remove_at 2 {{ "}}" }}
 ```
@@ -520,7 +520,7 @@ A new list with the element removed. If index is negative, remove at the end of 
 [4, 5, 7, 8]
 ```
 If the `index` is negative, removes at the end of the list (notice that we need to put -1 in parenthesis to avoid confusing the parser with a binary `-` operation):
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%2C%208%5D%20%7C%20array.remove_at%20%28-1%29%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%2C%208%5D%20%7C%20array.remove_at%20%28-1%29%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [4, 5, 6, 7, 8] | array.remove_at (-1) {{ "}}" }}
 ```
@@ -549,7 +549,7 @@ A new list in reversed order.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%5D%20%7C%20array.reverse%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B4%2C%205%2C%206%2C%207%5D%20%7C%20array.reverse%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [4, 5, 6, 7] | array.reverse {{ "}}" }}
 ```
@@ -578,7 +578,7 @@ A number of elements in the input `list`.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B4%2C%205%2C%206%5D%20%7C%20array.size%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B4%2C%205%2C%206%5D%20%7C%20array.size%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [4, 5, 6] | array.size {{ "}}" }}
 ```
@@ -609,7 +609,7 @@ A list sorted according to the value of each element or the value of the specifi
 #### Examples
 
 Sorts by element's value:
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B10%2C%202%2C%206%5D%20%7C%20array.sort%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B10%2C%202%2C%206%5D%20%7C%20array.sort%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [10, 2, 6] | array.sort {{ "}}" }}
 ```
@@ -618,7 +618,7 @@ Sorts by element's value:
 [2, 6, 10]
 ```
 Sorts by elements member's value:
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%0Aproducts%20%3D%20%5B%7Btitle%3A%20%22orange%22%2C%20type%3A%20%22fruit%22%7D%2C%20%7Btitle%3A%20%22computer%22%2C%20type%3A%20%22electronics%22%7D%2C%20%7Btitle%3A%20%22sofa%22%2C%20type%3A%20%22furniture%22%7D%5D%0Aproducts%20%7C%20array.sort%20%22title%22%20%7C%20array.map%20%22title%22%0A%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%0Aproducts%20%3D%20%5B%7Btitle%3A%20%22orange%22%2C%20type%3A%20%22fruit%22%7D%2C%20%7Btitle%3A%20%22computer%22%2C%20type%3A%20%22electronics%22%7D%2C%20%7Btitle%3A%20%22sofa%22%2C%20type%3A%20%22furniture%22%7D%5D%0Aproducts%20%7C%20array.sort%20%22title%22%20%7C%20array.map%20%22title%22%0A%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }}
 products = [{title: "orange", type: "fruit"}, {title: "computer", type: "electronics"}, {title: "sofa", type: "furniture"}]
@@ -650,7 +650,7 @@ A list of unique elements of the input `list`.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B1%2C%201%2C%204%2C%205%2C%208%2C%208%5D%20%7C%20array.uniq%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B1%2C%201%2C%204%2C%205%2C%208%2C%208%5D%20%7C%20array.uniq%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [1, 1, 4, 5, 8, 8] | array.uniq {{ "}}" }}
 ```
@@ -680,7 +680,7 @@ Returns if a `list` contains a specific `item`.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B1%2C%202%2C%203%2C%204%5D%20%7C%20array.contains%204%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B1%2C%202%2C%203%2C%204%5D%20%7C%20array.contains%204%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [1, 2, 3, 4] | array.contains 4 {{ "}}" }}
 ```

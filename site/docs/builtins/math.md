@@ -40,7 +40,7 @@ The absolute value of the input value
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20-15.5%7C%20math.abs%20%7D%7D%0A%7B%7B%20-5%7C%20math.abs%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20-15.5%7C%20math.abs%20%7D%7D%0A%7B%7B%20-5%7C%20math.abs%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} -15.5| math.abs {{ "}}" }}
 {{ "{{" }} -5| math.abs {{ "}}" }}
@@ -71,7 +71,7 @@ The smallest integer greater than or equal to the specified number.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%204.6%20%7C%20math.ceil%20%7D%7D%0A%7B%7B%204.3%20%7C%20math.ceil%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%204.6%20%7C%20math.ceil%20%7D%7D%0A%7B%7B%204.3%20%7C%20math.ceil%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 4.6 | math.ceil {{ "}}" }}
 {{ "{{" }} 4.3 | math.ceil {{ "}}" }}
@@ -104,7 +104,7 @@ The division of `value` by `divisor`.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%208.4%20%7C%20math.divided_by%202.0%20%7C%20math.round%201%20%7D%7D%0A%7B%7B%208.4%20%7C%20math.divided_by%202%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%208.4%20%7C%20math.divided_by%202.0%20%7C%20math.round%201%20%7D%7D%0A%7B%7B%208.4%20%7C%20math.divided_by%202%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 8.4 | math.divided_by 2.0 | math.round 1 {{ "}}" }}
 {{ "{{" }} 8.4 | math.divided_by 2 {{ "}}" }}
@@ -135,7 +135,7 @@ The largest integer less than or equal to the specified number.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%204.6%20%7C%20math.floor%20%7D%7D%0A%7B%7B%204.3%20%7C%20math.floor%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%204.6%20%7C%20math.floor%20%7D%7D%0A%7B%7B%204.3%20%7C%20math.floor%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 4.6 | math.floor {{ "}}" }}
 {{ "{{" }} 4.3 | math.floor {{ "}}" }}
@@ -168,7 +168,7 @@ The largest integer less than or equal to the specified number.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20255%20%7C%20math.format%20%22X4%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20255%20%7C%20math.format%20%22X4%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 255 | math.format "X4" {{ "}}" }}
 ```
@@ -197,7 +197,7 @@ Returns a boolean indicating if the input value is a number
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20255%20%7C%20math.is_number%20%7D%7D%0A%7B%7B%20%22yo%22%20%7C%20math.is_number%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20255%20%7C%20math.is_number%20%7D%7D%0A%7B%7B%20%22yo%22%20%7C%20math.is_number%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 255 | math.is_number {{ "}}" }}
 {{ "{{" }} "yo" | math.is_number {{ "}}" }}
@@ -229,7 +229,7 @@ The results of the subtraction: `value` - `with`
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20255%20%7C%20math.minus%205%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20255%20%7C%20math.minus%205%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 255 | math.minus 5{{ "}}" }}
 ```
@@ -259,7 +259,7 @@ The results of the modulo: `value` % `with`
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%2011%20%7C%20math.modulo%2010%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%2011%20%7C%20math.modulo%2010%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 11 | math.modulo 10{{ "}}" }}
 ```
@@ -289,7 +289,7 @@ The results of the addition: `value` + `with`
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%201%20%7C%20math.plus%202%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%201%20%7C%20math.plus%202%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 1 | math.plus 2{{ "}}" }}
 ```
@@ -319,7 +319,7 @@ A value rounded to the nearest integer or to the specified number of fractional 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%204.6%20%7C%20math.round%20%7D%7D%0A%7B%7B%204.3%20%7C%20math.round%20%7D%7D%0A%7B%7B%204.5612%20%7C%20math.round%202%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%204.6%20%7C%20math.round%20%7D%7D%0A%7B%7B%204.3%20%7C%20math.round%20%7D%7D%0A%7B%7B%204.5612%20%7C%20math.round%202%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 4.6 | math.round {{ "}}" }}
 {{ "{{" }} 4.3 | math.round {{ "}}" }}
@@ -353,7 +353,7 @@ The results of the multiplication: `value` * `with`
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%202%20%7C%20math.times%203%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%202%20%7C%20math.times%203%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 2 | math.times 3{{ "}}" }}
 ```
@@ -381,7 +381,7 @@ The created UUID, ex. 2dc55d50-3f6c-446a-87d0-a5a4eed23269
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20math.uuid%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20math.uuid%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} math.uuid {{ "}}" }}
 ```
@@ -411,7 +411,7 @@ A random number greater or equal to minValue and less than maxValue
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20math.random%201%2010%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20math.random%201%2010%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} math.random 1 10 {{ "}}" }}
 ```

@@ -41,7 +41,7 @@ The `default` value is returned if the input `value` is null or an empty string 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20undefined_var%20%7C%20object.default%20%22Yo%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20undefined_var%20%7C%20object.default%20%22Yo%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} undefined_var | object.default "Yo" {{ "}}" }}
 ```
@@ -70,7 +70,7 @@ The evaluation of the input value.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%221%20%2B%202%22%20%7C%20object.eval%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%221%20%2B%202%22%20%7C%20object.eval%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "1 + 2" | object.eval {{ "}}" }}
 ```
@@ -99,7 +99,7 @@ The evaluation of the input value.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22This%20is%20a%20template%20text%20%7B%7B%201%20%2B%202%20%7D%7D%22%20%7C%20object.eval_template%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22This%20is%20a%20template%20text%20%7B%7B%201%20%2B%202%20%7D%7D%22%20%7C%20object.eval_template%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "This is a template text {{ "{{" }} 1 + 2 {{ "}}" }}" | object.eval_template {{ "}}" }}
 ```
@@ -130,7 +130,7 @@ Formats an object using specified format.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20255%20%7C%20object.format%20%22X4%22%20%7D%7D%0A%7B%7B%201523%20%7C%20object.format%20%22N2%22%20%22en-US%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20255%20%7C%20object.format%20%22X4%22%20%7D%7D%0A%7B%7B%201523%20%7C%20object.format%20%22N2%22%20%22en-US%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 255 | object.format "X4" {{ "}}" }}
 {{ "{{" }} 1523 | object.format "N2" "en-US" {{ "}}" }}
@@ -162,7 +162,7 @@ Checks if the specified object as the member `key`
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20product%20%7C%20object.has_key%20%22title%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20product%20%7C%20object.has_key%20%22title%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} product | object.has_key "title" {{ "}}" }}
 ```
@@ -192,7 +192,7 @@ Checks if the specified object as a value for the member `key`
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20product%20%7C%20object.has_value%20%22title%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20product%20%7C%20object.has_value%20%22title%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} product | object.has_value "title" {{ "}}" }}
 ```
@@ -221,7 +221,7 @@ A list with the member names/key of the input object
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20product%20%7C%20object.keys%20%7C%20array.sort%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20product%20%7C%20object.keys%20%7C%20array.sort%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} product | object.keys | array.sort {{ "}}" }}
 ```
@@ -253,7 +253,7 @@ The size of the input object.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20object.size%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%5B1%2C%202%2C%203%5D%20%7C%20object.size%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} [1, 2, 3] | object.size {{ "}}" }}
 ```
@@ -282,7 +282,7 @@ Returns string representing the type of the input object. The type can be `strin
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20null%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20true%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%201%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%201.0%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20%22text%22%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%201..5%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20%5B1%2C2%2C3%2C4%2C5%5D%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20%7B%7D%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20object%20%7C%20object.typeof%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20null%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20true%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%201%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%201.0%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20%22text%22%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%201..5%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20%5B1%2C2%2C3%2C4%2C5%5D%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20%7B%7D%20%7C%20object.typeof%20%7D%7D%0A%7B%7B%20object%20%7C%20object.typeof%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} null | object.typeof {{ "}}" }}
 {{ "{{" }} true | object.typeof {{ "}}" }}
@@ -330,7 +330,7 @@ Returns string representing the type of the input object. The type can be `strin
 
 This function is newer than object.typeof and returns more detailed results about the types (e.g instead of `number`, returns `int` or `double`)
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20null%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20true%20%7C%20object.kind%20%7D%7D%0A%7B%7B%201%20%7C%20object.kind%20%7D%7D%0A%7B%7B%201.0%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20%22text%22%20%7C%20object.kind%20%7D%7D%0A%7B%7B%201..5%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20%5B1%2C2%2C3%2C4%2C5%5D%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20%7B%7D%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20object%20%7C%20object.kind%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20null%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20true%20%7C%20object.kind%20%7D%7D%0A%7B%7B%201%20%7C%20object.kind%20%7D%7D%0A%7B%7B%201.0%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20%22text%22%20%7C%20object.kind%20%7D%7D%0A%7B%7B%201..5%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20%5B1%2C2%2C3%2C4%2C5%5D%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20%7B%7D%20%7C%20object.kind%20%7D%7D%0A%7B%7B%20object%20%7C%20object.kind%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} null | object.kind {{ "}}" }}
 {{ "{{" }} true | object.kind {{ "}}" }}
@@ -375,7 +375,7 @@ A list with the member values of the input object
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20product%20%7C%20object.values%20%7C%20array.sort%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20product%20%7C%20object.values%20%7C%20array.sort%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} product | object.values | array.sort {{ "}}" }}
 ```
@@ -404,7 +404,7 @@ Returns the scriban value
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%0A%20%20%20obj%20%3D%20%60%7B%20%22foo%22%3A%20123%20%7D%60%20%7C%20object.from_json%0A%20%20%20obj.foo%0A%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%0A%20%20%20obj%20%3D%20%60%7B%20%22foo%22%3A%20123%20%7D%60%20%7C%20object.from_json%0A%20%20%20obj.foo%0A%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }}
    obj = `{ "foo": 123 }` | object.from_json
@@ -436,7 +436,7 @@ A JSON representation of the value
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%7B%20foo%3A%20%22bar%22%2C%20baz%3A%20%5B1%2C%202%2C%203%5D%20%7D%20%7C%20object.to_json%20%7D%7D%0A%7B%7B%20true%20%7C%20object.to_json%20%7D%7D%0A%7B%7B%20null%20%7C%20object.to_json%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%7B%20foo%3A%20%22bar%22%2C%20baz%3A%20%5B1%2C%202%2C%203%5D%20%7D%20%7C%20object.to_json%20%7D%7D%0A%7B%7B%20true%20%7C%20object.to_json%20%7D%7D%0A%7B%7B%20null%20%7C%20object.to_json%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} { foo: "bar", baz: [1, 2, 3] } | object.to_json {{ "}}" }}
 {{ "{{" }} true | object.to_json {{ "}}" }}

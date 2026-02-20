@@ -57,7 +57,7 @@ Returns a datetime object of the current time, including the hour, minutes, seco
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20date.now.year%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20date.now.year%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.now.year {{ "}}" }}
 ```
@@ -87,7 +87,7 @@ A new date
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.add_days%201%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.add_days%201%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.parse '2016/01/05' | date.add_days 1 {{ "}}" }}
 ```
@@ -117,7 +117,7 @@ A new date
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.add_months%201%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.add_months%201%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.parse '2016/01/05' | date.add_months 1 {{ "}}" }}
 ```
@@ -147,7 +147,7 @@ A new date
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.add_years%201%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.add_years%201%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.parse '2016/01/05' | date.add_years 1 {{ "}}" }}
 ```
@@ -270,7 +270,7 @@ A date object
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7D%7D%0A%7B%7B%20date.parse%20%272018--06--17%27%20%27%25Y--%25m--%25d%27%20%7D%7D%0A%7B%7B%20date.parse%20%272021%2F11%2F30%2020%3A50%3A23Z%27%20%7D%7D%0A%7B%7B%20date.parse%20%2720%2F01%2F2022%2008%3A32%3A48%20%2B00%3A00%27%20culture%3A%27en-GB%27%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7D%7D%0A%7B%7B%20date.parse%20%272018--06--17%27%20%27%25Y--%25m--%25d%27%20%7D%7D%0A%7B%7B%20date.parse%20%272021%2F11%2F30%2020%3A50%3A23Z%27%20%7D%7D%0A%7B%7B%20date.parse%20%2720%2F01%2F2022%2008%3A32%3A48%20%2B00%3A00%27%20culture%3A%27en-GB%27%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.parse '2016/01/05' {{ "}}" }}
 {{ "{{" }} date.parse '2018--06--17' '%Y--%m--%d' {{ "}}" }}
@@ -309,7 +309,7 @@ A formatted date string
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20date.parse_to_string%20%272016%2F01%2F05%27%20%27%25Y--%25m--%25d%27%20%7D%7D%0A%7B%7B%20%2203%2014%2C%202016%22%20%7C%20date.parse_to_string%20%22%25b%20%25d%2C%20%25y%22%20input_pattern%3A%20%22%25m%20%25d%2C%20%25Y%22%20%7D%7D%0A%7B%7B%20%222025-01-01%2014%3A01%3A23%22%20%7C%20date.parse_to_string%20%22%25r%22%20input_pattern%3A%20%22%25Y-%25m-%25d%20%25k%3A%25M%3A%25S%22%20%7D%7D%0A%7B%7B%20%2203%2F01%2F2025%2014%3A01%3A23%22%20%7C%20date.parse_to_string%20%22%25F%22%20input_culture%3A%27en-US%27%20output_culture%3A%27en-GB%27%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20date.parse_to_string%20%272016%2F01%2F05%27%20%27%25Y--%25m--%25d%27%20%7D%7D%0A%7B%7B%20%2203%2014%2C%202016%22%20%7C%20date.parse_to_string%20%22%25b%20%25d%2C%20%25y%22%20input_pattern%3A%20%22%25m%20%25d%2C%20%25Y%22%20%7D%7D%0A%7B%7B%20%222025-01-01%2014%3A01%3A23%22%20%7C%20date.parse_to_string%20%22%25r%22%20input_pattern%3A%20%22%25Y-%25m-%25d%20%25k%3A%25M%3A%25S%22%20%7D%7D%0A%7B%7B%20%2203%2F01%2F2025%2014%3A01%3A23%22%20%7C%20date.parse_to_string%20%22%25F%22%20input_culture%3A%27en-US%27%20output_culture%3A%27en-GB%27%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.parse_to_string '2016/01/05' '%Y--%m--%d' {{ "}}" }}
 {{ "{{" }} "03 14, 2016" | date.parse_to_string "%b %d, %y" input_pattern: "%m %d, %Y" {{ "}}" }}
@@ -393,7 +393,7 @@ Suppose that `date.now` would return the date `2013-09-12 22:49:27 +0530`, the f
 | `"%%"` |  `"%"`            | Output the character `%`
 
 Note that the format is using a good part of the ruby format ([source](http://apidock.com/ruby/DateTime/strftime))
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.to_string%20%27%25d%20%25b%20%25Y%27%20%7D%7D%0A%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.to_string%20%27%25d%20%25B%20%25Y%27%20%27fr-FR%27%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.to_string%20%27%25d%20%25b%20%25Y%27%20%7D%7D%0A%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7C%20date.to_string%20%27%25d%20%25B%20%25Y%27%20%27fr-FR%27%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.parse '2016/01/05' | date.to_string '%d %b %Y' {{ "}}" }}
 {{ "{{" }} date.parse '2016/01/05' | date.to_string '%d %B %Y' 'fr-FR' {{ "}}" }}

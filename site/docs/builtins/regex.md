@@ -39,7 +39,7 @@ A string of characters with metacharacters converted to their escaped form.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22%28abc.%2A%29%22%20%7C%20regex.escape%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22%28abc.%2A%29%22%20%7C%20regex.escape%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "(abc.*)" | regex.escape {{ "}}" }}
 ```
@@ -74,7 +74,7 @@ An array that contains all the match groups. The first group contains the entire
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22this%20is%20a%20text123%22%20%7C%20regex.match%20%60%28%5Cw%2B%29%20a%20%28%5Ba-z%5D%2B%5Cd%2B%29%60%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22this%20is%20a%20text123%22%20%7C%20regex.match%20%60%28%5Cw%2B%29%20a%20%28%5Ba-z%5D%2B%5Cd%2B%29%60%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "this is a text123" | regex.match `(\w+) a ([a-z]+\d+)` {{ "}}" }}
 ```
@@ -110,7 +110,7 @@ An array of matches that contains all the match groups. The first group contains
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22this%20is%20a%20text123%22%20%7C%20regex.matches%20%60%28%5Cw%2B%29%60%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22this%20is%20a%20text123%22%20%7C%20regex.matches%20%60%28%5Cw%2B%29%60%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "this is a text123" | regex.matches `(\w+)` {{ "}}" }}
 ```
@@ -147,7 +147,7 @@ A new string that is identical to the input string, except that the replacement 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22abbbbcccd%22%20%7C%20regex.replace%20%22b%2Bc%2B%22%20%22-Yo-%22%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22abbbbcccd%22%20%7C%20regex.replace%20%22b%2Bc%2B%22%20%22-Yo-%22%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "abbbbcccd" | regex.replace "b+c+" "-Yo-" {{ "}}" }}
 ```
@@ -182,7 +182,7 @@ A string array.
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22a%2C%20b%20%20%20%2C%20c%2C%20%20%20%20d%22%20%7C%20regex.split%20%60%5Cs%2A%2C%5Cs%2A%60%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22a%2C%20b%20%20%20%2C%20c%2C%20%20%20%20d%22%20%7C%20regex.split%20%60%5Cs%2A%2C%5Cs%2A%60%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "a, b   , c,    d" | regex.split `\s*,\s*` {{ "}}" }}
 ```
@@ -211,7 +211,7 @@ A string of characters with any escaped characters converted to their unescaped 
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%22%5C%5C%28abc%5C%5C.%5C%5C%2A%5C%5C%29%22%20%7C%20regex.unescape%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%22%5C%5C%28abc%5C%5C.%5C%5C%2A%5C%5C%29%22%20%7C%20regex.unescape%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} "\\(abc\\.\\*\\)" | regex.unescape {{ "}}" }}
 ```

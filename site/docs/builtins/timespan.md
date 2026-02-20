@@ -46,7 +46,7 @@ A timespan object
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%28timespan.from_days%205%29.days%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%28timespan.from_days%205%29.days%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} (timespan.from_days 5).days {{ "}}" }}
 ```
@@ -75,7 +75,7 @@ A timespan object
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%28timespan.from_hours%205%29.hours%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%28timespan.from_hours%205%29.hours%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} (timespan.from_hours 5).hours {{ "}}" }}
 ```
@@ -104,7 +104,7 @@ A timespan object
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%28timespan.from_minutes%205%29.minutes%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%28timespan.from_minutes%205%29.minutes%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} (timespan.from_minutes 5).minutes {{ "}}" }}
 ```
@@ -133,7 +133,7 @@ A timespan object
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%28timespan.from_seconds%205%29.seconds%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%28timespan.from_seconds%205%29.seconds%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} (timespan.from_seconds 5).seconds {{ "}}" }}
 ```
@@ -162,7 +162,7 @@ A timespan object
 
 #### Examples
 
-> **input** [:fast_forward: Try out](https://scribanonline.azurewebsites.net/?template=%7B%7B%20%28timespan.from_milliseconds%205%29.milliseconds%20%7D%7D&model={})
+> **input** [Try out](/?template=%7B%7B%20%28timespan.from_milliseconds%205%29.milliseconds%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} (timespan.from_milliseconds 5).milliseconds {{ "}}" }}
 ```
