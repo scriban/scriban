@@ -153,7 +153,8 @@ This software is released under the [BSD-Clause 2 license](https://opensource.or
   
 ## Online Demo
 
-* (https://scribanonline.azurewebsites.net/): ASP.NET Core Sample.
+* Latest: https://scriban.github.io directly
+* Legacy: https://scribanonline.azurewebsites.net/ ASP.NET Core Sample.
 
 ## Sponsors
 
