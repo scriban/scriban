@@ -37,14 +37,14 @@ namespace Scriban.Tests
         [Test]
         public void TestFailingError()
         {
-            var input = @"{{ 
+            var input = @"{{
   for $s in Foo
       {{ if $s
           false
       else if $s
           false
       end
-  end 
+  end
 }}";
             var template = Template.Parse(input);
             Assert.True(template.HasErrors);
@@ -126,17 +126,17 @@ namespace Scriban.Tests
             test = template.Render(context);
             Assert.AreEqual("history*5", test);
         }
-        
+
         private static string FunctionClear(ScriptExpression what = null)
         {
             return what?.ToString();
         }
-        
+
         private static void FunctionHistory(object line = null)
         {
         }
 
-        
+
 
         [Test]
         public void TestLiquidInvalidStringEscape()
@@ -773,7 +773,7 @@ Normal Text
         public void EnsureThatItemWithIndexePropertyDoesNotThrow()
         {
             var obj = JObject.Parse("{\"name\":\"steve\"}");
-          
+
             var template = Template.Parse("Hi {{name}}");
             Assert.DoesNotThrow(()=>template.Render(obj));
         }
@@ -1123,10 +1123,10 @@ m
 
         public static IEnumerable ListBuiltinFunctionTests(string functionObject)
         {
-            var builtinDocFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "doc", "builtins.md"));
+            var builtinDocFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "site", "docs", "builtins", $"{functionObject}.md"));
             var lines = File.ReadAllLines(builtinDocFile);
 
-            var matchFunctionSection = new Regex($@"^###\s+`({functionObject}\.\w+)`");
+            var matchFunctionSection = new Regex($@"^##\s+`({functionObject}\.\w+)`");
 
             var tests = new List<TestCaseData>();
 
@@ -1141,24 +1141,21 @@ m
             var output = new StringBuilder();
             foreach (var line in lines)
             {
+                // Unescape site delimiters: {{ "{{" }} -> {{ and {{ "}}" }} -> }}
+                var unescapedLine = line.Replace("{{ \"{{\" }}", "{{").Replace("{{ \"}}\" }}", "}}");
+
                 // Match first:
-                //### `array.add_range`
+                //## `array.add_range`
                 switch (processState)
                 {
                     case 0:
-                        var match = matchFunctionSection.Match(line);
+                        var match = matchFunctionSection.Match(unescapedLine);
                         if (match.Success)
                         {
                             nextFunctionName = match.Groups[1].Value;
                         }
 
-                        // We have reached another object section, we can exit
-                        if (line.StartsWith("## ") && nextFunctionName != null)
-                        {
-                            return tests;
-                        }
-
-                        if (nextFunctionName != null && line.StartsWith("```scriban-html"))
+                        if (nextFunctionName != null && unescapedLine.StartsWith("```scriban-html"))
                         {
                             processState = 1;
                             input = new StringBuilder();
@@ -1166,23 +1163,23 @@ m
                         }
                         break;
                     case 1:
-                        if (line.Equals("```"))
+                        if (unescapedLine.Equals("```"))
                         {
                             processState = 2;
                         }
                         else
                         {
-                            input.AppendLine(line);
+                            input.AppendLine(unescapedLine);
                         }
                         break;
                     case 2:
-                        if (line.StartsWith("```html"))
+                        if (unescapedLine.StartsWith("```html"))
                         {
                             processState = 3;
                         }
                         break;
                     case 3:
-                        if (line.Equals("```"))
+                        if (unescapedLine.Equals("```"))
                         {
                             var outputStr = output.ToString();
                             if (outputStr == "Hello<br />\r\nworld\r\n")
@@ -1195,7 +1192,7 @@ m
                         }
                         else
                         {
-                            output.AppendLine(line);
+                            output.AppendLine(unescapedLine);
                         }
                         break;
                 }
@@ -1213,12 +1210,12 @@ m
         class ASTVisualizer : ScriptVisitor
         {
             int deepCounter;
-            public StringBuilder output { get; } = new StringBuilder();            
+            public StringBuilder output { get; } = new StringBuilder();
 
             protected override void DefaultVisit(ScriptNode node)
             {
                 bool isTerminal = (node is IScriptTerminal);
-                string padding = new string(' ', deepCounter * 2); 
+                string padding = new string(' ', deepCounter * 2);
                 string value = node.ToString();
                 string type = node.GetType().Name;
                 string offset = $" ({node.Span.Start.Offset} - {node.Span.End.Offset}) ";

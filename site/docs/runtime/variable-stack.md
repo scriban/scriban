@@ -14,7 +14,7 @@ Then, each time you do a `TemplateContext.PushGlobal(scriptObject)`, you push a 
 
 Let's look at the following example:
 
-```C#
+```csharp
 // Creates scriptObject1
 var scriptObject1 = new ScriptObject();
 scriptObject1.Add("var1", "Variable 1");
@@ -45,7 +45,7 @@ As you can see the variable `var1` will be resolved from `scriptObject1` but the
 
 When writing to a variable, only the `ScriptObject` at the top of the `TemplateContext` will be used. This top object is accessible through `TemplateContext.CurrentGlobal` property. It the previous example, if we had something like this in a template:
 
-```C#
+```csharp
 var template2 = Template.Parse("This is var1: `{{ "{{" }}var1{{ "}}" }}` and var2: `{{ "{{" }}var2{{ "}}" }}`{{ "{{" }}var2 = 5{{ "}}" }} and new var2: `{{ "{{" }}var2{{ "}}" }}");
 
 var result = template2.Render(context);
@@ -72,7 +72,7 @@ Because scriban allows you to define new functions directly into the language an
 
 To access a variable at any point in the stack from a function, use `context.GetValue()`.
 
-```C#
+```csharp
 public virtual object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
 {
     // var1 defined in scriptObject pushed to global anywhere down the stack
@@ -95,7 +95,7 @@ public virtual object Invoke(TemplateContext context, ScriptNode callerContext, 
 
 To access a variable from _only_ the top of the global stack from a function, use `context.CurrentGlobal.TryGetValue()`.
 
-```C#
+```csharp
 public virtual object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
 {
     // var1 defined in scriptObject pushed to only the top level of the global stack
@@ -119,7 +119,7 @@ When using the `with` statement with a script object, it is relying on this conc
 - Assigning a variable enclosed by a `with` statement will set variable on the target object of the `with` statement.
 - Ending a with is equivalent of calling `context.PopGlobal()`
 
-```c#
+```csharp
 var scriptObject1 = new ScriptObject();
 var context = new TemplateContext();
 context.PushGlobal(scriptObject1);

@@ -8,7 +8,7 @@ The `include` directives requires that a template loader is setup on the `Templa
 
 A template loader is responsible for providing the text template from an include directive. The interface of a [`ITemplateLoader`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Runtime/ITemplateLoader.cs) is defined like this:
 
-```C#
+```csharp
 /// <summary>
 /// Interface used for loading a template.
 /// </summary>
@@ -45,7 +45,7 @@ The 2 step methods, `GetPath` and then `Load` allows to cache intermediate resul
 
 A typical implementation of `ITemplateLoader` could read data from the disk:
 
-```C#
+```csharp
 /// <summary>
 /// A very simple ITemplateLoader loading directly from the disk, without any checks...etc.
 /// </summary>

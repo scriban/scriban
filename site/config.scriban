@@ -27,3 +27,8 @@ site_project_owner_alias = "xoofx"
 site_project_owner_url = "https://xoofx.github.io"
 
 site_project_init
+
+# Playground API URL - override with http://localhost:5000 for local development
+playground_api_url = environment == "dev" ? "http://localhost:5000" : "https://scriban-a7bhepbxcrbkctgf.canadacentral-01.azurewebsites.net/"
+log.info $"Using playground API URL: {playground_api_url}"
+

@@ -12,7 +12,7 @@ Also, as in the [Abstract Syntax Tree](ast#abstract-syntax-tree) section, all AS
 
 Lastly, you can use the convenient static method `Template.Evaluate` to quickly evaluate an expression relative to a `TemplateContext`:
 
-```C#
+```csharp
 var scriptObject1 = new ScriptObject();
 scriptObject1.Add("var1", 5);
 
@@ -32,7 +32,7 @@ The default culture when running a template is `CultureInfo.InvariantCulture`
 
 You can change the culture that is used when rendering numbers/date/time and parsing date/time by pushing a new Culture to a `TemplateContext`
 
-```C#
+```csharp
 var context = new TemplateContext();
 context.PushCulture(CultureInfo.CurrentCulture);
 // ...

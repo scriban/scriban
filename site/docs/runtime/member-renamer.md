@@ -8,7 +8,7 @@ By default, .NET objects accessed through a `ScriptObject` are automatically exp
 
 A renamer is simply a delegate that takes an input MemberInfo and return a new member name:
 
-```C#
+```csharp
 namespace Scriban.Runtime
 {
     public delegate string MemberRenamerDelegate(MemberInfo member);
@@ -23,7 +23,7 @@ Note that renaming can be changed at two levels:
 
 - When importing a .NET object into a `ScriptObject` by passing a renamer delegate, before passing an object to a `TemplateContext`:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   // Here the renamer will just return a same member name as the original
   // hence importing .NET member name as-is
@@ -40,7 +40,7 @@ Note that renaming can be changed at two levels:
   ```
 - By setting the default member renamer on the `TemplateContext`
 
-  ```C#
+  ```csharp
   // Setup a default renamer at the `TemplateContext` level
   var context = new TemplateContext {MemberRenamer = member => member.Name};
   ```
@@ -51,7 +51,7 @@ The method `Template.Render(object, renamer)` takes also a member renamer, impor
 
 So you can rewrite the previous example with the shorter version:
 
-```C#
+```csharp
 var template = Template.Parse("This is Hello: `{{ "{{" }}Hello{{ "}}" }}`");
 template.Render(new MyObject(), member => member.Name);
 ```
@@ -63,7 +63,7 @@ Similar to the member renamer, by default, .NET objects accessed through a `Scri
 
 A filter is simply a delegate that takes an input MemberInfo and return a boolean to indicate whether to expose the member (`true`) or discard the member (`false`)
 
-```C#
+```csharp
 namespace Scriban.Runtime
 {
     /// <summary>
@@ -79,14 +79,14 @@ namespace Scriban.Runtime
 
 - You can use a MemberFilter when importing a an instance:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   // Imports only properties that contains the word "Yo"
   scriptObject1.Import(new MyObject(), filter: member => member is PropertyInfo && member.Name.Contains("Yo"));
   ```
 - By setting the default member filter on the `TemplateContext`, so that .NET objects automatically exposed via a `ScriptObject` will follow the global filtering rules defined on the context:
 
-  ```C#
+  ```csharp
   // Setup a default filter at the `TemplateContext` level
   var context = new TemplateContext {MemberFilter = member => member is PropertyInfo && member.Name.Contains("Yo") };
   ```

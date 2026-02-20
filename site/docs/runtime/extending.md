@@ -24,7 +24,7 @@ In the [`ScriptObject`](scriptobject) section we described how to easily import 
 In some cases, you also need to have access to the current `TemplateContext` and also, the current `SourceSpan` (original location position in the text template code).
 By simply adding as a first parameter `TemplateContext`, and optionally as a second parameter, a `SourceSpan` a custom function can have access to the current evaluation context:
 
-```C#
+```csharp
 var scriptObject1 = new ScriptObject();
 // Here, we can have access to the `TemplateContext`
 scriptObject1.Import("contextAccess", new Func<TemplateContext, string>(templateContext => "Yes"));
@@ -35,7 +35,7 @@ scriptObject1.Import("contextAccess", new Func<TemplateContext, string>(template
 
 Some custom functions can require deeper access to the internals for exposing a function. Scriban provides the interface [`IScriptCustomFunction`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Runtime/IScriptCustomFunction.cs) for this matter. If an object inherits from this interface and is accessed another `ScriptObject`, it will call the method `IScriptCustomFunction.Invoke`.
 
-```C#
+```csharp
 namespace Scriban.Runtime
 {
     /// <summary>

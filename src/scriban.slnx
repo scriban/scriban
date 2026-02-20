@@ -14,6 +14,7 @@
   <Project Path="Scriban.AsyncCodeGen/Scriban.AsyncCodeGen.csproj" />
   <Project Path="Scriban.Benchmarks/Scriban.Benchmarks.csproj" />
   <Project Path="Scriban.DelegateCodeGen/Scriban.DelegateCodeGen.csproj" />
+  <Project Path="Scriban.AppService/Scriban.AppService.csproj" />
   <Project Path="Scriban.DocGen/Scriban.DocGen.csproj" />
   <Project Path="Scriban.Tests/Scriban.Tests.csproj">
     <BuildDependency Project="Scriban/Scriban.csproj" />

@@ -24,7 +24,7 @@ og_type: website
 </section>
 
 <!-- Playground section -->
-<section class="container my-5">
+<section id="playground" class="container my-5" data-api-url="{{site.playground_api_url}}">
   <div class="card">
     <div class="card-header display-6">
       <i class="bi bi-play-circle lunet-feature-icon lunet-icon--controls"></i> Playground
@@ -44,25 +44,27 @@ og_type: website
         <div class="col-md-6">
           <label for="playground-template" class="form-label fw-bold"><i class="bi bi-file-code"></i> Template (Scriban)</label>
           <textarea id="playground-template" class="form-control font-monospace" rows="6" spellcheck="false">Hello {{ "{{" }} name {{ "}}" }}!
-
-{{ "{{" }} for item in items {{ "}}" }}
-  - {{ "{{" }} item | string.upcase {{ "}}" }}
-{{ "{{" }} end {{ "}}" }}</textarea>
+&lt;ul>
+{{ "{{~" }} for item in items {{ "~}}" }}
+  &lt;li>{{ "{{" }} item | string.upcase {{ "}}" }}&lt;/li>
+{{ "{{~" }} end {{ "~}}" }}
+&lt;/ul></textarea>
         </div>
       </div>
       <div class="mt-3 d-flex align-items-center gap-2">
         <button id="playground-run" class="btn btn-primary" disabled>
           <i class="bi bi-play-fill"></i> Run
         </button>
-        <span id="playground-status" class="text-secondary small">Playground coming soon — backend integration pending.</span>
+        <span id="playground-status" class="text-secondary small"><i class="bi bi-hourglass-split"></i> Checking service availability…</span>
       </div>
       <div class="mt-3">
         <label for="playground-output" class="form-label fw-bold"><i class="bi bi-terminal"></i> Output</label>
         <pre id="playground-output" class="border rounded p-3 bg-body-tertiary" style="min-height: 4rem; white-space: pre-wrap;"><code>Hello World!
-
-  - APPLE
-  - BANANA
-  - CHERRY
+&lt;ul>
+  &lt;li>APPLE&lt;/li>
+  &lt;li>BANANA&lt;/li>
+  &lt;li>CHERRY&lt;/li>
+&lt;/ul>
 </code></pre>
       </div>
     </div>
@@ -176,3 +178,97 @@ For more examples, see the [Getting started](docs/getting-started.md) guide.
 </div>
   </div>
 </section>
+<script>
+(function () {
+  "use strict";
+  var section = document.getElementById("playground");
+  if (!section) return;
+  var apiUrl = (section.getAttribute("data-api-url") || "").replace(/\/+$/, "");
+  var btnRun = document.getElementById("playground-run");
+  var status = document.getElementById("playground-status");
+  var tmplEl = document.getElementById("playground-template");
+  var dataEl = document.getElementById("playground-data");
+  var outEl  = document.getElementById("playground-output");
+  //
+  function setStatus(html, cls) {
+    status.className = "small " + (cls || "text-secondary");
+    status.innerHTML = html;
+  }
+  //
+  function enableRun() {
+    btnRun.disabled = false;
+    btnRun.classList.remove("btn-secondary");
+    btnRun.classList.add("btn-primary");
+  }
+  //
+  function disableRun() {
+    btnRun.disabled = true;
+    btnRun.classList.remove("btn-primary");
+    btnRun.classList.add("btn-secondary");
+  }
+  //
+  // Health check on load
+  if (!apiUrl) {
+    setStatus('<i class="bi bi-exclamation-triangle"></i> Playground API URL not configured.', "text-warning");
+    return;
+  }
+  //
+  fetch(apiUrl + "/api/health", { method: "GET", mode: "cors" })
+    .then(function (r) {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then(function () {
+      setStatus('<i class="bi bi-check-circle"></i> Service available', "text-success");
+      enableRun();
+    })
+    .catch(function () {
+      setStatus('<i class="bi bi-x-circle"></i> Service unavailable \u2014 try again later.', "text-danger");
+    });
+  //
+  // Run handler
+  function runTemplate() {
+    if (btnRun.disabled) return;
+    disableRun();
+    setStatus('<i class="bi bi-hourglass-split"></i> Rendering\u2026', "text-info");
+    outEl.textContent = "";
+    //
+    var body = JSON.stringify({
+      template: tmplEl.value,
+      model: dataEl.value || null
+    });
+    //
+    fetch(apiUrl + "/api/render", {
+      method: "POST",
+      mode: "cors",
+      headers: { "Content-Type": "application/json" },
+      body: body
+    })
+      .then(function (r) { return r.json().then(function (d) { return { ok: r.ok, data: d }; }); })
+      .then(function (res) {
+        if (res.ok) {
+          outEl.textContent = res.data.result;
+          setStatus('<i class="bi bi-check-circle"></i> Done', "text-success");
+        } else {
+          outEl.textContent = res.data.error || "Unknown error";
+          setStatus('<i class="bi bi-exclamation-triangle"></i> Error', "text-danger");
+        }
+        enableRun();
+      })
+      .catch(function (err) {
+        outEl.textContent = "Network error: " + err.message;
+        setStatus('<i class="bi bi-x-circle"></i> Request failed', "text-danger");
+        enableRun();
+      });
+  }
+  //
+  btnRun.addEventListener("click", runTemplate);
+  //
+  document.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+      e.preventDefault();
+      runTemplate();
+    }
+  });
+})();
+</script>

@@ -10,7 +10,7 @@ The `ScriptObject` is a special implementation of a `Dictionary<string, object>`
 
 A `ScriptObject` is mainly an extended version of a `IDictionary<string, object>`:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   scriptObject1.Add("var1", "Variable 1");
 
@@ -30,7 +30,7 @@ Note that any `IDictionary<string, object>` put as a property will be accessible
 
 A `ScriptObject` or `ScriptArray` can import `JsonElement`.
 
-```C#
+```csharp
   // objects with ScriptObject
   JsonElement json = JsonSerializer.Deserialize<JsonElement>("""{ "foo": "bar" }""");
   var model = ScriptObject.From(json);
@@ -60,7 +60,7 @@ A `ScriptObject` or `ScriptArray` can import `JsonElement`.
 
 Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   // Declare a function `myfunc` returning the string `Yes`
   scriptObject1.Import("myfunc", new Func<string>(() => "Yes"));
@@ -81,7 +81,7 @@ You can easily import static methods declared in a .NET class via `ScriptObject.
 
 Let's define a class with a static function `Hello`:
 
-  ```C#
+  ```csharp
   public static class MyFunctions
   {
       public static string Hello()
@@ -93,7 +93,7 @@ Let's define a class with a static function `Hello`:
 
 This function can be imported into a ScriptObject:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   scriptObject1.Import(typeof(MyFunctions));
   
@@ -139,7 +139,7 @@ When inheriting from a `ScriptObject`, the inherited object will automatically i
 
 Then using directly this custom `ScriptObject` as a regular object:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new MyCustomFunctions();
   
   var context = new TemplateContext();
@@ -218,7 +218,7 @@ When last parameter is of type `object[]` or `ScriptExpression[]` it is automati
 
 A nested ScriptObject can be accessed indirectly through another `ScriptObject`:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   var nestedObject = new ScriptObject();
   nestedObject["x"] = 5;
@@ -236,7 +236,7 @@ A nested ScriptObject can be accessed indirectly through another `ScriptObject`:
 
 The properties/functions of a `ScriptObject` can be imported into another instance.
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   scriptObject1.Add("var1", "Variable 1");
 
@@ -258,7 +258,7 @@ Importing a .NET object instance is thus different from [accessing a .NET object
 
 Let's define a standard .NET object:
 
-  ```C#
+  ```csharp
   public class MyObject
   {
       public MyObject()
@@ -272,7 +272,7 @@ Let's define a standard .NET object:
 
 and import the properties/functions of this object into a ScriptObject, via `ScriptObject.Import(object)`:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   scriptObject1.Import(new MyObject());
   
@@ -302,7 +302,7 @@ This is an important feature of scriban. Every .NET objects made accessible thro
 
 For example, if we re-use the previous `MyObject` directly as a variable in a `ScriptObject`:
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   // Notice: MyObject is not imported but accessible through
   // the variable myobject
@@ -327,7 +327,7 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
 
 Runtime equivalent of the language `readonly <var>` statement, you can easily define a variable of a `ScriptObject` as read-only
 
-  ```C#
+  ```csharp
   var scriptObject1 = new ScriptObject();
   // The variable `var1` is immutable
   scriptObject1.SetValue("var1", "My immutable variable", true);

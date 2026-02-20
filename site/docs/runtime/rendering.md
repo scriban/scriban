@@ -10,7 +10,7 @@ In order to render a template, you need pass a context for the variables, object
 
 In the following examples, we have a variable `name` that is used by the template:
 
-```c#
+```csharp
 var inputTemplateAsText = "This is a {{ "{{" }} name {{ "}}" }} template";
 
 // Parse the template

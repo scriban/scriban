@@ -16,7 +16,7 @@ The parser has a [`ParserOptions`](https://github.com/lunet-io/scriban/blob/mast
 
 The base object used by the syntax for all scriban elements is the class `Scriban.Syntax.ScriptNode`:
 
-```c#
+```csharp
 /// <summary>
 /// Base class for the abstract syntax tree of a scriban program.
 /// </summary>
@@ -42,7 +42,7 @@ As you can see, each `ScriptNode` contains a method to evaluate it against a `Te
 
 Scriban allows to write back an AST to a textual representation:
 
-```C#
+```csharp
 var template = Template.Parse("This is a {{ "{{" }} name {{ "}}" }} template");
 
 // Prints "This is a {{ "{{" }}name{{ "}}" }} template"
@@ -55,7 +55,7 @@ But you can specify the parser to keep all the hidden symbols from the original 
 
 In the following example, you can see that it keep all the whitespace and comment:
 
-```C#
+```csharp
 // Specifying the KeepTrivia allow to keep as much as hidden symbols from the original template (white spaces, newlines...etc.)
 var template = Template.Parse(@"This is a {{ "{{" }} name   +   ## With some comment ## '' {{ "}}" }} template", lexerOptions: new LexerOptions() { KeepTrivia = true });
 

@@ -988,7 +988,7 @@ When passing multiple arguments to an existing .NET function, you may want to us
 
 Suppose you have declared a .NET function like this:
 
-```c#
+```csharp
 public static string MyProcessor(string left, string right, int count, string options = null)
 {
     // ...

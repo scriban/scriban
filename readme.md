@@ -6,7 +6,7 @@ Scriban is a fast, powerful, safe and lightweight scripting language and engine 
 
 Today, not only Scriban can be used in text templating scenarios, but also can be integrated as a **general scripting engine**: For example, Scriban is at the core of the scripting engine for [kalk](https://github.com/xoofx/kalk), a command line calculator application for developers.
 
-```C#
+```csharp
 // Parse a scriban template
 var template = Template.Parse("Hello {{name}}!");
 var result = template.Render(new { Name = "World" }); // => "Hello World!" 
@@ -14,7 +14,7 @@ var result = template.Render(new { Name = "World" }); // => "Hello World!"
 
 Parse a Liquid template using the Liquid language:
 
-```C#
+```csharp
 // Parse a liquid template
 var template = Template.ParseLiquid("Hello {{name}}!");
 var result = template.Render(new { Name = "World" }); // => "Hello World!" 
@@ -22,7 +22,7 @@ var result = template.Render(new { Name = "World" }); // => "Hello World!"
 
 The language is very versatile, easy to read and use, similar to [liquid](https://shopify.github.io/liquid/) templates:
 
-```C#
+```csharp
 var template = Template.Parse(@"
 <ul id='products'>
   {{ for product in products }}

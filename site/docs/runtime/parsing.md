@@ -10,7 +10,7 @@ This class is mostly a user friendly frontend to the underlying classes used to 
 
 The `Template.Parse ` method is a convenient method to parse a template from a string and returns the compiled Template:
 
-```c#
+```csharp
 var inputTemplateAsText = "This is a {{ "{{" }} name {{ "}}" }} template";
 
 // Parse the template
@@ -37,7 +37,7 @@ If you are using the `Template.Parse` method, it is important to verify `HasErro
 
 The parse method can take an additional argument `sourceFilePath` used when reporting syntax errors, typically used to associate a template file read from the disk or an editor and you want to report the exact error to the user.
 
-```c#
+```csharp
 // Parse the template
 var template = Template.Parse(File.ReadAllText(filePath), filePath);
 ```
@@ -55,7 +55,7 @@ But you can also parse a template that contains directly scripting code (without
 
 For example illustrate how to use the `ScriptOnly` mode:
 
-```c#
+```csharp
 // Create a template in ScriptOnly mode
 var lexerOptions = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
 // Notice that code is not enclosed by `{{ "{{" }}` and `{{ "}}" }}`
@@ -82,7 +82,7 @@ The language is defined by the `LexerOptions.Lang` property which.
 
 For example illustrate how to use the the `ScriptLang.Scientific` and the `ScriptOnly` mode:
 
-```c#
+```csharp
 // Create a template in ScriptOnly mode
 var lexerOptions = new LexerOptions() { Lang = ScriptLang.Scientific, Mode = ScriptMode.ScriptOnly };
 // Notice that code is not enclosed by `{{ "{{" }}` and `{{ "}}" }}`
@@ -100,7 +100,7 @@ Scriban supports a Lexer and Parser that can understand a Liquid template instea
 
 You can easily parse an existing liquid template using the `Template.ParseLiquid` method:
 
-```c#
+```csharp
 // An Liquid 
 var inputTemplateAsText = "This is a {{ "{{" }} name {{ "}}" }} template";
 
