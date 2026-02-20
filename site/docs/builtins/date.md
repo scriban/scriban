@@ -26,17 +26,17 @@ Other comparison operators(`==`, `!=`, `<=`, `>=`, `<`, `>`) are also working wi
 
 A `timespan` and also the added to a `datetime` object.
 
-- [`date.now`](date#date.now)
-- [`date.add_days`](date#date.add_days)
-- [`date.add_months`](date#date.add_months)
-- [`date.add_years`](date#date.add_years)
-- [`date.add_hours`](date#date.add_hours)
-- [`date.add_minutes`](date#date.add_minutes)
-- [`date.add_seconds`](date#date.add_seconds)
-- [`date.add_milliseconds`](date#date.add_milliseconds)
-- [`date.parse`](date#date.parse)
-- [`date.parse_to_string`](date#date.parse_to_string)
-- [`date.to_string`](date#date.to_string)
+- [`date.now`](#datenow)
+- [`date.add_days`](#dateadd_days)
+- [`date.add_months`](#dateadd_months)
+- [`date.add_years`](#dateadd_years)
+- [`date.add_hours`](#dateadd_hours)
+- [`date.add_minutes`](#dateadd_minutes)
+- [`date.add_seconds`](#dateadd_seconds)
+- [`date.add_milliseconds`](#dateadd_milliseconds)
+- [`date.parse`](#dateparse)
+- [`date.parse_to_string`](#dateparse_to_string)
+- [`date.to_string`](#dateto_string)
 
 ## `date.now`
 

@@ -10,12 +10,12 @@ Functions exposed through `regex` builtin object.
 >- Anywhere you would use a ` \ `, use two.  For example: `"\d+\.\d+"` becomes `"\\d+\\.\\d+"`
 >- Use [verbatim strings](language.md#31-strings).  For example: `"\d+\.\d+"` becomes `` `\d+\.\d+` ``
 
-- [`regex.escape`](regex#regex.escape)
-- [`regex.match`](regex#regex.match)
-- [`regex.matches`](regex#regex.matches)
-- [`regex.replace`](regex#regex.replace)
-- [`regex.split`](regex#regex.split)
-- [`regex.unescape`](regex#regex.unescape)
+- [`regex.escape`](#regexescape)
+- [`regex.match`](#regexmatch)
+- [`regex.matches`](#regexmatches)
+- [`regex.replace`](#regexreplace)
+- [`regex.split`](#regexsplit)
+- [`regex.unescape`](#regexunescape)
 
 ## `regex.escape`
 

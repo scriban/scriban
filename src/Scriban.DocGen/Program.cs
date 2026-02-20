@@ -230,8 +230,8 @@ namespace Scriban.DocGen
 
                     var classWriter = _classWriters[shortName];
 
-                    // Write the toc — use explicit page reference so Lunet resolves it to the correct URL
-                    classWriter.Head.WriteLine($"- [`{shortName}.{methodShortName}`]({shortName}#{shortName}.{methodShortName})");
+                    // Write the toc — GitHub-style same-page anchor (dots stripped from heading)
+                    classWriter.Head.WriteLine($"- [`{shortName}.{methodShortName}`](#{shortName}{methodShortName})");
 
                     _writer = classWriter.Body;
                     _writer.WriteLine();

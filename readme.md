@@ -41,7 +41,7 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
 
 > [!NOTE]
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
-> If you want to change this behavior, you need to use a [`MemberRenamer`](https://scriban.github.io/docs/runtime/#member-renamer) delegate
+> If you want to change this behavior, you need to use a [`MemberRenamer`](https://scriban.github.io/docs/runtime/member-renamer/#member-renamer) delegate
 
 ## New in 3.0+
 
@@ -66,10 +66,10 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
 - Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly.
 - Powered by a Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than regex based parsers.
   - Precise source code location (path, column and line) for error reporting
-  - **Write an AST to a script textual representation**, with [`Template.ToText`](https://scriban.github.io/docs/runtime/#ast-to-text), allowing to manipulate scripts in memory and re-save them to the disk, useful for **roundtrip script update scenarios**
+  - **Write an AST to a script textual representation**, with [`Template.ToText`](https://scriban.github.io/docs/runtime/ast/#ast-to-text), allowing to manipulate scripts in memory and re-save them to the disk, useful for **roundtrip script update scenarios**
 - **Compatible with `liquid`** by using the `Template.ParseLiquid` method
   - While the `liquid` language is less powerful than scriban, this mode allows to migrate from `liquid` to `scriban` language easily
-  - With the [AST to text](https://scriban.github.io/docs/runtime/#ast-to-text) mode, you can convert a `liquid` script to a scriban script using `Template.ToText` on a template parsed with `Template.ParseLiquid`
+  - With the [AST to text](https://scriban.github.io/docs/runtime/ast/#ast-to-text) mode, you can convert a `liquid` script to a scriban script using `Template.ToText` on a template parsed with `Template.ParseLiquid`
   - As the liquid language is not strictly defined and there are in fact various versions of liquid syntax, there are restrictions while using liquid templates with scriban, see the document [liquid support in scriban](https://scriban.github.io/docs/liquid-support/) for more details.
 - **Extensible runtime** providing many extensibility points
 - Support for `async`/`await` evaluation of scripts (e.g `Template.RenderAsync`)

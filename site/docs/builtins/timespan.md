@@ -19,12 +19,12 @@ A timespan object represents a time interval.
 | `.total_seconds` | Gets the total number of seconds  in fractional part
 | `.total_milliseconds` | Gets the total number of milliseconds  in fractional part
 
-- [`timespan.from_days`](timespan#timespan.from_days)
-- [`timespan.from_hours`](timespan#timespan.from_hours)
-- [`timespan.from_minutes`](timespan#timespan.from_minutes)
-- [`timespan.from_seconds`](timespan#timespan.from_seconds)
-- [`timespan.from_milliseconds`](timespan#timespan.from_milliseconds)
-- [`timespan.parse`](timespan#timespan.parse)
+- [`timespan.from_days`](#timespanfrom_days)
+- [`timespan.from_hours`](#timespanfrom_hours)
+- [`timespan.from_minutes`](#timespanfrom_minutes)
+- [`timespan.from_seconds`](#timespanfrom_seconds)
+- [`timespan.from_milliseconds`](#timespanfrom_milliseconds)
+- [`timespan.parse`](#timespanparse)
 
 ## `timespan.from_days`
 

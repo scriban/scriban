@@ -37,7 +37,7 @@ That's it — three lines to parse, render, and output a template.
 
 1. **`Template.Parse`** compiles the template string into an internal AST (Abstract Syntax Tree).
 2. **`template.Render`** evaluates the AST with the given model and produces a string.
-3. Properties on the model (like `Name`) are automatically exposed as lowercase/snake_case variables (`name`). See [Member renamer](runtime/readme.md#member-renamer) to customize this.
+3. Properties on the model (like `Name`) are automatically exposed as lowercase/snake_case variables (`name`). See [Member renamer](runtime/member-renamer#member-renamer) to customize this.
 
 ## Passing data to templates
 

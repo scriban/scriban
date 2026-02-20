@@ -521,7 +521,7 @@ may be
 > **NOTICE**
 >
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
-> If you want to change this behavior, you need to use a [`MemberRenamer`](../runtime/readme.md#member-renamer) delegate
+> If you want to change this behavior, you need to use a [`MemberRenamer`](../runtime/member-renamer#member-renamer) delegate
 
 ### 5.1 The special property `empty?`
 
@@ -1418,7 +1418,7 @@ Note that variables declared outside the `with` block are accessible within.
 
 ### 9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> <begin?> <end?>`
 
-`include` is not a statement but rather a function that allows you to parse and render a specified template. To use this function, a delegate to a template loader must be setup on the [`TemplateOptions.TemplateLoader`](../runtime/readme.md#include-and-itemplateloader) property passed to the `Template.Parse` method.
+`include` is not a statement but rather a function that allows you to parse and render a specified template. To use this function, a delegate to a template loader must be setup on the [`TemplateOptions.TemplateLoader`](../runtime/includes#include-and-itemplateloader) property passed to the `Template.Parse` method.
  
 ```
 include 'myinclude.html'

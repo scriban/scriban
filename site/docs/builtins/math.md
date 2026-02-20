@@ -6,19 +6,19 @@ title: "Math functions"
 
 Math functions available through the object 'math' in scriban.
 
-- [`math.abs`](math#math.abs)
-- [`math.ceil`](math#math.ceil)
-- [`math.divided_by`](math#math.divided_by)
-- [`math.floor`](math#math.floor)
-- [`math.format`](math#math.format)
-- [`math.is_number`](math#math.is_number)
-- [`math.minus`](math#math.minus)
-- [`math.modulo`](math#math.modulo)
-- [`math.plus`](math#math.plus)
-- [`math.round`](math#math.round)
-- [`math.times`](math#math.times)
-- [`math.uuid`](math#math.uuid)
-- [`math.random`](math#math.random)
+- [`math.abs`](#mathabs)
+- [`math.ceil`](#mathceil)
+- [`math.divided_by`](#mathdivided_by)
+- [`math.floor`](#mathfloor)
+- [`math.format`](#mathformat)
+- [`math.is_number`](#mathis_number)
+- [`math.minus`](#mathminus)
+- [`math.modulo`](#mathmodulo)
+- [`math.plus`](#mathplus)
+- [`math.round`](#mathround)
+- [`math.times`](#mathtimes)
+- [`math.uuid`](#mathuuid)
+- [`math.random`](#mathrandom)
 
 ## `math.abs`
 

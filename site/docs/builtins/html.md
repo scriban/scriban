@@ -6,11 +6,11 @@ title: "Html functions"
 
 Html functions available through the builtin object 'html'.
 
-- [`html.strip`](html#html.strip)
-- [`html.escape`](html#html.escape)
-- [`html.newline_to_br`](html#html.newline_to_br)
-- [`html.url_encode`](html#html.url_encode)
-- [`html.url_escape`](html#html.url_escape)
+- [`html.strip`](#htmlstrip)
+- [`html.escape`](#htmlescape)
+- [`html.newline_to_br`](#htmlnewline_to_br)
+- [`html.url_encode`](#htmlurl_encode)
+- [`html.url_escape`](#htmlurl_escape)
 
 ## `html.strip`
 

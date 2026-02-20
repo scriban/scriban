@@ -86,7 +86,7 @@ In addition to this, scriban supports:
 
 In the following sections, you will find a list of the supported liquid tags and how scriban translates a liquid template into a scriban template. 
 
-> NOTE: All the following examples are using the feature [**Ast to text**](runtime/readme.md#ast-to-text) that
+> NOTE: All the following examples are using the feature [**Ast to text**](runtime/ast#ast-to-text) that
 allowed to translate liquid code into scriban code automatically
 
 
@@ -298,7 +298,7 @@ Liquid pipe call translates to the same [`pipe call`](language/readme.md#89-func
 {{ "{{" }} test = "abcdef" {{ "}}" }}
 {{ "{{" }} test |  string.truncate 5 {{ "}}" }}
 ```
-As you can notice, Scriban will translate a call to a liquid tag to the corresponding scriban tag. But scriban also provides supports for direct tags calls using the `LiquidTemplateContext`. See [liquid support in runtime](runtime/readme.md#liquid-support)
+As you can notice, Scriban will translate a call to a liquid tag to the corresponding scriban tag. But scriban also provides supports for direct tags calls using the `LiquidTemplateContext`. See [liquid support in runtime](runtime/parsing#liquid-support)
 
 
 ## Supported filters

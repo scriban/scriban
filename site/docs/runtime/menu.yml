@@ -1,2 +1,11 @@
 doc:
-  - {path: readme.md, title: "<i class='bi bi-cpu' aria-hidden='true'></i> Runtime API"}
+  - {path: readme.md, title: "<i class='bi bi-cpu' aria-hidden='true'></i> Overview"}
+  - {path: parsing.md, title: "Parsing"}
+  - {path: rendering.md, title: "Rendering"}
+  - {path: scriptobject.md, title: "ScriptObject"}
+  - {path: variable-stack.md, title: "Variable stack"}
+  - {path: member-renamer.md, title: "Member renamer"}
+  - {path: includes.md, title: "Includes"}
+  - {path: ast.md, title: "Lexer, Parser & AST"}
+  - {path: extending.md, title: "Extending"}
+  - {path: safe-runtime.md, title: "Safe runtime"}

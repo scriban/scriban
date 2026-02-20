@@ -6,19 +6,19 @@ title: "Object functions"
 
 Object functions available through the builtin object 'object'.
 
-- [`object.default`](object#object.default)
-- [`object.eval`](object#object.eval)
-- [`object.eval_template`](object#object.eval_template)
-- [`object.format`](object#object.format)
-- [`object.has_key`](object#object.has_key)
-- [`object.has_value`](object#object.has_value)
-- [`object.keys`](object#object.keys)
-- [`object.size`](object#object.size)
-- [`object.typeof`](object#object.typeof)
-- [`object.kind`](object#object.kind)
-- [`object.values`](object#object.values)
-- [`object.from_json`](object#object.from_json)
-- [`object.to_json`](object#object.to_json)
+- [`object.default`](#objectdefault)
+- [`object.eval`](#objecteval)
+- [`object.eval_template`](#objecteval_template)
+- [`object.format`](#objectformat)
+- [`object.has_key`](#objecthas_key)
+- [`object.has_value`](#objecthas_value)
+- [`object.keys`](#objectkeys)
+- [`object.size`](#objectsize)
+- [`object.typeof`](#objecttypeof)
+- [`object.kind`](#objectkind)
+- [`object.values`](#objectvalues)
+- [`object.from_json`](#objectfrom_json)
+- [`object.to_json`](#objectto_json)
 
 ## `object.default`
 
