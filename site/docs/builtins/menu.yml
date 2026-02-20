@@ -1,0 +1,10 @@
+doc:
+  - {path: readme.md, title: "<i class='bi bi-gear' aria-hidden='true'></i> Overview"}
+  - {path: array.md, title: "Array"}
+  - {path: date.md, title: "Date"}
+  - {path: html.md, title: "Html"}
+  - {path: math.md, title: "Math"}
+  - {path: object.md, title: "Object"}
+  - {path: regex.md, title: "Regex"}
+  - {path: string.md, title: "String"}
+  - {path: timespan.md, title: "Timespan"}

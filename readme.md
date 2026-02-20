@@ -41,7 +41,7 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
 
 > [!NOTE]
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
-> If you want to change this behavior, you need to use a [`MemberRenamer`](https://github.com/scriban/scriban/blob/master/doc/runtime.md#member-renamer) delegate
+> If you want to change this behavior, you need to use a [`MemberRenamer`](https://scriban.github.io/docs/runtime/#member-renamer) delegate
 
 ## New in 3.0+
 
@@ -50,8 +50,8 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
 - Several new language features:
   - Hexadecimal/binary numbers: `0x1ef` or `0b101010`
   - Support for large integers
-  - [New parametric functions](https://github.com/scriban/scriban/blob/master/doc/language.md#72-parametric-functions): `func sub(x,y = 1, z...); ret x - y - z[0]; end`
-  - [New inline functions](https://github.com/scriban/scriban/blob/master/doc/language.md#73-inline-functions): `sub(x,y) = x - y`
+  - [New parametric functions](https://scriban.github.io/docs/language/#72-parametric-functions): `func sub(x,y = 1, z...); ret x - y - z[0]; end`
+  - [New inline functions](https://scriban.github.io/docs/language/#73-inline-functions): `sub(x,y) = x - y`
   - Optional member access with `?.` instead of regular `.` (e.g `a?.b?.c`)
   - Conditional expressions: `cond ? a : b`
 - Separate language mode (via `ScriptLang` enum) from template/scripting parsing mode (`ScriptMode`).
@@ -66,31 +66,23 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
 - Very **efficient**, **fast** parser and a **lightweight** runtime. CPU and Garbage Collector friendly.
 - Powered by a Lexer/Parser providing a **full Abstract Syntax Tree, fast, versatile and robust**, more efficient than regex based parsers.
   - Precise source code location (path, column and line) for error reporting
-  - **Write an AST to a script textual representation**, with [`Template.ToText`](https://github.com/scriban/scriban/blob/master/doc/runtime.md#ast-to-text), allowing to manipulate scripts in memory and re-save them to the disk, useful for **roundtrip script update scenarios**
+  - **Write an AST to a script textual representation**, with [`Template.ToText`](https://scriban.github.io/docs/runtime/#ast-to-text), allowing to manipulate scripts in memory and re-save them to the disk, useful for **roundtrip script update scenarios**
 - **Compatible with `liquid`** by using the `Template.ParseLiquid` method
   - While the `liquid` language is less powerful than scriban, this mode allows to migrate from `liquid` to `scriban` language easily
-  - With the [AST to text](https://github.com/scriban/scriban/blob/master/doc/runtime.md#ast-to-text) mode, you can convert a `liquid` script to a scriban script using `Template.ToText` on a template parsed with `Template.ParseLiquid`
-  - As the liquid language is not strictly defined and there are in fact various versions of liquid syntax, there are restrictions while using liquid templates with scriban, see the document [liquid support in scriban](https://github.com/scriban/scriban/blob/master/doc/liquid-support.md) for more details.
+  - With the [AST to text](https://scriban.github.io/docs/runtime/#ast-to-text) mode, you can convert a `liquid` script to a scriban script using `Template.ToText` on a template parsed with `Template.ParseLiquid`
+  - As the liquid language is not strictly defined and there are in fact various versions of liquid syntax, there are restrictions while using liquid templates with scriban, see the document [liquid support in scriban](https://scriban.github.io/docs/liquid-support/) for more details.
 - **Extensible runtime** providing many extensibility points
 - Support for `async`/`await` evaluation of scripts (e.g `Template.RenderAsync`)
-- [Precise control of whitespace text output](https://github.com/scriban/scriban/blob/master/doc/language.md#14-whitespace-control)
-- [Full featured language](https://github.com/scriban/scriban/blob/master/doc/language.md) including `if`/`else`/`for`/`while`, [expressions](https://github.com/scriban/scriban/blob/master/doc/language.md#8-expressions) (`x = 1 + 2`), conditions... etc.
-- [Function calls and pipes](https://github.com/scriban/scriban/blob/master/doc/language.md#89-function-call-expression) (`myvar | string.capitalize`)
-  - [Custom functions](https://github.com/scriban/scriban/blob/master/doc/language.md#7-functions) directly into the language via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
-  - Bind [.NET custom functions](https://github.com/scriban/scriban/blob/master/doc/runtime.md#imports-functions-from-a-net-class) from the runtime API with [many options](https://github.com/scriban/scriban/blob/master/doc/runtime.md#the-scriptobject) for interfacing with .NET objects.
-- [Complex objects](https://github.com/scriban/scriban/blob/master/doc/language.md#5-objects) (javascript/json like objects `x = {mymember: 1}`) and [arrays](https://github.com/scriban/scriban/blob/master/doc/language.md#6-arrays) (e.g `x = [1,2,3,4]`)
-- Allow to pass [a block of statements](https://github.com/scriban/scriban/blob/master/doc/language.md#98-wrap-function-arg1argn--end) to a function, typically used by the `wrap` statement
-- Several [built-in functions](https://github.com/scriban/scriban/blob/master/doc/builtins.md):
-  - [`arrays functions`](https://github.com/scriban/scriban/blob/master/doc/builtins.md#array-functions)
-  - [`date`](https://github.com/scriban/scriban/blob/master/doc/builtins.md#date-functions)
-  - [`html`](https://github.com/scriban/scriban/blob/master/doc/builtins.md#html-functions)
-  - [`maths functions`](https://github.com/scriban/scriban/blob/master/doc/builtins.md#math-functions)
-  - [`object`](https://github.com/scriban/scriban/blob/master/doc/builtins.md#object-functions)
-  - [`regex functions`](https://github.com/scriban/scriban/blob/master/doc/builtins.md#regex-functions)
-  - [`string functions`](https://github.com/scriban/scriban/blob/master/doc/builtins.md#string-functions)
-  - [`timespan`](https://github.com/scriban/scriban/blob/master/doc/builtins.md#timespan-functions)
-- [Multi-line statements](https://github.com/scriban/scriban/blob/master/doc/language.md#11-code-block) without having to embrace each line by `{{...}}`
-- [Safe parser](https://github.com/scriban/scriban/blob/master/doc/runtime.md#the-lexer-and-parser) and [safe runtime](https://github.com/scriban/scriban/blob/master/doc/runtime.md#safe-runtime), allowing you to control what objects and functions are exposed
+- Precise control of whitespace text output
+- Full featured language including `if`/`else`/`for`/`while`, expressions (`x = 1 + 2`), conditions... etc.
+- Function calls and pipes (`myvar | string.capitalize`)
+  - Custom functions directly into the language via `func` statement and allow **function pointers/delegates** via the `alias @ directive`
+  - Bind .NET custom functions from the runtime API with many options for interfacing with .NET objects.
+- Complex objects (javascript/json like objects `x = {mymember: 1}`) and arrays (e.g `x = [1,2,3,4]`)
+- Allow to pass a block of statements to a function, typically used by the `wrap` statement
+- Several built-in functions: `array`, `date`, `html`, `math`, `object`, `regex`, `string`, `timespan`
+- Multi-line statements without having to embrace each line by `{{...}}`
+- Safe parser and safe runtime, allowing you to control what objects and functions are exposed
 
 ## Syntax Coloring
 
@@ -98,11 +90,7 @@ You can install the [Scriban Extension for Visual Studio Code](https://marketpla
 
 ## Documentation
 
-* See the [Language](https://github.com/scriban/scriban/blob/master/doc/language.md) document for a description of the language syntax.
-* See the [Built-in functions](https://github.com/scriban/scriban/blob/master/doc/builtins.md) document for the list of the built-in functions.
-* See the [Runtime](https://github.com/scriban/scriban/blob/master/doc/runtime.md) document for a description of the .NET runtime API to compile and run templates.
-* See the [Liquid support](https://github.com/scriban/scriban/blob/master/doc/liquid-support.md) document for more details about the support of liquid templates.
-* See my blog post "[Implementing a Text Templating Engine for .NET](https://xoofx.github.io/blog/2017/11/13/implementing-a-text-templating-language-and-engine-for-dotnet/)" for some behind the scene details.
+The full documentation is available at **https://scriban.github.io**.
 
 ## Binaries
 

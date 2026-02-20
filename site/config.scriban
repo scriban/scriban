@@ -1,0 +1,29 @@
+# Scriban documentation site.
+# Build from this folder with:
+#   lunet build
+#   lunet serve
+#
+# This site uses the shared template published as a Lunet extension.
+extend "lunet-io/templates"
+
+template_theme_default_mode = "light"
+
+# -----------------------------------------------------------------------------
+# SITE SECTION (project-specific values only)
+# -----------------------------------------------------------------------------
+
+# Canonical base URL used for `lunet build` (links, og:meta, sitemap...).
+site_project_baseurl = "https://scriban.github.io"
+
+site_project_name = "Scriban"
+site_project_description = "A fast, powerful, safe and lightweight scripting language and engine for .NET."
+site_project_logo_path = "/img/scriban.svg"
+site_project_social_banner_path = "/img/scriban.png"
+site_project_package_id = "Scriban"
+site_project_github_user = "scriban"
+site_project_github_repo = "scriban"
+site_project_owner_name = "Alexandre Mutel"
+site_project_owner_alias = "xoofx"
+site_project_owner_url = "https://xoofx.github.io"
+
+site_project_init

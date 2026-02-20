@@ -1,4 +1,8 @@
-# Runtime
+﻿---
+title: "Runtime API"
+---
+
+# Runtime API
 
 This document describes the runtime API to manipulate scriban text templating.
 
@@ -47,7 +51,7 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
   - [Changing the Culture](#changing-the-culture)
   - [Safe Runtime](#safe-runtime)
       
-[:top:](#runtime)
+
 ## Parsing a template
 
 The `Scriban.Template` class is a main entry point to easily parse a template and renders it. The action of parsing consist of compiling the template to a faster runtime representation, suitable later for rendering the template.
@@ -57,7 +61,7 @@ This class is mostly a user friendly frontend to the underlying classes used to 
 The `Template.Parse ` method is a convenient method to parse a template from a string and returns the compiled Template:
 
 ```c#
-var inputTemplateAsText = "This is a {{ name }} template";
+var inputTemplateAsText = "This is a {{ "{{" }} name {{ "}}" }} template";
 
 // Parse the template
 var template = Template.Parse(inputTemplateAsText);
@@ -90,21 +94,21 @@ var template = Template.Parse(File.ReadAllText(filePath), filePath);
 
 > Note that the `sourceFilePath` is not used for accessing the disk (it could be a logical path to a zip file, or the name of tab opened in an editor...etc.). It is only a logical name that is used when reporting errors, but also you will see with the include directive and the setup of the [Template Loader](#include-and-itemplateloader) that this value can be used to perform an include operation in the relative context to the template path being processed.
 
-[:top:](#runtime)
+
 ### Parsing modes
 
-By default, when parsing a template, the template is expected to have mixed content of text and scriban code blocks enclosed by `{{` and `}}`. But you can modify the way a template is parsed by passing a `LexerOptions` to the `Template.Parse` method.
+By default, when parsing a template, the template is expected to have mixed content of text and scriban code blocks enclosed by `{{ "{{" }}` and `{{ "}}" }}`. But you can modify the way a template is parsed by passing a `LexerOptions` to the `Template.Parse` method.
 
 The parsing mode is defined by the `LexerOptions.Mode` property which is `ScriptMode.Default` by default (i.e. mixed text and code).
 
-But you can also parse a template that contains directly scripting code (without enclosing `{{` `}}`), in that case, you can use the `ScriptMode.ScriptOnly` mode.
+But you can also parse a template that contains directly scripting code (without enclosing `{{ "{{" }}` `{{ "}}" }}`), in that case, you can use the `ScriptMode.ScriptOnly` mode.
 
 For example illustrate how to use the `ScriptOnly` mode:
 
 ```c#
 // Create a template in ScriptOnly mode
 var lexerOptions = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
-// Notice that code is not enclosed by `{{` and `}}`
+// Notice that code is not enclosed by `{{ "{{" }}` and `{{ "}}" }}`
 var template = Template.Parse("y = x + 1; y;", lexerOptions: lexerOptions);
 // Renders it with the specified parameter
 var result = template.Evaluate(new {x = 10});
@@ -112,7 +116,7 @@ var result = template.Evaluate(new {x = 10});
 Console.WriteLine(result);
 ```
 
-[:top:](#runtime)
+
 ### Parsing languages
 
 Scriban provides 3 languages through the `ScriptLang` enum:
@@ -131,7 +135,7 @@ For example illustrate how to use the the `ScriptLang.Scientific` and the `Scrip
 ```c#
 // Create a template in ScriptOnly mode
 var lexerOptions = new LexerOptions() { Lang = ScriptLang.Scientific, Mode = ScriptMode.ScriptOnly };
-// Notice that code is not enclosed by `{{` and `}}`
+// Notice that code is not enclosed by `{{ "{{" }}` and `{{ "}}" }}`
 var template = Template.Parse("y = x + 1; 2y;", lexerOptions: lexerOptions);
 // Renders it with the specified parameter
 var result = template.Evaluate(new {x = 10});
@@ -139,7 +143,7 @@ var result = template.Evaluate(new {x = 10});
 Console.WriteLine(result);
 ```
 
-[:top:](#runtime)
+
 ### Liquid support
 
 Scriban supports a Lexer and Parser that can understand a Liquid template instead, while still translating it to a Scriban Runtime AST.
@@ -148,7 +152,7 @@ You can easily parse an existing liquid template using the `Template.ParseLiquid
 
 ```c#
 // An Liquid 
-var inputTemplateAsText = "This is a {{ name }} template";
+var inputTemplateAsText = "This is a {{ "{{" }} name {{ "}}" }} template";
 
 // Parse the template
 var template = Template.ParseLiquid(inputTemplateAsText);
@@ -162,7 +166,7 @@ Console.WriteLine(result);
 
 Also, in terms of runtime, Liquid builtin functions are supported. They are created with the `LiquidTemplateContext` which inherits from the `TemplateContext`.
 
-[:top:](#runtime)
+
 ## Rendering a template
 
 ### Overview
@@ -172,7 +176,7 @@ In order to render a template, you need pass a context for the variables, object
 In the following examples, we have a variable `name` that is used by the template:
 
 ```c#
-var inputTemplateAsText = "This is a {{ name }} template";
+var inputTemplateAsText = "This is a {{ "{{" }} name {{ "}}" }} template";
 
 // Parse the template
 var template = Template.Parse(inputTemplateAsText);
@@ -190,20 +194,20 @@ While passing an anonymous object is nice for a hello world example, it is not a
 
 In this case, you want to use more directly the `TemplateContext` (used by the method `Template.Render(object)`) and a `ScriptObject` which are both at the core of scriban rendering architecture to provide more powerful constructions & hooks of the data model exposed (variables but also functions...etc.).
 
-[:top:](#runtime)
+
 ### The `TemplateContext` execution model
 
 The `TemplateContext` provides:
 
 - **an execution context** when evaluating a template. The same instance can be used with many different templates, depending on your requirements.
 - A **stack of `ScriptObject`** that provides the actual variables/functions accessible to the template, accessible through `Template.PushGlobal(scriptObj)` and `Template.PopGlobal()`. Why a stack and how to use this stack is described below.
-- The **text output** when evaluating a template, which is accessible through the `Template.Output` property as a `StringBuilder` but because you can have nested rendering happening, it is possible to use `Template.PushOutput()` and `Template.PopOutput()` to redirect temporarily the output to a new output. This functionality is typically used by the [`capture` statement](language.md#94-capture-variable--end).
+- The **text output** when evaluating a template, which is accessible through the `Template.Output` property as a `StringBuilder` but because you can have nested rendering happening, it is possible to use `Template.PushOutput()` and `Template.PopOutput()` to redirect temporarily the output to a new output. This functionality is typically used by the [`capture` statement](../language/readme.md#94-capture-variable--end).
 - Caching of templates previously loaded by an `include` directive (see [`include` and `ITemplateLoader`](#include-and-itemplateloader) section )
 - Various possible overrides to allow fine grained extensibility (evaluation of an expression, conversion to a string, enter/exit/step into a loop...etc.)
 
 Note that a `TemplateContext` is not thread safe, so it is recommended to have one `TemplateContext` per thread.
 
-[:top:](#runtime)
+
 ### The `ScriptObject`
 
 The `ScriptObject` is a special implementation of a `Dictionary<string, object>` that runtime properties and functions accessible to a template:
@@ -219,7 +223,7 @@ A `ScriptObject` is mainly an extended version of a `IDictionary<string, object>
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
   
-  var template = Template.Parse("This is var1: `{{var1}}`");
+  var template = Template.Parse("This is var1: `{{ "{{" }}var1{{ "}}" }}`");
   var result = template.Render(context);
   
   // Prints: This is var1: `Variable 1`
@@ -251,7 +255,7 @@ A `ScriptObject` or `ScriptArray` can import `JsonElement`.
 
   // render using JsonElement directly
   JsonElement model = JsonSerializer.Deserialize<JsonElement>("""{ "foo": "bar" }""");
-  var template = Template.Parse("foo: `{{foo}}`");
+  var template = Template.Parse("foo: `{{ "{{" }}foo{{ "}}" }}`");
   var result = template.Render(model);
   // Prints: foo: `bar`
 ```
@@ -270,7 +274,7 @@ Via `ScriptObject.Import(member, Delegate)`. Here we import a `Func<string>`:
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
   
-  var template = Template.Parse("This is myfunc: `{{myfunc}}`");
+  var template = Template.Parse("This is myfunc: `{{ "{{" }}myfunc{{ "}}" }}`");
   var result = template.Render(context);
   
   // Prints: This is myfunc: `Yes`
@@ -302,14 +306,14 @@ This function can be imported into a ScriptObject:
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
   
-  var template = Template.Parse("This is MyFunctions.Hello: `{{hello}}`");
+  var template = Template.Parse("This is MyFunctions.Hello: `{{ "{{" }}hello{{ "}}" }}`");
   var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
   Console.WriteLine(result);
   ```
 
-> Notice that when using a function with pipe calls like `{{description | string.strip }}`, the last argument passed to the `string.strip` function is the result of the previous pipe.
+> Notice that when using a function with pipe calls like `{{ "{{" }}description | string.strip {{ "}}" }}`, the last argument passed to the `string.strip` function is the result of the previous pipe.
 > That's a reason why you will notice in all builtin functions in scriban that they usually take the most relevant parameter as a last parameter instead of the first parameter, to allow proper support for pipe calls.
 
 > **NOTICE**
@@ -347,7 +351,7 @@ Then using directly this custom `ScriptObject` as a regular object:
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
   
-  var template = Template.Parse("This is MyFunctions.Hello: `{{hello}}`");
+  var template = Template.Parse("This is MyFunctions.Hello: `{{ "{{" }}hello{{ "}}" }}`");
   var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
@@ -390,12 +394,12 @@ Using the function above from a script could be like this:
 
 > **input**
 ```scriban-html
-{{ hello_opt "test" }}
-{{ hello_opt "test" "my_option" }}
-{{ hello_opt "test" option: "my_option" }}
-{{ hello_opt text: "test"  }}
-{{ hello_args "this" "is" "a" "test"}}
-{{ hello_args "this" "is" args: "a" args: "test"}}
+{{ "{{" }} hello_opt "test" {{ "}}" }}
+{{ "{{" }} hello_opt "test" "my_option" {{ "}}" }}
+{{ "{{" }} hello_opt "test" option: "my_option" {{ "}}" }}
+{{ "{{" }} hello_opt text: "test"  {{ "}}" }}
+{{ "{{" }} hello_args "this" "is" "a" "test"{{ "}}" }}
+{{ "{{" }} hello_args "this" "is" args: "a" args: "test"{{ "}}" }}
 ```
 
 > **output**
@@ -429,7 +433,7 @@ A nested ScriptObject can be accessed indirectly through another `ScriptObject`:
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
   
-  var template = Template.Parse("This is Hello: `{{subObject.x}}`");
+  var template = Template.Parse("This is Hello: `{{ "{{" }}subObject.x{{ "}}" }}`");
   template.Render(context);
 
   ```
@@ -481,7 +485,7 @@ and import the properties/functions of this object into a ScriptObject, via `Scr
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
   
-  var template = Template.Parse("This is Hello: `{{hello}}`");
+  var template = Template.Parse("This is Hello: `{{ "{{" }}hello{{ "}}" }}`");
   var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
@@ -513,7 +517,7 @@ For example, if we re-use the previous `MyObject` directly as a variable in a `S
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
   
-  var template = Template.Parse("This is Hello: `{{myobject.hello}}`");
+  var template = Template.Parse("This is Hello: `{{ "{{" }}myobject.hello{{ "}}" }}`");
   var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
@@ -549,7 +553,7 @@ The current builtin `ScriptObject` defined for a `TemplateContext` is accessible
 
 See section about [ScriptObject advanced usages](#scriptobject-advanced-usages) also for more specific usages.
 
-[:top:](#runtime)
+
 ### The stack of `ScriptObject`
 
 A `TemplateContext` maintains a stack of `ScriptObject` that defines the state of the variables accessible from the current template. 
@@ -578,7 +582,7 @@ var context = new TemplateContext();
 context.PushGlobal(scriptObject1);
 context.PushGlobal(scriptObject2);
 
-var template = Template.Parse("This is var1: `{{var1}}` and var2: `{{var2}}");
+var template = Template.Parse("This is var1: `{{ "{{" }}var1{{ "}}" }}` and var2: `{{ "{{" }}var2{{ "}}" }}");
 var result = template.Render(context);
 
 // Prints: "This is var1: `Variable 1` and var2: `Variable 2 - from ScriptObject 2"
@@ -594,7 +598,7 @@ As you can see the variable `var1` will be resolved from `scriptObject1` but the
 When writing to a variable, only the `ScriptObject` at the top of the `TemplateContext` will be used. This top object is accessible through `TemplateContext.CurrentGlobal` property. It the previous example, if we had something like this in a template:
 
 ```C#
-var template2 = Template.Parse("This is var1: `{{var1}}` and var2: `{{var2}}`{{var2 = 5}} and new var2: `{{var2}}");
+var template2 = Template.Parse("This is var1: `{{ "{{" }}var1{{ "}}" }}` and var2: `{{ "{{" }}var2{{ "}}" }}`{{ "{{" }}var2 = 5{{ "}}" }} and new var2: `{{ "{{" }}var2{{ "}}" }}");
 
 var result = template2.Render(context);
 
@@ -609,9 +613,9 @@ The stack provides a way to segregate variables between their usages or read-onl
 For example, the following code adds a new property `myprop` to the builtin object `string`:
 
 ```
-{{
+{{ "{{" }}
    string.myprop = "Yoyo"
-}}
+{{ "}}" }}
 ```
 
 Because scriban allows you to define new functions directly into the language and also allow to store a function pointer by using the alias `@` operator, you can basically extend an existing object with both properties and functions.
@@ -673,13 +677,13 @@ context.PushGlobal(scriptObject1);
 
 var template = Template.Parse(@"
    Create a variable 
-{{
+{{ "{{" }}
     myvar = {} 
     with myvar   # Equivalent of calling context.PushGlobal(myvar)
         x = 5    # Equivalent to set myvar.x = 5
         y = 6    
     end          # Equivalent of calling context.PopGlobal()
-}}");
+{{ "}}" }}");
 
 template.Render(context);
 
@@ -687,7 +691,7 @@ template.Render(context);
 Console.WriteLine(((ScriptObject)scriptObject1["myvar"])["x"]);
 ```
 
-[:top:](#runtime)
+
 ## Advanced usages
 
 ### Member renamer
@@ -720,7 +724,7 @@ Note that renaming can be changed at two levels:
   var context = new TemplateContext();
   context.PushGlobal(scriptObject1);
   
-  var template = Template.Parse("This is Hello: `{{Hello}}`");
+  var template = Template.Parse("This is Hello: `{{ "{{" }}Hello{{ "}}" }}`");
   var result = template.Render(context);
   
   // Prints This is MyFunctions.Hello: `hello from method!`
@@ -740,11 +744,11 @@ The method `Template.Render(object, renamer)` takes also a member renamer, impor
 So you can rewrite the previous example with the shorter version:
 
 ```C#
-var template = Template.Parse("This is Hello: `{{Hello}}`");
+var template = Template.Parse("This is Hello: `{{ "{{" }}Hello{{ "}}" }}`");
 template.Render(new MyObject(), member => member.Name);
 ```
 
-[:top:](#runtime)
+
 ### Member filter
 
 Similar to the member renamer, by default, .NET objects accessed through a `ScriptObject` are automatically exposing all public instance fields and properties of .NET objects.
@@ -781,7 +785,7 @@ namespace Scriban.Runtime
 
 As for the member renamer, it is important to setup this on the `TemplateContext` for any .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the same filtering convention 
 
-[:top:](#runtime)
+
 ### Include and `ITemplateLoader`
 
 The `include` directives requires that a template loader is setup on the `TemplateContext.TemplateLoader` property
@@ -847,7 +851,7 @@ public class MyIncludeFromDisk : ITemplateLoader
 }
 ```
 
-[:top:](#runtime)
+
 ### The Lexer and Parser
 
 - The [`Lexer`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/Lexer.cs) class is responsible for extracting `Tokens` from a text template.
@@ -857,7 +861,7 @@ The lexer has a few [`LexerOptions`](https://github.com/lunet-io/scriban/blob/ma
 
 The parser has a [`ParserOptions`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/ParserOptions.cs) only used for securing nested statements/blocks to avoid any stack overflow exceptions while parsing a document.
 
-[:top:](#runtime)
+
 ### Abstract Syntax Tree
 
 The base object used by the syntax for all scriban elements is the class `Scriban.Syntax.ScriptNode`:
@@ -883,15 +887,15 @@ public abstract class ScriptNode
 
 As you can see, each `ScriptNode` contains a method to evaluate it against a `TemplateContext`. You can go through the all the [Syntax classes](https://github.com/lunet-io/scriban/tree/master/src/Scriban/Syntax) in the codebase and you will see that it is very easy to create a new `SyntaxNode`
 
-[:top:](#runtime)
+
 #### AST to Text
 
 Scriban allows to write back an AST to a textual representation:
 
 ```C#
-var template = Template.Parse("This is a {{ name }} template");
+var template = Template.Parse("This is a {{ "{{" }} name {{ "}}" }} template");
 
-// Prints "This is a {{name}} template"
+// Prints "This is a {{ "{{" }}name{{ "}}" }} template"
 Console.WriteLine(template.ToText());
 ```
 
@@ -903,13 +907,13 @@ In the following example, you can see that it keep all the whitespace and commen
 
 ```C#
 // Specifying the KeepTrivia allow to keep as much as hidden symbols from the original template (white spaces, newlines...etc.)
-var template = Template.Parse(@"This is a {{ name   +   ## With some comment ## '' }} template", lexerOptions: new LexerOptions() { KeepTrivia = true });
+var template = Template.Parse(@"This is a {{ "{{" }} name   +   ## With some comment ## '' {{ "}}" }} template", lexerOptions: new LexerOptions() { KeepTrivia = true });
 
-// Prints "This is a {{ name   +   ## With some comment ## '' }} template"
+// Prints "This is a {{ "{{" }} name   +   ## With some comment ## '' {{ "}}" }} template"
 Console.WriteLine(template.ToText());
 ```
 
-[:top:](#runtime)
+
 ### Extending `TemplateContext`
 
 You may need to extend a `TemplateContext` to overrides some methods there, tyically in cases you want:
@@ -920,7 +924,7 @@ You may need to extend a `TemplateContext` to overrides some methods there, tyic
 - To override `ToString(span, object)` method to provide custom `ToString` for specifics .NET objects.
 - ...etc.
 
-[:top:](#runtime)
+
 ### `ScriptObject` advanced usages
 
 It is sometimes required for a custom function to have access to the current `TemplateContext` or to tha access to original location of the text code, where a particular expression is occurring (via a `SourceSpan` that gives a `line`, `column` and `sourcefile` )
@@ -938,7 +942,7 @@ var scriptObject1 = new ScriptObject();
 scriptObject1.Import("contextAccess", new Func<TemplateContext, string>(templateContext => "Yes"));
 ```
 
-[:top:](#runtime)
+
 #### Hyper custom functions`IScriptCustomFunction` 
 
 Some custom functions can require deeper access to the internals for exposing a function. Scriban provides the interface [`IScriptCustomFunction`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Runtime/IScriptCustomFunction.cs) for this matter. If an object inherits from this interface and is accessed another `ScriptObject`, it will call the method `IScriptCustomFunction.Invoke`.
@@ -973,7 +977,7 @@ As you can see, the `IScriptCustomFunction` gives you access to:
 
 The `include` expression is typically implemented via a `IScriptCustomFunction`. You can have a look at the details [here](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Functions/IncludeFunction.cs)
 
-[:top:](#runtime)
+
 ### Evaluating an expression
 
 It is sometimes convenient to evaluate a script expression without rendering it to a string.
@@ -997,7 +1001,7 @@ Console.WriteLine(result);
 ```
 When using `Template.Evaluate`, the underlying code will use the `ScriptMode.ScriptOnly` when compiling the expression and will disable the output on the `TemplateContext`.
 
-[:top:](#runtime)
+
 ### Changing the Culture
 
 The default culture when running a template is `CultureInfo.InvariantCulture`
@@ -1013,7 +1017,7 @@ context.PopCulture();
 
 > Notice that the parsing of numbers in the language is not culture dependent but is baked into the language specs instead.
 
-[:top:](#runtime)
+
 
 ### Safe Runtime
 
@@ -1024,4 +1028,4 @@ The `TemplateContext` provides a few properties to control the runtime and make 
 - `StrictVariables` (default is `false`): If set to `true`, any variables that were not found during variable resolution will throw a `ScriptRuntimeException`
 - `RegexTimeOut` (default is `10s`): If a builtin function is using a regular expression that is taking more than 10s to complete, the runtime will throw an exception.  Set to `System.Text.RegularExpressions.Regex.InfiniteMatchTimeout` to disable regular expression timeouts.
 
-[:top:](#runtime)
+

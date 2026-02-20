@@ -4,9 +4,6 @@
     <File Path="../.gitattributes" />
     <File Path="../.github/workflows/CI.yml" />
     <File Path="../changelog.md" />
-    <File Path="../doc/builtins.md" />
-    <File Path="../doc/language.md" />
-    <File Path="../doc/runtime.md" />
     <File Path="../license.txt" />
     <File Path="../readme.md" />
     <File Path="Directory.Packages.props" />

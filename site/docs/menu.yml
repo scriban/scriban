@@ -1,0 +1,7 @@
+doc:
+  - {path: readme.md, title: "<i class='bi bi-book' aria-hidden='true'></i> User Guide"}
+  - {path: getting-started.md, title: "<i class='bi bi-rocket-takeoff' aria-hidden='true'></i> Getting started"}
+  - {path: language.md, title: "<i class='bi bi-code-slash' aria-hidden='true'></i> Language"}
+  - {path: builtins/readme.md, title: "<i class='bi bi-gear' aria-hidden='true'></i> Built-in functions", folder: true}
+  - {path: runtime/readme.md, title: "<i class='bi bi-cpu' aria-hidden='true'></i> Runtime API", folder: true}
+  - {path: liquid-support.md, title: "<i class='bi bi-water' aria-hidden='true'></i> Liquid support"}
