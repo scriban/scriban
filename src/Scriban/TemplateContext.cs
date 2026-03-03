@@ -1303,8 +1303,10 @@ namespace Scriban
                     continue;
                 }
                 // add a local variable for each named argument
-                var newLocalVariable = ScriptVariable.Create(sna.Name.Name, ScriptVariableScope.Local);
-                SetValue(variable: newLocalVariable, value: sna.Value, asReadOnly: true, force: true);
+                var name = sna.Name.Name;
+                var value = sna.Value.Evaluate(this);
+                var newLocalVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
+                SetValue(variable: newLocalVariable, value: value, asReadOnly: true, force: true);
                 newVariables.Add(newLocalVariable);
             }
             return newVariables.ToArray();
