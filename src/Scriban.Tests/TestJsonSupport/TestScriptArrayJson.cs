@@ -49,6 +49,51 @@ public class TestScriptArrayJson {
     }
 
 
+    [TestCase("""[1, 2, 3]""", "{{ array | object.typeof }}", "array")]
+    [TestCase("""[1, 2, 3]""", "{{ array[0] }}", "1")]
+    [TestCase("""[{ "baz": 1 }, { "baz": 2 }, { "baz": 3 }]""", "{{ array[1].baz }}", "2")]
+    public void ScriptArray_From_json_array(string json, string script, string expected)
+    {
+        var obj = JsonSerializer.Deserialize<JsonElement>(json);
+        var model = ScriptArray.From(obj);
+
+        var result = RenderHelper.Render(
+            script: script,
+            scriptObject: ScriptObject.From(new { array = model })
+        );
+
+        Assert.AreEqual(expected, result);
+    }
+
+    [TestCase("""true""")]
+    [TestCase("""false""")]
+    [TestCase("\"bar\"")]
+    [TestCase("""123.45""")]
+    [TestCase("""{ "foo": "bar" }""")]
+    public void ScriptArray_From_json_non_array_throws(string json)
+    {
+        var obj = JsonSerializer.Deserialize<JsonElement>(json);
+        Assert.Throws<ArgumentException>(() => ScriptArray.From(obj));
+    }
+
+    [Test]
+    public void ScriptArray_From_enumerable()
+    {
+        var list = new List<object> { 1, "two", 3.0 };
+        var model = ScriptArray.From(list);
+
+        Assert.AreEqual(3, model.Count);
+        Assert.AreEqual(1, model[0]);
+        Assert.AreEqual("two", model[1]);
+        Assert.AreEqual(3.0, model[2]);
+    }
+
+    [Test]
+    public void ScriptArray_From_null_throws()
+    {
+        Assert.Throws<ArgumentNullException>(() => ScriptArray.From(null!));
+    }
+
     [TestCase("""true""", "Specified argument was out of the range of valid values. (Parameter 'Unsupported object type `True`. Expecting Json Array.')")]
     [TestCase("""false""", "Specified argument was out of the range of valid values. (Parameter 'Unsupported object type `False`. Expecting Json Array.')")]
     [TestCase("\"bar\"", "Specified argument was out of the range of valid values. (Parameter 'Unsupported object type `String`. Expecting Json Array.')")]
