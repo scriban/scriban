@@ -340,7 +340,7 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ date.parse '2016/01/05' }}
         /// {{ date.parse '2018--06--17' '%Y--%m--%d' }}
-        /// {{ date.parse '2021/11/30 20:50:23Z' }}
+        /// {{ date.parse '2021/11/30 09:50:23Z' }}
         /// {{ date.parse '20/01/2022 08:32:48 +00:00' culture:'en-GB' }}
         /// ```
         /// ```html
