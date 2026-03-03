@@ -687,5 +687,41 @@ namespace Scriban.Runtime
         public ScriptArray(IEnumerable values) : base(values)
         {
         }
+
+        /// <summary>
+        /// Creates a new <see cref="ScriptArray"/> from the specified object.
+        /// </summary>
+        /// <param name="obj">The object to create the array from. Supports <see cref="IEnumerable"/> and on .NET 7+ <see cref="T:System.Text.Json.JsonElement"/>.</param>
+        /// <returns>A new <see cref="ScriptArray"/> containing the elements from the specified object.</returns>
+        /// <exception cref="ArgumentNullException">If <paramref name="obj"/> is null.</exception>
+        /// <exception cref="ArgumentException">If <paramref name="obj"/> is not a supported type.</exception>
+        [ScriptMemberIgnore]
+        public static ScriptArray From(object obj)
+        {
+            if (obj == null) throw new ArgumentNullException(nameof(obj));
+
+#if NET7_0_OR_GREATER
+            if (obj is System.Text.Json.JsonElement json)
+            {
+                if (json.ValueKind == System.Text.Json.JsonValueKind.Array)
+                {
+                    return json.CopyToScriptArray(new ScriptArray());
+                }
+                throw new ArgumentException($"Unsupported JsonElement ValueKind `{json.ValueKind}`. Expecting Array.", nameof(obj));
+            }
+#endif
+
+            if (obj is IEnumerable enumerable)
+            {
+                var array = new ScriptArray();
+                foreach (var item in enumerable)
+                {
+                    array.Add(item);
+                }
+                return array;
+            }
+
+            throw new ArgumentException($"Unsupported object type `{obj.GetType()}`. Expecting an IEnumerable or a JsonElement array.", nameof(obj));
+        }
     }
 }
