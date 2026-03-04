@@ -62,6 +62,16 @@ namespace Scriban.Tests
                 case "named_arguments_promoted":
                     return "{{ $this_arg }}";
 
+                case "named_arguments_promoted_2":
+                    return "A{{x}}B{{$x}}C{{$.x}}D{{$y}}";
+
+                case "named_arguments_promoted_array_types":
+                    return """
+                        {{ $1 | object.typeof }}::{{ $1 }}
+                        {{ $.x | object.typeof }}::{{ $.x }}=={{ $x | object.typeof }}::{{ $x }}
+                        {{ $.y | object.typeof }}::{{ $.y }}=={{ $y | object.typeof }}::{{ $y }}
+                        """;
+
                 default:
                     return templatePath;
             }

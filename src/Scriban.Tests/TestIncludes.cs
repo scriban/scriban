@@ -173,6 +173,35 @@ This is a header
         }
 
         [Test]
+        public void TestIncludePromotedNamedArguments2()
+        {
+            var template = Template.Parse( @"{{~ include 'named_arguments_promoted_2' x: 'hello' y: 'there' ~}}" );
+            var context = new TemplateContext();
+            context.TemplateLoader = new CustomTemplateLoader();
+
+            var text = template.Render( context ).Replace( "\r\n", "\n" );
+            var expected = @"ABhelloChelloDthere";
+            TextAssert.AreEqual( expected, text );
+        }
+
+        [Test]
+        public void TestIncludePromotedNamedArguments_ArrayTypes()
+        {
+            var template = Template.Parse( @"{{~ include 'named_arguments_promoted_array_types' [1,2,3] x: data y: [4,5,6] ~}}" );
+            var context = new TemplateContext();
+            context.TemplateLoader = new CustomTemplateLoader();
+            context.CurrentGlobal.SetValue( "data", new string[] { "one", "two", "three" }, true );
+
+            var text = template.Render( context ).Replace( "\r\n", "\n" );
+            var expected = """
+                array::[1, 2, 3]
+                array::["one", "two", "three"]==array::["one", "two", "three"]
+                array::[4, 5, 6]==array::[4, 5, 6]
+                """.Replace( "\r\n", "\n" );
+            TextAssert.AreEqual( expected, text );
+        }
+
+        [Test]
         public void TestIndentedIncludes()
         {
             var template = Template.Parse(@"  {{ include 'header' }}
