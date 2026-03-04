@@ -270,11 +270,11 @@ A date object
 
 #### Examples
 
-> **input** [Try out](/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7D%7D%0A%7B%7B%20date.parse%20%272018--06--17%27%20%27%25Y--%25m--%25d%27%20%7D%7D%0A%7B%7B%20date.parse%20%272021%2F11%2F30%2020%3A50%3A23Z%27%20%7D%7D%0A%7B%7B%20date.parse%20%2720%2F01%2F2022%2008%3A32%3A48%20%2B00%3A00%27%20culture%3A%27en-GB%27%20%7D%7D&model=%7B%7D)
+> **input** [Try out](/?template=%7B%7B%20date.parse%20%272016%2F01%2F05%27%20%7D%7D%0A%7B%7B%20date.parse%20%272018--06--17%27%20%27%25Y--%25m--%25d%27%20%7D%7D%0A%7B%7B%20date.parse%20%272021%2F11%2F30%2009%3A50%3A23Z%27%20%7D%7D%0A%7B%7B%20date.parse%20%2720%2F01%2F2022%2008%3A32%3A48%20%2B00%3A00%27%20culture%3A%27en-GB%27%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.parse '2016/01/05' {{ "}}" }}
 {{ "{{" }} date.parse '2018--06--17' '%Y--%m--%d' {{ "}}" }}
-{{ "{{" }} date.parse '2021/11/30 20:50:23Z' {{ "}}" }}
+{{ "{{" }} date.parse '2021/11/30 09:50:23Z' {{ "}}" }}
 {{ "{{" }} date.parse '20/01/2022 08:32:48 +00:00' culture:'en-GB' {{ "}}" }}
 ```
 > **output**
