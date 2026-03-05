@@ -202,6 +202,45 @@ This is a header
         }
 
         [Test]
+        public void TestIncludePromotedNamedArguments_persist()
+        {
+            var rawTemplate = """
+                {{- for c in components1 -}}
+                {{- include 'named_arguments_promoted_persist_1' _:c -}}
+                {{- end -}}
+                """;
+
+            var template = Template.Parse( rawTemplate );
+            var context = new TemplateContext();
+            context.TemplateLoader = new CustomTemplateLoader();
+            var model = new
+            {
+                components1 = new object[] {
+                    new {
+                        header = new {
+                            components2 = new object[] {
+                                new {
+                                    key = "A"
+                                }
+                            }
+                        }
+                    },
+                }
+            };
+            context.PushGlobal( ScriptObject.From(model) );
+
+            var text = template.Render( context ).Replace( "\r\n", "\n" );
+            var expected = """
+                ORG(["header"])
+                X(["header"])
+                OUT({ key = A })
+                ORG(["header"])
+                X(["header"])
+                """.Replace( "\r\n", "\n" );
+            TextAssert.AreEqual( expected, text );
+        }
+
+        [Test]
         public void TestIndentedIncludes()
         {
             var template = Template.Parse(@"  {{ include 'header' }}
