@@ -72,6 +72,21 @@ namespace Scriban.Tests
                         {{ $.y | object.typeof }}::{{ $.y }}=={{ $y | object.typeof }}::{{ $y }}
                         """;
 
+                case "named_arguments_promoted_persist_1":
+                    return """
+                        {{- x = $_ -}}
+                        ORG({{ $_ | object.keys }})
+                        X({{ x | object.keys }})
+                        {{ for c in $_.header.components2 -}}
+                        {{ include 'named_arguments_promoted_persist_2' _:c }}
+                        {{- end }}
+                        ORG({{ $_ | object.keys }})
+                        X({{ x | object.keys }})
+                        """;
+
+                case "named_arguments_promoted_persist_2":
+                    return "OUT({{- $_ -}})";
+
                 default:
                     return templatePath;
             }
