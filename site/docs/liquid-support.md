@@ -59,27 +59,27 @@ Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/)
 
 Liquid types are translated to the same types in scriban:
 
-- [string](language/readme.md#31-strings)
-- [number](language/readme.md#32-numbers)
-- [boolean](language/readme.md#33-boolean)
+- [string](language.md#31-strings)
+- [number](language.md#32-numbers)
+- [boolean](llanguage.md#33-boolean)
 
-The `nil` value (which can't be expressed in liquid) is equivalent to the expression [`null`](language/readme.md#34-null) in scriban.
+The `nil` value (which can't be expressed in liquid) is equivalent to the expression [`null`](language.md#34-null) in scriban.
 
-- [array](language/readme.md#6-arrays) are also supported, except that scriban allows to create arrays directly from the language unlike liquid
+- [array](language.md#6-arrays) are also supported, except that scriban allows to create arrays directly from the language unlike liquid
 
-In addition to this, scriban supports the creation of an [`object`](language/readme.md#5-objects)
+In addition to this, scriban supports the creation of an [`object`](language.md#5-objects)
 
 
 ## Supported operators
 
-Liquid supports only conditional expressions and they directly translate to [conditionnal expressions](language/readme.md#85-conditional-expressions) in scriban.
+Liquid supports only conditional expressions and they directly translate to [conditionnal expressions](language.md#85-conditional-expressions) in scriban.
 
 In addition to this, scriban supports:
 
-- [binary operators](language/readme.md#84-arithmetic-expressions)
-- [unary operators](language/readme.md#86-unary-expressions)
-- [range `1..x` expressions](language/readme.md#87-range-expressions)
-- [The null coalescing operator `??`](language/readme.md#88-the-null-coalescing-operator-)
+- [binary operators](language.md#84-arithmetic-expressions)
+- [unary operators](language.md#86-unary-expressions)
+- [range `1..x` expressions](language.md#87-range-expressions)
+- [The null coalescing operator `??`](language.md#88-the-null-coalescing-operator-)
 
 
 ## Supported tags
@@ -106,7 +106,7 @@ allowed to translate liquid code into scriban code automatically
 
 ### `comment` tag
 
-Liquid `comment`/`endcomment` tags translate to a code block `{{ "{{" }}` ... `{{ "}}" }}` embracing a [multiline comments `##`](language/readme.md#2-comments)
+Liquid `comment`/`endcomment` tags translate to a code block `{{ "{{" }}` ... `{{ "}}" }}` embracing a [multiline comments `##`](language.md#2-comments)
 
 > **liquid**
 ```liquid
@@ -120,7 +120,7 @@ This is plain {{ "{{" }}## This is comment {% with \#\# some tag %\} and comment
 
 ### `raw` tag
 
-Liquid raw tag block translate to an [escape block](language/readme.md#13-escape-block)
+Liquid raw tag block translate to an [escape block](language.md#13-escape-block)
 
 > **liquid**
 ```liquid
@@ -134,7 +134,7 @@ This is plain {%{This is raw {% with some tag %} and raw}%}
 
 ### `assign` tag
 
-Liquid `assign` tag translates to a simple [assignment expression](language/readme.md#82-assign-expression)
+Liquid `assign` tag translates to a simple [assignment expression](language.md#82-assign-expression)
 
 > **liquid**
 ```liquid
@@ -150,7 +150,7 @@ Liquid `assign` tag translates to a simple [assignment expression](language/read
 
 ### `if` tag
 
-Liquid `if <expression>`/`endif` tags translate to a [`if <expression>`/`end`](language/readme.md#92-if-expression-else-else-if-expression)
+Liquid `if <expression>`/`endif` tags translate to a [`if <expression>`/`end`](language.md#92-if-expression-else-else-if-expression)
 
 > **liquid**
 ```liquid
@@ -170,7 +170,7 @@ Liquid `if <expression>`/`endif` tags translate to a [`if <expression>`/`end`](l
 
 ### `unless` tag
 
-Liquid `unless <expression>`/`endunless` tags translate to a [`if <expression>`/`end`](language/readme.md#92-if-expression-else-else-if-expression) with a reversed nested `!(expression)`
+Liquid `unless <expression>`/`endunless` tags translate to a [`if <expression>`/`end`](language.md#92-if-expression-else-else-if-expression) with a reversed nested `!(expression)`
 
 > **liquid**
 ```liquid
@@ -191,7 +191,7 @@ Liquid `unless <expression>`/`endunless` tags translate to a [`if <expression>`/
 
 ### `case` and `when` tags
 
-Liquid `case <variable>`/`when <expression>`/`endcase` tags translate to a [`case <expression>`/`when <expression>`/`end`](language/readme.md#93-case-and-when)
+Liquid `case <variable>`/`when <expression>`/`endcase` tags translate to a [`case <expression>`/`when <expression>`/`end`](language.md#93-case-and-when)
 
 > **liquid**
 ```liquid
@@ -222,7 +222,7 @@ Liquid `case <variable>`/`when <expression>`/`endcase` tags translate to a [`cas
 
 ### `for` tag
 
-Liquid `for <variable> in <expression>`/`endfor` tags translate to the same [`for`/`end`](language/readme.md#for-variable-in-expression--end)
+Liquid `for <variable> in <expression>`/`endfor` tags translate to the same [`for`/`end`](language.md#for-variable-in-expression--end)
 
 > **liquid**
 ```liquid
@@ -243,7 +243,7 @@ Liquid `for <variable> in <expression>`/`endfor` tags translate to the same [`fo
 
 ### `tablerow` tag
 
-Liquid `tablerow <variable> in <expression>`/`endtablerow` tags translate to the same [`tablerow`/`end`](language/readme.md#tablerow-variable-in-expression--end)
+Liquid `tablerow <variable> in <expression>`/`endtablerow` tags translate to the same [`tablerow`/`end`](language.md#tablerow-variable-in-expression--end)
 
 > **liquid**
 ```liquid
@@ -264,7 +264,7 @@ Liquid `tablerow <variable> in <expression>`/`endtablerow` tags translate to the
 
 ### `capture` tag
 
-Liquid `capture <variable>`/`endcapture` tags translate to a [`capture <expression>`/`end`](language/readme.md#94-capture-variable--end)
+Liquid `capture <variable>`/`endcapture` tags translate to a [`capture <expression>`/`end`](language.md#94-capture-variable--end)
 
 > **liquid**
 ```liquid
@@ -285,7 +285,7 @@ Liquid `capture <variable>`/`endcapture` tags translate to a [`capture <expressi
 
 ### Pipe calls
 
-Liquid pipe call translates to the same [`pipe call`](language/readme.md#89-function-call-expression)
+Liquid pipe call translates to the same [`pipe call`](language.md#89-function-call-expression)
 
 > **liquid**
 ```liquid
