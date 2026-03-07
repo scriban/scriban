@@ -12,14 +12,14 @@ Welcome to the Scriban documentation. Whether you are new to Scriban or an exper
 | Guide | What you'll learn |
 |---|---|
 | [Getting started](getting-started.md) | Install Scriban, write your first template, and render output |
-| [Language overview](language/readme.md) | Blocks, variables, expressions, control flow, functions, and more |
+| [Language overview](language.md) | Blocks, variables, expressions, control flow, functions, and more |
 
 ## Language reference
 
 {.table}
 | Guide | What you'll learn |
 |---|---|
-| [Language reference](language/readme.md) | Full syntax reference: blocks, literals, variables, expressions, statements |
+| [Language reference](language.md) | Full syntax reference: blocks, literals, variables, expressions, statements |
 
 ## Built-in functions
 
