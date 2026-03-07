@@ -61,7 +61,7 @@ Liquid types are translated to the same types in scriban:
 
 - [string](language.md#31-strings)
 - [number](language.md#32-numbers)
-- [boolean](llanguage.md#33-boolean)
+- [boolean](language.md#33-boolean)
 
 The `nil` value (which can't be expressed in liquid) is equivalent to the expression [`null`](language.md#34-null) in scriban.
 
