@@ -154,21 +154,21 @@ ______________          _____________________
 
 ### 1.3 Escape block
 
-Any code and text block can be escaped to produce a text block by enclosing it with `{%{` and `}%}` 
+Any code and text block can be escaped to produce a text block by enclosing it with `{{ "{%{" }}` and `{{ "}%}" }}` 
 
 For example the following escape:
-> **input**: `{%{Hello this is {{ "{{" }} name {{ "}}" }}}%}`   
+> **input**: `{{ "{%{Hello this is {{ name }}}%}" }}`   
 > **output**: `Hello this is {{ "{{" }} name {{ "}}" }}` 
 
 If you want to escape an escape block, you can increase the number of % in the starting and ending block:
-> **input**: `{%%{This is an escaped block: }%} here}%%}`
-> **output**: `This is an escaped block: }%} here`
+> **input**: `{{ "{%%{This is an escaped block: }%} here}%%}" }}`
+> 
+> **output**: `This is an escaped block: {{ "}%}" }} here`
 
 This allow effectively to nest escape blocks and still be able to escape them.
 
 This allows for effective nesting of escape blocks and the ability to escape them.
-For example, a starting escape block {%%%%{ will require an ending }%%%%}"
-
+For example, a starting escape block {{ "`{%%%%{`" }} will require an ending {{ "`}%%%%}`" }}
 
 ### 1.4 Whitespace control
 
