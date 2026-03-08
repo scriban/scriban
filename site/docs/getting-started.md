@@ -216,7 +216,7 @@ To enable source embedding:
 
 ## What's next?
 
-- **[Language reference](language/readme.md)** — Learn all the syntax: variables, expressions, loops, functions, and more.
+- **[Language reference](language.md)** — Learn all the syntax: variables, expressions, loops, functions, and more.
 - **[Built-in functions](builtins/readme.md)** — Explore the full list of string, array, date, math, and other functions.
 - **[Runtime API](runtime/readme.md)** — Dive deeper into `TemplateContext`, `ScriptObject`, custom functions, and advanced scenarios.
 - **[Liquid support](liquid-support.md)** — Migrate from Liquid or use Liquid templates with Scriban.

@@ -82,7 +82,7 @@ og_type: website
             Scriban uses a custom Lexer/Parser with a full AST for blazing-fast parsing and low-allocation rendering. CPU and GC-friendly by design.
           </p>
 
-[Language reference](docs/language/readme.md) · [Built-in functions](docs/builtins/readme.md)
+[Language reference](docs/language.md) · [Built-in functions](docs/builtins/readme.md)
 
 </div>
       </div>
@@ -147,7 +147,7 @@ og_type: website
             Variables, expressions, conditionals, loops, functions, pipes, objects, arrays — all the constructs you need for powerful templating and scripting scenarios.
           </p>
 
-[Language reference](docs/language/readme.md) · [Examples](docs/getting-started.md)
+[Language reference](docs/language.md) · [Examples](docs/getting-started.md)
 
 </div>
       </div>

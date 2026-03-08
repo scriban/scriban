@@ -36,7 +36,7 @@ The `TemplateContext` provides:
 
 - **an execution context** when evaluating a template. The same instance can be used with many different templates, depending on your requirements.
 - A **stack of [`ScriptObject`](variable-stack)** that provides the actual variables/functions accessible to the template, accessible through `Template.PushGlobal(scriptObj)` and `Template.PopGlobal()`. Why a stack and how to use this stack is described in the [variable stack](variable-stack) page.
-- The **text output** when evaluating a template, which is accessible through the `Template.Output` property as a `StringBuilder` but because you can have nested rendering happening, it is possible to use `Template.PushOutput()` and `Template.PopOutput()` to redirect temporarily the output to a new output. This functionality is typically used by the [`capture` statement](../language/readme.md#94-capture-variable--end).
+- The **text output** when evaluating a template, which is accessible through the `Template.Output` property as a `StringBuilder` but because you can have nested rendering happening, it is possible to use `Template.PushOutput()` and `Template.PopOutput()` to redirect temporarily the output to a new output. This functionality is typically used by the [`capture` statement](../language.md#94-capture-variable--end).
 - Caching of templates previously loaded by an `include` directive (see [`include` and `ITemplateLoader`](includes#include-and-itemplateloader) section )
 - Various possible overrides to allow fine grained extensibility (evaluation of an expression, conversion to a string, enter/exit/step into a loop...etc.)
 
