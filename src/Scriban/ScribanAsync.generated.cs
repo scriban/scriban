@@ -382,15 +382,16 @@ namespace Scriban
             var previousNamedArgumentValues = new Dictionary<ScriptVariable, object>();
             foreach (var v in namedArguments)
             {
+                var name = v.Name.Name;
+                var namedArgumentVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
                 try
                 {
-                    var name = v.Name.Name;
-                    var namedArgumentVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
                     var value = await namedArgumentVariable.EvaluateAsync(this).ConfigureAwait(false);
                     previousNamedArgumentValues[v.Name] = value;
                 }
                 catch (ScriptRuntimeException) when (StrictVariables)
                 {
+                    // Skip variables that cannot be evaluated in strict mode
                     continue;
                 }
             }
