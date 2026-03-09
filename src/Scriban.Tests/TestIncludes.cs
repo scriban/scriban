@@ -184,11 +184,13 @@ This is a header
             TextAssert.AreEqual( expected, text );
         }
 
-        [Test]
-        public void TestIncludePromotedNamedArguments_ArrayTypes()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestIncludePromotedNamedArguments_ArrayTypes(bool strictVariables)
         {
             var template = Template.Parse( @"{{~ include 'named_arguments_promoted_array_types' [1,2,3] x: data y: [4,5,6] ~}}" );
             var context = new TemplateContext();
+            context.StrictVariables = strictVariables;
             context.TemplateLoader = new CustomTemplateLoader();
             context.CurrentGlobal.SetValue( "data", new string[] { "one", "two", "three" }, true );
 
@@ -201,8 +203,9 @@ This is a header
             TextAssert.AreEqual( expected, text );
         }
 
-        [Test]
-        public void TestIncludePromotedNamedArguments_persist()
+        [TestCase(true)]
+        [TestCase(false)]
+        public void TestIncludePromotedNamedArguments_persist(bool strictVariables)
         {
             var rawTemplate = """
                 {{- for c in components1 -}}
@@ -212,6 +215,7 @@ This is a header
 
             var template = Template.Parse( rawTemplate );
             var context = new TemplateContext();
+            context.StrictVariables = strictVariables;
             context.TemplateLoader = new CustomTemplateLoader();
             var model = new
             {

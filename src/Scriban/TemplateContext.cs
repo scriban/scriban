@@ -1293,10 +1293,17 @@ namespace Scriban
             var previousNamedArgumentValues = new Dictionary<ScriptVariable, object>();
             foreach (var v in namedArguments)
             {
-                var name = v.Name.Name;
-                var namedArgumentVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
-                var value = namedArgumentVariable.Evaluate(this);
-                previousNamedArgumentValues[v.Name] = value;
+                try
+                {
+                    var name = v.Name.Name;
+                    var namedArgumentVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
+                    var value = namedArgumentVariable.Evaluate(this);
+                    previousNamedArgumentValues[v.Name] = value;
+                }
+                catch (ScriptRuntimeException) when(StrictVariables)
+                {
+                    continue;
+                }
             }
 
             // Make sure that we cannot recursively include a template
