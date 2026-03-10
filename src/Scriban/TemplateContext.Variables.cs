@@ -213,7 +213,24 @@ namespace Scriban
         /// </summary>
         /// <param name="variable">The variable to retrieve the value</param>
         /// <returns>Value of the variable</returns>
+        /// <exception cref="ScriptRuntimeException">If <see cref="StrictVariables"/> is enabled and the specified variable is undefined.</exception>
         public object GetValue(ScriptVariable variable)
+        {
+            if (variable == null) throw new ArgumentNullException(nameof(variable));
+
+            object value = GetValue(variable, out bool found);
+
+            CheckVariableFound(variable, found);
+            return value;
+        }
+
+        /// <summary>
+        /// Gets the value for the specified variable from the current object context/scope.
+        /// </summary>
+        /// <param name="variable">The variable to retrieve the value</param>
+        /// <param name="found">Contains <see langword="true"/> if the variable was found; otherwise, <see langword="false"/>.</param>
+        /// <returns>Value of the variable</returns>
+        internal object GetValue(ScriptVariable variable, out bool found)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
 
@@ -223,20 +240,21 @@ namespace Scriban
             {
                 if (store.TryGetValue(this, variable.Span, variable.Name, out value))
                 {
+                    found = true;
                     return value;
                 }
             }
 
-            bool found = false;
             if (TryGetVariable != null)
             {
                 if (TryGetVariable(this, variable.Span, variable, out value))
                 {
                     found = true;
+                    return value;
                 }
             }
 
-            CheckVariableFound(variable, found);
+            found = false;
             return value;
         }
 
@@ -245,6 +263,7 @@ namespace Scriban
         /// </summary>
         /// <param name="variable">The variable to retrieve the value</param>
         /// <returns>Value of the variable</returns>
+        /// <exception cref="ScriptRuntimeException">If <see cref="StrictVariables"/> is enabled and the specified variable is undefined.</exception>
         public object GetValue(ScriptVariableGlobal variable)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
