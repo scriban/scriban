@@ -1295,15 +1295,11 @@ namespace Scriban
             {
                 var name = v.Name.Name;
                 var namedArgumentVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
-                try
+                var value = GetValue(namedArgumentVariable, out bool found);
+                if (found)
                 {
-                    var value = namedArgumentVariable.Evaluate(this);
+                    // Found a existing local variables, remember the value
                     previousNamedArgumentValues[v.Name] = value;
-                }
-                catch (ScriptRuntimeException) when(StrictVariables)
-                {
-                    // Skip variables that cannot be evaluated in strict mode
-                    continue;
                 }
             }
 
