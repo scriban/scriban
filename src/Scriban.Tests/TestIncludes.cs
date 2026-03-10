@@ -13,7 +13,7 @@ using Scriban.Syntax;
 
 namespace Scriban.Tests
 {
-    [TestFixtureSource(nameof(FixtureDaten))]
+    [TestFixtureSource(nameof(FixtureData))]
     public class TestIncludes
     {
         private readonly bool _strictVariables;
@@ -23,7 +23,7 @@ namespace Scriban.Tests
             _strictVariables = strictVariables;
         }
 
-        static IEnumerable<TestFixtureData> FixtureDaten()
+        static IEnumerable<TestFixtureData> FixtureData()
         {
             yield return new TestFixtureData(true)
                 .SetArgDisplayNames("StrictVariables = True");
