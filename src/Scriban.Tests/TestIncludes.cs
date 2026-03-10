@@ -13,8 +13,23 @@ using Scriban.Syntax;
 
 namespace Scriban.Tests
 {
+    [TestFixtureSource(nameof(FixtureDaten))]
     public class TestIncludes
     {
+        private readonly bool _strictVariables;
+
+        public TestIncludes(bool strictVariables)
+        {
+            _strictVariables = strictVariables;
+        }
+
+        static IEnumerable<TestFixtureData> FixtureDaten()
+        {
+            yield return new TestFixtureData(true)
+                .SetArgDisplayNames("StrictVariables = True");
+            yield return new TestFixtureData(false)
+                .SetArgDisplayNames("StrictVariables = False");
+        }
 
         internal class DummyLoader : ITemplateLoader
         {
@@ -32,14 +47,15 @@ namespace Scriban.Tests
         public void IncludeShouldNotThrowWhenStrictVariablesSet()
         {
             var text = @"{{include 'testfile'}}";
-            var context = new TemplateContext { TemplateLoader = new DummyLoader() };
-            //NOTE - setting strict variables causes the test to fail
-            context.StrictVariables = true;
+            var context = new TemplateContext { TemplateLoader = new DummyLoader(), StrictVariables = _strictVariables };
             var compiledTemplate = Template.Parse(text);
             context.PushGlobal(new ScriptObject());
 
-            var result = compiledTemplate.Render(context);
-            Assert.AreEqual(result,"some text");
+            Assert.DoesNotThrow(() =>
+            {
+                var result = compiledTemplate.Render(context);
+                Assert.AreEqual(result, "some text");
+            });
         }
 
 
@@ -48,7 +64,8 @@ namespace Scriban.Tests
         {
             var context = new TemplateContext()
             {
-                TemplateLoader = new LoaderLoopWithInclude()
+                TemplateLoader = new LoaderLoopWithInclude(),
+                StrictVariables = _strictVariables
             };
             var template = Template.Parse(@"{{ for my_loop_variable in 1..3; include 'test'; end; }}");
 
@@ -80,7 +97,8 @@ namespace Scriban.Tests
             var context = new TemplateContext
             {
                 TemplateLoader = new LoaderIndentedNestedIncludes(),
-                IndentWithInclude = true
+                IndentWithInclude = true,
+                StrictVariables = _strictVariables
             };
 
             var template = Template.Parse(@"Test
@@ -137,9 +155,12 @@ namespace Scriban.Tests
             var template = Template.Parse(@"Test
 {{ include 'header' }}
 ");
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
-            context.IndentWithInclude = true;
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                IndentWithInclude = true,
+                StrictVariables = _strictVariables
+            };
 
             var text = template.Render(context).Replace("\r\n", "\n");
             var expected = @"Test
@@ -152,8 +173,11 @@ This is a header
         public void TestIncludeNamedArguments()
         {
             var template = Template.Parse(@"{{ include 'named_arguments' this_arg: 5 }}");
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = _strictVariables
+            };
 
             var text = template.Render(context).Replace("\r\n", "\n");
             var expected = @"5";
@@ -164,8 +188,11 @@ This is a header
         public void TestIncludePromotedNamedArguments()
         {
             var template = Template.Parse(@"{{ include 'named_arguments_promoted' this_arg: 5 }}");
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = _strictVariables
+            };
 
             var text = template.Render(context).Replace("\r\n", "\n");
             var expected = @"5";
@@ -176,22 +203,36 @@ This is a header
         public void TestIncludePromotedNamedArguments2()
         {
             var template = Template.Parse( @"{{~ include 'named_arguments_promoted_2' x: 'hello' y: 'there' ~}}" );
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = _strictVariables
+            };
 
-            var text = template.Render( context ).Replace( "\r\n", "\n" );
-            var expected = @"ABhelloChelloDthere";
-            TextAssert.AreEqual( expected, text );
+            if (_strictVariables)
+            {
+                // StrictVariables: Global Variable 'x' is undefined and cannot be resolved.
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                const string expectedString = "The variable or function `x` was not found";
+                Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
+            }
+            else
+            {
+                var text = template.Render( context ).Replace( "\r\n", "\n" );
+                var expected = @"ABhelloChelloDthere";
+                TextAssert.AreEqual( expected, text );
+            }
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public void TestIncludePromotedNamedArguments_ArrayTypes(bool strictVariables)
+        [Test]
+        public void TestIncludePromotedNamedArguments_ArrayTypes()
         {
             var template = Template.Parse( @"{{~ include 'named_arguments_promoted_array_types' [1,2,3] x: data y: [4,5,6] ~}}" );
-            var context = new TemplateContext();
-            context.StrictVariables = strictVariables;
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = _strictVariables
+            };
             context.CurrentGlobal.SetValue( "data", new string[] { "one", "two", "three" }, true );
 
             var text = template.Render( context ).Replace( "\r\n", "\n" );
@@ -203,9 +244,8 @@ This is a header
             TextAssert.AreEqual( expected, text );
         }
 
-        [TestCase(true)]
-        [TestCase(false)]
-        public void TestIncludePromotedNamedArguments_persist(bool strictVariables)
+        [Test]
+        public void TestIncludePromotedNamedArguments_persist()
         {
             var rawTemplate = """
                 {{- for c in components1 -}}
@@ -214,9 +254,11 @@ This is a header
                 """;
 
             var template = Template.Parse( rawTemplate );
-            var context = new TemplateContext();
-            context.StrictVariables = strictVariables;
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = _strictVariables
+            };
             var model = new
             {
                 components1 = new object[] {
@@ -253,9 +295,12 @@ Test1
       {{ include 'nested_templates_with_indent' }}
 Test2
 ");
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
-            context.IndentWithInclude = true;
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                IndentWithInclude = true,
+                StrictVariables = _strictVariables
+            };
 
             var text = template.Render(context).Replace("\r\n", "\n");
             var expectedText = @"  This is a header
@@ -277,7 +322,7 @@ Test2
         {
             var input = "{% include /this/is/a/test.htm %}";
             var template = Template.ParseLiquid(input, lexerOptions: new LexerOptions() { EnableIncludeImplicitString = true, Lang = ScriptLang.Liquid });
-            var context = new TemplateContext { TemplateLoader = new LiquidCustomTemplateLoader() };
+            var context = new TemplateContext { TemplateLoader = new LiquidCustomTemplateLoader(), StrictVariables = _strictVariables };
             var result = template.Render(context);
             TextAssert.AreEqual("/this/is/a/test.htm", result);
         }
@@ -286,7 +331,7 @@ Test2
         public void TestTemplateLoaderNoArgs()
         {
             var template = Template.Parse("Test with a include {{ include }}");
-            var context = new TemplateContext();
+            var context = new TemplateContext() { StrictVariables = _strictVariables };
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
             var expectedString = "Invalid number of arguments";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
@@ -296,7 +341,7 @@ Test2
         public void TestTemplateLoaderNotSetup()
         {
             var template = Template.Parse("Test with a include {{ include 'yoyo' }}");
-            var context = new TemplateContext();
+            var context = new TemplateContext() { StrictVariables = _strictVariables };
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
             var expectedString = "No TemplateLoader registered";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
@@ -306,7 +351,7 @@ Test2
         public void TestTemplateLoaderNotNull()
         {
             var template = Template.Parse("Test with a include {{ include null }}");
-            var context = new TemplateContext();
+            var context = new TemplateContext() { StrictVariables = _strictVariables };
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
             var expectedString = "Include template name cannot be null or empty";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
@@ -315,68 +360,78 @@ Test2
         [Test]
         public void TestSimple()
         {
-            TestParser.AssertTemplate("Test with a include yoyo", "Test with a include {{ include 'yoyo' }}");
+            TestParser.AssertTemplate("Test with a include yoyo", "Test with a include {{ include 'yoyo' }}", strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestArguments()
         {
-            TestParser.AssertTemplate("1 + 2", "{{ include 'arguments' 1 2 }}");
+            TestParser.AssertTemplate("1 + 2", "{{ include 'arguments' 1 2 }}", strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestProduct()
         {
-            TestParser.AssertTemplate("product: Orange", "{{ include 'product' }}");
+            TestParser.AssertTemplate("product: Orange", "{{ include 'product' }}", strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestNested()
         {
-            TestParser.AssertTemplate("This is a header body This is a body_detail This is a footer", "{{ include 'nested_templates' }}");
+            TestParser.AssertTemplate("This is a header body This is a body_detail This is a footer", "{{ include 'nested_templates' }}", strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestRecursiveNested()
         {
-            TestParser.AssertTemplate("56789", "{{ include 'recursive_nested_templates' 5 }}");
+            TestParser.AssertTemplate("56789", "{{ x = 0; include 'recursive_nested_templates' 5 }}", strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestLiquidNull()
         {
-            TestParser.AssertTemplate("", "{% include a %}", ScriptLang.Liquid);
+            string expected;
+            if (_strictVariables)
+            {
+                // StrictVariables: Variable 'a' is undefined and cannot be resolved.
+                expected = "text(1,12) : error : The variable or function `a` was not found";
+            }
+            else
+            {
+                expected = "";
+            }
+            TestParser.AssertTemplate(expected, "{% include a %}", ScriptLang.Liquid, strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestLiquidWith()
         {
-            TestParser.AssertTemplate("with_product: Orange", "{% include 'with_product' with product %}", ScriptLang.Liquid);
+            TestParser.AssertTemplate("with_product: Orange", "{% include 'with_product' with product %}", ScriptLang.Liquid, strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestLiquidFor()
         {
-            TestParser.AssertTemplate("for_product: Orange for_product: Banana for_product: Apple for_product: Computer for_product: Mobile Phone for_product: Table for_product: Sofa ", "{% include 'for_product' for products %}", ScriptLang.Liquid);
+            TestParser.AssertTemplate("for_product: Orange for_product: Banana for_product: Apple for_product: Computer for_product: Mobile Phone for_product: Table for_product: Sofa ", "{% include 'for_product' for products %}", ScriptLang.Liquid, strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestLiquidArguments()
         {
-            TestParser.AssertTemplate("1 + yoyo", "{% include 'arguments' var1: 1, var2: 'yoyo' %}", ScriptLang.Liquid);
+            TestParser.AssertTemplate("1 + yoyo", "{% include 'arguments' var1: 1, var2: 'yoyo' %}", ScriptLang.Liquid, strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestLiquidWithAndArguments()
         {
-            TestParser.AssertTemplate("tada : 1 + yoyo", "{% include 'with_arguments' with 'tada' var1: 1, var2: 'yoyo' %}", ScriptLang.Liquid);
+            TestParser.AssertTemplate("tada : 1 + yoyo", "{% include 'with_arguments' with 'tada' var1: 1, var2: 'yoyo' %}", ScriptLang.Liquid, strictVariables: _strictVariables);
         }
 
         [Test]
         public void TestTemplateLoaderIncludeWithParsingErrors()
         {
             var template = Template.Parse("Test with a include {{ include 'invalid' }}");
-            var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader() };
+            var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader(), StrictVariables = _strictVariables };
             var exception = Assert.Throws<ScriptParserRuntimeException>(() => template.Render(context));
             Console.WriteLine(exception);
             var expectedString = "Error while parsing template";
@@ -387,7 +442,7 @@ Test2
         public void TestTemplateLoaderIncludeWithLexerErrors()
         {
             var template = Template.Parse("Test with a include {{ include 'invalid2' }}");
-            var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader() };
+            var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader(), StrictVariables = _strictVariables };
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
             Console.WriteLine(exception);
             var expectedString = "The result of including";
@@ -398,7 +453,7 @@ Test2
         public void TestTemplateLoaderIncludeWithNullGetPath()
         {
             var template = Template.Parse("{{ include 'null' }}");
-            var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader() };
+            var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader(), StrictVariables = _strictVariables };
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
             Console.WriteLine(exception);
             var expectedString = "Include template path is null";
@@ -409,7 +464,7 @@ Test2
         public void TestIncludeJoin()
         {
             var template = Template.Parse("{{ include_join ['first', 'second', 'third'] ' ' }}");
-            var context = new TemplateContext() { TemplateLoader = new DummyLoader() };
+            var context = new TemplateContext() { TemplateLoader = new DummyLoader(), StrictVariables = _strictVariables };
             var expectedString = "some text some text some text";
             Assert.AreEqual(expectedString, template.Render(context));
         }
@@ -418,7 +473,7 @@ Test2
         public void TestIncludeJoinWithOptionalParams()
         {
             var template = Template.Parse("{{ include_join ['first', 'second', 'third'] ' ' 'begin ' ' end' }}");
-            var context = new TemplateContext() { TemplateLoader = new DummyLoader() };
+            var context = new TemplateContext() { TemplateLoader = new DummyLoader(), StrictVariables = _strictVariables };
             var expectedString = "begin some text some text some text end";
             Assert.AreEqual(expectedString, template.Render(context));
         }
@@ -429,7 +484,7 @@ Test2
             var template = Template.Parse("{{ include_join joinTemplateNames ' ' 'begin ' ' end' }}");
             var scriptObject = new BuiltinFunctions();
             scriptObject.SetValue("joinTemplateNames", new List<string>() {"first", "second", "third"}, false);
-            var context = new TemplateContext(scriptObject) { TemplateLoader = new DummyLoader() };
+            var context = new TemplateContext(scriptObject) { TemplateLoader = new DummyLoader(), StrictVariables = _strictVariables };
             var expectedString = "begin some text some text some text end";
             Assert.AreEqual(expectedString, template.Render(context));
         }
@@ -438,7 +493,7 @@ Test2
         public void TestIncludeJoinWithTemplateDelimiters()
         {
             var template = Template.Parse("{{ include_join ['first', 'second', 'third'] 'tpl: ' 'tpl:begin ' 'tpl: end' }}");
-            var context = new TemplateContext() { TemplateLoader = new DummyLoader() };
+            var context = new TemplateContext() { TemplateLoader = new DummyLoader(), StrictVariables = _strictVariables };
             var expectedString = "some textsome textsome textsome textsome textsome textsome text";
             Assert.AreEqual(expectedString, template.Render(context));
         }

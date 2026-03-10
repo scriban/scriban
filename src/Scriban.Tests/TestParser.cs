@@ -880,7 +880,7 @@ m
             "470-html.txt"
         };
 
-        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false, bool supportRoundTrip = true, bool testASTInstead = false)
+        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false, bool supportRoundTrip = true, bool testASTInstead = false, bool strictVariables = false)
         {
             bool isLiquid = lang == ScriptLang.Liquid;
 
@@ -1013,6 +1013,7 @@ m
                             // Render sync
                             {
                                 var context = NewTemplateContext(lang);
+                                context.StrictVariables = strictVariables;
                                 context.PushOutput(new TextWriterOutput(new StringWriter() {NewLine = "\n"}));
                                 var contextObj = new ScriptObject();
                                 contextObj.Import(model);
@@ -1023,6 +1024,7 @@ m
                             // Render async
                             {
                                 var asyncContext = NewTemplateContext(lang);
+                                asyncContext.StrictVariables = strictVariables;
                                 asyncContext.PushOutput(new TextWriterOutput(new StringWriter() {NewLine = "\n"}));
                                 var contextObj = new ScriptObject();
                                 contextObj.Import(model);
