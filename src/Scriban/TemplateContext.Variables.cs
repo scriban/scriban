@@ -218,7 +218,7 @@ namespace Scriban
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
 
-            object value = GetValue(variable, out bool found);
+            bool found = TryGetValue(variable, out object value);
 
             CheckVariableFound(variable, found);
             return value;
@@ -228,20 +228,18 @@ namespace Scriban
         /// Gets the value for the specified variable from the current object context/scope.
         /// </summary>
         /// <param name="variable">The variable to retrieve the value</param>
-        /// <param name="found">Contains <see langword="true"/> if the variable was found; otherwise, <see langword="false"/>.</param>
-        /// <returns>Value of the variable</returns>
-        internal object GetValue(ScriptVariable variable, out bool found)
+        /// <param name="value">Value of the variable</param>
+        /// <returns>Contains <see langword="true"/> if the variable was found; otherwise, <see langword="false"/>.</returns>
+        private bool TryGetValue(ScriptVariable variable, out object value)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
 
             var stores = GetStoreForRead(variable);
-            object value = null;
             foreach (var store in stores)
             {
                 if (store.TryGetValue(this, variable.Span, variable.Name, out value))
                 {
-                    found = true;
-                    return value;
+                    return true;
                 }
             }
 
@@ -249,13 +247,12 @@ namespace Scriban
             {
                 if (TryGetVariable(this, variable.Span, variable, out value))
                 {
-                    found = true;
-                    return value;
+                    return true;
                 }
             }
 
-            found = false;
-            return value;
+            value = null;
+            return false;
         }
 
         /// <summary>

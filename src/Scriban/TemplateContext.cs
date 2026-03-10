@@ -1295,8 +1295,7 @@ namespace Scriban
             {
                 var name = v.Name.Name;
                 var namedArgumentVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
-                var value = GetValue(namedArgumentVariable, out bool found);
-                if (found)
+                if (TryGetValue(namedArgumentVariable, out object value))
                 {
                     // Found a existing local variables, remember the value
                     previousNamedArgumentValues[v.Name] = value;
