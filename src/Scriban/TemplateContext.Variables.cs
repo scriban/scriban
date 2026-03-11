@@ -213,6 +213,7 @@ namespace Scriban
         /// </summary>
         /// <param name="variable">The variable to retrieve the value</param>
         /// <returns>Value of the variable</returns>
+        /// <exception cref="ScriptRuntimeException">If <see cref="StrictVariables"/> is enabled and the specified variable is undefined.</exception>
         public object GetValue(ScriptVariable variable)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
@@ -245,6 +246,7 @@ namespace Scriban
         /// </summary>
         /// <param name="variable">The variable to retrieve the value</param>
         /// <returns>Value of the variable</returns>
+        /// <exception cref="ScriptRuntimeException">If <see cref="StrictVariables"/> is enabled and the specified variable is undefined.</exception>
         public object GetValue(ScriptVariableGlobal variable)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
