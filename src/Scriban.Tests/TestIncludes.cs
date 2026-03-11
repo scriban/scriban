@@ -211,6 +211,26 @@ This is a header
             TextAssert.AreEqual(expected, text);
         }
 
+        [Test]
+        public async Task TestIncludePromotedNamedArguments2WithStrictVariables_Async()
+        {
+            var template = Template.Parse("""
+                {{~
+                x = 'hey';
+                include 'named_arguments_promoted_2' x: 'hello' y: 'there'
+                ~}}
+                """);
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = true
+            };
+
+            var text = (await template.RenderAsync(context)).Replace("\r\n", "\n");
+            var expected = @"AheyBhelloChelloDthere";
+            TextAssert.AreEqual(expected, text);
+        }
+
         [TestCase(false)]
         [TestCase(true)]
         public void TestIncludePromotedNamedArguments_ArrayTypes(bool strictVariables)

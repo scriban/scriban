@@ -377,34 +377,28 @@ namespace Scriban
 
         public async ValueTask<string> RenderTemplateAsync(Template template, ScriptArray arguments, ScriptNode callerContext)
         {
-            // Fetch and remember any named argument values so they can be added as local variables for the template and then restored after rendering the template
-            var namedArguments = (callerContext as ScriptFunctionCall)?.Arguments.OfType<ScriptNamedArgument>().ToArray();
-            var previousNamedArgumentValues = new Dictionary<ScriptVariable, object>();
-            foreach (var v in namedArguments)
-            {
-                var name = v.Name.Name;
-                var namedArgumentVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
-                var value = await namedArgumentVariable.EvaluateAsync(this).ConfigureAwait(false);
-                previousNamedArgumentValues[v.Name] = value;
-            }
-
             // Make sure that we cannot recursively include a template
             string result = null;
             EnterRecursive(callerContext);
             var previousIndent = CurrentIndent;
             CurrentIndent = null;
             PushOutput();
-            var previousArguments = await GetValueAsync(ScriptVariable.Arguments).ConfigureAwait(false);
+            // Start new local variables scope
+            PushLocal();
             try
             {
                 SetValue(ScriptVariable.Arguments, arguments, true, true);
-                // Add local variables for each named argument
-                foreach (var kv in namedArguments)
+                var namedArguments = (callerContext as ScriptFunctionCall)?.Arguments.OfType<ScriptNamedArgument>();
+                if (namedArguments != null)
                 {
-                    var name = kv.Name.Name;
-                    var value = await kv.Value.EvaluateAsync(this).ConfigureAwait(false);
-                    var newLocalVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
-                    SetValue(variable: newLocalVariable, value: value, asReadOnly: false, force: true);
+                    // Add local variables for each named argument
+                    foreach (var kv in namedArguments)
+                    {
+                        var name = kv.Name.Name;
+                        var value = await kv.Value.EvaluateAsync(this).ConfigureAwait(false);
+                        var newLocalVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
+                        SetValue(variable: newLocalVariable, value: value, asReadOnly: false, force: true);
+                    }
                 }
                 if (previousIndent != null)
                 {
@@ -419,26 +413,10 @@ namespace Scriban
             }
             finally
             {
+                PopLocal();
                 PopOutput();
                 CurrentIndent = previousIndent;
                 ExitRecursive(callerContext);
-
-                // Remove the arguments
-                DeleteValue(ScriptVariable.Arguments);
-                if (previousArguments != null)
-                {
-                    // Restore them if necessary
-                    SetValue(ScriptVariable.Arguments, previousArguments, true);
-                }
-                // Remove the local variables we added for the named arguments and restore their previous value if necessary
-                foreach (var kv in previousNamedArgumentValues)
-                {
-                    DeleteValue(kv.Key);
-                    var name = kv.Key.Name;
-                    var value = kv.Value;
-                    var namedArgumentVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
-                    SetValue(variable: namedArgumentVariable, value: value, asReadOnly: false, force: true);
-                }
             }
             return result;
         }
