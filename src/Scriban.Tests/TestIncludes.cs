@@ -5,7 +5,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using NUnit.Framework;
 using Scriban.Functions;
 using Scriban.Parsing;
 using Scriban.Runtime;
@@ -148,24 +147,32 @@ This is a header
             TextAssert.AreEqual(expected, text);
         }
 
-        [Test]
-        public void TestIncludeNamedArguments()
+        [TestCase(false)]
+        [TestCase(true)]
+        public void TestIncludeNamedArguments(bool strictVariables)
         {
             var template = Template.Parse(@"{{ include 'named_arguments' this_arg: 5 }}");
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = strictVariables
+            };
 
             var text = template.Render(context).Replace("\r\n", "\n");
             var expected = @"5";
             TextAssert.AreEqual(expected, text);
         }
 
-        [Test]
-        public void TestIncludePromotedNamedArguments()
+        [TestCase(false)]
+        [TestCase(true)]
+        public void TestIncludePromotedNamedArguments(bool strictVariables)
         {
             var template = Template.Parse(@"{{ include 'named_arguments_promoted' this_arg: 5 }}");
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = strictVariables
+            };
 
             var text = template.Render(context).Replace("\r\n", "\n");
             var expected = @"5";
@@ -185,11 +192,35 @@ This is a header
         }
 
         [Test]
-        public void TestIncludePromotedNamedArguments_ArrayTypes()
+        public void TestIncludePromotedNamedArguments2WithStrictVariables()
+        {
+            var template = Template.Parse("""
+                {{~
+                x = 'hey';
+                include 'named_arguments_promoted_2' x: 'hello' y: 'there'
+                ~}}
+                """);
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = true
+            };
+
+            var text = template.Render(context).Replace("\r\n", "\n");
+            var expected = @"AheyBhelloChelloDthere";
+            TextAssert.AreEqual(expected, text);
+        }
+
+        [TestCase(false)]
+        [TestCase(true)]
+        public void TestIncludePromotedNamedArguments_ArrayTypes(bool strictVariables)
         {
             var template = Template.Parse( @"{{~ include 'named_arguments_promoted_array_types' [1,2,3] x: data y: [4,5,6] ~}}" );
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = strictVariables
+            };
             context.CurrentGlobal.SetValue( "data", new string[] { "one", "two", "three" }, true );
 
             var text = template.Render( context ).Replace( "\r\n", "\n" );
@@ -201,8 +232,9 @@ This is a header
             TextAssert.AreEqual( expected, text );
         }
 
-        [Test]
-        public void TestIncludePromotedNamedArguments_persist()
+        [TestCase(false)]
+        [TestCase(true)]
+        public void TestIncludePromotedNamedArguments_persist(bool strictVariables)
         {
             var rawTemplate = """
                 {{- for c in components1 -}}
@@ -211,8 +243,11 @@ This is a header
                 """;
 
             var template = Template.Parse( rawTemplate );
-            var context = new TemplateContext();
-            context.TemplateLoader = new CustomTemplateLoader();
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = strictVariables
+            };
             var model = new
             {
                 components1 = new object[] {
