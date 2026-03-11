@@ -425,8 +425,7 @@ namespace Scriban
 
         private void CheckVariableFound(ScriptVariable variable, bool found)
         {
-            //ScriptVariable.Arguments is a special "magic" variable which is not always present so ignore this
-            if (StrictVariables && !found && variable != ScriptVariable.Arguments)
+            if (StrictVariables && !found)
             {
                 throw new ScriptRuntimeException(variable.Span, $"The variable or function `{variable}` was not found");
             }
