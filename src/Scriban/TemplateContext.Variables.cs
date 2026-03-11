@@ -230,7 +230,7 @@ namespace Scriban
         /// <param name="variable">The variable to retrieve the value</param>
         /// <param name="value">Value of the variable</param>
         /// <returns>Contains <see langword="true"/> if the variable was found; otherwise, <see langword="false"/>.</returns>
-        private bool TryGetValue(ScriptVariable variable, out object value)
+        public bool TryGetValue(ScriptVariable variable, out object value)
         {
             if (variable == null) throw new ArgumentNullException(nameof(variable));
 
