@@ -1288,17 +1288,19 @@ namespace Scriban
 
         private Dictionary<string, object> FetchNamedArguments( ScriptNode callerContext )
         {
-            var namedArgumentsValues = new Dictionary<string, object>();
-            if (callerContext is ScriptFunctionCall functionCall)
+            if (!(callerContext is ScriptFunctionCall functionCall))
             {
-                foreach (var arg in functionCall.Arguments)
+                return null;
+            }
+
+            var namedArgumentsValues = new Dictionary<string, object>();
+            foreach (var arg in functionCall.Arguments)
+            {
+                if (arg is ScriptNamedArgument namedArg)
                 {
-                    if (arg is ScriptNamedArgument namedArg)
-                    {
-                        var name = namedArg.Name.Name;
-                        var value = namedArg.Value.Evaluate(this);
-                        namedArgumentsValues[name] = value;
-                    }
+                    var name = namedArg.Name.Name;
+                    var value = namedArg.Value.Evaluate(this);
+                    namedArgumentsValues[name] = value;
                 }
             }
             return namedArgumentsValues;
@@ -1319,11 +1321,15 @@ namespace Scriban
             try
             {
                 SetValue(ScriptVariable.Arguments, arguments, true, true);
-                // Add local variables for each named argument
-                foreach (var kv in namedArgumentsValues)
+
+                if (namedArgumentsValues != null)
                 {
-                    var newLocalVariable = ScriptVariable.Create(kv.Key, ScriptVariableScope.Local);
-                    SetValue(variable: newLocalVariable, value: kv.Value, asReadOnly: false, force: true);
+                    // Add local variables for each named argument
+                    foreach (var kv in namedArgumentsValues)
+                    {
+                        var newLocalVariable = ScriptVariable.Create(kv.Key, ScriptVariableScope.Local);
+                        SetValue(variable: newLocalVariable, value: kv.Value, asReadOnly: false, force: true);
+                    }
                 }
                 if (previousIndent != null)
                 {
