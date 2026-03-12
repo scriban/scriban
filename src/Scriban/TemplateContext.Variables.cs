@@ -80,6 +80,9 @@ namespace Scriban
             return store;
         }
 
+        /// <summary>
+        /// Creates a new context for local variables.
+        /// </summary>
         public void PushLocal()
         {
             PushVariableScope(VariableScope.Local);
