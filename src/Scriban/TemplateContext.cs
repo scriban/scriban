@@ -1288,7 +1288,7 @@ namespace Scriban
 
         private Dictionary<string, object> FetchNamedArguments( ScriptNode callerContext )
         {
-            if (!(callerContext is ScriptFunctionCall functionCall))
+            if (!(callerContext is ScriptFunctionCall functionCall) || functionCall.Arguments.Count == 0)
             {
                 return null;
             }
