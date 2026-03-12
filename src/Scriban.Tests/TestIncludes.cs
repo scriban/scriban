@@ -295,6 +295,69 @@ This is a header
             TextAssert.AreEqual( expected, text );
         }
 
+        [TestCase(false)]
+        [TestCase(true)]
+        public void TestIncludePromotedNamedArgumentsEvalCallerContext(bool strictVariables)
+        {
+            var model = new
+            {
+                table = new
+                {
+                    rows = new object[]
+                      {
+                            new
+                            {
+                                label = "Row 1",
+                                cells = new object[] {
+                                    new {
+                                        value = "Cell 1 1"
+                                    },
+                                    new {
+                                        value = "Cell 1 2"
+                                    },
+                                }
+                            },
+                            new
+                            {
+                                label = "Row 2",
+                                cells = new object[] {
+                                    new {
+                                        value = "Cell 2 1"
+                                    },
+                                    new {
+                                        value = "Cell 2 2"
+                                    },
+                                }
+                            },
+                      }
+                }
+            };
+
+            var template = Template.Parse(@"{{- include 'named_arguments_caller_ctx_table' _:table -}}");
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                StrictVariables = strictVariables
+            };
+
+            var data = ScriptObject.From(model);
+
+            context.PushGlobal(data);
+
+            var text = template.Render(context).Replace("\r\n", "\n");
+            var expected = """
+                ROW "Row 1" 
+                CELL CONTENT Cell 1 1
+                CELL CONTENT Cell 1 2
+                ROW "Row 2" 
+                CELL CONTENT Cell 2 1
+                CELL CONTENT Cell 2 2
+
+                """.Replace("\r\n", "\n");
+
+            TextAssert.AreEqual(expected, text);
+        }
+
         [Test]
         public void TestIndentedIncludes()
         {
