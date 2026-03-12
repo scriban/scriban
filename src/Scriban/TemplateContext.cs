@@ -1286,6 +1286,26 @@ namespace Scriban
             return template;
         }
 
+        private Dictionary<string, object> FetchNamedArguments( ScriptNode callerContext )
+        {
+            if (!(callerContext is ScriptFunctionCall functionCall) || functionCall.Arguments.Count == 0)
+            {
+                return null;
+            }
+
+            var namedArgumentsValues = new Dictionary<string, object>();
+            foreach (var arg in functionCall.Arguments)
+            {
+                if (arg is ScriptNamedArgument namedArg)
+                {
+                    var name = namedArg.Name.Name;
+                    var value = namedArg.Value.Evaluate(this);
+                    namedArgumentsValues[name] = value;
+                }
+            }
+            return namedArgumentsValues;
+        }
+
         public string RenderTemplate(Template template, ScriptArray arguments, ScriptNode callerContext)
         {
             // Make sure that we cannot recursively include a template
@@ -1294,21 +1314,21 @@ namespace Scriban
             var previousIndent = CurrentIndent;
             CurrentIndent = null;
             PushOutput();
+            // Fetch any named argument values before pushing a new local scope, i.e. use the current context for evaluating the named arguments
+            var namedArgumentsValues = FetchNamedArguments(callerContext);
             // Start new local variables scope
             PushLocal();
             try
             {
                 SetValue(ScriptVariable.Arguments, arguments, true, true);
-                var namedArguments = (callerContext as ScriptFunctionCall)?.Arguments.OfType<ScriptNamedArgument>();
-                if (namedArguments != null)
+
+                if (namedArgumentsValues != null)
                 {
                     // Add local variables for each named argument
-                    foreach (var kv in namedArguments)
+                    foreach (var kv in namedArgumentsValues)
                     {
-                        var name = kv.Name.Name;
-                        var value = kv.Value.Evaluate(this);
-                        var newLocalVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
-                        SetValue(variable: newLocalVariable, value: value, asReadOnly: false, force: true);
+                        var newLocalVariable = ScriptVariable.Create(kv.Key, ScriptVariableScope.Local);
+                        SetValue(variable: newLocalVariable, value: kv.Value, asReadOnly: false, force: true);
                     }
                 }
                 if (previousIndent != null)

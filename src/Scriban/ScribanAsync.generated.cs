@@ -292,6 +292,26 @@ namespace Scriban
             return await EvaluateAsync(scriptNode, false).ConfigureAwait(false);
         }
 
+        private async ValueTask<Dictionary<string, object>> FetchNamedArgumentsAsync(ScriptNode callerContext)
+        {
+            if (!(callerContext is ScriptFunctionCall functionCall))
+            {
+                return null;
+            }
+
+            var namedArgumentsValues = new Dictionary<string, object>();
+            foreach (var arg in functionCall.Arguments)
+            {
+                if (arg is ScriptNamedArgument namedArg)
+                {
+                    var name = namedArg.Name.Name;
+                    var value = await namedArg.Value.EvaluateAsync(this).ConfigureAwait(false);
+                    namedArgumentsValues[name] = value;
+                }
+            }
+            return namedArgumentsValues;
+        }
+
         public async ValueTask<Template> GetOrCreateTemplateAsync(string templatePath, ScriptNode callerContext)
         {
             if (!CachedTemplates.TryGetValue(templatePath, out var template))
@@ -383,21 +403,21 @@ namespace Scriban
             var previousIndent = CurrentIndent;
             CurrentIndent = null;
             PushOutput();
+            // Fetch any named argument values before pushing a new local scope, i.e. use the current context for evaluating the named arguments
+            var namedArgumentsValues = await FetchNamedArgumentsAsync(callerContext).ConfigureAwait(false);
             // Start new local variables scope
             PushLocal();
             try
             {
                 SetValue(ScriptVariable.Arguments, arguments, true, true);
-                var namedArguments = (callerContext as ScriptFunctionCall)?.Arguments.OfType<ScriptNamedArgument>();
-                if (namedArguments != null)
+
+                if (namedArgumentsValues != null)
                 {
                     // Add local variables for each named argument
-                    foreach (var kv in namedArguments)
+                    foreach (var kv in namedArgumentsValues)
                     {
-                        var name = kv.Name.Name;
-                        var value = await kv.Value.EvaluateAsync(this).ConfigureAwait(false);
-                        var newLocalVariable = ScriptVariable.Create(name, ScriptVariableScope.Local);
-                        SetValue(variable: newLocalVariable, value: value, asReadOnly: false, force: true);
+                        var newLocalVariable = ScriptVariable.Create(kv.Key, ScriptVariableScope.Local);
+                        SetValue(variable: newLocalVariable, value: kv.Value, asReadOnly: false, force: true);
                     }
                 }
                 if (previousIndent != null)

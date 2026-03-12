@@ -87,6 +87,27 @@ namespace Scriban.Tests
                 case "named_arguments_promoted_persist_2":
                     return "OUT({{- $_ -}})";
 
+                case "named_arguments_caller_ctx_table":
+                    return """
+                        {{ for r in table.rows ~}}
+                        ROW "{{r.label}}" {{ include 'named_arguments_caller_ctx_row' _:r }}
+                        {{ end }}
+                        """;
+
+                case "named_arguments_caller_ctx_row":
+                    return """
+                        {{ for c in $_.cells }}
+                        CELL {{ include 'named_arguments_caller_ctx_cell' _:c ~}}
+                        {{ end }}
+                        """;
+
+                case "named_arguments_caller_ctx_cell":
+                    return "CONTENT {{ include 'named_arguments_caller_ctx_content' _:$_ }}";
+
+                case "named_arguments_caller_ctx_content":
+                    return "{{ $_.value }}";
+
+
                 default:
                     return templatePath;
             }
