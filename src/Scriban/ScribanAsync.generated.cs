@@ -294,7 +294,7 @@ namespace Scriban
 
         private async ValueTask<Dictionary<string, object>> FetchNamedArgumentsAsync(ScriptNode callerContext)
         {
-            if (!(callerContext is ScriptFunctionCall functionCall))
+            if (!(callerContext is ScriptFunctionCall functionCall) || functionCall.Arguments.Count == 0)
             {
                 return null;
             }
