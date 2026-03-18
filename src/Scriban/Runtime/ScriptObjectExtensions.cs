@@ -9,12 +9,9 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Scriban.Parsing;
 using Scriban.Syntax;
-
-#if NET7_0_OR_GREATER
-using System.Text.Json;
-#endif
 
 namespace Scriban.Runtime
 {
@@ -71,19 +68,16 @@ namespace Scriban.Runtime
                 return;
             }
 
-#if NET7_0_OR_GREATER
-            if (obj is JsonElement json) {
+            if (obj is JsonElement json)
+            {
                 script.Import(json);
             }
-            else {
+            else
+            {
                 script.Import(obj, ScriptMemberImportFlags.All, filter, renamer);
             }
-#else
-            script.Import(obj, ScriptMemberImportFlags.All, filter, renamer);
-#endif
         }
 
-#if NET7_0_OR_GREATER
         public static void Import(this IScriptObject script, JsonElement json)
         {
             if (json.ValueKind is JsonValueKind.Object && script is ScriptObject)
@@ -103,7 +97,6 @@ namespace Scriban.Runtime
                 throw new ArgumentOutOfRangeException($"Unsupported object type `{json.ValueKind}`. Expecting Json {(script is ScriptObject ? "Object" : "Array")}.");
             }
         }
-#endif
 
         public static bool TryGetValue(this IScriptObject @this, string key, out object value)
         {
@@ -381,14 +374,10 @@ namespace Scriban.Runtime
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private static object ConvertValue(object value)
         {
-#if NET7_0_OR_GREATER
             return value switch {
                 JsonElement json => json.ToScriban(),
                 _ => value,
             };
-#else
-            return value;
-#endif
         }
     }
 }

@@ -128,8 +128,9 @@ If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, in order to co
 
 ```xml
 <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.5.0" />
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
 </ItemGroup>
 ```
 

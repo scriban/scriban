@@ -3,6 +3,7 @@
 
 using System;
 using System.Text.Json;
+using Scriban.Runtime;
 
 
 namespace Scriban.Tests.TestJsonSupport;
@@ -18,5 +19,17 @@ public class TestTemplateRenderJson {
         var result = template.Render(json);
 
         Assert.AreEqual("2", result);
+    }
+
+    [Test]
+    public void Template_render_accepts_script_object_created_from_json_element()
+    {
+        var json = JsonSerializer.Deserialize<JsonElement>("""{ "foo": "bar" }""");
+        var model = ScriptObject.From(json);
+
+        var template = Template.Parse("foo: `{{ foo }}`");
+        var result = template.Render(model);
+
+        Assert.AreEqual("foo: `bar`", result);
     }
 }

@@ -213,6 +213,16 @@ To enable source embedding:
 ```
 
 > **Note:** In source-embedding mode, all Scriban types become `internal`.
+>
+> If your project targets `netstandard2.0` or `.NET Framework 4.7.2+`, also add the supporting packages that Scriban's sources compile against:
+>
+> ```xml
+> <ItemGroup>
+>   <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+>   <PackageReference Include="System.Text.Json" Version="8.0.5" />
+>   <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+> </ItemGroup>
+> ```
 
 ## What's next?
 

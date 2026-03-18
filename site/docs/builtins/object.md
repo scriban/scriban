@@ -392,7 +392,7 @@ object.from_json <json>
 
 #### Description
 
-Converts the json to a scriban value. Object, Array, string, etc. Only available in net7.0+
+Converts the json to a scriban value. Object, Array, string, etc.
 
 #### Arguments
 
@@ -424,7 +424,7 @@ object.to_json <value>
 
 #### Description
 
-Converts the scriban value to JSON. Only available in net7.0+
+Converts the scriban value to JSON.
 
 #### Arguments
 

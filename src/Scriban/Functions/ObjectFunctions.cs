@@ -11,15 +11,12 @@ using System.Globalization;
 using System.IO;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Runtime.Accessors;
 using Scriban.Syntax;
-
-#if NET7_0_OR_GREATER
-using System.Text.Json;
-#endif
 
 namespace Scriban.Functions
 {
@@ -437,9 +434,8 @@ namespace Scriban.Functions
             return scriptArray;
         }
 
-#if NET7_0_OR_GREATER
         /// <summary>
-        /// Converts the json to a scriban value. Object, Array, string, etc. Only available in net7.0+
+        /// Converts the json to a scriban value. Object, Array, string, etc.
         /// </summary>
         /// <param name="context">The template context</param>
         /// <param name="json">The json to deserialize.</param>
@@ -461,7 +457,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Converts the scriban value to JSON. Only available in net7.0+
+        /// Converts the scriban value to JSON.
         /// </summary>
         /// <param name="context">The template context</param>
         /// <param name="value">The input object.</param>
@@ -531,7 +527,6 @@ namespace Scriban.Functions
                 }
             }
         }
-#endif
 
     }
 }
