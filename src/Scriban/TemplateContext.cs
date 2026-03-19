@@ -145,7 +145,7 @@ namespace Scriban
             LoopLimit = 1000;
             RecursiveLimit = 100;
             LimitToString = 0;
-            ObjectRecursionLimit = 0;
+            ObjectRecursionLimit = 20;
             MemberRenamer = StandardMemberRenamer.Default;
 
             RegexTimeOut = TimeSpan.FromSeconds(10);
@@ -243,7 +243,7 @@ namespace Scriban
         public int LimitToString { get; set; }
 
         /// <summary>
-        /// Gets or sets the maximum recursion depth while traversing an object graph during the ToString operation.  Default is 0, no limit
+        /// Gets or sets the maximum recursion depth while traversing an object graph during the ToString operation.  Default is 20.
         /// </summary>
         public int ObjectRecursionLimit { get; set; }
 
