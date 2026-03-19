@@ -144,7 +144,7 @@ namespace Scriban
             IndentOnEmptyLines = true;
             LoopLimit = 1000;
             RecursiveLimit = 100;
-            LimitToString = 0;
+            LimitToString = 1048576;
             ObjectRecursionLimit = 20;
             MemberRenamer = StandardMemberRenamer.Default;
 
@@ -238,7 +238,7 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Gets or sets the buffer limit in characters for a ToString in a list/string. Default is 0, no limit.
+        /// Gets or sets the buffer limit in characters for a ToString in a list/string. Default is 1048576 (1 MB).
         /// </summary>
         public int LimitToString { get; set; }
 

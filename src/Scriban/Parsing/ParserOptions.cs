@@ -17,7 +17,7 @@ namespace Scriban.Parsing
         /// <summary>
         /// Sets the depth limit of nested statements (e.g nested if/else) to disallow deep/potential stack-overflow exploits. Default is 250.
         /// </summary>
-        public int? ExpressionDepthLimit { get; set; } = 250;
+        public int? ExpressionDepthLimit { get; set; }
 
         /// <summary>
         /// <c>true</c> to convert liquid builtin function calls to scriban function calls (e.g abs = math.abs, downcase = string.downcase)

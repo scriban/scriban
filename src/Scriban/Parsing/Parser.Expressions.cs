@@ -235,7 +235,7 @@ namespace Scriban.Parsing
                     {
                         NextToken(); // Skip the comma for arguments in a function call
                     }
-                    
+
                     // Parse Member expression are expected to be followed only by an identifier
                     if (Current.Type == TokenType.Dot || (!_isLiquid && Current.Type == TokenType.QuestionDot))
                     {
@@ -1000,10 +1000,10 @@ namespace Scriban.Parsing
                     expression.Parts.Add(ParseInterpolatedStringPart());
                 }
             }
-            
+
             return Close(expression);
         }
-        
+
         private ScriptExpression ParseInterpolatedExpression()
         {
             var expression = Open<ScriptInterpolatedExpression>();
@@ -1021,7 +1021,7 @@ namespace Scriban.Parsing
             }
             return Close(expression);
         }
-        
+
         private ScriptToken ParseToken(TokenType tokenType)
         {
             var verbatim = Open<ScriptToken>();
@@ -1175,9 +1175,10 @@ namespace Scriban.Parsing
         private void EnterExpression()
         {
             _expressionDepth++;
-            if (Options.ExpressionDepthLimit.HasValue && !_isExpressionDepthLimitReached && _expressionDepth > Options.ExpressionDepthLimit.Value)
+            var limit = Options.ExpressionDepthLimit ?? 250;
+            if (limit > 0 && !_isExpressionDepthLimitReached && _expressionDepth > limit)
             {
-                LogError(GetSpanForToken(Previous), $"The statement depth limit `{Options.ExpressionDepthLimit.Value}` was reached when parsing this statement");
+                LogError(GetSpanForToken(Previous), $"The statement depth limit `{limit}` was reached when parsing this statement");
                 _isExpressionDepthLimitReached = true;
             }
         }
