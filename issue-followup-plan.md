@@ -6,7 +6,9 @@ Issues `#625`, `#453`, `#529`, `#209`, and `#368` are fixed locally by the chang
 
 Issue `#553` is being closed without a code change because `{{~ ... }}` shows the same indentation-trimming behavior at top level, so this does not appear to be a caller-indent regression specific to function rendering.
 
-The 5 issues below remain open because they need an explicit design decision before any code change is worth doing, or are low-priority cleanup items better closed later.
+Issues `#284` and `#446` are also closed now as low-priority maintenance backlog items that are better handled outside the issue tracker.
+
+The 3 issues below remain open because they need an explicit design decision before any code change is worth doing.
 
 Default stance for the next pass:
 
@@ -70,29 +72,7 @@ Recommendation:
 
 - If broader support is not actually desired, close this instead of expanding the surface area.
 
-## 4. Internal maintenance and low-priority backlog
-
-### #284 Cleanup codegen
-
-Status: still reasonable internal debt, but not a user-facing bug.
-
-Suggested action:
-
-- Only pursue this if there is already active work in the generators.
-- Otherwise it can be closed later and tracked outside the issue tracker.
-
-### #446 Benchmarks are outdated
-
-Status: low priority.
-
-Suggested action:
-
-- Revisit only after performance work or before a benchmark-focused refresh.
-- Otherwise this can likely be closed as stale, especially now that #367 was closed as the older duplicate.
-
 ## Suggested review order
 
 1. #188 and #405 together
 2. #513
-3. #284
-4. #446
