@@ -10,6 +10,7 @@ using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using NUnit.Framework;
@@ -171,6 +172,83 @@ namespace Scriban.Tests
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
 
             StringAssert.Contains("LimitToString", exception!.Message);
+        }
+
+        [Test]
+        public void ArraySizeShouldRespectLoopLimitForInternalIteration()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 5
+            };
+            context.PushGlobal(new ScriptObject
+            {
+                { "numbers", Enumerable.Range(0, 10) }
+            });
+
+            var template = Template.Parse("{{ numbers | array.size }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("iteration limit `5`", exception!.Message);
+        }
+
+        [Test]
+        public void ArrayJoinShouldRespectLoopLimitForInternalIteration()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 5
+            };
+            context.PushGlobal(new ScriptObject
+            {
+                { "numbers", Enumerable.Range(0, 10) }
+            });
+
+            var template = Template.Parse("{{ numbers | array.join '' }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("iteration limit `5`", exception!.Message);
+        }
+
+        [Test]
+        public void ArrayOffsetShouldRespectLoopLimitForInternalIteration()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 5
+            };
+            context.PushGlobal(new ScriptObject
+            {
+                { "numbers", Enumerable.Range(0, 10) }
+            });
+
+            var template = Template.Parse("{{ numbers | array.offset 8 | array.first }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("iteration limit `5`", exception!.Message);
+        }
+
+        [Test]
+        public void InternalArrayEnumerationShouldCheckCancellation()
+        {
+            using var cancellation = new CancellationTokenSource();
+            cancellation.Cancel();
+
+            var context = new TemplateContext
+            {
+                CancellationToken = cancellation.Token
+            };
+            context.PushGlobal(new ScriptObject
+            {
+                { "numbers", Enumerable.Range(0, 10) }
+            });
+
+            var template = Template.Parse("{{ numbers | array.size }}");
+
+            Assert.Throws<ScriptAbortException>(() => template.Render(context));
         }
 
         [Test]

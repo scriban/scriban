@@ -1,5 +1,5 @@
 // ----------------------------------------------------------------------------------
-// This file was automatically generated - 03/21/2026 07:12:59 by Scriban.DelegateCodeGen
+// This file was automatically generated - 03/21/2026 07:41:46 by Scriban.DelegateCodeGen
 // DOT NOT EDIT THIS FILE MANUALLY
 // ----------------------------------------------------------------------------------
 
@@ -32,6 +32,7 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Empty), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(string) }, null), method => new Functionbool_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Whitespace), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(string) }, null), method => new Functionbool_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Any), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable), typeof(object), typeof(Object[]) }, null), method => new Functionbool_TemplateContext_SourceSpan_IEnumerable_object_objectArray(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Contains), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable), typeof(object) }, null), method => new Functionbool_TemplateContext_SourceSpan_IEnumerable_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetMethod(nameof(Scriban.Functions.DateTimeFunctions.Now), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, Type.EmptyTypes, null), method => new FunctionDateTime(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetMethod(nameof(Scriban.Functions.DateTimeFunctions.AddDays), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(DateTime), typeof(double) }, null), method => new FunctionDateTime_DateTime_double(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.DateTimeFunctions).GetMethod(nameof(Scriban.Functions.DateTimeFunctions.AddHours), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(DateTime), typeof(double) }, null), method => new FunctionDateTime_DateTime_double(method));
@@ -53,16 +54,25 @@ namespace Scriban.Runtime
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Reverse), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(IEnumerable) }, null), method => new FunctionIEnumerable_IEnumerable(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Uniq), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(IEnumerable) }, null), method => new FunctionIEnumerable_IEnumerable(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Split), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(string), typeof(string) }, null), method => new FunctionIEnumerable_string_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.AddRange), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable), typeof(IEnumerable) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Concat), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable), typeof(IEnumerable) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Limit), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable), typeof(int) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable_int(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Offset), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable), typeof(int) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable_int(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Compact), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Reverse), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Uniq), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Sort), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(object), typeof(string) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Map), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(object), typeof(string) }, null), method => new FunctionIEnumerable_TemplateContext_SourceSpan_object_string(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.RemoveAt), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(IList), typeof(int) }, null), method => new FunctionIList_IList_int(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Size), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(IEnumerable) }, null), method => new Functionint_IEnumerable(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Size), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(object) }, null), method => new Functionint_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.StringFunctions).GetMethod(nameof(Scriban.Functions.StringFunctions.Size), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(string) }, null), method => new Functionint_string(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Size), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable) }, null), method => new Functionint_TemplateContext_SourceSpan_IEnumerable(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.First), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(IEnumerable) }, null), method => new Functionobject_IEnumerable(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Last), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(IEnumerable) }, null), method => new Functionobject_IEnumerable(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ObjectFunctions).GetMethod(nameof(Scriban.Functions.ObjectFunctions.Default), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(object), typeof(object) }, null), method => new Functionobject_object_object(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetMethod(nameof(Scriban.Functions.MathFunctions.DividedBy), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(double), typeof(object) }, null), method => new Functionobject_TemplateContext_SourceSpan_double_object(method));
+            BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Last), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IEnumerable) }, null), method => new Functionobject_TemplateContext_SourceSpan_IEnumerable(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.ArrayFunctions).GetMethod(nameof(Scriban.Functions.ArrayFunctions.Cycle), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(IList), typeof(object) }, null), method => new Functionobject_TemplateContext_SourceSpan_IList_object___Opt(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetMethod(nameof(Scriban.Functions.MathFunctions.Random), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(int), typeof(int) }, null), method => new Functionobject_TemplateContext_SourceSpan_int_int(method));
             BuiltinFunctionDelegates.Add(typeof(Scriban.Functions.MathFunctions).GetMethod(nameof(Scriban.Functions.MathFunctions.Minus), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, new[] { typeof(TemplateContext), typeof(SourceSpan), typeof(object), typeof(object) }, null), method => new Functionobject_TemplateContext_SourceSpan_object_object(method));
@@ -255,6 +265,29 @@ namespace Scriban.Runtime
                 var arg2 = ((ScriptArray)arguments[2]).ToArray();
 
                 return _delegate(context, callerContext.Span, arg0, arg1, arg2);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: bool (TemplateContext, SourceSpan, IEnumerable, object)
+        /// </summary>
+        private partial class Functionbool_TemplateContext_SourceSpan_IEnumerable_object : DynamicCustomFunction
+        {
+            private delegate bool InternalDelegate(TemplateContext arg0, SourceSpan arg1, IEnumerable arg2, object arg3);
+
+            private readonly InternalDelegate _delegate;
+
+            public Functionbool_TemplateContext_SourceSpan_IEnumerable_object(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (IEnumerable)arguments[0];
+                var arg1 = (object)arguments[1];
+
+                return _delegate(context, callerContext.Span, arg0, arg1);
             }
         }
 
@@ -509,6 +542,74 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
+        /// Optimized custom function for: IEnumerable (TemplateContext, SourceSpan, IEnumerable, IEnumerable)
+        /// </summary>
+        private partial class FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable_IEnumerable : DynamicCustomFunction
+        {
+            private delegate IEnumerable InternalDelegate(TemplateContext arg0, SourceSpan arg1, IEnumerable arg2, IEnumerable arg3);
+
+            private readonly InternalDelegate _delegate;
+
+            public FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable_IEnumerable(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (IEnumerable)arguments[0];
+                var arg1 = (IEnumerable)arguments[1];
+
+                return _delegate(context, callerContext.Span, arg0, arg1);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: IEnumerable (TemplateContext, SourceSpan, IEnumerable, int)
+        /// </summary>
+        private partial class FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable_int : DynamicCustomFunction
+        {
+            private delegate IEnumerable InternalDelegate(TemplateContext arg0, SourceSpan arg1, IEnumerable arg2, int arg3);
+
+            private readonly InternalDelegate _delegate;
+
+            public FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable_int(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (IEnumerable)arguments[0];
+                var arg1 = (int)arguments[1];
+
+                return _delegate(context, callerContext.Span, arg0, arg1);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: IEnumerable (TemplateContext, SourceSpan, IEnumerable)
+        /// </summary>
+        private partial class FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable : DynamicCustomFunction
+        {
+            private delegate IEnumerable InternalDelegate(TemplateContext arg0, SourceSpan arg1, IEnumerable arg2);
+
+            private readonly InternalDelegate _delegate;
+
+            public FunctionIEnumerable_TemplateContext_SourceSpan_IEnumerable(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (IEnumerable)arguments[0];
+
+                return _delegate(context, callerContext.Span, arg0);
+            }
+        }
+
+        /// <summary>
         /// Optimized custom function for: IEnumerable (TemplateContext, SourceSpan, object, string = ...)
         /// </summary>
         private partial class FunctionIEnumerable_TemplateContext_SourceSpan_object_string___Opt : DynamicCustomFunction
@@ -644,6 +745,28 @@ namespace Scriban.Runtime
         }
 
         /// <summary>
+        /// Optimized custom function for: int (TemplateContext, SourceSpan, IEnumerable)
+        /// </summary>
+        private partial class Functionint_TemplateContext_SourceSpan_IEnumerable : DynamicCustomFunction
+        {
+            private delegate int InternalDelegate(TemplateContext arg0, SourceSpan arg1, IEnumerable arg2);
+
+            private readonly InternalDelegate _delegate;
+
+            public Functionint_TemplateContext_SourceSpan_IEnumerable(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (IEnumerable)arguments[0];
+
+                return _delegate(context, callerContext.Span, arg0);
+            }
+        }
+
+        /// <summary>
         /// Optimized custom function for: object (IEnumerable)
         /// </summary>
         private partial class Functionobject_IEnumerable : DynamicCustomFunction
@@ -708,6 +831,28 @@ namespace Scriban.Runtime
                 var arg1 = (object)arguments[1];
 
                 return _delegate(context, callerContext.Span, arg0, arg1);
+            }
+        }
+
+        /// <summary>
+        /// Optimized custom function for: object (TemplateContext, SourceSpan, IEnumerable)
+        /// </summary>
+        private partial class Functionobject_TemplateContext_SourceSpan_IEnumerable : DynamicCustomFunction
+        {
+            private delegate object InternalDelegate(TemplateContext arg0, SourceSpan arg1, IEnumerable arg2);
+
+            private readonly InternalDelegate _delegate;
+
+            public Functionobject_TemplateContext_SourceSpan_IEnumerable(MethodInfo method) : base(method)
+            {
+                _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
+            }
+
+            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            {
+                var arg0 = (IEnumerable)arguments[0];
+
+                return _delegate(context, callerContext.Span, arg0);
             }
         }
 

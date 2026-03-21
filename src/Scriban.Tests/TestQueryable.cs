@@ -250,5 +250,25 @@ end
 
             TextAssert.AreEqual("0123456789", result);
         }
+
+        [Test]
+        public void TestQueryableArraySizeUsesQueryableLoopLimit()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 5,
+                LoopLimitQueryable = 6,
+            };
+            context.PushGlobal(new ScriptObject
+            {
+                { "data", Enumerable.Range(0, 10).AsQueryable() }
+            });
+
+            var template = Template.Parse("{{ data | array.size }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            TextAssert.AreEqual("<input>(1,11) : error : Exceeding number of iteration limit `6` for internal iteration.", exception.Message);
+        }
     }
 }

@@ -1121,6 +1121,21 @@ namespace Scriban
             Queryable
         }
 
+        internal void StepLoop(SourceSpan span, ref int loopStep, LoopType loopType = LoopType.Default)
+        {
+            CheckAbort();
+
+            loopStep++;
+            var loopLimit = loopType == LoopType.Queryable
+                ? LoopLimitQueryable.GetValueOrDefault(LoopLimit)
+                : LoopLimit;
+
+            if (loopLimit != 0 && loopStep > loopLimit)
+            {
+                throw new ScriptRuntimeException(span, $"Exceeding number of iteration limit `{loopLimit}` for internal iteration.");
+            }
+        }
+
         internal bool StepLoop(ScriptLoopStatementBase loop, LoopType loopType = LoopType.Default)
         {
             Debug.Assert(_loops.Count > 0);
