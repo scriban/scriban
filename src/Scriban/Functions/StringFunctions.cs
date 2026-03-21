@@ -1178,9 +1178,31 @@ namespace Scriban.Functions
         /// hello     world
         /// ```
         /// </remarks>
+        [ScriptMemberIgnore]
         public static string PadLeft(string text, int width)
         {
             return (text ?? string.Empty).PadLeft(width);
+        }
+
+        /// <summary>
+        /// Pads a string with leading spaces to a specified total length.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="text">The input string</param>
+        /// <param name="width">The number of characters in the resulting string</param>
+        /// <returns>The input string padded</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// hello{{ "world" | string.pad_left 10 }}
+        /// ```
+        /// ```html
+        /// hello     world
+        /// ```
+        /// </remarks>
+        public static string PadLeft(TemplateContext context, string text, int width)
+        {
+            VerifyPaddingWidth(context, width);
+            return PadLeft(text, width);
         }
 
         /// <summary>
@@ -1197,9 +1219,41 @@ namespace Scriban.Functions
         /// hello     world
         /// ```
         /// </remarks>
+        [ScriptMemberIgnore]
         public static string PadRight(string text, int width)
         {
             return (text ?? string.Empty).PadRight(width);
+        }
+
+        /// <summary>
+        /// Pads a string with trailing spaces to a specified total length.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="text">The input string</param>
+        /// <param name="width">The number of characters in the resulting string</param>
+        /// <returns>The input string padded</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "hello" | string.pad_right 10 }}world
+        /// ```
+        /// ```html
+        /// hello     world
+        /// ```
+        /// </remarks>
+        public static string PadRight(TemplateContext context, string text, int width)
+        {
+            VerifyPaddingWidth(context, width);
+            return PadRight(text, width);
+        }
+
+        private static void VerifyPaddingWidth(TemplateContext context, int width)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            if (context.LimitToString > 0 && width > context.LimitToString)
+            {
+                throw new ArgumentOutOfRangeException(nameof(width), $"Padding width `{width}` exceeds the configured LimitToString `{context.LimitToString}`.");
+            }
         }
 
         /// <summary>

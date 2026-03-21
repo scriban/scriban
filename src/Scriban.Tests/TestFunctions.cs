@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Scriban.Functions;
+using Scriban.Syntax;
 
 namespace Scriban.Tests
 {
@@ -164,6 +165,42 @@ namespace Scriban.Tests
                     "Hello, world. Goodbye, world.",    // expected
                 },
             };
+
+            [Test]
+            public void TestPadLeft()
+            {
+                var template = Template.Parse("{{ 'world' | string.pad_left 10 }}");
+                var result = template.Render();
+                Assert.AreEqual("     world", result);
+            }
+
+            [Test]
+            public void TestPadRight()
+            {
+                var template = Template.Parse("{{ 'hello' | string.pad_right 10 }}");
+                var result = template.Render();
+                Assert.AreEqual("hello     ", result);
+            }
+
+            [Test]
+            public void TestPadLeftRespectsLimitToString()
+            {
+                var template = Template.Parse("{{ 'x' | string.pad_left 4 }}");
+                var context = new TemplateContext { LimitToString = 3 };
+
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                StringAssert.Contains("LimitToString", exception!.Message);
+            }
+
+            [Test]
+            public void TestPadRightRespectsLimitToString()
+            {
+                var template = Template.Parse("{{ 'x' | string.pad_right 4 }}");
+                var context = new TemplateContext { LimitToString = 3 };
+
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                StringAssert.Contains("LimitToString", exception!.Message);
+            }
         }
 
         public class Math

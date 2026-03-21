@@ -72,7 +72,8 @@ namespace Scriban.Runtime
                 {
                     var name = "Function" + GetSignature(method, SignatureMode.Name);
                     var methodName = method.Name;
-                    _writer.WriteLine($@"            BuiltinFunctionDelegates.Add(typeof({method.DeclaringType.FullName}).GetMethod(nameof({method.DeclaringType.FullName}.{methodName}), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly), method => new {name}(method));");
+                    var parameterTypes = GetReflectionParameterTypes(method);
+                    _writer.WriteLine($@"            BuiltinFunctionDelegates.Add(typeof({method.DeclaringType.FullName}).GetMethod(nameof({method.DeclaringType.FullName}.{methodName}), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, {parameterTypes}, null), method => new {name}(method));");
                 }
             }
             _writer.Write(@"
@@ -266,6 +267,30 @@ namespace Scriban.Runtime
                 text.Append(")");
             }
 
+            return text.ToString();
+        }
+
+        private static string GetReflectionParameterTypes(MethodDefinition method)
+        {
+            if (method.Parameters.Count == 0)
+            {
+                return "Type.EmptyTypes";
+            }
+
+            var text = new StringBuilder("new[] { ");
+            for (var i = 0; i < method.Parameters.Count; i++)
+            {
+                if (i > 0)
+                {
+                    text.Append(", ");
+                }
+
+                text.Append("typeof(");
+                text.Append(PrettyType(method.Parameters[i].ParameterType));
+                text.Append(")");
+            }
+
+            text.Append(" }");
             return text.ToString();
         }
 
