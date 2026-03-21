@@ -299,7 +299,42 @@ namespace Scriban
             return value;
         }
 
+        internal object AwaitIfNeeded(object value)
+        {
+            return value;
+        }
+
 #if !SCRIBAN_NO_ASYNC
+        internal async ValueTask<object> AwaitIfNeededAsync(object value)
+        {
+            if (value is null)
+            {
+                return null;
+            }
+
+            if (value is Task task)
+            {
+                await task.ConfigureAwait(false);
+                return task.GetType().GetProperty(nameof(Task<object>.Result))?.GetValue(task);
+            }
+
+            if (value is ValueTask valueTask)
+            {
+                await valueTask.ConfigureAwait(false);
+                return null;
+            }
+
+            var type = value.GetType();
+            if (type.IsValueType && type.IsGenericType && type.GetGenericTypeDefinition() == typeof(ValueTask<>))
+            {
+                var awaitedTask = (Task)type.GetMethod(nameof(ValueTask<object>.AsTask), Type.EmptyTypes).Invoke(value, null);
+                await awaitedTask.ConfigureAwait(false);
+                return awaitedTask.GetType().GetProperty(nameof(Task<object>.Result))?.GetValue(awaitedTask);
+            }
+
+            return value;
+        }
+
         public ValueTask<object> GetValueAsync(ScriptVariableGlobal variable)
         {
             return new ValueTask<object>(GetValue(variable));

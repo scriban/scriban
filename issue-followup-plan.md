@@ -2,11 +2,11 @@
 
 This cleanup pass closed 55 old issues that were stale, already answered, resolved in current Scriban, or outside the scope of core Scriban.
 
-Issues `#625`, `#453`, `#529`, and `#209` are fixed locally by the changes in this pass.
+Issues `#625`, `#453`, `#529`, `#209`, and `#368` are fixed locally by the changes in this pass.
 
 Issue `#553` is being closed without a code change because `{{~ ... }}` shows the same indentation-trimming behavior at top level, so this does not appear to be a caller-indent regression specific to function rendering.
 
-The 6 issues below remain open because they need an explicit design decision before any code change is worth doing, or are low-priority cleanup items better closed later.
+The 5 issues below remain open because they need an explicit design decision before any code change is worth doing, or are low-priority cleanup items better closed later.
 
 Default stance for the next pass:
 
@@ -52,19 +52,6 @@ Suggested action:
 - Decide whether stable sorting and/or multi-key sorting are worth adding.
 - If work is approved, combine the design with #188 so `array.sort` changes happen in one pass.
 
-### #368 Possible to Support Async members in RenderAsync?
-
-Status: still valid.
-
-Evidence:
-
-- `await Template.Parse("Hello {{ value }}").RenderAsync(new { value = Task.FromResult(42) })` still renders `Hello System.Threading.Tasks.Task\`1[System.Int32]`.
-
-Suggested action:
-
-- Decide whether `RenderAsync` should auto-await arbitrary model values, only imported async functions, or not at all.
-- Only implement after agreeing on the exact behavior and compatibility impact.
-
 ### #513 Support For DateOnly and TimeOnly
 
 Status: partially covered only.
@@ -106,7 +93,6 @@ Suggested action:
 ## Suggested review order
 
 1. #188 and #405 together
-2. #368
-3. #513
-4. #284
-5. #446
+2. #513
+3. #284
+4. #446

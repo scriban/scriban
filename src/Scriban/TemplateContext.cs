@@ -696,6 +696,7 @@ namespace Scriban
         {
             if (textAsObject != null)
             {
+                textAsObject = AwaitIfNeeded(textAsObject);
                 var text = ObjectToString(textAsObject);
                 Write(text);
             }
@@ -1237,6 +1238,8 @@ namespace Scriban
             {
                 throw new ScriptRuntimeException(targetExpression.Span, $"Unexpected exception while accessing target expression: {readonlyException.Message}", readonlyException);
             }
+
+            value = AwaitIfNeeded(value);
 
             // If the variable being returned is a function, we need to evaluate it
             // If function call is disabled, it will be only when returning the final object (level 0 of recursion)

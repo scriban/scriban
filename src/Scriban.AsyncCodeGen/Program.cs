@@ -409,6 +409,43 @@ using System.Numerics;
                             return awaitCall;
                         });
 
+                        method = method.ReplaceNodes(
+                            method.DescendantNodes()
+                                .OfType<InvocationExpressionSyntax>()
+                                .Where(callSite =>
+                                    callSite.Expression is IdentifierNameSyntax identifier && identifier.Identifier.Text == "AwaitIfNeeded"
+                                    || callSite.Expression is MemberAccessExpressionSyntax memberAccess && memberAccess.Name.Identifier.Text == "AwaitIfNeeded"),
+                            (callSite, _) =>
+                            {
+                                var leadingTrivia = callSite.GetLeadingTrivia();
+                                var newCallSite = callSite.WithLeadingTrivia(Space);
+
+                                switch (newCallSite.Expression)
+                                {
+                                    case IdentifierNameSyntax identifier:
+                                        newCallSite = newCallSite.WithExpression(identifier.WithIdentifier(Identifier(identifier.Identifier.Text + "Async")));
+                                        break;
+                                    case MemberAccessExpressionSyntax memberAccess:
+                                        newCallSite = newCallSite.WithExpression(memberAccess.WithName(IdentifierName(memberAccess.Name + "Async")));
+                                        break;
+                                    default:
+                                        return callSite;
+                                }
+
+                                return AwaitExpression(
+                                        InvocationExpression(
+                                                MemberAccessExpression(
+                                                    SyntaxKind.SimpleMemberAccessExpression,
+                                                    newCallSite,
+                                                    IdentifierName("ConfigureAwait")))
+                                            .WithArgumentList(
+                                                ArgumentList(
+                                                    SingletonSeparatedList<ArgumentSyntax>(
+                                                        Argument(
+                                                            LiteralExpression(SyntaxKind.FalseLiteralExpression))))))
+                                    .WithAwaitKeyword(Token(leadingTrivia, SyntaxKind.AwaitKeyword, TriviaList(Space)));
+                            });
+
                         if (addCancellationToken)
                         {
                             method = method.WithParameterList(method.ParameterList.AddParameters(

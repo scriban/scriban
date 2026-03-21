@@ -80,6 +80,26 @@ v.value}}";
         Assert.That(valueResult, Is.EqualTo("ok"));
     }
 
+    [Test]
+    public async Task RenderAsyncShouldAwaitTaskMemberValues()
+    {
+        var template = Template.Parse("{{ value }}|{{ value + 1 }}");
+
+        var result = await template.RenderAsync(new { value = Task.FromResult(41) });
+
+        Assert.That(result, Is.EqualTo("41|42"));
+    }
+
+    [Test]
+    public async Task RenderAsyncShouldAwaitValueTaskMemberValues()
+    {
+        var template = Template.Parse("{{ value }}");
+
+        var result = await template.RenderAsync(new { value = ValueTask.FromResult("hello") });
+
+        Assert.That(result, Is.EqualTo("hello"));
+    }
+
     public class ValueWrapper
     {
         public string Value { get; set; }
