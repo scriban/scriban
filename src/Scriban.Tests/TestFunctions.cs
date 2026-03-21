@@ -74,6 +74,61 @@ namespace Scriban.Tests
             }
 
             [Test]
+            public void TestSortFallsBackToNestedMemberPath()
+            {
+                var context = new TemplateContext();
+                var lines = new ScriptArray
+                {
+                    new ScriptObject
+                    {
+                        { "department", "food" },
+                        { "product", new ScriptObject { { "name", "celery" } } },
+                    },
+                    new ScriptObject
+                    {
+                        { "department", "pets" },
+                        { "product", new ScriptObject { { "name", "dog" } } },
+                    },
+                    new ScriptObject
+                    {
+                        { "department", "bakery" },
+                        { "product", new ScriptObject { { "name", "bread" } } },
+                    },
+                };
+
+                var sorted = ArrayFunctions.Sort(context, new SourceSpan(), lines, "product.name");
+                var orderedDepartments = sorted.Cast<ScriptObject>().Select(item => (string)item["department"]).ToArray();
+
+                Assert.That(orderedDepartments, Is.EqualTo(new[] { "bakery", "food", "pets" }));
+            }
+
+            [Test]
+            public void TestSortPrefersExactDottedMemberOverNestedPath()
+            {
+                var context = new TemplateContext();
+                var lines = new ScriptArray
+                {
+                    new ScriptObject
+                    {
+                        { "department", "food" },
+                        { "product.name", "celery" },
+                        { "product", new ScriptObject { { "name", "sedano" } } },
+                    },
+                    new ScriptObject
+                    {
+                        { "department", "pets" },
+                        { "product.name", "dog" },
+                        { "product", new ScriptObject { { "name", "cane" } } },
+                    },
+                };
+
+                var sorted = ArrayFunctions.Sort(context, new SourceSpan(), lines, "product.name");
+                var orderedDepartments = sorted.Cast<ScriptObject>().Select(item => (string)item["department"]).ToArray();
+
+                Assert.That(orderedDepartments, Is.EqualTo(new[] { "food", "pets" }));
+            }
+
+            [Test]
             public void TestContains()
             {
                 var mixed = new object[] { "hi", 1, TestEnum.First };

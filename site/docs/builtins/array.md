@@ -600,7 +600,7 @@ Sorts the elements of the input `list` according to the value of each element or
 #### Arguments
 
 - `list`: The input list
-- `member`: The member name to sort according to its value. Null by default, meaning that the element's value are used instead.
+- `member`: The member name to sort according to its value. Null by default, meaning that the element's value are used instead. When an exact member is not found, dotted member names fall back to nested member access.
 
 #### Returns
 
@@ -609,6 +609,7 @@ A stably sorted list according to the value of each element or the value of the 
 #### Examples
 
 Equal values preserve their original relative order.
+Exact member names still take precedence over dotted-path fallback.
 
 Sorts by element's value:
 > **input** [Try out](/?template=%7B%7B%20%5B10%2C%202%2C%206%5D%20%7C%20array.sort%20%7D%7D&model=%7B%7D)

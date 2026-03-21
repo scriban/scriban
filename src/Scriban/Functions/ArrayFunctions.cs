@@ -752,10 +752,11 @@ namespace Scriban.Functions
         /// <param name="context">The template context</param>
         /// <param name="span">The source span</param>
         /// <param name="list">The input list</param>
-        /// <param name="member">The member name to sort according to its value. Null by default, meaning that the element's value are used instead.</param>
+        /// <param name="member">The member name to sort according to its value. Null by default, meaning that the element's value are used instead. When an exact member is not found, dotted member names fall back to nested member access.</param>
         /// <returns>A stably sorted list according to the value of each element or the value of the specified `member` of each element.</returns>
         /// <remarks>
         /// Equal values preserve their original relative order.
+        /// Exact member names still take precedence over dotted-path fallback.
         ///
         /// Sorts by element's value:
         /// ```scriban-html
@@ -813,14 +814,45 @@ namespace Scriban.Functions
 
         private static object GetSortValue(TemplateContext context, SourceSpan span, object target, string member)
         {
-            var accessor = context.GetMemberAccessor(target);
-
-            if (!accessor.TryGetValue(context, span, target, member, out var value))
+            if (TryGetSortValue(context, span, target, member, out var value))
             {
-                context.TryGetMember?.Invoke(context, span, target, member, out value);
+                return value;
             }
 
-            return value;
+            if (member.IndexOf('.') >= 0 && TryGetSortValueByPath(context, span, target, member.Split('.'), out value))
+            {
+                return value;
+            }
+
+            return null;
+        }
+
+        private static bool TryGetSortValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
+        {
+            var accessor = context.GetMemberAccessor(target);
+
+            if (accessor.TryGetValue(context, span, target, member, out value))
+            {
+                return true;
+            }
+
+            return context.TryGetMember?.Invoke(context, span, target, member, out value) ?? false;
+        }
+
+        private static bool TryGetSortValueByPath(TemplateContext context, SourceSpan span, object target, string[] pathMembers, out object value)
+        {
+            value = target;
+
+            foreach (var pathMember in pathMembers)
+            {
+                if (value == null || !TryGetSortValue(context, span, value, pathMember, out value))
+                {
+                    value = null;
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         [ScriptMemberIgnore]
