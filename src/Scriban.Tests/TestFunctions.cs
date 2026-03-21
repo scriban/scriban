@@ -201,6 +201,59 @@ namespace Scriban.Tests
                 var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
                 StringAssert.Contains("LimitToString", exception!.Message);
             }
+
+            [Test]
+            public void TestAppendRespectsLimitToString()
+            {
+                var template = Template.Parse("{{ 'abc' | string.append 'def' }}");
+                var context = new TemplateContext { LimitToString = 5 };
+
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                StringAssert.Contains("LimitToString", exception!.Message);
+            }
+
+            [Test]
+            public void TestPrependRespectsLimitToString()
+            {
+                var template = Template.Parse("{{ 'abc' | string.prepend 'def' }}");
+                var context = new TemplateContext { LimitToString = 5 };
+
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                StringAssert.Contains("LimitToString", exception!.Message);
+            }
+
+            [Test]
+            public void TestReplaceRespectsLimitToString()
+            {
+                // "aa" replacing each "a" with "bbb" produces "bbbbbb" (length 6)
+                var template = Template.Parse("{{ 'aa' | string.replace 'a' 'bbb' }}");
+                var context = new TemplateContext { LimitToString = 5 };
+
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                StringAssert.Contains("LimitToString", exception!.Message);
+            }
+
+            [Test]
+            public void TestReplaceFirstRespectsLimitToString()
+            {
+                // "ab" replacing "a" with "ccccc" produces "cccccb" (length 6)
+                var template = Template.Parse("{{ 'ab' | string.replace_first 'a' 'ccccc' }}");
+                var context = new TemplateContext { LimitToString = 5 };
+
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                StringAssert.Contains("LimitToString", exception!.Message);
+            }
+
+            [Test]
+            public void TestAppendDoublingLoopRespectsLimitToString()
+            {
+                // Doubling loop: x grows exponentially, should be caught by LimitToString
+                var template = Template.Parse("{{ x = 'a'; for i in 1..30; x = x | string.append x; end; x }}");
+                var context = new TemplateContext { LimitToString = 1000 };
+
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                StringAssert.Contains("LimitToString", exception!.Message);
+            }
         }
 
         public class Math

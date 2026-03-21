@@ -115,9 +115,16 @@ namespace Scriban.Functions
             return builder != null ? builder.ToString() : text;
         }
 
+        [ScriptMemberIgnore]
+        public static string Append(string text, string with)
+        {
+            return (text ?? string.Empty) + (with ?? string.Empty);
+        }
+
         /// <summary>
         /// Concatenates two strings
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="text">The input string</param>
         /// <param name="with">The text to append</param>
         /// <returns>The two strings concatenated</returns>
@@ -129,9 +136,12 @@ namespace Scriban.Functions
         /// Hello World
         /// ```
         /// </remarks>
-        public static string Append(string text, string with)
+        public static string Append(TemplateContext context, string text, string with)
         {
-            return (text ?? string.Empty) + (with ?? string.Empty);
+            var t = text ?? string.Empty;
+            var w = with ?? string.Empty;
+            VerifyResultStringLength(context, (long)t.Length + w.Length);
+            return t + w;
         }
 
         /// <summary>
@@ -425,9 +435,16 @@ namespace Scriban.Functions
             return number == 1 ? singular : plural;
         }
 
+        [ScriptMemberIgnore]
+        public static string Prepend(string text, string by)
+        {
+            return (by ?? string.Empty) + (text ?? string.Empty);
+        }
+
         /// <summary>
         /// Concatenates two strings by placing the `by` string in from of the `text` string
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="text">The input string</param>
         /// <param name="by">The string to prepend to `text`</param>
         /// <returns>The two strings concatenated</returns>
@@ -439,9 +456,12 @@ namespace Scriban.Functions
         /// Hello World
         /// ```
         /// </remarks>
-        public static string Prepend(string text, string by)
+        public static string Prepend(TemplateContext context, string text, string by)
         {
-            return (by ?? string.Empty) + (text ?? string.Empty);
+            var t = text ?? string.Empty;
+            var b = by ?? string.Empty;
+            VerifyResultStringLength(context, (long)b.Length + t.Length);
+            return b + t;
         }
 
         /// <summary>
@@ -505,21 +525,7 @@ namespace Scriban.Functions
             return ReplaceFirst(text, remove, string.Empty, true);
         }
 
-        /// <summary>
-        /// Replaces all occurrences of a string with a substring.
-        /// </summary>
-        /// <param name="text">The input string</param>
-        /// <param name="match">The substring to find in the `text` string</param>
-        /// <param name="replace">The substring used to replace the string matched by `match` in the input `text`</param>
-        /// <returns>The input string replaced</returns>
-        /// <remarks>
-        /// ```scriban-html
-        /// {{ "Hello, world. Goodbye, world." | string.replace "world" "buddy" }}
-        /// ```
-        /// ```html
-        /// Hello, buddy. Goodbye, buddy.
-        /// ```
-        /// </remarks>
+        [ScriptMemberIgnore]
         public static string Replace(string text, string match, string replace)
         {
             if (string.IsNullOrEmpty(text))
@@ -534,21 +540,29 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Replaces the first occurrence of a string with a substring.
+        /// Replaces all occurrences of a string with a substring.
         /// </summary>
+        /// <param name="context">The template context</param>
         /// <param name="text">The input string</param>
         /// <param name="match">The substring to find in the `text` string</param>
         /// <param name="replace">The substring used to replace the string matched by `match` in the input `text`</param>
-        /// <param name="fromEnd">if true start match from end</param>
         /// <returns>The input string replaced</returns>
         /// <remarks>
         /// ```scriban-html
-        /// {{ "Hello, world. Goodbye, world." | string.replace_first "world" "buddy" }}
+        /// {{ "Hello, world. Goodbye, world." | string.replace "world" "buddy" }}
         /// ```
         /// ```html
-        /// Hello, buddy. Goodbye, world.
+        /// Hello, buddy. Goodbye, buddy.
         /// ```
         /// </remarks>
+        public static string Replace(TemplateContext context, string text, string match, string replace)
+        {
+            var result = Replace(text, match, replace);
+            VerifyResultStringLength(context, result.Length);
+            return result;
+        }
+
+        [ScriptMemberIgnore]
         public static string ReplaceFirst(string text, string match, string replace, bool fromEnd = false)
         {
             if (string.IsNullOrEmpty(text))
@@ -578,6 +592,30 @@ namespace Scriban.Functions
 
             var result = builder.ToString();
             ReleaseBuilder(builder);
+            return result;
+        }
+
+        /// <summary>
+        /// Replaces the first occurrence of a string with a substring.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="text">The input string</param>
+        /// <param name="match">The substring to find in the `text` string</param>
+        /// <param name="replace">The substring used to replace the string matched by `match` in the input `text`</param>
+        /// <param name="fromEnd">if true start match from end</param>
+        /// <returns>The input string replaced</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "Hello, world. Goodbye, world." | string.replace_first "world" "buddy" }}
+        /// ```
+        /// ```html
+        /// Hello, buddy. Goodbye, world.
+        /// ```
+        /// </remarks>
+        public static string ReplaceFirst(TemplateContext context, string text, string match, string replace, bool fromEnd = false)
+        {
+            var result = ReplaceFirst(text, match, replace, fromEnd);
+            VerifyResultStringLength(context, result.Length);
             return result;
         }
 
@@ -1225,6 +1263,16 @@ namespace Scriban.Functions
             if (context.LimitToString > 0 && width > context.LimitToString)
             {
                 throw new ArgumentOutOfRangeException(nameof(width), $"Padding width `{width}` exceeds the configured LimitToString `{context.LimitToString}`.");
+            }
+        }
+
+        private static void VerifyResultStringLength(TemplateContext context, long length)
+        {
+            if (context == null) throw new ArgumentNullException(nameof(context));
+
+            if (context.LimitToString > 0 && length > context.LimitToString)
+            {
+                throw new InvalidOperationException($"The resulting string length exceeds the configured LimitToString `{context.LimitToString}`.");
             }
         }
 
