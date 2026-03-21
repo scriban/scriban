@@ -604,9 +604,11 @@ Sorts the elements of the input `list` according to the value of each element or
 
 #### Returns
 
-A list sorted according to the value of each element or the value of the specified `member` of each element.
+A stably sorted list according to the value of each element or the value of the specified `member` of each element.
 
 #### Examples
+
+Equal values preserve their original relative order.
 
 Sorts by element's value:
 > **input** [Try out](/?template=%7B%7B%20%5B10%2C%202%2C%206%5D%20%7C%20array.sort%20%7D%7D&model=%7B%7D)

@@ -2,13 +2,13 @@
 
 This cleanup pass closed 55 old issues that were stale, already answered, resolved in current Scriban, or outside the scope of core Scriban.
 
-Issues `#625`, `#453`, `#529`, `#209`, and `#368` are fixed locally by the changes in this pass.
+Issues `#625`, `#453`, `#529`, `#209`, `#368`, and `#405` are fixed locally by the changes in this pass.
 
 Issue `#553` is being closed without a code change because `{{~ ... }}` shows the same indentation-trimming behavior at top level, so this does not appear to be a caller-indent regression specific to function rendering.
 
 Issues `#284` and `#446` are also closed now as low-priority maintenance backlog items that are better handled outside the issue tracker.
 
-The 3 issues below remain open because they need an explicit design decision before any code change is worth doing.
+The 2 issues below remain open because they need an explicit design decision before any code change is worth doing.
 
 Default stance for the next pass:
 
@@ -39,20 +39,7 @@ Suggested action:
 
 Recommendation:
 
-- Review together with #405 because both change `array.sort` semantics.
-
-### #405 array.sort for multiple members and/or stable sort algorithm
-
-Status: still valid.
-
-Evidence:
-
-- `ArrayFunctions.Sort` still uses `List<object>.Sort()` and only a single sort key.
-
-Suggested action:
-
-- Decide whether stable sorting and/or multi-key sorting are worth adding.
-- If work is approved, combine the design with #188 so `array.sort` changes happen in one pass.
+- Revisit only the nested-member-path question now that stable sorting is fixed separately.
 
 ### #513 Support For DateOnly and TimeOnly
 
@@ -74,5 +61,5 @@ Recommendation:
 
 ## Suggested review order
 
-1. #188 and #405 together
+1. #188
 2. #513

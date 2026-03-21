@@ -753,8 +753,10 @@ namespace Scriban.Functions
         /// <param name="span">The source span</param>
         /// <param name="list">The input list</param>
         /// <param name="member">The member name to sort according to its value. Null by default, meaning that the element's value are used instead.</param>
-        /// <returns>A list sorted according to the value of each element or the value of the specified `member` of each element.</returns>
+        /// <returns>A stably sorted list according to the value of each element or the value of the specified `member` of each element.</returns>
         /// <remarks>
+        /// Equal values preserve their original relative order.
+        ///
         /// Sorts by element's value:
         /// ```scriban-html
         /// {{ [10, 2, 6] | array.sort }}
@@ -799,32 +801,26 @@ namespace Scriban.Functions
 
             if (string.IsNullOrEmpty(member))
             {
-                realList.Sort();
+                realList = realList.OrderBy(item => item, Comparer<object>.Default).ToList();
             }
             else
             {
-                realList.Sort((a, b) =>
-                {
-                    var leftAccessor = context.GetMemberAccessor(a);
-                    var rightAccessor = context.GetMemberAccessor(b);
-
-                    object leftValue = null;
-                    object rightValue = null;
-                    if (!leftAccessor.TryGetValue(context, span, a, member, out leftValue))
-                    {
-                        context.TryGetMember?.Invoke(context, span, a, member, out leftValue);
-                    }
-
-                    if (!rightAccessor.TryGetValue(context, span, b, member, out rightValue))
-                    {
-                        context.TryGetMember?.Invoke(context, span, b, member, out rightValue);
-                    }
-
-                    return Comparer<object>.Default.Compare(leftValue, rightValue);
-                });
+                realList = realList.OrderBy(item => GetSortValue(context, span, item, member), Comparer<object>.Default).ToList();
             }
 
             return new ScriptArray(realList);
+        }
+
+        private static object GetSortValue(TemplateContext context, SourceSpan span, object target, string member)
+        {
+            var accessor = context.GetMemberAccessor(target);
+
+            if (!accessor.TryGetValue(context, span, target, member, out var value))
+            {
+                context.TryGetMember?.Invoke(context, span, target, member, out value);
+            }
+
+            return value;
         }
 
         [ScriptMemberIgnore]

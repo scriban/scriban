@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using Scriban.Functions;
+using Scriban.Parsing;
+using Scriban.Runtime;
 using Scriban.Syntax;
 
 namespace Scriban.Tests
@@ -31,6 +33,44 @@ namespace Scriban.Tests
             public void TestSortNoError()
             {
                 TestParser.AssertTemplate("true", "{{ [1,2] || array.sort }}");
+            }
+
+            [Test]
+            public void TestSortIsStableAcrossChainedSorts()
+            {
+                var context = new TemplateContext();
+                var items = new ScriptArray
+                {
+                    new ScriptObject { { "name", "00" }, { "key", 1 } },
+                    new ScriptObject { { "name", "01" }, { "key", 2 } },
+                    new ScriptObject { { "name", "02" }, { "key", 3 } },
+                    new ScriptObject { { "name", "03" }, { "key", 2 } },
+                    new ScriptObject { { "name", "04" }, { "key", 1 } },
+                    new ScriptObject { { "name", "05" }, { "key", 0 } },
+                    new ScriptObject { { "name", "06" }, { "key", 3 } },
+                    new ScriptObject { { "name", "07" }, { "key", 1 } },
+                    new ScriptObject { { "name", "08" }, { "key", 2 } },
+                    new ScriptObject { { "name", "09" }, { "key", 2 } },
+                    new ScriptObject { { "name", "10" }, { "key", 1 } },
+                    new ScriptObject { { "name", "11" }, { "key", 0 } },
+                    new ScriptObject { { "name", "12" }, { "key", 0 } },
+                    new ScriptObject { { "name", "13" }, { "key", 0 } },
+                    new ScriptObject { { "name", "14" }, { "key", 2 } },
+                    new ScriptObject { { "name", "15" }, { "key", 3 } },
+                    new ScriptObject { { "name", "16" }, { "key", 1 } },
+                };
+
+                var sortedByName = ArrayFunctions.Sort(context, new SourceSpan(), items, "name");
+                var sortedByKey = ArrayFunctions.Sort(context, new SourceSpan(), sortedByName, "key");
+                var orderedNames = sortedByKey.Cast<ScriptObject>().Select(item => (string)item["name"]).ToArray();
+
+                Assert.That(orderedNames, Is.EqualTo(new[]
+                {
+                    "05", "11", "12", "13",
+                    "00", "04", "07", "10", "16",
+                    "01", "03", "08", "09", "14",
+                    "02", "06", "15",
+                }));
             }
 
             [Test]
