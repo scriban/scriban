@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -16,12 +16,11 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptReadOnlyStatement : ScriptStatement
     {
-        private ScriptVariable _variable;
-        private ScriptKeyword _readOnlyKeyword;
-
+        private ScriptVariable? _variable;
+        private ScriptKeyword _readOnlyKeyword = ScriptKeyword.ReadOnly();
         public ScriptReadOnlyStatement()
         {
-            ReadOnlyKeyword = ScriptKeyword.ReadOnly();
+            _readOnlyKeyword.Parent = this;
         }
 
         public ScriptKeyword ReadOnlyKeyword
@@ -30,14 +29,18 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _readOnlyKeyword, value);
         }
 
-        public ScriptVariable Variable
+        public ScriptVariable? Variable
         {
             get => _variable;
-            set => ParentToThis(ref _variable, value);
+            set => ParentToThisNullable(ref _variable, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Variable is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid readonly statement. Variable is required.");
+            }
             context.SetReadOnly(Variable);
             return null;
         }
@@ -45,7 +48,10 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(ReadOnlyKeyword).ExpectSpace();
-            printer.Write(Variable);
+            if (Variable is not null)
+            {
+                printer.Write(Variable);
+            }
             printer.ExpectEos();
         }
     }

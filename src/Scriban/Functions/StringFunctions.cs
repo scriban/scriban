@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -26,12 +26,12 @@ namespace Scriban.Functions
 #endif
     class StringFunctions : ScriptObject
     {
-        [ThreadStatic] private static StringBuilder _tlsBuilder;
+        [ThreadStatic] private static StringBuilder? _tlsBuilder;
 
         private static StringBuilder GetTempStringBuilder()
         {
             var builder = _tlsBuilder;
-            if (builder == null) builder = _tlsBuilder = new StringBuilder(1024);
+            if (builder is null) builder = _tlsBuilder = new StringBuilder(1024);
             return builder;
         }
 
@@ -50,10 +50,10 @@ namespace Scriban.Functions
         /// Hel\tlo\n\"W\\orld
         /// ```
         /// </remarks>
-        public static string Escape(string text)
+        public static string? Escape(string? text)
         {
-            if (text == null) return text;
-            StringBuilder builder = null;
+            if (text is null) return text;
+            StringBuilder? builder = null;
             for (int i = 0; i < text.Length; i++)
             {
                 var c = text[i];
@@ -97,7 +97,7 @@ namespace Scriban.Functions
                             break;
                     }
 
-                    if (builder == null)
+                    if (builder is null)
                     {
                         builder = new StringBuilder(text.Length + 10);
                         if (i > 0) builder.Append(text, 0, i);
@@ -105,18 +105,18 @@ namespace Scriban.Functions
 
                     builder.Append(appendText);
                 }
-                else if (builder != null)
+                else if (builder is not null)
                 {
                     // TODO: could be more optimized by adding range
                     builder.Append(c);
                 }
             }
 
-            return builder != null ? builder.ToString() : text;
+            return builder is not null ? builder.ToString() : text;
         }
 
         [ScriptMemberIgnore]
-        public static string Append(string text, string with)
+        public static string Append(string? text, string? with)
         {
             return (text ?? string.Empty) + (with ?? string.Empty);
         }
@@ -136,7 +136,7 @@ namespace Scriban.Functions
         /// Hello World
         /// ```
         /// </remarks>
-        public static string Append(TemplateContext context, string text, string with)
+        public static string Append(TemplateContext context, string? text, string? with)
         {
             var t = text ?? string.Empty;
             var w = with ?? string.Empty;
@@ -188,9 +188,9 @@ namespace Scriban.Functions
         /// This Is Easy
         /// ```
         /// </remarks>
-        public static string Capitalizewords(string text)
+        public static string Capitalizewords(string? text)
         {
-            if (string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0)
             {
                 return string.Empty;
             }
@@ -231,9 +231,9 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool Contains(string text, string value)
+        public static bool Contains(string? text, string? value)
         {
-            if (string.IsNullOrEmpty(text) || string.IsNullOrEmpty(value))
+            if (text is null || text.Length == 0 || value is null || value.Length == 0)
             {
                 return false;
             }
@@ -289,7 +289,7 @@ namespace Scriban.Functions
         /// test
         /// ```
         /// </remarks>
-        public static string Downcase(string text)
+        public static string? Downcase(string? text)
         {
             return text?.ToLowerInvariant();
         }
@@ -308,9 +308,9 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool EndsWith(string text, string value)
+        public static bool EndsWith(string? text, string? value)
         {
-            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(text))
+            if (value is null || value.Length == 0 || text is null || text.Length == 0)
             {
                 return false;
             }
@@ -391,9 +391,9 @@ namespace Scriban.Functions
         /// "Hello\n\"World\""
         /// ```
         /// </remarks>
-        public static string Literal(string text)
+        public static string? Literal(string? text)
         {
-            return text == null ? null : $"\"{Escape(text)}\"";
+            return text is null ? null : $"\"{Escape(text)}\"";
         }
 
         /// <summary>
@@ -410,7 +410,7 @@ namespace Scriban.Functions
         /// too many spaces
         /// ```
         /// </remarks>
-        public static string LStrip(string text)
+        public static string? LStrip(string? text)
         {
             return text?.TrimStart();
         }
@@ -436,7 +436,7 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static string Prepend(string text, string by)
+        public static string Prepend(string? text, string? by)
         {
             return (by ?? string.Empty) + (text ?? string.Empty);
         }
@@ -456,7 +456,7 @@ namespace Scriban.Functions
         /// Hello World
         /// ```
         /// </remarks>
-        public static string Prepend(TemplateContext context, string text, string by)
+        public static string Prepend(TemplateContext context, string? text, string? by)
         {
             var t = text ?? string.Empty;
             var b = by ?? string.Empty;
@@ -478,9 +478,9 @@ namespace Scriban.Functions
         /// Hello, . Goodbye, .
         /// ```
         /// </remarks>
-        public static string Remove(string text, string remove)
+        public static string? Remove(string? text, string? remove)
         {
-            if (string.IsNullOrEmpty(remove) || string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0 || remove is null || remove.Length == 0)
             {
                 return text;
             }
@@ -501,8 +501,12 @@ namespace Scriban.Functions
         /// Hello, . Goodbye, world.
         /// ```
         /// </remarks>
-        public static string RemoveFirst(string text, string remove)
+        public static string? RemoveFirst(string? text, string? remove)
         {
+            if (text is null || text.Length == 0 || remove is null || remove.Length == 0)
+            {
+                return text;
+            }
             return ReplaceFirst(text, remove, string.Empty);
         }
 
@@ -520,15 +524,19 @@ namespace Scriban.Functions
         /// Hello, world. Goodbye, .
         /// ```
         /// </remarks>
-        public static string RemoveLast(string text, string remove)
+        public static string? RemoveLast(string? text, string? remove)
         {
+            if (text is null || text.Length == 0 || remove is null || remove.Length == 0)
+            {
+                return text;
+            }
             return ReplaceFirst(text, remove, string.Empty, true);
         }
 
         [ScriptMemberIgnore]
-        public static string Replace(string text, string match, string replace)
+        public static string Replace(string? text, string? match, string? replace)
         {
-            if (string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0)
             {
                 return string.Empty;
             }
@@ -555,7 +563,7 @@ namespace Scriban.Functions
         /// Hello, buddy. Goodbye, buddy.
         /// ```
         /// </remarks>
-        public static string Replace(TemplateContext context, string text, string match, string replace)
+        public static string Replace(TemplateContext context, string? text, string? match, string? replace)
         {
             var result = Replace(text, match, replace);
             VerifyResultStringLength(context, result.Length);
@@ -563,18 +571,18 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static string ReplaceFirst(string text, string match, string replace, bool fromEnd = false)
+        public static string ReplaceFirst(string? text, string? match, string? replace, bool fromEnd = false)
         {
-            if (string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0)
             {
                 return string.Empty;
             }
 
-            if (string.IsNullOrEmpty(match))
+            if (match is null || match.Length == 0)
             {
                 return text;
             }
-            replace = replace ?? string.Empty;
+            var replaceValue = replace ?? string.Empty;
 
             var indexOfMatch = fromEnd
                 ? text.LastIndexOf(match, StringComparison.OrdinalIgnoreCase)
@@ -587,7 +595,7 @@ namespace Scriban.Functions
 
             var builder = GetTempStringBuilder();
             builder.Append(text.Substring(0, indexOfMatch));
-            builder.Append(replace);
+            builder.Append(replaceValue);
             builder.Append(text.Substring(indexOfMatch + match.Length));
 
             var result = builder.ToString();
@@ -612,7 +620,7 @@ namespace Scriban.Functions
         /// Hello, buddy. Goodbye, world.
         /// ```
         /// </remarks>
-        public static string ReplaceFirst(TemplateContext context, string text, string match, string replace, bool fromEnd = false)
+        public static string ReplaceFirst(TemplateContext context, string? text, string? match, string? replace, bool fromEnd = false)
         {
             var result = ReplaceFirst(text, match, replace, fromEnd);
             VerifyResultStringLength(context, result.Length);
@@ -633,7 +641,7 @@ namespace Scriban.Functions
         ///    too many spaces
         /// ```
         /// </remarks>
-        public static string RStrip(string text)
+        public static string? RStrip(string? text)
         {
             return text?.TrimEnd();
         }
@@ -651,9 +659,9 @@ namespace Scriban.Functions
         /// 4
         /// ```
         /// </remarks>
-        public static int Size(string text)
+        public static int Size(string? text)
         {
-            return string.IsNullOrEmpty(text) ? 0 : text.Length;
+            return text?.Length ?? 0;
         }
 
         /// <summary>
@@ -678,9 +686,9 @@ namespace Scriban.Functions
         /// ell
         /// ```
         /// </remarks>
-        public static string Slice(string text, int start, int? length = null)
+        public static string Slice(string? text, int start, int? length = null)
         {
-            if (string.IsNullOrEmpty(text) || start >= text.Length)
+            if (text is null || text.Length == 0 || start >= text.Length)
             {
                 return string.Empty;
             }
@@ -735,9 +743,9 @@ namespace Scriban.Functions
         /// ell
         /// ```
         /// </remarks>
-        public static string Slice1(string text, int start, int length = 1)
+        public static string Slice1(string? text, int start, int length = 1)
         {
-            if (string.IsNullOrEmpty(text) || start > text.Length || length <= 0)
+            if (text is null || text.Length == 0 || start > text.Length || length <= 0)
             {
                 return string.Empty;
             }
@@ -782,11 +790,16 @@ namespace Scriban.Functions
         /// today?
         /// ```
         /// </remarks>
-        public static IEnumerable Split(string text, string match)
+        public static IEnumerable Split(string? text, string? match)
         {
-            if (string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0)
             {
                 return new ScriptRange(Enumerable.Empty<string>());
+            }
+
+            if (match is null || match.Length == 0)
+            {
+                return new ScriptRange(new[] { text });
             }
 
             return new ScriptRange(text.Split(new[] {match}, StringSplitOptions.RemoveEmptyEntries));
@@ -806,9 +819,9 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool StartsWith(string text, string value)
+        public static bool StartsWith(string? text, string? value)
         {
-            if (string.IsNullOrEmpty(value) || string.IsNullOrEmpty(text))
+            if (value is null || value.Length == 0 || text is null || text.Length == 0)
             {
                 return false;
             }
@@ -830,7 +843,7 @@ namespace Scriban.Functions
         /// too many spaces
         /// ```
         /// </remarks>
-        public static string Strip(string text)
+        public static string? Strip(string? text)
         {
             return text?.Trim();
         }
@@ -848,7 +861,7 @@ namespace Scriban.Functions
         /// This is a string. With another string
         /// ```
         /// </remarks>
-        public static string StripNewlines(string text)
+        public static string StripNewlines(string? text)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -872,7 +885,7 @@ namespace Scriban.Functions
         /// 124
         /// ```
         /// </remarks>
-        public static object ToInt(TemplateContext context, string text)
+        public static object? ToInt(TemplateContext context, string? text)
         {
             return int.TryParse(text, NumberStyles.Integer, context.CurrentCulture, out int result) ? (object) result : null;
         }
@@ -891,7 +904,7 @@ namespace Scriban.Functions
         /// 123678912345679
         /// ```
         /// </remarks>
-        public static object ToLong(TemplateContext context, string text)
+        public static object? ToLong(TemplateContext context, string? text)
         {
             return long.TryParse(text, NumberStyles.Integer, context.CurrentCulture, out long result) ? (object)result : null;
         }
@@ -910,7 +923,7 @@ namespace Scriban.Functions
         /// 124.4
         /// ```
         /// </remarks>
-        public static object ToFloat(TemplateContext context, string text)
+        public static object? ToFloat(TemplateContext context, string? text)
         {
             return float.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, context.CurrentCulture, out float result) ? (object)result : null;
         }
@@ -929,7 +942,7 @@ namespace Scriban.Functions
         /// 124.4
         /// ```
         /// </remarks>
-        public static object ToDouble(TemplateContext context, string text)
+        public static object? ToDouble(TemplateContext context, string? text)
         {
             return double.TryParse(text, NumberStyles.Float | NumberStyles.AllowThousands, context.CurrentCulture, out double result) ? (object)result : null;
         }
@@ -950,10 +963,10 @@ namespace Scriban.Functions
         /// The cat ca...
         /// ```
         /// </remarks>
-        public static string Truncate(string text, int length, string ellipsis = null)
+        public static string Truncate(string? text, int length, string? ellipsis = null)
         {
             ellipsis = ellipsis ?? "...";
-            if (string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0)
             {
                 return string.Empty;
             }
@@ -985,7 +998,7 @@ namespace Scriban.Functions
         /// The cat came back...
         /// ```
         /// </remarks>
-        public static string Truncatewords(string text, int count, string ellipsis = null)
+        public static string Truncatewords(string? text, int count, string? ellipsis = null)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -1030,7 +1043,7 @@ namespace Scriban.Functions
         /// TEST
         /// ```
         /// </remarks>
-        public static string Upcase(string text)
+        public static string? Upcase(string? text)
         {
             return text?.ToUpperInvariant();
         }
@@ -1258,7 +1271,7 @@ namespace Scriban.Functions
 
         private static void VerifyPaddingWidth(TemplateContext context, int width)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (context is null) throw new ArgumentNullException(nameof(context));
 
             if (context.LimitToString > 0 && width > context.LimitToString)
             {
@@ -1268,7 +1281,7 @@ namespace Scriban.Functions
 
         private static void VerifyResultStringLength(TemplateContext context, long length)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (context is null) throw new ArgumentNullException(nameof(context));
 
             if (context.LimitToString > 0 && length > context.LimitToString)
             {
@@ -1341,7 +1354,7 @@ namespace Scriban.Functions
         /// if <paramref name="search"/> is found, or -1 if it is not. If value is <see cref="String.Empty"/>,
         /// the return value is <paramref name="startIndex"/> (if <paramref name="startIndex"/> is not provided, the return value would be zero).
         /// </returns>
-        public static int IndexOf(string text, string search, int? startIndex = null, int? count = null, string stringComparison = null)
+        public static int IndexOf(string text, string search, int? startIndex = null, int? count = null, string? stringComparison = null)
         {
             text = text ?? throw new ArgumentNullException(nameof(text));
             search = search ?? throw new ArgumentNullException(nameof(search));
@@ -1351,7 +1364,7 @@ namespace Scriban.Functions
             return text.IndexOf(search, start, ct, comparison);
         }
 
-        private static StringComparison GetComparison(string stringComparison, StringComparison defaultValue, bool throwExceptions)
+        private static StringComparison GetComparison(string? stringComparison, StringComparison defaultValue, bool throwExceptions)
             => (Value: stringComparison, Throw: throwExceptions) switch
         {
             (Value: null, Throw: _) => defaultValue,

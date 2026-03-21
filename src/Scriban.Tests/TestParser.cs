@@ -25,6 +25,16 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestParser
     {
+        private static ScriptPage GetPage(Template template)
+        {
+            return template.Page ?? throw new AssertionException("Expected parsed template page to be available.");
+        }
+
+        private static IScriptObject GetCurrentGlobal(TemplateContext context)
+        {
+            return context.CurrentGlobal ?? throw new AssertionException("Expected a current global script object.");
+        }
+
         [Test]
         public void TestMemberDot()
         {
@@ -127,12 +137,12 @@ namespace Scriban.Tests
             Assert.AreEqual("history*5", test);
         }
 
-        private static string FunctionClear(ScriptExpression what = null)
+        private static string FunctionClear(ScriptExpression? what = null)
         {
-            return what?.ToString();
+            return what?.ToString() ?? string.Empty;
         }
 
-        private static void FunctionHistory(object line = null)
+        private static void FunctionHistory(object? line = null)
         {
         }
 
@@ -246,11 +256,13 @@ namespace Scriban.Tests
             Assert.False(template.HasErrors, $"Template has errors: {template.Messages}");
 
             var context = new TemplateContext();
-            context.CurrentGlobal.SetValue("x", 1, false);
-            context.CurrentGlobal.SetValue("y", 2, false);
-            context.CurrentGlobal.SetValue("z", -10, false);
-            context.CurrentGlobal.SetValue("ff", 4, false);
-            context.CurrentGlobal.SetValue("abs", ((ScriptObject)context.BuiltinObject["math"])["abs"], false);
+            var currentGlobal = GetCurrentGlobal(context);
+            currentGlobal.SetValue("x", 1, false);
+            currentGlobal.SetValue("y", 2, false);
+            currentGlobal.SetValue("z", -10, false);
+            currentGlobal.SetValue("ff", 4, false);
+            var mathObject = context.BuiltinObject["math"] as ScriptObject ?? throw new AssertionException("Expected math builtin object.");
+            currentGlobal.SetValue("abs", mathObject["abs"], false);
 
             var result = template.Evaluate(context);
             Assert.AreEqual(value, result);
@@ -258,7 +270,7 @@ namespace Scriban.Tests
             var resultAsync = template.EvaluateAsync(context).Result;
             Assert.AreEqual(value, resultAsync, "Invalid async result");
 
-            var reformat = template.Page.Format(new ScriptFormatterOptions(context, ScriptLang.Scientific, ScriptFormatterFlags.ExplicitClean));
+            var reformat = GetPage(template).Format(new ScriptFormatterOptions(context, ScriptLang.Scientific, ScriptFormatterFlags.ExplicitClean));
             var exprAsString = reformat.ToString();
             Assert.AreEqual(scriptReformat, exprAsString, "Format string don't match");
         }
@@ -402,16 +414,17 @@ variable + 1
             var template = ParseTemplate(input, options);
 
             // Make sure that we have a front matter
-            Assert.NotNull(template.Page.FrontMatter);
+            var page = GetPage(template);
+            var frontMatter = page.FrontMatter ?? throw new AssertionException("Expected front matter to be present.");
 
             var context = new TemplateContext();
 
             // Evaluate front-matter
-            var frontResult = context.Evaluate(template.Page.FrontMatter);
+            var frontResult = context.Evaluate(frontMatter);
             Assert.Null(frontResult);
 
             // Evaluate page-content
-            context.Evaluate(template.Page);
+            context.Evaluate(page);
             var pageResult = context.Output.ToString();
             TextAssert.AreEqual("This is after the frontmatter: yes\n2", pageResult);
         }
@@ -437,7 +450,7 @@ variable + 1
             var lexer = new Lexer(input, null, new LexerOptions() { Mode = ScriptMode.FrontMatterOnly });
             var parser = new Parser(lexer, options);
 
-            var page = parser.Run();
+            var page = parser.Run() ?? throw new AssertionException("Expected parser to return a page.");
             foreach (var message in parser.Messages)
             {
                 Console.WriteLine(message);
@@ -448,21 +461,20 @@ variable + 1
             // and hasn't tried to run the lexer on the remaining text
             Assert.AreEqual(new TextPosition(34, 4, 0), parser.CurrentSpan.Start);
 
-            var startPositionAfterFrontMatter = page.FrontMatter.TextPositionAfterEndMarker;
-
             // Make sure that we have a front matter
-            Assert.NotNull(page.FrontMatter);
+            var frontMatter = page.FrontMatter ?? throw new AssertionException("Expected front matter to be present.");
             Assert.Null(page.Body);
+            var startPositionAfterFrontMatter = frontMatter.TextPositionAfterEndMarker;
 
             var context = new TemplateContext();
 
             // Evaluate front-matter
-            var frontResult = context.Evaluate(page.FrontMatter);
+            var frontResult = context.Evaluate(frontMatter);
             Assert.Null(frontResult);
 
             lexer = new Lexer(input, null, new LexerOptions() { StartPosition =  startPositionAfterFrontMatter });
             parser = new Parser(lexer);
-            page = parser.Run();
+            page = parser.Run() ?? throw new AssertionException("Expected parser to return a page.");
             foreach (var message in parser.Messages)
             {
                 Console.WriteLine(message);
@@ -489,8 +501,8 @@ name = 'yes'
             var outputStr = context.Output.ToString();
             Assert.AreEqual(string.Empty, outputStr);
 
-            var global = context.CurrentGlobal;
-            object value;
+            var global = GetCurrentGlobal(context);
+            object? value;
             Assert.True(global.TryGetValue("name", out value));
             Assert.AreEqual("yes", value);
 
@@ -519,15 +531,13 @@ end
 }}");
             var parser = new Parser(lexer);
 
-            var scriptPage = parser.Run();
+            var scriptPage = parser.Run() ?? throw new AssertionException("Expected parser to return a page.");
 
             foreach (var message in parser.Messages)
             {
                 Console.WriteLine(message);
             }
             Assert.False(parser.HasErrors);
-            Assert.NotNull(scriptPage);
-
             var rootObject = new ScriptObject();
             rootObject.SetValue("math", ScriptObject.From(typeof(MathObject)), true);
 
@@ -790,7 +800,7 @@ Normal Text
             so.SetValue("X", "TEST", false);
             var evaluated = Template.Parse("{{X}}").Evaluate(new TemplateContext(so));
             //important - test type since ScriptArray can be cast to string implicitly
-            Assert.AreEqual(typeof(string), evaluated.GetType());
+            Assert.AreEqual(typeof(string), evaluated?.GetType());
             Assert.AreEqual("TEST", evaluated);
 
         }
@@ -916,10 +926,9 @@ m
             var filename = Path.GetFileName(inputName);
             var isSupportingExactRoundtrip = !NotSupportingExactRoundtrip.Contains(filename);
 
-            var inputText = LoadTestFile(inputName);
+            var inputText = LoadTestFile(inputName) ?? throw new AssertionException($"Unable to load input test file `{inputName}`.");
             var expectedOutputName = Path.ChangeExtension(inputName, OutputEndFileExtension);
-            var expectedOutputText = LoadTestFile(expectedOutputName);
-            Assert.NotNull(expectedOutputText, $"Expecting output result file `{expectedOutputName}` for input file `{inputName}`");
+            var expectedOutputText = LoadTestFile(expectedOutputName) ?? throw new AssertionException($"Expecting output result file `{expectedOutputName}` for input file `{inputName}`.");
 
             var lang = ScriptLang.Default;
             if (inputName.Contains("liquid"))
@@ -953,13 +962,14 @@ m
             "470-html.txt"
         };
 
-        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false, bool supportRoundTrip = true, bool testASTInstead = false)
+        public static void AssertTemplate(string expected, string input, ScriptLang lang = ScriptLang.Default, bool isRoundtripTest = false, bool supportExactRoundtrip = true, object? model = null, bool specialLiquid = false, bool expectParsingErrorForRountrip = false, bool supportRoundTrip = true, bool testASTInstead = false)
         {
             bool isLiquid = lang == ScriptLang.Liquid;
 
             var parserOptions = new ParserOptions()
             {
                 LiquidFunctionsToScriban = isLiquid,
+                ExpressionDepthLimit = specialLiquid ? 500 : 250,
             };
             var lexerOptions = new LexerOptions()
             {
@@ -969,11 +979,6 @@ m
             if (isRoundtripTest)
             {
                 lexerOptions.KeepTrivia = true;
-            }
-
-            if (specialLiquid)
-            {
-                parserOptions.ExpressionDepthLimit = 500;
             }
 
 #if EnableTokensOutput
@@ -988,28 +993,29 @@ m
                 Console.WriteLine();
             }
 #endif
-            string roundtripText = null;
+            string? roundtripText = null;
 
             // We loop first on input text, then on roundtrip
             while (true)
             {
-                bool isRoundtrip = roundtripText != null;
+                bool isRoundtrip = roundtripText is not null;
                 bool hasErrors = false;
                 bool hasException = false;
                 if (isRoundtrip)
                 {
+                    var checkedRoundtripText = roundtripText ?? throw new AssertionException("Expected roundtrip text to be available.");
                     Console.WriteLine("Roundtrip");
                     Console.WriteLine("======================================");
-                    Console.WriteLine(roundtripText);
+                    Console.WriteLine(checkedRoundtripText);
                     lexerOptions.Lang = lang == ScriptLang.Scientific ? lang : ScriptLang.Default;
 
                     if (!isLiquid && supportExactRoundtrip)
                     {
                         Console.WriteLine("Checking Exact Roundtrip - Input");
                         Console.WriteLine("======================================");
-                        TextAssert.AreEqual(input, roundtripText);
+                        TextAssert.AreEqual(input, checkedRoundtripText);
                     }
-                    input = roundtripText;
+                    input = checkedRoundtripText;
                 }
                 else
                 {
@@ -1061,7 +1067,7 @@ m
                         try
                         {
                             // Setup a default model context for the tests
-                            if (model == null)
+                            if (model is null)
                             {
                                 var scriptObj = new ScriptObject
                                 {
@@ -1120,7 +1126,7 @@ m
                     if (testASTInstead)
                     {
                         var astVisualizer = new ASTVisualizer();
-                        template.Page.Accept(astVisualizer);
+                        GetPage(template).Accept(astVisualizer);
                         result = astVisualizer.output.ToString();
                         resultAsync = result;
                     }
@@ -1179,13 +1185,13 @@ m
             return context;
         }
 
-        private static string GetReason(Exception ex)
+        private static string GetReason(Exception? ex)
         {
             var text = new StringBuilder();
-            while (ex != null)
+            while (ex is not null)
             {
                 text.Append(ex);
-                if (ex.InnerException != null)
+                if (ex.InnerException is not null)
                 {
                     text.Append(". Reason: ");
                 }
@@ -1203,7 +1209,7 @@ m
 
             var tests = new List<TestCaseData>();
 
-            string nextFunctionName = null;
+            string? nextFunctionName = null;
             int processState = 0;
             // states:
             // - 0 function section or wait for ```scriban-html (input)
@@ -1228,7 +1234,7 @@ m
                             nextFunctionName = match.Groups[1].Value;
                         }
 
-                        if (nextFunctionName != null && unescapedLine.StartsWith("```scriban-html"))
+                        if (nextFunctionName is not null && unescapedLine.StartsWith("```scriban-html"))
                         {
                             processState = 1;
                             input = new StringBuilder();
@@ -1285,8 +1291,13 @@ m
             int deepCounter;
             public StringBuilder output { get; } = new StringBuilder();
 
-            protected override void DefaultVisit(ScriptNode node)
+            protected override void DefaultVisit(ScriptNode? node)
             {
+                if (node is null)
+                {
+                    return;
+                }
+
                 bool isTerminal = (node is IScriptTerminal);
                 string padding = new string(' ', deepCounter * 2);
                 string value = node.ToString();

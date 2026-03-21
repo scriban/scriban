@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -28,25 +28,31 @@ namespace Scriban.Functions
         {
         }
 
-        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
-            if (arguments.Count < 2)
+            var resolvedCallerContext = callerContext ?? context.CurrentNode;
+            if (resolvedCallerContext is null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the separator and components to include for the <include_join> function.");
+                throw new ScriptRuntimeException(context.CurrentSpan, "Unable to resolve the include_join caller context.");
             }
 
-            var templateNames = 
-                (arguments[0] as ScriptArray)?.Select(x => context.ObjectToString(x)).ToArray() 
+            if (arguments.Count < 2)
+            {
+                throw new ScriptRuntimeException(resolvedCallerContext.Span, "Expecting at least the separator and components to include for the <include_join> function.");
+            }
+
+            var templateNames =
+                (arguments[0] as ScriptArray)?.Select(x => context.ObjectToString(x)).Where(x => !string.IsNullOrEmpty(x)).Cast<string>().ToArray()
                 ?? (arguments[0] as IEnumerable<string>)?.ToArray();
 
-            if (templateNames == null)
+            if (templateNames is null)
             {
                 return string.Empty;
             }
 
-            var separator = RenderComponent(context, callerContext, arguments, context.ObjectToString(arguments[1]) ?? string.Empty);
-            var start = RenderComponent(context, callerContext, arguments, arguments.Count > 2 ? context.ObjectToString(arguments[2]) : string.Empty);
-            var end = RenderComponent(context, callerContext, arguments, arguments.Count > 3 ? context.ObjectToString(arguments[3]) : string.Empty);
+            var separator = RenderComponent(context, resolvedCallerContext, arguments, context.ObjectToString(arguments[1]) ?? string.Empty);
+            var start = RenderComponent(context, resolvedCallerContext, arguments, arguments.Count > 2 ? context.ObjectToString(arguments[2]) ?? string.Empty : string.Empty);
+            var end = RenderComponent(context, resolvedCallerContext, arguments, arguments.Count > 3 ? context.ObjectToString(arguments[3]) ?? string.Empty : string.Empty);
 
             var sb = new StringBuilder();
             if (!string.IsNullOrEmpty(start))
@@ -56,14 +62,14 @@ namespace Scriban.Functions
             for (int i = 0; i < templateNames.Length; ++i)
             {
                 var templateName = templateNames[i];
-                var templatePath = context.GetTemplatePathFromName(templateName, callerContext);
+                var templatePath = context.GetTemplatePathFromName(templateName, resolvedCallerContext);
 
                 // liquid compatibility
-                if (templatePath == null) continue;
+                if (templatePath is null) continue;
 
-                Template template = context.GetOrCreateTemplate(templatePath, callerContext);
+                Template template = context.GetOrCreateTemplate(templatePath, resolvedCallerContext);
 
-                sb.Append(context.RenderTemplate(template, arguments, callerContext));
+                sb.Append(context.RenderTemplate(template, arguments, resolvedCallerContext));
 
                 if (!string.IsNullOrEmpty(separator) && i < templateNames.Length - 1)
                 {
@@ -110,6 +116,10 @@ namespace Scriban.Functions
                 return component;
 
             var path = context.GetTemplatePathFromName(component.Substring(4), callerContext);
+            if (path is null)
+            {
+                return string.Empty;
+            }
             var template = context.GetOrCreateTemplate(path, callerContext);
             return context.RenderTemplate(template, arguments, callerContext); 
         }

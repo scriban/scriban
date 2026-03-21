@@ -37,4 +37,8 @@ insert_final_newline = true
 [*.sh]
 end_of_line = lf
 
+[*.cs]
+csharp_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
+dotnet_diagnostic.IDE0041.severity = warning
+
 

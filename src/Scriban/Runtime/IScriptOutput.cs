@@ -38,13 +38,13 @@ namespace Scriban.Runtime
     {
         public static void Write(this IScriptOutput scriptOutput, string text)
         {
-            if (text == null) throw new ArgumentNullException(nameof(text));
+            if (text is null) throw new ArgumentNullException(nameof(text));
             scriptOutput.Write(text, 0, text.Length);
         }
 
         public static void Write(this IScriptOutput scriptOutput, ScriptStringSlice text)
         {
-            if (text.FullText == null) throw new ArgumentNullException(nameof(text));
+            if (text.FullText is null) throw new ArgumentNullException(nameof(text));
             if (text.Length == 0) return;
             scriptOutput.Write(text.FullText, text.Index, text.Length);
         }

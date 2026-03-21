@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using System.IO;
@@ -20,19 +20,18 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptMemberExpression : ScriptExpression, IScriptVariablePath
     {
-        private ScriptExpression _target;
-        private ScriptToken _dotToken;
-        private ScriptVariable _member;
-
+        private ScriptExpression? _target;
+        private ScriptToken _dotToken = ScriptToken.Dot();
+        private ScriptVariable? _member;
         public ScriptMemberExpression()
         {
-            DotToken = ScriptToken.Dot();
+            _dotToken.Parent = this;
         }
 
-        public ScriptExpression Target
+        public ScriptExpression? Target
         {
             get => _target;
-            set => ParentToThis(ref _target, value);
+            set => ParentToThisNullable(ref _target, value);
         }
 
         public ScriptToken DotToken
@@ -41,22 +40,28 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _dotToken, value);
         }
 
-        public ScriptVariable Member
+        public ScriptVariable? Member
         {
             get => _member;
-            set => ParentToThis(ref _member, value);
+            set => ParentToThisNullable(ref _member, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return context.GetValue(this);
         }
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(Target);
+            if (Target is not null)
+            {
+                printer.Write(Target);
+            }
             printer.Write(DotToken);
-            printer.Write(Member);
+            if (Member is not null)
+            {
+                printer.Write(Member);
+            }
         }
 
         public override bool CanHaveLeadingTrivia()
@@ -64,63 +69,86 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public virtual object GetValue(TemplateContext context)
+        public virtual object? GetValue(TemplateContext context)
         {
+            var member = Member;
+            if (member is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid member expression. Member is required.");
+            }
+
             var targetObject = GetTargetObject(context, false);
             // In case TemplateContext.EnableRelaxedMemberAccess
-            if (targetObject == null)
+            if (targetObject is null)
             {
                 if (context.EnableRelaxedTargetAccess || DotToken.TokenType == TokenType.QuestionDot)
                 {
                     return null;
                 }
 
-                throw new ScriptRuntimeException(this.Member.Span, $"Cannot get the member {this} for a null object.");
+                throw new ScriptRuntimeException(member.Span, $"Cannot get the member {this} for a null object.");
             }
 
             var accessor = context.GetMemberAccessor(targetObject);
 
-            var memberName = this.Member.Name;
+            var memberName = member.Name;
 
-            object value;
-            if (!accessor.TryGetValue(context, Member.Span, targetObject, memberName, out value))
+            object? value;
+            if (!accessor.TryGetValue(context, member.Span, targetObject, memberName, out value))
             {
-                var result = context.TryGetMember?.Invoke(context, Member.Span, targetObject, memberName, out value);
+                var result = context.TryGetMember?.Invoke(context, member.Span, targetObject, memberName, out value);
                 if (!context.EnableRelaxedMemberAccess && (!result.HasValue || !result.Value))
                 {
-                    throw new ScriptRuntimeException(this.Member.Span, $"Cannot get member with name {memberName}."); // unit test: 132-member-accessor-error2.txt
+                    throw new ScriptRuntimeException(member.Span, $"Cannot get member with name {memberName}."); // unit test: 132-member-accessor-error2.txt
                 }
             }
             return value;
         }
 
-        public virtual void SetValue(TemplateContext context, object valueToSet)
+        public virtual void SetValue(TemplateContext context, object? valueToSet)
         {
+            var member = Member;
+            if (member is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid member expression. Member is required.");
+            }
+
             var targetObject = GetTargetObject(context, true);
+            if (targetObject is null)
+            {
+                throw new ScriptRuntimeException(member.Span, $"Object `{Target}` is null. Cannot access member: {this}");
+            }
             var accessor = context.GetMemberAccessor(targetObject);
 
-            var memberName = this.Member.Name;
+            var memberName = member.Name;
 
-            if (!accessor.TrySetValue(context, this.Member.Span, targetObject, memberName, valueToSet))
+            if (!accessor.TrySetValue(context, member.Span, targetObject, memberName, valueToSet))
             {
-                throw new ScriptRuntimeException(this.Member.Span, $"Cannot set a value for the readonly member: {this}"); // unit test: 132-member-accessor-error3.txt
+                throw new ScriptRuntimeException(member.Span, $"Cannot set a value for the readonly member: {this}"); // unit test: 132-member-accessor-error3.txt
             }
         }
 
         public virtual string GetFirstPath()
         {
-            return (Target as IScriptVariablePath)?.GetFirstPath();
+            return (Target as IScriptVariablePath)?.GetFirstPath() ?? string.Empty;
         }
 
-        private object GetTargetObject(TemplateContext context, bool isSet)
+        private object? GetTargetObject(TemplateContext context, bool isSet)
         {
-            var targetObject = context.GetValue(Target);
+            var member = Member;
+            var target = Target;
+            if (member is null || target is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid member expression. Target and member are required.");
+            }
 
-            if (targetObject == null)
+            var targetObject = context.GetValue(target);
+
+            if (targetObject is null)
             {
                 if (isSet || (context.EnableRelaxedMemberAccess == false && DotToken.TokenType != TokenType.QuestionDot))
                 {
-                    throw new ScriptRuntimeException(this.Member.Span, $"Object `{this.Target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
+                    throw new ScriptRuntimeException(member.Span, $"Object `{target}` is null. Cannot access member: {this}"); // unit test: 131-member-accessor-error1.txt
                 }
             }
             return targetObject;

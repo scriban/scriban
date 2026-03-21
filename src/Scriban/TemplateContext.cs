@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Functions;
 using Scriban.Helpers;
@@ -49,10 +49,10 @@ namespace Scriban
         private readonly Dictionary<Type, IObjectAccessor> _memberAccessors;
         private FastStack<IScriptOutput> _outputs;
         private FastStack<VariableContext> _localContexts;
-        private VariableContext _currentLocalContext;
+        private VariableContext? _currentLocalContext;
         private IScriptOutput _output;
         private FastStack<string> _sourceFiles;
-        private FastStack<object> _caseValues;
+        private FastStack<object?> _caseValues;
         private int _callDepth;
         private bool _isFunctionCallDisabled;
         private int _loopStep;
@@ -62,10 +62,10 @@ namespace Scriban
         private FastStack<ScriptPipeArguments> _availablePipeArguments;
         private FastStack<ScriptPipeArguments> _pipeArguments;
         private FastStack<List<ScriptExpression>> _availableScriptExpressionLists;
-        private object[][] _availableReflectionArguments;
-        private ScriptPipeArguments _currentPipeArguments;
+        private object?[]?[] _availableReflectionArguments;
+        private ScriptPipeArguments? _currentPipeArguments;
         private bool _previousTextWasNewLine;
-        private readonly IEqualityComparer<string> _keyComparer;
+        private readonly IEqualityComparer<string>? _keyComparer;
 
         internal bool AllowPipeArguments => _getOrSetValueLevel <= 1;
 
@@ -78,7 +78,7 @@ namespace Scriban
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if the member on the target , <c>false</c> otherwise.</returns>
-        public delegate bool TryGetMemberDelegate(TemplateContext context, SourceSpan span, object target, string member, out object value);
+        public delegate bool TryGetMemberDelegate(TemplateContext context, SourceSpan span, object target, string member, out object? value);
 
         /// <summary>
         /// A delegate used to late binding <see cref="TryGetVariable"/>
@@ -88,7 +88,7 @@ namespace Scriban
         /// <param name="variable">The the variable to look for.</param>
         /// <param name="value">The value if the result is true.</param>
         /// <returns><c>true</c> if the variable was found, <c>false</c> otherwise.</returns>
-        public delegate bool TryGetVariableDelegate(TemplateContext context, SourceSpan span, ScriptVariable variable, out object value);
+        public delegate bool TryGetVariableDelegate(TemplateContext context, SourceSpan span, ScriptVariable variable, out object? value);
 
         /// <summary>
         /// A delegate used to format <see cref="ScriptRuntimeException"/>s while rendering the template.
@@ -115,7 +115,7 @@ namespace Scriban
         /// Initializes a new instance of the <see cref="TemplateContext" /> class.
         /// </summary>
         /// <param name="builtin">The builtin object used to expose builtin functions, default is <see cref="GetDefaultBuiltinObject"/>.</param>
-        public TemplateContext(ScriptObject builtin) : this(builtin, null)
+        public TemplateContext(ScriptObject? builtin) : this(builtin, null)
         {
         }
 
@@ -123,7 +123,7 @@ namespace Scriban
         /// Initializes a new instance of the <see cref="TemplateContext" /> class.
         /// </summary>
         /// <param name="keyComparer">Comparer to use when looking up members</param>
-        public TemplateContext(IEqualityComparer<string> keyComparer) : this(null, keyComparer)
+        public TemplateContext(IEqualityComparer<string>? keyComparer) : this(null, keyComparer)
         {
         }
 
@@ -132,7 +132,7 @@ namespace Scriban
         /// </summary>
         /// <param name="builtin">The builtin object used to expose builtin functions, default is <see cref="GetDefaultBuiltinObject"/>.</param>
         /// <param name="keyComparer">Comparer to use when looking up members</param>
-        public TemplateContext(ScriptObject builtin, IEqualityComparer<string> keyComparer)
+        public TemplateContext(ScriptObject? builtin, IEqualityComparer<string>? keyComparer)
         {
             BuiltinObject = builtin ?? GetDefaultBuiltinObject();
             EnableOutput = true;
@@ -172,7 +172,7 @@ namespace Scriban
             _localContexts = new FastStack<VariableContext>(4);
             _availableStores = new FastStack<ScriptObject>(4);
             _cultures = new FastStack<CultureInfo>(4);
-            _caseValues = new FastStack<object>(4);
+            _caseValues = new FastStack<object?>(4);
 
             _sourceFiles = new FastStack<string>(4);
 
@@ -185,13 +185,13 @@ namespace Scriban
             _availablePipeArguments = new FastStack<ScriptPipeArguments>(4);
             _pipeArguments = new FastStack<ScriptPipeArguments>(4);
             _availableScriptExpressionLists = new FastStack<List<ScriptExpression>>(4);
-            _availableReflectionArguments = new object[ScriptFunctionCall.MaximumParameterCount + 1][];
+            _availableReflectionArguments = new object?[ScriptFunctionCall.MaximumParameterCount + 1][];
 
             _keyComparer = keyComparer;
 
             for (int i = 0; i < _availableReflectionArguments.Length; i++)
             {
-                _availableReflectionArguments[i] = new object[i];
+                _availableReflectionArguments[i] = new object?[i];
             }
             _isFunctionCallDisabled = false;
 
@@ -211,7 +211,7 @@ namespace Scriban
         /// <summary>
         /// Gets or sets the <see cref="ITemplateLoader"/> used by the include directive. Must be set in order for the include directive to work.
         /// </summary>
-        public ITemplateLoader TemplateLoader { get; set; }
+        public ITemplateLoader? TemplateLoader { get; set; }
 
         /// <summary>
         /// Gets a boolean if the context is being used  with liquid
@@ -281,7 +281,7 @@ namespace Scriban
         /// <summary>
         /// A global settings used to filter field/property names of exposed .NET objects.
         /// </summary>
-        public MemberFilterDelegate MemberFilter { get; set; }
+        public MemberFilterDelegate? MemberFilter { get; set; }
 
         /// <summary>
         /// A loop limit that can be used at runtime to limit the number of loops. Default is 1000.
@@ -330,7 +330,7 @@ namespace Scriban
         /// <summary>
         /// Gets the current global <see cref="ScriptObject"/>.
         /// </summary>
-        public IScriptObject CurrentGlobal => _globalContexts.Peek()?.LocalObject;
+        public IScriptObject? CurrentGlobal => _globalContexts.Peek()?.LocalObject;
 
         /// <summary>
         /// Gets the cached templates, used by the include function.
@@ -340,24 +340,24 @@ namespace Scriban
         /// <summary>
         /// Gets the current source file.
         /// </summary>
-        public string CurrentSourceFile => _sourceFiles.Peek();
+        public string? CurrentSourceFile => _sourceFiles.Peek();
 
         /// <summary>
         /// Gets or sets a callback function that is called when a variable is being resolved and was not found from any scopes.
         /// </summary>
-        public TryGetVariableDelegate TryGetVariable { get; set; }
+        public TryGetVariableDelegate? TryGetVariable { get; set; }
 
         /// <summary>
         /// Gets ot sets a callback function which formats a <see cref="ScriptRuntimeException"/> to a string.
         /// The result from the delegate call will be rendered into the output where the exception occoured.
         /// You can assign <see cref="TemplateContext.RenderRuntimeExceptionDefault"/> to this property to easy get default exception rendering behavior.
         /// </summary>
-        public RenderRuntimeExceptionDelegate RenderRuntimeException { get; set; }
+        public RenderRuntimeExceptionDelegate? RenderRuntimeException { get; set; }
 
         /// <summary>
         /// Gets or sets the fallback accessor when accessing a member of an object and the member was not found, this accessor will be called.
         /// </summary>
-        public TryGetMemberDelegate TryGetMember { get; set; }
+        public TryGetMemberDelegate? TryGetMember { get; set; }
 
         /// <summary>
         /// Allows to store data within this context.
@@ -367,7 +367,7 @@ namespace Scriban
         /// <summary>
         /// Store the current stack of pipe arguments used by <see cref="ScriptPipeCall"/> and <see cref="ScriptFunctionCall"/>
         /// </summary>
-        internal ScriptPipeArguments CurrentPipeArguments => _currentPipeArguments;
+        internal ScriptPipeArguments? CurrentPipeArguments => _currentPipeArguments;
 
         /// <summary>
         /// Gets the number of <see cref="PushGlobal"/> that are pushed to this context.
@@ -438,14 +438,14 @@ namespace Scriban
         /// <summary>
         /// Gets the current node being evaluated.
         /// </summary>
-        public ScriptNode CurrentNode { get; private set; }
+        public ScriptNode? CurrentNode { get; private set; }
 
         public SourceSpan CurrentSpan => CurrentNode?.Span ?? new SourceSpan();
 
         /// <summary>
         /// Returns the current indent used for prefixing output lines.
         /// </summary>
-        public string CurrentIndent { get; set; }
+        public string? CurrentIndent { get; set; }
 
         /// <summary>
         /// Indicates if we are in a loop
@@ -477,7 +477,7 @@ namespace Scriban
         /// <param name="culture">The new culture to use when rendering/parsing numbers</param>
         public void PushCulture(CultureInfo culture)
         {
-            if (culture == null) throw new ArgumentNullException(nameof(culture));
+            if (culture is null) throw new ArgumentNullException(nameof(culture));
             // Create a stack for cultures if they are actually used
             _cultures.Push(culture);
         }
@@ -523,26 +523,26 @@ namespace Scriban
             list.Clear();
         }
 
-        internal object[] GetOrCreateReflectionArguments(int length)
+        internal object?[] GetOrCreateReflectionArguments(int length)
         {
             if (length < 0) throw new ArgumentOutOfRangeException(nameof(length));
 
             // Don't try to allocate more than we can allocate
-            if (length >= _availableReflectionArguments.Length) return new object[length];
+            if (length >= _availableReflectionArguments.Length) return new object?[length];
 
-            var reflectionArguments = _availableReflectionArguments[length] ?? new object[length];
+            var reflectionArguments = _availableReflectionArguments[length] ?? new object?[length];
             if (length > 0)
             {
-                _availableReflectionArguments[length] = (object[])reflectionArguments[0];
+                _availableReflectionArguments[length] = reflectionArguments[0] as object?[];
                 reflectionArguments[0] = null;
             }
             return reflectionArguments;
         }
 
-        internal void ReleaseReflectionArguments(object[] reflectionArguments)
+        internal void ReleaseReflectionArguments(object?[] reflectionArguments)
         {
             // Nothing to release
-            if (reflectionArguments == null) return;
+            if (reflectionArguments is null) return;
 
             if (reflectionArguments.Length >= _availableReflectionArguments.Length) return;
             Array.Clear(reflectionArguments, 0, reflectionArguments.Length);
@@ -575,7 +575,7 @@ namespace Scriban
         /// <param name="sourceFile">The source file.</param>
         public void PushSourceFile(string sourceFile)
         {
-            if (sourceFile == null) throw new ArgumentNullException(nameof(sourceFile));
+            if (sourceFile is null) throw new ArgumentNullException(nameof(sourceFile));
             _sourceFiles.Push(sourceFile);
         }
 
@@ -598,8 +598,12 @@ namespace Scriban
         /// </summary>
         /// <param name="target">The expression</param>
         /// <returns>The value of the expression</returns>
-        public object GetValue(ScriptExpression target)
+        public object? GetValue(ScriptExpression? target)
         {
+            if (target is null)
+            {
+                return null;
+            }
 
             var previousNode = CurrentNode;
             _getOrSetValueLevel++;
@@ -628,11 +632,12 @@ namespace Scriban
         public virtual void Import(SourceSpan span, object objectToImport)
         {
             var scriptObject = objectToImport as ScriptObject;
-            if (scriptObject == null)
+            if (scriptObject is null)
             {
                 throw new ScriptRuntimeException(span, $"Unexpected value `{GetTypeName(objectToImport)}` for import. Expecting an plain script object.");
             }
-            CurrentGlobal.Import(objectToImport);
+            var currentGlobal = CurrentGlobal ?? throw new ScriptRuntimeException(span, "No current global object is available.");
+            currentGlobal.Import(objectToImport);
         }
 
         /// <summary>
@@ -641,9 +646,9 @@ namespace Scriban
         /// <param name="target">The target expression.</param>
         /// <param name="value">The value.</param>
         /// <exception cref="System.ArgumentNullException">If target is null</exception>
-        public void SetValue(ScriptExpression target, object value)
+        public void SetValue(ScriptExpression? target, object? value)
         {
-            if (target == null) throw new ArgumentNullException(nameof(target));
+            if (target is null) return;
             _getOrSetValueLevel++;
             try
             {
@@ -692,13 +697,16 @@ namespace Scriban
         /// </summary>
         /// <param name="span">The span of the object to render.</param>
         /// <param name="textAsObject">The text as object.</param>
-        public virtual TemplateContext Write(SourceSpan span, object textAsObject)
+        public virtual TemplateContext Write(SourceSpan span, object? textAsObject)
         {
-            if (textAsObject != null)
+            if (textAsObject is not null)
             {
                 textAsObject = AwaitIfNeeded(textAsObject);
                 var text = ObjectToString(textAsObject);
-                Write(text);
+                if (text is not null)
+                {
+                    Write(text);
+                }
             }
             return this;
         }
@@ -763,9 +771,9 @@ namespace Scriban
         /// Writes the text to the current <see cref="Output"/>
         /// </summary>
         /// <param name="text">The text.</param>
-        public TemplateContext Write(string text)
+        public TemplateContext Write(string? text)
         {
-            if (text != null)
+            if (text is not null)
             {
                 Write(text, 0, text.Length);
             }
@@ -787,7 +795,7 @@ namespace Scriban
         /// <param name="slice">The text.</param>
         public TemplateContext Write(ScriptStringSlice slice)
         {
-            Write(slice.FullText, slice.Index, slice.Length);
+            Write(slice.FullText ?? string.Empty, slice.Index, slice.Length);
             return this;
         }
 
@@ -797,12 +805,12 @@ namespace Scriban
         /// <param name="text">The text.</param>
         /// <param name="startIndex">The zero-based position of the substring of text</param>
         /// <param name="count">The number of characters to output starting at <paramref name="startIndex"/> position from the text</param>
-        public TemplateContext Write(string text, int startIndex, int count)
+        public TemplateContext Write(string? text, int startIndex, int count)
         {
-            if (text != null)
+            if (text is not null)
             {
                 // Indented text
-                if (CurrentIndent != null)
+                if (CurrentIndent is not null)
                 {
                     var index = startIndex;
                     var indexEnd = startIndex + count;
@@ -866,7 +874,7 @@ namespace Scriban
         /// <param name="scriptNode">The script node.</param>
         /// <returns>The result of the evaluation.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        public object Evaluate(ScriptNode scriptNode)
+        public object? Evaluate(ScriptNode scriptNode)
         {
             return Evaluate(scriptNode, false);
         }
@@ -877,9 +885,9 @@ namespace Scriban
         /// <param name="scriptNode">The script node.</param>
         /// <param name="aliasReturnedFunction">if set to <c>true</c> and a function would be evaluated as part of this node, return the object function without evaluating it.</param>
         /// <returns>The result of the evaluation.</returns>
-        public virtual object Evaluate(ScriptNode scriptNode, bool aliasReturnedFunction)
+        public virtual object? Evaluate(ScriptNode? scriptNode, bool aliasReturnedFunction)
         {
-            if (scriptNode == null) return null;
+            if (scriptNode is null) return null;
 
             var previousFunctionCallState = _isFunctionCallDisabled;
             var previousLevel = _getOrSetValueLevel;
@@ -889,17 +897,16 @@ namespace Scriban
                 CurrentNode = scriptNode;
                 _getOrSetValueLevel = 0;
                 _isFunctionCallDisabled = aliasReturnedFunction;
-                var result = scriptNode.Evaluate(this);
-                return result;
+                return scriptNode.Evaluate(this);
             }
-            catch (ScriptRuntimeException ex) when (this.RenderRuntimeException != null)
+            catch (ScriptRuntimeException ex) when (this.RenderRuntimeException is not null)
             {
                 return this.RenderRuntimeException(ex);
             }
             catch (Exception ex) when (!(ex is ScriptRuntimeException))
             {
                 var toThrow = new ScriptRuntimeException(scriptNode.Span, ex.Message, ex);
-                if (RenderRuntimeException != null)
+                if (RenderRuntimeException is not null)
                 {
                     return RenderRuntimeException(toThrow);
                 }
@@ -920,7 +927,7 @@ namespace Scriban
         /// <returns>A member accessor</returns>
         public IObjectAccessor GetMemberAccessor(object target)
         {
-            if (target == null)
+            if (target is null)
             {
                 return NullAccessor.Default;
             }
@@ -984,7 +991,7 @@ namespace Scriban
         [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Runtime dispatch to reflection-based accessors; only triggered for arbitrary .NET objects, not ScriptObject.")]
         [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Runtime dispatch to reflection-based accessors; type comes from target.GetType() at runtime.")]
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Runtime dispatch to reflection-based accessors; only triggered for arbitrary .NET objects, not ScriptObject.")]
-        protected virtual IObjectAccessor GetMemberAccessorImpl(object target)
+        protected virtual IObjectAccessor? GetMemberAccessorImpl(object target)
         {
             var type = target.GetType();
             IObjectAccessor accessor;
@@ -1000,8 +1007,9 @@ namespace Scriban
             {
                 accessor = PrimitiveAccessor.Default;
             }
-            else if (DictionaryAccessor.TryGet(target, out accessor))
+            else if (DictionaryAccessor.TryGet(target, out var dictionaryAccessor) && dictionaryAccessor is not null)
             {
+                accessor = dictionaryAccessor;
             }
             else if (type.IsArray)
             {
@@ -1028,30 +1036,31 @@ namespace Scriban
             return builtinObject;
         }
 
-        public void EnterRecursive(ScriptNode node)
+        public void EnterRecursive(ScriptNode? node)
         {
+            var span = node?.Span ?? CurrentSpan;
             try
             {
                 RuntimeHelpers.EnsureSufficientExecutionStack();
             }
             catch (InsufficientExecutionStackException)
             {
-                throw new ScriptRuntimeException(node.Span, $"Exceeding recursive depth limit, near to stack overflow");
+                throw new ScriptRuntimeException(span, $"Exceeding recursive depth limit, near to stack overflow");
             }
 
             _callDepth++;
             if (RecursiveLimit != 0 && _callDepth > RecursiveLimit)
             {
-                throw new ScriptRuntimeException(node.Span, $"Exceeding number of recursive depth limit `{RecursiveLimit}` for node: `{node}`"); // unit test: 305-func-error2.txt
+                throw new ScriptRuntimeException(span, $"Exceeding number of recursive depth limit `{RecursiveLimit}` for node: `{node}`"); // unit test: 305-func-error2.txt
             }
         }
 
-        public void ExitRecursive(ScriptNode node)
+        public void ExitRecursive(ScriptNode? node)
         {
             _callDepth--;
             if (_callDepth < 0)
             {
-                throw new ScriptRuntimeException(node.Span, $"unexpected ExitRecursive not matching EnterRecursive for `{node}`");
+                throw new ScriptRuntimeException(node?.Span ?? CurrentSpan, $"unexpected ExitRecursive not matching EnterRecursive for `{node}`");
             }
         }
 
@@ -1059,7 +1068,7 @@ namespace Scriban
         /// Called when entering a function.
         /// </summary>
         /// <param name="caller"></param>
-        internal void EnterFunction(ScriptNode caller)
+        internal void EnterFunction(ScriptNode? caller)
         {
             EnterRecursive(caller);
         }
@@ -1067,7 +1076,7 @@ namespace Scriban
         /// <summary>
         /// Called when exiting a function.
         /// </summary>
-        internal void ExitFunction(ScriptNode caller)
+        internal void ExitFunction(ScriptNode? caller)
         {
             ExitRecursive(caller);
         }
@@ -1079,7 +1088,7 @@ namespace Scriban
         /// <param name="loop"></param>
         internal void EnterLoop(ScriptLoopStatementBase loop)
         {
-            if (loop == null) throw new ArgumentNullException(nameof(loop));
+            if (loop is null) throw new ArgumentNullException(nameof(loop));
             _loops.Push(loop);
             PushVariableScope(VariableScope.Loop);
             OnEnterLoop(loop);
@@ -1181,17 +1190,17 @@ namespace Scriban
             return true;
         }
 
-        internal void PushCase(object caseValue)
+        internal void PushCase(object? caseValue)
         {
             _caseValues.Push(caseValue);
         }
 
-        internal object PeekCase()
+        internal object? PeekCase()
         {
             return _caseValues.Peek();
         }
 
-        internal object PopCase()
+        internal object? PopCase()
         {
             if (_caseValues.Count == 0)
             {
@@ -1208,9 +1217,9 @@ namespace Scriban
         /// <param name="valueToSet">A value to set in case of a setter</param>
         /// <param name="setter">true if this a setter</param>
         /// <returns>The value of the targetExpression</returns>
-        private object GetOrSetValue(ScriptExpression targetExpression, object valueToSet, bool setter)
+        private object? GetOrSetValue(ScriptExpression targetExpression, object? valueToSet, bool setter)
         {
-            object value = null;
+            object? value = null;
 
             try
             {
@@ -1260,12 +1269,27 @@ namespace Scriban
         /// <returns>A list accessor for the specified type of target</returns>
         public IListAccessor GetListAccessor(object target)
         {
+            var accessor = TryGetListAccessor(target);
+            if (accessor is null)
+            {
+                throw new ScriptRuntimeException(CurrentSpan, $"Unable to find a list accessor for `{GetTypeName(target)}`.");
+            }
+
+            return accessor;
+        }
+
+        internal IListAccessor? TryGetListAccessor(object target)
+        {
             var type = target.GetType();
-            if (!_listAccessors.TryGetValue(type, out var accessor))
+            if (!_listAccessors.TryGetValue(type, out IListAccessor? accessor))
             {
                 accessor = GetListAccessorImpl(target, type);
-                _listAccessors.Add(type, accessor);
+                if (accessor is not null)
+                {
+                    _listAccessors.Add(type, accessor);
+                }
             }
+
             return accessor;
         }
 
@@ -1275,7 +1299,7 @@ namespace Scriban
         /// <param name="target">The expected object to be a list</param>
         /// <param name="type">Type of the target object</param>
         /// <returns>A list accessor for the specified type of target</returns>
-        protected virtual IListAccessor GetListAccessorImpl(object target, Type type)
+        protected virtual IListAccessor? GetListAccessorImpl(object target, Type type)
         {
             if (type.IsArray)
             {
@@ -1304,46 +1328,51 @@ namespace Scriban
             _previousTextWasNewLine = false;
         }
 
-        public virtual string GetTemplatePathFromName(string templateName, ScriptNode callerContext)
+        public virtual string? GetTemplatePathFromName(string? templateName, ScriptNode? callerContext)
         {
+            var callerSpan = callerContext?.Span ?? CurrentSpan;
             // If template name is empty, throw an exception
             if (string.IsNullOrEmpty(templateName))
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Include template name cannot be null or empty");
+                throw new ScriptRuntimeException(callerSpan, $"Include template name cannot be null or empty");
             }
 
-            return ConvertTemplateNameToPath(templateName, callerContext);
+            var checkedTemplateName = templateName ?? throw new ScriptRuntimeException(callerSpan, "Include template name cannot be null or empty");
+            return ConvertTemplateNameToPath(checkedTemplateName, callerContext);
         }
 
-        protected string ConvertTemplateNameToPath(string templateName, ScriptNode callerContext)
+        protected string ConvertTemplateNameToPath(string templateName, ScriptNode? callerContext)
         {
-            if (TemplateLoader == null)
+            var callerSpan = callerContext?.Span ?? CurrentSpan;
+            if (TemplateLoader is null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.TemplateLoader");
+                throw new ScriptRuntimeException(callerSpan, $"Unable to include <{templateName}>. No TemplateLoader registered in TemplateContext.TemplateLoader");
             }
 
-            string templatePath;
+            var templateLoader = TemplateLoader;
+
+            string? templatePath;
 
             try
             {
-                templatePath = TemplateLoader.GetPath(this, callerContext.Span, templateName);
+                templatePath = templateLoader.GetPath(this, callerSpan, templateName);
             }
             catch (Exception ex) when (!(ex is ScriptRuntimeException))
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while getting the path for the include name `{templateName}`", ex);
+                throw new ScriptRuntimeException(callerSpan, $"Unexpected exception while getting the path for the include name `{templateName}`", ex);
             }
             // If template path is empty (probably because template doesn't exist), throw an exception
-            if (templatePath == null)
+            if (templatePath is null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Include template path is null for `{templateName}");
+                throw new ScriptRuntimeException(callerSpan, $"Include template path is null for `{templateName}");
             }
 
             return templatePath;
         }
 
-        public Template GetOrCreateTemplate(string templatePath, ScriptNode callerContext)
+        public Template GetOrCreateTemplate(string templatePath, ScriptNode? callerContext)
         {
-            if (!CachedTemplates.TryGetValue(templatePath, out var template))
+            if (!CachedTemplates.TryGetValue(templatePath, out Template? template))
             {
                 template = CreateTemplate(templatePath, callerContext);
                 CachedTemplates[templatePath] = template;
@@ -1351,21 +1380,23 @@ namespace Scriban
             return template;
         }
 
-        protected virtual Template CreateTemplate(string templatePath, ScriptNode callerContext)
+        protected virtual Template CreateTemplate(string templatePath, ScriptNode? callerContext)
         {
-            string templateText;
+            var callerSpan = callerContext?.Span ?? CurrentSpan;
+            var templateLoader = TemplateLoader ?? throw new ScriptRuntimeException(callerSpan, "No TemplateLoader registered in TemplateContext.TemplateLoader");
+            string? templateText;
             try
             {
-                templateText = TemplateLoader.Load(this, callerContext.Span, templatePath);
+                templateText = templateLoader.Load(this, callerSpan, templatePath);
             }
             catch (Exception ex) when (!(ex is ScriptRuntimeException))
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception while creating template from path `{templatePath}`", ex);
+                throw new ScriptRuntimeException(callerSpan, $"Unexpected exception while creating template from path `{templatePath}`", ex);
             }
 
-            if (templateText == null)
+            if (templateText is null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"The result of including `{templatePath}` cannot be null");
+                throw new ScriptRuntimeException(callerSpan, $"The result of including `{templatePath}` cannot be null");
             }
 
             var template = Template.Parse(templateText, templatePath, TemplateLoaderParserOptions, TemplateLoaderLexerOptions);
@@ -1373,7 +1404,7 @@ namespace Scriban
             // If the template has any errors, throw an exception
             if (template.HasErrors)
             {
-                throw new ScriptParserRuntimeException(callerContext.Span, $"Error while parsing template `{templatePath}`", template.Messages);
+                throw new ScriptParserRuntimeException(callerSpan, $"Error while parsing template `{templatePath}`", template.Messages);
             }
 
             CachedTemplates.Add(templatePath, template);
@@ -1381,19 +1412,24 @@ namespace Scriban
             return template;
         }
 
-        private Dictionary<string, object> FetchNamedArguments( ScriptNode callerContext )
+        private Dictionary<string, object?>? FetchNamedArguments(ScriptNode? callerContext)
         {
             if (!(callerContext is ScriptFunctionCall functionCall) || functionCall.Arguments.Count == 0)
             {
                 return null;
             }
 
-            var namedArgumentsValues = new Dictionary<string, object>();
+            var namedArgumentsValues = new Dictionary<string, object?>();
             foreach (var arg in functionCall.Arguments)
             {
                 if (arg is ScriptNamedArgument namedArg)
                 {
-                    var name = namedArg.Name.Name;
+                    var name = namedArg.Name?.Name;
+                    if (name is null || namedArg.Value is null)
+                    {
+                        continue;
+                    }
+
                     var value = namedArg.Value.Evaluate(this);
                     namedArgumentsValues[name] = value;
                 }
@@ -1401,10 +1437,10 @@ namespace Scriban
             return namedArgumentsValues;
         }
 
-        public string RenderTemplate(Template template, ScriptArray arguments, ScriptNode callerContext)
+        public string RenderTemplate(Template template, ScriptArray arguments, ScriptNode? callerContext)
         {
             // Make sure that we cannot recursively include a template
-            string result = null;
+            var result = string.Empty;
             EnterRecursive(callerContext);
             var previousIndent = CurrentIndent;
             CurrentIndent = null;
@@ -1417,7 +1453,7 @@ namespace Scriban
             {
                 SetValue(ScriptVariable.Arguments, arguments, true, true);
 
-                if (namedArgumentsValues != null)
+                if (namedArgumentsValues is not null)
                 {
                     // Add local variables for each named argument
                     foreach (var kv in namedArgumentsValues)
@@ -1426,13 +1462,13 @@ namespace Scriban
                         SetValue(variable: newLocalVariable, value: kv.Value, asReadOnly: false, force: true);
                     }
                 }
-                if (previousIndent != null)
+                if (previousIndent is not null)
                 {
                     // We reset before and after the fact that we have a new line
                     ResetPreviousNewLine();
                 }
                 result = template.Render(this);
-                if (previousIndent != null)
+                if (previousIndent is not null)
                 {
                     ResetPreviousNewLine();
                 }
@@ -1471,7 +1507,7 @@ namespace Scriban
             IsLiquid = true;
         }
 
-        public override string GetTemplatePathFromName(string templateName, ScriptNode callerContext)
+        public override string? GetTemplatePathFromName(string? templateName, ScriptNode? callerContext)
         {
             // If template name is empty, throw an exception
             if (string.IsNullOrEmpty(templateName))
@@ -1479,7 +1515,8 @@ namespace Scriban
                 return null;
             }
 
-            return ConvertTemplateNameToPath(templateName, callerContext);
+            var checkedTemplateName = templateName ?? throw new ScriptRuntimeException(CurrentSpan, "Include template name cannot be null or empty");
+            return ConvertTemplateNameToPath(checkedTemplateName, callerContext);
         }
     }
 }

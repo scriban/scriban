@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Diagnostics;
@@ -64,7 +64,7 @@ namespace Scriban.Helpers
             }
 
             T item = _array[--_size];
-            _array[_size] = default(T);     // Free memory quicker.
+            Array.Clear(_array, _size, 1); // Free memory quicker.
             return item;
         }
 

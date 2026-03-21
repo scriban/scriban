@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -26,7 +26,7 @@ namespace Scriban.Runtime
 #else
     internal
 #endif
-    partial class ScriptObject : IDictionary<string, object>, IEnumerable, IScriptObject, IDictionary, IFormattable
+    partial class ScriptObject : IDictionary<string, object?>, IEnumerable, IScriptObject, IDictionary, IFormattable
     {
         internal Dictionary<string, InternalValue> Store { get; private set; }
 
@@ -40,7 +40,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptObject"/> class.
         /// </summary>
-        public ScriptObject(IEqualityComparer<string> keyComparer) : this (0, true, keyComparer)
+        public ScriptObject(IEqualityComparer<string>? keyComparer) : this (0, true, keyComparer)
         {
         }
 
@@ -54,7 +54,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Initializes a new instance of the <see cref="ScriptObject"/> class.
         /// </summary>
-        public ScriptObject(int capacity, IEqualityComparer<string> keyComparer) : this(capacity, true, keyComparer)
+        public ScriptObject(int capacity, IEqualityComparer<string>? keyComparer) : this(capacity, true, keyComparer)
         {
         }
 
@@ -74,7 +74,7 @@ namespace Scriban.Runtime
         /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
         /// <param name="keyComparer">Comparer to use when looking up members</param>
         [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Auto-import of static members from derived types; derived types within Scriban are statically known.")]
-        public ScriptObject(int capacity, bool? autoImportStaticsFromThisType, IEqualityComparer<string> keyComparer)
+        public ScriptObject(int capacity, bool? autoImportStaticsFromThisType, IEqualityComparer<string>? keyComparer)
         {
             Store = new Dictionary<string, InternalValue>(capacity, keyComparer);
 
@@ -85,7 +85,7 @@ namespace Scriban.Runtime
             }
         }
 
-        void IDictionary.Add(object key, object value)
+        void IDictionary.Add(object key, object? value)
         {
             this.AssertNotReadOnly();
             Store.Add((string) key, new InternalValue(value));
@@ -145,17 +145,17 @@ namespace Scriban.Runtime
         /// <value><c>true</c> if this instance is read only; otherwise, <c>false</c>.</value>
         public virtual bool IsReadOnly { get; set; }
 
-        object IDictionary.this[object key]
+        object? IDictionary.this[object key]
         {
             get
             {
-                var str = key as string ?? key.ToString();
+                var str = key as string ?? key?.ToString() ?? throw new ArgumentNullException(nameof(key));
                 return Store[str].Value;
             }
             set
             {
                 this.AssertNotReadOnly();
-                var str = key as string ?? key.ToString();
+                var str = key as string ?? key?.ToString() ?? throw new ArgumentNullException(nameof(key));
                 if (Store.TryGetValue(str, out var previousValue))
                 {
                     Store[str] = new InternalValue(value, previousValue.IsReadOnly);
@@ -180,7 +180,7 @@ namespace Scriban.Runtime
         /// <exception cref="System.ArgumentNullException">If member is null</exception>
         public virtual bool Contains(string member)
         {
-            if (member == null) throw new ArgumentNullException(nameof(member));
+            if (member is null) throw new ArgumentNullException(nameof(member));
             return Store.ContainsKey(member);
         }
 
@@ -192,7 +192,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <returns><c>true</c> if the value was retrieved</returns>
-        public virtual bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
+        public virtual bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object? value)
         {
             InternalValue internalValue;
             var result = Store.TryGetValue(member, out internalValue);
@@ -205,15 +205,26 @@ namespace Scriban.Runtime
         /// </summary>
         /// <typeparam name="T">Type of the expected member</typeparam>
         /// <param name="name">The name of the member.</param>
-        /// <param name="defaultValue">Default value used if the value is not set or not of the expected type.</param>
-        /// <returns>The value or default{T} is the value is different. Note that this method will override the value in this instance if the value doesn't match the type {T} </returns>
-        public T GetSafeValue<T>(string name, T defaultValue = default)
+        /// <returns>The value or default{T} if the value is different. Note that this method will override the value in this instance if the value doesn't match the type {T}.</returns>
+        public T? GetSafeValue<T>(string name)
         {
-            if (name == null) throw new ArgumentNullException(nameof(name));
-            var obj = this[name];
+            return GetSafeValue(name, default(T));
+        }
+
+        /// <summary>
+        /// Gets the value for the specified member and type.
+        /// </summary>
+        /// <typeparam name="T">Type of the expected member</typeparam>
+        /// <param name="name">The name of the member.</param>
+        /// <param name="defaultValue">Default value used if the value is not set or not of the expected type.</param>
+        /// <returns>The value or <paramref name="defaultValue"/> if the value is different. Note that this method will override the value in this instance if the value doesn't match the type {T}.</returns>
+        public T GetSafeValue<T>(string name, T defaultValue)
+        {
+            if (name is null) throw new ArgumentNullException(nameof(name));
+            object? obj = this[name];
             // If value is null, the property does no exist,
             // so we can safely return immediately with the default value
-            if (obj == null)
+            if (obj is null)
             {
                 return defaultValue;
             }
@@ -222,28 +233,28 @@ namespace Scriban.Runtime
                 obj = defaultValue;
                 this[name] = obj;
             }
-            return (T)obj;
+            return obj is T typedValue ? typedValue : defaultValue;
         }
 
-        bool IDictionary<String,Object>.TryGetValue(string key, out object value)
+        bool IDictionary<string, object?>.TryGetValue(string key, out object? value)
         {
-            return TryGetValue(null, new SourceSpan(), key, out value);
+            return TryGetValue(new TemplateContext(), new SourceSpan(), key, out value);
         }
 
-        public virtual object this[string key]
+        public virtual object? this[string key]
         {
             get
             {
-                if (key == null) throw new ArgumentNullException(nameof(key));
-                object value;
-                TryGetValue(null, new SourceSpan(), key, out value);
+                if (key is null) throw new ArgumentNullException(nameof(key));
+                object? value;
+                TryGetValue(new TemplateContext(), new SourceSpan(), key, out value);
                 return value;
             }
             set
             {
-                if (key == null) throw new ArgumentNullException(nameof(key));
+                if (key is null) throw new ArgumentNullException(nameof(key));
                 this.AssertNotReadOnly();
-                TrySetValue(null, new SourceSpan(), key, value, false);
+                TrySetValue(new TemplateContext(), new SourceSpan(), key, value, false);
             }
         }
 
@@ -258,7 +269,7 @@ namespace Scriban.Runtime
             get { return ((IDictionary) Store).Keys; }
         }
 
-        public ICollection<object> Values
+        public ICollection<object?> Values
         {
             get { return Store.Values.Select(val => val.Value).ToList(); }
         }
@@ -283,7 +294,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="value">The value.</param>
         /// <param name="readOnly">if set to <c>true</c> the value will be read only.</param>
-        public virtual bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+        public virtual bool TrySetValue(TemplateContext context, SourceSpan span, string member, object? value, bool readOnly)
         {
             if (!CanWrite(member)) return false;
             this.AssertNotReadOnly();
@@ -291,12 +302,12 @@ namespace Scriban.Runtime
             return true;
         }
 
-        public void SetValue(string member, object value, bool readOnly)
+        public void SetValue(string member, object? value, bool readOnly)
         {
             Store[member] = new InternalValue(value, readOnly);
         }
 
-        public void Add(string key, object value)
+        public void Add(string key, object? value)
         {
             Store.Add(key, new InternalValue(value, false));
         }
@@ -348,7 +359,7 @@ namespace Scriban.Runtime
             return true;
         }
 
-        public virtual string ToString(string format, IFormatProvider formatProvider)
+        public virtual string ToString(string? format, IFormatProvider? formatProvider)
         {
             var context = formatProvider as TemplateContext;
             var result = new StringBuilder();
@@ -366,10 +377,10 @@ namespace Scriban.Runtime
                 }
                 else
                 {
-                    result.Append(context != null ? context.ObjectToString(item.Key, true) : $"\"{StringFunctions.Escape(item.Key)}\"");
+                    result.Append(context is not null ? context.ObjectToString(item.Key, true) : $"\"{StringFunctions.Escape(item.Key)}\"");
                 }
                 result.Append(": ");
-                if (context != null)
+                if (context is not null)
                 {
                     result.Append(context.ObjectToString(item.Value, true));
                 }
@@ -403,7 +414,7 @@ namespace Scriban.Runtime
 
         public virtual void CopyTo(ScriptObject dest)
         {
-            if (dest == null) throw new ArgumentNullException(nameof(dest));
+            if (dest is null) throw new ArgumentNullException(nameof(dest));
             foreach (var keyPair in Store)
             {
                 dest.Store[keyPair.Key] = keyPair.Value;
@@ -447,11 +458,11 @@ namespace Scriban.Runtime
             return toObject;
         }
 
-        public IEnumerator<KeyValuePair<string, object>> GetEnumerator()
+        public IEnumerator<KeyValuePair<string, object?>> GetEnumerator()
         {
             foreach (var item in Store)
             {
-                yield return new KeyValuePair<string, object>(item.Key, item.Value.Value);
+                yield return new KeyValuePair<string, object?>(item.Key, item.Value.Value);
             }
         }
 
@@ -474,7 +485,7 @@ namespace Scriban.Runtime
         /// </remarks>
         [ScriptMemberIgnore]
         [RequiresUnreferencedCode("ScriptObject.From uses reflection to import members from the specified object.")]
-        public static ScriptObject From(object obj)
+        public static ScriptObject From(object? obj)
         {
             var scriptObject = new ScriptObject();
             scriptObject.Import(obj);
@@ -489,7 +500,7 @@ namespace Scriban.Runtime
         [ScriptMemberIgnore]
         public static bool IsImportable(object obj)
         {
-            if (obj == null)
+            if (obj is null)
             {
                 return true;
             }
@@ -498,19 +509,19 @@ namespace Scriban.Runtime
             return !(obj is string || typeInfo.IsPrimitive || typeInfo == typeof(decimal) || typeInfo.IsEnum || typeInfo.IsArray);
         }
 
-        void ICollection<KeyValuePair<string, object>>.Add(KeyValuePair<string, object> item)
+        void ICollection<KeyValuePair<string, object?>>.Add(KeyValuePair<string, object?> item)
         {
             Add(item.Key, item.Value);
         }
 
-        bool ICollection<KeyValuePair<string, object>>.Contains(KeyValuePair<string, object> item)
+        bool ICollection<KeyValuePair<string, object?>>.Contains(KeyValuePair<string, object?> item)
         {
-            return Store.TryGetValue(item.Key, out var value) && value.Equals(item.Value);
+            return Store.TryGetValue(item.Key, out var value) && Equals(value.Value, item.Value);
         }
 
-        void ICollection<KeyValuePair<string, object>>.CopyTo(KeyValuePair<string, object>[] array, int arrayIndex)
+        void ICollection<KeyValuePair<string, object?>>.CopyTo(KeyValuePair<string, object?>[] array, int arrayIndex)
         {
-            if (array == null)
+            if (array is null)
                 throw new ArgumentNullException(nameof(array));
             if (arrayIndex > array.Length)
                 throw new ArgumentOutOfRangeException(nameof(arrayIndex), arrayIndex, "The arrayIndex parameter is larger than the array's length.");
@@ -519,12 +530,12 @@ namespace Scriban.Runtime
             var count = Count;
             var store = Store;
             foreach (var pair in Store)
-                array[arrayIndex++] = new KeyValuePair<string, object>(pair.Key, pair.Value.Value);
+                array[arrayIndex++] = new KeyValuePair<string, object?>(pair.Key, pair.Value.Value);
         }
 
-        bool ICollection<KeyValuePair<string, object>>.Remove(KeyValuePair<string, object> item)
+        bool ICollection<KeyValuePair<string, object?>>.Remove(KeyValuePair<string, object?> item)
         {
-            if (Store.TryGetValue(item.Key, out var value) && value.Equals(item.Value))
+            if (Store.TryGetValue(item.Key, out var value) && Equals(value.Value, item.Value))
             {
                 Remove(item.Key);
                 return true;
@@ -532,22 +543,22 @@ namespace Scriban.Runtime
             return false;
         }
 
-        bool ICollection<KeyValuePair<string, object>>.IsReadOnly => IsReadOnly;
+        bool ICollection<KeyValuePair<string, object?>>.IsReadOnly => IsReadOnly;
 
         internal struct InternalValue
         {
-            public InternalValue(object value, bool isReadOnly)
+            public InternalValue(object? value, bool isReadOnly)
             {
                 Value = value;
                 IsReadOnly = isReadOnly;
             }
 
-            public InternalValue(object value) : this()
+            public InternalValue(object? value) : this()
             {
                 Value = value;
             }
 
-            public object Value { get; }
+            public object? Value { get; }
 
             public bool IsReadOnly { get; set; }
         }

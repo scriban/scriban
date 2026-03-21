@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -40,9 +40,9 @@ namespace Scriban.Functions
         /// [1, 2, 3, 4]
         /// ```
         /// </remarks>
-        public static IEnumerable Add(IEnumerable list, object value)
+        public static IEnumerable Add(IEnumerable? list, object? value)
         {
-            if (list == null)
+            if (list is null)
             {
                 return new ScriptRange { value };
             }
@@ -52,7 +52,7 @@ namespace Scriban.Functions
 
 
         [ScriptMemberIgnore]
-        public static IEnumerable AddRange(IEnumerable list1, IEnumerable list2)
+        public static IEnumerable? AddRange(IEnumerable? list1, IEnumerable? list2)
         {
             return Concat(list1, list2);
         }
@@ -73,13 +73,13 @@ namespace Scriban.Functions
         /// [1, 2, 3, 4, 5]
         /// ```
         /// </remarks>
-        public static IEnumerable AddRange(TemplateContext context, SourceSpan span, IEnumerable list1, IEnumerable list2)
+        public static IEnumerable? AddRange(TemplateContext context, SourceSpan span, IEnumerable? list1, IEnumerable? list2)
         {
             return Concat(context, span, list1, list2);
         }
 
         [ScriptMemberIgnore]
-        public static IEnumerable Compact(IEnumerable list)
+        public static IEnumerable? Compact(IEnumerable? list)
         {
             return ScriptRange.Compact(list);
         }
@@ -99,13 +99,13 @@ namespace Scriban.Functions
         /// [1, 3]
         /// ```
         /// </remarks>
-        public static IEnumerable Compact(TemplateContext context, SourceSpan span, IEnumerable list)
+        public static IEnumerable? Compact(TemplateContext context, SourceSpan span, IEnumerable? list)
         {
             return ScriptRange.Compact(context, span, list);
         }
 
         [ScriptMemberIgnore]
-        public static IEnumerable Concat(IEnumerable list1, IEnumerable list2)
+        public static IEnumerable? Concat(IEnumerable? list1, IEnumerable? list2)
         {
             return ScriptRange.Concat(list1, list2);
         }
@@ -126,7 +126,7 @@ namespace Scriban.Functions
         /// [1, 2, 3, 4, 5]
         /// ```
         /// </remarks>
-        public static IEnumerable Concat(TemplateContext context, SourceSpan span, IEnumerable list1, IEnumerable list2)
+        public static IEnumerable? Concat(TemplateContext context, SourceSpan span, IEnumerable? list1, IEnumerable? list2)
         {
             return ScriptRange.Concat(context, span, list1, list2);
         }
@@ -155,19 +155,19 @@ namespace Scriban.Functions
         /// `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template.
         /// If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
         /// </remarks>
-        public static object Cycle(TemplateContext context, SourceSpan span, IList list, object group = null)
+        public static object? Cycle(TemplateContext context, SourceSpan span, IList list, object? group = null)
         {
-            if (list == null)
+            if (list is null)
             {
                 return null;
             }
-            var strGroup = group == null ? Join(context, span, list, ",") : context.ObjectToString(@group);
+            var strGroup = group is null ? Join(context, span, list, ",") : context.ObjectToString(@group) ?? string.Empty;
 
             // We create a cycle variable that is dependent on the exact AST context.
             // So we allow to have multiple cycle running in the same loop
             var cycleKey = new CycleKey(strGroup);
 
-            object cycleValue;
+            object? cycleValue;
             var currentTags = context.Tags;
             if (!currentTags.TryGetValue(cycleKey, out cycleValue) || !(cycleValue is int))
             {
@@ -176,7 +176,7 @@ namespace Scriban.Functions
 
             var cycleIndex = (int)cycleValue;
             cycleIndex = list.Count == 0 ? 0 : cycleIndex % list.Count;
-            object result = null;
+            object? result = null;
             if (list.Count > 0)
             {
                 result = list[cycleIndex];
@@ -206,23 +206,24 @@ namespace Scriban.Functions
         /// false
         /// ```
         /// </remarks>
-        public static bool Any(TemplateContext context, SourceSpan span, IEnumerable list, object function, params object[] args)
+        public static bool Any(TemplateContext context, SourceSpan span, IEnumerable? list, object? function, params object?[] args)
         {
-            if (list == null)
+            if (list is null)
             {
                 return false;
             }
-            if (function == null)
+            if (function is null)
             {
                 return false;
             }
             var scriptFunction = function as IScriptCustomFunction;
-            if (scriptFunction == null)
+            if (scriptFunction is null)
             {
                 return false;
             }
 
-            var arguments = new ScriptArray { null };
+            var arguments = new ScriptArray();
+            arguments.Add(null);
             arguments.AddRange(args);
             var loopStep = 0;
             var loopType = GetLoopType(list);
@@ -255,11 +256,11 @@ namespace Scriban.Functions
         /// ["a", "5", "6"]
         /// ```
         /// </remarks>
-        public static ScriptRange Each(TemplateContext context, SourceSpan span, IEnumerable list, object function)
+        public static ScriptRange? Each(TemplateContext context, SourceSpan span, IEnumerable? list, object? function)
         {
             return ApplyFunction(context, span, list, function, EachProcessor);
         }
-        private static IEnumerable EachInternal(TemplateContext context, ScriptNode callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
+        private static IEnumerable EachInternal(TemplateContext context, ScriptNode? callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
         {
             var arg = new ScriptArray(1);
             var loopStep = 0;
@@ -292,13 +293,13 @@ namespace Scriban.Functions
         /// ["", ""]
         /// ```
         /// </remarks>
-        public static ScriptRange Filter(TemplateContext context, SourceSpan span, IEnumerable list, object function)
+        public static ScriptRange? Filter(TemplateContext context, SourceSpan span, IEnumerable? list, object? function)
         {
             return ApplyFunction(context, span, list, function, FilterProcessor);
         }
 
 
-        static IEnumerable FilterInternal(TemplateContext context, ScriptNode callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
+        static IEnumerable FilterInternal(TemplateContext context, ScriptNode? callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType)
         {
             var arg = new ScriptArray(1);
             var loopStep = 0;
@@ -329,15 +330,15 @@ namespace Scriban.Functions
         /// 4
         /// ```
         /// </remarks>
-        public static object First(IEnumerable list)
+        public static object? First(IEnumerable? list)
         {
-            if (list == null)
+            if (list is null)
             {
                 return null;
             }
 
             var realList = list as IList;
-            if (realList != null)
+            if (realList is not null)
             {
                 return realList.Count > 0 ? realList[0] : null;
             }
@@ -365,14 +366,14 @@ namespace Scriban.Functions
         /// ["a", "b", "Yo", "c"]
         /// ```
         /// </remarks>
-        public static IEnumerable InsertAt(IEnumerable list, int index, object value)
+        public static IEnumerable InsertAt(IEnumerable? list, int index, object? value)
         {
             if (index < 0)
             {
                 index = 0;
             }
 
-            var array = list == null ? new ScriptArray() : new ScriptArray(list);
+            var array = list is null ? new ScriptArray() : new ScriptArray(list);
             // Make sure that the list has already inserted elements before the index
             for (int i = array.Count; i < index; i++)
             {
@@ -402,15 +403,15 @@ namespace Scriban.Functions
         /// 1|2|3
         /// ```
         /// </remarks>
-        public static string Join(TemplateContext context, SourceSpan span, IEnumerable list, string delimiter, object function = null)
+        public static string Join(TemplateContext context, SourceSpan span, IEnumerable? list, string delimiter, object? function = null)
         {
-            if (list == null)
+            if (list is null)
             {
                 return string.Empty;
             }
 
             var scriptingFunction = function as IScriptCustomFunction;
-            if (function != null && scriptingFunction == null)
+            if (function is not null && scriptingFunction is null)
             {
                 throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
             }
@@ -430,7 +431,7 @@ namespace Scriban.Functions
                 }
 
                 var item = context.ObjectToString(obj);
-                if (scriptingFunction != null)
+                if (scriptingFunction is not null)
                 {
                     arg[0] = item;
                     var result = ScriptFunctionCall.Call(context, context.CurrentNode, scriptingFunction, arg);
@@ -453,15 +454,15 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static object Last(IEnumerable list)
+        public static object? Last(IEnumerable? list)
         {
-            if (list == null)
+            if (list is null)
             {
                 return null;
             }
 
             var readList = list as IList;
-            if (readList != null)
+            if (readList is not null)
             {
                 return readList.Count > 0 ? readList[readList.Count - 1] : null;
             }
@@ -485,20 +486,20 @@ namespace Scriban.Functions
         /// 6
         /// ```
         /// </remarks>
-        public static object Last(TemplateContext context, SourceSpan span, IEnumerable list)
+        public static object? Last(TemplateContext context, SourceSpan span, IEnumerable? list)
         {
-            if (list == null)
+            if (list is null)
             {
                 return null;
             }
 
             var readList = list as IList;
-            if (readList != null)
+            if (readList is not null)
             {
                 return readList.Count > 0 ? readList[readList.Count - 1] : null;
             }
 
-            object last = null;
+            object? last = null;
             var hasValue = false;
             var loopStep = 0;
             var loopType = GetLoopType(list);
@@ -513,7 +514,7 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static IEnumerable Limit(IEnumerable list, int count)
+        public static IEnumerable? Limit(IEnumerable? list, int count)
         {
             return ScriptRange.Limit(list, count);
         }
@@ -533,7 +534,7 @@ namespace Scriban.Functions
         /// [4, 5]
         /// ```
         /// </remarks>
-        public static IEnumerable Limit(TemplateContext context, SourceSpan span, IEnumerable list, int count)
+        public static IEnumerable? Limit(TemplateContext context, SourceSpan span, IEnumerable? list, int count)
         {
             return ScriptRange.Limit(context, span, list, count);
         }
@@ -555,25 +556,25 @@ namespace Scriban.Functions
         /// ["electronics", "fruit", "furniture"]
         /// ```
         /// </remarks>
-        public static IEnumerable Map(TemplateContext context, SourceSpan span, object list, string member)
+        public static IEnumerable Map(TemplateContext context, SourceSpan span, object? list, string? member)
         {
             return new ScriptRange(MapImpl(context, span, list, member));
         }
 
-        private static IEnumerable MapImpl(TemplateContext context, SourceSpan span, object list, string member)
+        private static IEnumerable MapImpl(TemplateContext context, SourceSpan span, object? list, string? member)
         {
-            if (list == null || member == null)
+            if (list is null || member is null)
             {
                 yield break;
             }
 
             var enumerable = list as IEnumerable;
-            if (enumerable == null)
+            if (enumerable is null)
             {
                 var itemAccessor = context.GetMemberAccessor(list);
                 if (itemAccessor.HasMember(context, span, list, member))
                 {
-                    itemAccessor.TryGetValue(context, span, list, member, out object value);
+                    itemAccessor.TryGetValue(context, span, list, member, out object? value);
                     yield return value;
                 }
                 yield break;
@@ -587,14 +588,14 @@ namespace Scriban.Functions
                 var itemAccessor = context.GetMemberAccessor(item);
                 if (itemAccessor.HasMember(context, span, item, member))
                 {
-                    itemAccessor.TryGetValue(context, span, item, member, out object value);
+                    itemAccessor.TryGetValue(context, span, item, member, out object? value);
                     yield return value;
                 }
             }
         }
 
         [ScriptMemberIgnore]
-        public static IEnumerable Offset(IEnumerable list, int index)
+        public static IEnumerable? Offset(IEnumerable? list, int index)
         {
             return ScriptRange.Offset(list, index);
         }
@@ -614,7 +615,7 @@ namespace Scriban.Functions
         /// [6, 7, 8]
         /// ```
         /// </remarks>
-        public static IEnumerable Offset(TemplateContext context, SourceSpan span, IEnumerable list, int index)
+        public static IEnumerable? Offset(TemplateContext context, SourceSpan span, IEnumerable? list, int index)
         {
             return ScriptRange.Offset(context, span, list, index);
         }
@@ -640,9 +641,9 @@ namespace Scriban.Functions
         /// [4, 5, 6, 7]
         /// ```
         /// </remarks>
-        public static IList RemoveAt(IList list, int index)
+        public static IList RemoveAt(IList? list, int index)
         {
-            if (list == null)
+            if (list is null)
             {
                 return new ScriptArray();
             }
@@ -663,8 +664,12 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static IEnumerable Reverse(IEnumerable list)
+        public static IEnumerable Reverse(IEnumerable? list)
         {
+            if (list is null)
+            {
+                return new ScriptArray();
+            }
             return ScriptRange.Reverse(list);
         }
 
@@ -683,20 +688,24 @@ namespace Scriban.Functions
         /// [7, 6, 5, 4]
         /// ```
         /// </remarks>
-        public static IEnumerable Reverse(TemplateContext context, SourceSpan span, IEnumerable list)
+        public static IEnumerable Reverse(TemplateContext context, SourceSpan span, IEnumerable? list)
         {
+            if (list is null)
+            {
+                return new ScriptArray();
+            }
             return ScriptRange.Reverse(context, span, list);
         }
 
         [ScriptMemberIgnore]
-        public static int Size(IEnumerable list)
+        public static int Size(IEnumerable? list)
         {
-            if (list == null)
+            if (list is null)
             {
                 return 0;
             }
             var collection = list as ICollection;
-            if (collection != null)
+            if (collection is not null)
             {
                 return collection.Count;
             }
@@ -720,15 +729,15 @@ namespace Scriban.Functions
         /// 3
         /// ```
         /// </remarks>
-        public static int Size(TemplateContext context, SourceSpan span, IEnumerable list)
+        public static int Size(TemplateContext context, SourceSpan span, IEnumerable? list)
         {
-            if (list == null)
+            if (list is null)
             {
                 return 0;
             }
 
             var collection = list as ICollection;
-            if (collection != null)
+            if (collection is not null)
             {
                 context.CheckAbort();
                 return collection.Count;
@@ -776,20 +785,20 @@ namespace Scriban.Functions
         /// ["computer", "orange", "sofa"]
         /// ```
         /// </remarks>
-        public static IEnumerable Sort(TemplateContext context, SourceSpan span, object list, string member = null)
+        public static IEnumerable Sort(TemplateContext context, SourceSpan span, object? list, string? member = null)
         {
-            if (list == null)
+            if (list is null)
             {
                 return new ScriptRange();
             }
 
             var enumerable = list as IEnumerable;
-            if (enumerable == null)
+            if (enumerable is null)
             {
                 return new ScriptArray(1) { list };
             }
 
-            var realList = new List<object>();
+            var realList = new List<object?>();
             var loopStep = 0;
             var loopType = GetLoopType(enumerable);
             foreach (var item in enumerable)
@@ -800,19 +809,20 @@ namespace Scriban.Functions
             if (realList.Count == 0)
                 return new ScriptArray();
 
-            if (string.IsNullOrEmpty(member))
+            var sortMember = member ?? string.Empty;
+            if (string.IsNullOrEmpty(sortMember))
             {
-                realList = realList.OrderBy(item => item, Comparer<object>.Default).ToList();
+                realList = realList.OrderBy(item => item, Comparer<object?>.Default).ToList();
             }
             else
             {
-                realList = realList.OrderBy(item => GetSortValue(context, span, item, member), Comparer<object>.Default).ToList();
+                realList = realList.OrderBy(item => GetSortValue(context, span, item, sortMember), Comparer<object?>.Default).ToList();
             }
 
             return new ScriptArray(realList);
         }
 
-        private static object GetSortValue(TemplateContext context, SourceSpan span, object target, string member)
+        private static object? GetSortValue(TemplateContext context, SourceSpan span, object? target, string member)
         {
             if (TryGetSortValue(context, span, target, member, out var value))
             {
@@ -827,8 +837,14 @@ namespace Scriban.Functions
             return null;
         }
 
-        private static bool TryGetSortValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
+        private static bool TryGetSortValue(TemplateContext context, SourceSpan span, object? target, string member, out object? value)
         {
+            if (target is null)
+            {
+                value = null;
+                return false;
+            }
+
             var accessor = context.GetMemberAccessor(target);
 
             if (accessor.TryGetValue(context, span, target, member, out value))
@@ -839,13 +855,13 @@ namespace Scriban.Functions
             return context.TryGetMember?.Invoke(context, span, target, member, out value) ?? false;
         }
 
-        private static bool TryGetSortValueByPath(TemplateContext context, SourceSpan span, object target, string[] pathMembers, out object value)
+        private static bool TryGetSortValueByPath(TemplateContext context, SourceSpan span, object? target, string[] pathMembers, out object? value)
         {
             value = target;
 
             foreach (var pathMember in pathMembers)
             {
-                if (value == null || !TryGetSortValue(context, span, value, pathMember, out value))
+                if (value is null || !TryGetSortValue(context, span, value, pathMember, out value))
                 {
                     value = null;
                     return false;
@@ -856,7 +872,7 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static IEnumerable Uniq(IEnumerable list)
+        public static IEnumerable? Uniq(IEnumerable? list)
         {
             return ScriptRange.Uniq(list);
         }
@@ -876,22 +892,22 @@ namespace Scriban.Functions
         /// [1, 4, 5, 8]
         /// ```
         /// </remarks>
-        public static IEnumerable Uniq(TemplateContext context, SourceSpan span, IEnumerable list)
+        public static IEnumerable? Uniq(TemplateContext context, SourceSpan span, IEnumerable? list)
         {
             return ScriptRange.Uniq(context, span, list);
         }
 
         [ScriptMemberIgnore]
-        public static bool Contains(IEnumerable list, object item)
+        public static bool Contains(IEnumerable? list, object? item)
         {
-            if (list == null)
+            if (list is null)
             {
                 return false;
             }
 
             foreach (var element in list)
             {
-                if (element == item || (element != null && element.Equals(item))) return true;
+                if (element == item || (element is not null && element.Equals(item))) return true;
                 if (element is Enum e && CompareEnum(e, item)) return true;
             }
 
@@ -914,9 +930,9 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool Contains(TemplateContext context, SourceSpan span, IEnumerable list, object item)
+        public static bool Contains(TemplateContext context, SourceSpan span, IEnumerable? list, object? item)
         {
-            if (list == null)
+            if (list is null)
             {
                 return false;
             }
@@ -926,7 +942,7 @@ namespace Scriban.Functions
             foreach (var element in list)
             {
                 context.StepLoop(span, ref loopStep, loopType);
-                if (element == item || (element != null && element.Equals(item))) return true;
+                if (element == item || (element is not null && element.Equals(item))) return true;
                 if (element is Enum e && CompareEnum(e, item)) return true;
             }
 
@@ -934,11 +950,12 @@ namespace Scriban.Functions
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        static bool CompareEnum(Enum e, object item)
+        static bool CompareEnum(Enum e, object? item)
         {
             try
             {
                 if (item is string s) return Enum.Parse(e.GetType(), s)?.Equals(e) ?? false;
+                if (item is null) return false;
                 return Enum.ToObject(e.GetType(), item)?.Equals(e) ?? false;
             }
             catch { return false; }
@@ -947,7 +964,7 @@ namespace Scriban.Functions
         /// <summary>
         /// Delegate type for function used to process a list
         /// </summary>
-        private delegate IEnumerable ListProcessor(TemplateContext context, ScriptNode callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType);
+        private delegate IEnumerable ListProcessor(TemplateContext context, ScriptNode? callerContext, SourceSpan span, IEnumerable list, IScriptCustomFunction function, Type destType);
 
         private static TemplateContext.LoopType GetLoopType(IEnumerable list)
         {
@@ -961,14 +978,14 @@ namespace Scriban.Functions
         /// <remarks>
         /// Encapsulates a common approach to parameter checking for any method that will take a Scriban function and apply it to a list
         /// </remarks>
-        private static ScriptRange ApplyFunction(TemplateContext context, SourceSpan span, IEnumerable list, object function,
+        private static ScriptRange? ApplyFunction(TemplateContext context, SourceSpan span, IEnumerable? list, object? function,
             ListProcessor impl)
         {
-            if (list == null) return null;
-            if (function == null) return new ScriptRange(list);
+            if (list is null) return null;
+            if (function is null) return new ScriptRange(list);
 
             var scriptingFunction = function as IScriptCustomFunction;
-            if (scriptingFunction == null)
+            if (scriptingFunction is null)
             {
                 throw new ArgumentException($"The parameter `{function}` is not a function. Maybe prefix it with @?", nameof(function));
             }
@@ -987,16 +1004,16 @@ namespace Scriban.Functions
                 Group = @group;
             }
 
-            public bool Equals(CycleKey other)
+            public bool Equals(CycleKey? other)
             {
-                if (ReferenceEquals(null, other)) return false;
+                if (other is null) return false;
                 if (ReferenceEquals(this, other)) return true;
                 return string.Equals(Group, other.Group);
             }
 
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
-                if (ReferenceEquals(null, obj)) return false;
+                if (obj is null) return false;
                 if (ReferenceEquals(this, obj)) return true;
                 if (obj.GetType() != this.GetType()) return false;
                 return Equals((CycleKey)obj);
@@ -1004,7 +1021,7 @@ namespace Scriban.Functions
 
             public override int GetHashCode()
             {
-                return (Group != null ? Group.GetHashCode() : 0);
+                return (Group is not null ? Group.GetHashCode() : 0);
             }
 
             public override string ToString()

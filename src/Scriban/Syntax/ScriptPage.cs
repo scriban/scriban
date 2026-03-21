@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Parsing;
 using System.Collections.Generic;
@@ -16,15 +16,8 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptPage : ScriptNode
     {
-        private ScriptFrontMatter _frontMatter;
-        private ScriptBlockStatement _body;
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ScriptPage"/> class.
-        /// </summary>
-        public ScriptPage()
-        {
-        }
+        private ScriptFrontMatter? _frontMatter;
+        private ScriptBlockStatement? _body;
 
         /// <summary>
         /// Gets or sets the front matter. May be <c>null</c> if script is not parsed using  <see cref="ScriptMode.FrontMatterOnly"/> or <see cref="ScriptMode.FrontMatterAndContent"/>. See remarks.
@@ -32,24 +25,24 @@ namespace Scriban.Syntax
         /// <remarks>
         /// Note that this code block is not executed when evaluating this page. It has to be evaluated separately (usually before evaluating the page).
         /// </remarks>
-        public ScriptFrontMatter FrontMatter
+        public ScriptFrontMatter? FrontMatter
         {
             get => _frontMatter;
-            set => ParentToThis(ref _frontMatter, value);
+            set => ParentToThisNullable(ref _frontMatter, value);
         }
 
-        public ScriptBlockStatement Body
+        public ScriptBlockStatement? Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set => ParentToThisNullable(ref _body, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             context.FlowState = ScriptFlowState.None;
             try
             {
-                return context.Evaluate(Body);
+                return Body is null ? null : context.Evaluate(Body);
             }
             finally
             {
@@ -59,7 +52,10 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(Body);
+            if (Body is not null)
+            {
+                printer.Write(Body);
+            }
         }
     }
 }

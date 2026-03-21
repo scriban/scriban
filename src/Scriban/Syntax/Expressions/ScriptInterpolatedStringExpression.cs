@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 using System;
 using System.Threading.Tasks;
 
@@ -20,7 +20,8 @@ namespace Scriban.Syntax
 
         public ScriptInterpolatedStringExpression()
         {
-            Parts = new ScriptList<ScriptExpression>();
+            _stringParts = new ScriptList<ScriptExpression>();
+            _stringParts.Parent = this;
         }
 
         public ScriptList<ScriptExpression> Parts
@@ -29,7 +30,7 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _stringParts, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             // A nested expression will reset the pipe arguments for the group
             context.PushPipeArguments();
@@ -39,7 +40,7 @@ namespace Scriban.Syntax
                 foreach (var scriptExpression in Parts)
                 {
                     var value = context.Evaluate(scriptExpression);
-                    if (value != null)
+                    if (value is not null)
                     {
                         builder.Append(value);
                     }
@@ -48,7 +49,7 @@ namespace Scriban.Syntax
             }
             finally
             {
-                if (context.CurrentPipeArguments != null)
+                if (context.CurrentPipeArguments is not null)
                 {
                     context.PopPipeArguments();
                 }

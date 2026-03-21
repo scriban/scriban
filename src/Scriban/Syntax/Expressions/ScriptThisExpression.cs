@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using System.Linq;
@@ -25,7 +25,8 @@ namespace Scriban.Syntax
 
         public ScriptThisExpression()
         {
-            ThisKeyword = ScriptKeyword.This();
+            _thisKeyword = ScriptKeyword.This();
+            _thisKeyword.Parent = this;
         }
 
         public ScriptKeyword ThisKeyword
@@ -34,7 +35,7 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _thisKeyword, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return context.GetValue(this);
         }
@@ -44,12 +45,12 @@ namespace Scriban.Syntax
             printer.Write(ThisKeyword);
         }
 
-        public object GetValue(TemplateContext context)
+        public object? GetValue(TemplateContext context)
         {
             return context.CurrentGlobal;
         }
 
-        public void SetValue(TemplateContext context, object valueToSet)
+        public void SetValue(TemplateContext context, object? valueToSet)
         {
             throw new ScriptRuntimeException(Span, "Cannot set this variable");
         }
@@ -60,12 +61,12 @@ namespace Scriban.Syntax
         }
 
 #if !SCRIBAN_NO_ASYNC
-        public ValueTask<object> GetValueAsync(TemplateContext context)
+        public ValueTask<object?> GetValueAsync(TemplateContext context)
         {
-            return new ValueTask<object>(context.CurrentGlobal);
+            return new ValueTask<object?>(context.CurrentGlobal);
         }
 
-        public ValueTask SetValueAsync(TemplateContext context, object valueToSet)
+        public ValueTask SetValueAsync(TemplateContext context, object? valueToSet)
         {
             throw new ScriptRuntimeException(Span, "Cannot set this variable");
         }

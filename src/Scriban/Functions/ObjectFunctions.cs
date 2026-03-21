@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -48,9 +48,9 @@ namespace Scriban.Functions
         /// Yo
         /// ```
         /// </remarks>
-        public static object Default(object value, object @default)
+        public static object? Default(object? value, object? @default)
         {
-            return value == null || (value is string && string.IsNullOrEmpty((string)value)) ? @default : value;
+            return value is null || (value is string text && string.IsNullOrEmpty(text)) ? @default : value;
         }
 
         /// <summary>
@@ -68,9 +68,9 @@ namespace Scriban.Functions
         /// 3
         /// ```
         /// </remarks>
-        public static object Eval(TemplateContext context, SourceSpan span, object value)
+        public static object? Eval(TemplateContext context, SourceSpan span, object? value)
         {
-            if (value == null) return null;
+            if (value is null) return null;
 
             if (value is string templateStr)
             {
@@ -82,7 +82,16 @@ namespace Scriban.Functions
                         throw new ScriptRuntimeException(span, template.Messages.ToString());
                     }
 
-                    var result = template.Page.Body.Statements.Count == 1 ? context.Evaluate(template.Page.Body.Statements[0]) : context.Evaluate(template.Page);
+                    var page = template.Page;
+                    if (page is null)
+                    {
+                        return null;
+                    }
+                    if (page.Body is null)
+                    {
+                        return null;
+                    }
+                    var result = page.Body.Statements.Count == 1 ? context.Evaluate(page.Body.Statements[0]) : context.Evaluate(page);
                     return result;
                 }
                 catch (Exception ex)
@@ -114,9 +123,9 @@ namespace Scriban.Functions
         /// This is a template text 3
         /// ```
         /// </remarks>
-        public static object EvalTemplate(TemplateContext context, SourceSpan span, object value)
+        public static object? EvalTemplate(TemplateContext context, SourceSpan span, object? value)
         {
-            if (value == null) return null;
+            if (value is null) return null;
 
             if (value is string templateStr)
             {
@@ -127,7 +136,10 @@ namespace Scriban.Functions
                     context.PushOutput(output);
                     try
                     {
-                        context.Evaluate(template.Page);
+                        if (template.Page is not null)
+                        {
+                            context.Evaluate(template.Page);
+                        }
                     }
                     finally
                     {
@@ -167,9 +179,9 @@ namespace Scriban.Functions
         /// 1,523.00
         /// ```
         /// </remarks>
-        public static string Format(TemplateContext context, SourceSpan span, object value, string format, string culture = null)
+        public static string Format(TemplateContext context, SourceSpan span, object value, string format, string? culture = null)
         {
-            if (value == null)
+            if (value is null)
             {
                 return string.Empty;
             }
@@ -179,7 +191,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable object");
             }
 
-            return formattable.ToString(format, culture != null ? new CultureInfo(culture) : context.CurrentCulture);
+            return formattable.ToString(format, culture is not null ? new CultureInfo(culture) : context.CurrentCulture);
         }
 
         /// <summary>
@@ -196,9 +208,9 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool HasKey(IDictionary<string, object> value, string key)
+        public static bool HasKey(IDictionary<string, object?> value, string key)
         {
-            if (value == null || key == null)
+            if (value is null || key is null)
             {
                 return false;
             }
@@ -220,13 +232,13 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool HasValue(IDictionary<string, object> value, string key)
+        public static bool HasValue(IDictionary<string, object?> value, string key)
         {
-            if (value == null || key == null)
+            if (value is null || key is null)
             {
                 return false;
             }
-            return value.ContainsKey(key) && value[key] != null;
+            return value.ContainsKey(key) && value[key] is not null;
         }
 
         /// <summary>
@@ -244,12 +256,12 @@ namespace Scriban.Functions
         /// ```
         /// </remarks>
 #pragma warning disable CS0108
-        public static ScriptArray Keys(TemplateContext context, object value)
+        public static ScriptArray Keys(TemplateContext context, object? value)
 #pragma warning restore CS0108
         {
-            if (value == null) return new ScriptArray();
+            if (value is null) return new ScriptArray();
             if (value is IDictionary dict) return new ScriptArray(dict.Keys);
-            if (value is IDictionary<string, object> dictStringObject) return new ScriptArray(dictStringObject.Keys);
+            if (value is IDictionary<string, object?> dictStringObject) return new ScriptArray(dictStringObject.Keys);
             if (value is IScriptObject scriptObj) return new ScriptArray(scriptObj.GetMembers());
             // Don't try to return members of a custom function
             if (value is IScriptCustomFunction) return new ScriptArray();
@@ -274,8 +286,13 @@ namespace Scriban.Functions
         /// 3
         /// ```
         /// </remarks>
-        public static int Size(object value)
+        public static int Size(object? value)
         {
+            if (value is null)
+            {
+                return 0;
+            }
+
             if (value is string)
             {
                 return StringFunctions.Size((string) value);
@@ -318,10 +335,10 @@ namespace Scriban.Functions
         /// object
         /// ```
         /// </remarks>
-        public static string Typeof(object value)
+        public static string? Typeof(object? value)
         {
             // TODO: rewrite this in a major version with TemplateContext.GetTypeName
-            if (value == null)
+            if (value is null)
             {
                 return null;
             }
@@ -395,10 +412,10 @@ namespace Scriban.Functions
         /// ```
         /// </remarks>
 #pragma warning disable 1573
-        public static string Kind(TemplateContext context, object value)
+        public static string? Kind(TemplateContext context, object? value)
 #pragma warning restore 1573
         {
-            if (value == null)
+            if (value is null)
             {
                 return null;
             }
@@ -420,11 +437,19 @@ namespace Scriban.Functions
         /// ```
         /// </remarks>
 #pragma warning disable CS0108
-        public static ScriptArray Values(TemplateContext context, object value)
+        public static ScriptArray Values(TemplateContext context, object? value)
 #pragma warning restore CS0108
         {
-            if (value == null) return new ScriptArray();
-            if (value is IDictionary<string, object> dictStringObject) return new ScriptArray(dictStringObject.Values);
+            if (value is null) return new ScriptArray();
+            if (value is IDictionary<string, object?> dictStringObject)
+            {
+                var values = new ScriptArray();
+                foreach (var memberValue in dictStringObject.Values)
+                {
+                    values.Add(memberValue);
+                }
+                return values;
+            }
             // Don't try to return values of a custom function
             if (value is IScriptCustomFunction) return new ScriptArray();
 
@@ -455,7 +480,7 @@ namespace Scriban.Functions
         /// 123
         /// ```
         /// </remarks>
-        public static object FromJson(TemplateContext context, string json)
+        public static object? FromJson(TemplateContext context, string json)
         {
 #if SCRIBAN_NO_SYSTEM_TEXT_JSON
             throw new ScriptRuntimeException(context?.CurrentSpan ?? new SourceSpan(), "object.from_json is unavailable when System.Text.Json support is disabled.");
@@ -485,7 +510,7 @@ namespace Scriban.Functions
         /// </remarks>
         [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Serializing known primitive types, strings, and IFormattable values.")]
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Serializing known primitive types, strings, and IFormattable values.")]
-        public static string ToJson(TemplateContext context, object value)
+        public static string ToJson(TemplateContext context, object? value)
         {
 #if SCRIBAN_NO_SYSTEM_TEXT_JSON
             throw new ScriptRuntimeException(context?.CurrentSpan ?? new SourceSpan(), "object.to_json is unavailable when System.Text.Json support is disabled.");
@@ -506,7 +531,7 @@ namespace Scriban.Functions
             var json = Encoding.UTF8.GetString(stream.ToArray());
             return json;
 
-            static void WriteValue(TemplateContext context, Utf8JsonWriter writer, object value, int depth, HashSet<object> path)
+            static void WriteValue(TemplateContext context, Utf8JsonWriter writer, object? value, int depth, HashSet<object> path)
             {
                 try
                 {
@@ -524,10 +549,10 @@ namespace Scriban.Functions
                 }
 
                 var type = value?.GetType() ?? typeof(object);
-                var shouldTrackPath = value != null && !type.IsValueType && !(value is string);
+                var shouldTrackPath = value is not null && !type.IsValueType && !(value is string);
                 var addedToPath = false;
 
-                if (shouldTrackPath)
+                if (shouldTrackPath && value is not null)
                 {
                     addedToPath = path.Add(value);
                     if (!addedToPath)
@@ -551,9 +576,13 @@ namespace Scriban.Functions
                     else if (value is IList || type.IsArray)
                     {
                         writer.WriteStartArray();
-                        foreach (var x in context.ToList(context.CurrentSpan, value))
+                        var list = context.ToList(context.CurrentSpan, value);
+                        if (list is not null)
                         {
-                            WriteValue(context, writer, x, depth, path);
+                            foreach (var x in list)
+                            {
+                                WriteValue(context, writer, x, depth, path);
+                            }
                         }
                         writer.WriteEndArray();
                     }
@@ -576,7 +605,10 @@ namespace Scriban.Functions
                 {
                     if (addedToPath)
                     {
-                        path.Remove(value);
+                        if (value is not null)
+                        {
+                            path.Remove(value);
+                        }
                     }
                 }
             }
@@ -587,7 +619,7 @@ namespace Scriban.Functions
         {
             internal static readonly ReferenceEqualityComparer Default = new ReferenceEqualityComparer();
 
-            public new bool Equals(object x, object y)
+            public new bool Equals(object? x, object? y)
             {
                 return ReferenceEquals(x, y);
             }

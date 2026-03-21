@@ -22,7 +22,7 @@ namespace Scriban.Parsing
 
         public string FileName { get; set; }
 
-        public bool IsEmpty => FileName == null;
+        public bool IsEmpty => FileName is null;
 
         public TextPosition Start { get; set; }
 

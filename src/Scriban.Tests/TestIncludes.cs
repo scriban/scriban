@@ -14,16 +14,20 @@ namespace Scriban.Tests
 {
     public class TestIncludes
     {
+        private static IScriptObject GetCurrentGlobal(TemplateContext context)
+        {
+            return context.CurrentGlobal ?? throw new AssertionException("Expected a current global script object.");
+        }
 
         internal class DummyLoader : ITemplateLoader
         {
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
                 => templateName;
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
                 => "some text";
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
                 => ValueTask.FromResult(Load(context, callerSpan, templatePath));
         }
 
@@ -57,17 +61,17 @@ namespace Scriban.Tests
 
         public class LoaderLoopWithInclude : ITemplateLoader
         {
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
                 return templateName;
             }
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return "{{ my_loop_variable }}";
             }
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 throw new System.NotImplementedException();
             }
@@ -77,17 +81,17 @@ namespace Scriban.Tests
         {
             public string Content { get; set; } = string.Empty;
 
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
                 return templateName;
             }
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return Content;
             }
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return ValueTask.FromResult(Load(context, callerSpan, templatePath));
             }
@@ -121,7 +125,7 @@ namespace Scriban.Tests
             var context = new TemplateContext
             {
                 TemplateLoader = new LoaderIndentedNestedIncludes(),
-                IndentWithInclude = true
+                AutoIndent = true
             };
 
             var template = Template.Parse(@"Test
@@ -155,17 +159,17 @@ namespace Scriban.Tests
 
         public class LoaderIndentedNestedIncludes : ITemplateLoader
         {
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
                 return templateName;
             }
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return templatePath == "test" ? "AA\r\nBB\r\nCC\r\n  {{include 'nested'}}{{include 'nested'}}" : "DD\r\nEE\r\nFF\r\n";
             }
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 throw new System.NotImplementedException();
             }
@@ -180,7 +184,7 @@ namespace Scriban.Tests
 ");
             var context = new TemplateContext();
             context.TemplateLoader = new CustomTemplateLoader();
-            context.IndentWithInclude = true;
+            context.AutoIndent = true;
 
             var text = template.Render(context).Replace("\r\n", "\n");
             var expected = @"Test
@@ -283,7 +287,7 @@ This is a header
                 TemplateLoader = new CustomTemplateLoader(),
                 StrictVariables = strictVariables
             };
-            context.CurrentGlobal.SetValue( "data", new string[] { "one", "two", "three" }, true );
+            GetCurrentGlobal(context).SetValue( "data", new string[] { "one", "two", "three" }, true );
 
             var text = template.Render( context ).Replace( "\r\n", "\n" );
             var expected = """
@@ -411,7 +415,7 @@ Test2
 ");
             var context = new TemplateContext();
             context.TemplateLoader = new CustomTemplateLoader();
-            context.IndentWithInclude = true;
+            context.AutoIndent = true;
 
             var text = template.Render(context).Replace("\r\n", "\n");
             var expectedText = @"  This is a header
@@ -443,7 +447,7 @@ Test2
         {
             var template = Template.Parse("Test with a include {{ include }}");
             var context = new TemplateContext();
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
             var expectedString = "Invalid number of arguments";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
         }
@@ -453,7 +457,7 @@ Test2
         {
             var template = Template.Parse("Test with a include {{ include 'yoyo' }}");
             var context = new TemplateContext();
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
             var expectedString = "No TemplateLoader registered";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `{expectedString}`");
         }
@@ -463,7 +467,7 @@ Test2
         {
             var template = Template.Parse("Test with a include {{ include null }}");
             var context = new TemplateContext();
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
             var expectedString = "Include template name cannot be null or empty";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
         }
@@ -533,7 +537,7 @@ Test2
         {
             var template = Template.Parse("Test with a include {{ include 'invalid' }}");
             var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader() };
-            var exception = Assert.Throws<ScriptParserRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptParserRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptParserRuntimeException.");
             Console.WriteLine(exception);
             var expectedString = "Error while parsing template";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
@@ -544,7 +548,7 @@ Test2
         {
             var template = Template.Parse("Test with a include {{ include 'invalid2' }}");
             var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader() };
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
             Console.WriteLine(exception);
             var expectedString = "The result of including";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");
@@ -555,7 +559,7 @@ Test2
         {
             var template = Template.Parse("{{ include 'null' }}");
             var context = new TemplateContext() { TemplateLoader = new CustomTemplateLoader() };
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
             Console.WriteLine(exception);
             var expectedString = "Include template path is null";
             Assert.True(exception.Message.Contains(expectedString), $"The message `{exception.Message}` does not contain the string `${expectedString}`");

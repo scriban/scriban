@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -35,11 +35,11 @@ namespace Scriban.Helpers
             return (type.IsPrimitive && type != typeof(bool)) || type == typeof(decimal) || type == typeof(BigInteger);
         }
 
-        internal static Type GetBaseOrInterface([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type, Type lookInterfaceType)
+        internal static Type? GetBaseOrInterface([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type, Type lookInterfaceType)
         {
-            if (type == null)
+            if (type is null)
                 throw new ArgumentNullException(nameof(type));
-            if (lookInterfaceType == null)
+            if (lookInterfaceType is null)
                 throw new ArgumentNullException(nameof(lookInterfaceType));
 
             if (lookInterfaceType.IsGenericTypeDefinition)
@@ -50,7 +50,7 @@ namespace Scriban.Helpers
                             && interfaceType.GetGenericTypeDefinition()  == lookInterfaceType)
                             return interfaceType;
 
-                for (var t = type; t != null; t = t.BaseType)
+                for (var t = type; t is not null; t = t.BaseType)
                     if (t.IsGenericType && t.GetGenericTypeDefinition() == lookInterfaceType)
                         return t;
             }
@@ -65,7 +65,7 @@ namespace Scriban.Helpers
 
         public static string ScriptPrettyName(this Type type)
         {
-            if (type == null) return "null";
+            if (type is null) return "null";
 
             if (type == typeof(bool)) return "bool";
             if (type == typeof(byte)) return "byte";
@@ -109,13 +109,13 @@ namespace Scriban.Helpers
             }
 
             var typeNameAttr = type.GetCustomAttribute<ScriptTypeNameAttribute>();
-            if (typeNameAttr != null)
+            if (typeNameAttr is not null)
             {
                 return typeNameAttr.TypeName;
             }
 
             // For any Scriban ScriptXxxYyy name, return xxx_yyy
-            if (type.Namespace != null && type.Namespace.StartsWith("Scriban."))
+            if (type.Namespace is not null && type.Namespace.StartsWith("Scriban."))
             {
                 if (name.StartsWith("Script"))
                 {

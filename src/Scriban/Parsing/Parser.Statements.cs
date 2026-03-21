@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.CodeDom.Compiler;
@@ -24,7 +24,7 @@ namespace Scriban.Parsing
 #endif
     partial class Parser
     {
-        private ScriptBlockStatement _currentBlockStatement;
+        private ScriptBlockStatement? _currentBlockStatement;
 
         private ScriptBlockStatement ParseBlockStatement(ScriptNode parentStatement, bool parseEndOfStatementAfterEnd = true)
         {
@@ -40,12 +40,12 @@ namespace Scriban.Parsing
             _currentBlockStatement = blockStatement;
             try
             {
-                ScriptStatement statement;
+                ScriptStatement? statement = null;
                 bool hasEnd;
                 while (TryParseStatement(parentStatement, parseEndOfStatementAfterEnd, out statement, out hasEnd))
                 {
                     // statement may be null if we have parsed an else continuation of a previous block
-                    if (statement != null)
+                    if (statement is not null)
                     {
                         blockStatement.Statements.Add(statement);
                     }
@@ -57,8 +57,8 @@ namespace Scriban.Parsing
                             var span = new SourceSpan(_lexer.SourcePath, Previous.End, Previous.End);
                             if (_isLiquid)
                             {
-                                var syntax = ScriptSyntaxAttribute.Get(parentStatement);
-                                LogError(parentStatement, span, $"Found <end> statement `end{syntax.TypeName}` without a corresponding beginning of a block");
+                                var typeName = ScriptSyntaxAttribute.Get(parentStatement)?.TypeName ?? string.Empty;
+                                LogError(parentStatement, span, $"Found <end> statement `end{typeName}` without a corresponding beginning of a block");
                             }
                             else
                             {
@@ -82,8 +82,8 @@ namespace Scriban.Parsing
                     {
                         if (_isLiquid)
                         {
-                            var syntax = ScriptSyntaxAttribute.Get(parentStatement);
-                            LogError(parentStatement, parentStatement?.Span ?? CurrentSpan, $"The `end{syntax.TypeName}` was not found");
+                            var typeName = ScriptSyntaxAttribute.Get(parentStatement)?.TypeName ?? string.Empty;
+                            LogError(parentStatement, parentStatement.Span, $"The `end{typeName}` was not found");
                         }
                         else
                         {
@@ -105,7 +105,7 @@ namespace Scriban.Parsing
             return Close(blockStatement);
         }
 
-        private bool TryParseStatement(ScriptNode parent, bool parseEndOfStatementAfterEnd, out ScriptStatement statement, out bool hasEnd)
+        private bool TryParseStatement(ScriptNode parent, bool parseEndOfStatementAfterEnd, out ScriptStatement? statement, out bool hasEnd)
         {
             hasEnd = false;
             bool nextStatement = true;
@@ -155,15 +155,16 @@ namespace Scriban.Parsing
                 case TokenType.FrontMatterMarker:
                     if (_inFrontMatter)
                     {
+                        var frontMatter = _frontmatter ?? throw new InvalidOperationException("No frontmatter block is available.");
                         _inFrontMatter = false;
                         _inCodeSection = false;
 
                         // Parse the frontmatter end-marker
-                        ExpectAndParseTokenTo(_frontmatter.EndMarker, TokenType.FrontMatterMarker);
+                        ExpectAndParseTokenTo(frontMatter.EndMarker, TokenType.FrontMatterMarker);
 
-                        Close(_frontmatter);
+                        Close(frontMatter);
 
-                        _frontmatter.TextPositionAfterEndMarker = Current.Start;
+                        frontMatter.TextPositionAfterEndMarker = Current.Start;
 
                         if (CurrentParsingMode == ScriptMode.FrontMatterAndContent || CurrentParsingMode == ScriptMode.FrontMatterOnly)
                         {
@@ -298,16 +299,20 @@ namespace Scriban.Parsing
             NextToken(); // Skip enter/exit token
 
             // Check indent
-            if (isCodeEnter && _currentBlockStatement.Statements.Count > 0)
+            if (isCodeEnter && _currentBlockStatement is not null && _currentBlockStatement.Statements.Count > 0)
             {
                 var previousStatement = _currentBlockStatement.Statements[_currentBlockStatement.Statements.Count - 1];
                 if (previousStatement is ScriptRawStatement rawStatement)
                 {
-                    string indent = null;
+                    string? indent = null;
 
                     // Iterate on the original string to detect \n
                     var slice = rawStatement.Text;
                     var text = slice.FullText;
+                    if (text is null)
+                    {
+                        return Close(scriptEscapeStatement);
+                    }
                     var end = slice.Index + slice.Length - 1;
                     for (int j = end; j >= 0; j--)
                     {
@@ -331,7 +336,7 @@ namespace Scriban.Parsing
                             indent = text.Substring(0, end + 1);
                         }
                     }
-                    scriptEscapeStatement.Indent = indent;
+                    scriptEscapeStatement.Indent = indent ?? string.Empty;
                 }
             }
 
@@ -384,7 +389,14 @@ namespace Scriban.Parsing
         {
             var expressionStatement = Open<ScriptExpressionStatement>();
 
-            var expression = TransformKeyword(ExpectAndParseExpressionAndAnonymous(expressionStatement));
+            var parsedExpression = ExpectAndParseExpressionAndAnonymous(expressionStatement);
+            if (parsedExpression is null)
+            {
+                expressionStatement.Expression = null;
+                return Close(expressionStatement);
+            }
+
+            var expression = TransformKeyword(parsedExpression);
 
             // Special case, if the expression return should be converted back to a statement
             if (expression is ScriptExpressionAsStatement expressionAsStatement)
@@ -405,7 +417,7 @@ namespace Scriban.Parsing
             // unit test: 211-for-error1.txt
             forStatement.Variable = ExpectAndParseExpression(forStatement, mode: ParseExpressionMode.BasicExpression);
 
-            if (forStatement.Variable != null)
+            if (forStatement.Variable is not null)
             {
                 if (!(forStatement.Variable is IScriptVariablePath))
                 {
@@ -435,13 +447,13 @@ namespace Scriban.Parsing
             return Close(forStatement);
         }
 
-        private ScriptIfStatement ParseIfStatement(bool invert, ScriptKeyword elseKeyword = null)
+        private ScriptIfStatement ParseIfStatement(bool invert, ScriptKeyword? elseKeyword = null)
         {
             // unit test: 200-if-else-statement.txt
             var ifStatement = Open<ScriptIfStatement>();
             ifStatement.ElseKeyword = elseKeyword;
 
-            if (_isLiquid && elseKeyword != null)
+            if (_isLiquid && elseKeyword is not null)
             {
                 // Parse elseif
                 Open(ifStatement.IfKeyword);
@@ -467,6 +479,12 @@ namespace Scriban.Parsing
             // Transform a `if condition` to `if !(condition)`
             if (invert)
             {
+                if (condition is null)
+                {
+                    ifStatement.Condition = null;
+                    return Close(ifStatement);
+                }
+
                 var invertCondition = ScriptUnaryExpression.Wrap(ScriptUnaryOperator.Not, ScriptToken.Exclamation(), ScriptNestedExpression.Wrap(condition, _isKeepTrivia), _isKeepTrivia);
                 condition = invertCondition;
             }
@@ -520,6 +538,11 @@ namespace Scriban.Parsing
                 if (IsStartOfExpression())
                 {
                     var constantExpression = ParseExpression(whenStatement, mode:ParseExpressionMode.WhenExpression, allowAssignment:false);
+                    if (constantExpression is null)
+                    {
+                        break;
+                    }
+
                     whenStatement.Values.Add(constantExpression);
                 }
                 else
@@ -555,14 +578,14 @@ namespace Scriban.Parsing
             }
         }
 
-        private ScriptVariable ExpectAndParseVariable(ScriptNode parentNode)
+        private ScriptVariable? ExpectAndParseVariable(ScriptNode parentNode)
         {
-            if (parentNode == null) throw new ArgumentNullException(nameof(parentNode));
+            if (parentNode is null) throw new ArgumentNullException(nameof(parentNode));
             if (Current.Type == TokenType.Identifier || Current.Type == TokenType.IdentifierSpecial)
             {
                 var variableOrLiteral = ParseVariable();
                 var variable = variableOrLiteral as ScriptVariable;
-                if (variable != null)
+                if (variable is not null)
                 {
                     return variable;
                 }
@@ -599,7 +622,7 @@ namespace Scriban.Parsing
             return false;
         }
 
-        private ScriptStatement FindFirstStatementExpectingEnd()
+        private ScriptStatement? FindFirstStatementExpectingEnd()
         {
             foreach (var scriptNode in Blocks)
             {
@@ -636,7 +659,7 @@ namespace Scriban.Parsing
 
             public ScriptStatement Statement { get; }
 
-            public override object Evaluate(TemplateContext context)
+            public override object? Evaluate(TemplateContext context)
             {
                 throw new NotSupportedException();
             }

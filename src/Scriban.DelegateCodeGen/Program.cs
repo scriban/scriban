@@ -17,12 +17,13 @@ namespace Scriban.DelegateCodeGen
         private readonly AssemblyDefinition _assemblyDefinition;
 
         private readonly Dictionary<string, List<MethodDefinition>> _methods;
-
-        private TextWriter _writer;
+        private readonly string _repoRoot;
 
         public Program()
         {
-            _assemblyDefinition = AssemblyDefinition.ReadAssembly(@"..\..\..\..\Scriban\bin\Debug\netstandard2.0\Scriban.dll");
+            _repoRoot = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", ".."));
+            var scribanAssemblyPath = Path.Combine(_repoRoot, "src", "Scriban", "bin", "Debug", "netstandard2.0", "Scriban.dll");
+            _assemblyDefinition = AssemblyDefinition.ReadAssembly(scribanAssemblyPath);
             _methods = new Dictionary<string, List<MethodDefinition>>();
         }
 
@@ -37,15 +38,18 @@ namespace Scriban.DelegateCodeGen
             CollectMethods("Scriban.Functions.StringFunctions");
             CollectMethods("Scriban.Functions.TimeSpanFunctions");
 
-            _writer = new StreamWriter(@"..\..\..\..\Scriban\Runtime\CustomFunction.Generated.cs");
-            _writer.WriteLine("// ----------------------------------------------------------------------------------");
-            _writer.WriteLine($"// This file was automatically generated - {DateTime.Now.ToString(CultureInfo.InvariantCulture.DateTimeFormat)} by Scriban.DelegateCodeGen");
-            _writer.WriteLine("// DOT NOT EDIT THIS FILE MANUALLY");
-            _writer.WriteLine("// ----------------------------------------------------------------------------------");
+            var generatedFilePath = Path.Combine(_repoRoot, "src", "Scriban", "Runtime", "CustomFunction.Generated.cs");
+            using var writer = new StreamWriter(generatedFilePath);
+            writer.WriteLine("// ----------------------------------------------------------------------------------");
+            writer.WriteLine($"// This file was automatically generated - {DateTime.Now.ToString(CultureInfo.InvariantCulture.DateTimeFormat)} by Scriban.DelegateCodeGen");
+            writer.WriteLine("// DOT NOT EDIT THIS FILE MANUALLY");
+            writer.WriteLine("// ----------------------------------------------------------------------------------");
 
-            _writer.WriteLine();
+            writer.WriteLine();
 
-            _writer.WriteLine(@"using System;
+            writer.WriteLine(@"#nullable enable
+
+using System;
 using System.Collections;
 using System.Reflection;
 using Scriban.Helpers;
@@ -62,7 +66,7 @@ namespace Scriban.Runtime
     abstract partial class DynamicCustomFunction
     {
 ");
-            _writer.Write(@"
+            writer.Write(@"
         static DynamicCustomFunction()
         {
 ");
@@ -73,28 +77,27 @@ namespace Scriban.Runtime
                     var name = "Function" + GetSignature(method, SignatureMode.Name);
                     var methodName = method.Name;
                     var parameterTypes = GetReflectionParameterTypes(method);
-                    _writer.WriteLine($@"            BuiltinFunctionDelegates.Add(typeof({method.DeclaringType.FullName}).GetMethod(nameof({method.DeclaringType.FullName}.{methodName}), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, {parameterTypes}, null), method => new {name}(method));");
+                    writer.WriteLine($@"            AddBuiltinFunctionDelegate(typeof({method.DeclaringType.FullName}).GetMethod(nameof({method.DeclaringType.FullName}.{methodName}), BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly, null, {parameterTypes}, null), method => new {name}(method));");
                 }
             }
-            _writer.Write(@"
+            writer.Write(@"
         }
 ");
 
             foreach (var keyPair in _methods.OrderBy(s => s.Key))
             {
-                DumpMethod(keyPair.Key, keyPair.Value.First());
+                DumpMethod(writer, keyPair.Value.First());
             }
 
-            _writer.WriteLine(@"
+            writer.WriteLine(@"
     }
 }");
-            _writer.WriteLine();
-            _writer.Flush();
-            _writer.Close();
+            writer.WriteLine();
         }
 
-        private void DumpMethod(string signature, MethodDefinition method)
+        private static void DumpMethod(TextWriter writer, MethodDefinition method)
         {
+            var signature = GetSignature(method, SignatureMode.Verbose);
             var name = "Function" + GetSignature(method, SignatureMode.Name);
             var delegateSignature = GetSignature(method, SignatureMode.Delegate);
 
@@ -133,18 +136,26 @@ namespace Scriban.Runtime
                 }
                 if (type.Name == "SourceSpan")
                 {
-                    delegateCallArgs.Append("callerContext.Span");
+                    delegateCallArgs.Append("callerSpan");
                     continue;
                 }
 
                 // If it is the last parameter and it is a params array, we need to handle it differently
                 if (paramIndex + 1 == method.Parameters.Count && arg.CustomAttributes.Any(x => x.AttributeType.FullName == typeof(ParamArrayAttribute).FullName))
                 {
-                    caseArgumentsBuilder.AppendLine($"                var arg{argIndex} = ((ScriptArray)arguments[{argIndex}]).ToArray();");
+                    if (type.FullName == "System.Object[]")
+                    {
+                        caseArgumentsBuilder.AppendLine($"                var arg{argIndex}Array = arguments[{argIndex}] as ScriptArray ?? throw new ScriptRuntimeException(callerSpan, $\"Invalid params array for function `{{Method.Name}}`.\");");
+                        caseArgumentsBuilder.AppendLine($"                object?[] arg{argIndex} = arg{argIndex}Array.ToArray();");
+                    }
+                    else
+                    {
+                        caseArgumentsBuilder.AppendLine($"                var arg{argIndex} = ({PrettyType(type)})arguments[{argIndex}];");
+                    }
                 }
                 else
                 {
-                    caseArgumentsBuilder.AppendLine($"                var arg{argIndex} = ({PrettyType(type)})arguments[{argIndex}];");
+                    caseArgumentsBuilder.AppendLine($"                var arg{argIndex} = {GetArgumentConversionMethod(arg)}<{PrettyType(type)}>(context, callerSpan, arguments[{argIndex}], {argIndex});");
                 }
 
                 delegateCallArgs.Append($"arg{argIndex}");
@@ -166,22 +177,23 @@ namespace Scriban.Runtime
                 _delegate = (InternalDelegate)method.CreateDelegate(typeof(InternalDelegate));
             }}
 
-            public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+            public override object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
             {{
+                var callerSpan = callerContext?.Span ?? context.CurrentSpan;
 {caseArgumentsBuilder}
                 return _delegate({delegateCallArgs});
             }}
         }}
 ";
 
-            _writer.Write(template);
+            writer.Write(template);
         }
 
         private void CollectMethods(string type)
         {
 
             var typeDefinition = _assemblyDefinition.MainModule.GetType(type);
-            if (typeDefinition == null)
+            if (typeDefinition is null)
             {
                 throw new InvalidOperationException($"Unable to find type {type}");
             }
@@ -204,7 +216,7 @@ namespace Scriban.Runtime
                     continue;
                 }
 
-                var signature = GetSignature(method, SignatureMode.Verbose);
+                var signature = GetSignature(method, SignatureMode.Name);
                 if (!_methods.ContainsKey(signature))
                 {
                     _methods.Add(signature, new List<MethodDefinition>());
@@ -243,7 +255,18 @@ namespace Scriban.Runtime
                     text.Append("_");
                 }
 
-                text.Append(PrettyType(parameter.ParameterType, asCSharp));
+                if (mode == SignatureMode.Delegate && parameter.CustomAttributes.Any(x => x.AttributeType.FullName == typeof(ParamArrayAttribute).FullName) && parameter.ParameterType.FullName == "System.Object[]")
+                {
+                    text.Append("object?[]");
+                }
+                else
+                {
+                    text.Append(PrettyType(parameter.ParameterType, asCSharp));
+                    if (mode == SignatureMode.Delegate &&  IsNullableReferenceParameter(parameter))
+                    {
+                        text.Append("?");
+                    }
+                }
 
                 if (mode == SignatureMode.Delegate)
                 {
@@ -301,6 +324,26 @@ namespace Scriban.Runtime
             Name,
 
             Delegate,
+        }
+
+        private static string GetArgumentConversionMethod(ParameterDefinition parameter)
+        {
+            if (parameter.ParameterType.IsValueType)
+            {
+                return "ConvertStructArgument";
+            }
+
+            return "ConvertNullableReferenceArgument";
+        }
+
+        private static bool  IsNullableReferenceParameter(ParameterDefinition parameter)
+        {
+            if (parameter.ParameterType.IsValueType || parameter.ParameterType.Name == "TemplateContext")
+            {
+                return false;
+            }
+
+            return true;
         }
 
         private static string PrettyType(TypeReference typeReference, bool asCSharp = true)

@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using Scriban.Runtime;
@@ -17,13 +17,12 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptWrapStatement : ScriptStatement
     {
-        private ScriptKeyword _wrapKeyword;
-        private ScriptExpression _target;
-        private ScriptBlockStatement _body;
-
+        private ScriptKeyword _wrapKeyword = ScriptKeyword.Wrap();
+        private ScriptExpression? _target;
+        private ScriptBlockStatement? _body;
         public ScriptWrapStatement()
         {
-            WrapKeyword = ScriptKeyword.Wrap();
+            _wrapKeyword.Parent = this;
         }
 
         public ScriptKeyword WrapKeyword
@@ -32,45 +31,58 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _wrapKeyword, value);
         }
 
-        public ScriptExpression Target
+        public ScriptExpression? Target
         {
             get => _target;
-            set => ParentToThis(ref _target, value);
+            set => ParentToThisNullable(ref _target, value);
         }
 
-        public ScriptBlockStatement Body
+        public ScriptBlockStatement? Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set => ParentToThisNullable(ref _body, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
-            // Check that the Target is actually a function
-            var functionCall = Target as ScriptFunctionCall;
-            if (functionCall == null)
+            var target = Target;
+            var body = Body;
+            if (target is null || body is null)
             {
-                var parameterLessFunction = context.Evaluate(Target, true);
+                throw new ScriptRuntimeException(Span, "Invalid wrap statement. Target and body are required.");
+            }
+
+            // Check that the Target is actually a function
+            var functionCall = target as ScriptFunctionCall;
+            if (functionCall is null)
+            {
+                var parameterLessFunction = context.Evaluate(target, true);
                 if (!(parameterLessFunction is IScriptCustomFunction))
                 {
-                    var targetPrettyName = ScriptSyntaxAttribute.Get(Target);
-                    throw new ScriptRuntimeException(Target.Span, $"Expecting a direct function instead of the expression `{Target}/{targetPrettyName.TypeName}`");
+                    var targetPrettyName = ScriptSyntaxAttribute.Get(target);
+                    throw new ScriptRuntimeException(target.Span, $"Expecting a direct function instead of the expression `{target}/{targetPrettyName?.TypeName ?? "unknown"}`");
                 }
 
-                context.BlockDelegates.Push(Body);
+                context.BlockDelegates.Push(body);
                 return ScriptFunctionCall.Call(context, this, parameterLessFunction, false, null);
             }
 
-            context.BlockDelegates.Push(Body);
+            context.BlockDelegates.Push(body);
             return context.Evaluate(functionCall);
         }
 
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(WrapKeyword).ExpectSpace();
-            printer.Write(Target);
+            if (Target is not null)
+            {
+                printer.Write(Target);
+            }
             printer.ExpectEos();
-            printer.Write(Body).ExpectEos();
+            if (Body is not null)
+            {
+                printer.Write(Body).ExpectEos();
+            }
         }
     }
 }

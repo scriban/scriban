@@ -91,7 +91,8 @@ public class TestScriptArrayJson {
     [Test]
     public void ScriptArray_From_null_throws()
     {
-        Assert.Throws<ArgumentNullException>(() => ScriptArray.From(null!));
+        IEnumerable? source = null;
+        Assert.Throws<ArgumentNullException>(() => ScriptArray.From(source));
     }
 
     [TestCase("""true""", "Specified argument was out of the range of valid values. (Parameter 'Unsupported object type `True`. Expecting Json Array.')")]

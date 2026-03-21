@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -29,7 +29,7 @@ namespace Scriban.Runtime.Accessors
             return ((IList) target).Count;
         }
 
-        public object GetValue(TemplateContext context, SourceSpan span, object target, int index)
+        public object? GetValue(TemplateContext context, SourceSpan span, object target, int index)
         {
             var list = ((IList)target);
             if (index < 0 || index >= list.Count)
@@ -40,7 +40,7 @@ namespace Scriban.Runtime.Accessors
             return list[index];
         }
 
-        public void SetValue(TemplateContext context, SourceSpan span, object target, int index, object value)
+        public void SetValue(TemplateContext context, SourceSpan span, object target, int index, object? value)
         {
             var list = ((IList) target);
             if (index < 0)
@@ -73,7 +73,7 @@ namespace Scriban.Runtime.Accessors
             return member == "size";
         }
 
-        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
+        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object? value)
         {
             if (member == "size")
             {
@@ -89,7 +89,7 @@ namespace Scriban.Runtime.Accessors
             return false;
         }
 
-        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
+        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object? value)
         {
             if (member == "size")
             {
@@ -102,18 +102,18 @@ namespace Scriban.Runtime.Accessors
             return false;
         }
 
-        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object? value)
         {
             throw new System.NotImplementedException();
         }
 
-        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object? value)
         {
             throw new System.NotImplementedException();
         }
 
         public bool HasIndexer => false;
 
-        public Type IndexType => null;
+        public Type? IndexType => null;
     }
 }

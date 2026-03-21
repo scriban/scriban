@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -37,6 +37,7 @@ namespace Scriban.Syntax
         {
             BaseName = name;
             Scope = scope;
+            Trivias = new ScriptTrivias();
             switch (scope)
             {
                 case ScriptVariableScope.Global:
@@ -45,6 +46,8 @@ namespace Scriban.Syntax
                 case ScriptVariableScope.Local:
                     Name = $"${name}";
                     break;
+                default:
+                    throw new InvalidOperationException($"Scope `{scope}` is not supported");
             }
             unchecked
             {
@@ -91,22 +94,22 @@ namespace Scriban.Syntax
         }
 
 #if !SCRIBAN_NO_ASYNC
-        public ValueTask SetValueAsync(TemplateContext context, object valueToSet)
+        public ValueTask SetValueAsync(TemplateContext context, object? valueToSet)
         {
             return context.SetValueAsync(this, valueToSet);
         }
 #endif
 
-        public virtual bool Equals(ScriptVariable other)
+        public virtual bool Equals(ScriptVariable? other)
         {
-            if (ReferenceEquals(null, other)) return false;
+            if (other is null) return false;
             if (ReferenceEquals(this, other)) return true;
             return string.Equals(Name, other.Name) && Scope == other.Scope;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             if (ReferenceEquals(this, obj)) return true;
             return obj is ScriptVariable && Equals((ScriptVariable) obj);
         }
@@ -126,17 +129,17 @@ namespace Scriban.Syntax
             return !Equals(left, right);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return context.GetValue((ScriptExpression)this);
         }
 
-        public virtual object GetValue(TemplateContext context)
+        public virtual object? GetValue(TemplateContext context)
         {
             return context.GetValue(this);
         }
 
-        public void SetValue(TemplateContext context, object valueToSet)
+        public void SetValue(TemplateContext context, object? valueToSet)
         {
             context.SetValue(this, valueToSet);
         }
@@ -158,7 +161,7 @@ namespace Scriban.Syntax
         {
         }
 
-        public override object GetValue(TemplateContext context)
+        public override object? GetValue(TemplateContext context)
         {
             // Used a specialized overrides on contxet for ScriptVariableGlobal
             return context.GetValue(this);

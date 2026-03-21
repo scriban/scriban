@@ -24,8 +24,8 @@ namespace Scriban.AsyncCodeGen
     /// </summary>
     class Program
     {
-        private static INamedTypeSymbol _scriptNodeType;
-        private static INamedTypeSymbol _scriptListType;
+        private static INamedTypeSymbol? _scriptNodeType;
+        private static INamedTypeSymbol? _scriptListType;
 
         static async Task Main(string[] args)
         {
@@ -43,7 +43,7 @@ namespace Scriban.AsyncCodeGen
 
             var solution = await workspace.OpenSolutionAsync(solutionPath, new ConsoleProgressReporter());
             var project = solution.Projects.First(x => x.Name == "Scriban");
-            var compilation = await project.GetCompilationAsync();
+            var compilation = await project.GetCompilationAsync() ?? throw new InvalidOperationException("Unable to create a compilation for Scriban.");
 
             var errors = compilation.GetDiagnostics().Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToList();
 
@@ -60,14 +60,14 @@ namespace Scriban.AsyncCodeGen
                 return;
             }
 
-            _scriptNodeType = compilation.GetTypeByMetadataName("Scriban.Syntax.ScriptNode");
-            _scriptListType = compilation.GetTypeByMetadataName("Scriban.Syntax.ScriptList");
-            var interfaceScriptVariablePath = compilation.GetTypeByMetadataName("Scriban.Syntax.IScriptVariablePath");
+            _scriptNodeType = compilation.GetTypeByMetadataName("Scriban.Syntax.ScriptNode") ?? throw new InvalidOperationException("Unable to find Scriban.Syntax.ScriptNode.");
+            _scriptListType = compilation.GetTypeByMetadataName("Scriban.Syntax.ScriptList") ?? throw new InvalidOperationException("Unable to find Scriban.Syntax.ScriptList.");
+            var interfaceScriptVariablePath = compilation.GetTypeByMetadataName("Scriban.Syntax.IScriptVariablePath") ?? throw new InvalidOperationException("Unable to find Scriban.Syntax.IScriptVariablePath.");
 
             var models = compilation.SyntaxTrees.Select(tree => compilation.GetSemanticModel(tree)).ToList();
 
             var methods = new Stack<IMethodSymbol>();
-            var visited = new HashSet<IMethodSymbol>();
+            var visited = new HashSet<IMethodSymbol>(SymbolEqualityComparer.Default);
 
             // ----------------------------------------------------------------------------------
             // 1) Collect origin methods from IScriptOutput.Write and all ScriptNode.Evaluate methods
@@ -81,11 +81,15 @@ namespace Scriban.AsyncCodeGen
                         var interfaceDecl = (InterfaceDeclarationSyntax) methodDeclaration.Parent;
 
                         var interfaceType = model.GetDeclaredSymbol(interfaceDecl);
-                        if (interfaceType != null &&
+                        if (interfaceType is not null &&
                             (interfaceType.ContainingNamespace.Name == "Runtime" && (interfaceType.Name == "IScriptOutput" || interfaceType.Name == "IScriptCustomFunction" || (interfaceType.Name == "ITemplateLoader" && methodDeclaration.Identifier.Text == "Load")))
-                            || interfaceScriptVariablePath.Equals(interfaceType))
+                            || SymbolEqualityComparer.Default.Equals(interfaceScriptVariablePath, interfaceType))
                         {
                             var method = model.GetDeclaredSymbol(methodDeclaration);
+                            if (method is null)
+                            {
+                                continue;
+                            }
 
                             // Convert only IScriptCustomFunction.Invoke
                             if (interfaceType.Name == "IScriptCustomFunction" && method.Name != "Invoke") continue;
@@ -100,6 +104,10 @@ namespace Scriban.AsyncCodeGen
                     else
                     {
                         var methodModel = model.GetDeclaredSymbol(methodDeclaration);
+                        if (methodModel is null || methodModel.ReceiverType is null)
+                        {
+                            continue;
+                        }
 
                         //var isScriptVariablePathMethod = (methodModel.Name == "GetValue" || methodModel.Name == "SetValue") && (methodModel.ImplementsInterfaceMember(interfaceScriptVariablePath) ||
                         //                                                                                           methodModel.OverriddenMethod != null &&
@@ -113,7 +121,7 @@ namespace Scriban.AsyncCodeGen
                                 || isTemplateContextGetValue)
                             )
                         {
-                            while (methodModel != null)
+                            while (methodModel is not null)
                             {
                                 if (visited.Add(methodModel))
                                 {
@@ -131,8 +139,8 @@ namespace Scriban.AsyncCodeGen
             // ----------------------------------------------------------------------------------
             // 2) Collect method graph calls
             // ----------------------------------------------------------------------------------
-            var methodGraph = new Dictionary<IMethodSymbol, HashSet<ITypeSymbol>>();
-            var classGraph = new Dictionary<ITypeSymbol, ClassToTransform>();
+            var methodGraph = new Dictionary<IMethodSymbol, HashSet<ITypeSymbol>>(SymbolEqualityComparer.Default);
+            var classGraph = new Dictionary<ITypeSymbol, ClassToTransform>(SymbolEqualityComparer.Default);
 
             visited.Clear();
             while (methods.Count > 0)
@@ -143,23 +151,25 @@ namespace Scriban.AsyncCodeGen
                     continue;
                 }
 
-                HashSet<ITypeSymbol> callerTypes;
-                if (!methodGraph.TryGetValue(method, out callerTypes))
+                if (!methodGraph.TryGetValue(method, out var callerTypes))
                 {
-                    callerTypes = new HashSet<ITypeSymbol>();
+                    callerTypes = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
                     methodGraph.Add(method, callerTypes);
                 }
 
                 var finds = await SymbolFinder.FindCallersAsync(method, solution);
                 foreach (var referencer in finds)
                 {
-                    var doc  =solution.GetDocument(referencer.Locations.First().SourceTree);
-                    if (doc.Project != project)
+                    var doc = solution.GetDocument(referencer.Locations.First().SourceTree);
+                    if (doc is null || doc.Project != project)
                     {
                         continue;
                     }
 
-                    var callingMethodSymbol = (IMethodSymbol)referencer.CallingSymbol;
+                    if (referencer.CallingSymbol is not IMethodSymbol callingMethodSymbol || callingMethodSymbol.ReceiverType is null)
+                    {
+                        continue;
+                    }
 
                     if (callingMethodSymbol.MethodKind == MethodKind.StaticConstructor || callingMethodSymbol.MethodKind == MethodKind.Constructor)
                     {
@@ -171,7 +181,7 @@ namespace Scriban.AsyncCodeGen
                     if (
                         callingMethodSymbol.Name == "ObjectToStringImpl" ||
                         callingMethodSymbol.Name == "ToString" ||
-                        (callingMethodSymbol.OverriddenMethod != null && callingMethodSymbol.OverriddenMethod.ContainingType.Name == "ScriptNode" && callingMethodSymbol.Name != "Evaluate") ||
+                        (callingMethodSymbol.OverriddenMethod is not null && callingMethodSymbol.OverriddenMethod.ContainingType.Name == "ScriptNode" && callingMethodSymbol.Name != "Evaluate") ||
                         InheritFrom(callingMethodSymbol.ContainingType, "Syntax", "ScriptVisitor") ||
                         InheritFrom(callingMethodSymbol.ContainingType, "Runtime", "ScriptObject"))
                     {
@@ -182,10 +192,15 @@ namespace Scriban.AsyncCodeGen
 
                     // Push the method overriden
                     var methodOverride = callingMethodSymbol;
-                    while (methodOverride != null && methodOverride.IsOverride && methodOverride.OverriddenMethod != null)
+                    while (methodOverride is not null && methodOverride.IsOverride && methodOverride.OverriddenMethod is not null)
                     {
                         methods.Push(methodOverride.OverriddenMethod);
                         methodOverride = methodOverride.OverriddenMethod;
+                    }
+
+                    if (referencer.CallingSymbol.DeclaringSyntaxReferences.Length == 0)
+                    {
+                        continue;
                     }
 
                     var callingSyntax = referencer.CallingSymbol.DeclaringSyntaxReferences[0].GetSyntax();
@@ -194,20 +209,19 @@ namespace Scriban.AsyncCodeGen
                     foreach (var invokeLocation in referencer.Locations)
                     {
                         var invoke = callingMethod.FindNode(invokeLocation.SourceSpan);
-                        while (invoke != null && !(invoke is InvocationExpressionSyntax))
+                        while (invoke is not null && !(invoke is InvocationExpressionSyntax))
                         {
                             invoke = invoke.Parent;
                         }
                         Debug.Assert(invoke is InvocationExpressionSyntax);
 
-                        var declaredSymbol = callingMethodSymbol.ReceiverType;
+                    var declaredSymbol = callingMethodSymbol.ReceiverType;
 
 
                         if (declaredSymbol.Name != "ScriptPrinter" && callingMethodSymbol.Parameters.All(x => x.Type.Name != "ScriptPrinter" && x.Type.Name != "ScriptPrinterOptions")
-                            && (declaredSymbol.BaseType.Name != "DynamicCustomFunction" || declaredSymbol.Name == "GenericFunctionWrapper"))
+                            && (declaredSymbol.BaseType?.Name != "DynamicCustomFunction" || declaredSymbol.Name == "GenericFunctionWrapper"))
                         {
-                            ClassToTransform classToTransform;
-                            if (!classGraph.TryGetValue(callingMethodSymbol.ReceiverType, out classToTransform))
+                            if (!classGraph.TryGetValue(callingMethodSymbol.ReceiverType, out var classToTransform))
                             {
                                 classToTransform = new ClassToTransform(callingMethodSymbol.ReceiverType);
                                 classGraph.Add(callingMethodSymbol.ReceiverType, classToTransform);
@@ -215,8 +229,8 @@ namespace Scriban.AsyncCodeGen
                             }
 
                             // Find an existing method to transform
-                            var methodToTransform = classToTransform.MethodCalls.FirstOrDefault(x => x.MethodSymbol.Equals(callingMethodSymbol));
-                            if (methodToTransform == null)
+                            var methodToTransform = classToTransform.MethodCalls.FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(x.MethodSymbol, callingMethodSymbol));
+                            if (methodToTransform is null)
                             {
                                 methodToTransform = new MethodCallToTransform(callingMethodSymbol, callingMethod);
                                 classToTransform.MethodCalls.Add(methodToTransform);
@@ -239,6 +253,8 @@ namespace Scriban.AsyncCodeGen
 
 
             var cu = (CompilationUnitSyntax)ParseSyntaxTree(@"
+#nullable enable
+#if !SCRIBAN_NO_ASYNC
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -256,6 +272,7 @@ using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
 using System.Numerics;
+#endif
 ").GetRoot();
 
             solution = project.Solution;
@@ -264,7 +281,7 @@ using System.Numerics;
             var namespaces = new Dictionary<string, NamespaceDeclarationSyntax>();
             foreach (var classToTransform in classGraph.Values)
             {
-                NamespaceDeclarationSyntax nsDecl;
+                NamespaceDeclarationSyntax? nsDecl;
                 if (!namespaces.TryGetValue(classToTransform.Namespace, out nsDecl))
                 {
                     nsDecl = NamespaceDeclaration(ParseName(classToTransform.Namespace)).NormalizeWhitespace()
@@ -274,7 +291,7 @@ using System.Numerics;
                 }
             }
 
-            var typeTransformed = new HashSet<ITypeSymbol>();
+            var typeTransformed = new HashSet<ITypeSymbol>(SymbolEqualityComparer.Default);
 
             while (methods.Count > 0)
             {
@@ -303,7 +320,7 @@ using System.Numerics;
                     {
                         var rootSyntax = typeDecl.SyntaxTree.GetRoot();
                         var originalDoc = solution.GetDocument(rootSyntax.SyntaxTree);
-                        if (originalDoc != null)
+                        if (originalDoc is not null)
                         {
                             var previousDecl = typeDecl;
                             typeDecl = typeDecl.WithModifiers(typeDecl.Modifiers.Add(Token(SyntaxKind.PartialKeyword).WithTrailingTrivia(Space)));
@@ -315,7 +332,8 @@ using System.Numerics;
                         }
                     }
 
-                    typeDecl = typeDecl.RemoveNodes(typeDecl.ChildNodes().ToList(), SyntaxRemoveOptions.KeepNoTrivia);
+                    typeDecl = typeDecl.RemoveNodes(typeDecl.ChildNodes().ToList(), SyntaxRemoveOptions.KeepNoTrivia)
+                        ?? throw new InvalidOperationException($"Unable to strip child nodes from `{asyncTypeSymbol.Name}`.");
 
                     // Remove if/endif directive
                     typeDecl = typeDecl.WithCloseBraceToken(Token(RemoveIfDef(typeDecl.CloseBraceToken.LeadingTrivia), SyntaxKind.CloseBraceToken, typeDecl.CloseBraceToken.TrailingTrivia));
@@ -360,7 +378,7 @@ using System.Numerics;
                                     var originalMember = ((MemberAccessExpressionSyntax) callSite.Expression).Expression;
                                     var symbol = sm.GetSymbolInfo(originalMember).Symbol;
 
-                                    if (symbol != null)
+                                    if (symbol is not null)
                                     {
                                         if (symbol is IPropertySymbol)
                                         {
@@ -547,7 +565,7 @@ using System.Numerics;
             }
 
             var text = GenerateScribanVisitors(scriptNodeViewModels);
-            var projectPath = Path.GetDirectoryName(project.FilePath);
+            var projectPath = Path.GetDirectoryName(project.FilePath) ?? throw new InvalidOperationException("Project path is not available.");
             File.WriteAllText(Path.Combine(projectPath, "ScribanVisitors.generated.cs"), text, new UTF8Encoding(false));
 
             // ----------------------------------------------------------------------------------
@@ -580,12 +598,14 @@ using System.Numerics;
 
         private static bool IsScriptNode(ITypeSymbol typeSymbol)
         {
-            return ReferenceEquals(typeSymbol, _scriptNodeType) || typeSymbol.InheritsFrom(_scriptNodeType);
+            var scriptNodeType = _scriptNodeType ?? throw new InvalidOperationException("Script node type has not been initialized.");
+            return ReferenceEquals(typeSymbol, scriptNodeType) || typeSymbol.InheritsFrom(scriptNodeType);
         }
 
         private static bool IsScriptList(ITypeSymbol typeSymbol)
         {
-            return typeSymbol.InheritsFrom(_scriptListType);
+            var scriptListType = _scriptListType ?? throw new InvalidOperationException("Script list type has not been initialized.");
+            return typeSymbol.InheritsFrom(scriptListType);
         }
 
         private static NamespaceDeclarationSyntax ReorderNsMembers(NamespaceDeclarationSyntax ns)
@@ -605,7 +625,7 @@ using System.Numerics;
                 CanRewrite = true;
             }
 
-            public string Name { get; set; }
+            public string Name { get; set; } = string.Empty;
 
             public bool CanRewrite { get; set; }
 
@@ -616,9 +636,9 @@ using System.Numerics;
 
         private class ScriptNodePropertyViewModel
         {
-            public string Name { get; set; }
+            public string Name { get; set; } = string.Empty;
 
-            public string Type { get; set; }
+            public string Type { get; set; } = string.Empty;
 
             public bool IsScriptNode { get; set; }
 
@@ -674,11 +694,11 @@ using System.Numerics;
             var types = new Stack<ITypeSymbol>();
 
             var typeToFetch = typeSymbol;
-            while (typeToFetch != null)
+            while (typeToFetch is not null)
             {
                 types.Push(typeToFetch);
                 typeToFetch = typeToFetch.BaseType;
-                if (typeToFetch.Name == "ScriptNode")
+                if (typeToFetch is null || typeToFetch.Name == "ScriptNode")
                 {
                     break;
                 }
@@ -691,7 +711,7 @@ using System.Numerics;
                 var localProperties = type.GetMembers().OfType<IPropertySymbol>().Where(prop =>
                     prop.Name != "Trivias" &&
                     !prop.IsReadOnly &&
-                    (prop.SetMethod != null && prop.SetMethod.DeclaredAccessibility == Accessibility.Public)
+                    (prop.SetMethod is not null && prop.SetMethod.DeclaredAccessibility == Accessibility.Public)
                 ).ToList();
                 properties.AddRange(localProperties);
             }
@@ -701,7 +721,11 @@ using System.Numerics;
 
         private static SyntaxNode GetDeclaredSyntax(ISymbol symbol, Solution solution)
         {
-            var typeRefDeclList = symbol.DeclaringSyntaxReferences.Where(x => !solution.GetDocument(x.SyntaxTree).FilePath.Contains(".generated")).ToList();
+            var typeRefDeclList = symbol.DeclaringSyntaxReferences.Where(x =>
+            {
+                var document = solution.GetDocument(x.SyntaxTree);
+                return document?.FilePath?.Contains(".generated", StringComparison.Ordinal) != true;
+            }).ToList();
             if (typeRefDeclList.Count != 1) throw new InvalidOperationException($"Invalid number {typeRefDeclList.Count} of syntax references for {symbol.MetadataName}. Expecting only 1.");
             return typeRefDeclList[0].GetSyntax();
         }
@@ -710,13 +734,13 @@ using System.Numerics;
         {
             if (string.IsNullOrEmpty(symbol.ContainingNamespace?.Name))
             {
-                return null;
+                throw new InvalidOperationException($"Unable to determine namespace for symbol `{symbol.MetadataName}`.");
             }
 
             var restOfResult = GetNamespace(symbol.ContainingNamespace);
             var result = symbol.ContainingNamespace.Name;
 
-            if (restOfResult != null)
+            if (restOfResult is not null)
                 result = restOfResult + '.' + result;
 
             return result;
@@ -727,13 +751,13 @@ using System.Numerics;
             int inDirective = 0;
             for (int i = 0; i < trivia.Count; i++)
             {
-                if (trivia[i].Kind() == SyntaxKind.IfDirectiveTrivia)
+                if (trivia[i].IsKind(SyntaxKind.IfDirectiveTrivia))
                 {
                     trivia = trivia.RemoveAt(i);
                     i--;
                     inDirective++;
                 }
-                else if (trivia[i].Kind() == SyntaxKind.EndIfDirectiveTrivia)
+                else if (trivia[i].IsKind(SyntaxKind.EndIfDirectiveTrivia))
                 {
                     trivia = trivia.RemoveAt(i);
                     i--;
@@ -748,9 +772,9 @@ using System.Numerics;
             return trivia;
         }
 
-        public static bool InheritFrom(ITypeSymbol type, string nameSpace, string typeName)
+        public static bool InheritFrom(ITypeSymbol? type, string nameSpace, string typeName)
         {
-            while (type != null)
+            while (type is not null)
             {
                 if (type.Name == typeName && type.ContainingNamespace.Name == nameSpace)
                 {
@@ -779,7 +803,7 @@ using System.Numerics;
 
             public string Namespace { get; }
 
-            public TypeDeclarationSyntax AsyncDeclarationTypeSyntax { get; set; }
+            public TypeDeclarationSyntax? AsyncDeclarationTypeSyntax { get; set; }
 
             public List<MethodCallToTransform> MethodCalls { get; }
         }
@@ -798,7 +822,7 @@ using System.Numerics;
 
             public MethodDeclarationSyntax CallerMethod { get; }
 
-            public MethodDeclarationSyntax AsyncCalleeMethod { get; set; }
+            public MethodDeclarationSyntax? AsyncCalleeMethod { get; set; }
 
             public List<InvocationExpressionSyntax> CallSites { get; }
         }
@@ -808,7 +832,7 @@ using System.Numerics;
             public void Report(ProjectLoadProgress loadProgress)
             {
                 var projectDisplay = Path.GetFileName(loadProgress.FilePath);
-                if (loadProgress.TargetFramework != null)
+                if (loadProgress.TargetFramework is not null)
                 {
                     projectDisplay += $" ({loadProgress.TargetFramework})";
                 }

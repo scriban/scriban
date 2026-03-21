@@ -25,14 +25,14 @@ namespace DotLiquid.Tests.Tags
         public void TestUnlessInLoop()
         {
             Helper.AssertTemplateResult("23", "{% for i in choices %}{% unless i %}{{ forloop.index }}{% endunless %}{% endfor %}",
-                Hash.FromAnonymousObject(new { choices = new object[] { 1, null, false } }));
+                Hash.FromAnonymousObject(new { choices = new object?[] { 1, null, false } }));
         }
 
         [Test]
         public void TestUnlessElseInLoop()
         {
             Helper.AssertTemplateResult(" TRUE  2  3 ", "{% for i in choices %}{% unless i %} {{ forloop.index }} {% else %} TRUE {% endunless %}{% endfor %}",
-                Hash.FromAnonymousObject(new { choices = new object[] { 1, null, false } }));
+                Hash.FromAnonymousObject(new { choices = new object?[] { 1, null, false } }));
         }
     }
 }

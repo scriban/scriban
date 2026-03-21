@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections;
 using System.Collections.Generic;
@@ -19,52 +19,59 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptPipeCall : ScriptExpression
     {
-        private ScriptExpression _from;
-        private ScriptToken _pipeToken;
-        private ScriptExpression _to;
-
-        public ScriptExpression From
+        private ScriptExpression? _from;
+        private ScriptToken? _pipeToken;
+        private ScriptExpression? _to;
+        public ScriptExpression? From
         {
             get => _from;
-            set => ParentToThis(ref _from, value);
+            set => ParentToThisNullable(ref _from, value);
         }
 
-        public ScriptToken PipeToken
+        public ScriptToken? PipeToken
         {
             get => _pipeToken;
-            set => ParentToThis(ref _pipeToken, value);
+            set => ParentToThisNullable(ref _pipeToken, value);
         }
 
-        public ScriptExpression To
+        public ScriptExpression? To
         {
             get => _to;
-            set => ParentToThis(ref _to, value);
+            set => ParentToThisNullable(ref _to, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
-            bool newPipe = context.CurrentPipeArguments == null;
+            var from = From;
+            var to = To;
+            if (from is null || to is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid pipe expression. Source and destination are required.");
+            }
+
+            bool newPipe = context.CurrentPipeArguments is null;
             try
             {
                 // Push a new pipe arguments
                 if (newPipe) context.PushPipeArguments();
 
-                context.CurrentPipeArguments.Push(From);
+                var pipeArguments = context.CurrentPipeArguments ?? throw new ScriptRuntimeException(Span, "Pipe arguments were not initialized.");
+                pipeArguments.Push(from);
 
-                var result = context.Evaluate(To);
+                var result = context.Evaluate(to);
 
                 // If the result returns by the evaluation is a function and we haven't yet consumed the pipe argument
                 // that means that we need to evaluate this function with the actual pipe arguments.
-                if (result is IScriptCustomFunction && context.CurrentPipeArguments.Count > 0 && context.CurrentPipeArguments.Peek() == From)
+                if (result is IScriptCustomFunction && pipeArguments.Count > 0 && pipeArguments.Peek() == from)
                 {
-                    result = ScriptFunctionCall.Call(context, To, result, true, null);
+                    result = ScriptFunctionCall.Call(context, to, result, true, null);
                 }
 
                 // If we have still remaining arguments, it is likely that the destination expression is not a function
                 // so pipe arguments were not picked up and this is an error
-                if (context.CurrentPipeArguments.Count > 0 && context.CurrentPipeArguments.Peek() == From)
+                if (pipeArguments.Count > 0 && pipeArguments.Peek() == from)
                 {
-                    throw new ScriptRuntimeException(To.Span, $"Pipe expression destination `{To}` is not a valid function ");
+                    throw new ScriptRuntimeException(to.Span, $"Pipe expression destination `{to}` is not a valid function ");
                 }
 
                 return result;
@@ -92,9 +99,18 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(From);
-            printer.Write(PipeToken);
-            printer.Write(To);
+            if (From is not null)
+            {
+                printer.Write(From);
+            }
+            if (PipeToken is not null)
+            {
+                printer.Write(PipeToken);
+            }
+            if (To is not null)
+            {
+                printer.Write(To);
+            }
         }
     }
 }

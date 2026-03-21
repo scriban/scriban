@@ -39,17 +39,18 @@ namespace Scriban.Tests
             Assert.AreEqual(ToText(template.Page), ToText(result));
         }
 
-        private string ToText(ScriptNode node)
+        private string ToText(ScriptNode? node)
         {
+            var checkedNode = node ?? throw new AssertionException("Expected a script node.");
             var output = new StringBuilder();
             var context = new ScriptPrinter(new StringBuilderOutput(output));
-            context.Write(node);
+            context.Write(checkedNode);
             return output.ToString();
         }
 
         private Template LoadTemplate(string inputName)
         {
-            var templateSource = TestFilesHelper.LoadTestFile(inputName);
+            var templateSource = TestFilesHelper.LoadTestFile(inputName) ?? throw new AssertionException($"Unable to load test file `{inputName}`.");
             var parser =
                 inputName.Contains("500-liquid")
                     ? (Func<string, string, ParserOptions?, LexerOptions?, Template>) Template.ParseLiquid
@@ -66,7 +67,7 @@ namespace Scriban.Tests
             }
 
             var template = parser(templateSource, inputName, default, options);
-            if (template.HasErrors || template.Page == null)
+            if (template.HasErrors || template.Page is null)
             {
                 if (inputName.Contains("error"))
                 {

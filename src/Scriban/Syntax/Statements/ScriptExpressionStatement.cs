@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using System.IO;
@@ -17,24 +17,29 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptExpressionStatement : ScriptStatement
     {
-        private ScriptExpression _expression;
+        private ScriptExpression? _expression;
 
-        public ScriptExpression Expression
+        public ScriptExpression? Expression
         {
             get => _expression;
             set
             {
-                ParentToThis(ref _expression, value);
-                CanOutput = !(value is ScriptAssignExpression);
+                ParentToThisNullable(ref _expression, value);
+                CanOutput = value is not ScriptAssignExpression;
             }
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Expression is null)
+            {
+                return null;
+            }
+
             var result = context.Evaluate(Expression);
             // This code is necessary for wrap to work
             var codeDelegate = result as ScriptNode;
-            if (codeDelegate != null)
+            if (codeDelegate is not null)
             {
                 return context.Evaluate(codeDelegate);
             }

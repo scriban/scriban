@@ -14,12 +14,12 @@ namespace DotLiquid.Tests.Tags
     {
         private class TestFileSystem : ITemplateLoader
         {
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
                 return templateName;
             }
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 switch (templatePath)
                 {
@@ -52,32 +52,32 @@ namespace DotLiquid.Tests.Tags
                 }
             }
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
-                return new ValueTask<string>(Load(context, callerSpan, templatePath));
+                return ValueTask.FromResult(Load(context, callerSpan, templatePath));
             }
         }
 
         internal class TestTemplateFileSystem : ITemplateLoader
         {
-            private ITemplateLoader _baseFileSystem = null;
+            private readonly ITemplateLoader _baseFileSystem;
 
             public TestTemplateFileSystem(ITemplateLoader baseFileSystem)
             {
                 _baseFileSystem = baseFileSystem;
             }
 
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
                 return _baseFileSystem.GetPath(context, callerSpan, templateName);
             }
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return _baseFileSystem.Load(context, callerSpan, templatePath);
             }
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return _baseFileSystem.LoadAsync(context, callerSpan, templatePath);
             }
@@ -85,37 +85,37 @@ namespace DotLiquid.Tests.Tags
 
         private class OtherFileSystem : ITemplateLoader
         {
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
                 return templateName;
             }
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return "from OtherFileSystem";
             }
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
-                return new ValueTask<string>(Load(context, callerSpan, templatePath));
+                return ValueTask.FromResult(Load(context, callerSpan, templatePath));
             }
         }
 
         private class InfiniteFileSystem : ITemplateLoader
         {
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
                 return templateName;
             }
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return "-{% include 'loop' %}";
             }
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
-                return new ValueTask<string>(Load(context, callerSpan, templatePath));
+                return ValueTask.FromResult(Load(context, callerSpan, templatePath));
             }
         }
 
@@ -250,13 +250,13 @@ namespace DotLiquid.Tests.Tags
 
         class Template
         {
-            private Scriban.Template _template;
+            private readonly Scriban.Template _template;
             public Template(Scriban.Template template)
             {
                 _template = template;
             }
 
-            public static ITemplateLoader FileSystem;
+            public static ITemplateLoader? FileSystem { get; set; }
 
             public static Template Parse(string text)
             {
@@ -266,11 +266,11 @@ namespace DotLiquid.Tests.Tags
                 return new Template(scriban);
             }
 
-            public string Render(object model = null)
+            public string Render(object? model = null)
             {
-                var context = new LiquidTemplateContext {TemplateLoader = FileSystem};
+                var context = new LiquidTemplateContext { TemplateLoader = FileSystem };
                 var obj = new ScriptObject();
-                if (model != null)
+                if (model is not null)
                 {
                     obj.Import(model);
                 }

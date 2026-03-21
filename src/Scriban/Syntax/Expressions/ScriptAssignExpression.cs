@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -19,19 +19,18 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptAssignExpression : ScriptExpression
     {
-        private ScriptExpression _target;
-        private ScriptToken _equalToken;
-        private ScriptExpression _value;
-
+        private ScriptExpression? _target;
+        private ScriptToken _equalToken = ScriptToken.Equal();
+        private ScriptExpression? _value;
         public ScriptAssignExpression()
         {
-            EqualToken = ScriptToken.Equal();
+            _equalToken.Parent = this;
         }
 
-        public ScriptExpression Target
+        public ScriptExpression? Target
         {
             get => _target;
-            set => ParentToThis(ref _target, value);
+            set => ParentToThisNullable(ref _target, value);
         }
 
         public ScriptToken EqualToken
@@ -40,14 +39,19 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _equalToken, value);
         }
 
-        public ScriptExpression Value
+        public ScriptExpression? Value
         {
             get => _value;
-            set => ParentToThis(ref _value, value);
+            set => ParentToThisNullable(ref _value, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Target is null || Value is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid assignment expression. Target and value are required.");
+            }
+
             var valueObject = EqualToken.TokenType == TokenType.Equal
                 ? context.Evaluate(Value)
                 : GetValueToSet(context);
@@ -55,8 +59,13 @@ namespace Scriban.Syntax
             return null;
         }
 
-        private object GetValueToSet(TemplateContext context)
+        private object? GetValueToSet(TemplateContext context)
         {
+            if (Target is null || Value is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid assignment expression. Target and value are required.");
+            }
+
             var right = context.Evaluate(Value);
             var left = context.Evaluate(Target);
             var op = this.EqualToken.TokenType switch
@@ -79,9 +88,15 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(Target);
+            if (Target is not null)
+            {
+                printer.Write(Target);
+            }
             printer.Write(EqualToken);
-            printer.Write(Value);
+            if (Value is not null)
+            {
+                printer.Write(Value);
+            }
         }
     }
 }

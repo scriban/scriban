@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -56,7 +56,7 @@ namespace Scriban.Runtime
         /// </ul>
         /// </remarks>
         [RequiresUnreferencedCode("This method uses reflection to import members from the specified object.")]
-        public static void Import(this IScriptObject script, object obj, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
+        public static void Import(this IScriptObject script, object? obj, MemberFilterDelegate? filter = null, MemberRenamerDelegate? renamer = null)
         {
             if (obj is IScriptObject scriptObj)
             {
@@ -105,14 +105,14 @@ namespace Scriban.Runtime
         }
 #endif
 
-        public static bool TryGetValue(this IScriptObject @this, string key, out object value)
+        public static bool TryGetValue(this IScriptObject @this, string key, out object? value)
         {
-            return @this.TryGetValue(null, new SourceSpan(), key, out value);
+            return @this.TryGetValue(new TemplateContext(), new SourceSpan(), key, out value);
         }
 
-        public static void SetValue(this IScriptObject @this, string member, object value, bool readOnly)
+        public static void SetValue(this IScriptObject @this, string member, object? value, bool readOnly)
         {
-            @this.TrySetValue(null, new SourceSpan(), member, value, readOnly);
+            @this.TrySetValue(new TemplateContext(), new SourceSpan(), member, value, readOnly);
         }
 
         /// <summary>
@@ -122,7 +122,7 @@ namespace Scriban.Runtime
         /// <param name="other">The other <see cref="ScriptObject"/>.</param>
         public static void Import(this IScriptObject @this, IScriptObject other)
         {
-            if (other == null)
+            if (other is null)
             {
                 return;
             }
@@ -144,7 +144,7 @@ namespace Scriban.Runtime
 
         private static void ImportDictionary(this IScriptObject @this, IDictionary dictionary)
         {
-            if (dictionary == null)
+            if (dictionary is null)
             {
                 return;
             }
@@ -152,6 +152,10 @@ namespace Scriban.Runtime
             foreach (DictionaryEntry entry in dictionary)
             {
                 var member = entry.Key?.ToString();
+                if (member is null)
+                {
+                    continue;
+                }
                 if (!@this.CanWrite(member))
                 {
                     continue;
@@ -171,10 +175,10 @@ namespace Scriban.Runtime
         public static ScriptObject GetScriptObject(this IScriptObject @this)
         {
             var script = @this as ScriptObject;
-            if (script == null)
+            if (script is null)
             {
                 var scriptArray = @this as ScriptArray;
-                if (scriptArray == null)
+                if (scriptArray is null)
                 {
                     throw new ArgumentException("Expecting ScriptObject or ScriptArray instance", nameof(@this));
                 }
@@ -192,9 +196,10 @@ namespace Scriban.Runtime
         /// <param name="memberName">Name of the member.</param>
         /// <param name="exportName">Name of the member name replacement. If null, use the default renamer will be used.</param>
         [RequiresUnreferencedCode("This method uses reflection to import a specific member from the specified object.")]
-        public static void ImportMember(this IScriptObject script, object obj, string memberName, string exportName = null)
+        public static void ImportMember(this IScriptObject script, object obj, string memberName, string? exportName = null)
         {
-            script.Import(obj, ScriptMemberImportFlags.All, member => member.Name == memberName, exportName != null ? name => exportName: (MemberRenamerDelegate)null);
+            MemberRenamerDelegate? renamer = exportName is not null ? _ => exportName : null;
+            script.Import(obj, ScriptMemberImportFlags.All, member => member.Name == memberName, renamer);
         }
 
 
@@ -208,9 +213,9 @@ namespace Scriban.Runtime
         /// <param name="renamer">The member renamer.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
         [RequiresUnreferencedCode("This method uses reflection to discover and import fields, properties, and methods from the specified object or type.")]
-        public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
+        public static void Import(this IScriptObject script, object? obj, ScriptMemberImportFlags flags, MemberFilterDelegate? filter = null, MemberRenamerDelegate? renamer = null)
         {
-            if (obj == null)
+            if (obj is null)
             {
                 return;
             }
@@ -235,7 +240,7 @@ namespace Scriban.Runtime
             renamer = renamer ?? StandardMemberRenamer.Default;
 
             var typeToImports = new Stack<Type>();
-            while (typeInfo != null)
+            while (typeInfo is not null)
             {
                 typeToImports.Push(typeInfo);
                 if (typeInfo.BaseType == typeof(object))
@@ -260,12 +265,12 @@ namespace Scriban.Runtime
                         {
                             continue;
                         }
-                        if (filter != null && !filter(field))
+                        if (filter is not null && !filter(field))
                         {
                             continue;
                         }
 
-                        var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                        var keep = field.GetCustomAttribute<ScriptMemberIgnoreAttribute>() is null;
                         if (keep && ((field.IsStatic && useStatic) || useInstance))
                         {
                             var newFieldName = renamer(field);
@@ -275,9 +280,9 @@ namespace Scriban.Runtime
                             }
 
                             // If field is init only or literal, it cannot be set back, so we mark it as read-only
-                            if (scriptObj == null)
+                            if (scriptObj is null)
                             {
-                                script.TrySetValue(null, new SourceSpan(), newFieldName, ConvertValue(field.GetValue(obj)), field.IsInitOnly || field.IsLiteral);
+                                script.TrySetValue(new TemplateContext(), new SourceSpan(), newFieldName, ConvertValue(field.GetValue(obj)), field.IsInitOnly || field.IsLiteral);
                             }
                             else
                             {
@@ -293,17 +298,17 @@ namespace Scriban.Runtime
                     {
                         // Workaround with .NET Core, extension method is not working (retuning null despite doing property.GetMethod), so we need to inline it here
                         var getMethod = property.GetMethod;
-                        if (!property.CanRead || !getMethod.IsPublic)
+                        if (!property.CanRead || getMethod is null || !getMethod.IsPublic)
                         {
                             continue;
                         }
 
-                        if (filter != null && !filter(property))
+                        if (filter is not null && !filter(property))
                         {
                             continue;
                         }
 
-                        var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                        var keep = property.GetCustomAttribute<ScriptMemberIgnoreAttribute>() is null;
                         if (keep && (((getMethod.IsStatic && useStatic) || useInstance)))
                         {
                             var newPropertyName = renamer(property);
@@ -314,9 +319,9 @@ namespace Scriban.Runtime
 
                             // Initially, we were setting readonly depending on the presence of a set method, but this is not compatible with liquid implems, so we remove readonly restriction
                             //script.SetValue(null, new SourceSpan(), newPropertyName, property.GetValue(obj), property.GetSetMethod() == null || !property.GetSetMethod().IsPublic);
-                            if (scriptObj == null)
+                            if (scriptObj is null)
                             {
-                                script.TrySetValue(null, new SourceSpan(), newPropertyName, ConvertValue(property.GetValue(obj)), false);
+                                script.TrySetValue(new TemplateContext(), new SourceSpan(), newPropertyName, ConvertValue(property.GetValue(obj)), false);
                             }
                             else
                             {
@@ -331,12 +336,12 @@ namespace Scriban.Runtime
                 {
                     foreach (var method in typeInfo.GetMethods(BindingFlags.Static | BindingFlags.Public| BindingFlags.DeclaredOnly))
                     {
-                        if (filter != null && !filter(method))
+                        if (filter is not null && !filter(method))
                         {
                             continue;
                         }
 
-                        var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() == null;
+                        var keep = method.GetCustomAttribute<ScriptMemberIgnoreAttribute>() is null;
                         if (keep && method.IsPublic && method.IsStatic && !method.IsSpecialName)
                         {
                             var newMethodName = renamer(method);
@@ -345,9 +350,9 @@ namespace Scriban.Runtime
                                 newMethodName = method.Name;
                             }
 
-                            if (scriptObj == null)
+                            if (scriptObj is null)
                             {
-                                script.TrySetValue(null, new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
+                                script.TrySetValue(new TemplateContext(), new SourceSpan(), newMethodName, DynamicCustomFunction.Create(obj, method), true);
                             }
                             else
                             {
@@ -369,10 +374,10 @@ namespace Scriban.Runtime
         [RequiresUnreferencedCode("This method uses reflection to create a DynamicCustomFunction from the delegate's method.")]
         public static void Import(this IScriptObject script, string member, Delegate function)
         {
-            if (member == null) throw new ArgumentNullException(nameof(member));
-            if (function == null) throw new ArgumentNullException(nameof(function));
+            if (member is null) throw new ArgumentNullException(nameof(member));
+            if (function is null) throw new ArgumentNullException(nameof(function));
 
-            script.TrySetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function), true);
+            script.TrySetValue(new TemplateContext(), new SourceSpan(), member, DynamicCustomFunction.Create(function), true);
         }
 
         /// <summary>
@@ -382,7 +387,7 @@ namespace Scriban.Runtime
         /// <param name="value">The object to import as scriban value.</param>
         /// <returns>A scriban compatible value.</returns>
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static object ConvertValue(object value)
+        private static object? ConvertValue(object? value)
         {
 #if !SCRIBAN_NO_SYSTEM_TEXT_JSON
             return value switch {

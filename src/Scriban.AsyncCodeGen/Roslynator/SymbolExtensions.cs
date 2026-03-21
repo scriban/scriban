@@ -20,7 +20,7 @@ namespace Roslynator
         #region ISymbol
         internal static IEnumerable<ISymbol> FindImplementedInterfaceMembers(this ISymbol symbol, bool allInterfaces = false)
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
             return Iterator();
@@ -29,7 +29,7 @@ namespace Roslynator
             {
                 INamedTypeSymbol containingType = symbol.ContainingType;
 
-                if (containingType != null)
+                if (containingType is not null)
                 {
                     ImmutableArray<INamedTypeSymbol> interfaces = containingType.GetInterfaces(allInterfaces);
 
@@ -39,7 +39,7 @@ namespace Roslynator
 
                         for (int j = 0; j < members.Length; j++)
                         {
-                            if (symbol.Equals(containingType.FindImplementationForInterfaceMember(members[j])))
+                            if (SymbolEqualityComparer.Default.Equals(symbol, containingType.FindImplementationForInterfaceMember(members[j])))
                             {
                                 yield return members[j];
                             }
@@ -49,43 +49,43 @@ namespace Roslynator
             }
         }
 
-        internal static ISymbol FindFirstImplementedInterfaceMember(this ISymbol symbol, bool allInterfaces = false)
+        internal static ISymbol? FindFirstImplementedInterfaceMember(this ISymbol symbol, bool allInterfaces = false)
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
             return FindFirstImplementedInterfaceMemberImpl(symbol, null, allInterfaces);
         }
 
-        internal static ISymbol FindImplementedInterfaceMember(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false)
+        internal static ISymbol? FindImplementedInterfaceMember(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false)
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
-            if (interfaceSymbol == null)
+            if (interfaceSymbol is null)
                 throw new ArgumentNullException(nameof(interfaceSymbol));
 
             return FindFirstImplementedInterfaceMemberImpl(symbol, interfaceSymbol, allInterfaces);
         }
 
-        private static ISymbol FindFirstImplementedInterfaceMemberImpl(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces)
+        private static ISymbol? FindFirstImplementedInterfaceMemberImpl(this ISymbol symbol, INamedTypeSymbol? interfaceSymbol, bool allInterfaces)
         {
-            INamedTypeSymbol containingType = symbol.ContainingType;
+            INamedTypeSymbol? containingType = symbol.ContainingType;
 
-            if (containingType != null)
+            if (containingType is not null)
             {
                 ImmutableArray<INamedTypeSymbol> interfaces = containingType.GetInterfaces(allInterfaces);
 
                 for (int i = 0; i < interfaces.Length; i++)
                 {
-                    if (interfaceSymbol == null
-                        || interfaces[i].Equals(interfaceSymbol))
+                    if (interfaceSymbol is null
+                        || SymbolEqualityComparer.Default.Equals(interfaces[i], interfaceSymbol))
                     {
                         ImmutableArray<ISymbol> members = interfaces[i].GetMembers();
 
                         for (int j = 0; j < members.Length; j++)
                         {
-                            if (symbol.Equals(containingType.FindImplementationForInterfaceMember(members[j])))
+                            if (SymbolEqualityComparer.Default.Equals(symbol, containingType.FindImplementationForInterfaceMember(members[j])))
                                 return members[j];
                         }
                     }
@@ -102,7 +102,7 @@ namespace Roslynator
         /// <param name="allInterfaces">If true, use <see cref="ITypeSymbol.AllInterfaces"/>, otherwise use <see cref="ITypeSymbol.Interfaces"/>.</param>
         public static bool ImplementsInterfaceMember(this ISymbol symbol, bool allInterfaces = false)
         {
-            return FindFirstImplementedInterfaceMember(symbol, allInterfaces) != null;
+            return FindFirstImplementedInterfaceMember(symbol, allInterfaces) is not null;
         }
 
         /// <summary>
@@ -113,47 +113,47 @@ namespace Roslynator
         /// <param name="allInterfaces">If true, use <see cref="ITypeSymbol.AllInterfaces"/>, otherwise use <see cref="ITypeSymbol.Interfaces"/>.</param>
         public static bool ImplementsInterfaceMember(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false)
         {
-            return FindImplementedInterfaceMember(symbol, interfaceSymbol, allInterfaces) != null;
+            return FindImplementedInterfaceMember(symbol, interfaceSymbol, allInterfaces) is not null;
         }
 
-        internal static TSymbol FindFirstImplementedInterfaceMember<TSymbol>(this ISymbol symbol, bool allInterfaces = false) where TSymbol : ISymbol
+        internal static TSymbol? FindFirstImplementedInterfaceMember<TSymbol>(this ISymbol symbol, bool allInterfaces = false) where TSymbol : class, ISymbol
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
             return FindFirstImplementedInterfaceMemberImpl<TSymbol>(symbol, null, allInterfaces);
         }
 
-        internal static TSymbol FindFirstImplementedInterfaceMember<TSymbol>(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false) where TSymbol : ISymbol
+        internal static TSymbol? FindFirstImplementedInterfaceMember<TSymbol>(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false) where TSymbol : class, ISymbol
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
-            if (interfaceSymbol == null)
+            if (interfaceSymbol is null)
                 throw new ArgumentNullException(nameof(interfaceSymbol));
 
             return FindFirstImplementedInterfaceMemberImpl<TSymbol>(symbol, interfaceSymbol, allInterfaces);
         }
 
-        private static TSymbol FindFirstImplementedInterfaceMemberImpl<TSymbol>(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false) where TSymbol : ISymbol
+        private static TSymbol? FindFirstImplementedInterfaceMemberImpl<TSymbol>(this ISymbol symbol, INamedTypeSymbol? interfaceSymbol, bool allInterfaces = false) where TSymbol : class, ISymbol
         {
-            INamedTypeSymbol containingType = symbol.ContainingType;
+            INamedTypeSymbol? containingType = symbol.ContainingType;
 
-            if (containingType != null)
+            if (containingType is not null)
             {
                 ImmutableArray<INamedTypeSymbol> interfaces = containingType.GetInterfaces(allInterfaces);
 
                 for (int i = 0; i < interfaces.Length; i++)
                 {
-                    if (interfaceSymbol == null
-                        || interfaces[i].Equals(interfaceSymbol))
+                    if (interfaceSymbol is null
+                        || SymbolEqualityComparer.Default.Equals(interfaces[i], interfaceSymbol))
                     {
                         ImmutableArray<ISymbol> members = interfaces[i].GetMembers();
 
                         for (int j = 0; j < members.Length; j++)
                         {
                             if ((members[j] is TSymbol tmember)
-                                && symbol.Equals(containingType.FindImplementationForInterfaceMember(tmember)))
+                                && SymbolEqualityComparer.Default.Equals(symbol, containingType.FindImplementationForInterfaceMember(tmember)))
                             {
                                 return tmember;
                             }
@@ -171,11 +171,9 @@ namespace Roslynator
         /// <typeparam name="TSymbol"></typeparam>
         /// <param name="symbol"></param>
         /// <param name="allInterfaces">If true, use <see cref="ITypeSymbol.AllInterfaces"/>, otherwise use <see cref="ITypeSymbol.Interfaces"/>.</param>
-        public static bool ImplementsInterfaceMember<TSymbol>(this ISymbol symbol, bool allInterfaces = false) where TSymbol : ISymbol
+        public static bool ImplementsInterfaceMember<TSymbol>(this ISymbol symbol, bool allInterfaces = false) where TSymbol : class, ISymbol
         {
-            return !EqualityComparer<TSymbol>.Default.Equals(
-                FindFirstImplementedInterfaceMember<TSymbol>(symbol, allInterfaces),
-                default(TSymbol));
+            return FindFirstImplementedInterfaceMember<TSymbol>(symbol, allInterfaces) is not null;
         }
 
         /// <summary>
@@ -185,11 +183,9 @@ namespace Roslynator
         /// <param name="symbol"></param>
         /// <param name="interfaceSymbol"></param>
         /// <param name="allInterfaces">If true, use <see cref="ITypeSymbol.AllInterfaces"/>, otherwise use <see cref="ITypeSymbol.Interfaces"/>.</param>
-        public static bool ImplementsInterfaceMember<TSymbol>(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false) where TSymbol : ISymbol
+        public static bool ImplementsInterfaceMember<TSymbol>(this ISymbol symbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false) where TSymbol : class, ISymbol
         {
-            return !EqualityComparer<TSymbol>.Default.Equals(
-                FindFirstImplementedInterfaceMember<TSymbol>(symbol, interfaceSymbol, allInterfaces),
-                default(TSymbol));
+            return FindFirstImplementedInterfaceMember<TSymbol>(symbol, interfaceSymbol, allInterfaces) is not null;
         }
 
         /// <summary>
@@ -210,7 +206,7 @@ namespace Roslynator
         /// <param name="kind2"></param>
         public static bool IsKind(this ISymbol symbol, SymbolKind kind1, SymbolKind kind2)
         {
-            if (symbol == null)
+            if (symbol is null)
                 return false;
 
             SymbolKind kind = symbol.Kind;
@@ -228,7 +224,7 @@ namespace Roslynator
         /// <param name="kind3"></param>
         public static bool IsKind(this ISymbol symbol, SymbolKind kind1, SymbolKind kind2, SymbolKind kind3)
         {
-            if (symbol == null)
+            if (symbol is null)
                 return false;
 
             SymbolKind kind = symbol.Kind;
@@ -248,7 +244,7 @@ namespace Roslynator
         /// <param name="kind4"></param>
         public static bool IsKind(this ISymbol symbol, SymbolKind kind1, SymbolKind kind2, SymbolKind kind3, SymbolKind kind4)
         {
-            if (symbol == null)
+            if (symbol is null)
                 return false;
 
             SymbolKind kind = symbol.Kind;
@@ -270,7 +266,7 @@ namespace Roslynator
         /// <param name="kind5"></param>
         public static bool IsKind(this ISymbol symbol, SymbolKind kind1, SymbolKind kind2, SymbolKind kind3, SymbolKind kind4, SymbolKind kind5)
         {
-            if (symbol == null)
+            if (symbol is null)
                 return false;
 
             SymbolKind kind = symbol.Kind;
@@ -321,7 +317,7 @@ namespace Roslynator
                 .GetSyntaxAsync(cancellationToken);
         }
 
-        internal static SyntaxNode GetSyntaxOrDefault(this ISymbol symbol, CancellationToken cancellationToken = default)
+        internal static SyntaxNode? GetSyntaxOrDefault(this ISymbol symbol, CancellationToken cancellationToken = default)
         {
             return symbol
                 .DeclaringSyntaxReferences
@@ -334,18 +330,18 @@ namespace Roslynator
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="attributeClass"></param>
-        public static AttributeData GetAttribute(this ISymbol symbol, INamedTypeSymbol attributeClass)
+        public static AttributeData? GetAttribute(this ISymbol symbol, INamedTypeSymbol attributeClass)
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
-            if (attributeClass != null)
+            if (attributeClass is not null)
             {
                 ImmutableArray<AttributeData> attributes = symbol.GetAttributes();
 
                 for (int i = 0; i < attributes.Length; i++)
                 {
-                    if (attributes[i].AttributeClass.Equals(attributeClass))
+                    if (SymbolEqualityComparer.Default.Equals(attributes[i].AttributeClass, attributeClass))
                         return attributes[i];
                 }
             }
@@ -358,14 +354,14 @@ namespace Roslynator
         /// </summary>
         /// <param name="symbol"></param>
         /// <param name="attributeName"></param>
-        public static AttributeData GetAttribute(this ISymbol symbol, in MetadataName attributeName)
+        public static AttributeData? GetAttribute(this ISymbol symbol, in MetadataName attributeName)
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
             foreach (AttributeData attributeData in symbol.GetAttributes())
             {
-                if (attributeData.AttributeClass.HasMetadataName(attributeName))
+                if (attributeData.AttributeClass is not null && attributeData.AttributeClass.HasMetadataName(attributeName))
                     return attributeData;
             }
 
@@ -379,7 +375,7 @@ namespace Roslynator
         /// <param name="attributeClass"></param>
         public static bool HasAttribute(this ISymbol symbol, INamedTypeSymbol attributeClass)
         {
-            return GetAttribute(symbol, attributeClass) != null;
+            return GetAttribute(symbol, attributeClass) is not null;
         }
 
         /// <summary>
@@ -393,7 +389,7 @@ namespace Roslynator
             if (!includeBaseTypes)
                 return HasAttribute(typeSymbol, attributeClass);
 
-            ITypeSymbol t = typeSymbol;
+            ITypeSymbol? t = typeSymbol;
 
             do
             {
@@ -402,7 +398,7 @@ namespace Roslynator
 
                 t = t.BaseType;
 
-            } while (t != null
+            } while (t is not null
                 && t.SpecialType != SpecialType.System_Object);
 
             return false;
@@ -415,7 +411,7 @@ namespace Roslynator
         /// <param name="attributeName"></param>
         public static bool HasAttribute(this ISymbol symbol, in MetadataName attributeName)
         {
-            return GetAttribute(symbol, attributeName) != null;
+            return GetAttribute(symbol, attributeName) is not null;
         }
 
         /// <summary>
@@ -429,7 +425,7 @@ namespace Roslynator
             if (!includeBaseTypes)
                 return HasAttribute(typeSymbol, attributeName);
 
-            ITypeSymbol t = typeSymbol;
+            ITypeSymbol? t = typeSymbol;
 
             do
             {
@@ -438,7 +434,7 @@ namespace Roslynator
 
                 t = t.BaseType;
 
-            } while (t != null
+            } while (t is not null
                 && t.SpecialType != SpecialType.System_Object);
 
             return false;
@@ -446,7 +442,7 @@ namespace Roslynator
 
         internal static ImmutableArray<IParameterSymbol> ParametersOrDefault(this ISymbol symbol)
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
             switch (symbol.Kind)
@@ -460,9 +456,9 @@ namespace Roslynator
             }
         }
 
-        internal static ISymbol BaseOverriddenSymbol(this ISymbol symbol)
+        internal static ISymbol? BaseOverriddenSymbol(this ISymbol symbol)
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
             switch (symbol.Kind)
@@ -499,7 +495,7 @@ namespace Roslynator
         /// <param name="symbol"></param>
         public static bool IsPubliclyVisible(this ISymbol symbol)
         {
-            if (symbol == null)
+            if (symbol is null)
                 throw new ArgumentNullException(nameof(symbol));
 
             do
@@ -514,7 +510,7 @@ namespace Roslynator
 
                 symbol = symbol.ContainingType;
 
-            } while (symbol != null);
+            } while (symbol is not null);
 
             return true;
         }
@@ -532,7 +528,7 @@ namespace Roslynator
 
                 symbol = symbol.ContainingType;
 
-            } while (symbol != null);
+            } while (symbol is not null);
 
             return true;
         }
@@ -576,7 +572,7 @@ namespace Roslynator
 
                 symbol = symbol.ContainingType;
 
-            } while (symbol != null);
+            } while (symbol is not null);
 
             return visibility;
         }
@@ -640,9 +636,9 @@ namespace Roslynator
             return ImmutableArray<IParameterSymbol>.Empty;
         }
 
-        internal static INamespaceSymbol GetRootNamespace(this ISymbol symbol)
+        internal static INamespaceSymbol? GetRootNamespace(this ISymbol symbol)
         {
-            INamespaceSymbol n = symbol.ContainingNamespace;
+            INamespaceSymbol? n = symbol.ContainingNamespace;
 
             if (n?.IsGlobalNamespace == false)
             {
@@ -662,7 +658,7 @@ namespace Roslynator
         #endregion ISymbol
 
         #region IAssemblySymbol
-        internal static ImmutableArray<INamedTypeSymbol> GetTypes(this IAssemblySymbol assemblySymbol, Func<INamedTypeSymbol, bool> predicate = null)
+        internal static ImmutableArray<INamedTypeSymbol> GetTypes(this IAssemblySymbol assemblySymbol, Func<INamedTypeSymbol, bool>? predicate = null)
         {
             ImmutableArray<INamedTypeSymbol>.Builder builder = ImmutableArray.CreateBuilder<INamedTypeSymbol>();
 
@@ -673,7 +669,7 @@ namespace Roslynator
             void GetTypes(INamespaceOrTypeSymbol namespaceOrTypeSymbol)
             {
                 if (namespaceOrTypeSymbol is INamedTypeSymbol namedTypeSymbol
-                    && (predicate == null || predicate(namedTypeSymbol)))
+                    && (predicate is null || predicate(namedTypeSymbol)))
                 {
                     builder.Add(namedTypeSymbol);
                 }
@@ -688,7 +684,7 @@ namespace Roslynator
             }
         }
 
-        internal static ImmutableArray<INamespaceSymbol> GetNamespaces(this IAssemblySymbol assemblySymbol, Func<INamespaceSymbol, bool> predicate = null)
+        internal static ImmutableArray<INamespaceSymbol> GetNamespaces(this IAssemblySymbol assemblySymbol, Func<INamespaceSymbol, bool>? predicate = null)
         {
             ImmutableArray<INamespaceSymbol>.Builder builder = ImmutableArray.CreateBuilder<INamespaceSymbol>();
 
@@ -698,7 +694,7 @@ namespace Roslynator
 
             void GetNamespaces(INamespaceSymbol namespaceSymbol)
             {
-                if (predicate == null || predicate(namespaceSymbol))
+                if (predicate is null || predicate(namespaceSymbol))
                     builder.Add(namespaceSymbol);
 
                 foreach (INamespaceSymbol namespaceSymbol2 in namespaceSymbol.GetNamespaceMembers())
@@ -708,21 +704,21 @@ namespace Roslynator
         #endregion IAssemblySymbol
 
         #region IEventSymbol
-        internal static IEventSymbol BaseOverriddenEvent(this IEventSymbol eventSymbol)
+        internal static IEventSymbol? BaseOverriddenEvent(this IEventSymbol eventSymbol)
         {
-            if (eventSymbol == null)
+            if (eventSymbol is null)
                 throw new ArgumentNullException(nameof(eventSymbol));
 
-            IEventSymbol overriddenEvent = eventSymbol.OverriddenEvent;
+            IEventSymbol? overriddenEvent = eventSymbol.OverriddenEvent;
 
-            if (overriddenEvent == null)
+            if (overriddenEvent is null)
                 return null;
 
             while (true)
             {
-                IEventSymbol symbol = overriddenEvent.OverriddenEvent;
+                IEventSymbol? symbol = overriddenEvent.OverriddenEvent;
 
-                if (symbol == null)
+                if (symbol is null)
                     return overriddenEvent;
 
                 overriddenEvent = symbol;
@@ -738,7 +734,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, bool value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -759,7 +755,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, char value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -780,7 +776,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, sbyte value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -801,7 +797,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, byte value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -822,7 +818,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, short value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -843,7 +839,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, ushort value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -864,7 +860,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, int value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -885,7 +881,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, uint value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -906,7 +902,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, long value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -927,7 +923,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, ulong value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -948,7 +944,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, decimal value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -969,7 +965,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, float value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -990,7 +986,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, double value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -1011,7 +1007,7 @@ namespace Roslynator
         /// <param name="value"></param>
         public static bool HasConstantValue(this IFieldSymbol fieldSymbol, string value)
         {
-            if (fieldSymbol == null)
+            if (fieldSymbol is null)
                 throw new ArgumentNullException(nameof(fieldSymbol));
 
             if (fieldSymbol.HasConstantValue)
@@ -1027,21 +1023,21 @@ namespace Roslynator
         #endregion IFieldSymbol
 
         #region IMethodSymbol
-        internal static IMethodSymbol BaseOverriddenMethod(this IMethodSymbol methodSymbol)
+        internal static IMethodSymbol? BaseOverriddenMethod(this IMethodSymbol methodSymbol)
         {
-            if (methodSymbol == null)
+            if (methodSymbol is null)
                 throw new ArgumentNullException(nameof(methodSymbol));
 
-            IMethodSymbol overriddenMethod = methodSymbol.OverriddenMethod;
+            IMethodSymbol? overriddenMethod = methodSymbol.OverriddenMethod;
 
-            if (overriddenMethod == null)
+            if (overriddenMethod is null)
                 return null;
 
             while (true)
             {
-                IMethodSymbol symbol = overriddenMethod.OverriddenMethod;
+                IMethodSymbol? symbol = overriddenMethod.OverriddenMethod;
 
-                if (symbol == null)
+                if (symbol is null)
                     return overriddenMethod;
 
                 overriddenMethod = symbol;
@@ -1054,7 +1050,7 @@ namespace Roslynator
         /// <param name="methodSymbol"></param>
         public static IMethodSymbol ReducedFromOrSelf(this IMethodSymbol methodSymbol)
         {
-            return methodSymbol?.ReducedFrom ?? methodSymbol;
+            return methodSymbol.ReducedFrom ?? methodSymbol;
         }
 
         /// <summary>
@@ -1160,7 +1156,7 @@ namespace Roslynator
         /// <param name="parameterSymbol"></param>
         public static bool IsRefOrOut(this IParameterSymbol parameterSymbol)
         {
-            if (parameterSymbol == null)
+            if (parameterSymbol is null)
                 throw new ArgumentNullException(nameof(parameterSymbol));
 
             RefKind refKind = parameterSymbol.RefKind;
@@ -1171,21 +1167,21 @@ namespace Roslynator
         #endregion IParameterSymbol
 
         #region IPropertySymbol
-        internal static IPropertySymbol BaseOverriddenProperty(this IPropertySymbol propertySymbol)
+        internal static IPropertySymbol? BaseOverriddenProperty(this IPropertySymbol propertySymbol)
         {
-            if (propertySymbol == null)
+            if (propertySymbol is null)
                 throw new ArgumentNullException(nameof(propertySymbol));
 
-            IPropertySymbol overriddenProperty = propertySymbol.OverriddenProperty;
+            IPropertySymbol? overriddenProperty = propertySymbol.OverriddenProperty;
 
-            if (overriddenProperty == null)
+            if (overriddenProperty is null)
                 return null;
 
             while (true)
             {
-                IPropertySymbol symbol = overriddenProperty.OverriddenProperty;
+                IPropertySymbol? symbol = overriddenProperty.OverriddenProperty;
 
-                if (symbol == null)
+                if (symbol is null)
                     return overriddenProperty;
 
                 overriddenProperty = symbol;
@@ -1213,7 +1209,7 @@ namespace Roslynator
         public static bool IsNullableOf(this INamedTypeSymbol namedTypeSymbol, ITypeSymbol typeArgument)
         {
             return namedTypeSymbol.IsNullableType()
-                && namedTypeSymbol.TypeArguments[0] == typeArgument;
+                && SymbolEqualityComparer.Default.Equals(namedTypeSymbol.TypeArguments[0], typeArgument);
         }
 
         /// <summary>
@@ -1223,15 +1219,15 @@ namespace Roslynator
         /// <param name="typeSymbol"></param>
         /// <param name="predicate"></param>
         /// <param name="includeBaseTypes"></param>
-        public static TSymbol FindMember<TSymbol>(
+        public static TSymbol? FindMember<TSymbol>(
             this INamedTypeSymbol typeSymbol,
             Func<TSymbol, bool> predicate,
-            bool includeBaseTypes = false) where TSymbol : ISymbol
+            bool includeBaseTypes = false) where TSymbol : class, ISymbol
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
-            if (predicate == null)
+            if (predicate is null)
                 throw new ArgumentNullException(nameof(predicate));
 
             return FindMemberImpl(typeSymbol, name: null, predicate, includeBaseTypes);
@@ -1245,43 +1241,47 @@ namespace Roslynator
         /// <param name="name"></param>
         /// <param name="predicate"></param>
         /// <param name="includeBaseTypes"></param>
-        public static TSymbol FindMember<TSymbol>(
+        public static TSymbol? FindMember<TSymbol>(
             this INamedTypeSymbol typeSymbol,
             string name,
-            Func<TSymbol, bool> predicate = null,
-            bool includeBaseTypes = false) where TSymbol : ISymbol
+            Func<TSymbol, bool>? predicate = null,
+            bool includeBaseTypes = false) where TSymbol : class, ISymbol
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             return FindMemberImpl(typeSymbol, name, predicate, includeBaseTypes);
         }
 
-        private static TSymbol FindMemberImpl<TSymbol>(
+        private static TSymbol? FindMemberImpl<TSymbol>(
             this INamedTypeSymbol typeSymbol,
-            string name,
-            Func<TSymbol, bool> predicate = null,
-            bool includeBaseTypes = false) where TSymbol : ISymbol
+            string? name,
+            Func<TSymbol, bool>? predicate = null,
+            bool includeBaseTypes = false) where TSymbol : class, ISymbol
         {
             ImmutableArray<ISymbol> members;
 
             do
             {
-                members = (name != null)
+                members = (name is not null)
                     ? typeSymbol.GetMembers(name)
                     : typeSymbol.GetMembers();
 
-                TSymbol symbol = FindMemberImpl(members, predicate);
+                TSymbol? symbol = FindMemberImpl(members, predicate);
 
-                if (symbol != null)
+                if (symbol is not null)
                     return symbol;
 
                 if (!includeBaseTypes)
                     break;
 
-                typeSymbol = typeSymbol.BaseType;
+                var baseType = typeSymbol.BaseType;
+                if (baseType is null)
+                    break;
 
-            } while (typeSymbol != null);
+                typeSymbol = baseType;
+
+            } while (typeSymbol is not null);
 
             return default;
         }
@@ -1292,15 +1292,15 @@ namespace Roslynator
         /// <param name="typeSymbol"></param>
         /// <param name="predicate"></param>
         /// <param name="includeBaseTypes"></param>
-        public static INamedTypeSymbol FindTypeMember(
+        public static INamedTypeSymbol? FindTypeMember(
             this INamedTypeSymbol typeSymbol,
             Func<INamedTypeSymbol, bool> predicate,
             bool includeBaseTypes = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
-            if (predicate == null)
+            if (predicate is null)
                 throw new ArgumentNullException(nameof(predicate));
 
             return FindTypeMemberImpl(typeSymbol, name: null, arity: null, predicate, includeBaseTypes);
@@ -1313,16 +1313,16 @@ namespace Roslynator
         /// <param name="name"></param>
         /// <param name="predicate"></param>
         /// <param name="includeBaseTypes"></param>
-        public static INamedTypeSymbol FindTypeMember(
+        public static INamedTypeSymbol? FindTypeMember(
             this INamedTypeSymbol typeSymbol,
             string name,
-            Func<INamedTypeSymbol, bool> predicate = null,
+            Func<INamedTypeSymbol, bool>? predicate = null,
             bool includeBaseTypes = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
-            if (name == null)
+            if (name is null)
                 throw new ArgumentNullException(nameof(name));
 
             return FindTypeMemberImpl(typeSymbol, name, arity: null, predicate, includeBaseTypes);
@@ -1336,36 +1336,36 @@ namespace Roslynator
         /// <param name="arity"></param>
         /// <param name="predicate"></param>
         /// <param name="includeBaseTypes"></param>
-        public static INamedTypeSymbol FindTypeMember(
+        public static INamedTypeSymbol? FindTypeMember(
             this INamedTypeSymbol typeSymbol,
             string name,
             int arity,
-            Func<INamedTypeSymbol, bool> predicate = null,
+            Func<INamedTypeSymbol, bool>? predicate = null,
             bool includeBaseTypes = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
-            if (name == null)
+            if (name is null)
                 throw new ArgumentNullException(nameof(name));
 
             return FindTypeMemberImpl(typeSymbol, name, arity, predicate, includeBaseTypes);
         }
 
-        private static INamedTypeSymbol FindTypeMemberImpl(
+        private static INamedTypeSymbol? FindTypeMemberImpl(
             this INamedTypeSymbol typeSymbol,
-            string name,
+            string? name,
             int? arity,
-            Func<INamedTypeSymbol, bool> predicate = null,
+            Func<INamedTypeSymbol, bool>? predicate = null,
             bool includeBaseTypes = false)
         {
             ImmutableArray<INamedTypeSymbol> members;
 
             do
             {
-                if (name != null)
+                if (name is not null)
                 {
-                    if (arity != null)
+                    if (arity is not null)
                     {
                         members = typeSymbol.GetTypeMembers(name, arity.Value);
                     }
@@ -1379,17 +1379,21 @@ namespace Roslynator
                     members = typeSymbol.GetTypeMembers();
                 }
 
-                INamedTypeSymbol symbol = FindMemberImpl(members, predicate);
+                INamedTypeSymbol? symbol = FindMemberImpl(members, predicate);
 
-                if (symbol != null)
+                if (symbol is not null)
                     return symbol;
 
                 if (!includeBaseTypes)
                     break;
 
-                typeSymbol = typeSymbol.BaseType;
+                var baseType = typeSymbol.BaseType;
+                if (baseType is null)
+                    break;
 
-            } while (typeSymbol != null);
+                typeSymbol = baseType;
+
+            } while (typeSymbol is not null);
 
             return null;
         }
@@ -1449,16 +1453,16 @@ namespace Roslynator
         /// <param name="type"></param>
         public static IEnumerable<INamedTypeSymbol> BaseTypes(this ITypeSymbol type)
         {
-            if (type == null)
+            if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
             return BaseTypesIterator();
 
             IEnumerable<INamedTypeSymbol> BaseTypesIterator()
             {
-                INamedTypeSymbol baseType = type.BaseType;
+                INamedTypeSymbol? baseType = type.BaseType;
 
-                while (baseType != null)
+                while (baseType is not null)
                 {
                     yield return baseType;
                     baseType = baseType.BaseType;
@@ -1472,16 +1476,16 @@ namespace Roslynator
         /// <param name="typeSymbol"></param>
         public static IEnumerable<ITypeSymbol> BaseTypesAndSelf(this ITypeSymbol typeSymbol)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             return BaseTypesAndSelfIterator();
 
             IEnumerable<ITypeSymbol> BaseTypesAndSelfIterator()
             {
-                ITypeSymbol current = typeSymbol;
+                ITypeSymbol? current = typeSymbol;
 
-                while (current != null)
+                while (current is not null)
                 {
                     yield return current;
                     current = current.BaseType;
@@ -1497,7 +1501,7 @@ namespace Roslynator
         /// <param name="allInterfaces">If true, use <see cref="ITypeSymbol.AllInterfaces"/>, otherwise use <see cref="ITypeSymbol.Interfaces"/>.</param>
         public static bool Implements(this ITypeSymbol typeSymbol, SpecialType interfaceType, bool allInterfaces = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             ImmutableArray<INamedTypeSymbol> interfaces = typeSymbol.GetInterfaces(allInterfaces);
@@ -1513,7 +1517,7 @@ namespace Roslynator
 
         internal static bool IsOrImplements(this ITypeSymbol typeSymbol, SpecialType interfaceType, bool allInterfaces = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             return typeSymbol.SpecialType == interfaceType
@@ -1529,7 +1533,7 @@ namespace Roslynator
         /// <param name="allInterfaces">If true, use <see cref="ITypeSymbol.AllInterfaces"/>, otherwise use <see cref="ITypeSymbol.Interfaces"/>.</param>
         public static bool ImplementsAny(this ITypeSymbol typeSymbol, SpecialType interfaceType1, SpecialType interfaceType2, bool allInterfaces = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             ImmutableArray<INamedTypeSymbol> interfaces = typeSymbol.GetInterfaces(allInterfaces);
@@ -1553,7 +1557,7 @@ namespace Roslynator
         /// <param name="allInterfaces">If true, use <see cref="ITypeSymbol.AllInterfaces"/>, otherwise use <see cref="ITypeSymbol.Interfaces"/>.</param>
         public static bool ImplementsAny(this ITypeSymbol typeSymbol, SpecialType interfaceType1, SpecialType interfaceType2, SpecialType interfaceType3, bool allInterfaces = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             ImmutableArray<INamedTypeSymbol> interfaces = typeSymbol.GetInterfaces(allInterfaces);
@@ -1575,16 +1579,16 @@ namespace Roslynator
         /// <param name="allInterfaces">If true, use <see cref="ITypeSymbol.AllInterfaces"/>, otherwise use <see cref="ITypeSymbol.Interfaces"/>.</param>
         public static bool Implements(this ITypeSymbol typeSymbol, INamedTypeSymbol interfaceSymbol, bool allInterfaces = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
-            if (interfaceSymbol != null)
+            if (interfaceSymbol is not null)
             {
                 ImmutableArray<INamedTypeSymbol> interfaces = typeSymbol.GetInterfaces(allInterfaces);
 
                 for (int i = 0; i < interfaces.Length; i++)
                 {
-                    if (interfaces[i].Equals(interfaceSymbol))
+                    if (SymbolEqualityComparer.Default.Equals(interfaces[i], interfaceSymbol))
                         return true;
                 }
             }
@@ -1600,7 +1604,7 @@ namespace Roslynator
         /// <param name="allInterfaces"></param>
         public static bool Implements(this ITypeSymbol typeSymbol, in MetadataName interfaceName, bool allInterfaces = false)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             foreach (INamedTypeSymbol interfaceSymbol in typeSymbol.GetInterfaces(allInterfaces))
@@ -1618,7 +1622,7 @@ namespace Roslynator
         /// <param name="typeSymbol"></param>
         public static bool SupportsExplicitDeclaration(this ITypeSymbol typeSymbol)
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             if (typeSymbol.IsAnonymousType)
@@ -1693,19 +1697,19 @@ namespace Roslynator
         /// <param name="includeInterfaces"></param>
         public static bool InheritsFrom(this ITypeSymbol type, ITypeSymbol baseType, bool includeInterfaces = false)
         {
-            if (type == null)
+            if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            if (baseType == null)
+            if (baseType is null)
                 return false;
 
-            INamedTypeSymbol t = type.BaseType;
+            INamedTypeSymbol? t = type.BaseType;
 
-            while (t != null)
+            while (t is not null)
             {
                 Debug.Assert(t.TypeKind.Is(TypeKind.Class, TypeKind.Error), t.TypeKind.ToString());
 
-                if (t.OriginalDefinition.Equals(baseType))
+                if (SymbolEqualityComparer.Default.Equals(t.OriginalDefinition, baseType))
                     return true;
 
                 t = t.BaseType;
@@ -1716,7 +1720,7 @@ namespace Roslynator
             {
                 foreach (INamedTypeSymbol interfaceType in type.AllInterfaces)
                 {
-                    if (interfaceType.OriginalDefinition.Equals(baseType))
+                    if (SymbolEqualityComparer.Default.Equals(interfaceType.OriginalDefinition, baseType))
                         return true;
                 }
             }
@@ -1732,12 +1736,12 @@ namespace Roslynator
         /// <param name="includeInterfaces"></param>
         public static bool InheritsFrom(this ITypeSymbol type, in MetadataName baseTypeName, bool includeInterfaces = false)
         {
-            if (type == null)
+            if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            INamedTypeSymbol baseType = type.BaseType;
+            INamedTypeSymbol? baseType = type.BaseType;
 
-            while (baseType != null)
+            while (baseType is not null)
             {
                 if (baseType.HasMetadataName(baseTypeName))
                     return true;
@@ -1765,10 +1769,10 @@ namespace Roslynator
         /// <param name="includeInterfaces"></param>
         public static bool EqualsOrInheritsFrom(this ITypeSymbol type, ITypeSymbol baseType, bool includeInterfaces = false)
         {
-            if (type == null)
+            if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
-            return type.Equals(baseType)
+            return SymbolEqualityComparer.Default.Equals(type, baseType)
                 || InheritsFrom(type, baseType, includeInterfaces);
         }
 
@@ -1780,7 +1784,7 @@ namespace Roslynator
         /// <param name="includeInterfaces"></param>
         public static bool EqualsOrInheritsFrom(this ITypeSymbol type, in MetadataName baseTypeName, bool includeInterfaces = false)
         {
-            if (type == null)
+            if (type is null)
                 throw new ArgumentNullException(nameof(type));
 
             return type.HasMetadataName(baseTypeName)
@@ -1793,9 +1797,9 @@ namespace Roslynator
         /// <typeparam name="TSymbol"></typeparam>
         /// <param name="typeSymbol"></param>
         /// <param name="predicate"></param>
-        public static TSymbol FindMember<TSymbol>(this ITypeSymbol typeSymbol, Func<TSymbol, bool> predicate = null) where TSymbol : ISymbol
+        public static TSymbol? FindMember<TSymbol>(this ITypeSymbol typeSymbol, Func<TSymbol, bool>? predicate = null) where TSymbol : class, ISymbol
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             return FindMemberImpl(typeSymbol.GetMembers(), predicate);
@@ -1808,19 +1812,19 @@ namespace Roslynator
         /// <param name="typeSymbol"></param>
         /// <param name="name"></param>
         /// <param name="predicate"></param>
-        public static TSymbol FindMember<TSymbol>(this ITypeSymbol typeSymbol, string name, Func<TSymbol, bool> predicate = null) where TSymbol : ISymbol
+        public static TSymbol? FindMember<TSymbol>(this ITypeSymbol typeSymbol, string name, Func<TSymbol, bool>? predicate = null) where TSymbol : class, ISymbol
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
             return FindMemberImpl(typeSymbol.GetMembers(name), predicate);
         }
 
-        private static TSymbol FindMemberImpl<TSymbol, TMemberSymbol>(ImmutableArray<TMemberSymbol> members, Func<TSymbol, bool> predicate)
-            where TSymbol : ISymbol
+        private static TSymbol? FindMemberImpl<TSymbol, TMemberSymbol>(ImmutableArray<TMemberSymbol> members, Func<TSymbol, bool>? predicate)
+            where TSymbol : class, ISymbol
             where TMemberSymbol : ISymbol
         {
-            if (predicate != null)
+            if (predicate is not null)
             {
                 foreach (TMemberSymbol symbol in members)
                 {
@@ -1849,12 +1853,12 @@ namespace Roslynator
         /// <typeparam name="TSymbol"></typeparam>
         /// <param name="typeSymbol"></param>
         /// <param name="predicate"></param>
-        internal static bool ContainsMember<TSymbol>(this ITypeSymbol typeSymbol, Func<TSymbol, bool> predicate = null) where TSymbol : ISymbol
+        internal static bool ContainsMember<TSymbol>(this ITypeSymbol typeSymbol, Func<TSymbol, bool>? predicate = null) where TSymbol : class, ISymbol
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
-            return FindMember(typeSymbol, predicate) != null;
+            return FindMember(typeSymbol, predicate) is not null;
         }
 
         /// <summary>
@@ -1864,12 +1868,12 @@ namespace Roslynator
         /// <param name="typeSymbol"></param>
         /// <param name="name"></param>
         /// <param name="predicate"></param>
-        internal static bool ContainsMember<TSymbol>(this ITypeSymbol typeSymbol, string name, Func<TSymbol, bool> predicate = null) where TSymbol : ISymbol
+        internal static bool ContainsMember<TSymbol>(this ITypeSymbol typeSymbol, string name, Func<TSymbol, bool>? predicate = null) where TSymbol : class, ISymbol
         {
-            if (typeSymbol == null)
+            if (typeSymbol is null)
                 throw new ArgumentNullException(nameof(typeSymbol));
 
-            return FindMember(typeSymbol, name, predicate) != null;
+            return FindMember(typeSymbol, name, predicate) is not null;
         }
 
         /// <summary>
@@ -1896,7 +1900,7 @@ namespace Roslynator
         /// Returns true if the type is a reference type or a nullable type.
         /// </summary>
         /// <param name="typeSymbol"></param>
-        public static bool IsReferenceTypeOrNullableType(this ITypeSymbol typeSymbol)
+        public static bool IsReferenceTypeOrNullableType(this ITypeSymbol? typeSymbol)
         {
             return typeSymbol?.IsReferenceType == true
                 || typeSymbol.IsNullableType();
@@ -1906,7 +1910,7 @@ namespace Roslynator
         /// Returns true if the type is a nullable type.
         /// </summary>
         /// <param name="typeSymbol"></param>
-        public static bool IsNullableType(this ITypeSymbol typeSymbol)
+        public static bool IsNullableType(this ITypeSymbol? typeSymbol)
         {
             return typeSymbol?.OriginalDefinition.SpecialType == SpecialType.System_Nullable_T;
         }

@@ -37,7 +37,7 @@ namespace Scriban
 
         public void Add(LogMessage message)
         {
-            if (message == null) throw new ArgumentNullException(nameof(message));
+            if (message is null) throw new ArgumentNullException(nameof(message));
 
             if (message.Type == ParserMessageType.Error)
             {
@@ -49,7 +49,7 @@ namespace Scriban
 
         public void AddRange(IEnumerable<LogMessage> messages)
         {
-            if (messages == null) throw new ArgumentNullException(nameof(messages));
+            if (messages is null) throw new ArgumentNullException(nameof(messages));
             foreach (var message in messages)
             {
                 Add(message);

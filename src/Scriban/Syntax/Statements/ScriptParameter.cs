@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using Scriban.Parsing;
@@ -16,29 +16,29 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptParameter : ScriptNode
     {
-        private ScriptVariable _name;
-        private ScriptToken _equalOrTripleDotToken;
-        private ScriptLiteral _defaultValue;
+        private ScriptVariable? _name;
+        private ScriptToken? _equalOrTripleDotToken;
+        private ScriptLiteral? _defaultValue;
 
-        public ScriptVariable Name
+        public ScriptVariable? Name
         {
             get => _name;
-            set => ParentToThis(ref _name, value);
+            set => ParentToThisNullable(ref _name, value);
         }
 
-        public ScriptToken EqualOrTripleDotToken
+        public ScriptToken? EqualOrTripleDotToken
         {
             get => _equalOrTripleDotToken;
-            set => ParentToThis(ref _equalOrTripleDotToken, value);
+            set => ParentToThisNullable(ref _equalOrTripleDotToken, value);
         }
 
-        public ScriptLiteral DefaultValue
+        public ScriptLiteral? DefaultValue
         {
             get => _defaultValue;
-            set => ParentToThis(ref _defaultValue, value);
+            set => ParentToThisNullable(ref _defaultValue, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             throw new InvalidOperationException("A parameter should not be evaluated directly");
         }
@@ -46,10 +46,10 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(Name);
-            if (EqualOrTripleDotToken != null)
+            if (EqualOrTripleDotToken is not null)
             {
                 printer.Write(EqualOrTripleDotToken);
-                if (EqualOrTripleDotToken.TokenType == TokenType.Equal)
+                if (EqualOrTripleDotToken.TokenType == TokenType.Equal && DefaultValue is not null)
                 {
                     printer.Write(DefaultValue);
                 }

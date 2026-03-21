@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Runtime;
 using System.Collections.Generic;
@@ -17,13 +17,12 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptCaptureStatement : ScriptStatement
     {
-        private ScriptExpression _target;
-        private ScriptBlockStatement _body;
-        private ScriptKeyword _captureKeyword;
-
+        private ScriptExpression? _target;
+        private ScriptBlockStatement? _body;
+        private ScriptKeyword _captureKeyword = ScriptKeyword.Capture();
         public ScriptCaptureStatement()
         {
-            CaptureKeyword = ScriptKeyword.Capture();
+            _captureKeyword.Parent = this;
         }
 
         public ScriptKeyword CaptureKeyword
@@ -32,30 +31,37 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _captureKeyword, value);
         }
 
-        public ScriptExpression Target
+        public ScriptExpression? Target
         {
             get => _target;
-            set => ParentToThis(ref _target, value);
+            set => ParentToThisNullable(ref _target, value);
         }
 
-        public ScriptBlockStatement Body
+        public ScriptBlockStatement? Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set => ParentToThisNullable(ref _body, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            var body = Body;
+            var target = Target;
+            if (body is null || target is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid capture statement. Target and body are required.");
+            }
+
             // unit test: 230-capture-statement.txt
             context.PushOutput();
             try
             {
-                context.Evaluate(Body);
+                context.Evaluate(body);
             }
             finally
             {
                 var result = context.PopOutput();
-                context.SetValue(Target, result);
+                context.SetValue(target, result);
             }
             return null;
         }
@@ -63,8 +69,14 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(CaptureKeyword).ExpectSpace();
-            printer.Write(Target).ExpectEos();
-            printer.Write(Body).ExpectEos();
+            if (Target is not null)
+            {
+                printer.Write(Target).ExpectEos();
+            }
+            if (Body is not null)
+            {
+                printer.Write(Body).ExpectEos();
+            }
         }
     }
 }

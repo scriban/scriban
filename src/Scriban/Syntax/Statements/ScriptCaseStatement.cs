@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -17,12 +17,13 @@ namespace Scriban.Syntax
     partial class ScriptCaseStatement : ScriptConditionStatement
     {
         private ScriptKeyword _caseKeyword;
-        private ScriptExpression _value;
-        private ScriptBlockStatement _body;
+        private ScriptExpression? _value;
+        private ScriptBlockStatement? _body;
 
         public ScriptCaseStatement()
         {
-            CaseKeyword = ScriptKeyword.Case();
+            _caseKeyword = ScriptKeyword.Case();
+            _caseKeyword.Parent = this;
         }
 
         public ScriptKeyword CaseKeyword
@@ -34,20 +35,25 @@ namespace Scriban.Syntax
         /// <summary>
         /// Get or sets the value used to check against When clause.
         /// </summary>
-        public ScriptExpression Value
+        public ScriptExpression? Value
         {
             get => _value;
-            set => ParentToThis(ref _value, value);
+            set => ParentToThisNullable(ref _value, value);
         }
 
-        public ScriptBlockStatement Body
+        public ScriptBlockStatement? Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set => ParentToThisNullable(ref _body, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Value is null || Body is null)
+            {
+                return null;
+            }
+
             var caseValue = context.Evaluate(Value);
             context.PushCase(caseValue);
             try

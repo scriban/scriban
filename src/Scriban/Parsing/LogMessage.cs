@@ -33,7 +33,7 @@ namespace Scriban.Parsing
             builder.Append(" : ");
             builder.Append(Type.ToString().ToLowerInvariant());
             builder.Append(" : ");
-            if (Message != null)
+            if (Message is not null)
             {
                 builder.Append(Message);
             }

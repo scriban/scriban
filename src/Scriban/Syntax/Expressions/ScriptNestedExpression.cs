@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -18,14 +18,13 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptNestedExpression : ScriptExpression, IScriptVariablePath
     {
-        private ScriptExpression _expression;
-        private ScriptToken _openParen;
-        private ScriptToken _closeParen;
-
+        private ScriptExpression? _expression;
+        private ScriptToken _openParen = ScriptToken.OpenParen();
+        private ScriptToken _closeParen = ScriptToken.CloseParen();
         public ScriptNestedExpression()
         {
-            OpenParen = ScriptToken.OpenParen();
-            CloseParen = ScriptToken.CloseParen();
+            _openParen.Parent = this;
+            _closeParen.Parent = this;
         }
 
         public ScriptNestedExpression(ScriptExpression expression) : this()
@@ -35,7 +34,7 @@ namespace Scriban.Syntax
 
         public static ScriptNestedExpression Wrap(ScriptExpression expression, bool transferTrivia = false)
         {
-            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (expression is null) throw new ArgumentNullException(nameof(expression));
             var nested = new ScriptNestedExpression()
                 {
                     Span = expression.Span,
@@ -59,10 +58,10 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _openParen, value);
         }
 
-        public ScriptExpression Expression
+        public ScriptExpression? Expression
         {
             get => _expression;
-            set => ParentToThis(ref _expression, value);
+            set => ParentToThisNullable(ref _expression, value);
         }
 
         public ScriptToken CloseParen
@@ -71,8 +70,13 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _closeParen, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Expression is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid nested expression. Inner expression is required.");
+            }
+
             // A nested expression will reset the pipe arguments for the group
             context.PushPipeArguments();
             try
@@ -81,7 +85,7 @@ namespace Scriban.Syntax
             }
             finally
             {
-                if (context.CurrentPipeArguments != null)
+                if (context.CurrentPipeArguments is not null)
                 {
                     context.PopPipeArguments();
                 }
@@ -91,22 +95,33 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(OpenParen);
-            printer.Write(Expression);
+            if (Expression is not null)
+            {
+                printer.Write(Expression);
+            }
             printer.Write(CloseParen);
         }
-        public object GetValue(TemplateContext context)
+        public object? GetValue(TemplateContext context)
         {
+            if (Expression is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid nested expression. Inner expression is required.");
+            }
             return context.Evaluate(Expression);
         }
 
-        public void SetValue(TemplateContext context, object valueToSet)
+        public void SetValue(TemplateContext context, object? valueToSet)
         {
+            if (Expression is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid nested expression. Inner expression is required.");
+            }
             context.SetValue(Expression, valueToSet);
         }
 
         public string GetFirstPath()
         {
-            return (Expression as IScriptVariablePath)?.GetFirstPath();
+            return (Expression as IScriptVariablePath)?.GetFirstPath() ?? string.Empty;
         }
     }
 }

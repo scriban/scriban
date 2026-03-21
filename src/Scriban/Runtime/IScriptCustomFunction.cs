@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Diagnostics;
@@ -29,7 +29,7 @@ namespace Scriban.Runtime
         /// <param name="arguments">The parameters of the call</param>
         /// <param name="blockStatement">The current block statement this call is made</param>
         /// <returns>The result of the call</returns>
-        object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
+        object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement);
 
 #if !SCRIBAN_NO_ASYNC
         /// <summary>
@@ -40,7 +40,7 @@ namespace Scriban.Runtime
         /// <param name="arguments">The parameters of the call</param>
         /// <param name="blockStatement">The current block statement this call is made</param>
         /// <returns>The result of the call</returns>
-        ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
+        ValueTask<object?> InvokeAsync(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement);
 #endif
     }
 
@@ -107,7 +107,7 @@ namespace Scriban.Runtime
             DefaultValue = null;
         }
 
-        public ScriptParameterInfo(Type parameterType, string name, object defaultValue)
+        public ScriptParameterInfo(Type parameterType, string name, object? defaultValue)
         {
             ParameterType = parameterType;
             Name = name;
@@ -121,14 +121,14 @@ namespace Scriban.Runtime
 
         public readonly bool HasDefaultValue;
 
-        public readonly object DefaultValue;
+        public readonly object? DefaultValue;
 
         public bool Equals(ScriptParameterInfo other)
         {
             return ParameterType == other.ParameterType && Name == other.Name;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is ScriptParameterInfo other && Equals(other);
         }

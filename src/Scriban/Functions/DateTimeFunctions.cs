@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -57,7 +57,7 @@ namespace Scriban.Functions
 
         // Code from DotLiquid https://github.com/dotliquid/dotliquid/blob/master/src/DotLiquid/Util/StrFTime.cs
         // Apache License, Version 2.0
-        private static readonly Dictionary<char, (Func<DateTime, CultureInfo, string>, string)> Formats = new Dictionary<char, (Func<DateTime, CultureInfo, string>, string)>
+        private static readonly Dictionary<char, (Func<DateTime, CultureInfo, string>, string?)> Formats = new Dictionary<char, (Func<DateTime, CultureInfo, string>, string?)>
         {
             { 'a', ((dateTime, cultureInfo) => dateTime.ToString("ddd", cultureInfo), "ddd") },
             { 'A', ((dateTime, cultureInfo) => dateTime.ToString("dddd", cultureInfo), "dddd") },
@@ -107,7 +107,8 @@ namespace Scriban.Functions
         /// </summary>
         public DateTimeFunctions()
         {
-            this["default_format"] = DefaultFormat;
+            SetValue("default_format", DefaultFormat, true);
+            SetValue(FormatKey, DefaultFormat, false);
             Format = DefaultFormat;
             CreateImportFunctions();
         }
@@ -237,10 +238,10 @@ namespace Scriban.Functions
 
         private static readonly Regex PlusFollowedByNumberRegex = new Regex(@"\+\d");
 
-        private static string ParseCustomFormat(CultureInfo culture, string pattern, out CultureInfo cultureOverride)
+        private static string? ParseCustomFormat(CultureInfo culture, string? pattern, out CultureInfo cultureOverride)
         {
             cultureOverride = culture;
-            if (pattern == null)
+            if (pattern is null)
             {
                 return null;
             }
@@ -263,7 +264,7 @@ namespace Scriban.Functions
 
                     if (Formats.TryGetValue(format, out var formatterPair))
                     {
-                        if (formatterPair.Item2 == null)
+                        if (formatterPair.Item2 is null)
                         {
                             throw new ArgumentException($"The pattern %{format} is not supported for the parse method", nameof(pattern));
                         }
@@ -283,7 +284,7 @@ namespace Scriban.Functions
             return builder.ToString();
         }
 
-        private static DateTime? ParseDateTime(TemplateContext context, string text, string pattern = null, string culture = null)
+        private static DateTime? ParseDateTime(TemplateContext context, string text, string? pattern = null, string? culture = null)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -294,11 +295,11 @@ namespace Scriban.Functions
             bool hasZ = text.TrimEnd().EndsWith("Z", StringComparison.OrdinalIgnoreCase);
             var dateTimeStyle = hasOffset || hasZ ? DateTimeStyles.None : DateTimeStyles.AssumeLocal;
 
-            var currentCulture = (culture != null ? CultureInfo.GetCultureInfo(culture) : context.CurrentCulture) ?? context.CurrentCulture;
-            string customFormat = ParseCustomFormat(currentCulture, pattern, out var inputCulture);
+            var currentCulture = (culture is not null ? CultureInfo.GetCultureInfo(culture) : context.CurrentCulture) ?? context.CurrentCulture;
+            var customFormat = ParseCustomFormat(currentCulture, pattern, out var inputCulture);
 
             var result = new DateTime();
-            if (customFormat != null)
+            if (customFormat is not null)
             {
                 if (hasOffset || hasZ)
                 {
@@ -351,7 +352,7 @@ namespace Scriban.Functions
         /// 20 Jan 2022
         /// ```
         /// </remarks>
-        public static DateTime? Parse(TemplateContext context, string text, string pattern = null, string culture = null)
+        public static DateTime? Parse(TemplateContext context, string text, string? pattern = null, string? culture = null)
         {
             return ParseDateTime(context, text, pattern, culture);
         }
@@ -380,7 +381,7 @@ namespace Scriban.Functions
         /// 2025-03-01
         /// ```
         /// </remarks>
-        public static string ParseToString(TemplateContext context, string text, string output_pattern = null, string output_culture = null, string input_pattern = null, string input_culture = null)
+        public static string? ParseToString(TemplateContext context, string text, string? output_pattern = null, string? output_culture = null, string? input_pattern = null, string? input_culture = null)
         {
             var datetime = ParseDateTime(context, text, input_pattern, input_culture);
             if (datetime is null)
@@ -391,8 +392,8 @@ namespace Scriban.Functions
             {
                 return datetime.Value.ToString(DefaultFormat);
             }
-            var defaultOutputCulture = (output_culture != null ? CultureInfo.GetCultureInfo(output_culture) : context.CurrentCulture) ?? context.CurrentCulture;
-            string outputCustomFormat = ParseCustomFormat(defaultOutputCulture, output_pattern, out var outputCulture);
+            var defaultOutputCulture = (output_culture is not null ? CultureInfo.GetCultureInfo(output_culture) : context.CurrentCulture) ?? context.CurrentCulture;
+            var outputCustomFormat = ParseCustomFormat(defaultOutputCulture, output_pattern, out var outputCulture);
 
             return datetime.Value.ToString(outputCustomFormat, outputCulture);
         }
@@ -482,9 +483,9 @@ namespace Scriban.Functions
         /// <returns>
         /// A <see cref="System.String" /> that represents this instance.
         /// </returns>
-        public virtual string ToString(DateTime? datetime, string pattern, CultureInfo culture)
+        public virtual string? ToString(DateTime? datetime, string pattern, CultureInfo culture)
         {
-            if (pattern == null) throw new ArgumentNullException(nameof(pattern));
+            if (pattern is null) throw new ArgumentNullException(nameof(pattern));
             if (!datetime.HasValue) return null;
 
             // If pattern is %g only, use the default date
@@ -531,8 +532,9 @@ namespace Scriban.Functions
 
         }
 
-        public virtual object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public virtual object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
+            var callerSpan = callerContext?.Span ?? context.CurrentSpan;
             // If we access `date` without any parameter, it calls by default the "parse" function
             // otherwise it is the 'date' object itself
             switch (arguments.Count)
@@ -540,9 +542,10 @@ namespace Scriban.Functions
                 case 0:
                     return this;
                 case 1:
-                    return ParseDateTime(context, context.ObjectToString(arguments[0]));
+                    var text = context.ObjectToString(arguments[0]);
+                    return text is null ? null : ParseDateTime(context, text);
                 default:
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid number of parameters `{arguments.Count}` for `date` object/function.");
+                    throw new ScriptRuntimeException(callerSpan, $"Invalid number of parameters `{arguments.Count}` for `date` object/function.");
             }
         }
 
@@ -562,9 +565,9 @@ namespace Scriban.Functions
         }
 
 #if !SCRIBAN_NO_ASYNC
-        public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public ValueTask<object?> InvokeAsync(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
-            return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));
+            return new ValueTask<object?>(Invoke(context, callerContext, arguments, blockStatement));
         }
 #endif
 
@@ -573,12 +576,12 @@ namespace Scriban.Functions
         {
             // This function is very specific, as it is calling a member function of this instance
             // in order to retrieve the `date.format`
-            this.Import("to_string", new Func<TemplateContext, DateTime?, string, string, string>(ToStringTrampoline));
+            SetValue("to_string", DynamicCustomFunction.Create(new Func<TemplateContext, DateTime?, string, string?, string?>(ToStringTrampoline)), true);
         }
 
-        private string ToStringTrampoline(TemplateContext context, DateTime? date, string pattern, string culture = null)
+        private string? ToStringTrampoline(TemplateContext context, DateTime? date, string pattern, string? culture = null)
         {
-            var cultureObject = culture != null ? CultureInfo.GetCultureInfo(culture) : null;
+            var cultureObject = culture is not null ? CultureInfo.GetCultureInfo(culture) : null;
             return ToString(date, pattern, cultureObject ?? context.CurrentCulture);
         }
     }

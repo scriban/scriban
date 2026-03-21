@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Diagnostics;
@@ -28,11 +28,11 @@ namespace Scriban.Syntax
             Context = null;
         }
 
-        public ScriptFormatterOptions(TemplateContext context, ScriptLang language, ScriptFormatterFlags flags)
+        public ScriptFormatterOptions(TemplateContext? context, ScriptLang language, ScriptFormatterFlags flags)
         {
             Language = language;
             Flags = flags;
-            Context = context == null && language == ScriptLang.Scientific ? throw new ArgumentNullException(nameof(context), "Context cannot be null with scientific language.") : context;
+            Context = context is null && language == ScriptLang.Scientific ? throw new ArgumentNullException(nameof(context), "Context cannot be null with scientific language.") : context;
         }
 
         /// <summary>
@@ -48,6 +48,6 @@ namespace Scriban.Syntax
         /// <summary>
         /// Defines the context used for formatting scientific scripts.
         /// </summary>
-        public readonly TemplateContext Context;
+        public readonly TemplateContext? Context;
     }
 }

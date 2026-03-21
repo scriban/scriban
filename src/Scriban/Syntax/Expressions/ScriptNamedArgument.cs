@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -15,49 +15,51 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptNamedArgument : ScriptExpression
     {
-        private ScriptVariable _name;
-        private ScriptToken _colonToken;
-        private ScriptExpression _value;
-
+        private ScriptVariable? _name;
+        private ScriptToken? _colonToken;
+        private ScriptExpression? _value;
         public ScriptNamedArgument()
         {
         }
 
-        public ScriptVariable Name
+        public ScriptVariable? Name
         {
             get => _name;
-            set => ParentToThis(ref _name, value);
+            set => ParentToThisNullable(ref _name, value);
         }
 
-        public ScriptToken ColonToken
+        public ScriptToken? ColonToken
         {
             get => _colonToken;
-            set => ParentToThis(ref _colonToken, value);
+            set => ParentToThisNullable(ref _colonToken, value);
         }
 
-        public ScriptExpression Value
+        public ScriptExpression? Value
         {
             get => _value;
-            set => ParentToThis(ref _value, value);
+            set => ParentToThisNullable(ref _value, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
-            if (Value != null) return context.Evaluate(Value);
+            if (Value is not null) return context.Evaluate(Value);
             return true;
         }
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            if (Name == null)
+            if (Name is null)
             {
                 return;
             }
             printer.Write(Name);
 
-            if (Value != null)
+            if (Value is not null)
             {
-                printer.Write(ColonToken);
+                if (ColonToken is not null)
+                {
+                    printer.Write(ColonToken);
+                }
                 printer.Write(Value);
             }
         }

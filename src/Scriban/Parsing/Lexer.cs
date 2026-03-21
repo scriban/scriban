@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -32,7 +32,7 @@ namespace Scriban.Parsing
         private char c;
         private BlockType _blockType;
         private bool _isLiquidTagBlock;
-        private List<LogMessage> _errors;
+        private List<LogMessage>? _errors;
         private int _openBraceCount;
         private int _escapeRawCharCount;
         private bool _isExpectingFrontMatter;
@@ -63,13 +63,13 @@ namespace Scriban.Parsing
         /// <param name="options">The options for the lexer</param>
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="System.ArgumentNullException"></exception>
-        public Lexer(string text, string sourcePath = null, LexerOptions? options = null)
+        public Lexer(string text, string? sourcePath = null, LexerOptions? options = null)
         {
             Text = text ?? throw new ArgumentNullException(nameof(text));
 
             // Setup options
             var localOptions = options ?? LexerOptions.Default;
-            if (localOptions.FrontMatterMarker == null)
+            if (localOptions.FrontMatterMarker is null)
             {
                 localOptions.FrontMatterMarker = LexerOptions.DefaultFrontMatterMarker;
             }
@@ -112,7 +112,7 @@ namespace Scriban.Parsing
         /// <summary>
         /// Gets a boolean indicating whether this lexer has errors.
         /// </summary>
-        public bool HasErrors => _errors != null && _errors.Count > 0;
+        public bool HasErrors => _errors is not null && _errors.Count > 0;
 
         /// <summary>
         /// Gets error messages.
@@ -1098,7 +1098,7 @@ namespace Scriban.Parsing
 
         private bool TryMatchCustomToken(TextPosition start)
         {
-            if (_tryMatchCustomToken != null)
+            if (_tryMatchCustomToken is not null)
             {
                 if (_tryMatchCustomToken(Text, _position, out var matchLength, out var matchTokenType))
                 {
@@ -1904,7 +1904,7 @@ namespace Scriban.Parsing
         private void AddError(string message, TextPosition start, TextPosition end)
         {
             _token = new Token(TokenType.Invalid, start, end);
-            if (_errors == null)
+            if (_errors is null)
             {
                 _errors = new List<LogMessage>();
             }

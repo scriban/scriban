@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Runtime;
 using System.Collections.Generic;
@@ -18,11 +18,12 @@ namespace Scriban.Syntax
     partial class ScriptImportStatement : ScriptStatement
     {
         private ScriptKeyword _importKeyword;
-        private ScriptExpression _expression;
+        private ScriptExpression? _expression;
 
         public ScriptImportStatement()
         {
-            ImportKeyword = ScriptKeyword.Import();
+            _importKeyword = ScriptKeyword.Import();
+            _importKeyword.Parent = this;
         }
 
         public ScriptKeyword ImportKeyword
@@ -31,19 +32,25 @@ namespace Scriban.Syntax
             set => ParentToThis(ref  _importKeyword, value);
         }
 
-        public ScriptExpression Expression
+        public ScriptExpression? Expression
         {
             get => _expression;
-            set => ParentToThis(ref _expression, value);
+            set => ParentToThisNullable(ref _expression, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
-            var value = context.Evaluate(Expression);
-            if (value == null)
+            if (Expression is null)
             {
                 return null;
             }
+
+            var value = context.Evaluate(Expression);
+            if (value is null)
+            {
+                return null;
+            }
+
             context.Import(Expression.Span, value);
             return null;
         }

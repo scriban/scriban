@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -34,30 +34,30 @@ namespace Scriban.Runtime.Accessors
             return false;
         }
 
-        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
+        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object? value)
         {
             value = null;
             return false;
         }
 
-        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
+        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object? value)
         {
             return false;
         }
 
-        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object? value)
         {
             value = null;
             return false;
         }
 
-        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object? value)
         {
             return false;
         }
 
         public bool HasIndexer => false;
 
-        public Type IndexType => null;
+        public Type? IndexType => null;
     }
 }

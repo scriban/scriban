@@ -12,22 +12,22 @@ namespace Scriban.Parsing
 #else
     internal
 #endif
-    struct ParserOptions
+    class ParserOptions
     {
         /// <summary>
         /// Sets the depth limit of nested statements (e.g nested if/else) to disallow deep/potential stack-overflow exploits. Default is 250.
         /// </summary>
-        public int? ExpressionDepthLimit { get; set; }
+        public int ExpressionDepthLimit { get; init; } = 250;
 
         /// <summary>
         /// <c>true</c> to convert liquid builtin function calls to scriban function calls (e.g abs = math.abs, downcase = string.downcase)
         /// </summary>
-        public bool LiquidFunctionsToScriban { get; set; }
+        public bool LiquidFunctionsToScriban { get; init; }
 
         /// <summary>
         /// Parse float as <see cref="decimal"/> instead of <see cref="double"/>.
         /// If the number cannot be represented to a decimal, it will fall back to a double.
         /// </summary>
-        public bool ParseFloatAsDecimal { get; set; }
+        public bool ParseFloatAsDecimal { get; init; }
     }
 }

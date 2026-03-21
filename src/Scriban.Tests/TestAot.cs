@@ -42,9 +42,9 @@ namespace Scriban.Tests
             var output = new StringBuilder();
             var errors = new StringBuilder();
 
-            using var process = Process.Start(psi);
-            process.OutputDataReceived += (_, e) => { if (e.Data != null) output.AppendLine(e.Data); };
-            process.ErrorDataReceived += (_, e) => { if (e.Data != null) errors.AppendLine(e.Data); };
+            using var process = Process.Start(psi) ?? throw new AssertionException("Expected process to start.");
+            process.OutputDataReceived += (_, e) => { if (e.Data is not null) output.AppendLine(e.Data); };
+            process.ErrorDataReceived += (_, e) => { if (e.Data is not null) errors.AppendLine(e.Data); };
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 

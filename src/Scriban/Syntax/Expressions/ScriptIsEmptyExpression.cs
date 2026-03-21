@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Runtime;
 using System.Collections.Generic;
@@ -17,11 +17,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptIsEmptyExpression: ScriptMemberExpression, IScriptVariablePath
     {
-        private ScriptToken _questionToken;
-
+        private ScriptToken _questionToken = ScriptToken.Question();
         public ScriptIsEmptyExpression()
         {
-            QuestionToken = ScriptToken.Question();
+            _questionToken.Parent = this;
         }
 
         public ScriptToken QuestionToken
@@ -30,7 +29,7 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _questionToken, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return context.GetValue(this);
         }
@@ -46,27 +45,33 @@ namespace Scriban.Syntax
             return false;
         }
 
-        public override object GetValue(TemplateContext context)
+        public override object? GetValue(TemplateContext context)
         {
             var targetObject = GetTargetObject(context, false);
             return context.IsEmpty(Span, targetObject);
         }
 
-        public override void SetValue(TemplateContext context, object valueToSet)
+        public override void SetValue(TemplateContext context, object? valueToSet)
         {
             throw new ScriptRuntimeException(Span, $"The `.empty?` property cannot be set");
         }
 
         public override string GetFirstPath()
         {
-            return (Target as IScriptVariablePath)?.GetFirstPath();
+            return (Target as IScriptVariablePath)?.GetFirstPath() ?? string.Empty;
         }
 
-        private object GetTargetObject(TemplateContext context, bool isSet)
+        private object? GetTargetObject(TemplateContext context, bool isSet)
         {
-            var targetObject = context.GetValue(Target);
+            var target = Target;
+            if (target is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid `.empty?` expression. Target is required.");
+            }
 
-            if (targetObject == null)
+            var targetObject = context.GetValue(target);
+
+            if (targetObject is null)
             {
                 if (isSet || !context.EnableRelaxedMemberAccess)
                 {

@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -36,9 +36,9 @@ namespace Scriban.Functions
             ((ScriptObject)Default.Clone(false)).CopyTo(this);
         }
 
-        public static bool TryLiquidToScriban(string liquidBuiltin, out string target, out string member)
+        public static bool TryLiquidToScriban(string liquidBuiltin, out string? target, out string? member)
         {
-            if (liquidBuiltin == null) throw new ArgumentNullException(nameof(liquidBuiltin));
+            if (liquidBuiltin is null) throw new ArgumentNullException(nameof(liquidBuiltin));
 
             target = null;
             member = null;
@@ -103,12 +103,12 @@ namespace Scriban.Functions
             public DefaultBuiltins() : base(50, false)
             {
                 // ReSharper disable CollectionNeverUpdated.Local
-                var math = (ScriptObject)BuiltinFunctions.Default["math"];
-                var str = (ScriptObject)BuiltinFunctions.Default["string"];
-                var array = (ScriptObject)BuiltinFunctions.Default["array"];
-                var date = (ScriptObject)BuiltinFunctions.Default[DateTimeFunctions.DateVariable.Name];
-                var html = (ScriptObject)BuiltinFunctions.Default["html"];
-                var objs = (ScriptObject)BuiltinFunctions.Default["object"];
+                var math = BuiltinFunctions.Default["math"] as ScriptObject ?? throw new InvalidOperationException("Missing builtin `math` object.");
+                var str = BuiltinFunctions.Default["string"] as ScriptObject ?? throw new InvalidOperationException("Missing builtin `string` object.");
+                var array = BuiltinFunctions.Default["array"] as ScriptObject ?? throw new InvalidOperationException("Missing builtin `array` object.");
+                var date = BuiltinFunctions.Default[DateTimeFunctions.DateVariable.Name] as ScriptObject ?? throw new InvalidOperationException("Missing builtin `date` object.");
+                var html = BuiltinFunctions.Default["html"] as ScriptObject ?? throw new InvalidOperationException("Missing builtin `html` object.");
+                var objs = BuiltinFunctions.Default["object"] as ScriptObject ?? throw new InvalidOperationException("Missing builtin `object` object.");
 
                 // NOTE: must be in sync with TryLiquidToScriban
 

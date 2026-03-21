@@ -6,7 +6,7 @@ namespace Scriban.Tests
 {
     class CustomTemplateLoader : ITemplateLoader
     {
-        public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+        public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
         {
             if (templateName == "null")
             {
@@ -16,7 +16,7 @@ namespace Scriban.Tests
             return templateName;
         }
 
-        public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
             switch (templatePath)
             {
@@ -113,20 +113,20 @@ namespace Scriban.Tests
             }
         }
 
-        public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
-            return new ValueTask<string>(Load(context, callerSpan, templatePath));
+            return ValueTask.FromResult(Load(context, callerSpan, templatePath));
         }
     }
 
     class LiquidCustomTemplateLoader : ITemplateLoader
     {
-        public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+        public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
         {
             return templateName;
         }
 
-        public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
             switch (templatePath)
             {
@@ -147,9 +147,9 @@ namespace Scriban.Tests
             }
         }
 
-        public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+        public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
         {
-            return new ValueTask<string>(Load(context, callerSpan, templatePath));
+            return ValueTask.FromResult(Load(context, callerSpan, templatePath));
         }
     }
 }

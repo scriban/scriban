@@ -11,15 +11,15 @@ namespace Roslynator.Text
         private const int DefaultCapacity = 16;
 
         [ThreadStatic]
-        private static StringBuilder _cachedInstance;
+        private static StringBuilder? _cachedInstance;
 
         public static StringBuilder GetInstance(int capacity = DefaultCapacity)
         {
             if (capacity <= MaxSize)
             {
-                StringBuilder sb = _cachedInstance;
+                StringBuilder? sb = _cachedInstance;
 
-                if (sb != null
+                if (sb is not null
                     && capacity <= sb.Capacity)
                 {
                     _cachedInstance = null;

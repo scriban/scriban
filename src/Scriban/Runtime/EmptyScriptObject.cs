@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -46,7 +46,7 @@ namespace Scriban.Runtime
             set { }
         }
 
-        public bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
+        public bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object? value)
         {
             value = null;
             return false;
@@ -57,7 +57,7 @@ namespace Scriban.Runtime
             return false;
         }
 
-        public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+        public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object? value, bool readOnly)
         {
             throw new ScriptRuntimeException(span, "Cannot set a property on the empty object");
         }

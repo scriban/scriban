@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -16,24 +16,25 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptIfStatement : ScriptConditionStatement
     {
-        private ScriptExpression _condition;
-        private ScriptBlockStatement _then;
-        private ScriptConditionStatement _else;
+        private ScriptExpression? _condition;
+        private ScriptBlockStatement? _then;
+        private ScriptConditionStatement? _else;
         private ScriptKeyword _ifKeyword;
-        private ScriptKeyword _elseKeyword;
+        private ScriptKeyword? _elseKeyword;
 
         public ScriptIfStatement()
         {
-            IfKeyword = ScriptKeyword.If();
+            _ifKeyword = ScriptKeyword.If();
+            _ifKeyword.Parent = this;
         }
 
         /// <summary>
         /// Only valid for `else if`
         /// </summary>
-        public ScriptKeyword ElseKeyword
+        public ScriptKeyword? ElseKeyword
         {
             get => _elseKeyword;
-            set => ParentToThis(ref _elseKeyword, value);
+            set => ParentToThisNullable(ref _elseKeyword, value);
         }
 
         public ScriptKeyword IfKeyword
@@ -45,30 +46,37 @@ namespace Scriban.Syntax
         /// <summary>
         /// Get or sets the condition of this if statement.
         /// </summary>
-        public ScriptExpression Condition
+        public ScriptExpression? Condition
         {
             get => _condition;
-            set => ParentToThis(ref _condition, value);
+            set => ParentToThisNullable(ref _condition, value);
         }
 
-        public ScriptBlockStatement Then
+        public ScriptBlockStatement? Then
         {
             get => _then;
-            set => ParentToThis(ref _then, value);
+            set => ParentToThisNullable(ref _then, value);
         }
 
-        public ScriptConditionStatement Else
+        public ScriptConditionStatement? Else
         {
             get => _else;
-            set => ParentToThis(ref _else, value);
+            set => ParentToThisNullable(ref _else, value);
         }
 
-        public bool IsElseIf => ElseKeyword != null;
+        public bool IsElseIf => ElseKeyword is not null;
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Condition is null)
+            {
+                return null;
+            }
+
             var conditionValue = context.ToBool(Condition.Span, context.Evaluate(Condition));
-            return conditionValue ? context.Evaluate(Then) : context.Evaluate(Else);
+            return conditionValue
+                ? Then is null ? null : context.Evaluate(Then)
+                : Else is null ? null : context.Evaluate(Else);
         }
 
         public override void PrintTo(ScriptPrinter printer)

@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Globalization;
@@ -44,9 +44,9 @@ namespace Scriban.Functions
         /// 5
         /// ```
         /// </remarks>
-        public static object Abs(TemplateContext context, SourceSpan span, object value)
+        public static object? Abs(TemplateContext context, SourceSpan span, object? value)
         {
-            if (value == null)
+            if (value is null)
             {
                 return null;
             }
@@ -129,7 +129,7 @@ namespace Scriban.Functions
         /// 4
         /// ```
         /// </remarks>
-        public static object DividedBy(TemplateContext context, SourceSpan span, double value, object divisor)
+        public static object? DividedBy(TemplateContext context, SourceSpan span, double value, object divisor)
         {
             var result = ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Divide, value, divisor);
 
@@ -185,19 +185,19 @@ namespace Scriban.Functions
         /// 00FF
         /// ```
         /// </remarks>
-        public static string Format(TemplateContext context, SourceSpan span, object value, string format, string culture = null)
+        public static string Format(TemplateContext context, SourceSpan span, object value, string format, string? culture = null)
         {
-            if (value == null)
+            if (value is null)
             {
                 return string.Empty;
             }
             format = format ?? string.Empty;
             var formattable = value as IFormattable;
-            if (!IsNumber(value) || formattable == null)
+            if (!IsNumber(value) || formattable is null)
             {
                 throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable number");
             }
-            return formattable.ToString(format, culture != null ? new CultureInfo(culture) : context.CurrentCulture);
+            return formattable.ToString(format, culture is not null ? new CultureInfo(culture) : context.CurrentCulture);
         }
 
         /// <summary>
@@ -247,7 +247,7 @@ namespace Scriban.Functions
         /// 250
         /// ```
         /// </remarks>
-        public static object Minus(TemplateContext context, SourceSpan span, object value, object with)
+        public static object? Minus(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Subtract, value, with);
         }
@@ -268,7 +268,7 @@ namespace Scriban.Functions
         /// 1
         /// ```
         /// </remarks>
-        public static object Modulo(TemplateContext context, SourceSpan span, object value, object with)
+        public static object? Modulo(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Modulus, value, with);
         }
@@ -289,7 +289,7 @@ namespace Scriban.Functions
         /// 3
         /// ```
         /// </remarks>
-        public static object Plus(TemplateContext context, SourceSpan span, object value, object with)
+        public static object? Plus(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Add, value, with);
         }
@@ -333,7 +333,7 @@ namespace Scriban.Functions
         /// 6
         /// ```
         /// </remarks>
-        public static object Times(TemplateContext context, SourceSpan span, object value, object with)
+        public static object? Times(TemplateContext context, SourceSpan span, object value, object with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Multiply, value, with);
         }

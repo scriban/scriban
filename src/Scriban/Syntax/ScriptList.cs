@@ -5,6 +5,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 using Scriban.Helpers;
 
@@ -79,15 +80,15 @@ namespace Scriban.Syntax
         /// <param name="node">Node to add to this list</param>
         public void Add(TScriptNode node)
         {
-            if (node == null) throw new ArgumentNullException(nameof(node));
-            if (node.Parent != null) throw ThrowHelper.GetExpectingNoParentException();
+            if (node is null) throw new ArgumentNullException(nameof(node));
+            if (node.Parent is not null) throw ThrowHelper.GetExpectingNoParentException();
             _children.Add(node);
             node.Parent = this;
         }
 
         public void AddRange(IEnumerable<TScriptNode> nodes)
         {
-            if (nodes == null) throw new ArgumentNullException(nameof(nodes));
+            if (nodes is null) throw new ArgumentNullException(nameof(nodes));
             foreach (var node in nodes)
             {
                 Add(node);
@@ -97,9 +98,10 @@ namespace Scriban.Syntax
         public void Clear()
         {
             var children = _children;
+            var items = children.Items ?? Array.Empty<ScriptNode>();
             for(int i = 0; i < children.Count; i++)
             {
-                var item = children.Items[i];
+                var item = items[i];
                 item.Parent = null;
             }
             _children.Clear();
@@ -117,7 +119,7 @@ namespace Scriban.Syntax
 
         public bool Remove(TScriptNode item)
         {
-            if (item == null) throw new ArgumentNullException(nameof(item));
+            if (item is null) throw new ArgumentNullException(nameof(item));
             if (_children.Remove(item))
             {
                 item.Parent = null;
@@ -129,7 +131,7 @@ namespace Scriban.Syntax
 
         public bool IsReadOnly => false;
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             throw new InvalidOperationException("A list cannot be evaluated.");
         }
@@ -154,6 +156,7 @@ namespace Scriban.Syntax
             visitor.Visit(this);
         }
 
+        [return: MaybeNull]
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor)
         {
             return visitor.Visit(this);
@@ -165,7 +168,7 @@ namespace Scriban.Syntax
         /// <returns>The enumerator of this list</returns>
         public Enumerator GetEnumerator()
         {
-            return new Enumerator(_children.Items, _children.Count);
+            return new Enumerator(_children.Items ?? Array.Empty<ScriptNode>(), _children.Count);
         }
 
         IEnumerator<TScriptNode> IEnumerable<TScriptNode>.GetEnumerator()
@@ -236,7 +239,7 @@ namespace Scriban.Syntax
         {
             AssertNoParent(item);
             _children.Insert(index, item);
-            if (item != null)
+            if (item is not null)
             {
                 item.Parent = this;
             }
@@ -246,7 +249,7 @@ namespace Scriban.Syntax
         {
             var previous = _children[index];
             _children.RemoveAt(index);
-            if (previous != null) previous.Parent = null;
+            if (previous is not null) previous.Parent = null;
         }
 
         public new TScriptNode this[int index]
@@ -258,13 +261,13 @@ namespace Scriban.Syntax
                 if (previous == value) return;
                 AssertNoParent(value);
                 _children[index] = value;
-                if (previous != null) previous.Parent = null;
+                if (previous is not null) previous.Parent = null;
             }
         }
 
         private void AssertNoParent(ScriptNode node)
         {
-            if (node != null && node.Parent != null) throw new ArgumentException("Cannot add this node which is already attached to another list instance");
+            if (node is not null && node.Parent is not null) throw new ArgumentException("Cannot add this node which is already attached to another list instance");
         }
 
         internal class DebugListView

@@ -144,7 +144,8 @@ foo = (do; ret 'fo'; end) + (do; ret 'o'; end)
 
         private static string Format(Template script, ScriptFormatterFlags flags)
         {
-            var newScript = script.Page.Format(new ScriptFormatterOptions(flags));
+            var page = script.Page ?? throw new AssertionException("Expected parsed template page to be available.");
+            var newScript = page.Format(new ScriptFormatterOptions(flags));
             var result = newScript.ToString();
             return result;
         }

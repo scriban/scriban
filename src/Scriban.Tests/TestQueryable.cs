@@ -11,11 +11,16 @@ namespace Scriban.Tests
 {
     public class TestQueryable
     {
+        private static IScriptObject GetGlobal(TemplateContext context)
+        {
+            return context.CurrentGlobal ?? throw new AssertionException("Expected a current global script object.");
+        }
+
         [Test]
         public void TestQueryableAll ()
         {
             var context = new TemplateContext();
-                context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -31,7 +36,7 @@ end
         public void TestQueryableOffset()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data offset:2
@@ -47,7 +52,7 @@ end
         public void TestQueryableLimit()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data limit:2
@@ -63,7 +68,7 @@ end
         public void TestQueryableReversed()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data reversed
@@ -80,7 +85,7 @@ end
         public void TestQueryableIndex()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(5, 5).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(5, 5).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -96,7 +101,7 @@ end
         public void TestQueryableRIndex()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 5).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 5).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -113,7 +118,7 @@ end
         public void TestQueryableFirst()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 4).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 4).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -129,7 +134,7 @@ end
         public void TestQueryableLast()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 5).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 5).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -147,7 +152,7 @@ end
         public void TestQueryableEven()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 4).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 4).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -163,7 +168,7 @@ end
         public void TestQueryableOdd()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 4).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 4).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -179,7 +184,7 @@ end
         public void TestQueryableChanged()
         {
             var context = new TemplateContext();
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => new[] { 0,0,1,1,2 }.AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => new[] { 0,0,1,1,2 }.AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -199,14 +204,14 @@ end
             {
                 LoopLimit = 5
             };
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
 item
 end
 }}");
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
             TextAssert.AreEqual("<input>(2,1) : error : Exceeding number of iteration limit `5` for loop statement.", exception.Message);
 
         }
@@ -219,14 +224,14 @@ end
                 LoopLimit = 5,
                 LoopLimitQueryable = 6,
             };
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
 item
 end
 }}");
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
             TextAssert.AreEqual("<input>(2,1) : error : Exceeding number of iteration limit `6` for loop statement.", exception.Message);
 
         }
@@ -239,7 +244,7 @@ end
                 LoopLimit = 5,
                 LoopLimitQueryable = 0,
             };
-            context.CurrentGlobal.Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
+            GetGlobal(context).Import("data", new Func<IQueryable<int>>(() => Enumerable.Range(0, 10).AsQueryable()));
 
             var template = Template.Parse(@"{{
 for item in data
@@ -266,7 +271,7 @@ end
 
             var template = Template.Parse("{{ data | array.size }}");
 
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context)) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
 
             TextAssert.AreEqual("<input>(1,11) : error : Exceeding number of iteration limit `6` for internal iteration.", exception.Message);
         }

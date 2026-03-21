@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -26,21 +26,28 @@ namespace Scriban.Functions
         {
         }
 
-        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
+            var callerSpan = callerContext?.Span ?? context.CurrentSpan;
+            var resolvedCallerContext = callerContext ?? context.CurrentNode;
             if (arguments.Count == 0)
             {
-                throw new ScriptRuntimeException(callerContext.Span, "Expecting at least the name of the template to include for the <include> function");
+                throw new ScriptRuntimeException(callerSpan, "Expecting at least the name of the template to include for the <include> function");
             }
 
             var templateName = context.ObjectToString(arguments[0]);
-            var templatePath = context.GetTemplatePathFromName(templateName, callerContext);
+            if (resolvedCallerContext is null)
+            {
+                throw new ScriptRuntimeException(callerSpan, "Unable to resolve the include caller context.");
+            }
+
+            var templatePath = context.GetTemplatePathFromName(templateName, resolvedCallerContext);
             // liquid compatibility
-            if (templatePath == null) return null;
+            if (templatePath is null) return null;
 
-            Template template = context.GetOrCreateTemplate(templatePath, callerContext);
+            Template template = context.GetOrCreateTemplate(templatePath, resolvedCallerContext);
 
-            return context.RenderTemplate(template, arguments, callerContext);
+            return context.RenderTemplate(template, arguments, resolvedCallerContext);
         }
 
         public int RequiredParameterCount => 1;

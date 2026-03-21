@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ namespace Scriban.Parsing
     partial class Parser
     {
 
-        private void ParseScribanStatement(string identifier, ScriptNode parent, bool parseEndOfStatementAfterEnd, ref ScriptStatement statement, ref bool hasEnd, ref bool nextStatement)
+        private void ParseScribanStatement(string identifier, ScriptNode parent, bool parseEndOfStatementAfterEnd, ref ScriptStatement? statement, ref bool hasEnd, ref bool nextStatement)
         {
             var startToken = Current;
             switch (identifier)
@@ -49,7 +49,10 @@ namespace Scriban.Parsing
                     var whenParent = parent as ScriptConditionStatement;
                     if (parent is ScriptWhenStatement)
                     {
-                        ((ScriptWhenStatement)whenParent).Next = whenStatement;
+                        if (whenParent is ScriptWhenStatement whenParentStatement)
+                        {
+                            whenParentStatement.Next = whenStatement;
+                        }
                     }
                     else if (parent is ScriptCaseStatement)
                     {
@@ -71,11 +74,17 @@ namespace Scriban.Parsing
                     {
                         if (parent is ScriptIfStatement)
                         {
-                            ((ScriptIfStatement)parentCondition).Else = nextCondition;
+                            if (parentCondition is ScriptIfStatement ifParentCondition)
+                            {
+                                ifParentCondition.Else = nextCondition;
+                            }
                         }
                         else
                         {
-                            ((ScriptWhenStatement)parentCondition).Next = nextCondition;
+                            if (parentCondition is ScriptWhenStatement whenParentCondition)
+                            {
+                                whenParentCondition.Next = nextCondition;
+                            }
                         }
                     }
                     else if (parent is ScriptForStatement forStatement)
@@ -266,7 +275,7 @@ namespace Scriban.Parsing
                             var arg = ExpectAndParseVariable(scriptFunction);
                             if (!(arg is ScriptVariableGlobal))
                             {
-                                if (arg == null)
+                                if (arg is null)
                                     break;
                                 LogError(arg.Span, "Expecting only a simple name parameter for a function");
                             }
@@ -325,7 +334,7 @@ namespace Scriban.Parsing
                         }
                     }
 
-                    if (scriptFunction.CloseParen == null)
+                    if (scriptFunction.CloseParen is null)
                     {
                         LogError(Current, "Expecting a closing parenthesis for a function call.");
                     }
@@ -432,8 +441,8 @@ namespace Scriban.Parsing
             // In case of parsing a front matter, we don't want to include any \r\n after the end of the front-matter
             // So we manipulate back the syntax tree for the expected raw statement (if any), otherwise we can early
             // exit.
-            var rawStatement = page.Body.Statements.FirstOrDefault() as ScriptRawStatement;
-            if (rawStatement == null)
+            var rawStatement = page.Body?.Statements.FirstOrDefault() as ScriptRawStatement;
+            if (rawStatement is null)
             {
                 return;
             }

@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -45,20 +45,20 @@ namespace Scriban.Runtime
         protected readonly bool _hasTemplateContext;
         protected readonly bool _hasSpan;
         protected readonly int _optionalParameterCount;
-        protected readonly Type _paramsElementType;
+        protected readonly Type? _paramsElementType;
         protected readonly int _expectedNumberOfParameters;
         protected readonly int _minimumRequiredParameters;
         protected readonly int _firstIndexOfUserParameters;
 
         [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "GetAwaiter is a well-known public method on Task-like types.")]
-        protected DynamicCustomFunction(MethodInfo method, ParameterInfo[] parameters = null)
+        protected DynamicCustomFunction(MethodInfo method, ParameterInfo[]? parameters = null)
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));
             _returnType = method.ReturnType;
 
             Parameters = parameters ?? method.GetParameters();
 #if !SCRIBAN_NO_ASYNC
-            IsAwaitable = method.ReturnType.GetMethod(nameof(Task.GetAwaiter)) != null;
+            IsAwaitable = method.ReturnType.GetMethod(nameof(Task.GetAwaiter)) is not null;
 #endif
 
             _paramsIndex = -1;
@@ -122,16 +122,24 @@ namespace Scriban.Runtime
             {
                 var realIndex = _firstIndexOfUserParameters + i;
                 var parameterInfo = Parameters[realIndex];
-                var parameterType = realIndex == Parameters.Length - 1 && _varParamKind == ScriptVarParamKind.LastParameter ? _paramsElementType : parameterInfo.ParameterType;
+                var parameterType = realIndex == Parameters.Length - 1 && _varParamKind == ScriptVarParamKind.LastParameter
+                    ? _paramsElementType ?? parameterInfo.ParameterType
+                    : parameterInfo.ParameterType;
+                var parameterName = parameterInfo.Name ?? string.Empty;
                 _parameterInfos[i] = parameterInfo.HasDefaultValue
-                    ? new ScriptParameterInfo(parameterType, parameterInfo.Name, parameterInfo.DefaultValue)
-                    : new ScriptParameterInfo(parameterType, parameterInfo.Name);
+                    ? new ScriptParameterInfo(parameterType, parameterName, parameterInfo.DefaultValue)
+                    : new ScriptParameterInfo(parameterType, parameterName);
             }
         }
 
 #if !SCRIBAN_NO_ASYNC
-        protected async ValueTask<object> ConfigureAwait(object result)
+        protected async ValueTask<object?> ConfigureAwait(object? result)
         {
+            if (result is null)
+            {
+                return null;
+            }
+
             switch (result)
             {
                 case Task<object> taskObj:
@@ -148,7 +156,7 @@ namespace Scriban.Runtime
             for (int j = 0; j < Parameters.Length; j++)
             {
                 var arg = Parameters[j];
-                if (arg.Name == namedArg.Name.Name)
+                if (arg.Name == namedArg.Name?.Name)
                 {
                     return new ArgumentValue(j, arg.ParameterType, context.Evaluate(namedArg));
                 }
@@ -156,7 +164,7 @@ namespace Scriban.Runtime
             throw new ScriptRuntimeException(callerContext.Span, $"Invalid argument `{namedArg.Name}` not found for function `{callerContext}`");
         }
 
-        public abstract object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement);
+        public abstract object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement);
 
         public int RequiredParameterCount => _minimumRequiredParameters;
 
@@ -169,7 +177,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Get or set an object tag for this instance.
         /// </summary>
-        public object Tag { get; set; }
+        public object? Tag { get; set; }
 
         public ScriptParameterInfo GetParameterInfo(int index)
         {
@@ -189,11 +197,194 @@ namespace Scriban.Runtime
         }
 
 #if !SCRIBAN_NO_ASYNC
-        public virtual ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public virtual ValueTask<object?> InvokeAsync(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
-            return new ValueTask<object>(Invoke(context, callerContext, arguments, blockStatement));
+            return new ValueTask<object?>(Invoke(context, callerContext, arguments, blockStatement));
         }
 #endif
+
+        protected T ConvertReferenceArgument<T>(TemplateContext context, SourceSpan span, object? value, int parameterIndex)
+            where T : class
+        {
+            var converted = ConvertArgument(context, span, value, typeof(T), parameterIndex);
+            if (converted is null)
+            {
+                var realParameterIndex = _firstIndexOfUserParameters + parameterIndex;
+                var parameterName = realParameterIndex < Parameters.Length
+                    ? Parameters[realParameterIndex].Name ?? $"arg{parameterIndex}"
+                    : $"arg{parameterIndex}";
+                throw new ScriptRuntimeException(span, $"Argument `{parameterName}` cannot be null for function `{Method.Name}`.");
+            }
+
+            return (T)converted;
+        }
+
+        protected T? ConvertNullableReferenceArgument<T>(TemplateContext context, SourceSpan span, object? value, int parameterIndex)
+            where T : class
+        {
+            return (T?)ConvertArgument(context, span, value, typeof(T), parameterIndex);
+        }
+
+        protected T ConvertStructArgument<T>(TemplateContext context, SourceSpan span, object? value, int parameterIndex)
+            where T : struct
+        {
+            var converted = ConvertArgument(context, span, value, typeof(T), parameterIndex);
+            if (converted is null)
+            {
+                return default;
+            }
+
+            return (T)converted;
+        }
+
+        [return: MaybeNull]
+        protected T ConvertGenericArgument<T>(TemplateContext context, SourceSpan span, object? value, int parameterIndex)
+        {
+            var converted = ConvertArgument(context, span, value, typeof(T), parameterIndex);
+            if (converted is null)
+            {
+                return default;
+            }
+
+            return (T)converted;
+        }
+
+        protected object? ConvertArgument(TemplateContext context, SourceSpan span, object? value, Type destinationType, int parameterIndex)
+        {
+            var converted = context.ToObject(span, value, destinationType);
+            var realParameterIndex = _firstIndexOfUserParameters + parameterIndex;
+            if (converted is null && realParameterIndex < Parameters.Length && !CanAcceptNull(Parameters[realParameterIndex]))
+            {
+                var parameter = Parameters[realParameterIndex];
+                var parameterName = parameter.Name ?? $"arg{parameterIndex}";
+                throw new ScriptRuntimeException(span, $"Argument `{parameterName}` cannot be null for function `{Method.Name}`.");
+            }
+
+            return converted;
+        }
+
+        protected static void AddBuiltinFunctionDelegate(MethodInfo? method, Func<MethodInfo, DynamicCustomFunction> factory)
+        {
+            if (factory is null) throw new ArgumentNullException(nameof(factory));
+            if (method is null)
+            {
+                throw new InvalidOperationException("Unable to resolve a generated builtin method.");
+            }
+
+            BuiltinFunctionDelegates.Add(method, factory);
+        }
+
+        private static bool CanAcceptNull(ParameterInfo parameter)
+        {
+            var parameterType = parameter.ParameterType;
+            if (Nullable.GetUnderlyingType(parameterType) is not null)
+            {
+                return true;
+            }
+
+            if (parameterType.IsValueType)
+            {
+                return false;
+            }
+
+            return HasNullableMetadata(parameter)
+                   || HasNullableContext(parameter.Member)
+                   || HasNullableContext(parameter.Member.DeclaringType);
+        }
+
+        private static bool HasNullableMetadata(ParameterInfo provider)
+        {
+            foreach (var attribute in provider.GetCustomAttributesData())
+            {
+                if (attribute.AttributeType.FullName != "System.Runtime.CompilerServices.NullableAttribute")
+                {
+                    continue;
+                }
+
+                if (TryGetNullableFlag(attribute, out var flag))
+                {
+                    return flag == 2;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasNullableContext(MemberInfo? provider)
+        {
+            if (provider is null)
+            {
+                return false;
+            }
+
+            foreach (var attribute in provider.GetCustomAttributesData())
+            {
+                if (attribute.AttributeType.FullName != "System.Runtime.CompilerServices.NullableContextAttribute")
+                {
+                    continue;
+                }
+
+                if (TryGetNullableFlag(attribute, out var flag))
+                {
+                    return flag == 2;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool HasNullableContext(Type? provider)
+        {
+            if (provider is null)
+            {
+                return false;
+            }
+
+            foreach (var attribute in provider.GetCustomAttributesData())
+            {
+                if (attribute.AttributeType.FullName != "System.Runtime.CompilerServices.NullableContextAttribute")
+                {
+                    continue;
+                }
+
+                if (TryGetNullableFlag(attribute, out var flag))
+                {
+                    return flag == 2;
+                }
+            }
+
+            return false;
+        }
+
+        private static bool TryGetNullableFlag(CustomAttributeData attribute, out byte flag)
+        {
+            flag = 0;
+            if (attribute.ConstructorArguments.Count == 0)
+            {
+                return false;
+            }
+
+            var value = attribute.ConstructorArguments[0].Value;
+            if (value is byte byteValue)
+            {
+                flag = byteValue;
+                return true;
+            }
+
+            if (value is IReadOnlyCollection<CustomAttributeTypedArgument> args && args.Count > 0)
+            {
+                foreach (var arg in args)
+                {
+                    if (arg.Value is byte nestedByteValue)
+                    {
+                        flag = nestedByteValue;
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        }
 
         /// <summary>
         /// Returns a <see cref="DynamicCustomFunction"/> from the specified object target and <see cref="MethodInfo"/>.
@@ -201,11 +392,11 @@ namespace Scriban.Runtime
         /// <param name="target">A target object - might be null</param>
         /// <param name="method">A MethodInfo</param>
         /// <returns>A custom <see cref="DynamicCustomFunction"/></returns>
-        public static DynamicCustomFunction Create(object target, MethodInfo method)
+        public static DynamicCustomFunction Create(object? target, MethodInfo method)
         {
-            if (method == null) throw new ArgumentNullException(nameof(method));
+            if (method is null) throw new ArgumentNullException(nameof(method));
 
-            if (target == null && method.IsStatic && BuiltinFunctionDelegates.TryGetValue(method, out var newFunction))
+            if (target is null && method.IsStatic && BuiltinFunctionDelegates.TryGetValue(method, out var newFunction))
             {
                 return newFunction(method);
             }
@@ -219,13 +410,13 @@ namespace Scriban.Runtime
         /// <returns>A custom <see cref="DynamicCustomFunction"/></returns>
         public static DynamicCustomFunction Create(Delegate del)
         {
-            if (del == null) throw new ArgumentNullException(nameof(del));
+            if (del is null) throw new ArgumentNullException(nameof(del));
             return new DelegateCustomFunction(del);
         }
 
         protected struct ArgumentValue
         {
-            public ArgumentValue(int index, Type type, object value)
+            public ArgumentValue(int index, Type type, object? value)
             {
                 Index = index;
                 Type = type;
@@ -236,18 +427,18 @@ namespace Scriban.Runtime
 
             public readonly Type Type;
 
-            public readonly object Value;
+            public readonly object? Value;
         }
 
         private class MethodComparer : IEqualityComparer<MethodInfo>
         {
             public static readonly MethodComparer Default = new MethodComparer();
 
-            public bool Equals(MethodInfo method, MethodInfo otherMethod)
+            public bool Equals(MethodInfo? method, MethodInfo? otherMethod)
             {
-                if (method != null && otherMethod != null && method.ReturnType == otherMethod.ReturnType && method.IsStatic == otherMethod.IsStatic)
+                if (method is not null && otherMethod is not null && method.ReturnType == otherMethod.ReturnType && method.IsStatic == otherMethod.IsStatic)
                 {
-                    if (method.DeclaringType.FullName != otherMethod.DeclaringType.FullName)
+                    if (method.DeclaringType?.FullName != otherMethod.DeclaringType?.FullName)
                         return false;
                     if (method.Name != otherMethod.Name)
                         return false;

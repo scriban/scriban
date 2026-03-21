@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -16,11 +16,10 @@ namespace Scriban.Syntax
 #endif
     sealed partial class ScriptBlockStatement : ScriptStatement
     {
-        private ScriptList<ScriptStatement> _statements;
-
+        private ScriptList<ScriptStatement> _statements = new ScriptList<ScriptStatement>();
         public ScriptBlockStatement()
         {
-            Statements = new ScriptList<ScriptStatement>();
+            _statements.Parent = this;
         }
 
         public ScriptList<ScriptStatement> Statements
@@ -29,13 +28,13 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _statements, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             var autoIndent = context.AutoIndent;
-            object result = null;
+            object? result = null;
             var statements = Statements;
-            string previousIndent = context.CurrentIndent;
-            string currentIndent = previousIndent;
+            string? previousIndent = context.CurrentIndent;
+            string? currentIndent = previousIndent;
             try
             {
                 for (int i = 0; i < statements.Count; i++)
@@ -70,7 +69,7 @@ namespace Scriban.Syntax
                     {
                         result = null;
                     }
-                    else if (result != null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
+                    else if (result is not null && context.FlowState != ScriptFlowState.Return && context.EnableOutput)
                     {
                         context.Write(Span, result);
                         result = null;

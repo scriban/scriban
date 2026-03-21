@@ -56,9 +56,9 @@ namespace Scriban
 
         public bool IsInWhileLoop => _isWhileLoop.Count > 0 && _isWhileLoop.Peek();
 
-        public ScriptPrinter Write(ScriptNode node)
+        public ScriptPrinter Write(ScriptNode? node)
         {
-            if (node != null)
+            if (node is not null)
             {
                 bool pushedWhileLoop = false;
                 if (node is ScriptLoopStatementBase)
@@ -116,9 +116,9 @@ namespace Scriban
             return this;
         }
 
-        public ScriptPrinter WriteListWithCommas<T>(IList<T> list) where T : ScriptNode
+        public ScriptPrinter WriteListWithCommas<T>(IList<T>? list) where T : ScriptNode
         {
-            if (list == null)
+            if (list is null)
             {
                 return this;
             }
@@ -232,7 +232,7 @@ namespace Scriban
         {
             if (!(node is IScriptTerminal terminal)) return;
             var trivias = terminal.Trivias;
-            if (trivias != null)
+            if (trivias is not null)
             {
                 foreach (var trivia in (before ? trivias.Before : trivias.After))
                 {

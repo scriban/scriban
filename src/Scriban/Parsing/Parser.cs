@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -44,7 +44,7 @@ namespace Scriban.Parsing
         private readonly bool _isKeepTrivia;
         private readonly List<ScriptTrivia> _trivias;
         private readonly Queue<ScriptStatement> _pendingStatements;
-        private IScriptTerminal _lastTerminalWithTrivias;
+        private IScriptTerminal? _lastTerminalWithTrivias;
 
         private Stack<char> _interpolatedNestedStringChars;
         
@@ -80,7 +80,7 @@ namespace Scriban.Parsing
         }
 
         public readonly ParserOptions Options;
-        private ScriptFrontMatter _frontmatter;
+        private ScriptFrontMatter? _frontmatter;
 
         public LogMessageBag Messages { get; private set; }
 
@@ -98,7 +98,7 @@ namespace Scriban.Parsing
 
         private ScriptMode CurrentParsingMode { get; set; }
 
-        public ScriptPage Run()
+        public ScriptPage? Run()
         {
             Messages = new LogMessageBag();
             HasErrors = false;
@@ -149,18 +149,18 @@ namespace Scriban.Parsing
             }
 
             page.Body = ParseBlockStatement(page);
-            if (page.Body != null)
+            if (page.Body is not null)
             {
                 page.Span = page.Body.Span;
             }
 
             // Flush any pending trivias
-            if (_isKeepTrivia && _lastTerminalWithTrivias != null)
+            if (_isKeepTrivia && _lastTerminalWithTrivias is not null)
             {
                 FlushTriviasToLastTerminal();
             }
 
-            if (page.FrontMatter != null)
+            if (page.FrontMatter is not null)
             {
                 FixRawStatementAfterFrontMatter(page);
             }
@@ -244,7 +244,7 @@ namespace Scriban.Parsing
 
         private void FlushTriviasToLastTerminal()
         {
-            if (_isKeepTrivia && _lastTerminalWithTrivias != null)
+            if (_isKeepTrivia && _lastTerminalWithTrivias is not null)
             {
                 FlushTrivias(_lastTerminalWithTrivias, false);
             }
@@ -464,7 +464,7 @@ namespace Scriban.Parsing
 
         private void LogError(ScriptNode node, SourceSpan span, string message, bool isFatal = false)
         {
-            var syntax = ScriptSyntaxAttribute.Get(node);
+            var syntax = ScriptSyntaxAttribute.Get(node) ?? ScriptSyntaxAttribute.Get(node.GetType());
             string inMessage = " in";
             if (message.EndsWith("after"))
             {
@@ -475,7 +475,7 @@ namespace Scriban.Parsing
 
         private void Log(LogMessage logMessage, bool isFatal = false)
         {
-            if (logMessage == null) throw new ArgumentNullException(nameof(logMessage));
+            if (logMessage is null) throw new ArgumentNullException(nameof(logMessage));
             Messages.Add(logMessage);
             if (logMessage.Type == ParserMessageType.Error)
             {

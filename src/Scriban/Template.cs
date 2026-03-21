@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ namespace Scriban
 #endif
     partial class Template
     {
-        private Template(ParserOptions? parserOptions, LexerOptions? lexerOptions, string sourceFilePath)
+        private Template(ParserOptions? parserOptions, LexerOptions? lexerOptions, string? sourceFilePath)
         {
             ParserOptions = parserOptions ?? new ParserOptions();
             LexerOptions = lexerOptions ?? new LexerOptions();
@@ -34,12 +34,12 @@ namespace Scriban
         /// <summary>
         /// Gets the source file path.
         /// </summary>
-        public string SourceFilePath { get; }
+        public string? SourceFilePath { get; }
 
         /// <summary>
         /// Gets the resulting compiled <see cref="ScriptPage"/>. May be null if this template <see cref="HasErrors"/>
         /// </summary>
-        public ScriptPage Page { get; private set; }
+        public ScriptPage? Page { get; private set; }
 
         /// <summary>
         /// Gets a value indicating whether this template has errors. Error messages are in <see cref="Messages"/>.
@@ -69,7 +69,7 @@ namespace Scriban
         /// <param name="parserOptions">The templating parsing parserOptions.</param>
         /// <param name="lexerOptions">The options passed to the lexer</param>
         /// <returns>A template</returns>
-        public static Template Parse(string text, string sourceFilePath = null, ParserOptions? parserOptions = null, LexerOptions? lexerOptions = null)
+        public static Template Parse(string text, string? sourceFilePath = null, ParserOptions? parserOptions = null, LexerOptions? lexerOptions = null)
         {
             var template = new Template(parserOptions, lexerOptions, sourceFilePath);
             template.ParseInternal(text, sourceFilePath);
@@ -84,7 +84,7 @@ namespace Scriban
         /// <param name="parserOptions">The templating parsing parserOptions.</param>
         /// <param name="lexerOptions">The options passed to the lexer</param>
         /// <returns>A template</returns>
-        public static Template ParseLiquid(string text, string sourceFilePath = null, ParserOptions? parserOptions = null, LexerOptions? lexerOptions = null)
+        public static Template ParseLiquid(string text, string? sourceFilePath = null, ParserOptions? parserOptions = null, LexerOptions? lexerOptions = null)
         {
             var localLexerOptions = lexerOptions ?? new LexerOptions();
             localLexerOptions.Lang = ScriptLang.Liquid;
@@ -97,9 +97,9 @@ namespace Scriban
         /// <param name="expression">A code only expression (without enclosing `{{` and `}}`)</param>
         /// <param name="context">The template context</param>
         /// <returns>The result of the evaluation of the expression</returns>
-        public static object Evaluate(string expression, TemplateContext context)
+        public static object? Evaluate(string expression, TemplateContext context)
         {
-            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (expression is null) throw new ArgumentNullException(nameof(expression));
             var lexerOption = new LexerOptions() {Mode = ScriptMode.ScriptOnly};
             var template = Parse(expression, lexerOptions: lexerOption);
             return template.Evaluate(context);
@@ -114,9 +114,9 @@ namespace Scriban
         /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <returns>The result of the evaluation of the expression</returns>
         [RequiresUnreferencedCode("This overload imports the model object using reflection. Use Evaluate(TemplateContext) for AOT-safe evaluation.")]
-        public static object Evaluate(string expression, object model, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        public static object? Evaluate(string expression, object model, MemberRenamerDelegate? memberRenamer = null, MemberFilterDelegate? memberFilter = null)
         {
-            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (expression is null) throw new ArgumentNullException(nameof(expression));
             var lexerOption = new LexerOptions() { Mode = ScriptMode.ScriptOnly };
             var template = Parse(expression, lexerOptions: lexerOption);
             return template.Evaluate(model, memberRenamer, memberFilter);
@@ -129,7 +129,7 @@ namespace Scriban
         /// <exception cref="System.ArgumentNullException">If context is null</exception>
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
         /// <returns>Returns the result of the last statement</returns>
-        public object Evaluate(TemplateContext context)
+        public object? Evaluate(TemplateContext context)
         {
             var previousOutput = context.EnableOutput;
             try
@@ -153,17 +153,17 @@ namespace Scriban
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
         /// <returns>Returns the result of the last statement</returns>
         [RequiresUnreferencedCode("This overload imports the model object using reflection. Use Evaluate(TemplateContext) for AOT-safe evaluation.")]
-        public object Evaluate(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        public object? Evaluate(object? model = null, MemberRenamerDelegate? memberRenamer = null, MemberFilterDelegate? memberFilter = null)
         {
             var scriptObject = new ScriptObject();
-            if (model != null)
+            if (model is not null)
             {
                 scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
             }
 
             var context = LexerOptions.Lang == ScriptLang.Liquid ? new LiquidTemplateContext() : new TemplateContext();
             context.EnableOutput = false;
-            context.MemberRenamer = memberRenamer;
+            context.MemberRenamer = memberRenamer ?? StandardMemberRenamer.Default;
             context.MemberFilter = memberFilter;
             context.UseScientific = LexerOptions.Lang == ScriptLang.Scientific;
             context.PushGlobal(scriptObject);
@@ -186,11 +186,11 @@ namespace Scriban
             EvaluateAndRender(context, true);
             var result = context.Output.ToString();
             var output = context.Output as StringBuilderOutput;
-            if (output != null)
+            if (output is not null)
             {
                 output.Builder.Length = 0;
             }
-            return result;
+            return result ?? string.Empty;
         }
 
         /// <summary>
@@ -201,16 +201,16 @@ namespace Scriban
         /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <returns>A rendering result as a string </returns>
         [RequiresUnreferencedCode("This overload imports the model object using reflection. Use Render(TemplateContext) for AOT-safe rendering.")]
-        public string Render(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
+        public string Render(object? model = null, MemberRenamerDelegate? memberRenamer = null, MemberFilterDelegate? memberFilter = null)
         {
             var scriptObject = new ScriptObject();
-            if (model != null)
+            if (model is not null)
             {
                 scriptObject.Import(model, renamer: memberRenamer, filter: memberFilter);
             }
 
             var context = LexerOptions.Lang == ScriptLang.Liquid ? new LiquidTemplateContext() : new TemplateContext();
-            context.MemberRenamer = memberRenamer;
+            context.MemberRenamer = memberRenamer ?? StandardMemberRenamer.Default;
             context.MemberFilter = memberFilter;
             context.PushGlobal(scriptObject);
             return Render(context);
@@ -226,7 +226,10 @@ namespace Scriban
             CheckErrors();
             var writer = new TextWriterOutput();
             var renderContext = new ScriptPrinter(writer, options);
-            renderContext.Write(Page);
+            if (Page is not null)
+            {
+                renderContext.Write(Page);
+            }
 
             return writer.ToString();
         }
@@ -238,13 +241,13 @@ namespace Scriban
         /// <param name="render"><c>true</c> to render the output to the <see cref="TemplateContext.Output"/></param>
         /// <exception cref="System.ArgumentNullException">If context is null</exception>
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
-        private object EvaluateAndRender(TemplateContext context, bool render)
+        private object? EvaluateAndRender(TemplateContext context, bool render)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (context is null) throw new ArgumentNullException(nameof(context));
             CheckErrors();
 
             // Make sure that we are using the same parserOptions
-            if (SourceFilePath != null)
+            if (SourceFilePath is not null)
             {
                 context.PushSourceFile(SourceFilePath);
             }
@@ -252,10 +255,15 @@ namespace Scriban
             try
             {
                 context.UseScientific = LexerOptions.Lang == ScriptLang.Scientific;
+                if (Page is null)
+                {
+                    return null;
+                }
+
                 var result = context.Evaluate(Page);
                 if (render)
                 {
-                    if (Page != null && context.EnableOutput && result != null)
+                    if (context.EnableOutput && result is not null)
                     {
                         context.Write(Page.Span, result);
                     }
@@ -264,7 +272,7 @@ namespace Scriban
             }
             finally
             {
-                if (SourceFilePath != null)
+                if (SourceFilePath is not null)
                 {
                     context.PopSourceFile();
                 }
@@ -276,13 +284,13 @@ namespace Scriban
             if (HasErrors) throw new InvalidOperationException("This template has errors. Check the <Template.HasError> and <Template.Messages> before evaluating a template. Messages:\n" + string.Join("\n", Messages));
         }
 
-        private void ParseInternal(string text, string sourceFilePath)
+        private void ParseInternal(string text, string? sourceFilePath)
         {
             // Early exit
             if (string.IsNullOrEmpty(text))
             {
                 HasErrors = false;
-                Page = new ScriptPage() {Span = new SourceSpan(sourceFilePath, new TextPosition(), TextPosition.Eof) };
+                Page = new ScriptPage() {Span = new SourceSpan(sourceFilePath ?? string.Empty, new TextPosition(), TextPosition.Eof) };
                 return;
             }
 

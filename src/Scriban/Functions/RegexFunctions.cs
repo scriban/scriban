@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Text.RegularExpressions;
 using Scriban.Runtime;
@@ -66,7 +66,7 @@ namespace Scriban.Functions
         /// ```
         /// Notice that the first element returned in the array is the entire regex match, followed by the regex group matches.
         /// </remarks>
-        public static ScriptArray Match(TemplateContext context, string text, string pattern, string options = null)
+        public static ScriptArray Match(TemplateContext context, string text, string pattern, string? options = null)
         {
             var match = Regex.Match(text, pattern, GetOptions(options), context.RegexTimeOut);
             var matchObject = new ScriptArray();
@@ -105,7 +105,7 @@ namespace Scriban.Functions
         /// ```
         /// Notice that the first element returned in the sub array is the entire regex match, followed by the regex group matches.
         /// </remarks>
-        public static ScriptArray Matches(TemplateContext context, string text, string pattern, string options = null)
+        public static ScriptArray Matches(TemplateContext context, string text, string pattern, string? options = null)
         {
             var matches = Regex.Matches(text, pattern, GetOptions(options), context.RegexTimeOut);
             var allMatches = new ScriptArray();
@@ -152,7 +152,7 @@ namespace Scriban.Functions
         /// a-Yo-d
         /// ```
         /// </remarks>
-        public static string Replace(TemplateContext context, string text, string pattern, string replace, string options = null)
+        public static string Replace(TemplateContext context, string text, string pattern, string replace, string? options = null)
         {
             return Regex.Replace(text, pattern, replace, GetOptions(options), context.RegexTimeOut);
         }
@@ -178,7 +178,7 @@ namespace Scriban.Functions
         /// ["a", "b", "c", "d"]
         /// ```
         /// </remarks>
-        public static ScriptArray Split(TemplateContext context, string text, string pattern, string options = null)
+        public static ScriptArray Split(TemplateContext context, string text, string pattern, string? options = null)
         {
             return new ScriptArray(Regex.Split(text, pattern, GetOptions(options), context.RegexTimeOut));
         }
@@ -201,9 +201,9 @@ namespace Scriban.Functions
             return Regex.Unescape(pattern);
         }
 
-        private static RegexOptions GetOptions(string options)
+        private static RegexOptions GetOptions(string? options)
         {
-            if (options == null)
+            if (options is null)
             {
                 return RegexOptions.None;
             }

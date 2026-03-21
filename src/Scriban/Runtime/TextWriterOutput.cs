@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.IO;
@@ -44,7 +44,7 @@ namespace Scriban.Runtime
 
         public void Write(string text, int offset, int count)
         {
-            if (text == null) throw new ArgumentNullException(nameof(text));
+            if (text is null) throw new ArgumentNullException(nameof(text));
             Writer.Write(text.Substring(offset, count));
         }
 #if !SCRIBAN_NO_ASYNC
@@ -57,7 +57,7 @@ namespace Scriban.Runtime
 
         public override string ToString()
         {
-            return Writer.ToString();
+            return Writer.ToString() ?? string.Empty;
         }
     }
 }

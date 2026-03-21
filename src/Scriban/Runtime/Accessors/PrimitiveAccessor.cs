@@ -1,4 +1,4 @@
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -31,7 +31,7 @@ namespace Scriban.Runtime.Accessors
             return false;
         }
 
-        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value)
+        public bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object? value)
         {
             if (!context.EnableRelaxedMemberAccess)
             {
@@ -43,12 +43,12 @@ namespace Scriban.Runtime.Accessors
             return true;
         }
 
-        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value)
+        public bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object? value)
         {
             throw new ScriptRuntimeException(span, $"Cannot get or set a member on the primitive `{target}/{context.GetTypeName(target)}` when accessing member: {member}"); // unit test: 132-member-accessor-error2.txt
         }
 
-        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value)
+        public bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object? value)
         {
             if (!context.EnableRelaxedMemberAccess)
             {
@@ -60,14 +60,14 @@ namespace Scriban.Runtime.Accessors
             return true;
         }
 
-        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value)
+        public bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object? value)
         {
             throw new ScriptRuntimeException(span, $"Cannot get or set a member on the primitive `{target}/{context.GetTypeName(target)}` when accessing index: {index}");
         }
 
         public bool HasIndexer => false;
 
-        public Type IndexType => null;
+        public Type? IndexType => null;
 
         public int GetLength(TemplateContext context, SourceSpan span, object target)
         {
@@ -79,7 +79,7 @@ namespace Scriban.Runtime.Accessors
             throw new ScriptRuntimeException(span, $"Cannot index the {context.GetTypeName(target)} primitive `{target}`."); // unit test: 130-indexer-accessor-error4.txt
         }
 
-        public void SetValue(TemplateContext context, SourceSpan span, object target, int index, object value)
+        public void SetValue(TemplateContext context, SourceSpan span, object target, int index, object? value)
         {
             throw new ScriptRuntimeException(span, $"Cannot index the {context.GetTypeName(target)} primitive `{target}`."); // unit test: 130-indexer-accessor-error4.txt
         }

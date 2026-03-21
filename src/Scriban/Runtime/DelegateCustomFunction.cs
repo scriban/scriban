@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Diagnostics.CodeAnalysis;
@@ -23,39 +23,40 @@ namespace Scriban.Runtime
 #endif
     partial class DelegateCustomFunction : DynamicCustomFunction
     {
-        private readonly Delegate _del;
+        private readonly Delegate? _del;
 
-        public DelegateCustomFunction(Delegate del) : base(del?.Method, GetDelegateParameterInfos(del))
+        public DelegateCustomFunction(Delegate del) : base(GetDelegateMethod(del), GetDelegateParameterInfos(del))
         {
             _del = del ?? throw new ArgumentNullException(nameof(del));
             Target = del.Target;
         }
 
-        public DelegateCustomFunction(object target, MethodInfo method) : base(method)
+        public DelegateCustomFunction(object? target, MethodInfo method) : base(method)
         {
             Target = target;
         }
 
-        public object Target { get; }
+        public object? Target { get; }
 
-        public override object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
+        public override object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray scriptArguments, ScriptBlockStatement? blockStatement)
         {
-            Array paramArguments = null;
+            Array? paramArguments = null;
             var arguments = PrepareArguments(context, callerContext, scriptArguments, ref paramArguments);
+            var callerSpan = callerContext?.Span ?? context.CurrentSpan;
             try
             {
                 // Call the method via reflection
-                var result = InvokeImpl(context, callerContext.Span, arguments);
+                var result = InvokeImpl(context, callerSpan, arguments);
                 return result;
             }
             catch (TargetInvocationException exception)
             {
-                if (exception.InnerException != null)
+                if (exception.InnerException is not null)
                 {
                     throw exception.InnerException;
                 }
 
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}");
+                throw new ScriptRuntimeException(callerSpan, $"Unexpected exception when calling {callerContext}");
             }
             finally
             {
@@ -65,23 +66,29 @@ namespace Scriban.Runtime
 
 
 #if !SCRIBAN_NO_ASYNC
-        public override async ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ScriptBlockStatement blockStatement)
+        public override async ValueTask<object?> InvokeAsync(TemplateContext context, ScriptNode? callerContext, ScriptArray scriptArguments, ScriptBlockStatement? blockStatement)
         {
-            Array paramArguments = null;
+            Array? paramArguments = null;
             var arguments = PrepareArguments(context, callerContext, scriptArguments, ref paramArguments);
+            var callerSpan = callerContext?.Span ?? context.CurrentSpan;
             try
             {
                 // Call the method via reflection
-                var result = InvokeImpl(context, callerContext.Span, arguments);
-                return IsAwaitable ? await ConfigureAwait(result) : result;
+                var result = InvokeImpl(context, callerSpan, arguments);
+                if (!IsAwaitable)
+                {
+                    return result;
+                }
+
+                return await ConfigureAwait(result);
             }
             catch (TargetInvocationException exception)
             {
-                if (exception.InnerException != null)
+                if (exception.InnerException is not null)
                 {
                     throw exception.InnerException;
                 }
-                throw new ScriptRuntimeException(callerContext.Span, $"Unexpected exception when calling {callerContext}");
+                throw new ScriptRuntimeException(callerSpan, $"Unexpected exception when calling {callerContext}");
             }
             finally
             {
@@ -92,84 +99,90 @@ namespace Scriban.Runtime
 
         public static DelegateCustomFunction Create(Action action)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (action is null) throw new ArgumentNullException(nameof(action));
             return new DelegateCustomAction(action);
         }
 
         public static DelegateCustomFunction Create<T>(Action<T> action)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (action is null) throw new ArgumentNullException(nameof(action));
             return new DelegateCustomAction<T>(action);
         }
 
         public static DelegateCustomFunction Create<T1, T2>(Action<T1, T2> action)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (action is null) throw new ArgumentNullException(nameof(action));
             return new DelegateCustomAction<T1, T2>(action);
         }
 
         public static DelegateCustomFunction Create<T1, T2, T3>(Action<T1, T2, T3> action)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (action is null) throw new ArgumentNullException(nameof(action));
             return new DelegateCustomAction<T1, T2, T3>(action);
         }
 
         public static DelegateCustomFunction Create<T1, T2, T3, T4>(Action<T1, T2, T3, T4> action)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (action is null) throw new ArgumentNullException(nameof(action));
             return new DelegateCustomAction<T1, T2, T3, T4>(action);
         }
 
         public static DelegateCustomFunction Create<T1, T2, T3, T4, T5>(Action<T1, T2, T3, T4, T5> action)
         {
-            if (action == null) throw new ArgumentNullException(nameof(action));
+            if (action is null) throw new ArgumentNullException(nameof(action));
             return new DelegateCustomAction<T1, T2, T3, T4, T5>(action);
         }
 
         public static DelegateCustomFunction CreateFunc<TResult>(Func<TResult> func)
         {
-            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (func is null) throw new ArgumentNullException(nameof(func));
             return new InternalDelegateCustomFunction<TResult>(func);
         }
 
         public static DelegateCustomFunction CreateFunc<T1, TResult>(Func<T1, TResult> func)
         {
-            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (func is null) throw new ArgumentNullException(nameof(func));
             return new InternalDelegateCustomFunction<T1, TResult>(func);
         }
 
         public static DelegateCustomFunction CreateFunc<T1, T2, TResult>(Func<T1, T2, TResult> func)
         {
-            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (func is null) throw new ArgumentNullException(nameof(func));
             return new InternalDelegateCustomFunction<T1, T2, TResult>(func);
         }
 
         public static DelegateCustomFunction CreateFunc<T1, T2, T3, TResult>(Func<T1, T2, T3, TResult> func)
         {
-            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (func is null) throw new ArgumentNullException(nameof(func));
             return new InternalDelegateCustomFunction<T1, T2, T3, TResult>(func);
         }
 
         public static DelegateCustomFunction CreateFunc<T1, T2, T3, T4, TResult>(Func<T1, T2, T3, T4, TResult> func)
         {
-            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (func is null) throw new ArgumentNullException(nameof(func));
             return new InternalDelegateCustomFunction<T1, T2, T3, T4, TResult>(func);
         }
 
         public static DelegateCustomFunction CreateFunc<T1, T2, T3, T4, T5, TResult>(Func<T1, T2, T3, T4, T5, TResult> func)
         {
-            if (func == null) throw new ArgumentNullException(nameof(func));
+            if (func is null) throw new ArgumentNullException(nameof(func));
             return new InternalDelegateCustomFunction<T1, T2, T3, T4, T5, TResult>(func);
         }
 
-        protected virtual object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+        protected virtual object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
         {
-            return _del != null ? _del.DynamicInvoke(arguments) : Method.Invoke(Target, arguments);
+            return _del is not null ? _del.DynamicInvoke(arguments) : Method.Invoke(Target, arguments);
+        }
+
+        private static MethodInfo GetDelegateMethod(Delegate del)
+        {
+            if (del is null) throw new ArgumentNullException(nameof(del));
+            return del.Method;
         }
 
         private static ParameterInfo[] GetDelegateParameterInfos(Delegate del)
         {
-            if (del == null) throw new ArgumentNullException(nameof(del));
+            if (del is null) throw new ArgumentNullException(nameof(del));
 
             var delegateInvokeMethod = del.GetType().GetMethod(nameof(Action.Invoke)) ?? throw new ArgumentException("Unable to resolve delegate Invoke method.", nameof(del));
             var methodParameters = del.Method.GetParameters();
@@ -192,10 +205,11 @@ namespace Scriban.Runtime
         }
 
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Array element type is known from the method's parameter type at import time.")]
-        private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ref Array paramsArguments)
+        private object?[] PrepareArguments(TemplateContext context, ScriptNode? callerContext, ScriptArray scriptArguments, ref Array? paramsArguments)
         {
             // TODO: optimize arguments allocations
             var reflectArgs = context.GetOrCreateReflectionArguments(Parameters.Length);
+            var callerSpan = callerContext?.Span ?? context.CurrentSpan;
 
             // Copy TemplateContext/SourceSpan parameters
             if (_hasTemplateContext)
@@ -203,7 +217,7 @@ namespace Scriban.Runtime
                 reflectArgs[0] = context;
                 if (_hasSpan)
                 {
-                    reflectArgs[1] = callerContext.Span;
+                    reflectArgs[1] = callerSpan;
                 }
             }
 
@@ -213,28 +227,39 @@ namespace Scriban.Runtime
             {
                 // 0         1        _firstIndexOfUserParameters  _paramsIndex
                 // [context, [span]], arg0, arg1...,        ,argn, [varg0,varg1, ...]
-                var varArgs = (ScriptArray)scriptArguments[scriptArguments.Count - 1];
+                var varArgs = scriptArguments[scriptArguments.Count - 1] as ScriptArray ?? new ScriptArray();
+                var paramsElementType = _paramsElementType ?? typeof(object);
 
                 // Copy all normal arguments
                 var normalArgCount = scriptArguments.Count - 1;
-                if (normalArgCount > 0)
+                for (int i = 0; i < normalArgCount; i++)
                 {
-                    scriptArguments.CopyTo(0, reflectArgs, _firstIndexOfUserParameters, normalArgCount);
+                    var destIndex = _firstIndexOfUserParameters + i;
+                    reflectArgs[destIndex] = context.ToObject(callerSpan, scriptArguments[i], Parameters[destIndex].ParameterType);
                 }
 
-                paramsArguments = _paramsElementType == typeof(object) ? context.GetOrCreateReflectionArguments(varArgs.Count) : Array.CreateInstance(_paramsElementType, varArgs.Count);
+                paramsArguments = paramsElementType == typeof(object) ? context.GetOrCreateReflectionArguments(varArgs.Count) : Array.CreateInstance(paramsElementType, varArgs.Count);
                 reflectArgs[_paramsIndex] = paramsArguments;
 
                 // Convert each argument
                 for(int i = 0; i < varArgs.Count; i++)
                 {
-                    var destValue = context.ToObject(context.CurrentSpan, varArgs[i], _paramsElementType);
+                    var destValue = context.ToObject(callerSpan, varArgs[i], paramsElementType);
                     paramsArguments.SetValue(destValue, i);
                 }
             }
             else
             {
-                scriptArguments.CopyTo(0, reflectArgs, _firstIndexOfUserParameters, scriptArguments.Count);
+                for (int i = 0; i < scriptArguments.Count; i++)
+                {
+                    var destIndex = _firstIndexOfUserParameters + i;
+                    reflectArgs[destIndex] = context.ToObject(callerSpan, scriptArguments[i], Parameters[destIndex].ParameterType);
+                }
+            }
+
+            for (int i = _firstIndexOfUserParameters + scriptArguments.Count; i < Parameters.Length; i++)
+            {
+                reflectArgs[i] = Parameters[i].HasDefaultValue ? Parameters[i].DefaultValue : null;
             }
 
             return reflectArgs;
@@ -253,7 +278,7 @@ namespace Scriban.Runtime
 
             public Func<TResult> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
                 return Func();
             }
@@ -273,10 +298,9 @@ namespace Scriban.Runtime
 
             public Func<T, TResult> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg = (T)arguments[0];
-                return Func(arg);
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -293,11 +317,9 @@ namespace Scriban.Runtime
 
             public Action<T> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg = (T)arguments[0];
-                Func(arg);
-                return null;
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -317,11 +339,9 @@ namespace Scriban.Runtime
             public Func<T1, T2, TResult> Func { get; }
 
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg1 = (T1)arguments[0];
-                var arg2 = (T2)arguments[1];
-                return Func(arg1, arg2);
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -339,12 +359,9 @@ namespace Scriban.Runtime
 
             public Action<T1, T2> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg1 = (T1)arguments[0];
-                var arg2 = (T2)arguments[1];
-                Func(arg1, arg2);
-                return null;
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -364,12 +381,9 @@ namespace Scriban.Runtime
 
             public Func<T1, T2, T3, TResult> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg1 = (T1)arguments[0];
-                var arg2 = (T2)arguments[1];
-                var arg3 = (T3)arguments[2];
-                return Func(arg1, arg2, arg3);
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -388,13 +402,9 @@ namespace Scriban.Runtime
 
             public Action<T1, T2, T3> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg1 = (T1)arguments[0];
-                var arg2 = (T2)arguments[1];
-                var arg3 = (T3)arguments[2];
-                Func(arg1, arg2, arg3);
-                return null;
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -415,13 +425,9 @@ namespace Scriban.Runtime
 
             public Func<T1, T2, T3, T4, TResult> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg1 = (T1)arguments[0];
-                var arg2 = (T2)arguments[1];
-                var arg3 = (T3)arguments[2];
-                var arg4 = (T4)arguments[3];
-                return Func(arg1, arg2, arg3, arg4);
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -441,14 +447,9 @@ namespace Scriban.Runtime
 
             public Action<T1, T2, T3, T4> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg1 = (T1)arguments[0];
-                var arg2 = (T2)arguments[1];
-                var arg3 = (T3)arguments[2];
-                var arg4 = (T4)arguments[3];
-                Func(arg1, arg2, arg3, arg4);
-                return null;
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -470,14 +471,9 @@ namespace Scriban.Runtime
 
             public Func<T1, T2, T3, T4, T5, TResult> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg1 = (T1)arguments[0];
-                var arg2 = (T2)arguments[1];
-                var arg3 = (T3)arguments[2];
-                var arg4 = (T4)arguments[3];
-                var arg5 = (T5)arguments[4];
-                return Func(arg1, arg2, arg3, arg4, arg5);
+                return base.InvokeImpl(context, span, arguments);
             }
         }
 
@@ -498,15 +494,9 @@ namespace Scriban.Runtime
 
             public Action<T1, T2, T3, T4, T5> Func { get; }
 
-            protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+            protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
             {
-                var arg1 = (T1)arguments[0];
-                var arg2 = (T2)arguments[1];
-                var arg3 = (T3)arguments[2];
-                var arg4 = (T4)arguments[3];
-                var arg5 = (T5)arguments[4];
-                Func(arg1, arg2, arg3, arg4, arg5);
-                return null;
+                return base.InvokeImpl(context, span, arguments);
             }
         }
     }
@@ -528,7 +518,7 @@ namespace Scriban.Runtime
 
         public Action Func { get; }
 
-        protected override object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
+        protected override object? InvokeImpl(TemplateContext context, SourceSpan span, object?[] arguments)
         {
             Func();
             return null;

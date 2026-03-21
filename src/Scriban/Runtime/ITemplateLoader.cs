@@ -25,8 +25,8 @@ namespace Scriban.Runtime
         /// <param name="context">The current context called from</param>
         /// <param name="callerSpan">The current span called from</param>
         /// <param name="templateName">The name of the template to load</param>
-        /// <returns>An absolute path or unique key for the specified template name</returns>
-        string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName);
+        /// <returns>An absolute path or unique key for the specified template name, or <see langword="null"/> if no template could be resolved.</returns>
+        string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName);
 
         /// <summary>
         /// Loads a template using the specified template path/key.
@@ -34,8 +34,8 @@ namespace Scriban.Runtime
         /// <param name="context">The current context called from</param>
         /// <param name="callerSpan">The current span called from</param>
         /// <param name="templatePath">The path/key previously returned by <see cref="GetPath"/></param>
-        /// <returns>The content string loaded from the specified template path/key</returns>
-        string Load(TemplateContext context, SourceSpan callerSpan, string templatePath);
+        /// <returns>The content string loaded from the specified template path/key, or <see langword="null"/> if no template content could be loaded.</returns>
+        string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath);
 
 #if !SCRIBAN_NO_ASYNC
         /// <summary>
@@ -44,8 +44,8 @@ namespace Scriban.Runtime
         /// <param name="context">The current context called from</param>
         /// <param name="callerSpan">The current span called from</param>
         /// <param name="templatePath">The path/key previously returned by <see cref="GetPath"/></param>
-        /// <returns>The content string loaded from the specified template path/key</returns>
-        ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath);
+        /// <returns>The content string loaded from the specified template path/key, or <see langword="null"/> if no template content could be loaded.</returns>
+        ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath);
 #endif
     }
 }

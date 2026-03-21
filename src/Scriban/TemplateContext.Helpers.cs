@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -27,7 +27,7 @@ namespace Scriban
 #endif
     partial class TemplateContext : IFormatProvider
     {
-        public object GetFormat(Type formatType)
+        public object? GetFormat(Type? formatType)
         {
             return CurrentCulture.GetFormat(formatType);
         }
@@ -38,9 +38,9 @@ namespace Scriban
         /// <param name="span"></param>
         /// <param name="against"></param>
         /// <returns></returns>
-        public virtual object IsEmpty(SourceSpan span, object against)
+        public virtual object? IsEmpty(SourceSpan span, object? against)
         {
-            if (against == null)
+            if (against is null)
             {
                 return null;
             }
@@ -59,9 +59,9 @@ namespace Scriban
             return GetMemberAccessor(against).GetMemberCount(this, span, against) > 0;
         }
 
-        public virtual IList ToList(SourceSpan span, object value)
+        public virtual IList? ToList(SourceSpan span, object? value)
         {
-            if (value == null)
+            if (value is null)
             {
                 return null;
             }
@@ -71,7 +71,7 @@ namespace Scriban
                 return (IList) value;
             }
             var iterator = value as IEnumerable;
-            if (iterator == null)
+            if (iterator is null)
             {
                 throw new ScriptRuntimeException(span, $"Unexpected list value. Expecting an array, list or iterator. Unable to convert to a list.");
             }
@@ -89,7 +89,7 @@ namespace Scriban
         /// <param name="value">The object value to print</param>
         /// <param name="nested">True if value is a string, the string should be escaped</param>
         /// <returns>A string representing the object value</returns>
-        public virtual string ObjectToString(object value, bool nested = false)
+        public virtual string? ObjectToString(object? value, bool nested = false)
         {
             if (_objectToStringLevel == 0)
             {
@@ -101,7 +101,7 @@ namespace Scriban
                 if (ObjectRecursionLimit != 0 && _objectToStringLevel > ObjectRecursionLimit)
                     throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
                 var result = ObjectToStringImpl(value, nested);
-                if (LimitToString > 0 && _objectToStringLevel == 1 && result != null && result.Length >= LimitToString)
+                if (LimitToString > 0 && _objectToStringLevel == 1 && result is not null && result.Length >= LimitToString)
                 {
                     return result + "...";
                 }
@@ -114,7 +114,7 @@ namespace Scriban
         }
 
         [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflecting on KeyValuePair, a well-known BCL type whose members are always preserved.")]
-        private string ObjectToStringImpl(object value, bool nested)
+        private string? ObjectToStringImpl(object? value, bool nested)
         {
             if (LimitToString > 0 && _currentToStringLength >= LimitToString) return string.Empty;
 
@@ -131,7 +131,7 @@ namespace Scriban
                 return nested ? $"\"{StringFunctions.Escape(str)}\"" : str;
             }
 
-            if (value == null || value == EmptyScriptObject.Default)
+            if (value is null || value == EmptyScriptObject.Default)
             {
                 return nested ? "null" : null;
             }
@@ -187,7 +187,7 @@ namespace Scriban
 
                     var itemStr = ObjectToString(item, true);
                     result.Append(itemStr);
-                    if (itemStr != null) _currentToStringLength += itemStr.Length;
+                    if (itemStr is not null) _currentToStringLength += itemStr.Length;
 
                     // Limit to size
                     if (LimitToString > 0 && _currentToStringLength >= LimitToString)
@@ -205,7 +205,7 @@ namespace Scriban
             // Special case to display KeyValuePair as key, value
             var type = value.GetType();
             var typeName = type.FullName;
-            if (typeName != null && typeName.StartsWith("System.Collections.Generic.KeyValuePair"))
+            if (typeName is not null && typeName.StartsWith("System.Collections.Generic.KeyValuePair"))
             {
                 var keyValuePair = new ScriptObject(2);
                 keyValuePair.Import(value, renamer: this.MemberRenamer);
@@ -227,10 +227,10 @@ namespace Scriban
         /// <param name="span">The span requiring this conversion</param>
         /// <param name="value">An object value</param>
         /// <returns>The boolean representation of the object</returns>
-        public virtual bool ToBool(SourceSpan span, object value)
+        public virtual bool ToBool(SourceSpan span, object? value)
         {
             // null -> false
-            if (value == null || value == EmptyScriptObject.Default)
+            if (value is null || value == EmptyScriptObject.Default)
             {
                 return false;
             }
@@ -262,9 +262,9 @@ namespace Scriban
         /// <param name="span">The span requiring this conversion</param>
         /// <param name="value">The value of the object to convert</param>
         /// <returns>The integer value</returns>
-        public virtual int ToInt(SourceSpan span, object value)
+        public virtual int ToInt(SourceSpan span, object? value)
         {
-            if (value == null) return 0;
+            if (value is null) return 0;
             if (value is int intValue) return intValue;
             try
             {
@@ -296,9 +296,9 @@ namespace Scriban
             }
         }
 
-        public virtual string GetTypeName(object value)
+        public virtual string GetTypeName(object? value)
         {
-            if (value == null) return "null";
+            if (value is null) return "null";
 
             if (value is Type type)
             {
@@ -310,9 +310,21 @@ namespace Scriban
             return value.GetType().ScriptPrettyName();
         }
 
-        public T ToObject<T>(SourceSpan span, object value)
+        [return: MaybeNull]
+        public T ToObject<T>(SourceSpan span, object? value)
         {
-            return (T) ToObject(span, value, typeof(T));
+            var convertedValue = ToObject(span, value, typeof(T));
+            if (convertedValue is T typedValue)
+            {
+                return typedValue;
+            }
+
+            if (convertedValue is null && default(T) is null)
+            {
+                return default;
+            }
+
+            throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to `{GetTypeName(typeof(T))}`");
         }
 
         /// <summary>
@@ -323,13 +335,18 @@ namespace Scriban
         /// <param name="destinationType">The destination type to try to convert to</param>
         /// <returns>The object value of possibly the destination type</returns>
         [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "IScriptConvertibleFrom implementations are required to have a public parameterless constructor.")]
-        public virtual object ToObject(SourceSpan span, object value, Type destinationType)
+        public virtual object? ToObject(SourceSpan span, object? value, Type destinationType)
         {
-            if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));
+            if (destinationType is null) throw new ArgumentNullException(nameof(destinationType));
 
             // Make sure that we are using the underlying type of a a Nullable type
             bool isNullable;
             (isNullable, destinationType) = GetNullableInfo(destinationType);
+
+            if (isNullable && value is null)
+            {
+                return null;
+            }
 
             var type = value?.GetType();
 
@@ -337,11 +354,6 @@ namespace Scriban
             if (destinationType == type)
             {
                 return value;
-            }
-
-            if (isNullable && value is null)
-            {
-                return null;
             }
 
             if (destinationType == typeof(string))
@@ -360,7 +372,7 @@ namespace Scriban
             }
 
             // Handle null case
-            if (value == null)
+            if (value is null)
             {
                 if (destinationType == typeof(double))
                 {
@@ -412,7 +424,12 @@ namespace Scriban
 
             if (typeof(IScriptConvertibleFrom).IsAssignableFrom(destinationType))
             {
-                var dest = (IScriptConvertibleFrom)Activator.CreateInstance(destinationType);
+                var dest = Activator.CreateInstance(destinationType) as IScriptConvertibleFrom;
+                if (dest is null)
+                {
+                    throw new ScriptRuntimeException(span, $"Unable to create an instance of `{GetTypeName(destinationType)}`");
+                }
+
                 if (dest.TryConvertFrom(this, span, value))
                 {
                     return dest;
@@ -422,7 +439,7 @@ namespace Scriban
             // Check for inheritance
             var typeInfo = type;
 
-            if (type.IsPrimitiveOrDecimal() && destinationType.IsPrimitiveOrDecimal())
+            if (type is not null && type.IsPrimitiveOrDecimal() && destinationType.IsPrimitiveOrDecimal())
             {
                 try
                 {
@@ -508,13 +525,12 @@ namespace Scriban
 
             throw new ScriptRuntimeException(span, $"Unable to convert type `{GetTypeName(value)}` to `{GetTypeName(destinationType)}`");
 
-            static (bool IsNullable, Type DestinationType) GetNullableInfo(Type destinationType)
+            static (bool isNullable, Type DestinationType) GetNullableInfo(Type destinationType)
             {
                 destinationType = destinationType ?? throw new ArgumentNullException(nameof(destinationType));
                 var underlyingType = Nullable.GetUnderlyingType(destinationType);
                 return underlyingType is null ? (false, destinationType) : (true, underlyingType);
             }
         }
-
     }
 }

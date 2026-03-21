@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -23,22 +23,24 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptConditionalExpression : ScriptExpression
     {
-        private ScriptExpression _condition;
+        private ScriptExpression? _condition;
         private ScriptToken _questionToken;
-        private ScriptExpression _thenValue;
+        private ScriptExpression? _thenValue;
         private ScriptToken _colonToken;
-        private ScriptExpression _elseValue;
+        private ScriptExpression? _elseValue;
 
         public ScriptConditionalExpression()
         {
-            QuestionToken = ScriptToken.Question();
-            ColonToken = ScriptToken.Colon();
+            _questionToken = ScriptToken.Question();
+            _questionToken.Parent = this;
+            _colonToken = ScriptToken.Colon();
+            _colonToken.Parent = this;
         }
 
-        public ScriptExpression Condition
+        public ScriptExpression? Condition
         {
             get => _condition;
-            set => ParentToThis(ref _condition, value);
+            set => ParentToThisNullable(ref _condition, value);
         }
 
         public ScriptToken QuestionToken
@@ -47,10 +49,10 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _questionToken, value);
         }
 
-        public ScriptExpression ThenValue
+        public ScriptExpression? ThenValue
         {
             get => _thenValue;
-            set => ParentToThis(ref _thenValue, value);
+            set => ParentToThisNullable(ref _thenValue, value);
         }
 
         public ScriptToken ColonToken
@@ -59,14 +61,19 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _colonToken, value);
         }
 
-        public ScriptExpression ElseValue
+        public ScriptExpression? ElseValue
         {
             get => _elseValue;
-            set => ParentToThis(ref _elseValue, value);
+            set => ParentToThisNullable(ref _elseValue, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Condition is null || ThenValue is null || ElseValue is null)
+            {
+                return null;
+            }
+
             var condValue = context.Evaluate(Condition);
             var result = context.ToBool(Condition.Span, condValue);
             return context.Evaluate(result ? ThenValue : ElseValue);

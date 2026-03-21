@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -18,14 +18,16 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptInterpolatedExpression : ScriptExpression
     {
-        private ScriptExpression _expression;
+        private ScriptExpression? _expression;
         private ScriptToken _openBrace;
         private ScriptToken _closeBrace;
 
         public ScriptInterpolatedExpression()
         {
-            OpenBrace = ScriptToken.OpenInterpBrace();
-            CloseBrace = ScriptToken.CloseInterpBrace();
+            _openBrace = ScriptToken.OpenInterpBrace();
+            _openBrace.Parent = this;
+            _closeBrace = ScriptToken.CloseInterpBrace();
+            _closeBrace.Parent = this;
         }
 
         public ScriptInterpolatedExpression(ScriptExpression expression) : this()
@@ -39,10 +41,10 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _openBrace, value);
         }
 
-        public ScriptExpression Expression
+        public ScriptExpression? Expression
         {
             get => _expression;
-            set => ParentToThis(ref _expression, value);
+            set => ParentToThisNullable(ref _expression, value);
         }
 
         public ScriptToken CloseBrace
@@ -51,8 +53,13 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _closeBrace, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Expression is null)
+            {
+                return null;
+            }
+
             // A nested expression will reset the pipe arguments for the group
             context.PushPipeArguments();
             try
@@ -61,7 +68,7 @@ namespace Scriban.Syntax
             }
             finally
             {
-                if (context.CurrentPipeArguments != null)
+                if (context.CurrentPipeArguments is not null)
                 {
                     context.PopPipeArguments();
                 }

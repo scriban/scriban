@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -36,7 +36,7 @@ namespace Scriban.Syntax
         /// <param name="context">The context</param>
         /// <param name="state">The state of the loop</param>
         /// <returns></returns>
-        protected abstract object LoopItem(TemplateContext context, LoopState state);
+        protected abstract object? LoopItem(TemplateContext context, LoopState state);
 
         protected virtual LoopState CreateLoopState() {  return new LoopState(); }
 
@@ -58,10 +58,10 @@ namespace Scriban.Syntax
         {
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             // Notify the context that we enter a loop block (used for variable with scope Loop)
-            object result = null;
+            object? result = null;
             context.EnterLoop(this);
             try
             {
@@ -81,12 +81,12 @@ namespace Scriban.Syntax
             return result;
         }
 
-        protected abstract object EvaluateImpl(TemplateContext context);
+        protected abstract object? EvaluateImpl(TemplateContext context);
 
 #if !SCRIBAN_NO_ASYNC
-        protected abstract ValueTask<object> EvaluateImplAsync(TemplateContext context);
+        protected abstract ValueTask<object?> EvaluateImplAsync(TemplateContext context);
 
-        protected abstract ValueTask<object> LoopItemAsync(TemplateContext context, LoopState state);
+        protected abstract ValueTask<object?> LoopItemAsync(TemplateContext context, LoopState state);
 
         protected virtual ValueTask BeforeLoopAsync(TemplateContext context)
         {
@@ -105,9 +105,9 @@ namespace Scriban.Syntax
         protected class LoopState : IScriptObject
         {
             private int _length;
-            private object _lengthObject;
-            private IEnumerable _list;
-            private IEnumerator _it;
+            private object? _lengthObject;
+            private IEnumerable? _list;
+            private IEnumerator? _it;
             private bool _isLast;
             private bool _isLastTaken;
 
@@ -146,9 +146,9 @@ namespace Scriban.Syntax
             {
                 get
                 {
-                    if (_lengthObject == null)
+                    if (_lengthObject is null)
                     {
-                        _length = _list is IList list ? list.Count : _list.Cast<object>().Count();
+                        _length = _list is IList list ? list.Count : _list?.Cast<object?>().Count() ?? 0;
                         _lengthObject = _length;
                     }
                     return _length;
@@ -183,7 +183,7 @@ namespace Scriban.Syntax
 
             public bool IsReadOnly { get; set; }
 
-            public virtual  bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
+            public virtual bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object? value)
             {
                 value = null;
                 var isLiquid = context.IsLiquid;
@@ -236,7 +236,7 @@ namespace Scriban.Syntax
                 throw new System.NotImplementedException();
             }
 
-            public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object value, bool readOnly)
+            public bool TrySetValue(TemplateContext context, SourceSpan span, string member, object? value, bool readOnly)
             {
                 return false;
             }

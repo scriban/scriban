@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -16,9 +16,9 @@ namespace Scriban.Syntax
 #endif
     static class ScriptNodeExtensions
     {
-        public static ScriptNode FindFirstTerminal(this ScriptNode node)
+        public static ScriptNode? FindFirstTerminal(this ScriptNode? node)
         {
-            if (node == null) return null;
+            if (node is null) return null;
             if (node is IScriptTerminal)
             {
                 return node;
@@ -28,11 +28,11 @@ namespace Scriban.Syntax
             for (int i = 0; i < count; i++)
             {
                 var child = node.GetChildren(i);
-                if (child != null)
+                if (child is not null)
                 {
                     // TODO: could be optimized with a stack
                     var first = FindFirstTerminal(child);
-                    if (first != null)
+                    if (first is not null)
                     {
                         return first;
                     }
@@ -41,9 +41,9 @@ namespace Scriban.Syntax
             return null;
         }
 
-        public static ScriptNode FindLastTerminal(this ScriptNode node)
+        public static ScriptNode? FindLastTerminal(this ScriptNode? node)
         {
-            if (node == null) return null;
+            if (node is null) return null;
             if (node is IScriptTerminal)
             {
                 return node;
@@ -53,11 +53,11 @@ namespace Scriban.Syntax
             for (int i = count - 1; i >= 0; i--)
             {
                 var child = node.GetChildren(i);
-                if (child != null)
+                if (child is not null)
                 {
                     // TODO: could be optimized with a stack
                     var last = FindLastTerminal(child);
-                    if (last != null)
+                    if (last is not null)
                     {
                         return last;
                     }
@@ -68,9 +68,9 @@ namespace Scriban.Syntax
 
         public static T RemoveLeadingSpace<T>(this T node) where T : ScriptNode
         {
-            var firstTerminal = (IScriptTerminal)FindFirstTerminal(node);
+            var firstTerminal = FindFirstTerminal(node) as IScriptTerminal;
             var trivias = firstTerminal?.Trivias;
-            if (trivias != null)
+            if (trivias is not null)
             {
                 var triviasBefore = trivias.Before;
                 if (triviasBefore.Count > 0)
@@ -96,9 +96,9 @@ namespace Scriban.Syntax
 
         public static T RemoveTrailingSpace<T>(this T node) where T : ScriptNode
         {
-            var lastTerminal = (IScriptTerminal)FindLastTerminal(node);
+            var lastTerminal = FindLastTerminal(node) as IScriptTerminal;
             var trivias = lastTerminal?.Trivias;
-            if (trivias != null)
+            if (trivias is not null)
             {
                 var triviasAfter = trivias.After;
                 if (triviasAfter.Count > 0)
@@ -123,10 +123,10 @@ namespace Scriban.Syntax
 
         public static void MoveLeadingTriviasTo<T>(this ScriptNode node, T destinationNode) where T : ScriptNode, IScriptTerminal
         {
-            var firstTerminal = (IScriptTerminal)node.FindFirstTerminal();
+            var firstTerminal = node.FindFirstTerminal() as IScriptTerminal;
 
             var trivias = firstTerminal?.Trivias;
-            if (trivias != null)
+            if (trivias is not null)
             {
                 var before = trivias.Before;
                 foreach (var trivia in before)
@@ -139,10 +139,10 @@ namespace Scriban.Syntax
 
         public static void MoveTrailingTriviasTo<T>(this ScriptNode node, T destinationNode, bool before) where T : ScriptNode, IScriptTerminal
         {
-            var lastTerminal = (IScriptTerminal)node.FindLastTerminal();
+            var lastTerminal = node.FindLastTerminal() as IScriptTerminal;
 
             var trivias = lastTerminal?.Trivias;
-            if (trivias != null)
+            if (trivias is not null)
             {
                 var after = trivias.After;
                 if (before)
@@ -199,7 +199,7 @@ namespace Scriban.Syntax
         public static void AddTrivia(this IScriptTerminal node, ScriptTrivia trivia, bool before)
         {
             var trivias = node.Trivias;
-            if (trivias == null)
+            if (trivias is null)
             {
                 node.Trivias = trivias = new ScriptTrivias();
             }
@@ -209,7 +209,7 @@ namespace Scriban.Syntax
         public static void InsertTrivia(this IScriptTerminal node, ScriptTrivia trivia, bool before)
         {
             var trivias = node.Trivias;
-            if (trivias == null)
+            if (trivias is null)
             {
                 node.Trivias = trivias = new ScriptTrivias();
             }
@@ -227,7 +227,7 @@ namespace Scriban.Syntax
 
         public static bool HasLeadingSpaceTrivias(this IScriptTerminal node)
         {
-            if (node.Trivias == null)
+            if (node.Trivias is null)
             {
                 return false;
             }
@@ -247,7 +247,7 @@ namespace Scriban.Syntax
 
         public static bool HasTrailingSpaceTrivias(this IScriptTerminal node)
         {
-            if (node.Trivias == null)
+            if (node.Trivias is null)
             {
                 return false;
             }
@@ -267,7 +267,7 @@ namespace Scriban.Syntax
 
         public static bool HasTrivia(this IScriptTerminal node, ScriptTriviaType triviaType, bool before)
         {
-            if (node.Trivias == null)
+            if (node.Trivias is null)
             {
                 return false;
             }
@@ -284,7 +284,7 @@ namespace Scriban.Syntax
 
         public static bool HasTriviaEndOfStatement(this IScriptTerminal node, bool before)
         {
-            if (node.Trivias == null)
+            if (node.Trivias is null)
             {
                 return false;
             }

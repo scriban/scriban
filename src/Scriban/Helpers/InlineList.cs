@@ -1,4 +1,4 @@
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -15,7 +15,7 @@ namespace Scriban.Helpers
 
         public int Count;
 
-        public T[] Items;
+        public T[]? Items;
 
         public InlineList(int capacity)
         {
@@ -30,7 +30,7 @@ namespace Scriban.Helpers
             set
             {
                 Ensure();
-                if (value <= Items.Length) return;
+                if (value <= (Items?.Length ?? 0)) return;
                 EnsureCapacity(value);
             }
         }
@@ -48,7 +48,7 @@ namespace Scriban.Helpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Ensure()
         {
-            if (Items == null) Items = Array.Empty<T>();
+            if (Items is null) Items = Array.Empty<T>();
         }
 
         public bool IsReadOnly => false;
@@ -58,14 +58,14 @@ namespace Scriban.Helpers
         {
             if (Count > 0)
             {
-                Array.Clear(Items, 0, Count);
+                Array.Clear(Items!, 0, Count);
                 Count = 0;
             }
         }
 
         public InlineList<T> Clone()
         {
-            var items = (T[])Items?.Clone();
+            var items = Items is null ? Array.Empty<T>() : (T[])Items.Clone();
             return new InlineList<T>() { Count = Count, Items = items };
         }
 
@@ -76,10 +76,10 @@ namespace Scriban.Helpers
 
         public void CopyTo(T[] array, int arrayIndex)
         {
-            if (array == null) throw new ArgumentNullException(nameof(array));
+            if (array is null) throw new ArgumentNullException(nameof(array));
             if (Count > 0)
             {
-                System.Array.Copy(Items, 0, array, arrayIndex, Count);
+                System.Array.Copy(Items!, 0, array, arrayIndex, Count);
             }
         }
 
@@ -99,7 +99,8 @@ namespace Scriban.Helpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Add(T child)
         {
-            if (Count == Items.Length)
+            Ensure();
+            if (Count == Items!.Length)
             {
                 EnsureCapacity(Count + 1);
             }
@@ -109,7 +110,8 @@ namespace Scriban.Helpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void AddByRef(in T child)
         {
-            if (Count == Items.Length)
+            Ensure();
+            if (Count == Items!.Length)
             {
                 EnsureCapacity(Count + 1);
             }
@@ -119,13 +121,14 @@ namespace Scriban.Helpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void Insert(int index, T item)
         {
-            if (Count == Items.Length)
+            Ensure();
+            if (Count == Items!.Length)
             {
                 EnsureCapacity(Count + 1);
             }
             if (index < Count)
             {
-                Array.Copy(Items, index, Items, index + 1, Count - index);
+                Array.Copy(Items!, index, Items, index + 1, Count - index);
             }
             Items[index] = item;
             Count++;
@@ -134,31 +137,32 @@ namespace Scriban.Helpers
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public ref T InsertReturnRef(int index, T item)
         {
-            if (Count == Items.Length)
+            Ensure();
+            if (Count == Items!.Length)
             {
                 EnsureCapacity(Count + 1);
             }
             if (index < Count)
             {
-                Array.Copy(Items, index, Items, index + 1, Count - index);
+                Array.Copy(Items!, index, Items, index + 1, Count - index);
             }
 
-            ref var refItem = ref Items[index];
-            refItem = item;
+            Items![index] = item;
             Count++;
-            return ref refItem;
+            return ref Items[index];
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         public void InsertByRef(int index, in T item)
         {
-            if (Count == Items.Length)
+            Ensure();
+            if (Count == Items!.Length)
             {
                 EnsureCapacity(Count + 1);
             }
             if (index < Count)
             {
-                Array.Copy(Items, index, Items, index + 1, Count - index);
+                Array.Copy(Items!, index, Items, index + 1, Count - index);
             }
             Items[index] = item;
             Count++;
@@ -177,7 +181,7 @@ namespace Scriban.Helpers
 
         public int IndexOf(T element)
         {
-            return Array.IndexOf(Items, element, 0, Count);
+            return Array.IndexOf(Items ?? Array.Empty<T>(), element, 0, Count);
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -186,12 +190,12 @@ namespace Scriban.Helpers
             if (index < 0 || index >= Count) ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
             Count--;
             // previous children
-            var item = Items[index];
+            var item = Items![index];
             if (index < Count)
             {
                 Array.Copy(Items, index + 1, Items, index, Count - index);
             }
-            Items[Count] = default(T);
+            Array.Clear(Items, Count, 1);
             return item;
         }
 
@@ -201,19 +205,20 @@ namespace Scriban.Helpers
             get
             {
                 if ((uint)index >= (uint)Count) ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
-                return Items[index];
+                return Items![index];
             }
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             set {
                 if ((uint)index >= (uint)Count) ThrowHelper.ThrowArgumentOutOfRangeException(ExceptionArgument.index);
-                Items[index] = value;
+                Items![index] = value;
             }
         }
 
         private void EnsureCapacity(int min)
         {
-            if (Items.Length < min)
+            Ensure();
+            if (Items!.Length < min)
             {
                 int num = (Items.Length == 0) ? DefaultCapacity : (Items.Length * 2);
                 if (num < min)
@@ -243,19 +248,24 @@ namespace Scriban.Helpers
         {
             private readonly InlineList<T> list;
             private int index;
-            private T current;
 
             [MethodImpl(MethodImplOptions.AggressiveInlining)]
             internal Enumerator(InlineList<T> list)
             {
                 this.list = list;
                 index = 0;
-                current = default(T);
             }
 
-            public T Current => current;
+            public T Current
+            {
+                get
+                {
+                    if (index == 0 || index > list.Count) throw new InvalidOperationException();
+                    return list[index - 1];
+                }
+            }
 
-            object IEnumerator.Current => Current;
+            object? IEnumerator.Current => Current;
 
 
             public void Dispose()
@@ -266,7 +276,6 @@ namespace Scriban.Helpers
             {
                 if (index < list.Count)
                 {
-                    current = list[index];
                     index++;
                     return true;
                 }
@@ -276,14 +285,12 @@ namespace Scriban.Helpers
             private bool MoveNextRare()
             {
                 index = list.Count + 1;
-                current = default(T);
                 return false;
             }
 
             void IEnumerator.Reset()
             {
                 index = 0;
-                current = default(T);
             }
         }
 

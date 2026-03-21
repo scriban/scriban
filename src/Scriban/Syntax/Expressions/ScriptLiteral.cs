@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Parsing;
 using System;
@@ -23,29 +23,31 @@ namespace Scriban.Syntax
     {
         public ScriptLiteral()
         {
+            Trivias = new ScriptTrivias();
         }
 
-        public ScriptLiteral(object value)
+        public ScriptLiteral(object? value)
         {
+            Trivias = new ScriptTrivias();
             Value = value;
         }
 
         public ScriptTrivias Trivias { get; set; }
 
-        public object Value { get; set; }
+        public object? Value { get; set; }
         
         public ScriptLiteralStringQuoteType StringQuoteType { get; set; }
 
         public TokenType StringTokenType { get; set; } = TokenType.String;
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return Value;
         }
 
         public bool IsPositiveInteger()
         {
-            if (Value == null)
+            if (Value is null)
             {
                 return false;
             }
@@ -87,7 +89,7 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            if (Value == null)
+            if (Value is null)
             {
                 printer.Write("null");
                 return;
@@ -150,15 +152,20 @@ namespace Scriban.Syntax
             }
             else if (type == typeof(char))
             {
+                var valueText = Value.ToString();
                 printer.Write(ToLiteral(
                     ScriptLiteralStringQuoteType.SimpleQuote,
                     StringTokenType,
-                    Value.ToString())
+                    valueText ?? string.Empty)
                 );
             }
             else
             {
-                printer.Write(Value.ToString());
+                var valueText = Value.ToString();
+                if (valueText is not null)
+                {
+                    printer.Write(valueText);
+                }
             }
         }
 

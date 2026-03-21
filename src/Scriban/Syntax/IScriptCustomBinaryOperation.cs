@@ -13,6 +13,6 @@ namespace Scriban.Syntax
 #endif
     interface IScriptCustomBinaryOperation
     {
-        bool TryEvaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue, out object result);
+        bool TryEvaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object? leftValue, SourceSpan rightSpan, object? rightValue, out object? result);
     }
 }

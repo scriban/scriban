@@ -7,7 +7,7 @@
     <DefineConstants>$(DefineConstants);SCRIBAN_PUBLIC</DefineConstants>
     <Authors>Alexandre Mutel</Authors>
     <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
-    <LangVersion Condition="'$(TargetFramework)' == 'netstandard2.0'">8.0</LangVersion>
+    <LangVersion>latest</LangVersion>
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageIcon>scriban.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
@@ -55,5 +55,9 @@
     <PackageReference Include="Microsoft.CSharp" />
     <PackageReference Include="System.Text.Json" />
     <PackageReference Include="System.Threading.Tasks.Extensions" />
+    <PackageReference Include="PolySharp">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 </Project>

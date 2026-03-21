@@ -12,7 +12,7 @@ namespace DotLiquid.Tests.Tags
 {
     public class Helper
     {
-        public static void AssertTemplateResult(string result, string input, object model = null, bool hasForVariableNotSupportedByScriban = false, bool supportRoundTrip = true)
+        public static void AssertTemplateResult(string result, string input, object? model = null, bool hasForVariableNotSupportedByScriban = false, bool supportRoundTrip = true)
         {
             TestParser.AssertTemplate(result, input, ScriptLang.Liquid, false, false, model, true, expectParsingErrorForRountrip: hasForVariableNotSupportedByScriban, supportRoundTrip: supportRoundTrip);
         }

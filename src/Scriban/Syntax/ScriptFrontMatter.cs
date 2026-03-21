@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Parsing;
 
@@ -15,14 +15,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptFrontMatter : ScriptStatement
     {
-        private ScriptToken _startMarker;
-        private ScriptToken _endMarker;
-        private ScriptBlockStatement _statements;
-
+        private ScriptToken _startMarker = new ScriptToken(TokenType.FrontMatterMarker);
+        private ScriptToken _endMarker = new ScriptToken(TokenType.FrontMatterMarker);
+        private ScriptBlockStatement _statements = new ScriptBlockStatement();
         public ScriptFrontMatter()
         {
-            StartMarker = new ScriptToken(TokenType.FrontMatterMarker);
-            EndMarker = new ScriptToken(TokenType.FrontMatterMarker);
+            _startMarker.Parent = this;
+            _endMarker.Parent = this;
+            _statements.Parent = this;
         }
 
 
@@ -46,7 +46,7 @@ namespace Scriban.Syntax
 
         public TextPosition TextPositionAfterEndMarker;
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return context.Evaluate(Statements);
         }

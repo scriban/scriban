@@ -2,11 +2,12 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Scriban.Helpers;
 using Scriban.Runtime;
 
@@ -20,11 +21,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptFunctionCall : ScriptExpression
     {
-        private ScriptExpression _target;
-        private ScriptToken _openParent;
+        private ScriptExpression? _target;
+        private ScriptToken? _openParent;
         private ScriptList<ScriptExpression> _arguments;
-        private ScriptToken _closeParen;
-
+        private ScriptToken? _closeParen;
         // Maximum number of parameters is 64
         // it equals the argMask we are using for matching arguments passed
         // as it is a long, it can only store 64 bits, so we are limiting
@@ -33,19 +33,20 @@ namespace Scriban.Syntax
 
         public ScriptFunctionCall()
         {
-            Arguments = new ScriptList<ScriptExpression>();
+            _arguments = new ScriptList<ScriptExpression>();
+            _arguments.Parent = this;
         }
 
-        public ScriptExpression Target
+        public ScriptExpression? Target
         {
             get => _target;
-            set => ParentToThis(ref _target, value);
+            set => ParentToThisNullable(ref _target, value);
         }
 
-        public ScriptToken OpenParent
+        public ScriptToken? OpenParent
         {
             get => _openParent;
-            set => ParentToThis(ref _openParent, value);
+            set => ParentToThisNullable(ref _openParent, value);
         }
 
         public ScriptList<ScriptExpression> Arguments
@@ -54,20 +55,20 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _arguments, value);
         }
 
-        public ScriptToken CloseParen
+        public ScriptToken? CloseParen
         {
             get => _closeParen;
-            set => ParentToThis(ref _closeParen, value);
+            set => ParentToThisNullable(ref _closeParen, value);
         }
 
         public bool ExplicitCall { get; set; }
 
-        public bool TryGetFunctionDeclaration(out ScriptFunction function)
+        public bool TryGetFunctionDeclaration([NotNullWhen(true)] out ScriptFunction? function)
         {
             function = null;
             if (!ExplicitCall) return false;
             if (!(Target is ScriptVariableGlobal name)) return false;
-            if (OpenParent == null || CloseParen == null) return false;
+            if (OpenParent is null || CloseParen is null) return false;
 
             foreach(var arg in Arguments)
             {
@@ -97,9 +98,9 @@ namespace Scriban.Syntax
 
         public void AddArgument(ScriptExpression argument)
         {
-            if (argument == null) throw new ArgumentNullException(nameof(argument));
+            if (argument is null) throw new ArgumentNullException(nameof(argument));
             Arguments.Add(argument);
-            if (CloseParen == null && !argument.Span.IsEmpty)
+            if (CloseParen is null && !argument.Span.IsEmpty)
             {
                 Span.End = argument.Span.End;
             }
@@ -111,19 +112,25 @@ namespace Scriban.Syntax
             return this;
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            var target = Target;
+            if (target is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid function call. Target is required.");
+            }
+
             // Invoke evaluate on the target, but don't automatically call the function as if it was a parameterless call.
-            var targetFunction = context.Evaluate(Target, true);
+            var targetFunction = context.Evaluate(target, true);
 
             // Throw an exception if the target function is null
-            if (targetFunction == null)
+            if (targetFunction is null)
             {
                 if (context.EnableRelaxedFunctionAccess)
                 {
                     return null;
                 }
-                throw new ScriptRuntimeException(Target.Span, $"The function `{Target}` was not found");
+                throw new ScriptRuntimeException(target.Span, $"The function `{target}` was not found");
             }
 
             return Call(context, this, targetFunction, context.AllowPipeArguments, Arguments);
@@ -131,8 +138,11 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(Target);
-            if (OpenParent != null)
+            if (Target is not null)
+            {
+                printer.Write(Target);
+            }
+            if (OpenParent is not null)
             {
                 printer.Write(OpenParent);
                 printer.WriteListWithCommas(Arguments);
@@ -147,58 +157,58 @@ namespace Scriban.Syntax
                 }
             }
 
-            if (CloseParen != null) printer.Write(CloseParen);
+            if (CloseParen is not null) printer.Write(CloseParen);
         }
 
         public override bool CanHaveLeadingTrivia()
         {
             return false;
         }
-        public static bool IsFunction(object target)
+        public static bool IsFunction(object? target)
         {
             return target is IScriptCustomFunction;
         }
 
-        public static object Call(TemplateContext context, ScriptNode callerContext, object functionObject, bool processPipeArguments, IReadOnlyList<ScriptExpression> arguments)
+        public static object? Call(TemplateContext context, ScriptNode? callerContext, object? functionObject, bool processPipeArguments, IReadOnlyList<ScriptExpression>? arguments)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
+            if (context is null) throw new ArgumentNullException(nameof(context));
 
             // Pop immediately the block
-            ScriptBlockStatement blockDelegate = null;
+            ScriptBlockStatement? blockDelegate = null;
             if (context.BlockDelegates.Count > 0)
             {
                 blockDelegate = context.BlockDelegates.Pop();
             }
 
-            if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
-            if (functionObject == null)
+            var callerSpan = callerContext?.Span ?? context.CurrentSpan;
+            if (functionObject is null)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"The target function `{callerContext}` is null");
+                throw new ScriptRuntimeException(callerSpan, $"The target function `{callerContext}` is null");
             }
             var scriptFunction = functionObject as ScriptFunction;
             var function = functionObject as IScriptCustomFunction;
 
-            var isPipeCall = processPipeArguments && context.CurrentPipeArguments != null && context.CurrentPipeArguments.Count > 0;
+            var isPipeCall = processPipeArguments && context.CurrentPipeArguments is not null && context.CurrentPipeArguments.Count > 0;
 
-            if (function == null)
+            if (function is null)
             {
                 if ((isPipeCall) && (callerContext is ScriptFunctionCall funcCall))
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Pipe expression destination `{funcCall.Target}` is not a valid function ");
+                    throw new ScriptRuntimeException(callerSpan, $"Pipe expression destination `{funcCall.Target}` is not a valid function ");
                 }
                 else
                 {
-                    throw new ScriptRuntimeException(callerContext.Span, $"Invalid target function `{functionObject}` ({context.GetTypeName(functionObject)})");
+                    throw new ScriptRuntimeException(callerSpan, $"Invalid target function `{functionObject}` ({context.GetTypeName(functionObject)})");
                 }
             }
 
             if (function.ParameterCount >= MaximumParameterCount)
             {
-                throw new ScriptRuntimeException(callerContext.Span, $"Out of range number of parameters {function.ParameterCount} for target function `{functionObject}`. The maximum number of parameters for a function is: {MaximumParameterCount}.");
+                throw new ScriptRuntimeException(callerSpan, $"Out of range number of parameters {function.ParameterCount} for target function `{functionObject}`. The maximum number of parameters for a function is: {MaximumParameterCount}.");
             }
 
             // Generates an error only if the context is configured for it
-            if (context.ErrorForStatementFunctionAsExpression && function.ReturnType == typeof(void) && callerContext.Parent is ScriptExpression)
+            if (context.ErrorForStatementFunctionAsExpression && function.ReturnType == typeof(void) && callerContext?.Parent is ScriptExpression)
             {
                 var firstToken = callerContext.FindFirstTerminal();
                 throw new ScriptRuntimeException(callerContext.Span, $"The function `{firstToken}` is a statement and cannot be used within an expression.");
@@ -207,18 +217,24 @@ namespace Scriban.Syntax
             // We can't cache this array because it might be collect by the function
             // So we absolutely need to generate a new array everytime we call a function
             ScriptArray argumentValues;
-            List<ScriptExpression> allArgumentsWithPipe = null;
+            List<ScriptExpression>? allArgumentsWithPipe = null;
 
             // Handle pipe arguments here
             if (isPipeCall)
             {
                 var argCount = Math.Max(function.RequiredParameterCount, 1 + (arguments?.Count ?? 0));
                 allArgumentsWithPipe = context.GetOrCreateListOfScriptExpressions(argCount);
-                var pipeFrom = context.CurrentPipeArguments.Pop();
+                var currentPipeArguments = context.CurrentPipeArguments;
+                if (currentPipeArguments is null)
+                {
+                    throw new ScriptRuntimeException(callerSpan, "Invalid pipe state. Missing pipe arguments.");
+                }
+
+                var pipeFrom = currentPipeArguments.Pop();
                 argumentValues =  new ScriptArray(argCount);
                 allArgumentsWithPipe.Add(pipeFrom);
 
-                if (arguments != null)
+                if (arguments is not null)
                 {
                     allArgumentsWithPipe.AddRange(arguments);
                 }
@@ -229,13 +245,12 @@ namespace Scriban.Syntax
                 argumentValues = new ScriptArray(arguments?.Count ?? 0);
             }
 
-            var needLocal = !(function is ScriptFunction func && func.HasParameters);
-            object result = null;
+            object? result = null;
             try
             {
                 // Process direct arguments
                 ulong argMask = 0;
-                if (arguments != null)
+                if (arguments is not null)
                 {
                     argMask = ProcessArguments(context, callerContext, arguments, function, scriptFunction, argumentValues);
                 }
@@ -255,7 +270,7 @@ namespace Scriban.Syntax
                 argMask = argMask & requiredMask;
 
                 // Create a span after the caller for missing arguments
-                var afterCallerSpan = callerContext.Span;
+                var afterCallerSpan = callerSpan;
                 afterCallerSpan.Start = afterCallerSpan.End.NextColumn();
                 afterCallerSpan.End = afterCallerSpan.End.NextColumn();
 
@@ -272,14 +287,17 @@ namespace Scriban.Syntax
 
                 if (!hasVariableParams && argumentValues.Count > parameterCount)
                 {
-                    if (argumentValues.Count > 0 && arguments != null && argumentValues.Count <= arguments.Count)
+                    if (argumentValues.Count > 0 && arguments is not null && argumentValues.Count <= arguments.Count)
                     {
                         throw new ScriptRuntimeException(arguments[argumentValues.Count - 1].Span, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
                     }
                     throw new ScriptRuntimeException(afterCallerSpan, $"Invalid number of arguments `{argumentValues.Count}` passed to `{callerContext}` while expecting `{parameterCount}` arguments");
                 }
 
-                context.EnterFunction(callerContext);
+                if (callerContext is not null)
+                {
+                    context.EnterFunction(callerContext);
+                }
                 try
                 {
                     result = function.Invoke(context, callerContext, argumentValues, blockDelegate);
@@ -288,7 +306,7 @@ namespace Scriban.Syntax
                 {
                     // Slow path to detect the argument index from the name if we can
                     var index = GetParameterIndexByName(function, ex.ParamName);
-                    if (index >= 0 && arguments != null && index < arguments.Count)
+                    if (index >= 0 && arguments is not null && index < arguments.Count)
                     {
                         throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
                     }
@@ -298,7 +316,7 @@ namespace Scriban.Syntax
                 catch (ScriptArgumentException ex)
                 {
                     var index = ex.ArgumentIndex;
-                    if (index >= 0 && arguments != null && index < arguments.Count)
+                    if (index >= 0 && arguments is not null && index < arguments.Count)
                     {
                         throw new ScriptRuntimeException(arguments[index].Span, ex.Message);
                     }
@@ -307,12 +325,15 @@ namespace Scriban.Syntax
                 }
                 finally
                 {
-                    context.ExitFunction(callerContext);
+                    if (callerContext is not null)
+                    {
+                        context.ExitFunction(callerContext);
+                    }
                 }
             }
             finally
             {
-                if (allArgumentsWithPipe != null)
+                if (allArgumentsWithPipe is not null)
                 {
                     context.ReleaseListOfScriptExpressions(allArgumentsWithPipe);
                 }
@@ -331,16 +352,15 @@ namespace Scriban.Syntax
         /// <param name="function"></param>
         /// <param name="arguments"></param>
         /// <returns></returns>
-        public static object Call(TemplateContext context, ScriptNode callerContext, IScriptCustomFunction function, ScriptArray arguments)
+        public static object? Call(TemplateContext context, ScriptNode? callerContext, IScriptCustomFunction function, ScriptArray arguments)
         {
-            if (context == null) throw new ArgumentNullException(nameof(context));
-            if (callerContext == null) throw new ArgumentNullException(nameof(callerContext));
-            if (function == null) throw new ArgumentNullException(nameof(function));
-            if (arguments == null) throw new ArgumentNullException(nameof(arguments));
+            if (context is null) throw new ArgumentNullException(nameof(context));
+            if (function is null) throw new ArgumentNullException(nameof(function));
+            if (arguments is null) throw new ArgumentNullException(nameof(arguments));
             var parameterCount = function.ParameterCount;
 
             var argumentValues = new ScriptArray();
-            var span = callerContext.Span;
+            var span = callerContext?.Span ?? context.CurrentSpan;
             // Fast path if we don't have complicated parameters to handle (direct call, same amount of arguments than expected parameters)
             if (function.VarParamKind == ScriptVarParamKind.None && parameterCount == arguments.Count)
             {
@@ -375,7 +395,7 @@ namespace Scriban.Syntax
                 argMask = argMask & requiredMask;
 
                 // Create a span after the caller for missing arguments
-                var afterCallerSpan = callerContext.Span;
+                var afterCallerSpan = callerContext?.Span ?? span;
                 afterCallerSpan.Start = afterCallerSpan.End.NextColumn();
                 afterCallerSpan.End = afterCallerSpan.End.NextColumn();
 
@@ -392,8 +412,11 @@ namespace Scriban.Syntax
                 }
             }
 
-            object result = null;
-            context.EnterFunction(callerContext);
+            object? result = null;
+            if (callerContext is not null)
+            {
+                context.EnterFunction(callerContext);
+            }
             try
             {
                 result = function.Invoke(context, callerContext, argumentValues, null);
@@ -402,7 +425,7 @@ namespace Scriban.Syntax
             {
                 // Slow path to detect the argument index from the name if we can
                 var index = GetParameterIndexByName(function, ex.ParamName);
-                if (index >= 0 && arguments != null && index < arguments.Count)
+                if (index >= 0 && arguments is not null && index < arguments.Count)
                 {
                     throw new ScriptRuntimeException(span, ex.Message);
                 }
@@ -412,7 +435,7 @@ namespace Scriban.Syntax
             catch (ScriptArgumentException ex)
             {
                 var index = ex.ArgumentIndex;
-                if (index >= 0 && arguments != null && index < arguments.Count)
+                if (index >= 0 && arguments is not null && index < arguments.Count)
                 {
                     throw new ScriptRuntimeException(span, ex.Message);
                 }
@@ -421,7 +444,10 @@ namespace Scriban.Syntax
             }
             finally
             {
-                context.ExitFunction(callerContext);
+                if (callerContext is not null)
+                {
+                    context.ExitFunction(callerContext);
+                }
             }
 
             // Restore the flow state to none
@@ -429,24 +455,25 @@ namespace Scriban.Syntax
             return result;
         }
 
-        private static ulong ProcessArguments(TemplateContext context, ScriptNode callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction scriptFunction, ScriptArray argumentValues)
+        private static ulong ProcessArguments(TemplateContext context, ScriptNode? callerContext, IReadOnlyList<ScriptExpression> arguments, IScriptCustomFunction function, ScriptFunction? scriptFunction, ScriptArray argumentValues)
         {
             ulong argMask = 0;
             var parameterCount = function.ParameterCount;
+            var callerSpan = callerContext?.Span ?? context.CurrentSpan;
 
             for (var argIndex = 0; argIndex < arguments.Count; argIndex++)
             {
                 var argument = arguments[argIndex];
 
                 int index = argumentValues.Count;
-                object value;
+                object? value;
 
                 // Handle named arguments
                 var namedArg = argument as ScriptNamedArgument;
-                if (namedArg != null)
+                if (namedArg is not null)
                 {
                     var argName = namedArg.Name?.Name;
-                    if (argName == null)
+                    if (argName is null)
                     {
                         throw new ScriptRuntimeException(argument.Span, "Invalid null argument name");
                     }
@@ -461,7 +488,7 @@ namespace Scriban.Syntax
                         // We can't add an argument that is "size" for array
                         else if (argumentValues.CanWrite(argName))
                         {
-                            argumentValues.TrySetValue(context, callerContext.Span, argName, context.Evaluate(namedArg), false);
+                            argumentValues.TrySetValue(context, callerSpan, argName, context.Evaluate(namedArg), false);
                             continue;
                         }
                         else
@@ -478,7 +505,7 @@ namespace Scriban.Syntax
 
                 if (function.IsParameterType<ScriptExpression>(index))
                 {
-                    value = namedArg != null ? namedArg.Value : argument;
+                    value = namedArg is not null ? namedArg.Value : argument;
                 }
                 else
                 {
@@ -489,12 +516,12 @@ namespace Scriban.Syntax
                 if (argument is ScriptUnaryExpression unaryExpression && unaryExpression.Operator == ScriptUnaryOperator.FunctionParametersExpand && !(value is ScriptExpression))
                 {
                     var valueEnumerator = value as IEnumerable;
-                    if (valueEnumerator != null)
+                    if (valueEnumerator is not null)
                     {
                         foreach (var subValue in valueEnumerator)
                         {
                             var paramType = function.GetParameterInfo(argumentValues.Count).ParameterType;
-                            var newValue = context.ToObject(callerContext.Span, subValue, paramType);
+                            var newValue = context.ToObject(callerSpan, subValue, paramType);
 
                             SetArgumentValue(index, newValue, function, ref argMask, argumentValues, parameterCount);
                             index++;
@@ -514,7 +541,7 @@ namespace Scriban.Syntax
             return argMask;
         }
 
-        private static void SetArgumentValue(int index, object value, IScriptCustomFunction function, ref ulong argMask, ScriptArray argumentValues, int parameterCount)
+        private static void SetArgumentValue(int index, object? value, IScriptCustomFunction function, ref ulong argMask, ScriptArray argumentValues, int parameterCount)
         {
             // NamedArguments can index further, so we need to fill any intermediate argument values
             // with their default values.
@@ -527,10 +554,10 @@ namespace Scriban.Syntax
 
             if (function.VarParamKind == ScriptVarParamKind.LastParameter && index >= parameterCount - 1)
             {
-                var varArgs = (ScriptArray) argumentValues[parameterCount - 1];
-                if (varArgs == null)
+                var varArgs = argumentValues[parameterCount - 1] as ScriptArray;
+                if (varArgs is null)
                 {
-                    argumentValues[index] = varArgs = new ScriptArray();
+                    argumentValues[parameterCount - 1] = varArgs = new ScriptArray();
                 }
                 varArgs.Add(value);
             }
@@ -562,8 +589,13 @@ namespace Scriban.Syntax
             }
         }
 
-        private static int GetParameterIndexByName(IScriptFunctionInfo functionInfo, string name)
+        private static int GetParameterIndexByName(IScriptFunctionInfo functionInfo, string? name)
         {
+            if (name is null)
+            {
+                return -1;
+            }
+
             var paramCount = functionInfo.ParameterCount;
             for (var i = 0; i < paramCount; i++)
             {

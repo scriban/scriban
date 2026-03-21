@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using System.Linq;
@@ -17,11 +17,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptContinueStatement : ScriptStatement
     {
-        private ScriptKeyword _continueKeyword;
-
+        private ScriptKeyword _continueKeyword = ScriptKeyword.Continue();
         public ScriptContinueStatement()
         {
-            ContinueKeyword = ScriptKeyword.Continue();
+            _continueKeyword.Parent = this;
         }
 
         public ScriptKeyword ContinueKeyword
@@ -30,7 +29,7 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _continueKeyword, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             // Only valid when we are in a loop (this should not happen as this is detected by the parser)
             if (context.IsInLoop)

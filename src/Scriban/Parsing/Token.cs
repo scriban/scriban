@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 
@@ -87,9 +87,9 @@ namespace Scriban.Parsing
             return Type == other.Type && Start.Equals(other.Start) && End.Equals(other.End);
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
+            if (obj is null) return false;
             return obj is Token && Equals((Token) obj);
         }
 

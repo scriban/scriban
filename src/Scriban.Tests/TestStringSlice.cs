@@ -9,7 +9,7 @@ namespace Scriban.Tests
 {
     public class TestStringSlice
     {
-        private static readonly string[] StringsToCompare = new string[]
+        private static readonly string?[] StringsToCompare = new string?[]
         {
             null,
             "",
@@ -26,7 +26,7 @@ namespace Scriban.Tests
         {
             for (int i = 0; i < text.Length; i++)
             {
-                var subText = text?.Substring(i);
+                var subText = text.Substring(i);
                 var slice = text.Slice(i);
                 CompareString(subText, slice);
             }
@@ -84,8 +84,10 @@ namespace Scriban.Tests
                     Assert.AreEqual(result, sliceResult);
                 }
 
-                Assert.AreEqual(subText == compare, slice == compare);
-                Assert.AreEqual(subText == compare, compare == slice);
+                var sliceEqualsCompare = compare is not null && slice == compare;
+                var compareEqualsSlice = compare is not null && compare == slice;
+                Assert.AreEqual(subText == compare, sliceEqualsCompare);
+                Assert.AreEqual(subText == compare, compareEqualsSlice);
             }
         }
     }

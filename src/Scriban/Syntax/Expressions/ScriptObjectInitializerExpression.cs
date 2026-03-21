@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using System.IO;
@@ -24,9 +24,12 @@ namespace Scriban.Syntax
 
         public ScriptObjectInitializerExpression()
         {
-            OpenBrace = ScriptToken.OpenBrace();
-            Members = new ScriptList<ScriptObjectMember>();
-            CloseBrace = ScriptToken.CloseBrace();
+            _openBrace = ScriptToken.OpenBrace();
+            _openBrace.Parent = this;
+            _members = new ScriptList<ScriptObjectMember>();
+            _members.Parent = this;
+            _closeBrace = ScriptToken.CloseBrace();
+            _closeBrace.Parent = this;
         }
 
         public ScriptToken OpenBrace
@@ -47,7 +50,7 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _closeBrace, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             var obj = new ScriptObject();
             context.PushGlobalOnly(obj);

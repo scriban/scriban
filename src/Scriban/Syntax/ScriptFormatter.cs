@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -19,10 +19,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptFormatter : ScriptRewriter
     {
-        private readonly TemplateContext _context;
+        private readonly TemplateContext? _context;
         private readonly ScriptFormatterFlags _flags;
         private readonly bool _isScientific;
-        private readonly CompressWhitespacesVisitor _compressWhitespacesVisitor;
+        private readonly CompressWhitespacesVisitor? _compressWhitespacesVisitor;
 
         public ScriptFormatter(ScriptFormatterOptions options)
         {
@@ -30,7 +30,7 @@ namespace Scriban.Syntax
             _flags = options.Flags;
             CopyTrivias = !_flags.HasFlags(ScriptFormatterFlags.RemoveExistingTrivias);
             _isScientific = options.Language == ScriptLang.Scientific;
-            _context = options.Context == null && _isScientific
+            _context = options.Context is null && _isScientific
                 ? throw new InvalidOperationException("The context within the options cannot be null when the scientific language is used.")
                 : options.Context;
             _compressWhitespacesVisitor = _flags.HasFlags(ScriptFormatterFlags.CompressSpaces) ? new CompressWhitespacesVisitor() : null;
@@ -41,7 +41,7 @@ namespace Scriban.Syntax
         public ScriptNode Format(ScriptNode node)
         {
             ScriptNode newNode;
-            if (_context != null)
+            if (_context is not null)
             {
                 var contextStrictVariables = _context.StrictVariables;
                 var contextEnableRelaxedIndexerAccess = _context.EnableRelaxedIndexerAccess;
@@ -59,7 +59,7 @@ namespace Scriban.Syntax
 
                 try
                 {
-                    newNode = Visit(node);
+                    newNode = Visit(node) ?? node;
                 }
                 finally
                 {
@@ -73,18 +73,18 @@ namespace Scriban.Syntax
             }
             else
             {
-                newNode = Visit(node);
+                newNode = Visit(node) ?? node;
             }
 
             if (_flags.HasFlags(ScriptFormatterFlags.CompressSpaces))
             {
-                _compressWhitespacesVisitor.CompressSpaces(newNode);
+                _compressWhitespacesVisitor?.CompressSpaces(newNode);
             }
 
             return newNode;
         }
 
-        public override ScriptNode Visit(ScriptNode node)
+        public override ScriptNode? Visit(ScriptNode? node)
         {
             var newNode = base.Visit(node);
             return newNode;
@@ -106,7 +106,7 @@ namespace Scriban.Syntax
         {
             var pipeCall = (ScriptPipeCall) base.Visit(node);
 
-            if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators))
+            if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators) && pipeCall.PipeToken is not null)
             {
                 pipeCall.PipeToken.AddLeadingSpace();
                 pipeCall.PipeToken.AddSpaceAfter();
@@ -117,12 +117,12 @@ namespace Scriban.Syntax
 
         public override ScriptNode Visit(ScriptBinaryExpression node)
         {
-            if (_isScientific)
+            if (_isScientific && _context is not null)
             {
                 var newNode = ScientificFunctionCallRewriter.Rewrite(_context, node);
                 if (newNode != node)
                 {
-                    return Visit((ScriptNode)newNode);
+                    return Visit(newNode) ?? newNode;
                 }
             }
 
@@ -131,7 +131,7 @@ namespace Scriban.Syntax
             // We don't surround range with spaces
             if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators))
             {
-                if (binaryExpression.Operator < ScriptBinaryOperator.RangeInclude)
+                if (binaryExpression.Operator < ScriptBinaryOperator.RangeInclude && binaryExpression.OperatorToken is not null)
                 {
                     binaryExpression.OperatorToken.AddLeadingSpace();
                     binaryExpression.OperatorToken.AddSpaceAfter();
@@ -178,7 +178,11 @@ namespace Scriban.Syntax
             var stmt = (ScriptExpressionStatement) base.Visit(node);
 
             // De-nest top-level expressions
-            stmt.Expression = DeNestExpression(stmt.Expression);
+            if (stmt.Expression is not null)
+            {
+                stmt.Expression = DeNestExpression(stmt.Expression);
+            }
+
             return stmt;
         }
 
@@ -196,7 +200,11 @@ namespace Scriban.Syntax
                     functionCall.CloseParen ??= ScriptToken.CloseParen();
 
                     // We remove any trailing spaces after the target cos (x) => cos(x)
-                    functionCall.Target.RemoveTrailingSpace();
+                    if (functionCall.Target is not null)
+                    {
+                        functionCall.Target.RemoveTrailingSpace();
+                    }
+
                     functionCall.Arguments.RemoveLeadingSpace();
                     functionCall.Arguments.MoveTrailingTriviasTo(functionCall.CloseParen, false);
                 }
@@ -209,16 +217,20 @@ namespace Scriban.Syntax
 
                 // No need to nest expression for arguments
                 arg = DeNestExpression(arg);
+                if (arg is null)
+                {
+                    continue;
+                }
 
                 if (i + 1 < functionCall.Arguments.Count)
                 {
-                    var lastToken = (IScriptTerminal)arg.FindLastTerminal();
-                    if (_isScientific)
+                    var lastToken = arg.FindLastTerminal() as IScriptTerminal;
+                    if (_isScientific && lastToken is not null)
                     {
                         lastToken.AddCommaAfter();
                     }
 
-                    if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators))
+                    if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators) && lastToken is not null)
                     {
                         lastToken.AddSpaceAfter();
                     }
@@ -233,7 +245,7 @@ namespace Scriban.Syntax
         public override ScriptNode Visit(ScriptFunction node)
         {
             ScriptFunction newFunction;
-            if (_context != null)
+            if (_context is not null)
             {
                 var hasParams = node.HasParameters;
 
@@ -252,11 +264,20 @@ namespace Scriban.Syntax
 
                     if (node.HasParameters)
                     {
-                        var glob = _context.CurrentGlobal;
-                        for (var i = 0; i < node.Parameters.Count; i++)
+                        var parameters = node.Parameters;
+                        if (parameters is null)
                         {
-                            var arg = node.Parameters[i];
-                            glob.SetValue(arg.Name.Name, string.Empty, false);
+                            return (ScriptFunction)base.Visit(node);
+                        }
+
+                        var glob = _context.CurrentGlobal ?? throw new InvalidOperationException("No current global object is available.");
+                        for (var i = 0; i < parameters.Count; i++)
+                        {
+                            var arg = parameters[i];
+                            if (arg.Name is not null)
+                            {
+                                glob.SetValue(arg.Name.Name, string.Empty, false);
+                            }
                         }
                     }
 
@@ -279,14 +300,21 @@ namespace Scriban.Syntax
                 newFunction = (ScriptFunction) base.Visit(node);
             }
 
-            if (_flags.HasFlags(ScriptFormatterFlags.Clean) && newFunction.OpenParen != null)
+            if (_flags.HasFlags(ScriptFormatterFlags.Clean) && newFunction.OpenParen is not null)
             {
-                newFunction.NameOrDoToken.RemoveTrailingSpace();
-                newFunction.Parameters.RemoveLeadingSpace();
-                newFunction.Parameters.RemoveTrailingSpace();
+                if (newFunction.NameOrDoToken is not null)
+                {
+                    newFunction.NameOrDoToken.RemoveTrailingSpace();
+                }
+
+                if (newFunction.Parameters is not null)
+                {
+                    newFunction.Parameters.RemoveLeadingSpace();
+                    newFunction.Parameters.RemoveTrailingSpace();
+                }
             }
 
-            if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators) &&  newFunction.EqualToken != null)
+            if (_flags.HasFlags(ScriptFormatterFlags.AddSpaceBetweenOperators) &&  newFunction.EqualToken is not null)
             {
                 newFunction.EqualToken.AddLeadingSpace();
                 newFunction.EqualToken.AddSpaceAfter();
@@ -295,12 +323,22 @@ namespace Scriban.Syntax
             return newFunction;
         }
 
-        private ScriptExpression DeNestExpression(ScriptExpression expr)
+        private ScriptExpression? DeNestExpression(ScriptExpression? expr)
         {
+            if (expr is null)
+            {
+                return null;
+            }
+
             if (_flags.HasFlags(ScriptFormatterFlags.MinimizeParenthesisNesting))
             {
                 while (expr is ScriptNestedExpression nested)
                 {
+                    if (nested.Expression is null)
+                    {
+                        break;
+                    }
+
                     expr = nested.Expression;
                     nested.Expression = null;
                 }
@@ -328,19 +366,16 @@ namespace Scriban.Syntax
 
         private class CompressWhitespacesVisitor : ScriptVisitor
         {
-            private ScriptTrivias _leftTrivias;
-            private ScriptTrivias _rightTrivias;
-
+            private ScriptTrivias? _leftTrivias;
+            private ScriptTrivias? _rightTrivias;
             public void CompressSpaces(ScriptNode node)
             {
-                if (node == null) return;
-
                 _leftTrivias = null;
                 _rightTrivias = null;
 
                 node.RemoveLeadingSpace();
                 Visit(node);
-                if (_rightTrivias != null)
+                if (_rightTrivias is not null)
                 {
                     bool previousHasSpaces = false;
                     CompactSpaces(_rightTrivias.After, ref previousHasSpaces);
@@ -348,9 +383,9 @@ namespace Scriban.Syntax
                 node.RemoveTrailingSpace();
             }
 
-            public override void Visit(ScriptNode node)
+            public override void Visit(ScriptNode? node)
             {
-                if (node == null) return;
+                if (node is null) return;
 
                 // Visit first to get nodes from left to right
                 base.Visit(node);
@@ -358,9 +393,9 @@ namespace Scriban.Syntax
                 if (node is IScriptTerminal terminal)
                 {
                     var trivias = terminal.Trivias;
-                    if (trivias != null)
+                    if (trivias is not null)
                     {
-                        if (_leftTrivias == null)
+                        if (_leftTrivias is null)
                         {
                             _leftTrivias = trivias;
 
@@ -371,7 +406,7 @@ namespace Scriban.Syntax
                         }
                         else
                         {
-                            if (_rightTrivias != null)
+                            if (_rightTrivias is not null)
                             {
                                 _leftTrivias = _rightTrivias;
                             }

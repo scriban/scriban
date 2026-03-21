@@ -73,7 +73,7 @@ namespace Scriban.Syntax
         public ScriptToken(TokenType type)
         {
             TokenType = type;
-            Value = type.ToText();
+            Value = type.ToText() ?? string.Empty;
         }
 
         public TokenType TokenType { get; set; }

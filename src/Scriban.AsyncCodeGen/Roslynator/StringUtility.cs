@@ -10,7 +10,7 @@ namespace Roslynator
     {
         internal static bool IsNullOrEquals(string s, string value)
         {
-            return s == null
+            return s is null
                 || Equals(s, value);
         }
 
@@ -27,7 +27,7 @@ namespace Roslynator
 
         public static string FirstCharToLower(string value)
         {
-            if (value == null)
+            if (value is null)
                 throw new ArgumentNullException(nameof(value));
 
             if (value.Length > 0)
@@ -42,7 +42,7 @@ namespace Roslynator
 
         public static string FirstCharToUpper(string value)
         {
-            if (value == null)
+            if (value is null)
                 throw new ArgumentNullException(nameof(value));
 
             if (value.Length > 0)
@@ -68,7 +68,7 @@ namespace Roslynator
 
         public static string GetLeadingWhitespaceExceptNewLine(string value)
         {
-            if (value == null)
+            if (value is null)
                 throw new ArgumentNullException(nameof(value));
 
             for (int i = 0; i < value.Length; i++)
@@ -100,7 +100,7 @@ namespace Roslynator
 
         public static string ToCamelCase(string value, bool prefixWithUnderscore = false)
         {
-            if (value == null)
+            if (value is null)
                 throw new ArgumentNullException(nameof(value));
 
             string prefix = (prefixWithUnderscore) ? "_" : "";
@@ -143,10 +143,10 @@ namespace Roslynator
 
         public static bool HasPrefix(string value, string prefix, StringComparison comparison = StringComparison.Ordinal)
         {
-            if (value == null)
+            if (value is null)
                 throw new ArgumentNullException(nameof(value));
 
-            if (prefix == null)
+            if (prefix is null)
                 throw new ArgumentNullException(nameof(prefix));
 
             return prefix.Length > 0
@@ -157,10 +157,10 @@ namespace Roslynator
 
         public static bool HasSuffix(string value, string suffix, StringComparison comparison = StringComparison.Ordinal)
         {
-            if (value == null)
+            if (value is null)
                 throw new ArgumentNullException(nameof(value));
 
-            if (suffix == null)
+            if (suffix is null)
                 throw new ArgumentNullException(nameof(suffix));
 
             return suffix.Length > 0
@@ -258,7 +258,7 @@ namespace Roslynator
 
         public static bool IsOneOrManyUnderscores(string value)
         {
-            if (value == null)
+            if (value is null)
                 return false;
 
             int length = value.Length;

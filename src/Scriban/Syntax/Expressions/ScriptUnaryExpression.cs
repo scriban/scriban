@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -23,29 +23,34 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptUnaryExpression : ScriptExpression
     {
-        private ScriptToken _operatorToken;
-        private ScriptExpression _right;
+        private ScriptToken? _operatorToken;
+        private ScriptExpression? _right;
         public ScriptUnaryOperator Operator { get; set; }
 
-        public ScriptToken OperatorToken
+        public ScriptToken? OperatorToken
         {
             get => _operatorToken;
-            set => ParentToThis(ref _operatorToken, value);
+            set => ParentToThisNullable(ref _operatorToken, value);
         }
 
-        public string OperatorAsText => OperatorToken?.Value ?? Operator.ToText();
+        public string? OperatorAsText => OperatorToken?.Value ?? Operator.ToText();
 
-        public ScriptExpression Right
+        public ScriptExpression? Right
         {
             get => _right;
-            set => ParentToThis(ref _right, value);
+            set => ParentToThisNullable(ref _right, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             if (Operator == ScriptUnaryOperator.FunctionAlias)
             {
                 return context.Evaluate(Right, true);
+            }
+
+            if (Right is null)
+            {
+                return Evaluate(context, Span, Operator, null);
             }
 
             var value = context.Evaluate(Right);
@@ -55,7 +60,7 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            if (OperatorToken != null)
+            if (OperatorToken is not null)
             {
                 printer.Write(OperatorToken);
             }
@@ -66,7 +71,7 @@ namespace Scriban.Syntax
             printer.Write(Right);
         }
 
-        public static object Evaluate(TemplateContext context, SourceSpan span, ScriptUnaryOperator op, object value)
+        public static object? Evaluate(TemplateContext context, SourceSpan span, ScriptUnaryOperator op, object? value)
         {
             if (value is IScriptCustomUnaryOperation customUnary)
             {
@@ -100,7 +105,7 @@ namespace Scriban.Syntax
                     {
                         bool negate = op == ScriptUnaryOperator.Negate;
 
-                        if (value != null)
+                        if (value is not null)
                         {
                             if (value is int)
                             {
@@ -145,7 +150,7 @@ namespace Scriban.Syntax
 
         public static ScriptUnaryExpression Wrap(ScriptUnaryOperator unaryOperator, ScriptToken unaryToken, ScriptExpression expression, bool transferTrivia)
         {
-            if (expression == null) throw new ArgumentNullException(nameof(expression));
+            if (expression is null) throw new ArgumentNullException(nameof(expression));
             var unary = new ScriptUnaryExpression()
             {
                 Span = expression.Span,

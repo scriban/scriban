@@ -39,7 +39,7 @@ namespace Scriban.Functions
         /// This is a paragraph
         /// ```
         /// </remarks>
-        public static string Strip(TemplateContext context, string text)
+        public static string? Strip(TemplateContext context, string? text)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -62,7 +62,7 @@ namespace Scriban.Functions
         /// &amp;lt;p&amp;gt;This is a paragraph&amp;lt;/p&amp;gt;
         /// ```
         /// </remarks>
-        public static string Escape(string text)
+        public static string? Escape(string? text)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -87,7 +87,7 @@ namespace Scriban.Functions
         /// world
         /// ```
         /// </remarks>
-        public static string NewlineToBr(string text)
+        public static string? NewlineToBr(string? text)
         {
             if (string.IsNullOrEmpty(text))
             {
@@ -111,7 +111,7 @@ namespace Scriban.Functions
         /// john%40liquid.com
         /// ```
         /// </remarks>
-        public static string UrlEncode(string text)
+        public static string? UrlEncode(string? text)
         {
             if (string.IsNullOrEmpty(text))
             {

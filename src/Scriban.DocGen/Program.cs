@@ -154,7 +154,7 @@ namespace Scriban.DocGen
             private readonly Dictionary<string, ClassWriter> _classWriters;
             private readonly StringWriter _writerToc;
 
-            private StringWriter _writer;
+            private StringWriter? _writer;
             private StringWriter _writerParameters;
             private StringWriter _writerReturns;
             private StringWriter _writerSummary;
@@ -190,10 +190,10 @@ namespace Scriban.DocGen
 
             public Dictionary<string, ClassWriter> ClassWriters => _classWriters;
 
-            private bool IsBuiltinType(Type type, out string shortName)
+            private bool IsBuiltinType(Type? type, out string? shortName)
             {
                 shortName = null;
-                return type.Namespace == "Scriban.Functions" && _builtinClassNames.TryGetValue(type.Name, out shortName);
+                return type is not null && type.Namespace == "Scriban.Functions" && _builtinClassNames.TryGetValue(type.Name, out shortName);
             }
 
             public override void VisitMember(Member member)
@@ -202,7 +202,7 @@ namespace Scriban.DocGen
                 var methodInfo = member.Info as MethodInfo;
 
 
-                if (type != null && IsBuiltinType(type, out string shortName))
+                if (type is not null && IsBuiltinType(type, out string? shortName) && shortName is not null)
                 {
                     var classWriter = new ClassWriter();
                     _classWriters[shortName] = classWriter;
@@ -224,7 +224,7 @@ namespace Scriban.DocGen
                     // Write the toc
                     _writerToc.WriteLine($"- [`{shortName}` functions](#{shortName}-functions)");
                 }
-                else if (methodInfo != null && IsBuiltinType(methodInfo.DeclaringType, out shortName)  && methodInfo.IsPublic)
+                else if (methodInfo is not null && IsBuiltinType(methodInfo.DeclaringType, out shortName) && shortName is not null && methodInfo.IsPublic)
                 {
                     var methodShortName = StandardMemberRenamer.Default(methodInfo);
 
@@ -257,7 +257,7 @@ namespace Scriban.DocGen
                                 defaultValue = "\"" + defaultValue + "\"";
                             }
 
-                            if (defaultValue != null)
+                            if (defaultValue is not null)
                             {
                                 defaultValue = ": " + defaultValue;
                             }
@@ -352,13 +352,14 @@ namespace Scriban.DocGen
 
             public override void VisitText(Text text)
             {
+                var writer = _writer ?? throw new InvalidOperationException("A writer must be assigned before visiting text.");
                 var content = text.Content;
 
                 content = content.Replace("```scriban-html", "> **input**\r\n```scriban-html");
                 content = AddTryOutLink(content);
                 content = content.Replace("```html", "> **output**\r\n```html");
 
-                _writer.Write(content);
+                writer.Write(content);
             }
 
             private static string AddTryOutLink(string content)

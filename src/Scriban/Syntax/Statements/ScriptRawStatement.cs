@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 namespace Scriban.Syntax
 {
@@ -18,9 +18,9 @@ namespace Scriban.Syntax
 
         public bool IsEscape { get; set; }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
-            if (Text == null) return null;
+            if (Text.Length == 0 || string.IsNullOrEmpty(Text.FullText)) return null;
 
             if (Text.Length > 0)
             {
@@ -39,7 +39,7 @@ namespace Scriban.Syntax
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            if (Text != null && Text.Length > 0)
+            if (Text.Length > 0 && !string.IsNullOrEmpty(Text.FullText))
             {
                 printer.Write(Text);
             }

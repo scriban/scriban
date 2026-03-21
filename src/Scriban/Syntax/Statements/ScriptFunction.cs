@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using Scriban.Parsing;
@@ -19,18 +19,20 @@ namespace Scriban.Syntax
     partial class ScriptFunction : ScriptStatement, IScriptCustomFunction
     {
         private ScriptKeyword _funcToken;
-        private ScriptNode _nameOrDoToken;
-        private ScriptToken _openParen;
-        private ScriptList<ScriptParameter> _parameters;
-        private ScriptToken _closeParen;
-        private ScriptToken _equalToken;
-        private ScriptStatement _body;
+        private ScriptNode? _nameOrDoToken;
+        private ScriptToken? _openParen;
+        private ScriptList<ScriptParameter>? _parameters;
+        private ScriptToken? _closeParen;
+        private ScriptToken? _equalToken;
+        private ScriptStatement? _body;
         private bool _hasReturnType;
-        private ScriptVarParamKind _varParamKind;
+        private ScriptVarParamKind _varParamKind = ScriptVarParamKind.Direct;
         private int _requiredParameterCount;
 
         public ScriptFunction()
         {
+            _funcToken = ScriptKeyword.Func();
+            _funcToken.Parent = this;
             _varParamKind = ScriptVarParamKind.Direct;
         }
 
@@ -40,43 +42,43 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _funcToken, value);
         }
 
-        public ScriptNode NameOrDoToken
+        public ScriptNode? NameOrDoToken
         {
             get => _nameOrDoToken;
             set
             {
-                if (value != null && (!(value is ScriptVariable || (value is ScriptKeyword token && token.Value == "do"))))
+                if (value is not null && (!(value is ScriptVariable || (value is ScriptKeyword token && token.Value == "do"))))
                 {
                     throw new ArgumentException($"Must be a {nameof(ScriptVariable)} or `do` {nameof(ScriptKeyword)}");
                 }
 
-                ParentToThis(ref _nameOrDoToken, value);
+                ParentToThisNullable(ref _nameOrDoToken, value);
             }
         }
 
-        public ScriptToken OpenParen
+        public ScriptToken? OpenParen
         {
             get => _openParen;
-            set => ParentToThis(ref _openParen, value);
+            set => ParentToThisNullable(ref _openParen, value);
         }
 
-        public ScriptList<ScriptParameter> Parameters
+        public ScriptList<ScriptParameter>? Parameters
         {
             get => _parameters;
             set
             {
-                ParentToThis(ref _parameters, value);
+                ParentToThisNullable(ref _parameters, value);
 
                 // Pre-calculate parameters
                 _requiredParameterCount = _parameters?.Count ?? 0;
-                _varParamKind = _parameters == null ? ScriptVarParamKind.Direct : ScriptVarParamKind.None;
-                if (_parameters != null)
+                _varParamKind = _parameters is null ? ScriptVarParamKind.Direct : ScriptVarParamKind.None;
+                if (_parameters is not null)
                 {
                     for (int i = 0; i < _parameters.Count; i++)
                     {
                         var param = _parameters[i];
                         var token = param.EqualOrTripleDotToken;
-                        if (token != null)
+                        if (token is not null)
                         {
                             if (token.TokenType == TokenType.TripleDot)
                             {
@@ -94,38 +96,38 @@ namespace Scriban.Syntax
             }
         }
 
-        public ScriptToken CloseParen
+        public ScriptToken? CloseParen
         {
             get => _closeParen;
-            set => ParentToThis(ref _closeParen, value);
+            set => ParentToThisNullable(ref _closeParen, value);
         }
 
-        public ScriptToken EqualToken
+        public ScriptToken? EqualToken
         {
             get => _equalToken;
-            set => ParentToThis(ref _equalToken, value);
+            set => ParentToThisNullable(ref _equalToken, value);
         }
 
-        public ScriptStatement Body
+        public ScriptStatement? Body
         {
             get => _body;
             set
             {
-                ParentToThis(ref _body, value);
+                ParentToThisNullable(ref _body, value);
                 UpdateReturnType();
             }
         }
 
         public void UpdateReturnType()
         {
-            _hasReturnType = Body is ScriptExpressionStatement || FindRetVisitor.HasRet(Body);
+            _hasReturnType = Body is ScriptExpressionStatement || (Body is not null && FindRetVisitor.HasRet(Body));
         }
 
         public bool IsAnonymous => !(NameOrDoToken is ScriptVariable);
 
-        public bool HasParameters => Parameters != null;
+        public bool HasParameters => Parameters is not null;
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             if (NameOrDoToken is ScriptVariable variable)
             {
@@ -140,7 +142,7 @@ namespace Scriban.Syntax
 
         public override bool CanHaveLeadingTrivia()
         {
-            return NameOrDoToken != null;
+            return NameOrDoToken is not null;
         }
 
         public override void PrintTo(ScriptPrinter printer)
@@ -151,14 +153,14 @@ namespace Scriban.Syntax
             }
             printer.Write(NameOrDoToken);
 
-            if (OpenParen != null) printer.Write(OpenParen);
+            if (OpenParen is not null) printer.Write(OpenParen);
             if (HasParameters)
             {
-                if (OpenParen != null)
+                if (OpenParen is not null && Parameters is not null)
                 {
                     printer.WriteListWithCommas(Parameters);
                 }
-                else
+                else if (Parameters is not null)
                 {
                     for (var i = 0; i < Parameters.Count; i++)
                     {
@@ -171,14 +173,14 @@ namespace Scriban.Syntax
                     }
                 }
             }
-            if (CloseParen != null) printer.Write(CloseParen);
+            if (CloseParen is not null) printer.Write(CloseParen);
 
             if (Body is ScriptBlockStatement)
             {
                 printer.ExpectEos();
                 printer.Write(Body);
             }
-            else
+            else if (Body is not null)
             {
                 printer.Write(EqualToken);
                 printer.Write(Body);
@@ -189,7 +191,7 @@ namespace Scriban.Syntax
                 printer.ExpectEos();
             }
         }
-        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
             bool hasParams = HasParameters;
             if (hasParams)
@@ -212,20 +214,36 @@ namespace Scriban.Syntax
                 if (hasParams)
                 {
                     var glob = context.CurrentGlobal;
-                    for (var i = 0; i < Parameters.Count; i++)
+                    if (glob is null)
                     {
-                        var param = Parameters[i];
-                        glob.SetValue(param.Name.Name, arguments[i], false);
+                        throw new ScriptRuntimeException(Span, "Missing global scope for function invocation.");
+                    }
+                    var parameters = Parameters;
+                    if (parameters is null)
+                    {
+                        throw new ScriptRuntimeException(Span, "Missing function parameters.");
+                    }
+
+                    for (var i = 0; i < parameters.Count; i++)
+                    {
+                        var param = parameters[i];
+                        var parameterName = param.Name?.Name;
+                        if (parameterName is null)
+                        {
+                            throw new ScriptRuntimeException(param.Span, "Missing function parameter name.");
+                        }
+
+                        glob.SetValue(parameterName, arguments[i], false);
                     }
                 }
 
                 // Set the block delegate
-                if (blockStatement != null)
+                if (blockStatement is not null)
                 {
                     context.SetValue(ScriptVariable.BlockDelegate, blockStatement, true);
                 }
 
-                var result = context.Evaluate(Body);
+                var result = Body is null ? null : context.Evaluate(Body);
                 return result;
             }
             finally
@@ -251,16 +269,17 @@ namespace Scriban.Syntax
 
         public ScriptParameterInfo GetParameterInfo(int index)
         {
-            if (Parameters == null) return new ScriptParameterInfo(typeof(object), string.Empty);
-            var parameterCount = ParameterCount;
+            var parameters = Parameters;
+            if (parameters is null || parameters.Count == 0) return new ScriptParameterInfo(typeof(object), string.Empty);
+            var parameterCount = parameters.Count;
             if (index > parameterCount - 1)
             {
                 index = parameterCount - 1;
             }
-            var param = Parameters[index];
-            var name = param.Name.Name;
+            var param = parameters[index];
+            var name = param.Name?.Name ?? string.Empty;
             var defaultValue = param.DefaultValue?.Value;
-            return defaultValue != null ? new ScriptParameterInfo(typeof(object), name, defaultValue) : new ScriptParameterInfo(typeof(object), name);
+            return defaultValue is not null ? new ScriptParameterInfo(typeof(object), name, defaultValue) : new ScriptParameterInfo(typeof(object), name);
         }
 
         /// <summary>
@@ -269,13 +288,13 @@ namespace Scriban.Syntax
         /// </summary>
         private class FindRetVisitor : ScriptVisitor
         {
-            [ThreadStatic] private static FindRetVisitor _instance;
+            [ThreadStatic] private static FindRetVisitor? _instance;
 
             private FindRetVisitor(){}
 
             public static bool HasRet(ScriptNode node)
             {
-                if (node == null) return false;
+                if (node is null) return false;
                 var local = _instance ??= new FindRetVisitor();
                 local.Found = false;
                 local.Visit(node);
@@ -284,16 +303,19 @@ namespace Scriban.Syntax
 
             public bool Found { get; private set; }
 
-            public override void Visit(ScriptReturnStatement node)
+            public override void Visit(ScriptReturnStatement? node)
             {
-                Found = true;
+                if (node is not null)
+                {
+                    Found = true;
+                }
             }
 
-            protected override void DefaultVisit(ScriptNode node)
+            protected override void DefaultVisit(ScriptNode? node)
             {
                 if (Found) return;
 
-                if (node == null)
+                if (node is null)
                     return;
 
                 var childrenCount = node.ChildrenCount;

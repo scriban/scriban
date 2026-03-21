@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections;
 using System.Threading.Tasks;
@@ -22,17 +22,19 @@ namespace Scriban.Syntax
     partial class ScriptForStatement : ScriptLoopStatementBase, IScriptNamedArgumentContainer
     {
         private ScriptKeyword _forOrTableRowKeyword;
-        private ScriptExpression _variable;
+        private ScriptExpression? _variable;
         private ScriptKeyword _inKeyword;
-        private ScriptExpression _iterator;
-        private ScriptList<ScriptNamedArgument> _namedArguments;
-        private ScriptBlockStatement _body;
-        private ScriptElseStatement _else;
-
+        private ScriptExpression? _iterator;
+        private ScriptList<ScriptNamedArgument> _namedArguments = new ScriptList<ScriptNamedArgument>();
+        private ScriptBlockStatement? _body;
+        private ScriptElseStatement? _else;
         public ScriptForStatement()
         {
-            ForOrTableRowKeyword = this is ScriptTableRowStatement ?  ScriptKeyword.TableRow() : ScriptKeyword.For();
-            InKeyword = ScriptKeyword.In();
+            _forOrTableRowKeyword = this is ScriptTableRowStatement ? ScriptKeyword.TableRow() : ScriptKeyword.For();
+            _forOrTableRowKeyword.Parent = this;
+            _inKeyword = ScriptKeyword.In();
+            _inKeyword.Parent = this;
+            _namedArguments.Parent = this;
         }
 
         public ScriptKeyword ForOrTableRowKeyword
@@ -41,10 +43,10 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _forOrTableRowKeyword, value);
         }
 
-        public ScriptExpression Variable
+        public ScriptExpression? Variable
         {
             get => _variable;
-            set => ParentToThis(ref _variable, value);
+            set => ParentToThisNullable(ref _variable, value);
         }
 
         public ScriptKeyword InKeyword
@@ -53,10 +55,10 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _inKeyword, value);
         }
 
-        public ScriptExpression Iterator
+        public ScriptExpression? Iterator
         {
             get => _iterator;
-            set => ParentToThis(ref _iterator, value);
+            set => ParentToThisNullable(ref _iterator, value);
         }
 
         public ScriptList<ScriptNamedArgument> NamedArguments
@@ -65,16 +67,16 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _namedArguments, value);
         }
 
-        public ScriptBlockStatement Body
+        public ScriptBlockStatement? Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set => ParentToThisNullable(ref _body, value);
         }
 
-        public ScriptElseStatement Else
+        public ScriptElseStatement? Else
         {
             get => _else;
-            set => ParentToThis(ref _else, value);
+            set => ParentToThisNullable(ref _else, value);
         }
 
         /// <summary>
@@ -82,12 +84,16 @@ namespace Scriban.Syntax
         /// </summary>
         public bool SetContinue { get; set; }
 
-        internal ScriptNode IteratorOrLastParameter => NamedArguments != null && NamedArguments.Count > 0
+        internal ScriptNode? IteratorOrLastParameter => NamedArguments is not null && NamedArguments.Count > 0
             ? NamedArguments[NamedArguments.Count - 1]
             : Iterator;
 
-        protected override object LoopItem(TemplateContext context, LoopState state)
+        protected override object? LoopItem(TemplateContext context, LoopState state)
         {
+            if (Body is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid for statement. Body is required.");
+            }
             return context.Evaluate(Body);
         }
 
@@ -96,21 +102,28 @@ namespace Scriban.Syntax
             return ScriptVariable.ForObject;
         }
 
-        protected override object EvaluateImpl(TemplateContext context)
+        protected override object? EvaluateImpl(TemplateContext context)
         {
-            var loopIterator = context.Evaluate(Iterator);
+            var iterator = Iterator;
+            var variable = Variable;
+            if (iterator is null || variable is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid for statement. Variable and iterator are required.");
+            }
+
+            var loopIterator = context.Evaluate(iterator);
             var list = loopIterator as IEnumerable;
 
-            if (list != null)
+            if (list is not null)
             {
-                object loopResult = null;
-                object previousValue = null;
+                object? loopResult = null;
+                object? previousValue = null;
                 var loopType = loopIterator is System.Linq.IQueryable ? TemplateContext.LoopType.Queryable : TemplateContext.LoopType.Default;
 
                 //int startIndex = 0;
                 int limit = -1;
                 int continueIndex = 0;
-                if (NamedArguments != null)
+                if (NamedArguments is not null)
                 {
                     bool reversed = false;
                     int offset = 0;
@@ -118,17 +131,20 @@ namespace Scriban.Syntax
                     var listTyped = System.Linq.Enumerable.Cast<object>(list);
                     foreach (var option in NamedArguments)
                     {
-                        switch (option.Name.Name)
+                        var optionName = option.Name?.Name;
+                        switch (optionName)
                         {
                             case "offset":
 
-                                offset = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
-                                continueIndex = offset;
+                            if (option.Value is null) throw new ScriptRuntimeException(option.Span, "Invalid `offset` argument. Value is required.");
+                            offset = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
+                            continueIndex = offset;
                                 break;
                             case "reversed":
                                 reversed = true;
                                 break;
                             case "limit":
+                                if (option.Value is null) throw new ScriptRuntimeException(option.Span, "Invalid `limit` argument. Value is required.");
                                 limit = context.ToInt(option.Value.Span, context.Evaluate(option.Value));
                                 break;
                             default:
@@ -182,13 +198,13 @@ namespace Scriban.Syntax
                         loopState.Index = index;
                         loopState.ValueChanged = isFirst || !Equals(previousValue, value);
 
-                        if (Variable is ScriptVariable loopVariable)
+                        if (variable is ScriptVariable loopVariable)
                         {
                             context.SetLoopVariable(loopVariable, value);
                         }
                         else
                         {
-                            context.SetValue(Variable, value);
+                            context.SetValue(variable, value);
                         }
 
                         loopResult = LoopItem(context, loopState);
@@ -212,7 +228,7 @@ namespace Scriban.Syntax
                     context.SetValue(ScriptVariable.Continue, continueIndex + 1);
                 }
 
-                if (!enteredLoop && Else != null)
+                if (!enteredLoop && Else is not null)
                 {
                     loopResult = context.Evaluate(Else);
                 }
@@ -220,10 +236,10 @@ namespace Scriban.Syntax
                 return loopResult;
             }
 
-            if (loopIterator != null)
+            if (loopIterator is not null)
             {
-                throw new ScriptRuntimeException(Iterator.Span, $"Unexpected type `{loopIterator.GetType()}` for iterator");
-            }
+                    throw new ScriptRuntimeException(iterator.Span, $"Unexpected type `{loopIterator.GetType()}` for iterator");
+                }
 
             return null;
         }
@@ -231,14 +247,20 @@ namespace Scriban.Syntax
         public override void PrintTo(ScriptPrinter printer)
         {
             printer.Write(ForOrTableRowKeyword).ExpectSpace();
-            printer.Write(Variable).ExpectSpace();
+            if (Variable is not null)
+            {
+                printer.Write(Variable).ExpectSpace();
+            }
             if (!printer.PreviousHasSpace)
             {
                 printer.Write(" ");
             }
             printer.Write(InKeyword).ExpectSpace();
-            printer.Write(Iterator);
-            if (NamedArguments != null)
+            if (Iterator is not null)
+            {
+                printer.Write(Iterator);
+            }
+            if (NamedArguments is not null)
             {
                 foreach (var arg in NamedArguments)
                 {
@@ -247,8 +269,14 @@ namespace Scriban.Syntax
                 }
             }
             printer.ExpectEos();
-            printer.Write(Body).ExpectEos();
-            printer.Write(Else);
+            if (Body is not null)
+            {
+                printer.Write(Body).ExpectEos();
+            }
+            if (Else is not null)
+            {
+                printer.Write(Else);
+            }
         }
 
         protected virtual void ProcessArgument(TemplateContext context, ScriptNamedArgument argument)

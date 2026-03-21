@@ -73,7 +73,7 @@ v.value}}";
     {
         var template = Template.Parse("{{ a?.b[0][1] }}");
 
-        var nullResult = await template.RenderAsync(new { a = (object)null });
+        var nullResult = await template.RenderAsync(new { a = (object?)null });
         Assert.That(nullResult, Is.EqualTo(string.Empty));
 
         var valueResult = await template.RenderAsync(new { a = new { b = new[] { new[] { "skip", "ok" } } } });

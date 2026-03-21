@@ -2,11 +2,12 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -32,13 +33,13 @@ namespace Scriban.Syntax
         /// <summary>
         /// Gets the parent of this node.
         /// </summary>
-        public ScriptNode Parent { get; internal set; }
+        public ScriptNode? Parent { get; internal set; }
 
         /// <summary>
         /// Evaluates this instance with the specified context.
         /// </summary>
         /// <param name="context">The template context.</param>
-        public abstract object Evaluate(TemplateContext context);
+        public abstract object? Evaluate(TemplateContext context);
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         public virtual int ChildrenCount => 0;
@@ -60,7 +61,7 @@ namespace Scriban.Syntax
         public ScriptNode Clone(bool withTrivias)
         {
             var cloner = withTrivias ? ScriptCloner.WithTrivias : ScriptCloner.Instance;
-            return cloner.Visit(this);
+            return cloner.Visit(this) ?? throw new InvalidOperationException($"Unable to clone node `{GetType()}`.");
         }
 
         /// <summary>
@@ -72,7 +73,7 @@ namespace Scriban.Syntax
         {
             if (index < 0) throw ThrowHelper.GetIndexNegativeArgumentOutOfRangeException();
             if (index > ChildrenCount) throw ThrowHelper.GetIndexArgumentOutOfRangeException(ChildrenCount);
-            return GetChildrenImpl(index);
+            return GetChildrenImpl(index)!;
         }
 
         /// <summary>
@@ -81,12 +82,12 @@ namespace Scriban.Syntax
         /// <param name="index">Index of the children</param>
         /// <returns>A children at the specified index</returns>
         /// <remarks>The index is safe to use</remarks>
-        protected virtual ScriptNode GetChildrenImpl(int index) => null;
+        protected virtual ScriptNode? GetChildrenImpl(int index) => null;
 
 #if !SCRIBAN_NO_ASYNC
-        public virtual ValueTask<object> EvaluateAsync(TemplateContext context)
+        public virtual ValueTask<object?> EvaluateAsync(TemplateContext context)
         {
-            return new ValueTask<object>(Evaluate(context));
+            return new ValueTask<object?>(Evaluate(context));
         }
 #endif
 
@@ -99,6 +100,7 @@ namespace Scriban.Syntax
 
         public virtual void Accept(ScriptVisitor visitor) => throw new NotImplementedException($"This method must be implemented by the type {this.GetType()}");
 
+        [return: MaybeNull]
         public virtual TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => throw new NotImplementedException($"This method must be implemented by the type {this.GetType()}");
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -109,7 +111,11 @@ namespace Scriban.Syntax
                 var count = ChildrenCount;
                 for (int i = 0; i < count; i++)
                 {
-                    yield return GetChildrenImpl(i);
+                    var child = GetChildrenImpl(i);
+                    if (child is not null)
+                    {
+                        yield return child;
+                    }
                 }
             }
         }
@@ -120,15 +126,28 @@ namespace Scriban.Syntax
         /// <typeparam name="TSyntaxNode">Type of the node</typeparam>
         /// <param name="set">The previous child node parented to this instance</param>
         /// <param name="node">The new child node to parent to this instance</param>
-        protected void ParentToThis<TSyntaxNode>(ref TSyntaxNode set, TSyntaxNode node) where TSyntaxNode : ScriptNode
+        protected void ParentToThis<TSyntaxNode>(ref TSyntaxNode set, TSyntaxNode? node) where TSyntaxNode : ScriptNode
         {
+            if (node is null) throw new ArgumentNullException(nameof(node));
             if (node == set) return;
-            if (node?.Parent != null) throw ThrowHelper.GetExpectingNoParentException();
-            if (set != null)
+            if (node.Parent is not null) throw ThrowHelper.GetExpectingNoParentException();
+            if (set is not null)
             {
                 set.Parent = null;
             }
-            if (node != null)
+            node.Parent = this;
+            set = node;
+        }
+
+        protected void ParentToThisNullable<TSyntaxNode>(ref TSyntaxNode? set, TSyntaxNode? node) where TSyntaxNode : ScriptNode
+        {
+            if (node == set) return;
+            if (node?.Parent is not null) throw ThrowHelper.GetExpectingNoParentException();
+            if (set is not null)
+            {
+                set.Parent = null;
+            }
+            if (node is not null)
             {
                 node.Parent = this;
             }

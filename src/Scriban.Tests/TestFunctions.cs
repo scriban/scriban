@@ -60,9 +60,9 @@ namespace Scriban.Tests
                     new ScriptObject { { "name", "16" }, { "key", 1 } },
                 };
 
-                var sortedByName = ArrayFunctions.Sort(context, new SourceSpan(), items, "name");
-                var sortedByKey = ArrayFunctions.Sort(context, new SourceSpan(), sortedByName, "key");
-                var orderedNames = sortedByKey.Cast<ScriptObject>().Select(item => (string)item["name"]).ToArray();
+                var sortedByName = ArrayFunctions.Sort(context, new SourceSpan(), items, "name") ?? throw new AssertionException("Expected a sorted array.");
+                var sortedByKey = ArrayFunctions.Sort(context, new SourceSpan(), sortedByName, "key") ?? throw new AssertionException("Expected a sorted array.");
+                var orderedNames = sortedByKey.Cast<ScriptObject>().Select(item => item["name"]?.ToString() ?? throw new AssertionException("Expected a name value.")).ToArray();
 
                 Assert.That(orderedNames, Is.EqualTo(new[]
                 {
@@ -96,8 +96,8 @@ namespace Scriban.Tests
                     },
                 };
 
-                var sorted = ArrayFunctions.Sort(context, new SourceSpan(), lines, "product.name");
-                var orderedDepartments = sorted.Cast<ScriptObject>().Select(item => (string)item["department"]).ToArray();
+                var sorted = ArrayFunctions.Sort(context, new SourceSpan(), lines, "product.name") ?? throw new AssertionException("Expected a sorted array.");
+                var orderedDepartments = sorted.Cast<ScriptObject>().Select(item => item["department"]?.ToString() ?? throw new AssertionException("Expected a department value.")).ToArray();
 
                 Assert.That(orderedDepartments, Is.EqualTo(new[] { "bakery", "food", "pets" }));
             }
@@ -122,8 +122,8 @@ namespace Scriban.Tests
                     },
                 };
 
-                var sorted = ArrayFunctions.Sort(context, new SourceSpan(), lines, "product.name");
-                var orderedDepartments = sorted.Cast<ScriptObject>().Select(item => (string)item["department"]).ToArray();
+                var sorted = ArrayFunctions.Sort(context, new SourceSpan(), lines, "product.name") ?? throw new AssertionException("Expected a sorted array.");
+                var orderedDepartments = sorted.Cast<ScriptObject>().Select(item => item["department"]?.ToString() ?? throw new AssertionException("Expected a department value.")).ToArray();
 
                 Assert.That(orderedDepartments, Is.EqualTo(new[] { "food", "pets" }));
             }
@@ -150,7 +150,7 @@ namespace Scriban.Tests
             }
             class ObjectModel
             {
-                public object[] Value { get; set; }
+                public object[]? Value { get; set; }
             }
 
             enum TestEnum : int
@@ -204,17 +204,20 @@ namespace Scriban.Tests
                     (Name: "string_comparison", Value: MakeString(testCase.StringComparison?.ToString())),
                 }.Select(x => $"{x.Name}: {x.Value}");
                 var script = $@"{{{{ string.index_of {string.Join(" ", args)} }}}}";
-                Template template = null;
+                Template? template = null;
                 Assert.DoesNotThrow(() => template = Template.Parse(script));
-                Assert.That(template, Is.Not.Null);
+                if (template is null)
+                {
+                    throw new AssertionException("Expected template parsing to succeed.");
+                }
                 Assert.That(template.HasErrors, Is.False);
                 Assert.That(template.Messages, Is.Not.Null);
                 Assert.That(template.Messages.Count, Is.EqualTo(0));
                 var result = template.Render();
                 Assert.That(result, Is.EqualTo(testCase.Expected.ToString()));
 
-                static string MakeString(string value) => value is null ? "null" : $"'{value}'";
-                static string MakeInt(int? value) => value is null ? "null" : value.ToString();
+                static string MakeString(string? value) => value is null ? "null" : $"'{value}'";
+                static string MakeInt(int? value) => value is null ? "null" : value.Value.ToString();
             }
 
             [Test]

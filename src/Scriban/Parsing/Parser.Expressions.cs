@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -78,7 +78,7 @@ namespace Scriban.Parsing
             return binaryOperator != ScriptBinaryOperator.None;
         }
 
-        private ScriptExpression ParseExpressionAsVariableOrStringOrExpression(ScriptNode parentNode)
+        private ScriptExpression? ParseExpressionAsVariableOrStringOrExpression(ScriptNode parentNode)
         {
             switch (Current.Type)
             {
@@ -97,7 +97,7 @@ namespace Scriban.Parsing
             }
         }
 
-        private ScriptExpression ParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
+        private ScriptExpression? ParseExpression(ScriptNode parentNode, ScriptExpression? parentExpression = null, int precedence = 0, ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             bool hasAnonymousFunction = false;
             int expressionCount = 0;
@@ -113,13 +113,13 @@ namespace Scriban.Parsing
             EnterExpression();
             try
             {
-                ScriptFunctionCall functionCall = null;
+                ScriptFunctionCall? functionCall = null;
 
                 parseExpression:
                 expressionCount++;
 
                 // Allow custom parsing for a first pre-expression
-                ScriptExpression leftOperand = null;
+                ScriptExpression? leftOperand = null;
                 bool isLeftOperandClosed = false;
 
                 switch (Current.Type)
@@ -203,9 +203,9 @@ namespace Scriban.Parsing
                 }
 
                 // Should not happen but in case
-                if (leftOperand == null)
+                if (leftOperand is null)
                 {
-                    if (functionCall != null)
+                    if (functionCall is not null)
                     {
                         LogError($"Unexpected token `{GetAsTextForLog(Current)}` while parsing function call `{functionCall}`");
                     }
@@ -231,7 +231,7 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (_isLiquid && Current.Type == TokenType.Comma && functionCall != null)
+                    if (_isLiquid && Current.Type == TokenType.Comma && functionCall is not null)
                     {
                         NextToken(); // Skip the comma for arguments in a function call
                     }
@@ -250,7 +250,12 @@ namespace Scriban.Parsing
                                 var memberExpression = Open<ScriptIsEmptyExpression>();
                                 memberExpression.Span = leftOperand.Span;
                                 memberExpression.DotToken = dotToken;
-                                memberExpression.Member = (ScriptVariable)ParseVariable();
+                                if (ParseVariable() is not ScriptVariable memberVariable)
+                                {
+                                    LogError("Unexpected literal member `{member}`");
+                                    return null;
+                                }
+                                memberExpression.Member = memberVariable;
                                 ExpectAndParseTokenTo(memberExpression.QuestionToken, TokenType.Question);
                                 memberExpression.Target = leftOperand;
                                 leftOperand = Close(memberExpression);
@@ -269,13 +274,12 @@ namespace Scriban.Parsing
                                     dotToken.TokenType = TokenType.QuestionDot;
                                 }
 
-                                var member = ParseVariable();
-                                if (!(member is ScriptVariable))
+                                if (ParseVariable() is not ScriptVariable member)
                                 {
                                     LogError("Unexpected literal member `{member}`");
                                     return null;
                                 }
-                                memberExpression.Member = (ScriptVariable)member;
+                                memberExpression.Member = member;
                                 leftOperand = Close(memberExpression);
                             }
                         }
@@ -354,7 +358,7 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (Current.Type == TokenType.Equal && leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out ScriptFunction declaration))
+                    if (Current.Type == TokenType.Equal && leftOperand is ScriptFunctionCall call && call.TryGetFunctionDeclaration(out var declaration))
                     {
                         if (_expressionLevel > 1 || !allowAssignment)
                         {
@@ -372,12 +376,12 @@ namespace Scriban.Parsing
                         var assignExpression = Open<ScriptAssignExpression>();
                         assignExpression.EqualToken = scriptToken;
 
-                        if (leftOperand != null)
+                        if (leftOperand is not null)
                         {
                             assignExpression.Span.Start = leftOperand.Span.Start;
                         }
 
-                        if (leftOperand != null && !(leftOperand is IScriptVariablePath) || functionCall != null || _expressionLevel > 1 || !allowAssignment)
+                        if ((leftOperand is not null && leftOperand is not IScriptVariablePath) || functionCall is not null || _expressionLevel > 1 || !allowAssignment)
                         {
                             // unit test: 101-assign-complex-error1.txt
                             LogError(assignExpression, $"Expression is only allowed for a top level assignment");
@@ -385,6 +389,10 @@ namespace Scriban.Parsing
 
                         ExpectAndParseTokenTo(assignExpression.EqualToken, tokenType);
 
+                        if (leftOperand is null)
+                        {
+                            return null;
+                        }
                         assignExpression.Target = TransformKeyword(leftOperand);
 
                         // unit test: 105-assign-error3.txt
@@ -451,7 +459,7 @@ namespace Scriban.Parsing
                         }
 
                         // If we have any pending function call, we close it
-                        if (functionCall != null)
+                        if (functionCall is not null)
                         {
                             functionCall.Arguments.Add(leftOperand);
                             Close(functionCall);
@@ -482,7 +490,7 @@ namespace Scriban.Parsing
                     if (IsStartOfExpression())
                     {
                         // If we can parse a statement, we have a method call
-                        if (parentExpression != null)
+                        if (parentExpression is not null)
                         {
                             break;
                         }
@@ -491,9 +499,9 @@ namespace Scriban.Parsing
                         var paramContainer = parentNode as IScriptNamedArgumentContainer;
                         if (!_isScientific && Current.Type == TokenType.Identifier && (parentNode is IScriptNamedArgumentContainer || !_isLiquid && PeekToken().Type == TokenType.Colon))
                         {
-                            if (paramContainer == null)
+                            if (paramContainer is null)
                             {
-                                if (functionCall == null)
+                                if (functionCall is null)
                                 {
                                     functionCall = Open<ScriptFunctionCall>();
                                     functionCall.Target = leftOperand;
@@ -510,7 +518,7 @@ namespace Scriban.Parsing
                             while (true)
                             {
                                 // Don't parse boolean parameters as named parameters for function calls
-                                if (Current.Type != TokenType.Identifier || (paramContainer == null && PeekToken().Type != TokenType.Colon))
+                                if (Current.Type != TokenType.Identifier || (paramContainer is null && PeekToken().Type != TokenType.Colon))
                                 {
                                     break;
                                 }
@@ -519,20 +527,25 @@ namespace Scriban.Parsing
 
                                 // Parse the name
                                 var variable = ParseVariable();
-                                if (!(variable is ScriptVariable))
+                                if (variable is not ScriptVariable scriptVariable)
                                 {
                                     LogError(variable.Span, $"Invalid identifier passed as a named argument. Expecting a simple variable name");
                                     break;
                                 }
 
-                                parameter.Name = (ScriptVariable)variable;
+                                parameter.Name = scriptVariable;
 
-                                if (paramContainer != null)
+                                if (paramContainer is not null)
                                 {
                                     paramContainer.AddParameter(Close(parameter));
                                 }
                                 else
                                 {
+                                    if (functionCall is null)
+                                    {
+                                        break;
+                                    }
+
                                     functionCall.Arguments.Add(parameter);
                                 }
 
@@ -546,12 +559,12 @@ namespace Scriban.Parsing
                                     parameter.Value = ExpectAndParseExpression(parentNode, mode: ParseExpressionMode.BasicExpression);
                                     // Certain patterns of malformed input (see issue-295) can cause the expression parser to return null
                                     // at this point.  In that case, leave the span empty
-                                    if (parameter.Value != null)
+                                    if (parameter.Value is not null)
                                         parameter.Span.End = parameter.Value.Span.End;
 
                                 }
 
-                                if (functionCall != null)
+                                if (functionCall is not null)
                                 {
                                     functionCall.Span.End = parameter.Span.End;
                                     if (parameter.Value is ScriptAnonymousFunction)
@@ -561,9 +574,9 @@ namespace Scriban.Parsing
                                 }
                             }
 
-                            if (paramContainer != null || !IsStartOfExpression())
+                            if (paramContainer is not null || !IsStartOfExpression())
                             {
-                                if (functionCall != null)
+                                if (functionCall is not null)
                                 {
                                     leftOperand = functionCall;
                                     functionCall = null;
@@ -586,7 +599,7 @@ namespace Scriban.Parsing
                         }
 
                         bool isLikelyExplicitFunctionCall = Current.Type == TokenType.OpenParen && !IsPreviousCharWhitespace();
-                        if (functionCall == null || isLikelyExplicitFunctionCall)
+                        if (functionCall is null || isLikelyExplicitFunctionCall)
                         {
                             if (_isScientific && !isLikelyExplicitFunctionCall)
                             {
@@ -667,6 +680,10 @@ namespace Scriban.Parsing
                                     if (IsStartOfExpression())
                                     {
                                         var arg = ParseExpression(functionCall);
+                                        if (arg is null)
+                                        {
+                                            break;
+                                        }
                                         functionCall.Arguments.Add(arg);
                                         functionCall.Span.End = arg.Span.End;
                                     }
@@ -677,7 +694,7 @@ namespace Scriban.Parsing
                                     }
                                 }
 
-                                if (functionCall.CloseParen == null)
+                                if (functionCall.CloseParen is null)
                                 {
                                     LogError(Current, "Expecting a closing parenthesis for a function call.");
                                 }
@@ -707,7 +724,7 @@ namespace Scriban.Parsing
                     }
 
                     if ((!_isScientific) && (parentNode is ScriptPipeCall) // after a pipe call we expect to see a function call
-                                         && (functionCall == null)         // but when function is not followed by any parameter e.g. '1 | math.abs', above code does not create function call,
+                                         && (functionCall is null)         // but when function is not followed by any parameter e.g. '1 | math.abs', above code does not create function call,
                                                                            // here we fix that by creating function call, but only when leftOperand is e.g. '1 | abs' or '1 | math.abs'
                                          && (leftOperand is IScriptVariablePath) // we need that restriction since leftOperand can be of other type e.g. binary expression '"123" | string.to_int + 1'
                         )
@@ -720,7 +737,7 @@ namespace Scriban.Parsing
 
                     if (IsCurrentPipeOrExpressionContinuation())
                     {
-                        if (functionCall != null)
+                        if (functionCall is not null)
                         {
                             functionCall.Arguments.Add(leftOperand);
                             leftOperand = functionCall;
@@ -728,7 +745,7 @@ namespace Scriban.Parsing
                         }
 
                         var pipeCall = Open<ScriptPipeCall>();
-                        if (leftOperand != null)
+                        if (leftOperand is not null)
                         {
                             pipeCall.Span.Start = leftOperand.Span.Start;
                         }
@@ -745,7 +762,7 @@ namespace Scriban.Parsing
                     break;
                 }
 
-                if (functionCall != null)
+                if (functionCall is not null)
                 {
                     functionCall.Arguments.Add(leftOperand);
                     functionCall.Span.End = leftOperand.Span.End;
@@ -796,7 +813,7 @@ namespace Scriban.Parsing
                     {
                         // unit test: 120-array-initializer-error2.txt
                         var expression = ExpectAndParseExpression(scriptArray);
-                        if (expression == null)
+                        if (expression is null)
                         {
                             break;
                         }
@@ -870,14 +887,15 @@ namespace Scriban.Parsing
                     var variable = variableOrLiteral as ScriptVariable;
                     var literal = variableOrLiteral as ScriptLiteral;
 
-                    if (variable == null && literal == null)
+                    if (variable is null && literal is null)
                     {
                         hasErrors = true;
-                        LogError(positionBefore, $"Unexpected member type `{variableOrLiteral}/{ScriptSyntaxAttribute.Get(variableOrLiteral).TypeName}` found for object initializer member name");
+                        var typeName = ScriptSyntaxAttribute.Get(variableOrLiteral)?.TypeName ?? "unknown";
+                        LogError(positionBefore, $"Unexpected member type `{variableOrLiteral}/{typeName}` found for object initializer member name");
                         break;
                     }
 
-                    if (literal != null && !(literal.Value is string))
+                    if (literal is not null && !(literal.Value is string))
                     {
                         hasErrors = true;
                         LogError(positionBefore,
@@ -885,7 +903,7 @@ namespace Scriban.Parsing
                         break;
                     }
 
-                    if (variable != null)
+                    if (variable is not null)
                     {
                         if (variable.Scope != ScriptVariableScope.Global)
                         {
@@ -916,6 +934,11 @@ namespace Scriban.Parsing
                     }
 
                     var expression = ParseExpression(scriptObject);
+                    if (expression is null)
+                    {
+                        hasErrors = true;
+                        break;
+                    }
                     objectMember.Value = expression;
                     objectMember.Span.End = expression.Span.End;
                     Close(objectMember);
@@ -994,7 +1017,7 @@ namespace Scriban.Parsing
                 while (Current.Type != TokenType.EndingInterpolatedString)
                 {
                     var nextExpression = ParseExpression(expression);
-                    if (nextExpression == null)
+                    if (nextExpression is null)
                     {
                         // Missing closing token, but it should be caught at a higher level
                         break;
@@ -1038,7 +1061,7 @@ namespace Scriban.Parsing
                 LogError(CurrentSpan, $"Unexpected token found `{GetAsTextForLog(Current)}` while expecting `{tokenType.ToText()}`.");
             }
             verbatim.TokenType = Current.Type;
-            verbatim.Value = tokenType.ToText();
+            verbatim.Value = tokenType.ToText() ?? string.Empty;
             NextToken();
             return Close(verbatim);
         }
@@ -1056,8 +1079,8 @@ namespace Scriban.Parsing
 
         private ScriptKeyword ExpectAndParseKeywordTo(ScriptKeyword existingKeyword)
         {
-            if (existingKeyword == null) throw new ArgumentNullException(nameof(existingKeyword));
-            if (existingKeyword.Value == null) throw new InvalidOperationException($"{nameof(ScriptKeyword)}.{nameof(ScriptKeyword.Value)} cannot be null");
+            if (existingKeyword is null) throw new ArgumentNullException(nameof(existingKeyword));
+            if (existingKeyword.Value is null) throw new InvalidOperationException($"{nameof(ScriptKeyword)}.{nameof(ScriptKeyword.Value)} cannot be null");
 
             var verbatim = Open(existingKeyword);
             if (!MatchText(Current, existingKeyword.Value))
@@ -1155,10 +1178,13 @@ namespace Scriban.Parsing
         private void TransformLiquidFunctionCallToScriban(ScriptFunctionCall functionCall)
         {
             var liquidTarget = functionCall.Target as ScriptVariable;
-            string targetName;
-            string memberName;
+            string? targetName;
+            string? memberName;
             // In case of cycle we transform it to array.cycle at runtime
-            if (liquidTarget != null && LiquidBuiltinsFunctions.TryLiquidToScriban(liquidTarget.Name, out targetName, out memberName))
+            if (liquidTarget is not null
+                && LiquidBuiltinsFunctions.TryLiquidToScriban(liquidTarget.Name, out targetName, out memberName)
+                && targetName is not null
+                && memberName is not null)
             {
                 var targetVariable = new ScriptVariableGlobal(targetName) {Span = liquidTarget.Span};
                 var memberVariable = new ScriptVariableGlobal(memberName) {Span = liquidTarget.Span};
@@ -1171,7 +1197,7 @@ namespace Scriban.Parsing
                 };
 
                 // Transfer trivias accordingly to target (trivias before) and member (trivias after)
-                if (_isKeepTrivia && liquidTarget.Trivias != null)
+                if (_isKeepTrivia && liquidTarget.Trivias is not null)
                 {
                     targetVariable.AddTrivias(liquidTarget.Trivias.Before, true);
                     memberVariable.AddTrivias(liquidTarget.Trivias.After, false);
@@ -1183,7 +1209,7 @@ namespace Scriban.Parsing
         private void EnterExpression()
         {
             _expressionDepth++;
-            var limit = Options.ExpressionDepthLimit ?? 250;
+            var limit = Options.ExpressionDepthLimit;
             if (limit > 0 && !_isExpressionDepthLimitReached && _expressionDepth > limit)
             {
                 LogError(GetSpanForToken(Previous), $"The statement depth limit `{limit}` was reached when parsing this statement");
@@ -1191,7 +1217,7 @@ namespace Scriban.Parsing
             }
         }
 
-        private ScriptExpression ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression parentExpression = null, int newPrecedence = 0, string message = null,  ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
+        private ScriptExpression? ExpectAndParseExpression(ScriptNode parentNode, ScriptExpression? parentExpression = null, int newPrecedence = 0, string? message = null,  ParseExpressionMode mode = ParseExpressionMode.Default, bool allowAssignment = true)
         {
             if (IsStartOfExpression())
             {
@@ -1201,7 +1227,7 @@ namespace Scriban.Parsing
             return null;
         }
 
-        private ScriptExpression ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, ParseExpressionMode mode = ParseExpressionMode.Default)
+        private ScriptExpression? ExpectAndParseExpressionAndAnonymous(ScriptNode parentNode, ParseExpressionMode mode = ParseExpressionMode.Default)
         {
             if (IsStartOfExpression())
             {
@@ -1239,7 +1265,7 @@ namespace Scriban.Parsing
             return false;
         }
 
-        private bool TryGetCompoundAssignmentOperator(out ScriptToken scriptToken, out TokenType tokenType)
+        private bool TryGetCompoundAssignmentOperator(out ScriptToken? scriptToken, out TokenType tokenType)
         {
             tokenType = this.Current.Type;
             scriptToken = tokenType switch

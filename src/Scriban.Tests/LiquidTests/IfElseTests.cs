@@ -82,7 +82,7 @@ namespace DotLiquid.Tests.Tags
         [Test]
         public void TestIfFromVariable()
         {
-            const object nullValue = null;
+            object? nullValue = null;
 
             Helper.AssertTemplateResult("", "{% if var %} NO {% endif %}", Hash.FromAnonymousObject(new { var = false }));
             Helper.AssertTemplateResult("", "{% if var %} NO {% endif %}", Hash.FromAnonymousObject(new { var = nullValue }));

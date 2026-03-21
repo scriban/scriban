@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -27,34 +27,40 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptBinaryExpression : ScriptExpression
     {
-        private ScriptExpression _left;
-        private ScriptToken _operatorToken;
-        private ScriptExpression _right;
-
-        public ScriptExpression Left
+        private ScriptExpression? _left;
+        private ScriptToken? _operatorToken;
+        private ScriptExpression? _right;
+        public ScriptExpression? Left
         {
             get => _left;
-            set => ParentToThis(ref _left, value);
+            set => ParentToThisNullable(ref _left, value);
         }
 
         public ScriptBinaryOperator Operator { get; set; }
 
-        public ScriptToken OperatorToken
+        public ScriptToken? OperatorToken
         {
             get => _operatorToken;
-            set => ParentToThis(ref _operatorToken, value);
+            set => ParentToThisNullable(ref _operatorToken, value);
         }
 
         public string OperatorAsText => OperatorToken?.Value ?? Operator.ToText();
 
-        public ScriptExpression Right
+        public ScriptExpression? Right
         {
             get => _right;
-            set => ParentToThis(ref _right, value);
+            set => ParentToThisNullable(ref _right, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            var leftExpression = Left;
+            var rightExpression = Right;
+            if (leftExpression is null || rightExpression is null)
+            {
+                throw new ScriptRuntimeException(Span, "Invalid binary expression. Left and right expressions are required.");
+            }
+
             // If we are in scientific mode and we have a function which takes arguments, and is not an explicit call (e.g sin(x) rather then sin * x)
             // Then we need to rewrite the call to a proper expression.
             if (context.UseScientific)
@@ -66,45 +72,48 @@ namespace Scriban.Syntax
                 }
             }
 
-            var leftValue = context.Evaluate(Left);
+            var leftValue = context.Evaluate(leftExpression);
 
             switch (Operator)
             {
                 case ScriptBinaryOperator.And:
                 {
-                    var leftBoolValue = context.ToBool(Left.Span, leftValue);
+                    var leftBoolValue = context.ToBool(leftExpression.Span, leftValue);
                     if (!leftBoolValue) return false;
-                    var rightValue = context.Evaluate(Right);
-                    var rightBoolValue = context.ToBool(Right.Span, rightValue);
+                    var rightValue = context.Evaluate(rightExpression);
+                    var rightBoolValue = context.ToBool(rightExpression.Span, rightValue);
                     return leftBoolValue && rightBoolValue;
                 }
 
                 case ScriptBinaryOperator.Or:
                 {
-                    var leftBoolValue = context.ToBool(Left.Span, leftValue);
+                    var leftBoolValue = context.ToBool(leftExpression.Span, leftValue);
                     if (leftBoolValue) return true;
-                    var rightValue = context.Evaluate(Right);
-                    return context.ToBool(Right.Span, rightValue);
+                    var rightValue = context.Evaluate(rightExpression);
+                    return context.ToBool(rightExpression.Span, rightValue);
                 }
 
                 default:
                 {
-                    var rightValue = context.Evaluate(Right);
-                    return Evaluate(context, OperatorToken?.Span ?? Span , Operator, Left.Span, leftValue, Right.Span, rightValue);
+                    var rightValue = context.Evaluate(rightExpression);
+                    return Evaluate(context, OperatorToken?.Span ?? Span , Operator, leftExpression.Span, leftValue, rightExpression.Span, rightValue);
                 }
             }
         }
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(Left);
+            if (Left is not null)
+            {
+                printer.Write(Left);
+            }
             // Because a-b is a variable name, we need to transform binary op a-b to a - b
             if (Operator == ScriptBinaryOperator.Subtract && !printer.PreviousHasSpace)
             {
                 printer.ExpectSpace();
             }
 
-            if (OperatorToken != null)
+            if (OperatorToken is not null)
             {
                 printer.Write(OperatorToken);
             }
@@ -117,7 +126,10 @@ namespace Scriban.Syntax
             {
                 printer.ExpectSpace();
             }
-            printer.Write(Right);
+            if (Right is not null)
+            {
+                printer.Write(Right);
+            }
         }
 
         public override bool CanHaveLeadingTrivia()
@@ -126,12 +138,12 @@ namespace Scriban.Syntax
         }
 
 
-        public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object leftValue, object rightValue)
+        public static object? Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, object? leftValue, object? rightValue)
         {
             return Evaluate(context, span, op, span, leftValue, span, rightValue);
         }
 
-        public static object Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)
+        public static object? Evaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object? leftValue, SourceSpan rightSpan, object? rightValue)
         {
             if (op == ScriptBinaryOperator.EmptyCoalescing)
             {
@@ -140,27 +152,27 @@ namespace Scriban.Syntax
 
             if (op == ScriptBinaryOperator.NotEmptyCoalescing)
             {
-                return leftValue != null ? rightValue : leftValue;
+                return leftValue is not null ? rightValue : leftValue;
             }
 
             switch (op)
             {
                 case ScriptBinaryOperator.LiquidHasKey:
                 {
-                    var leftDict = leftValue as IDictionary<string, object>;
-                    if (leftDict != null)
+                    var leftDict = leftValue as IDictionary<string, object?>;
+                    if (leftDict is not null)
                     {
-                        return ObjectFunctions.HasKey(leftDict, context.ObjectToString(rightValue));
+                        return ObjectFunctions.HasKey(leftDict, context.ObjectToString(rightValue) ?? string.Empty);
                     }
                 }
                     break;
 
                 case ScriptBinaryOperator.LiquidHasValue:
                 {
-                    var leftDict = leftValue as IDictionary<string, object>;
-                    if (leftDict != null)
+                    var leftDict = leftValue as IDictionary<string, object?>;
+                    if (leftDict is not null)
                     {
-                        return ObjectFunctions.HasValue(leftDict, context.ObjectToString(rightValue));
+                        return ObjectFunctions.HasValue(leftDict, context.ObjectToString(rightValue) ?? string.Empty);
                     }
                 }
                     break;
@@ -196,7 +208,7 @@ namespace Scriban.Syntax
 
                             return CalculateToString(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
-                        else if (leftValue == null || rightValue == null)
+                        else if (leftValue is null || rightValue is null)
                         {
                             return CalculateOthers(context, span, op, leftSpan, leftValue, rightSpan, rightValue);
                         }
@@ -235,7 +247,7 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not supported between `{leftValue}` and `{rightValue}`");
         }
 
-        private static object CalculateEmpty(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)
+        private static object? CalculateEmpty(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object? leftValue, SourceSpan rightSpan, object? rightValue)
         {
 
             var leftIsEmptyObject = leftValue == EmptyScriptObject.Default;
@@ -298,12 +310,12 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not implemented for `{(leftIsEmptyObject ? "empty" : leftValue)}` / `{(rightIsEmptyObject ? "empty" : rightValue)}`");
         }
 
-        private static object CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object left, SourceSpan rightSpan, object right)
+        private static object? CalculateToString(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object? left, SourceSpan rightSpan, object? right)
         {
             switch (op)
             {
                 case ScriptBinaryOperator.Add:
-                    return context.ObjectToString(left) + context.ObjectToString(right);
+                    return (context.ObjectToString(left) ?? string.Empty) + (context.ObjectToString(right) ?? string.Empty);
                 case ScriptBinaryOperator.Multiply:
 
                     var spanMultiplier = rightSpan;
@@ -325,7 +337,7 @@ namespace Scriban.Syntax
                     {
                         throw new ScriptRuntimeException(spanMultiplier, $"Expecting an integer. The operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1
                     }
-                    var leftText = context.ObjectToString(left);
+                    var leftText = context.ObjectToString(left) ?? string.Empty;
                     if (context.LimitToString > 0 && value > 0 && leftText.Length > 0 && (long)leftText.Length * value > context.LimitToString)
                     {
                         throw new ScriptRuntimeException(spanMultiplier, $"String multiplication exceeds LimitToString `{context.LimitToString}`.");
@@ -342,20 +354,20 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareNotEqual:
                     return context.ObjectToString(left) != context.ObjectToString(right);
                 case ScriptBinaryOperator.CompareGreater:
-                    return context.ObjectToString(left).CompareTo(context.ObjectToString(right)) > 0;
+                    return string.Compare(context.ObjectToString(left), context.ObjectToString(right), StringComparison.Ordinal) > 0;
                 case ScriptBinaryOperator.CompareLess:
-                    return context.ObjectToString(left).CompareTo(context.ObjectToString(right)) < 0;
+                    return string.Compare(context.ObjectToString(left), context.ObjectToString(right), StringComparison.Ordinal) < 0;
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
-                    return context.ObjectToString(left).CompareTo(context.ObjectToString(right)) >= 0;
+                    return string.Compare(context.ObjectToString(left), context.ObjectToString(right), StringComparison.Ordinal) >= 0;
                 case ScriptBinaryOperator.CompareLessOrEqual:
-                    return context.ObjectToString(left).CompareTo(context.ObjectToString(right)) <= 0;
+                    return string.Compare(context.ObjectToString(left), context.ObjectToString(right), StringComparison.Ordinal) <= 0;
 
                 case ScriptBinaryOperator.LiquidContains:
-                    return context.ObjectToString(left).Contains(context.ObjectToString(right));
+                    return (context.ObjectToString(left) ?? string.Empty).Contains(context.ObjectToString(right) ?? string.Empty);
                 case ScriptBinaryOperator.LiquidStartsWith:
-                    return context.ObjectToString(left).StartsWith(context.ObjectToString(right));
+                    return (context.ObjectToString(left) ?? string.Empty).StartsWith(context.ObjectToString(right) ?? string.Empty, StringComparison.Ordinal);
                 case ScriptBinaryOperator.LiquidEndsWith:
-                    return context.ObjectToString(left).EndsWith(context.ObjectToString(right));
+                    return (context.ObjectToString(left) ?? string.Empty).EndsWith(context.ObjectToString(right) ?? string.Empty, StringComparison.Ordinal);
                 default:
                     break;
             }
@@ -464,10 +476,10 @@ namespace Scriban.Syntax
             }
         }
 
-        private static object CalculateOthers(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue)
+        private static object? CalculateOthers(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object? leftValue, SourceSpan rightSpan, object? rightValue)
         {
             // Both values are null, applies the relevant binary ops
-            if (leftValue == null && rightValue == null)
+            if (leftValue is null && rightValue is null)
             {
                 switch (op)
                 {
@@ -505,7 +517,7 @@ namespace Scriban.Syntax
             }
 
             // One value is null
-            if (leftValue == null || rightValue == null)
+            if (leftValue is null || rightValue is null)
             {
                 switch (op)
                 {
@@ -521,7 +533,7 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.LiquidContains:
                     case ScriptBinaryOperator.LiquidStartsWith:
                     case ScriptBinaryOperator.LiquidEndsWith:
-                        if (context.UseScientific) throw new ScriptRuntimeException(span, $"The {(leftValue == null ? "left" : "right")} expression is null. Cannot perform this operation on a null value.");
+                        if (context.UseScientific) throw new ScriptRuntimeException(span, $"The {(leftValue is null ? "left" : "right")} expression is null. Cannot perform this operation on a null value.");
                         return false;
                     case ScriptBinaryOperator.Add:
                     case ScriptBinaryOperator.Subtract:
@@ -536,7 +548,7 @@ namespace Scriban.Syntax
                     case ScriptBinaryOperator.Modulus:
                     case ScriptBinaryOperator.RangeInclude:
                     case ScriptBinaryOperator.RangeExclude:
-                        if (context.UseScientific) throw new ScriptRuntimeException(span, $"The {(leftValue == null ? "left" : "right")} expression is null. Cannot perform this operation on a null value.");
+                        if (context.UseScientific) throw new ScriptRuntimeException(span, $"The {(leftValue is null ? "left" : "right")} expression is null. Cannot perform this operation on a null value.");
 
                         return null;
                 }
@@ -549,109 +561,109 @@ namespace Scriban.Syntax
             // The order matters: decimal, double, float, long, int
             if (leftType == typeof(decimal))
             {
-                var rightDecimal = (decimal)context.ToObject(span, rightValue, typeof(decimal));
+                var rightDecimal = context.ToObject<decimal>(span, rightValue);
                 return CalculateDecimal(op, span, (decimal)leftValue, rightDecimal);
             }
 
             if (rightType == typeof(decimal))
             {
-                var leftDecimal = (decimal)context.ToObject(span, leftValue, typeof(decimal));
+                var leftDecimal = context.ToObject<decimal>(span, leftValue);
                 return CalculateDecimal(op, span, leftDecimal, (decimal)rightValue);
             }
 
             if (leftType == typeof(double))
             {
-                var rightDouble = (double)context.ToObject(span, rightValue, typeof(double));
+                var rightDouble = context.ToObject<double>(span, rightValue);
                 return CalculateDouble(op, span, (double)leftValue, rightDouble);
             }
 
             if (rightType == typeof(double))
             {
-                var leftDouble = (double)context.ToObject(span, leftValue, typeof(double));
+                var leftDouble = context.ToObject<double>(span, leftValue);
                 return CalculateDouble(op, span, leftDouble, (double)rightValue);
             }
 
             if (leftType == typeof(float))
             {
-                var rightFloat = (float)context.ToObject(span, rightValue, typeof(float));
+                var rightFloat = context.ToObject<float>(span, rightValue);
                 return CalculateFloat(op, span, (float)leftValue, rightFloat);
             }
 
             if (rightType == typeof(float))
             {
-                var leftFloat = (float)context.ToObject(span, leftValue, typeof(float));
+                var leftFloat = context.ToObject<float>(span, leftValue);
                 return CalculateFloat(op, span, leftFloat, (float)rightValue);
             }
 
             if (leftType == typeof(BigInteger))
             {
-                var rightBig = (BigInteger)context.ToObject(span, rightValue, typeof(BigInteger));
+                var rightBig = context.ToObject<BigInteger>(span, rightValue);
                 return CalculateBigInteger(context, op, span, (BigInteger)leftValue, rightBig);
             }
 
             if (rightType == typeof(BigInteger))
             {
-                var leftBig = (BigInteger)context.ToObject(span, leftValue, typeof(BigInteger));
+                var leftBig = context.ToObject<BigInteger>(span, leftValue);
                 return CalculateBigInteger(context, op, span, leftBig, (BigInteger)rightValue);
             }
 
             if (leftType == typeof(long))
             {
-                var rightLong = (long)context.ToObject(span, rightValue, typeof(long));
+                var rightLong = context.ToObject<long>(span, rightValue);
                 return CalculateLong(context, op, span, (long)leftValue, rightLong);
             }
 
             if (rightType == typeof(long))
             {
-                var leftLong = (long)context.ToObject(span, leftValue, typeof(long));
+                var leftLong = context.ToObject<long>(span, leftValue);
                 return CalculateLong(context, op, span, leftLong, (long)rightValue);
             }
 
             if (leftType == typeof(ulong))
             {
-                var rightLong = (ulong)context.ToObject(span, rightValue, typeof(ulong));
+                var rightLong = context.ToObject<ulong>(span, rightValue);
                 return CalculateLong(context, op, span, (ulong)leftValue, rightLong);
             }
 
             if (rightType == typeof(ulong))
             {
-                var leftLong = (ulong)context.ToObject(span, leftValue, typeof(ulong));
+                var leftLong = context.ToObject<ulong>(span, leftValue);
                 return CalculateLong(context, op, span, leftLong, (ulong)rightValue);
             }
 
             if (leftType == typeof(uint))
             {
-                var rightLong = (uint)context.ToObject(span, rightValue, typeof(uint));
+                var rightLong = context.ToObject<uint>(span, rightValue);
                 return CalculateLong(context, op, span, (uint)leftValue, rightLong);
             }
 
             if (rightType == typeof(uint))
             {
-                var leftLong = (uint)context.ToObject(span, leftValue, typeof(uint));
+                var leftLong = context.ToObject<uint>(span, leftValue);
                 return CalculateLong(context, op, span, leftLong, (uint)rightValue);
             }
 
-            if (leftType == typeof(int) || (leftType != null && leftType.IsEnum))
+            if (leftType == typeof(int) || (leftType is not null && leftType.IsEnum))
             {
-                var rightInt = (int)context.ToObject(span, rightValue, typeof(int));
+                var rightInt = context.ToObject<int>(span, rightValue);
                 return CalculateInt(context, op, span, (int)leftValue, rightInt);
             }
 
-            if (rightType == typeof(int) || (rightType != null && rightType.IsEnum))
+            if (rightType == typeof(int) || (rightType is not null && rightType.IsEnum))
             {
-                var leftInt = (int)context.ToObject(span, leftValue, typeof(int));
+                var leftInt = context.ToObject<int>(span, leftValue);
                 return CalculateInt(context, op, span, leftInt, (int)rightValue);
             }
             
             if (leftType == typeof(bool))
             {
-                var rightBool = (bool)context.ToObject(span, rightValue, typeof(bool));
+                var rightBool = context.ToObject<bool>(span, rightValue);
                 return CalculateBool(op, span, (bool)leftValue, rightBool);
             }
 
             if (rightType == typeof(bool))
             {
-                var leftBool = (bool)context.ToObject(span, leftValue, typeof(bool));
+                var leftBool = context.ToObject<bool>(span, leftValue);
                 return CalculateBool(op, span, leftBool, (bool)rightValue);
             }
 

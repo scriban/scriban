@@ -37,7 +37,7 @@ public class TestModelWithJsonElement {
     [Test]
     public void Can_import_boxed_jsonElement()
     {
-        var model = JsonSerializer.Deserialize<Dictionary<string, object>>("""{ "model": { "foo": "bar" } }""");
+        var model = JsonSerializer.Deserialize<Dictionary<string, object>>("""{ "model": { "foo": "bar" } }""") ?? throw new AssertionException("Expected JSON model.");
 
         // ensure we have a boxed JsonElement:
         Assert.AreEqual(typeof(string), model.GetType().GetGenericArguments()[0]);

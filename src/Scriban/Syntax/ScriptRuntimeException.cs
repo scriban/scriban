@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace Scriban.Syntax
             Span = span;
         }
 
-        public ScriptRuntimeException(SourceSpan span, string message, Exception innerException) : base(message, innerException)
+        public ScriptRuntimeException(SourceSpan span, string message, Exception? innerException) : base(message, innerException)
         {
             Span = span;
         }
@@ -57,7 +57,7 @@ namespace Scriban.Syntax
 
         public override string ToString()
         { 
-            if (ScriptRuntimeException.EnableDisplayInnerException && InnerException != null)
+            if (ScriptRuntimeException.EnableDisplayInnerException && InnerException is not null)
             {
                 return base.ToString();
             }
@@ -96,9 +96,9 @@ namespace Scriban.Syntax
         {
         }
 
-        public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages, Exception innerException) : base(span, message, innerException)
+        public ScriptParserRuntimeException(SourceSpan span, string message, LogMessageBag parserMessages, Exception? innerException) : base(span, message, innerException)
         {
-            if (parserMessages == null) throw new ArgumentNullException(nameof(parserMessages));
+            if (parserMessages is null) throw new ArgumentNullException(nameof(parserMessages));
             ParserMessages = parserMessages;
         }
 

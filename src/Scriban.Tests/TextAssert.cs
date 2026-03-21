@@ -21,19 +21,19 @@ namespace Scriban.Tests
 
         public static string Normalize(string text) => text.Replace("\r\n", "\n");
 
-        public static void AreEqual(string expected, string actual)
+        public static void AreEqual(string expected, string? actual)
         {
             AreEqual(expected, actual, DiffStyle.Full, Console.Out);
         }
 
-        public static void AreEqual(string expected, string actual, DiffStyle diffStyle)
+        public static void AreEqual(string expected, string? actual, DiffStyle diffStyle)
         {
             AreEqual(expected, actual, diffStyle, Console.Out);
         }
 
-        public static void AreEqual(string expected, string actual, DiffStyle diffStyle, TextWriter output)
+        public static void AreEqual(string expected, string? actual, DiffStyle diffStyle, TextWriter output)
         {
-            if (actual == null || expected == null)
+            if (actual is null || expected is null)
             {
                 Assert.AreEqual(expected, actual);
                 return;

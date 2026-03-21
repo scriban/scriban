@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -22,9 +22,9 @@ namespace Scriban.Parsing
 #endif
     partial class Parser
     {
-        private ScriptExpression ParseVariableOrLiteral()
+        private ScriptExpression? ParseVariableOrLiteral()
         {
-            ScriptExpression literal = null;
+            ScriptExpression? literal = null;
             switch (Current.Type)
             {
                 case TokenType.Identifier:
@@ -96,7 +96,7 @@ namespace Scriban.Parsing
                     }
                 }
 
-                if (literal.Value == null)
+                if (literal.Value is null)
                 {
                     LogError($"Unable to parse double value `{text}`");
                 }
@@ -200,7 +200,7 @@ namespace Scriban.Parsing
                         literal.Value = new BigInteger(tempResult);
                     }
 
-                    if (literal.Value == null)
+                    if (literal.Value is null)
                     {
                         literal.Value = unchecked((long)tempResult);
                     }
@@ -288,7 +288,7 @@ namespace Scriban.Parsing
                         literal.Value = number;
                     }
 
-                    if (literal.Value == null)
+                    if (literal.Value is null)
                     {
                         literal.Value = unchecked((long) (ulong) number);
                     }
@@ -559,7 +559,7 @@ namespace Scriban.Parsing
             }
 
             // Keeps trivia before this token
-            List<ScriptTrivia> triviasBefore = null;
+            List<ScriptTrivia>? triviasBefore = null;
             if (_isKeepTrivia && _trivias.Count > 0)
             {
                 triviasBefore = new List<ScriptTrivia>();
@@ -593,7 +593,7 @@ namespace Scriban.Parsing
 
                     if (_isKeepTrivia)
                     {
-                        if (triviasBefore != null)
+                        if (triviasBefore is not null)
                         {
                             target.AddTrivias(triviasBefore, true);
                         }
@@ -719,7 +719,7 @@ namespace Scriban.Parsing
                 // Flush any trivias after
                 if (_isKeepTrivia)
                 {
-                    if (triviasBefore != null)
+                    if (triviasBefore is not null)
                     {
                         target.ThisKeyword.AddTrivias(triviasBefore, true);
                     }
@@ -734,7 +734,7 @@ namespace Scriban.Parsing
             if (_isKeepTrivia)
             {
                 // Flush any trivias after
-                if (triviasBefore != null)
+                if (triviasBefore is not null)
                 {
                     result.AddTrivias(triviasBefore, true);
                 }
@@ -753,7 +753,7 @@ namespace Scriban.Parsing
 
             literal.StringQuoteType = ScriptLiteralStringQuoteType.Verbatim;
 
-            StringBuilder builder = null;
+            StringBuilder? builder = null;
 
             // startOffset start at the first character (`a` in the string `abc`)
             var startOffset = Current.Start.Offset + 1;
@@ -769,7 +769,7 @@ namespace Scriban.Parsing
                 {
                     break;
                 }
-                if (builder == null)
+                if (builder is null)
                 {
                     builder = new StringBuilder(endOffset - startOffset + 1);
                 }
@@ -777,7 +777,7 @@ namespace Scriban.Parsing
                 // Skip the escape ``
                 offset = nextOffset + 2;
             }
-            if (builder != null)
+            if (builder is not null)
             {
                 var count = endOffset - offset + 1;
                 if (count > 0)

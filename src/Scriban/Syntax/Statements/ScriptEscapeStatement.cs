@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 
@@ -18,6 +18,8 @@ namespace Scriban.Syntax
     {
         public ScriptEscapeStatement()
         {
+            Trivias = new ScriptTrivias();
+            Indent = string.Empty;
             CanSkipEvaluation = true;
         }
 
@@ -34,7 +36,7 @@ namespace Scriban.Syntax
 
         public int EscapeCount { get; set; }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return null;
         }

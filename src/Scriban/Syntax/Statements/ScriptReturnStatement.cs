@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Runtime;
 using System.Collections.Generic;
@@ -17,12 +17,13 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptReturnStatement : ScriptStatement
     {
-        private ScriptExpression _expression;
+        private ScriptExpression? _expression;
         private ScriptKeyword _retKeyword;
 
         public ScriptReturnStatement()
         {
-            RetKeyword = ScriptKeyword.Ret();
+            _retKeyword = ScriptKeyword.Ret();
+            _retKeyword.Parent = this;
         }
 
         public ScriptKeyword RetKeyword
@@ -31,18 +32,20 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _retKeyword, value);
         }
 
-        public ScriptExpression Expression
+        public ScriptExpression? Expression
         {
             get => _expression;
-            set => ParentToThis(ref _expression, value);
+            set => ParentToThisNullable(ref _expression, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
-            var result = context.Evaluate(Expression);
+            var result = Expression is null ? null : context.Evaluate(Expression);
             //ensure that deferred array interators are evaluated before we lose context
             if (result is ScriptRange range)
+            {
                 result = new ScriptArray(range);
+            }
             context.FlowState = ScriptFlowState.Return;
             return result;
         }

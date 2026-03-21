@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using Scriban.Runtime;
@@ -18,12 +18,13 @@ namespace Scriban.Syntax
     partial class ScriptWithStatement : ScriptStatement
     {
         private ScriptKeyword _withKeyword;
-        private ScriptExpression _name;
-        private ScriptBlockStatement _body;
+        private ScriptExpression? _name;
+        private ScriptBlockStatement? _body;
 
         public ScriptWithStatement()
         {
-            WithKeyword = ScriptKeyword.With();
+            _withKeyword = ScriptKeyword.With();
+            _withKeyword.Parent = this;
         }
 
         public ScriptKeyword WithKeyword
@@ -32,31 +33,36 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _withKeyword, value);
         }
 
-        public ScriptExpression Name
+        public ScriptExpression? Name
         {
             get => _name;
-            set => ParentToThis(ref _name, value);
+            set => ParentToThisNullable(ref _name, value);
         }
 
-        public ScriptBlockStatement Body
+        public ScriptBlockStatement? Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set => ParentToThisNullable(ref _body, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
+            if (Name is null)
+            {
+                return null;
+            }
+
             var target = context.GetValue(Name);
-            if (!(target is IScriptObject))
+            if (target is not IScriptObject scriptObject)
             {
                 var targetName = target?.GetType().Name ?? "null";
                 throw new ScriptRuntimeException(Name.Span, $"Invalid target property `{Name}` used for [with] statement. Must be a ScriptObject instead of `{targetName}`");
             }
 
-            context.PushGlobal((IScriptObject)target);
+            context.PushGlobal(scriptObject);
             try
             {
-                var result = context.Evaluate(Body);
+                var result = Body is null ? null : context.Evaluate(Body);
                 return result;
             }
             finally

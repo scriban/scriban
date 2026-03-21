@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -17,12 +17,13 @@ namespace Scriban.Syntax
     partial class ScriptWhileStatement : ScriptLoopStatementBase
     {
         private ScriptKeyword _whileKeyword;
-        private ScriptExpression _condition;
-        private ScriptBlockStatement _body;
+        private ScriptExpression? _condition;
+        private ScriptBlockStatement? _body;
 
         public ScriptWhileStatement()
         {
-            WhileKeyword = ScriptKeyword.While();
+            _whileKeyword = ScriptKeyword.While();
+            _whileKeyword.Parent = this;
         }
 
         public ScriptKeyword WhileKeyword
@@ -31,27 +32,27 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _whileKeyword, value);
         }
 
-        public ScriptExpression Condition
+        public ScriptExpression? Condition
         {
             get => _condition;
-            set => ParentToThis(ref _condition, value);
+            set => ParentToThisNullable(ref _condition, value);
         }
 
-        public ScriptBlockStatement Body
+        public ScriptBlockStatement? Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set => ParentToThisNullable(ref _body, value);
         }
 
-        protected override object LoopItem(TemplateContext context, LoopState state)
+        protected override object? LoopItem(TemplateContext context, LoopState state)
         {
-            return context.Evaluate(Body);
+            return Body is null ? null : context.Evaluate(Body);
         }
 
-        protected override object EvaluateImpl(TemplateContext context)
+        protected override object? EvaluateImpl(TemplateContext context)
         {
             var index = 0;
-            object result = null;
+            object? result = null;
             BeforeLoop(context);
 
             var loopState = CreateLoopState();
@@ -59,6 +60,11 @@ namespace Scriban.Syntax
 
             while (context.StepLoop(this))
             {
+                if (Condition is null)
+                {
+                    break;
+                }
+
                 var conditionResult = context.ToBool(Condition.Span, context.Evaluate(Condition));
                 if (!conditionResult)
                 {

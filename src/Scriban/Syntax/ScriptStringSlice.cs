@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Diagnostics;
@@ -22,17 +22,17 @@ namespace Scriban.Syntax
     {
         public static readonly ScriptStringSlice Empty = new ScriptStringSlice(string.Empty);
 
-        public ScriptStringSlice(string fullText)
+        public ScriptStringSlice(string? fullText)
         {
             FullText = fullText;
             Index = 0;
             Length = fullText?.Length ?? 0;
         }
 
-        public ScriptStringSlice(string fullText, int index, int length)
+        public ScriptStringSlice(string? fullText, int index, int length)
         {
-            if (index < 0 || fullText != null && index >= fullText.Length) throw new ArgumentOutOfRangeException(nameof(index));
-            if (length < 0 || fullText != null && index + length > fullText.Length) throw new ArgumentOutOfRangeException(nameof(length));
+            if (index < 0 || fullText is not null && index >= fullText.Length) throw new ArgumentOutOfRangeException(nameof(index));
+            if (length < 0 || fullText is not null && index + length > fullText.Length) throw new ArgumentOutOfRangeException(nameof(length));
             FullText = fullText;
             Index = index;
             Length = length;
@@ -41,7 +41,7 @@ namespace Scriban.Syntax
         /// <summary>
         /// The text of this slice.
         /// </summary>
-        public readonly string FullText;
+        public readonly string? FullText;
 
         /// <summary>
         /// Index into the text
@@ -58,7 +58,7 @@ namespace Scriban.Syntax
             get
             {
                 if ((uint)index >= (uint)Length) throw new ArgumentOutOfRangeException(nameof(index));
-                return FullText[Index + index];
+                return (FullText ?? string.Empty)[Index + index];
             }
         }
 
@@ -66,23 +66,23 @@ namespace Scriban.Syntax
         {
             if (index == Length) return "";
             if ((uint)index > (uint)Length) throw new ArgumentOutOfRangeException(nameof(index));
-            return FullText?.Substring(Index + index, Length - index);
+            return FullText?.Substring(Index + index, Length - index) ?? string.Empty;
         }
 
         public override string ToString()
         {
-            return FullText?.Substring(Index, Length);
+            return FullText?.Substring(Index, Length) ?? string.Empty;
         }
 
         public bool Equals(ScriptStringSlice other)
         {
             if (Length != other.Length) return false;
-            if (FullText == null && other.FullText == null) return true;
-            if (FullText == null || other.FullText == null) return false;
+            if (FullText is null && other.FullText is null) return true;
+            if (FullText is null || other.FullText is null) return false;
             return string.CompareOrdinal(FullText, Index, other.FullText, other.Index, Length) == 0;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is ScriptStringSlice other && Equals(other);
         }
@@ -91,7 +91,7 @@ namespace Scriban.Syntax
         {
             unchecked
             {
-                if (FullText == null) return 0;
+                if (FullText is null) return 0;
 
                 // TODO: optimize with Span for >= netstandard 2.1
                 var hashCode = Length;
@@ -118,14 +118,14 @@ namespace Scriban.Syntax
 
         public int CompareTo(ScriptStringSlice other)
         {
-            if (FullText == null || other.FullText == null)
+            if (FullText is null || other.FullText is null)
             {
                 if (object.ReferenceEquals(FullText, other.FullText))
                 {
                     return 0;
                 }
 
-                return FullText == null ? -1 : 1;
+                return FullText is null ? -1 : 1;
             }
 
             if (Length == 0 && other.Length == 0) return 0;
@@ -137,16 +137,16 @@ namespace Scriban.Syntax
             return textComparison != 0 ? textComparison < 0 ? -1 : 1 : Length.CompareTo(other.Length);
         }
 
-        public int CompareTo(string other)
+        public int CompareTo(string? other)
         {
-            if (FullText == null || other == null)
+            if (FullText is null || other is null)
             {
                 if (object.ReferenceEquals(FullText, other))
                 {
                     return 0;
                 }
 
-                return FullText == null ? -1 : 1;
+                return FullText is null ? -1 : 1;
             }
 
             if (Length == 0 && other.Length == 0) return 0;
@@ -160,11 +160,15 @@ namespace Scriban.Syntax
 
         public static explicit operator ScriptStringSlice(string text) => new ScriptStringSlice(text);
 
-        public static explicit operator string(ScriptStringSlice slice) => slice.ToString();
+        public static explicit operator string(ScriptStringSlice slice) => slice.ToString() ?? string.Empty;
 
         public ScriptStringSlice TrimStart()
         {
             var text = FullText;
+            if (text is null)
+            {
+                return Empty;
+            }
             for (int i = 0; i < Length; i++)
             {
                 var c = text[Index + i];
@@ -179,6 +183,10 @@ namespace Scriban.Syntax
         public ScriptStringSlice TrimEnd()
         {
             var text = FullText;
+            if (text is null)
+            {
+                return Empty;
+            }
             for (int i = Length - 1; i >= 0; i--)
             {
                 var c = text[Index + i];
@@ -194,6 +202,10 @@ namespace Scriban.Syntax
         public ScriptStringSlice TrimEndKeepNewLine()
         {
             var text = FullText;
+            if (text is null)
+            {
+                return Empty;
+            }
             for (int i = Length - 1; i >= 0; i--)
             {
                 var c = text[Index + i];

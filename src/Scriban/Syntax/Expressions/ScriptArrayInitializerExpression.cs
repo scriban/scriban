@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using Scriban.Helpers;
 using Scriban.Runtime;
@@ -17,15 +17,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptArrayInitializerExpression : ScriptExpression
     {
-        private ScriptList<ScriptExpression> _values;
-        private ScriptToken _openBracketToken;
-        private ScriptToken _closeBracketToken;
-
+        private ScriptList<ScriptExpression> _values = new ScriptList<ScriptExpression>();
+        private ScriptToken _openBracketToken = ScriptToken.OpenBracket();
+        private ScriptToken _closeBracketToken = ScriptToken.CloseBracket();
         public ScriptArrayInitializerExpression()
         {
-            OpenBracketToken = ScriptToken.OpenBracket();
-            Values = new ScriptList<ScriptExpression>();
-            CloseBracketToken = ScriptToken.CloseBracket();
+            _openBracketToken.Parent = this;
+            _values.Parent = this;
+            _closeBracketToken.Parent = this;
         }
 
         public ScriptToken OpenBracketToken
@@ -46,7 +45,7 @@ namespace Scriban.Syntax
             set => ParentToThis(ref _closeBracketToken, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             var scriptArray = new ScriptArray();
             foreach (var value in Values)

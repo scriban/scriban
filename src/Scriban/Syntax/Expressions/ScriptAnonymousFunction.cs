@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -15,26 +15,25 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptAnonymousFunction : ScriptExpression
     {
-        private ScriptFunction _function;
+        private ScriptFunction? _function;
 
-        public ScriptAnonymousFunction()
-        {
-        }
-
-        public ScriptFunction Function
+        public ScriptFunction? Function
         {
             get => _function;
-            set => ParentToThis(ref _function, value);
+            set => ParentToThisNullable(ref _function, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return Function;
         }
 
         public override void PrintTo(ScriptPrinter printer)
         {
-            printer.Write(Function);
+            if (Function is not null)
+            {
+                printer.Write(Function);
+            }
         }
     }
 }

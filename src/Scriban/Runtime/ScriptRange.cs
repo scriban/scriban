@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Collections;
@@ -22,13 +22,13 @@ namespace Scriban.Runtime
 #else
     internal
 #endif
-    class ScriptRange : IList<object>, IList, IEnumerable<object>, IScriptTransformable, IScriptCustomBinaryOperation
+    class ScriptRange : IList<object?>, IList, IEnumerable<object?>, IScriptTransformable, IScriptCustomBinaryOperation
     {
         private IEnumerable _values;
 
         public ScriptRange()
         {
-            _values = Enumerable.Empty<object>();
+            _values = Enumerable.Empty<object?>();
         }
 
         public ScriptRange(IEnumerable values)
@@ -38,7 +38,7 @@ namespace Scriban.Runtime
 
         public IEnumerable Values => _values;
 
-        public IEnumerator<object> GetEnumerator()
+        public IEnumerator<object?> GetEnumerator()
         {
             var enumerator = _values.GetEnumerator();
             while (enumerator.MoveNext()) {
@@ -58,7 +58,7 @@ namespace Scriban.Runtime
             return true;
         }
 
-        public virtual bool Visit(TemplateContext context, SourceSpan span, Func<object, bool> visit)
+        public virtual bool Visit(TemplateContext context, SourceSpan span, Func<object?, bool> visit)
         {
             foreach (var item in this)
             {
@@ -71,12 +71,12 @@ namespace Scriban.Runtime
             return true;
         }
 
-        public virtual object Transform(TemplateContext context, SourceSpan span, Func<object, object> apply, Type destType)
+        public virtual object? Transform(TemplateContext context, SourceSpan span, Func<object?, object?> apply, Type destType)
         {
             return new ScriptRange(TransformImpl(apply));
         }
 
-        private IEnumerable TransformImpl(Func<object, object> apply)
+        private IEnumerable TransformImpl(Func<object?, object?> apply)
         {
             foreach (var value in this)
             {
@@ -84,14 +84,14 @@ namespace Scriban.Runtime
             }
         }
 
-        public static ScriptRange Offset(IEnumerable list, int index)
+        public static ScriptRange? Offset(IEnumerable? list, int index)
         {
-            return list == null ? null : new ScriptRange(OffsetImpl(list, index));
+            return list is null ? null : new ScriptRange(OffsetImpl(list, index));
         }
 
-        internal static ScriptRange Offset(TemplateContext context, SourceSpan span, IEnumerable list, int index)
+        internal static ScriptRange? Offset(TemplateContext context, SourceSpan span, IEnumerable? list, int index)
         {
-            return list == null ? null : new ScriptRange(OffsetImpl(context, span, list, index));
+            return list is null ? null : new ScriptRange(OffsetImpl(context, span, list, index));
         }
 
         private static IEnumerable OffsetImpl(IEnumerable list, int index)
@@ -128,14 +128,14 @@ namespace Scriban.Runtime
         }
 
 
-        public static ScriptRange Limit(IEnumerable list, int count)
+        public static ScriptRange? Limit(IEnumerable? list, int count)
         {
-            return list == null ? null : new ScriptRange(LimitImpl(list, count));
+            return list is null ? null : new ScriptRange(LimitImpl(list, count));
         }
 
-        internal static ScriptRange Limit(TemplateContext context, SourceSpan span, IEnumerable list, int count)
+        internal static ScriptRange? Limit(TemplateContext context, SourceSpan span, IEnumerable? list, int count)
         {
-            return list == null ? null : new ScriptRange(LimitImpl(context, span, list, count));
+            return list is null ? null : new ScriptRange(LimitImpl(context, span, list, count));
         }
 
         private static IEnumerable LimitImpl(IEnumerable list, int count)
@@ -167,41 +167,41 @@ namespace Scriban.Runtime
             }
         }
 
-        public static ScriptRange Compact(IEnumerable list)
+        public static ScriptRange? Compact(IEnumerable? list)
         {
-            return list == null ? null : new ScriptRange(CompactImpl(list));
+            return list is null ? null : new ScriptRange(CompactImpl(list));
         }
 
-        internal static ScriptRange Compact(TemplateContext context, SourceSpan span, IEnumerable list)
+        internal static ScriptRange? Compact(TemplateContext context, SourceSpan span, IEnumerable? list)
         {
-            return list == null ? null : new ScriptRange(CompactImpl(context, span, list));
+            return list is null ? null : new ScriptRange(CompactImpl(context, span, list));
         }
 
-        public static ScriptRange Uniq(IEnumerable list)
+        public static ScriptRange? Uniq(IEnumerable? list)
         {
-            return list == null ? null : new ScriptRange(list.Cast<object>().Distinct());
+            return list is null ? null : new ScriptRange(list.Cast<object?>().Distinct());
         }
 
-        internal static ScriptRange Uniq(TemplateContext context, SourceSpan span, IEnumerable list)
+        internal static ScriptRange? Uniq(TemplateContext context, SourceSpan span, IEnumerable? list)
         {
-            return list == null ? null : new ScriptRange(UniqImpl(context, span, list));
+            return list is null ? null : new ScriptRange(UniqImpl(context, span, list));
         }
 
         public static ScriptRange Reverse(IEnumerable list)
         {
-            if (list == null)
+            if (list is null)
             {
-                return new ScriptRange(Enumerable.Empty<object>());
+                return new ScriptRange(Enumerable.Empty<object?>());
             }
 
-            return new ScriptRange(list.Cast<object>().Reverse());
+            return new ScriptRange(list.Cast<object?>().Reverse());
         }
 
         internal static ScriptRange Reverse(TemplateContext context, SourceSpan span, IEnumerable list)
         {
-            if (list == null)
+            if (list is null)
             {
-                return new ScriptRange(Enumerable.Empty<object>());
+                return new ScriptRange(Enumerable.Empty<object?>());
             }
 
             return new ScriptRange(ReverseImpl(context, span, list));
@@ -210,11 +210,11 @@ namespace Scriban.Runtime
 
         private static IEnumerable CompactImpl(IEnumerable list)
         {
-            if (list == null) yield break;
+            if (list is null) yield break;
 
             foreach (var item in list)
             {
-                if (item != null)
+                if (item is not null)
                 {
                     yield return item;
                 }
@@ -223,14 +223,14 @@ namespace Scriban.Runtime
 
         private static IEnumerable CompactImpl(TemplateContext context, SourceSpan span, IEnumerable list)
         {
-            if (list == null) yield break;
+            if (list is null) yield break;
 
             int loopStep = 0;
             var loopType = GetLoopType(list);
             foreach (var item in list)
             {
                 context.StepLoop(span, ref loopStep, loopType);
-                if (item != null)
+                if (item is not null)
                 {
                     yield return item;
                 }
@@ -241,7 +241,7 @@ namespace Scriban.Runtime
         {
             int loopStep = 0;
             var loopType = GetLoopType(list);
-            var distinct = new HashSet<object>();
+            var distinct = new HashSet<object?>();
             foreach (var item in list)
             {
                 context.StepLoop(span, ref loopStep, loopType);
@@ -254,7 +254,7 @@ namespace Scriban.Runtime
 
         private static IEnumerable ReverseImpl(TemplateContext context, SourceSpan span, IEnumerable list)
         {
-            var items = new List<object>();
+            var items = new List<object?>();
             int loopStep = 0;
             var loopType = GetLoopType(list);
             foreach (var item in list)
@@ -270,43 +270,43 @@ namespace Scriban.Runtime
         }
 
 
-        public static ScriptRange BinaryOr(IEnumerable<object> left, IEnumerable<object> right)
+        public static ScriptRange BinaryOr(IEnumerable<object?> left, IEnumerable<object?> right)
         {
             return new ScriptRange(left.Union(right));
         }
 
-        private static ScriptRange BinaryOr(TemplateContext context, SourceSpan span, IEnumerable<object> left, IEnumerable<object> right)
+        private static ScriptRange BinaryOr(TemplateContext context, SourceSpan span, IEnumerable<object?> left, IEnumerable<object?> right)
         {
             return new ScriptRange(BinaryOrImpl(context, span, left, right));
         }
 
-        public static ScriptRange BinaryAnd(IEnumerable<object> left, IEnumerable<object> right)
+        public static ScriptRange BinaryAnd(IEnumerable<object?> left, IEnumerable<object?> right)
         {
             return new ScriptRange(left.Intersect(right));
         }
 
-        private static ScriptRange BinaryAnd(TemplateContext context, SourceSpan span, IEnumerable<object> left, IEnumerable<object> right)
+        private static ScriptRange BinaryAnd(TemplateContext context, SourceSpan span, IEnumerable<object?> left, IEnumerable<object?> right)
         {
             return new ScriptRange(BinaryAndImpl(context, span, left, right));
         }
 
-        public static ScriptRange ShiftLeft(IEnumerable left, object value)
+        public static ScriptRange ShiftLeft(IEnumerable left, object? value)
         {
             return new ScriptRange(ShiftLeftImpl(left, value));
         }
 
-        private static ScriptRange ShiftLeft(TemplateContext context, SourceSpan span, IEnumerable left, object value)
+        private static ScriptRange ShiftLeft(TemplateContext context, SourceSpan span, IEnumerable left, object? value)
         {
             return new ScriptRange(ShiftLeftImpl(context, span, left, value));
         }
 
-        private static IEnumerable ShiftLeftImpl(IEnumerable left, object value)
+        private static IEnumerable ShiftLeftImpl(IEnumerable left, object? value)
         {
             foreach (var o in left) yield return o;
             yield return value;
         }
 
-        private static IEnumerable ShiftLeftImpl(TemplateContext context, SourceSpan span, IEnumerable left, object value)
+        private static IEnumerable ShiftLeftImpl(TemplateContext context, SourceSpan span, IEnumerable left, object? value)
         {
             int loopStep = 0;
             var loopType = GetLoopType(left);
@@ -318,23 +318,23 @@ namespace Scriban.Runtime
             yield return value;
         }
 
-        public static ScriptRange ShiftRight(object value, IEnumerable right)
+        public static ScriptRange ShiftRight(object? value, IEnumerable right)
         {
             return new ScriptRange(ShiftRightImpl(value, right));
         }
 
-        private static ScriptRange ShiftRight(TemplateContext context, SourceSpan span, object value, IEnumerable right)
+        private static ScriptRange ShiftRight(TemplateContext context, SourceSpan span, object? value, IEnumerable right)
         {
             return new ScriptRange(ShiftRightImpl(context, span, value, right));
         }
 
-        private static IEnumerable ShiftRightImpl(object value, IEnumerable right)
+        private static IEnumerable ShiftRightImpl(object? value, IEnumerable right)
         {
             yield return value;
             foreach (var o in right) yield return o;
         }
 
-        private static IEnumerable ShiftRightImpl(TemplateContext context, SourceSpan span, object value, IEnumerable right)
+        private static IEnumerable ShiftRightImpl(TemplateContext context, SourceSpan span, object? value, IEnumerable right)
         {
             yield return value;
 
@@ -445,41 +445,41 @@ namespace Scriban.Runtime
             }
         }
 
-        public static ScriptRange Concat(IEnumerable left, IEnumerable right)
+        public static ScriptRange? Concat(IEnumerable? left, IEnumerable? right)
         {
-            if (right == null && left == null)
+            if (right is null && left is null)
             {
                 return null;
             }
 
-            if (right == null)
+            if (right is null)
             {
-                return new ScriptRange(left);
+                return new ScriptRange(left ?? throw new InvalidOperationException("left"));
             }
 
-            if (left == null)
+            if (left is null)
             {
-                return new ScriptRange(right);
+                return new ScriptRange(right ?? throw new InvalidOperationException("right"));
             }
 
             return new ScriptRange(ConcatImpl(left, right));
         }
 
-        internal static ScriptRange Concat(TemplateContext context, SourceSpan span, IEnumerable left, IEnumerable right)
+        internal static ScriptRange? Concat(TemplateContext context, SourceSpan span, IEnumerable? left, IEnumerable? right)
         {
-            if (right == null && left == null)
+            if (right is null && left is null)
             {
                 return null;
             }
 
-            if (right == null)
+            if (right is null)
             {
-                return new ScriptRange(left);
+                return new ScriptRange(left ?? throw new InvalidOperationException("left"));
             }
 
-            if (left == null)
+            if (left is null)
             {
-                return new ScriptRange(right);
+                return new ScriptRange(right ?? throw new InvalidOperationException("right"));
             }
 
             return new ScriptRange(ConcatImpl(context, span, left, right));
@@ -509,7 +509,7 @@ namespace Scriban.Runtime
             }
         }
 
-        public bool TryEvaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object leftValue, SourceSpan rightSpan, object rightValue, out object result)
+        public bool TryEvaluate(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, SourceSpan leftSpan, object? leftValue, SourceSpan rightSpan, object? rightValue, out object? result)
         {
             result = null;
             var leftArray = TryGetRange(leftValue);
@@ -518,7 +518,7 @@ namespace Scriban.Runtime
             var intSpan = leftSpan;
 
             var errorSpan = span;
-            string reason = null;
+            string? reason = null;
             switch (op)
             {
                 case ScriptBinaryOperator.BinaryOr:
@@ -530,32 +530,32 @@ namespace Scriban.Runtime
                 case ScriptBinaryOperator.CompareLess:
                 case ScriptBinaryOperator.CompareGreater:
                 case ScriptBinaryOperator.Add:
-                    if (leftArray == null)
+                    if (leftArray is null)
                     {
                         errorSpan = leftSpan;
                         reason = " Expecting an array for the left argument.";
                     }
-                    if (rightArray == null)
+                    if (rightArray is null)
                     {
                         errorSpan = rightSpan;
                         reason = " Expecting an array for the right argument.";
                     }
                     break;
                 case ScriptBinaryOperator.Multiply:
-                    if (leftArray == null && rightArray == null || leftArray != null && rightArray != null)
+                    if (leftArray is null && rightArray is null || leftArray is not null && rightArray is not null)
                     {
                         reason = " Expecting only one array for the left or right argument.";
                     }
                     else
                     {
-                        intModifier = context.ToInt(span, leftArray == null ? leftValue : rightValue);
-                        if (rightArray == null) intSpan = rightSpan;
+                        intModifier = context.ToInt(span, leftArray is null ? leftValue : rightValue);
+                        if (rightArray is null) intSpan = rightSpan;
                     }
                     break;
                 case ScriptBinaryOperator.Divide:
                 case ScriptBinaryOperator.DivideRound:
                 case ScriptBinaryOperator.Modulus:
-                    if (leftArray == null)
+                    if (leftArray is null)
                     {
                         errorSpan = leftSpan;
                         reason = " Expecting an array for the left argument.";
@@ -567,14 +567,14 @@ namespace Scriban.Runtime
                     }
                     break;
                 case ScriptBinaryOperator.ShiftLeft:
-                    if (leftArray == null)
+                    if (leftArray is null)
                     {
                         errorSpan = leftSpan;
                         reason = " Expecting an array for the left argument.";
                     }
                     break;
                 case ScriptBinaryOperator.ShiftRight:
-                    if (rightArray == null)
+                    if (rightArray is null)
                     {
                         errorSpan = rightSpan;
                         reason = " Expecting an array for the right argument.";
@@ -591,7 +591,7 @@ namespace Scriban.Runtime
                 reason = $" Integer {intModifier} cannot be negative when multiplying";
             }
 
-            if (reason != null)
+            if (reason is not null)
             {
                 throw new ScriptRuntimeException(errorSpan, $"The operator `{op.ToText()}` is not supported between {context.GetTypeName(leftValue)} and {context.GetTypeName(rightValue)}.{reason}");
             }
@@ -599,10 +599,18 @@ namespace Scriban.Runtime
             switch (op)
             {
                 case ScriptBinaryOperator.BinaryOr:
+                    if (leftArray is null || rightArray is null)
+                    {
+                        throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` requires array operands.");
+                    }
                     result = BinaryOr(context, span, leftArray, rightArray);
                     return true;
 
                 case ScriptBinaryOperator.BinaryAnd:
+                    if (leftArray is null || rightArray is null)
+                    {
+                        throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` requires array operands.");
+                    }
                     result = BinaryAnd(context, span, leftArray, rightArray);
                     return true;
 
@@ -616,6 +624,10 @@ namespace Scriban.Runtime
                 case ScriptBinaryOperator.CompareGreaterOrEqual:
                 case ScriptBinaryOperator.CompareLess:
                 case ScriptBinaryOperator.CompareGreater:
+                    if (leftArray is null || rightArray is null)
+                    {
+                        throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` requires array operands.");
+                    }
                     result = CompareTo(context, span, op, leftArray, rightArray);
                     return true;
 
@@ -623,6 +635,10 @@ namespace Scriban.Runtime
                 {
                     // array with integer
                     var array = leftArray ?? rightArray;
+                    if (array is null)
+                    {
+                        throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` requires an array operand.");
+                    }
                     if (intModifier == 0)
                     {
                         result = new ScriptRange();
@@ -638,6 +654,10 @@ namespace Scriban.Runtime
                 {
                     // array with integer
                     var array = leftArray ?? rightArray;
+                    if (array is null)
+                    {
+                        throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` requires an array operand.");
+                    }
                     if (intModifier == 0) throw new ScriptRuntimeException(intSpan, "Cannot divide by 0");
 
                     result = Divide(context, span, array, intModifier);
@@ -648,6 +668,10 @@ namespace Scriban.Runtime
                 {
                     // array with integer
                     var array = leftArray ?? rightArray;
+                    if (array is null)
+                    {
+                        throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` requires an array operand.");
+                    }
                     if (intModifier == 0) throw new ScriptRuntimeException(intSpan, "Cannot divide by 0");
 
                     result = Modulus(context, span, array, intModifier);
@@ -655,10 +679,18 @@ namespace Scriban.Runtime
                 }
 
                 case ScriptBinaryOperator.ShiftLeft:
+                    if (leftArray is null)
+                    {
+                        throw new ScriptRuntimeException(leftSpan, "Expecting an array for the left argument.");
+                    }
                     result = ShiftLeft(context, span, leftArray, rightValue);
                     return true;
 
                 case ScriptBinaryOperator.ShiftRight:
+                    if (rightArray is null)
+                    {
+                        throw new ScriptRuntimeException(rightSpan, "Expecting an array for the right argument.");
+                    }
                     result = ShiftRight(context, span, leftValue, rightArray);
                     return true;
             }
@@ -666,12 +698,12 @@ namespace Scriban.Runtime
             return false;
         }
 
-        private static IEnumerable<object> TryGetRange(object rightValue)
+        private static IEnumerable<object?>? TryGetRange(object? rightValue)
         {
-            return rightValue as IEnumerable<object>;
+            return rightValue as IEnumerable<object?>;
         }
 
-        private static bool CompareTo(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, IEnumerable<object> left, IEnumerable<object> right)
+        private static bool CompareTo(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, IEnumerable<object?> left, IEnumerable<object?> right)
         {
             var leftItems = MaterializeValues(context, span, left);
             var rightItems = MaterializeValues(context, span, right);
@@ -710,8 +742,7 @@ namespace Scriban.Runtime
             {
                 var leftValue = leftItems[i];
                 var rightValue = rightItems[i];
-                var result = (bool) ScriptBinaryExpression.Evaluate(context, span, op, leftValue, rightValue);
-                if (!result)
+                if (ScriptBinaryExpression.Evaluate(context, span, op, leftValue, rightValue) is not true)
                 {
                     return false;
                 }
@@ -720,9 +751,9 @@ namespace Scriban.Runtime
             return true;
         }
 
-        private static IEnumerable<object> BinaryOrImpl(TemplateContext context, SourceSpan span, IEnumerable<object> left, IEnumerable<object> right)
+        private static IEnumerable<object?> BinaryOrImpl(TemplateContext context, SourceSpan span, IEnumerable<object?> left, IEnumerable<object?> right)
         {
-            var seen = new HashSet<object>();
+            var seen = new HashSet<object?>();
             int loopStep = 0;
             var leftLoopType = GetLoopType(left);
             foreach (var item in left)
@@ -745,10 +776,10 @@ namespace Scriban.Runtime
             }
         }
 
-        private static IEnumerable<object> BinaryAndImpl(TemplateContext context, SourceSpan span, IEnumerable<object> left, IEnumerable<object> right)
+        private static IEnumerable<object?> BinaryAndImpl(TemplateContext context, SourceSpan span, IEnumerable<object?> left, IEnumerable<object?> right)
         {
-            var rightValues = new HashSet<object>();
-            var yielded = new HashSet<object>();
+            var rightValues = new HashSet<object?>();
+            var yielded = new HashSet<object?>();
             int loopStep = 0;
             var rightLoopType = GetLoopType(right);
             foreach (var item in right)
@@ -768,9 +799,9 @@ namespace Scriban.Runtime
             }
         }
 
-        private static List<object> MaterializeValues(TemplateContext context, SourceSpan span, IEnumerable<object> values)
+        private static List<object?> MaterializeValues(TemplateContext context, SourceSpan span, IEnumerable<object?> values)
         {
-            var items = new List<object>();
+            var items = new List<object?>();
             int loopStep = 0;
             var loopType = GetLoopType(values);
             foreach (var value in values)
@@ -787,22 +818,22 @@ namespace Scriban.Runtime
             return values is IQueryable ? TemplateContext.LoopType.Queryable : TemplateContext.LoopType.Default;
         }
 
-        public void Add(object item)
+        public void Add(object? item)
         {
             AddImpl(item);
         }
 
-        private int AddImpl(object item)
+        private int AddImpl(object? item)
         {
             var list = _values as IList;
-            if (list == null || list.IsFixedSize)
+            if (list is null || list.IsFixedSize)
             {
                 _values = list = new ScriptArray(_values);
             }
             return list.Add(item);
         }
 
-        int IList.Add(object value)
+        int IList.Add(object? value)
         {
             return AddImpl(value);
         }
@@ -812,13 +843,13 @@ namespace Scriban.Runtime
             _values = Enumerable.Empty<object>();
         }
 
-        public bool Contains(object item)
+        public bool Contains(object? item)
         {
             if (_values is IList list) return list.Contains(item);
             return _values.Cast<object>().Any(value => value == item);
         }
 
-        public void CopyTo(object[] array, int arrayIndex)
+        public void CopyTo(object?[] array, int arrayIndex)
         {
             if (_values is IList list) list.CopyTo(array, arrayIndex);
 
@@ -828,10 +859,10 @@ namespace Scriban.Runtime
             }
         }
 
-        public bool Remove(object item)
+        public bool Remove(object? item)
         {
             var list = _values as IList;
-            if (list == null)
+            if (list is null)
             {
                 _values = list = new ScriptArray(_values);
             }
@@ -862,11 +893,11 @@ namespace Scriban.Runtime
 
         bool ICollection.IsSynchronized => false;
 
-        object ICollection.SyncRoot => null;
+        object ICollection.SyncRoot => this;
 
         public bool IsReadOnly => false;
 
-        public int IndexOf(object item)
+        public int IndexOf(object? item)
         {
             if (_values is IList list) return list.IndexOf(item);
             int index = 0;
@@ -879,10 +910,10 @@ namespace Scriban.Runtime
             return -1;
         }
 
-        public void Insert(int index, object item)
+        public void Insert(int index, object? item)
         {
             var list = _values as IList;
-            if (list == null)
+            if (list is null)
             {
                 _values = list = new ScriptArray(_values);
             }
@@ -890,7 +921,7 @@ namespace Scriban.Runtime
             list.Insert(index, item);
         }
 
-        void IList.Remove(object value)
+        void IList.Remove(object? value)
         {
             Remove(value);
         }
@@ -898,7 +929,7 @@ namespace Scriban.Runtime
         public void RemoveAt(int index)
         {
             var list = _values as IList;
-            if (list == null)
+            if (list is null)
             {
                 _values = list = new ScriptArray(_values);
             }
@@ -907,7 +938,7 @@ namespace Scriban.Runtime
 
         bool IList.IsFixedSize => false;
 
-        public object this[int index]
+        public object? this[int index]
         {
             get
             {
@@ -918,7 +949,7 @@ namespace Scriban.Runtime
             set
             {
                 var list = _values as IList;
-                if (list == null)
+                if (list is null)
                 {
                     _values = list = new ScriptArray(_values);
                 }

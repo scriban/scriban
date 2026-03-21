@@ -27,7 +27,7 @@ namespace Roslynator
         public MetadataName(IEnumerable<string> containingNamespaces, string name)
             : this(containingNamespaces, Array.Empty<string>(), name)
         {
-            if (containingNamespaces == null)
+            if (containingNamespaces is null)
                 throw new ArgumentNullException(nameof(containingNamespaces));
 
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -43,10 +43,10 @@ namespace Roslynator
         /// <param name="name"></param>
         public MetadataName(IEnumerable<string> containingNamespaces, IEnumerable<string> containingTypes, string name)
         {
-            if (containingNamespaces == null)
+            if (containingNamespaces is null)
                 throw new ArgumentNullException(nameof(containingNamespaces));
 
-            if (containingTypes == null)
+            if (containingTypes is null)
                 throw new ArgumentNullException(nameof(containingTypes));
 
             Name = name ?? throw new ArgumentNullException(nameof(name));
@@ -103,7 +103,7 @@ namespace Roslynator
         /// </summary>
         public bool IsDefault
         {
-            get { return Name == null; }
+            get { return Name is null; }
         }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
@@ -170,7 +170,7 @@ namespace Roslynator
         /// </summary>
         /// <param name="obj">The object to compare with the current instance.</param>
         /// <returns>true if <paramref name="obj" /> and this instance are the same type and represent the same value; otherwise, false. </returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             return obj is MetadataName other
                 && Equals(other);
@@ -178,7 +178,7 @@ namespace Roslynator
 
         internal bool Equals(ISymbol symbol)
         {
-            if (symbol == null)
+            if (symbol is null)
                 return false;
 
             if (!string.Equals(Name, symbol.MetadataName, StringComparison.Ordinal))
@@ -188,7 +188,7 @@ namespace Roslynator
 
             for (int i = ContainingTypes.Length - 1; i >= 0; i--)
             {
-                if (containingType == null)
+                if (containingType is null)
                     return false;
 
                 if (!string.Equals(containingType.MetadataName, ContainingTypes[i], StringComparison.Ordinal))
@@ -197,7 +197,7 @@ namespace Roslynator
                 containingType = containingType.ContainingType;
             }
 
-            if (containingType != null)
+            if (containingType is not null)
                 return false;
 
             INamespaceSymbol containingNamespace = symbol.ContainingNamespace;
@@ -328,7 +328,7 @@ namespace Roslynator
 
         private static MetadataName Parse(string name, bool shouldThrow)
         {
-            if (name == null)
+            if (name is null)
             {
                 if (shouldThrow)
                     throw new ArgumentNullException(nameof(name));
@@ -346,7 +346,7 @@ namespace Roslynator
                 return default;
             }
 
-            string containingType = null;
+            string? containingType = null;
 
             int prevIndex = 0;
 
@@ -389,11 +389,11 @@ namespace Roslynator
                 }
             }
 
-            ImmutableArray<string>.Builder containingNamespaces = (containingNamespaceCount > 0)
+            ImmutableArray<string>.Builder? containingNamespaces = (containingNamespaceCount > 0)
                 ? ImmutableArray.CreateBuilder<string>(containingNamespaceCount)
                 : null;
 
-            ImmutableArray<string>.Builder containingTypes = (containingTypeCount > 1)
+            ImmutableArray<string>.Builder? containingTypes = (containingTypeCount > 1)
                 ? ImmutableArray.CreateBuilder<string>(containingTypeCount)
                 : null;
 
@@ -405,6 +405,9 @@ namespace Roslynator
                 {
                     string n = name.Substring(prevIndex, i - prevIndex);
 
+                    if (containingNamespaces is null)
+                        throw new InvalidOperationException("Containing namespaces builder must be initialized.");
+
                     containingNamespaces.Add(n);
 
                     prevIndex = i + 1;
@@ -413,7 +416,7 @@ namespace Roslynator
                 {
                     string n = name.Substring(prevIndex, i - prevIndex);
 
-                    if (containingTypes != null)
+                    if (containingTypes is not null)
                     {
                         containingTypes.Add(n);
                     }
@@ -428,7 +431,7 @@ namespace Roslynator
 
             return new MetadataName(
                 containingNamespaces?.MoveToImmutable() ?? ImmutableArray<string>.Empty,
-                (containingType != null)
+                (containingType is not null)
                     ? ImmutableArray.Create(containingType)
                     : containingTypes?.MoveToImmutable() ?? ImmutableArray<string>.Empty,
                 name.Substring(prevIndex, length - prevIndex));

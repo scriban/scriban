@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System;
 using System.Text;
@@ -21,7 +21,7 @@ namespace Scriban.Runtime
 #endif
     class StringBuilderOutput : IScriptOutput
     {
-        [ThreadStatic] private static StringBuilder TlsBuilder;
+        [ThreadStatic] private static StringBuilder? TlsBuilder;
 
         /// <summary>
         /// Initialize a new instance of <see cref="StringBuilderOutput"/>
@@ -55,7 +55,7 @@ namespace Scriban.Runtime
         /// <returns></returns>
         public static StringBuilderOutput GetThreadInstance()
         {
-            if (TlsBuilder == null)
+            if (TlsBuilder is null)
             {
                 TlsBuilder = new StringBuilder();
             }

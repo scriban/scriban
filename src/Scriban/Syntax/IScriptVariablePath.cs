@@ -15,16 +15,16 @@ namespace Scriban.Syntax
 #endif
     interface IScriptVariablePath
     {
-        object GetValue(TemplateContext context);
+        object? GetValue(TemplateContext context);
 
-        void SetValue(TemplateContext context, object valueToSet);
+        void SetValue(TemplateContext context, object? valueToSet);
 
         string GetFirstPath();
 
 #if !SCRIBAN_NO_ASYNC
-        ValueTask<object> GetValueAsync(TemplateContext context);
+        ValueTask<object?> GetValueAsync(TemplateContext context);
 
-        ValueTask SetValueAsync(TemplateContext context, object valueToSet);
+        ValueTask SetValueAsync(TemplateContext context, object? valueToSet);
 #endif
     }
 }

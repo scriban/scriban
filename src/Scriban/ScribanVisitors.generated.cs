@@ -362,19 +362,18 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptFunction
     {
-        public override int ChildrenCount => 7;
+        public override int ChildrenCount => 6;
 
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
             {
                 0 => FuncToken,
-                1 => NameOrDoToken,
-                2 => OpenParen,
-                3 => Parameters,
-                4 => CloseParen,
-                5 => EqualToken,
-                6 => Body,
+                1 => OpenParen,
+                2 => Parameters,
+                3 => CloseParen,
+                4 => EqualToken,
+                5 => Body,
                 _ => null
             };
         }
@@ -1214,13 +1213,13 @@ namespace Scriban.Syntax
         public override ScriptNode Visit(ScriptFunction node)
         {
             var newFuncToken = (ScriptKeyword)Visit((ScriptNode)node.FuncToken);
-            var newNameOrDoToken = (ScriptNode)Visit((ScriptNode)node.NameOrDoToken);
+            var newNameOrDoToken = node.NameOrDoToken is null ? null : (ScriptNode)Visit(node.NameOrDoToken);
             var newOpenParen = (ScriptToken)Visit((ScriptNode)node.OpenParen);
             var newParameters = VisitAll(node.Parameters);
             var newCloseParen = (ScriptToken)Visit((ScriptNode)node.CloseParen);
             var newEqualToken = (ScriptToken)Visit((ScriptNode)node.EqualToken);
             var newBody = (ScriptStatement)Visit((ScriptNode)node.Body);
-            return new ScriptFunction() { FuncToken = newFuncToken, NameOrDoToken = newNameOrDoToken, OpenParen = newOpenParen, Parameters = newParameters, CloseParen = newCloseParen, EqualToken = newEqualToken, Body = newBody };
+            return new ScriptFunction() { FuncToken = newFuncToken, OpenParen = newOpenParen, Parameters = newParameters, CloseParen = newCloseParen, EqualToken = newEqualToken, Body = newBody, NameOrDoToken = newNameOrDoToken };
         }
 
         public override ScriptNode Visit(ScriptFunctionCall node)

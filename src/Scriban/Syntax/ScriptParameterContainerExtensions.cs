@@ -14,7 +14,7 @@ namespace Scriban.Syntax
     {
         public static void AddParameter(this IScriptNamedArgumentContainer container, ScriptNamedArgument argument)
         {
-            if (container.NamedArguments == null)
+            if (container.NamedArguments is null)
             {
                 container.NamedArguments = new ScriptList<ScriptNamedArgument>();
             }
@@ -23,7 +23,7 @@ namespace Scriban.Syntax
 
         public static void Write(this ScriptPrinter printer, List<ScriptNamedArgument> parameters)
         {
-            if (parameters == null)
+            if (parameters is null)
             {
                 return;
             }

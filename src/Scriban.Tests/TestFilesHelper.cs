@@ -55,7 +55,7 @@ namespace Scriban.Tests
             }
         }
 
-        public static string LoadTestFile(string inputName)
+        public static string? LoadTestFile(string inputName)
         {
             var baseDir = BaseDirectory;
             var inputFile = Path.Combine(baseDir, inputName);

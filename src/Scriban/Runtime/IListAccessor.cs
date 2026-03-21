@@ -33,7 +33,7 @@ namespace Scriban.Runtime
         /// <param name="target">The target list object</param>
         /// <param name="index">The index to retrieve a value</param>
         /// <returns>The value retrieved at the specified index for the target object</returns>
-        object GetValue(TemplateContext context, SourceSpan span, object target, int index);
+        object? GetValue(TemplateContext context, SourceSpan span, object target, int index);
 
         /// <summary>
         /// Sets the element value at the specified index.
@@ -43,6 +43,6 @@ namespace Scriban.Runtime
         /// <param name="target">The target list object</param>
         /// <param name="index">The index to set the value</param>
         /// <param name="value">The value to set at the specified index</param>
-        void SetValue(TemplateContext context, SourceSpan span, object target, int index, object value);
+        void SetValue(TemplateContext context, SourceSpan span, object target, int index, object? value);
     }
 }

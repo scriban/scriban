@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -50,11 +50,11 @@ namespace Scriban.Syntax
             return ParseBinaryExpressionTree(iterator, 0, false);
         }
 
-        private static bool HasImplicitBinaryExpression(ScriptExpression expression)
+        private static bool HasImplicitBinaryExpression(ScriptExpression? expression)
         {
             if (expression is ScriptBinaryExpression binaryExpression)
             {
-                if (binaryExpression.OperatorToken == null && binaryExpression.Operator == ScriptBinaryOperator.Multiply)
+                if (binaryExpression.OperatorToken is null && binaryExpression.Operator == ScriptBinaryOperator.Multiply)
                 {
                     return true;
                 }
@@ -74,9 +74,14 @@ namespace Scriban.Syntax
                     return;
                 }
 
+                if (binaryExpression.Left is null || binaryExpression.Right is null)
+                {
+                    throw new ScriptRuntimeException(binaryExpression.Span, "Invalid binary expression while rewriting a scientific expression.");
+                }
+
                 var left = (ScriptExpression)binaryExpression.Left.Clone();
                 var right = (ScriptExpression)binaryExpression.Right.Clone();
-                var token = (ScriptToken)binaryExpression.OperatorToken?.Clone();
+                var token = binaryExpression.OperatorToken is not null ? (ScriptToken)binaryExpression.OperatorToken.Clone() : null;
                 FlattenBinaryExpressions(context, left, expressions);
 
                 expressions.Add(new BinaryExpressionOrOperator(binaryExpression.Operator, token));
@@ -88,13 +93,13 @@ namespace Scriban.Syntax
         
         private static ScriptExpression ParseBinaryExpressionTree(BinaryExpressionIterator it, int precedence, bool isExpectingExpression)
         {
-            ScriptExpression leftOperand = null;
+            ScriptExpression? leftOperand = null;
             while (it.HasCurrent)
             {
                 var op = it.Current;
                 var nextOperand = op.Expression;
 
-                if (nextOperand == null)
+                if (nextOperand is null)
                 {
                     var newPrecedence = Parser.GetDefaultBinaryOperatorPrecedence(op.Operator);
 
@@ -111,6 +116,11 @@ namespace Scriban.Syntax
                     }
 
                     it.MoveNext(); // Skip operator
+
+                    if (leftOperand is null)
+                    {
+                        throw new ScriptRuntimeException(default, "Unexpected missing left operand while rewriting a scientific expression.");
+                    }
 
                     var binary = new ScriptBinaryExpression
                     {
@@ -148,7 +158,7 @@ namespace Scriban.Syntax
                         }
 
                         // We are expecting only an implicit multiply. Anything else is invalid.
-                        if (it.Current.Expression == null && (it.Current.Operator != ScriptBinaryOperator.Multiply || it.Current.OperatorToken != null))
+                        if (it.Current.Expression is null && (it.Current.Operator != ScriptBinaryOperator.Multiply || it.Current.OperatorToken is not null))
                         {
                             throw new ScriptRuntimeException(nextOperand.Span, $"The function expecting one argument cannot be followed by the operator {it.Current.OperatorToken?.ToString() ?? it.Current.Operator.ToText()}");
                         }
@@ -172,7 +182,7 @@ namespace Scriban.Syntax
                 }
             }
 
-            return leftOperand;
+            return leftOperand ?? throw new ScriptRuntimeException(default, "Unexpected empty scientific expression.");
         }
 
         private static FunctionCallKind GetFunctionCallKind(TemplateContext context, ScriptExpression expression)
@@ -181,7 +191,7 @@ namespace Scriban.Syntax
 
             // Don't fail on trying to lookup for a variable
             context.StrictVariables = false;
-            object result = null;
+            object? result = null;
             try
             {
                 result = context.Evaluate(expression, true);
@@ -255,7 +265,7 @@ namespace Scriban.Syntax
                 CallKind = kind;
             }
 
-            public BinaryExpressionOrOperator(ScriptBinaryOperator @operator, ScriptToken operatorToken)
+            public BinaryExpressionOrOperator(ScriptBinaryOperator @operator, ScriptToken? operatorToken)
             {
                 Expression = null;
                 Operator = @operator;
@@ -263,17 +273,17 @@ namespace Scriban.Syntax
                 CallKind = FunctionCallKind.None;
             }
 
-            public readonly ScriptExpression Expression;
+            public readonly ScriptExpression? Expression;
 
             public readonly ScriptBinaryOperator Operator;
 
-            public readonly ScriptToken OperatorToken;
+            public readonly ScriptToken? OperatorToken;
 
             public readonly FunctionCallKind CallKind;
 
             private string ToDebuggerDisplay()
             {
-                return Expression != null ? Expression.ToString() : OperatorToken?.ToString() ?? $"`{Operator.ToText()}` - CallKind = {CallKind}";
+                return Expression is not null ? Expression.ToString() : OperatorToken?.ToString() ?? $"`{Operator.ToText()}` - CallKind = {CallKind}";
             }
         }
 

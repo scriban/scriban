@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -17,11 +17,12 @@ namespace Scriban.Syntax
     partial class ScriptElseStatement : ScriptConditionStatement
     {
         private ScriptKeyword _elseKeyword;
-        private ScriptBlockStatement _body;
+        private ScriptBlockStatement? _body;
 
         public ScriptElseStatement()
         {
-            ElseKeyword = ScriptKeyword.Else();
+            _elseKeyword = ScriptKeyword.Else();
+            _elseKeyword.Parent = this;
         }
 
         public ScriptKeyword ElseKeyword
@@ -30,15 +31,15 @@ namespace Scriban.Syntax
             set => ParentToThis(ref  _elseKeyword, value);
         }
 
-        public ScriptBlockStatement Body
+        public ScriptBlockStatement? Body
         {
             get => _body;
-            set => ParentToThis(ref _body, value);
+            set => ParentToThisNullable(ref _body, value);
         }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
-            return context.Evaluate(Body);
+            return Body is null ? null : context.Evaluate(Body);
         }
 
         public override void PrintTo(ScriptPrinter printer)

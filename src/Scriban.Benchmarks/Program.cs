@@ -165,9 +165,9 @@ namespace Scriban.Benchmarks
         }
 
         [Benchmark(Description = "Cottle - Parser")]
-        public Cottle.Documents.SimpleDocument TestCottle()
+        public Cottle.IDocument TestCottle()
         {
-            return new Cottle.Documents.SimpleDocument(TextTemplateCottle);
+            return Cottle.Document.CreateDefault(TextTemplateCottle, default).DocumentOrThrow;
         }
 
         [Benchmark(Description = "Fluid - Parser")]
@@ -198,7 +198,7 @@ namespace Scriban.Benchmarks
         private readonly Stubble.Core.Tokens.MustacheTemplate _stubbleTemplate;
         private readonly Nustache.Core.Template _nustacheTemplate;
         private readonly HandlebarsTemplate<object, object> _handlebarsTemplate;
-        private readonly Cottle.Documents.SimpleDocument _cottleTemplate;
+        private readonly Cottle.IDocument _cottleTemplate;
         private readonly Fluid.IFluidTemplate _fluidTemplate;
 
         private const string Lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum";
@@ -221,7 +221,7 @@ namespace Scriban.Benchmarks
             _stubbleSettings = new Stubble.Core.Settings.RendererSettingsBuilder().BuildSettings();
             _nustacheTemplate = parsers.TestNustache();
             _handlebarsTemplate = parsers.TestHandlebars();
-            _cottleTemplate = parsers.TestCottle();
+            _cottleTemplate = Cottle.Document.CreateDefault(BenchParsers.TextTemplateCottle, default).DocumentOrThrow;
             _fluidTemplate = parsers.TestFluid();
 
             const int ProductCount = 500;
@@ -253,7 +253,7 @@ namespace Scriban.Benchmarks
             // For Cottle, we match the behavior of Scriban that is accessing the Truncate function via an reflection invoke
             // In Scriban, we could also have a direct Truncate function, but it is much less practical in terms of declaration
             _cottleStringStore = new Dictionary<Cottle.Value, Cottle.Value>();
-            _cottleStringStore["truncate"] = new Cottle.Functions.NativeFunction(values => StringFunctions.Truncate(values[0].AsString, Convert.ToInt32(values[1].AsNumber)), 2);
+            _cottleStringStore["truncate"] = Cottle.Value.FromFunction(Cottle.Function.CreatePure2((_, value0, value1) => Cottle.Value.FromString(StringFunctions.Truncate(value0.AsString, Convert.ToInt32(value1.AsNumber)))));
         }
 
         [Benchmark(Description = "Scriban")]

@@ -37,6 +37,10 @@ namespace Scriban.Syntax
             _columnsCount = 1;
             if (argument.Name?.Name == "cols")
             {
+                if (argument.Value is null)
+                {
+                    throw new ScriptRuntimeException(argument.Span, "Invalid `cols` argument. Value is required.");
+                }
                 _columnsCount = context.ToInt(argument.Value.Span, context.Evaluate(argument.Value));
                 if (_columnsCount <= 0)
                 {
@@ -57,7 +61,7 @@ namespace Scriban.Syntax
             context.Write("</tr>").WriteLine();
         }
 
-        protected override object LoopItem(TemplateContext context, LoopState state)
+        protected override object? LoopItem(TemplateContext context, LoopState state)
         {
             var localIndex = state.Index;
 
@@ -117,7 +121,7 @@ namespace Scriban.Syntax
             }
 
 
-            public override bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object value)
+            public override bool TryGetValue(TemplateContext context, SourceSpan span, string member, out object? value)
             {
                 if (!base.TryGetValue(context, span, member, out value))
                 {

@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
@@ -35,15 +35,15 @@ namespace Scriban.Runtime
 
         public ScriptParameterInfo GetParameterInfo(int index) => default;
 
-        public object Invoke(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
             return _lazy.Value;
         }
 
 #if !SCRIBAN_NO_ASYNC
-        public ValueTask<object> InvokeAsync(TemplateContext context, ScriptNode callerContext, ScriptArray arguments, ScriptBlockStatement blockStatement)
+        public ValueTask<object?> InvokeAsync(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
-            return new ValueTask<object>(_lazy.Value);
+            return new ValueTask<object?>(_lazy.Value);
         }
 #endif
     }

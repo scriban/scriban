@@ -184,6 +184,6 @@ public class TestObjectFunctions {
 
     private sealed class JsonNode
     {
-        public JsonNode Next { get; set; }
+        public JsonNode? Next { get; set; }
     }
 }

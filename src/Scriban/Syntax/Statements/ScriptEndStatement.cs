@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 namespace Scriban.Syntax
 {
@@ -14,11 +14,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptEndStatement : ScriptStatement
     {
-        private ScriptKeyword _endKeyword;
-
+        private ScriptKeyword _endKeyword = ScriptKeyword.End();
         public ScriptEndStatement()
         {
-            EndKeyword = ScriptKeyword.End();
+            _endKeyword.Parent = this;
             CanSkipEvaluation = true;
             ExpectEos = true;
         }
@@ -31,7 +30,7 @@ namespace Scriban.Syntax
 
         public bool ExpectEos { get; set; }
 
-        public override object Evaluate(TemplateContext context)
+        public override object? Evaluate(TemplateContext context)
         {
             return null;
         }

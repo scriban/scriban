@@ -51,7 +51,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member name</param>
         /// <param name="value">The value of the specified member if successful.</param>
         /// <returns><c>true</c> if the member value was retrieved from the target object; <c>false</c> otherwise</returns>
-        bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object value);
+        bool TryGetValue(TemplateContext context, SourceSpan span, object target, string member, out object? value);
 
         /// <summary>
         /// Tries to set the member value for the specified target object.
@@ -62,7 +62,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member name</param>
         /// <param name="value">The value of the specified member to set.</param>
         /// <returns><c>true</c> if the member value was set onto the target object; <c>false</c> otherwise</returns>
-        bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object value);
+        bool TrySetValue(TemplateContext context, SourceSpan span, object target, string member, object? value);
 
         /// <summary>
         /// Tries to get an item value at the specified index.
@@ -74,7 +74,7 @@ namespace Scriban.Runtime
         /// <param name="value">The value of the specified member if successful.</param>
         /// <returns><c>true</c> if the member value was retrieved from the target object; <c>false</c> otherwise</returns>
 
-        bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object value);
+        bool TryGetItem(TemplateContext context, SourceSpan span, object target, object index, out object? value);
 
         /// <summary>
         /// Tries to set an item value at the specified index.
@@ -85,7 +85,7 @@ namespace Scriban.Runtime
         /// <param name="index">The index value</param>
         /// <param name="value">The value of the specified member to set.</param>
         /// <returns><c>true</c> if the member value was set onto the target object; <c>false</c> otherwise</returns>
-        bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object value);
+        bool TrySetItem(TemplateContext context, SourceSpan span, object target, object index, object? value);
 
         /// <summary>
         /// Gets a boolean indicating whether this instance provides an indexer.
@@ -95,6 +95,6 @@ namespace Scriban.Runtime
         /// <summary>
         /// Gets the type of the indexer. Might be null if <see cref="HasIndexer"/> is <c>false</c>.
         /// </summary>
-        Type IndexType { get; }
+        Type? IndexType { get; }
     }
 }

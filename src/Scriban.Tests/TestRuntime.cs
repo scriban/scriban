@@ -26,6 +26,21 @@ namespace Scriban.Tests
     [TestFixture]
     public class TestRuntime
     {
+        private static ScriptPage GetPage(Template template)
+        {
+            return template.Page ?? throw new AssertionException("Expected parsed template page to be available.");
+        }
+
+        private static IScriptObject GetCurrentGlobal(TemplateContext context)
+        {
+            return context.CurrentGlobal ?? throw new AssertionException("Expected a current global script object.");
+        }
+
+        private static TException AssertThrows<TException>(TestDelegate code) where TException : Exception
+        {
+            return Assert.Throws<TException>(code) ?? throw new AssertionException($"Expected {typeof(TException).Name}.");
+        }
+
         [Test]
         public void TestFunctionPointerWithPath()
         {
@@ -71,7 +86,7 @@ namespace Scriban.Tests
             var template = Scriban.Template.Parse(script);
             var result = template.Render();
 
-            template.Page.PrintTo(new ScriptPrinter(new TextWriterOutput(Console.Out)));
+            GetPage(template).PrintTo(new ScriptPrinter(new TextWriterOutput(Console.Out)));
 
             Assert.AreEqual("hello", result);
         }
@@ -299,7 +314,7 @@ namespace Scriban.Tests
             var context = new TemplateContext();
             var result = template.Render(context);
             Assert.AreEqual("", result);
-            Assert.AreEqual(2, ((ScriptObject)context.CurrentGlobal)["x"]);
+            Assert.AreEqual(2, ((ScriptObject)GetCurrentGlobal(context))["x"]);
 
             input = @"{{ x = object.eval '+' }}";
             template = Template.Parse(input);
@@ -432,7 +447,7 @@ end
         {
             var result = Template.Parse("{{['', '200', '','400'] | array.filter @string.empty}}").Evaluate(new TemplateContext());
             Assert.IsInstanceOf<ScriptRange>(result);
-            var array = (ScriptRange)result;
+            var array = (ScriptRange)(result ?? throw new AssertionException("Expected a ScriptRange."));
             Assert.AreEqual(2, array.Count);
             Assert.AreEqual("", array[0]);
             Assert.AreEqual("", array[1]);
@@ -585,7 +600,7 @@ end
             }
         }
 
-        private static void AssertAllNulls(object[] array)
+        private static void AssertAllNulls(object?[] array)
         {
             for (int i = 0; i < array.Length; i++)
             {
@@ -595,7 +610,7 @@ end
 
         public static class MyPipeFunctions
         {
-            public static string A(TemplateContext context, object input, string currencyCode = null)
+            public static string A(TemplateContext context, object input, string? currencyCode = null)
             {
                 return input.ToString() + "A";
             }
@@ -660,10 +675,10 @@ y and z = 5 and 0";
             var template = Template.Parse(@"{{ if x }}return{{ ret; end }}not return");
 
             var tc = new TemplateContext();
-            tc.CurrentGlobal.SetValue("x", true, false);
+            GetCurrentGlobal(tc).SetValue("x", true, false);
             var result = template.Render(tc);
             Assert.AreEqual("return", result);
-            tc.CurrentGlobal.SetValue("x", false, false);
+            GetCurrentGlobal(tc).SetValue("x", false, false);
             result = template.Render(tc);
             Assert.AreEqual("not return", result);
         }
@@ -792,7 +807,7 @@ f(1)
         public void TestInvalidConvertToInt()
         {
             var template = Template.ParseLiquid("{{html>0}}");
-            var ex = Assert.Catch<ScriptRuntimeException>(() => template.Render(new { x = 0 }));
+            var ex = Assert.Catch<ScriptRuntimeException>(() => template.Render(new { x = 0 })) ?? throw new AssertionException("Expected a ScriptRuntimeException.");
             Assert.AreEqual("<input>(1,7) : error : Unable to convert type `object` to int", ex.Message);
         }
 
@@ -851,7 +866,7 @@ end
             var template = Template.Parse(text);
             var context = new TemplateContext();
             const int MinDelay = 100;
-            context.CurrentGlobal.Import("wait_and_see", new Func<Task<string>>(async () =>
+            GetCurrentGlobal(context).Import("wait_and_see", new Func<Task<string>>(async () =>
             {
                 await Task.Delay(MinDelay + 10);
                 return "yes";
@@ -1000,7 +1015,7 @@ Tax: {{ 7 | match_tax }}";
             {
                 {"a", a}
             });
-            var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
+            var exception = AssertThrows<ScriptRuntimeException>(() => context.Evaluate(GetPage(template)));
             var result = exception.ToString();
             Assert.True(result.Contains("The object is readonly"), $"The exception string `{result}` does not contain \"The object is readonly\"");
         }
@@ -1010,7 +1025,7 @@ Tax: {{ 7 | match_tax }}";
         {
             var context = new TemplateContext
             {
-                TryGetVariable = (TemplateContext templateContext, SourceSpan span, ScriptVariable variable, out object value) =>
+                TryGetVariable = (TemplateContext templateContext, SourceSpan span, ScriptVariable variable, out object? value) =>
                 {
                     value = null;
                     if (variable.Name == "myvar")
@@ -1024,7 +1039,7 @@ Tax: {{ 7 | match_tax }}";
 
             {
                 var template = Template.Parse("Test with a dynamic {{ myvar }}");
-                context.Evaluate(template.Page);
+                context.Evaluate(GetPage(template));
                 var result = context.Output.ToString();
 
                 TextAssert.AreEqual("Test with a dynamic yes", result);
@@ -1034,7 +1049,7 @@ Tax: {{ 7 | match_tax }}";
                 // Test StrictVariables
                 var template = Template.Parse("Test with a dynamic {{ myvar2 }}");
                 context.StrictVariables = true;
-                var exception = Assert.Throws<ScriptRuntimeException>(() => context.Evaluate(template.Page));
+                var exception = AssertThrows<ScriptRuntimeException>(() => context.Evaluate(GetPage(template)));
                 var result = exception.ToString();
                 var check = "The variable or function `myvar2` was not found";
                 Assert.True(result.Contains(check), $"The exception string `{result}` does not contain the expected value");
@@ -1051,7 +1066,7 @@ Tax: {{ 7 | match_tax }}";
 
             var context = new TemplateContext
             {
-                TryGetMember = (TemplateContext localContext, SourceSpan span, object target, string member, out object value) =>
+                TryGetMember = (TemplateContext localContext, SourceSpan span, object target, string member, out object? value) =>
                 {
                     value = null;
                     if (member == "myvar")
@@ -1064,7 +1079,7 @@ Tax: {{ 7 | match_tax }}";
             };
 
             context.PushGlobal(globalObject);
-            context.Evaluate(template.Page);
+            context.Evaluate(GetPage(template));
             var result = context.Output.ToString();
 
             TextAssert.AreEqual("Test with a dynamic yes", result);
@@ -1160,7 +1175,7 @@ Tax: {{ 7 | match_tax }}";
                 obj.Import(typeof(MyStaticObject2));
 
                 Assert.True(obj.ContainsKey("static_yoyo"));
-                var function = (IScriptCustomFunction)obj["static_yoyo"];
+                var function = (IScriptCustomFunction)(obj["static_yoyo"] ?? throw new AssertionException("Expected static_yoyo function."));
                 var context = new TemplateContext();
                 var result = function.Invoke(context, new ScriptFunctionCall(), new ScriptArray() { "a" }, null);
                 Assert.AreEqual("yoyo2 a", result);
@@ -1214,7 +1229,7 @@ Tax: {{ 7 | match_tax }}";
             OptionalTextDelegate formatter = text => text.ToUpperInvariant();
             obj.Import("formatter", formatter);
 
-            var function = (IScriptCustomFunction)obj["formatter"];
+            var function = (IScriptCustomFunction)(obj["formatter"] ?? throw new AssertionException("Expected formatter function."));
             Assert.AreEqual(0, function.RequiredParameterCount);
             Assert.AreEqual(1, function.ParameterCount);
 
@@ -1350,9 +1365,9 @@ Tax: {{ 7 | match_tax }}";
             var template = Template.Parse("Test {{ 'error' | unknown }} behind");
             var context = new TemplateContext();
             context.RenderRuntimeException = TemplateContext.RenderRuntimeExceptionDefault;
-            context.Evaluate(template.Page);
+            context.Evaluate(GetPage(template));
             var result = context.Output.ToString();
-            Assert.True(System.Text.RegularExpressions.Regex.IsMatch(result, @"^Test \[.+\] behind$"));
+            Assert.True(System.Text.RegularExpressions.Regex.IsMatch(result ?? string.Empty, @"^Test \[.+\] behind$"));
         }
 
         [Test]
@@ -1361,9 +1376,9 @@ Tax: {{ 7 | match_tax }}";
             var template = Template.Parse("Test {{ 'error' | unknown }} behind");
             var context = new TemplateContext();
             context.RenderRuntimeException = ex => string.Format("#Scriban-Exception:{0}#", ex.OriginalMessage);
-            context.Evaluate(template.Page);
+            context.Evaluate(GetPage(template));
             var result = context.Output.ToString();
-            Assert.True(System.Text.RegularExpressions.Regex.IsMatch(result, @"^Test #Scriban-Exception:.+# behind$"));
+            Assert.True(System.Text.RegularExpressions.Regex.IsMatch(result ?? string.Empty, @"^Test #Scriban-Exception:.+# behind$"));
         }
 
         [Test]
@@ -1637,7 +1652,7 @@ end
 }}");
 
             // This should throw because the inner loop has 3 iterations, exceeding limit of 2
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = AssertThrows<ScriptRuntimeException>(() => template.Render(context));
             Assert.That(exception.Message, Does.Contain("LoopLimit `2`"));
         }
 
@@ -1660,7 +1675,7 @@ end
 }}");
 
             // This should throw because inner loop has 4 iterations > limit of 3
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = AssertThrows<ScriptRuntimeException>(() => template.Render(context));
             Assert.That(exception.Message, Does.Contain("LoopLimit `3`"));
         }
 
@@ -1683,7 +1698,7 @@ end
 }}");
 
             // This should throw because the inner loop has 6 iterations, exceeding limit of 4
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = AssertThrows<ScriptRuntimeException>(() => template.Render(context));
             Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `8` for loop statement"));
         }
 
@@ -1730,7 +1745,7 @@ end
 }}");
 
             // This should throw because the innermost loop has 3 iterations, exceeding limit of 8
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = AssertThrows<ScriptRuntimeException>(() => template.Render(context));
             Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `8` for loop statement"));
         }
 
@@ -1753,7 +1768,7 @@ end
 }}");
 
             // This should throw on the inner loop (5 iterations > 3 limit)
-            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            var exception = AssertThrows<ScriptRuntimeException>(() => template.Render(context));
             Assert.That(exception.Message, Does.Contain("LoopLimit `3`"));
         }
 
@@ -1818,7 +1833,7 @@ end
         {
             var template = Template.Parse("{{ a?.b[0][1] }}");
 
-            var nullResult = template.Render(new { a = (object)null });
+            var nullResult = template.Render(new { a = (object?)null });
             Assert.AreEqual(string.Empty, nullResult);
 
             var valueResult = template.Render(new { a = new { b = new[] { new[] { "skip", "ok" } } } });
@@ -1827,17 +1842,17 @@ end
 
         private class CircularIncludeLoader : ITemplateLoader
         {
-            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            public string? GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
             {
                 return templateName;
             }
 
-            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public string? Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return "{{ include 'self' }}";
             }
 
-            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            public ValueTask<string?> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
             {
                 return ValueTask.FromResult(Load(context, callerSpan, templatePath));
             }
@@ -1845,21 +1860,21 @@ end
 
         private class MyObject : MyStaticObject
         {
-            public string FieldA;
+            public string? FieldA;
 
 #pragma warning disable 649
-            public string FieldB;
+            public string? FieldB;
 #pragma warning restore 649
 
-            public string PropertyA { get; set; }
+            public string? PropertyA { get; set; }
 
-            public string PropertyB { get; set; }
+            public string? PropertyB { get; set; }
 
         }
 
         private class MyObject2 : MyObject
         {
-            public string PropertyC { get; set; }
+            public string? PropertyC { get; set; }
         }
 
         private class MyStaticObject
@@ -1878,7 +1893,7 @@ end
 
             public static string StaticPropertyB { get; set; }
 
-            public string Invalid()
+            public string? Invalid()
             {
                 return null;
             }

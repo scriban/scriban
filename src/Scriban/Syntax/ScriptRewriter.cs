@@ -2,7 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
-#nullable disable
+#nullable enable
 
 using System.Collections.Generic;
 
@@ -16,7 +16,7 @@ namespace Scriban.Syntax
 #else
     internal
 #endif
-    abstract partial class ScriptRewriter : ScriptVisitor<ScriptNode>
+    abstract partial class ScriptRewriter : ScriptVisitor<ScriptNode?>
     {
         protected ScriptRewriter()
         {
@@ -25,10 +25,15 @@ namespace Scriban.Syntax
 
         public bool CopyTrivias { get; set; }
 
-        public override ScriptNode Visit(ScriptNode node)
+        public override ScriptNode? Visit(ScriptNode? node)
         {
-            if (node == null) return null;
+            if (node is null) return null;
             var newNode = node.Accept(this);
+            if (newNode is null)
+            {
+                return null;
+            }
+
             newNode.Span = node.Span;
             if (CopyTrivias && !ReferenceEquals(node, newNode) && node is IScriptTerminal nodeTerminal && newNode is IScriptTerminal newNodeTerminal)
             {
@@ -48,17 +53,20 @@ namespace Scriban.Syntax
             return new ScriptVariableLocal(node.BaseName);
         }
 
-        protected ScriptList<TNode> VisitAll<TNode>(ScriptList<TNode> nodes)
+        protected ScriptList<TNode>? VisitAll<TNode>(ScriptList<TNode>? nodes)
             where TNode : ScriptNode
         {
-            if (nodes == null)
+            if (nodes is null)
                 return null;
 
             var newNodes = new ScriptList<TNode>();
             foreach (var node in nodes)
             {
-                var newNode = (TNode) Visit(node);
-                newNodes.Add(newNode);
+                var newNode = (TNode?)Visit(node);
+                if (newNode is not null)
+                {
+                    newNodes.Add(newNode);
+                }
             }
             return newNodes;
         }
