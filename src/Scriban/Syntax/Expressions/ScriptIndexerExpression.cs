@@ -9,6 +9,7 @@ using System.IO;
 using Scriban.Runtime;
 using Scriban.Helpers;
 using System.Collections.Generic;
+using Scriban.Parsing;
 
 namespace Scriban.Syntax
 {
@@ -102,7 +103,7 @@ namespace Scriban.Syntax
             var targetObject = context.GetValue(Target);
             if (targetObject == null)
             {
-                if (context.EnableRelaxedTargetAccess)
+                if (!setter && (context.EnableRelaxedTargetAccess || HasNullConditionalTarget(Target)))
                 {
                     return null;
                 }
@@ -203,6 +204,21 @@ namespace Scriban.Syntax
                 }
             }
             return value;
+        }
+
+        private static bool HasNullConditionalTarget(ScriptExpression expression)
+        {
+            switch (expression)
+            {
+                case ScriptMemberExpression memberExpression:
+                    return memberExpression.DotToken.TokenType == TokenType.QuestionDot || HasNullConditionalTarget(memberExpression.Target);
+                case ScriptIndexerExpression indexerExpression:
+                    return HasNullConditionalTarget(indexerExpression.Target);
+                case ScriptNestedExpression nestedExpression:
+                    return HasNullConditionalTarget(nestedExpression.Expression);
+                default:
+                    return false;
+            }
         }
     }
 }

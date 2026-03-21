@@ -1785,6 +1785,18 @@ end
             Assert.That(exception!.Message, Does.Contain("LoopLimit"));
         }
 
+        [Test]
+        public void NullConditionalShouldShortCircuitFollowingIndexers()
+        {
+            var template = Template.Parse("{{ a?.b[0][1] }}");
+
+            var nullResult = template.Render(new { a = (object)null });
+            Assert.AreEqual(string.Empty, nullResult);
+
+            var valueResult = template.Render(new { a = new { b = new[] { new[] { "skip", "ok" } } } });
+            Assert.AreEqual("ok", valueResult);
+        }
+
         private class CircularIncludeLoader : ITemplateLoader
         {
             public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)

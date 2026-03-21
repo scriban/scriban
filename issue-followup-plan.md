@@ -2,9 +2,9 @@
 
 This cleanup pass closed 55 old issues that were stale, already answered, resolved in current Scriban, or outside the scope of core Scriban.
 
-Issues `#625` and `#453` are fixed locally by the changes in this pass.
+Issues `#625`, `#453`, and `#529` are fixed locally by the changes in this pass.
 
-The 9 issues below remain open because they were either reproduced on current head, still point to incorrect documentation, or need an explicit design decision before any code change is worth doing.
+The 8 issues below remain open because they were either reproduced on current head, still point to incorrect documentation, or need an explicit design decision before any code change is worth doing.
 
 Default stance for the next pass:
 
@@ -13,19 +13,6 @@ Default stance for the next pass:
 - Prefer narrowing or closing vague backlog items instead of keeping them open indefinitely.
 
 ## 1. Concrete docs and bug fixes
-
-### #529 Null-Conditional cannot be mixed with indexers
-
-Status: reproduced.
-
-Evidence:
-
-- `{{ a?.b[0] }}` still throws `Object \`a?.b\` is null. Cannot access indexer: a?.b[0]`.
-
-Suggested action:
-
-- Decide whether null-conditional access should short-circuit a following indexer in the same chain.
-- If yes, propagate a null result cleanly through the indexer access path and add coverage for mixed member/indexer chains.
 
 ### #553 Whitespace control inside of functions affects auto-indent of caller
 
@@ -143,11 +130,10 @@ Suggested action:
 
 ## Suggested review order
 
-1. #529
-2. #553
-3. #209
-4. #188 and #405 together
-5. #368
-6. #513
-7. #284
-8. #446
+1. #553
+2. #209
+3. #188 and #405 together
+4. #368
+5. #513
+6. #284
+7. #446

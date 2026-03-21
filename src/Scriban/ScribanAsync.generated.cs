@@ -1779,7 +1779,7 @@ namespace Scriban.Syntax
             var targetObject = await context.GetValueAsync(Target).ConfigureAwait(false);
             if (targetObject == null)
             {
-                if (context.EnableRelaxedTargetAccess)
+                if (!setter && (context.EnableRelaxedTargetAccess || HasNullConditionalTarget(Target)))
                 {
                     return null;
                 }
