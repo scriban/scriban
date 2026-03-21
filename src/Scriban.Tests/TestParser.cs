@@ -826,6 +826,31 @@ m
             Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
         }
 
+        [Test]
+        public void EnsureExpressionDepthLimitAppliesToNestedArrayInitializers()
+        {
+            var builder = new StringBuilder();
+            for (var i = 0; i < 20; i++)
+            {
+                builder.Append('[');
+            }
+
+            builder.Append('0');
+
+            for (var i = 0; i < 20; i++)
+            {
+                builder.Append(']');
+            }
+
+            var template = Template.Parse($"{{{{ {builder} }}}}", parserOptions: new ParserOptions
+            {
+                ExpressionDepthLimit = 10
+            });
+
+            Assert.True(template.HasErrors);
+            StringAssert.Contains("The statement depth limit `10` was reached when parsing this statement", template.Messages[0].ToString());
+        }
+
         [TestCase(@"ab{{end}}c")]  // no blocks
         [TestCase(@"a{{if true}}b{{end}}{{end}}c")]  // one-level block
         [TestCase(@"a{{if true}}{{for i in 0..1}}b{{end}}{{end}}{{end}}c")]  // two-level block (nested)

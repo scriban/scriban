@@ -771,67 +771,75 @@ namespace Scriban.Parsing
 
         private ScriptExpression ParseArrayInitializer()
         {
-            var scriptArray = Open<ScriptArrayInitializerExpression>();
-
-            // Should happen before the NextToken to consume any EOL after
-            _allowNewLineLevel++;
-
-            // Parse [
-            ExpectAndParseTokenTo(scriptArray.OpenBracketToken, TokenType.OpenBracket);
-
-            bool expectingEndOfInitializer = false;
-
-            // unit test: 120-array-initializer-accessor.txt
-            while (true)
+            EnterExpression();
+            try
             {
-                if (Current.Type == TokenType.CloseBracket)
-                {
-                    break;
-                }
+                var scriptArray = Open<ScriptArrayInitializerExpression>();
 
-                if (!expectingEndOfInitializer)
+                // Should happen before the NextToken to consume any EOL after
+                _allowNewLineLevel++;
+
+                // Parse [
+                ExpectAndParseTokenTo(scriptArray.OpenBracketToken, TokenType.OpenBracket);
+
+                bool expectingEndOfInitializer = false;
+
+                // unit test: 120-array-initializer-accessor.txt
+                while (true)
                 {
-                    // unit test: 120-array-initializer-error2.txt
-                    var expression = ExpectAndParseExpression(scriptArray);
-                    if (expression == null)
+                    if (Current.Type == TokenType.CloseBracket)
                     {
                         break;
                     }
-                    scriptArray.Values.Add(expression);
 
-                    if (Current.Type == TokenType.Comma)
+                    if (!expectingEndOfInitializer)
                     {
-                        // Record trailing Commas
-                        if (_isKeepTrivia)
+                        // unit test: 120-array-initializer-error2.txt
+                        var expression = ExpectAndParseExpression(scriptArray);
+                        if (expression == null)
                         {
-                            PushTokenToTrivia();
+                            break;
                         }
+                        scriptArray.Values.Add(expression);
 
-                        NextToken();
-
-                        if (_isKeepTrivia)
+                        if (Current.Type == TokenType.Comma)
                         {
-                            FlushTriviasToLastTerminal();
+                            // Record trailing Commas
+                            if (_isKeepTrivia)
+                            {
+                                PushTokenToTrivia();
+                            }
+
+                            NextToken();
+
+                            if (_isKeepTrivia)
+                            {
+                                FlushTriviasToLastTerminal();
+                            }
+                        }
+                        else
+                        {
+                            expectingEndOfInitializer = true;
                         }
                     }
                     else
                     {
-                        expectingEndOfInitializer = true;
+                        break;
                     }
                 }
-                else
-                {
-                    break;
-                }
+
+                // Should happen before NextToken() to stop on the next EOF
+                _allowNewLineLevel--;
+
+                // Parse ]
+                // unit test: 120-array-initializer-error1.txt
+                ExpectAndParseTokenTo(scriptArray.CloseBracketToken, TokenType.CloseBracket);
+                return Close(scriptArray);
             }
-
-            // Should happen before NextToken() to stop on the next EOF
-            _allowNewLineLevel--;
-
-            // Parse ]
-            // unit test: 120-array-initializer-error1.txt
-            ExpectAndParseTokenTo(scriptArray.CloseBracketToken, TokenType.CloseBracket);
-            return Close(scriptArray);
+            finally
+            {
+                LeaveExpression();
+            }
         }
 
         private ScriptExpression ParseObjectInitializer()
