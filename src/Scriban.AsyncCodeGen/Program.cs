@@ -599,13 +599,13 @@ using System.Numerics;
         private static bool IsScriptNode(ITypeSymbol typeSymbol)
         {
             var scriptNodeType = _scriptNodeType ?? throw new InvalidOperationException("Script node type has not been initialized.");
-            return ReferenceEquals(typeSymbol, scriptNodeType) || typeSymbol.InheritsFrom(scriptNodeType);
+            return SymbolEqualityComparer.Default.Equals(typeSymbol, scriptNodeType) || typeSymbol.InheritsFrom(scriptNodeType);
         }
 
         private static bool IsScriptList(ITypeSymbol typeSymbol)
         {
             var scriptListType = _scriptListType ?? throw new InvalidOperationException("Script list type has not been initialized.");
-            return typeSymbol.InheritsFrom(scriptListType);
+            return SymbolEqualityComparer.Default.Equals(typeSymbol, scriptListType) || typeSymbol.InheritsFrom(scriptListType);
         }
 
         private static NamespaceDeclarationSyntax ReorderNsMembers(NamespaceDeclarationSyntax ns)
@@ -732,18 +732,18 @@ using System.Numerics;
 
         public static string GetNamespace(ISymbol symbol)
         {
-            if (string.IsNullOrEmpty(symbol.ContainingNamespace?.Name))
+            if (symbol is null)
+            {
+                throw new ArgumentNullException(nameof(symbol));
+            }
+
+            var namespaceSymbol = symbol as INamespaceSymbol ?? symbol.ContainingNamespace;
+            if (namespaceSymbol is null || namespaceSymbol.IsGlobalNamespace)
             {
                 throw new InvalidOperationException($"Unable to determine namespace for symbol `{symbol.MetadataName}`.");
             }
 
-            var restOfResult = GetNamespace(symbol.ContainingNamespace);
-            var result = symbol.ContainingNamespace.Name;
-
-            if (restOfResult is not null)
-                result = restOfResult + '.' + result;
-
-            return result;
+            return namespaceSymbol.ToDisplayString();
         }
 
         public static SyntaxTriviaList RemoveIfDef(SyntaxTriviaList trivia)
