@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using Scriban.Helpers;
@@ -484,47 +485,102 @@ namespace Scriban.Functions
 
             using var stream = new MemoryStream();
             var writer = new Utf8JsonWriter(stream, writerOptions);
+            var path = new HashSet<object>(ReferenceEqualityComparer.Default);
 
-            WriteValue(context, writer, value);
+            WriteValue(context, writer, value, 0, path);
             writer.Flush();
 
             var json = Encoding.UTF8.GetString(stream.ToArray());
             return json;
 
-            static void WriteValue(TemplateContext context, Utf8JsonWriter writer, object value)
+            static void WriteValue(TemplateContext context, Utf8JsonWriter writer, object value, int depth, HashSet<object> path)
             {
-                var type = value?.GetType() ?? typeof(object);
-                if (
-                    value is null ||
-                    value is string ||
-                    value is bool ||
-                    type.IsPrimitiveOrDecimal() ||
-                    value is IFormattable // handles types like System.DateTime and 99 more types. see: https://learn.microsoft.com/en-us/dotnet/api/system.iformattable?view=net-8.0
-                )
+                try
                 {
-                    JsonSerializer.Serialize(writer, value, type);
+                    RuntimeHelpers.EnsureSufficientExecutionStack();
                 }
-                else if (value is IList || type.IsArray) {
-                    writer.WriteStartArray();
-                    foreach (var x in context.ToList(context.CurrentSpan, value))
+                catch (InsufficientExecutionStackException)
+                {
+                    throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
+                }
+
+                depth++;
+                if (context.ObjectRecursionLimit != 0 && depth > context.ObjectRecursionLimit)
+                {
+                    throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
+                }
+
+                var type = value?.GetType() ?? typeof(object);
+                var shouldTrackPath = value != null && !type.IsValueType && value is not string;
+                var addedToPath = false;
+
+                if (shouldTrackPath)
+                {
+                    addedToPath = path.Add(value);
+                    if (!addedToPath)
                     {
-                        WriteValue(context, writer, x);
+                        throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
                     }
-                    writer.WriteEndArray();
                 }
-                else {
-                    writer.WriteStartObject();
-                    var accessor = context.GetMemberAccessor(value);
-                    foreach (var member in accessor.GetMembers(context, context.CurrentSpan, value))
+
+                try
+                {
+                    if (
+                        value is null ||
+                        value is string ||
+                        value is bool ||
+                        type.IsPrimitiveOrDecimal() ||
+                        value is IFormattable // handles types like System.DateTime and 99 more types. see: https://learn.microsoft.com/en-us/dotnet/api/system.iformattable?view=net-8.0
+                    )
                     {
-                        if (accessor.TryGetValue(context, context.CurrentSpan, value, member, out var memberValue))
+                        JsonSerializer.Serialize(writer, value, type);
+                    }
+                    else if (value is IList || type.IsArray)
+                    {
+                        writer.WriteStartArray();
+                        foreach (var x in context.ToList(context.CurrentSpan, value))
                         {
-                            writer.WritePropertyName(member);
-                            WriteValue(context, writer, memberValue);
+                            WriteValue(context, writer, x, depth, path);
                         }
+                        writer.WriteEndArray();
                     }
-                    writer.WriteEndObject();
+                    else
+                    {
+                        writer.WriteStartObject();
+                        var accessor = context.GetMemberAccessor(value);
+                        foreach (var member in accessor.GetMembers(context, context.CurrentSpan, value))
+                        {
+                            if (accessor.TryGetValue(context, context.CurrentSpan, value, member, out var memberValue))
+                            {
+                                writer.WritePropertyName(member);
+                                WriteValue(context, writer, memberValue, depth, path);
+                            }
+                        }
+                        writer.WriteEndObject();
+                    }
                 }
+                finally
+                {
+                    if (addedToPath)
+                    {
+                        path.Remove(value);
+                    }
+                }
+            }
+        }
+
+        private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
+        {
+            internal static readonly ReferenceEqualityComparer Default = new ReferenceEqualityComparer();
+
+            public new bool Equals(object x, object y)
+            {
+                return ReferenceEquals(x, y);
+            }
+
+            public int GetHashCode(object obj)
+            {
+                return RuntimeHelpers.GetHashCode(obj);
             }
         }
 

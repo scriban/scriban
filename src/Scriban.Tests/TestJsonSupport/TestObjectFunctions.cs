@@ -141,4 +141,49 @@ public class TestObjectFunctions {
 
         Assert.AreEqual("<input>(6,20) : error : Can not serialize functions to JSON. (Parameter 'value')", ex.Message);
     }
+
+    [Test]
+    public void Throws_when_serializing_cyclic_object_graph_to_json()
+    {
+        var node = new JsonNode();
+        node.Next = node;
+
+        var template = Template.Parse("""
+            {{ model | object.to_json }}
+            """
+        );
+
+        var ex = Assert.Throws<ScriptRuntimeException>(() => template.Render(new { Model = node }))!;
+        StringAssert.Contains("Structure is too deeply nested or contains reference loops.", ex.Message);
+    }
+
+    [Test]
+    public void Throws_when_serializing_object_graph_beyond_recursion_limit_to_json()
+    {
+        var root = new JsonNode();
+        root.Next = new JsonNode
+        {
+            Next = new JsonNode
+            {
+                Next = new JsonNode()
+            }
+        };
+
+        var template = Template.Parse("""
+            {{ model | object.to_json }}
+            """
+        );
+        var context = new TemplateContext { ObjectRecursionLimit = 3 };
+        var globals = new ScriptObject();
+        globals.Import(new { Model = root });
+        context.PushGlobal(globals);
+
+        var ex = Assert.Throws<ScriptRuntimeException>(() => template.Render(context))!;
+        StringAssert.Contains("Structure is too deeply nested or contains reference loops.", ex.Message);
+    }
+
+    private sealed class JsonNode
+    {
+        public JsonNode Next { get; set; }
+    }
 }
