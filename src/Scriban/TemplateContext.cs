@@ -899,6 +899,8 @@ namespace Scriban
             {
                 PopSourceFile();
             }
+
+            CachedTemplates.Clear();
         }
 
         /// <summary>

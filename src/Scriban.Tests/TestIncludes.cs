@@ -73,6 +73,48 @@ namespace Scriban.Tests
             }
         }
 
+        private sealed class SwitchingLoader : ITemplateLoader
+        {
+            public string Content { get; set; } = string.Empty;
+
+            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            {
+                return templateName;
+            }
+
+            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                return Content;
+            }
+
+            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                return ValueTask.FromResult(Load(context, callerSpan, templatePath));
+            }
+        }
+
+        [Test]
+        public void ResetShouldClearCachedTemplates()
+        {
+            var loader = new SwitchingLoader { Content = "admin-only" };
+            var context = new TemplateContext
+            {
+                TemplateLoader = loader
+            };
+            var template = Template.Parse("{{ include 'profile' }}");
+
+            var first = template.Render(context);
+            Assert.AreEqual("admin-only", first);
+            Assert.That(context.CachedTemplates, Does.ContainKey("profile"));
+
+            context.Reset();
+            loader.Content = "guest-view";
+
+            var second = template.Render(context);
+            Assert.AreEqual("guest-view", second);
+            Assert.That(context.CachedTemplates, Does.ContainKey("profile"));
+        }
+
         [Test]
         public void TestIndentedNestedIncludes()
         {
