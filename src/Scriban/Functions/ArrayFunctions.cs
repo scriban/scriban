@@ -389,6 +389,7 @@ namespace Scriban.Functions
             {
                 if (afterFirst)
                 {
+                    ValidateJoinedTextLength(context, span, text.Length, delimiter?.Length ?? 0);
                     text.Append(delimiter);
                 }
 
@@ -400,10 +401,19 @@ namespace Scriban.Functions
                     item = context.ObjectToString(result);
                 }
 
+                ValidateJoinedTextLength(context, span, text.Length, item?.Length ?? 0);
                 text.Append(item);
                 afterFirst = true;
             }
             return text.ToString();
+        }
+
+        private static void ValidateJoinedTextLength(TemplateContext context, SourceSpan span, int currentLength, int additionalLength)
+        {
+            if (context.LimitToString > 0 && additionalLength > 0 && (long)currentLength + additionalLength > context.LimitToString)
+            {
+                throw new ScriptRuntimeException(span, $"Joined string exceeds LimitToString `{context.LimitToString}`.");
+            }
         }
 
         /// <summary>

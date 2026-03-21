@@ -1,1 +1,1 @@
-text(5,1) : error : Exceeding number of iteration limit `1000` for loop statement.
+text(5,11) : error : Range expression exceeds LoopLimit `1000`.

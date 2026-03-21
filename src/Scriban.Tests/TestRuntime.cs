@@ -122,6 +122,58 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void StringMultiplicationShouldRespectLimitToString()
+        {
+            var context = new TemplateContext
+            {
+                LimitToString = 5
+            };
+            var template = Template.Parse("{{ 'ab' * 3 }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("LimitToString", exception!.Message);
+        }
+
+        [Test]
+        public void BigIntegerShiftShouldRejectOversizedAmounts()
+        {
+            var template = Template.Parse("{{ 1 << 1048577 }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render());
+
+            StringAssert.Contains("Shift amount", exception!.Message);
+        }
+
+        [Test]
+        public void RangeExpressionShouldRespectLoopLimit()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 5
+            };
+            var template = Template.Parse("1..6", lexerOptions: new LexerOptions { Mode = ScriptMode.ScriptOnly });
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Evaluate(context));
+
+            StringAssert.Contains("LoopLimit", exception!.Message);
+        }
+
+        [Test]
+        public void ArrayJoinShouldRespectLimitToString()
+        {
+            var context = new TemplateContext
+            {
+                LimitToString = 3
+            };
+            var template = Template.Parse("{{ ['ab', 'cd'] | array.join '' }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("LimitToString", exception!.Message);
+        }
+
+        [Test]
         public void TestAssignValToDictionary()
         {
             var dict = new Dictionary<string, string>();
@@ -1456,7 +1508,7 @@ end
 
             // This should throw because the inner loop has 3 iterations, exceeding limit of 2
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
-            Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `2` for loop statement"));
+            Assert.That(exception.Message, Does.Contain("LoopLimit `2`"));
         }
 
         [Test]
@@ -1479,7 +1531,7 @@ end
 
             // This should throw because inner loop has 4 iterations > limit of 3
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
-            Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `3` for loop statement"));
+            Assert.That(exception.Message, Does.Contain("LoopLimit `3`"));
         }
 
         [Test]
@@ -1572,7 +1624,7 @@ end
 
             // This should throw on the inner loop (5 iterations > 3 limit)
             var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
-            Assert.That(exception.Message, Does.Contain("Exceeding number of iteration limit `3` for loop statement"));
+            Assert.That(exception.Message, Does.Contain("LoopLimit `3`"));
         }
 
         [Test]

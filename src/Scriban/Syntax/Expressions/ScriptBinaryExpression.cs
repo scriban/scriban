@@ -326,6 +326,10 @@ namespace Scriban.Syntax
                         throw new ScriptRuntimeException(spanMultiplier, $"Expecting an integer. The operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1
                     }
                     var leftText = context.ObjectToString(left);
+                    if (context.LimitToString > 0 && value > 0 && leftText.Length > 0 && (long)leftText.Length * value > context.LimitToString)
+                    {
+                        throw new ScriptRuntimeException(spanMultiplier, $"String multiplication exceeds LimitToString `{context.LimitToString}`.");
+                    }
                     var builder = new StringBuilder();
                     for (int i = 0; i < value; i++)
                     {
@@ -360,7 +364,13 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(span, $"Operator `{op.ToText()}` is not supported on string objects"); // unit test: 112-binary-string-error2.txt
         }
 
-        private static IEnumerable<object> RangeInclude(long left, long right)
+        private static IEnumerable<object> RangeInclude(TemplateContext context, SourceSpan span, long left, long right)
+        {
+            ValidateRangeSize(context, span, left, right, inclusive: true);
+            return RangeIncludeImpl(left, right);
+        }
+
+        private static IEnumerable<object> RangeIncludeImpl(long left, long right)
         {
             // unit test: 150-range-expression.txt
             if (left < right)
@@ -379,7 +389,13 @@ namespace Scriban.Syntax
             }
         }
 
-        private static IEnumerable<object> RangeExclude(long left, long right)
+        private static IEnumerable<object> RangeExclude(TemplateContext context, SourceSpan span, long left, long right)
+        {
+            ValidateRangeSize(context, span, left, right, inclusive: false);
+            return RangeExcludeImpl(left, right);
+        }
+
+        private static IEnumerable<object> RangeExcludeImpl(long left, long right)
         {
             // unit test: 150-range-expression.txt
             if (left < right)
@@ -398,7 +414,13 @@ namespace Scriban.Syntax
             }
         }
 
-        private static IEnumerable<object> RangeInclude(BigInteger left, BigInteger right)
+        private static IEnumerable<object> RangeInclude(TemplateContext context, SourceSpan span, BigInteger left, BigInteger right)
+        {
+            ValidateRangeSize(context, span, left, right, inclusive: true);
+            return RangeIncludeImpl(left, right);
+        }
+
+        private static IEnumerable<object> RangeIncludeImpl(BigInteger left, BigInteger right)
         {
             // unit test: 150-range-expression.txt
             if (left < right)
@@ -417,7 +439,13 @@ namespace Scriban.Syntax
             }
         }
 
-        private static IEnumerable<object> RangeExclude(BigInteger left, BigInteger right)
+        private static IEnumerable<object> RangeExclude(TemplateContext context, SourceSpan span, BigInteger left, BigInteger right)
+        {
+            ValidateRangeSize(context, span, left, right, inclusive: false);
+            return RangeExcludeImpl(left, right);
+        }
+
+        private static IEnumerable<object> RangeExcludeImpl(BigInteger left, BigInteger right)
         {
             // unit test: 150-range-expression.txt
             if (left < right)
@@ -558,61 +586,61 @@ namespace Scriban.Syntax
             if (leftType == typeof(BigInteger))
             {
                 var rightBig = (BigInteger)context.ToObject(span, rightValue, typeof(BigInteger));
-                return CalculateBigInteger(op, span, (BigInteger)leftValue, rightBig);
+                return CalculateBigInteger(context, op, span, (BigInteger)leftValue, rightBig);
             }
 
             if (rightType == typeof(BigInteger))
             {
                 var leftBig = (BigInteger)context.ToObject(span, leftValue, typeof(BigInteger));
-                return CalculateBigInteger(op, span, leftBig, (BigInteger)rightValue);
+                return CalculateBigInteger(context, op, span, leftBig, (BigInteger)rightValue);
             }
 
             if (leftType == typeof(long))
             {
                 var rightLong = (long)context.ToObject(span, rightValue, typeof(long));
-                return CalculateLong(op, span, (long)leftValue, rightLong);
+                return CalculateLong(context, op, span, (long)leftValue, rightLong);
             }
 
             if (rightType == typeof(long))
             {
                 var leftLong = (long)context.ToObject(span, leftValue, typeof(long));
-                return CalculateLong(op, span, leftLong, (long)rightValue);
+                return CalculateLong(context, op, span, leftLong, (long)rightValue);
             }
 
             if (leftType == typeof(ulong))
             {
                 var rightLong = (ulong)context.ToObject(span, rightValue, typeof(ulong));
-                return CalculateLong(op, span, (ulong)leftValue, rightLong);
+                return CalculateLong(context, op, span, (ulong)leftValue, rightLong);
             }
 
             if (rightType == typeof(ulong))
             {
                 var leftLong = (ulong)context.ToObject(span, leftValue, typeof(ulong));
-                return CalculateLong(op, span, leftLong, (ulong)rightValue);
+                return CalculateLong(context, op, span, leftLong, (ulong)rightValue);
             }
 
             if (leftType == typeof(uint))
             {
                 var rightLong = (uint)context.ToObject(span, rightValue, typeof(uint));
-                return CalculateLong(op, span, (uint)leftValue, rightLong);
+                return CalculateLong(context, op, span, (uint)leftValue, rightLong);
             }
 
             if (rightType == typeof(uint))
             {
                 var leftLong = (uint)context.ToObject(span, leftValue, typeof(uint));
-                return CalculateLong(op, span, leftLong, (uint)rightValue);
+                return CalculateLong(context, op, span, leftLong, (uint)rightValue);
             }
 
             if (leftType == typeof(int) || (leftType != null && leftType.IsEnum))
             {
                 var rightInt = (int)context.ToObject(span, rightValue, typeof(int));
-                return CalculateInt(op, span, (int)leftValue, rightInt);
+                return CalculateInt(context, op, span, (int)leftValue, rightInt);
             }
 
             if (rightType == typeof(int) || (rightType != null && rightType.IsEnum))
             {
                 var leftInt = (int)context.ToObject(span, leftValue, typeof(int));
-                return CalculateInt(op, span, leftInt, (int)rightValue);
+                return CalculateInt(context, op, span, leftInt, (int)rightValue);
             }
             
             if (leftType == typeof(bool))
@@ -650,9 +678,9 @@ namespace Scriban.Syntax
             throw new ScriptRuntimeException(span, $"Unsupported types `{leftValue}/{context.GetTypeName(leftValue)}` {op.ToText()} `{rightValue}/{context.GetTypeName(rightValue)}` for binary operation");
         }
 
-        private static object CalculateInt(ScriptBinaryOperator op, SourceSpan span, int left, int right)
+        private static object CalculateInt(TemplateContext context, ScriptBinaryOperator op, SourceSpan span, int left, int right)
         {
-            return FitToBestInteger(CalculateLongWithInt(op, span, left, right));
+            return FitToBestInteger(CalculateLongWithInt(context, op, span, left, right));
         }
 
         private static object FitToBestInteger(object value)
@@ -688,8 +716,9 @@ namespace Scriban.Syntax
         /// Use this value as a maximum integer
         /// </summary>
         private static readonly BigInteger MaxBigInteger = BigInteger.One << 1024 * 1024;
+        private const int MaxBigIntegerShift = 1024 * 1024;
 
-        private static object CalculateLongWithInt(ScriptBinaryOperator op, SourceSpan span, int leftInt, int rightInt)
+        private static object CalculateLongWithInt(TemplateContext context, ScriptBinaryOperator op, SourceSpan span, int leftInt, int rightInt)
         {
             long left = leftInt;
             long right = rightInt;
@@ -708,9 +737,9 @@ namespace Scriban.Syntax
                     return left / right;
 
                 case ScriptBinaryOperator.ShiftLeft:
-                    return (BigInteger)left << (int)right;
+                    return (BigInteger)left << ValidateShiftAmount(span, right);
                 case ScriptBinaryOperator.ShiftRight:
-                    return (BigInteger)left >> (int)right;
+                    return (BigInteger)left >> ValidateShiftAmount(span, right);
 
                 case ScriptBinaryOperator.Power:
                     if (right < 0)
@@ -743,29 +772,29 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
                 case ScriptBinaryOperator.RangeInclude:
-                    return new ScriptRange(RangeInclude(left, right));
+                    return new ScriptRange(RangeInclude(context, span, left, right));
                 case ScriptBinaryOperator.RangeExclude:
-                    return new ScriptRange(RangeExclude(left, right));
+                    return new ScriptRange(RangeExclude(context, span, left, right));
             }
             throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for long<->long");
         }
 
-        private static object CalculateLong(ScriptBinaryOperator op, SourceSpan span, long left, long right)
+        private static object CalculateLong(TemplateContext context, ScriptBinaryOperator op, SourceSpan span, long left, long right)
         {
-            return CalculateBigInteger(op, span, new BigInteger(left), new BigInteger(right));
+            return CalculateBigInteger(context, op, span, new BigInteger(left), new BigInteger(right));
         }
 
-        private static object CalculateLong(ScriptBinaryOperator op, SourceSpan span, ulong left, ulong right)
+        private static object CalculateLong(TemplateContext context, ScriptBinaryOperator op, SourceSpan span, ulong left, ulong right)
         {
-            return CalculateBigInteger(op, span, new BigInteger(left), new BigInteger(right));
+            return CalculateBigInteger(context, op, span, new BigInteger(left), new BigInteger(right));
         }
 
-        private static object CalculateBigInteger(ScriptBinaryOperator op, SourceSpan span, BigInteger left, BigInteger right)
+        private static object CalculateBigInteger(TemplateContext context, ScriptBinaryOperator op, SourceSpan span, BigInteger left, BigInteger right)
         {
-            return FitToBestInteger(CalculateBigIntegerNoFit(op, span, left, right));
+            return FitToBestInteger(CalculateBigIntegerNoFit(context, op, span, left, right));
         }
 
-        private static object CalculateBigIntegerNoFit(ScriptBinaryOperator op, SourceSpan span, BigInteger left, BigInteger right)
+        private static object CalculateBigIntegerNoFit(TemplateContext context, ScriptBinaryOperator op, SourceSpan span, BigInteger left, BigInteger right)
         {
             switch (op)
             {
@@ -781,9 +810,9 @@ namespace Scriban.Syntax
                     return left / right;
 
                 case ScriptBinaryOperator.ShiftLeft:
-                    return left << (int)right;
+                    return left << ValidateShiftAmount(span, right);
                 case ScriptBinaryOperator.ShiftRight:
-                    return left >> (int)right;
+                    return left >> ValidateShiftAmount(span, right);
 
                 case ScriptBinaryOperator.Power:
                     if (right < 0)
@@ -815,11 +844,46 @@ namespace Scriban.Syntax
                 case ScriptBinaryOperator.CompareLessOrEqual:
                     return left <= right;
                 case ScriptBinaryOperator.RangeInclude:
-                    return new ScriptRange(RangeInclude(left, right));
+                    return new ScriptRange(RangeInclude(context, span, left, right));
                 case ScriptBinaryOperator.RangeExclude:
-                    return new ScriptRange(RangeExclude(left, right));
+                    return new ScriptRange(RangeExclude(context, span, left, right));
             }
             throw new ScriptRuntimeException(span, $"The operator `{op.ToText()}` is not implemented for long<->long");
+        }
+
+        private static void ValidateRangeSize(TemplateContext context, SourceSpan span, BigInteger left, BigInteger right, bool inclusive)
+        {
+            if (context.LoopLimit <= 0)
+            {
+                return;
+            }
+
+            var rangeSize = BigInteger.Abs(right - left);
+            if (inclusive)
+            {
+                rangeSize += BigInteger.One;
+            }
+
+            if (rangeSize > context.LoopLimit)
+            {
+                throw new ScriptRuntimeException(span, $"Range expression exceeds LoopLimit `{context.LoopLimit}`.");
+            }
+        }
+
+        private static int ValidateShiftAmount(SourceSpan span, BigInteger shift)
+        {
+            if (shift > int.MaxValue || shift < int.MinValue)
+            {
+                throw new ScriptRuntimeException(span, $"Shift amount `{shift}` exceeds maximum supported magnitude `{MaxBigIntegerShift}`.");
+            }
+
+            var shiftAmount = (int)shift;
+            if (Math.Abs((long)shiftAmount) > MaxBigIntegerShift)
+            {
+                throw new ScriptRuntimeException(span, $"Shift amount `{shift}` exceeds maximum supported magnitude `{MaxBigIntegerShift}`.");
+            }
+
+            return shiftAmount;
         }
 
         private static object CalculateDouble(ScriptBinaryOperator op, SourceSpan span, double left, double right)
