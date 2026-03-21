@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -112,6 +113,7 @@ namespace Scriban
         /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
         /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <returns>The result of the evaluation of the expression</returns>
+        [RequiresUnreferencedCode("This overload imports the model object using reflection. Use Evaluate(TemplateContext) for AOT-safe evaluation.")]
         public static object Evaluate(string expression, object model, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             if (expression == null) throw new ArgumentNullException(nameof(expression));
@@ -150,6 +152,7 @@ namespace Scriban
         /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <exception cref="System.InvalidOperationException">If the template <see cref="HasErrors"/>. Check the <see cref="Messages"/> property for more details</exception>
         /// <returns>Returns the result of the last statement</returns>
+        [RequiresUnreferencedCode("This overload imports the model object using reflection. Use Evaluate(TemplateContext) for AOT-safe evaluation.")]
         public object Evaluate(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             var scriptObject = new ScriptObject();
@@ -197,6 +200,7 @@ namespace Scriban
         /// <param name="memberRenamer">The member renamer used to import this .NET object and transitive objects. See member renamer documentation for more details.</param>
         /// <param name="memberFilter">The member filter used to filter members for .NET objects being accessed through the template, including the model being passed to this method.</param>
         /// <returns>A rendering result as a string </returns>
+        [RequiresUnreferencedCode("This overload imports the model object using reflection. Use Render(TemplateContext) for AOT-safe rendering.")]
         public string Render(object model = null, MemberRenamerDelegate memberRenamer = null, MemberFilterDelegate memberFilter = null)
         {
             var scriptObject = new ScriptObject();

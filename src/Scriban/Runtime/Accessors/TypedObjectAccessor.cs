@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -20,17 +21,23 @@ namespace Scriban.Runtime.Accessors
 #endif
     class TypedObjectAccessor : IObjectAccessor
     {
+        private const DynamicallyAccessedMemberTypes TypeAccessedMembers =
+            DynamicallyAccessedMemberTypes.PublicFields | DynamicallyAccessedMemberTypes.PublicProperties;
+
         private readonly MemberFilterDelegate _filter;
+        [DynamicallyAccessedMembers(TypeAccessedMembers)]
         private readonly Type _type;
         private readonly MemberRenamerDelegate _renamer;
         private readonly Dictionary<string, MemberInfo> _members;
         private PropertyInfo _indexer;
 
-        public TypedObjectAccessor(Type targetType, MemberFilterDelegate filter, MemberRenamerDelegate renamer) : this(targetType, null, filter, renamer)
+        [RequiresUnreferencedCode("TypedObjectAccessor uses reflection to access fields and properties of the target type.")]
+        public TypedObjectAccessor([DynamicallyAccessedMembers(TypeAccessedMembers)] Type targetType, MemberFilterDelegate filter, MemberRenamerDelegate renamer) : this(targetType, null, filter, renamer)
         {
         }
 
-        public TypedObjectAccessor(Type targetType, IEqualityComparer<string> keyComparer, MemberFilterDelegate filter, MemberRenamerDelegate renamer)
+        [RequiresUnreferencedCode("TypedObjectAccessor uses reflection to access fields and properties of the target type.")]
+        public TypedObjectAccessor([DynamicallyAccessedMembers(TypeAccessedMembers)] Type targetType, IEqualityComparer<string> keyComparer, MemberFilterDelegate filter, MemberRenamerDelegate renamer)
         {
             _type = targetType ?? throw new ArgumentNullException(nameof(targetType));
             _filter = filter;
@@ -116,6 +123,7 @@ namespace Scriban.Runtime.Accessors
             return true;
         }
 
+        [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "DynamicallyAccessedMembers on _type preserves all public fields/properties including inherited ones; BaseType walk is safe.")]
         private void PrepareMembers()
         {
             var type = _type;

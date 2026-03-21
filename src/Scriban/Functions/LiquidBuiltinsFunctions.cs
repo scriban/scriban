@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections;
+using System.Diagnostics.CodeAnalysis;
 using Scriban.Parsing;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -98,6 +99,7 @@ namespace Scriban.Functions
         /// </summary>
         private class DefaultBuiltins : ScriptObject
         {
+            [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Importing static members from the known LiquidBuiltinsFunctions type.")]
             public DefaultBuiltins() : base(50, false)
             {
                 // ReSharper disable CollectionNeverUpdated.Local
@@ -156,7 +158,7 @@ namespace Scriban.Functions
                 SetValue("uniq", array["uniq"], true);
                 SetValue("upcase", str["upcase"], true);
                 SetValue("contains", array["contains"], true);
-
+
                 this.Import(typeof(LiquidBuiltinsFunctions), ScriptMemberImportFlags.All);
             }
         }

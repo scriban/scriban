@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
 using Scriban.Helpers;
@@ -49,6 +50,7 @@ namespace Scriban.Runtime
         protected readonly int _minimumRequiredParameters;
         protected readonly int _firstIndexOfUserParameters;
 
+        [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "GetAwaiter is a well-known public method on Task-like types.")]
         protected DynamicCustomFunction(MethodInfo method)
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));

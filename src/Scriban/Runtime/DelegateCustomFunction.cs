@@ -5,6 +5,7 @@
 #nullable disable
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Threading.Tasks;
 using Scriban.Parsing;
@@ -166,6 +167,7 @@ namespace Scriban.Runtime
             return _del != null ? _del.DynamicInvoke(arguments) : Method.Invoke(Target, arguments);
         }
 
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Array element type is known from the method's parameter type at import time.")]
         private object[] PrepareArguments(TemplateContext context, ScriptNode callerContext, ScriptArray scriptArguments, ref Array paramsArguments)
         {
             // TODO: optimize arguments allocations

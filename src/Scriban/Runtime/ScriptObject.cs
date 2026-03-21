@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Scriban.Helpers;
 using System.Reflection;
@@ -72,6 +73,7 @@ namespace Scriban.Runtime
         /// <param name="capacity">Initial capacity of the dictionary</param>
         /// <param name="autoImportStaticsFromThisType">if set to <c>true</c> it is automatically importing statics members from the derived type.</param>
         /// <param name="keyComparer">Comparer to use when looking up members</param>
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Auto-import of static members from derived types; derived types within Scriban are statically known.")]
         public ScriptObject(int capacity, bool? autoImportStaticsFromThisType, IEqualityComparer<string> keyComparer)
         {
             Store = new Dictionary<string, InternalValue>(capacity, keyComparer);
@@ -471,6 +473,7 @@ namespace Scriban.Runtime
         /// </ul>
         /// </remarks>
         [ScriptMemberIgnore]
+        [RequiresUnreferencedCode("ScriptObject.From uses reflection to import members from the specified object.")]
         public static ScriptObject From(object obj)
         {
             var scriptObject = new ScriptObject();

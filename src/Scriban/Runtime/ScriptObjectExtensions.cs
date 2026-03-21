@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 #if !SCRIBAN_NO_SYSTEM_TEXT_JSON
@@ -54,6 +55,7 @@ namespace Scriban.Runtime
         /// <li>If <paramref name="obj"/> is a plain object, this method will import the public fields/properties of the specified object into the <see cref="ScriptObject"/>.</li>
         /// </ul>
         /// </remarks>
+        [RequiresUnreferencedCode("This method uses reflection to import members from the specified object.")]
         public static void Import(this IScriptObject script, object obj, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
         {
             if (obj is IScriptObject scriptObj)
@@ -189,6 +191,7 @@ namespace Scriban.Runtime
         /// <param name="obj">The object.</param>
         /// <param name="memberName">Name of the member.</param>
         /// <param name="exportName">Name of the member name replacement. If null, use the default renamer will be used.</param>
+        [RequiresUnreferencedCode("This method uses reflection to import a specific member from the specified object.")]
         public static void ImportMember(this IScriptObject script, object obj, string memberName, string exportName = null)
         {
             script.Import(obj, ScriptMemberImportFlags.All, member => member.Name == memberName, exportName != null ? name => exportName: (MemberRenamerDelegate)null);
@@ -204,6 +207,7 @@ namespace Scriban.Runtime
         /// <param name="filter">A filter applied on each member</param>
         /// <param name="renamer">The member renamer.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
+        [RequiresUnreferencedCode("This method uses reflection to discover and import fields, properties, and methods from the specified object or type.")]
         public static void Import(this IScriptObject script, object obj, ScriptMemberImportFlags flags, MemberFilterDelegate filter = null, MemberRenamerDelegate renamer = null)
         {
             if (obj == null)
@@ -362,6 +366,7 @@ namespace Scriban.Runtime
         /// <param name="member">The member.</param>
         /// <param name="function">The function delegate.</param>
         /// <exception cref="System.ArgumentNullException">if member or function are null</exception>
+        [RequiresUnreferencedCode("This method uses reflection to create a DynamicCustomFunction from the delegate's method.")]
         public static void Import(this IScriptObject script, string member, Delegate function)
         {
             if (member == null) throw new ArgumentNullException(nameof(member));

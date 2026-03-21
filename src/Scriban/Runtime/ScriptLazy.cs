@@ -4,6 +4,7 @@
 
 #nullable disable
 
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using System;
 using Scriban.Syntax;
@@ -15,7 +16,7 @@ namespace Scriban.Runtime
 #else
     internal
 #endif
-    class ScriptLazy<T> : IScriptCustomFunction
+    class ScriptLazy<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicParameterlessConstructor)] T> : IScriptCustomFunction
     {
         private readonly Lazy<T> _lazy;
 

@@ -9,3 +9,4 @@ doc:
   - {path: ast.md, title: "Lexer, Parser & AST"}
   - {path: extending.md, title: "Extending"}
   - {path: safe-runtime.md, title: "Safe runtime"}
+  - {path: aot-support.md, title: "AOT Support"}

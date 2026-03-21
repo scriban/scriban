@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Numerics;
 using System.Reflection; // Leave this as it is required by some .NET targets
@@ -112,6 +113,7 @@ namespace Scriban
             }
         }
 
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflecting on KeyValuePair, a well-known BCL type whose members are always preserved.")]
         private string ObjectToStringImpl(object value, bool nested)
         {
             if (LimitToString > 0 && _currentToStringLength >= LimitToString) return string.Empty;
@@ -320,6 +322,7 @@ namespace Scriban
         /// <param name="value">The value of the object to convert</param>
         /// <param name="destinationType">The destination type to try to convert to</param>
         /// <returns>The object value of possibly the destination type</returns>
+        [UnconditionalSuppressMessage("Trimming", "IL2067", Justification = "IScriptConvertibleFrom implementations are required to have a public parameterless constructor.")]
         public virtual object ToObject(SourceSpan span, object value, Type destinationType)
         {
             if (destinationType == null) throw new ArgumentNullException(nameof(destinationType));

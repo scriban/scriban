@@ -13,6 +13,7 @@ using Scriban.Syntax;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
@@ -623,6 +624,7 @@ namespace Scriban
             SetValue(variable, value ? TrueObject : FalseObject);
         }
 
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "objectToImport is verified to be a ScriptObject above; the IScriptObject branch in Import does not use reflection.")]
         public virtual void Import(SourceSpan span, object objectToImport)
         {
             var scriptObject = objectToImport as ScriptObject;
@@ -978,6 +980,9 @@ namespace Scriban
         /// </summary>
         /// <param name="target"></param>
         /// <returns></returns>
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Runtime dispatch to reflection-based accessors; only triggered for arbitrary .NET objects, not ScriptObject.")]
+        [UnconditionalSuppressMessage("Trimming", "IL2072", Justification = "Runtime dispatch to reflection-based accessors; type comes from target.GetType() at runtime.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Runtime dispatch to reflection-based accessors; only triggered for arbitrary .NET objects, not ScriptObject.")]
         protected virtual IObjectAccessor GetMemberAccessorImpl(object target)
         {
             var type = target.GetType();

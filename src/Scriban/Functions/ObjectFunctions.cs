@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -459,7 +460,8 @@ namespace Scriban.Functions
 #if SCRIBAN_NO_SYSTEM_TEXT_JSON
             throw new ScriptRuntimeException(context?.CurrentSpan ?? new SourceSpan(), "object.from_json is unavailable when System.Text.Json support is disabled.");
 #else
-            return JsonSerializer.Deserialize<JsonElement>(json).ToScriban();
+            using var doc = JsonDocument.Parse(json);
+            return doc.RootElement.Clone().ToScriban();
 #endif
         }
 
@@ -481,6 +483,8 @@ namespace Scriban.Functions
         /// null
         /// ```
         /// </remarks>
+        [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Serializing known primitive types, strings, and IFormattable values.")]
+        [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Serializing known primitive types, strings, and IFormattable values.")]
         public static string ToJson(TemplateContext context, object value)
         {
 #if SCRIBAN_NO_SYSTEM_TEXT_JSON

@@ -6,6 +6,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Numerics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
@@ -34,7 +35,7 @@ namespace Scriban.Helpers
             return (type.IsPrimitive && type != typeof(bool)) || type == typeof(decimal) || type == typeof(BigInteger);
         }
 
-        internal static Type GetBaseOrInterface(this Type type, Type lookInterfaceType)
+        internal static Type GetBaseOrInterface([DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.Interfaces)] this Type type, Type lookInterfaceType)
         {
             if (type == null)
                 throw new ArgumentNullException(nameof(type));

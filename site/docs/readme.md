@@ -42,6 +42,7 @@ Welcome to the Scriban documentation. Whether you are new to Scriban or an exper
 | Guide | What you'll learn |
 |---|---|
 | [Runtime API](runtime/readme.md) | Parsing, rendering, `TemplateContext`, `ScriptObject`, custom functions |
+| [AOT Support](runtime/aot-support.md) | Using Scriban with Native AOT and trimming |
 
 ## Liquid compatibility
 

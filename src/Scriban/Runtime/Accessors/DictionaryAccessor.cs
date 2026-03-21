@@ -7,6 +7,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using Scriban.Helpers;
 using Scriban.Parsing;
@@ -27,6 +28,8 @@ namespace Scriban.Runtime.Accessors
         }
 
 
+        [RequiresDynamicCode("Creating generic dictionary accessors requires MakeGenericType.")]
+        [RequiresUnreferencedCode("Discovering generic dictionary interfaces requires reflection.")]
         public static bool TryGet(object target, out IObjectAccessor accessor)
         {
             if (target == null) throw new ArgumentNullException(nameof(target));

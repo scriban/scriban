@@ -83,6 +83,7 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
 - Several built-in functions: `array`, `date`, `html`, `math`, `object`, `regex`, `string`, `timespan`
 - Multi-line statements without having to embrace each line by `{{...}}`
 - Safe parser and safe runtime, allowing you to control what objects and functions are exposed
+- **[AOT and trimming compatible](https://scriban.github.io/docs/runtime/aot-support/)** on .NET 8+. `ScriptObject`-based APIs produce zero linker warnings for Native AOT publishing
 
 ## Syntax Coloring
 
