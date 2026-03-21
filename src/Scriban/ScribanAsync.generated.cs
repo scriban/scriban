@@ -485,10 +485,16 @@ namespace Scriban
                             // Write indents if necessary
                             if (_previousTextWasNewLine)
                             {
-                                await Output.WriteAsync(CurrentIndent, 0, CurrentIndent.Length, CancellationToken).ConfigureAwait(false);
+                                if (!await WriteOutputChunkAsync(CurrentIndent, 0, CurrentIndent.Length).ConfigureAwait(false))
+                                {
+                                    return this;
+                                }
                                 _previousTextWasNewLine = false;
                             }
-                            await Output.WriteAsync(text, index, indexEnd - index, CancellationToken).ConfigureAwait(false);
+                            if (!await WriteOutputChunkAsync(text, index, indexEnd - index).ConfigureAwait(false))
+                            {
+                                return this;
+                            }
                             break;
                         }
 
@@ -496,12 +502,18 @@ namespace Scriban
                         // Write indents if necessary
                         if (_previousTextWasNewLine && (IndentOnEmptyLines || length != 0 && (length != 1 || text[index] != '\r')))
                         {
-                            await Output.WriteAsync(CurrentIndent, 0, CurrentIndent.Length, CancellationToken).ConfigureAwait(false);
+                            if (!await WriteOutputChunkAsync(CurrentIndent, 0, CurrentIndent.Length).ConfigureAwait(false))
+                            {
+                                return this;
+                            }
                             _previousTextWasNewLine = false;
                         }
 
                         // We output the new line
-                        await Output.WriteAsync(text, index, length + 1, CancellationToken).ConfigureAwait(false);
+                        if (!await WriteOutputChunkAsync(text, index, length + 1).ConfigureAwait(false))
+                        {
+                            return this;
+                        }
                         index = newLineIndex + 1;
                         _previousTextWasNewLine = true;
                     }
@@ -512,7 +524,7 @@ namespace Scriban
                     {
                         _previousTextWasNewLine = text[startIndex + count - 1] == '\n';
                     }
-                    await Output.WriteAsync(text, startIndex, count, CancellationToken).ConfigureAwait(false);
+                    await WriteOutputChunkAsync(text, startIndex, count).ConfigureAwait(false);
                 }
             }
 
@@ -564,6 +576,40 @@ namespace Scriban
         {
             await WriteAsync(NewLine).ConfigureAwait(false);
             return this;
+        }
+
+        private async ValueTask<bool> WriteOutputChunkAsync(string text, int startIndex, int count)
+        {
+            if (count <= 0)
+            {
+                return true;
+            }
+
+            var allowedCount = GetAllowedOutputCount(count);
+            if (allowedCount > 0)
+            {
+                await Output.WriteAsync(text, startIndex, allowedCount, CancellationToken).ConfigureAwait(false);
+                _currentOutputLength += allowedCount;
+            }
+
+            if (allowedCount < count)
+            {
+                await WriteOutputLimitEllipsisAsync().ConfigureAwait(false);
+                return false;
+            }
+
+            return true;
+        }
+
+        private async ValueTask WriteOutputLimitEllipsisAsync()
+        {
+            if (_hasOutputLimitEllipsis)
+            {
+                return;
+            }
+
+            await Output.WriteAsync("...", 0, 3, CancellationToken).ConfigureAwait(false);
+            _hasOutputLimitEllipsis = true;
         }
     }
 }

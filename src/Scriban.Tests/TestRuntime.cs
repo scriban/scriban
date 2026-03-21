@@ -91,6 +91,37 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void LimitToStringShouldApplyToCumulativeRenderOutput()
+        {
+            var context = new TemplateContext
+            {
+                LimitToString = 5
+            };
+            var template = Template.Parse("{{ 'abc' }}{{ 'def' }}");
+
+            var result = template.Render(context);
+
+            Assert.AreEqual("abcde...", result);
+        }
+
+        [Test]
+        public void ResetShouldClearCumulativeRenderOutputTracking()
+        {
+            var context = new TemplateContext
+            {
+                LimitToString = 5
+            };
+            var largeTemplate = Template.Parse("{{ 'abc' }}{{ 'def' }}");
+            var smallTemplate = Template.Parse("{{ 'xy' }}");
+
+            Assert.AreEqual("abcde...", largeTemplate.Render(context));
+
+            context.Reset();
+
+            Assert.AreEqual("xy", smallTemplate.Render(context));
+        }
+
+        [Test]
         public void TestAssignValToDictionary()
         {
             var dict = new Dictionary<string, string>();

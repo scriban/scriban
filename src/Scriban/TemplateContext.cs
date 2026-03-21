@@ -700,6 +700,62 @@ namespace Scriban
             return this;
         }
 
+        private void ResetOutputLimitTracking()
+        {
+            _currentOutputLength = 0;
+            _hasOutputLimitEllipsis = false;
+        }
+
+        private bool WriteOutputChunk(string text, int startIndex, int count)
+        {
+            if (count <= 0)
+            {
+                return true;
+            }
+
+            var allowedCount = GetAllowedOutputCount(count);
+            if (allowedCount > 0)
+            {
+                Output.Write(text, startIndex, allowedCount);
+                _currentOutputLength += allowedCount;
+            }
+
+            if (allowedCount < count)
+            {
+                WriteOutputLimitEllipsis();
+                return false;
+            }
+
+            return true;
+        }
+
+        private int GetAllowedOutputCount(int requestedCount)
+        {
+            if (LimitToString <= 0)
+            {
+                return requestedCount;
+            }
+
+            var remaining = LimitToString - _currentOutputLength;
+            if (remaining <= 0)
+            {
+                return 0;
+            }
+
+            return Math.Min(requestedCount, remaining);
+        }
+
+        private void WriteOutputLimitEllipsis()
+        {
+            if (_hasOutputLimitEllipsis)
+            {
+                return;
+            }
+
+            Output.Write("...", 0, 3);
+            _hasOutputLimitEllipsis = true;
+        }
+
         /// <summary>
         /// Writes the text to the current <see cref="Output"/>
         /// </summary>
@@ -756,10 +812,16 @@ namespace Scriban
                             // Write indents if necessary
                             if (_previousTextWasNewLine)
                             {
-                                Output.Write(CurrentIndent, 0, CurrentIndent.Length);
+                                if (!WriteOutputChunk(CurrentIndent, 0, CurrentIndent.Length))
+                                {
+                                    return this;
+                                }
                                 _previousTextWasNewLine = false;
                             }
-                            Output.Write(text, index, indexEnd - index);
+                            if (!WriteOutputChunk(text, index, indexEnd - index))
+                            {
+                                return this;
+                            }
                             break;
                         }
 
@@ -767,12 +829,18 @@ namespace Scriban
                         // Write indents if necessary
                         if (_previousTextWasNewLine && (IndentOnEmptyLines || length != 0 && (length != 1 || text[index] != '\r')))
                         {
-                            Output.Write(CurrentIndent, 0, CurrentIndent.Length);
+                            if (!WriteOutputChunk(CurrentIndent, 0, CurrentIndent.Length))
+                            {
+                                return this;
+                            }
                             _previousTextWasNewLine = false;
                         }
 
                         // We output the new line
-                        Output.Write(text, index, length + 1);
+                        if (!WriteOutputChunk(text, index, length + 1))
+                        {
+                            return this;
+                        }
                         index = newLineIndex + 1;
                         _previousTextWasNewLine = true;
                     }
@@ -782,7 +850,7 @@ namespace Scriban
                     if(count > 0){
                         _previousTextWasNewLine = text[startIndex + count - 1] == '\n';
                     }
-                    Output.Write(text, startIndex, count);
+                    WriteOutputChunk(text, startIndex, count);
                 }
             }
 
@@ -902,6 +970,7 @@ namespace Scriban
 
             CachedTemplates.Clear();
             _memberAccessors.Clear();
+            ResetOutputLimitTracking();
         }
 
         /// <summary>

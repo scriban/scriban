@@ -511,7 +511,7 @@ namespace Scriban.Functions
                 }
 
                 var type = value?.GetType() ?? typeof(object);
-                var shouldTrackPath = value != null && !type.IsValueType && value is not string;
+                var shouldTrackPath = value != null && !type.IsValueType && !(value is string);
                 var addedToPath = false;
 
                 if (shouldTrackPath)
