@@ -609,6 +609,14 @@ end
             }
         }
 
+        public static class ImportedPipeOrderFunctions
+        {
+            public static string Format(DateTime input, string formatString)
+            {
+                return input.ToString(formatString, CultureInfo.InvariantCulture);
+            }
+        }
+
         [Test]
         public void TestFunctionArrayEachAndFunctionCall()
         {
@@ -758,6 +766,26 @@ f(1)
                 var result = parsedTemplate.Render(context);
                 TextAssert.AreEqual("yoyo1,2,3", result);
             }
+        }
+
+        [Test]
+        public void TestImportedFunctionPipeValueUsesFirstArgument()
+        {
+            var template = Template.Parse(@"{{ date | format ""dd.MM"" }}");
+            Assert.False(template.HasErrors);
+
+            var context = new TemplateContext();
+            var scriptObject = new ScriptObject();
+            scriptObject.Import(typeof(ImportedPipeOrderFunctions));
+            context.PushGlobal(scriptObject);
+            context.PushGlobal(new ScriptObject
+            {
+                ["date"] = new DateTime(2024, 2, 3),
+            });
+
+            var result = template.Render(context);
+
+            Assert.AreEqual("03.02", result);
         }
 
         [Test]

@@ -107,8 +107,8 @@ This function can be imported into a ScriptObject:
   Console.WriteLine(result);
   ```
 
-> Notice that when using a function with pipe calls like `{{ "{{" }}description | string.strip {{ "}}" }}`, the last argument passed to the `string.strip` function is the result of the previous pipe.
-> That's a reason why you will notice in all builtin functions in scriban that they usually take the most relevant parameter as a last parameter instead of the first parameter, to allow proper support for pipe calls.
+> Notice that when using a function with pipe calls like `{{ "{{" }}description | string.strip {{ "}}" }}`, the result of the previous pipe becomes the first explicit argument passed to `string.strip`.
+> For example, `{{ "{{" }} date | format "dd.MM" {{ "}}" }}` calls `format(date, "dd.MM")` (or `format(context, date, "dd.MM")` for methods that declare a leading `TemplateContext`).
 
 > **NOTICE**
 >

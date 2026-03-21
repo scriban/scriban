@@ -2,9 +2,11 @@
 
 This cleanup pass closed 55 old issues that were stale, already answered, resolved in current Scriban, or outside the scope of core Scriban.
 
-Issues `#625`, `#453`, and `#529` are fixed locally by the changes in this pass.
+Issues `#625`, `#453`, `#529`, and `#209` are fixed locally by the changes in this pass.
 
-The 8 issues below remain open because they were either reproduced on current head, still point to incorrect documentation, or need an explicit design decision before any code change is worth doing.
+Issue `#553` is being closed without a code change because `{{~ ... }}` shows the same indentation-trimming behavior at top level, so this does not appear to be a caller-indent regression specific to function rendering.
+
+The 6 issues below remain open because they need an explicit design decision before any code change is worth doing, or are low-priority cleanup items better closed later.
 
 Default stance for the next pass:
 
@@ -14,34 +16,7 @@ Default stance for the next pass:
 
 ## 1. Concrete docs and bug fixes
 
-### #553 Whitespace control inside of functions affects auto-indent of caller
-
-Status: reproduced.
-
-Evidence:
-
-- `{{~ ... }}` inside a called function still perturbs the caller's auto-indent/output layout.
-
-Suggested action:
-
-- Isolate callee whitespace trimming from caller indentation state.
-- Add regression tests for function calls with and without `{{~ ... }}` inside the callee body.
-
 ## 2. Docs cleanup that should be narrowed
-
-### #209 Is the documentation out of date?
-
-Status: still broadly true, but too broad.
-
-Evidence:
-
-- `site/docs/runtime/scriptobject.md` still says pipe calls pass the previous value as the last argument, which is outdated or at least misleading.
-- #625 is another concrete example of doc drift.
-
-Suggested action:
-
-- Either narrow this issue to a short checklist of specific doc fixes or close it after fixing the concrete doc items already identified.
-- Do not leave this as a permanent catch-all docs issue.
 
 ## 3. Feature and design decisions before implementation
 
@@ -130,10 +105,8 @@ Suggested action:
 
 ## Suggested review order
 
-1. #553
-2. #209
-3. #188 and #405 together
-4. #368
-5. #513
-6. #284
-7. #446
+1. #188 and #405 together
+2. #368
+3. #513
+4. #284
+5. #446
