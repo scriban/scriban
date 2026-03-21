@@ -901,6 +901,7 @@ namespace Scriban
             }
 
             CachedTemplates.Clear();
+            _memberAccessors.Clear();
         }
 
         /// <summary>

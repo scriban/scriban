@@ -1071,6 +1071,37 @@ Tax: {{ 7 | match_tax }}";
                 Assert.False(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyStaticObject.StaticPropertyA)));
                 Assert.False(accessor.HasMember(context, new SourceSpan(), obj, nameof(MyStaticObject.StaticPropertyB)));
             }
+
+            // Test Reset clears cached typed accessors that captured the previous MemberFilter
+            {
+                var context = new TemplateContext
+                {
+                    EnableRelaxedMemberAccess = false,
+                    MemberFilter = _ => true
+                };
+                var obj = new MyObject { PropertyA = "allowed", PropertyB = "blocked" };
+                var template = Template.Parse("{{ model.property_b }}");
+                var accessor = context.GetMemberAccessor(obj);
+                var globals = new ScriptObject();
+                globals["model"] = obj;
+                context.PushGlobal(globals);
+
+                Assert.True(accessor.HasMember(context, new SourceSpan(), obj, "property_b"));
+                Assert.AreEqual("blocked", template.Render(context));
+
+                context.Reset();
+                context.MemberFilter = member => member.Name == nameof(MyObject.PropertyA);
+
+                accessor = context.GetMemberAccessor(obj);
+                Assert.False(accessor.HasMember(context, new SourceSpan(), obj, "property_b"));
+
+                globals = new ScriptObject();
+                globals["model"] = obj;
+                context.PushGlobal(globals);
+
+                var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+                StringAssert.Contains("Cannot get member", exception!.Message);
+            }
         }
 
         [Test]
