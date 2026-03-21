@@ -372,7 +372,7 @@ namespace Scriban.Runtime
             if (member == null) throw new ArgumentNullException(nameof(member));
             if (function == null) throw new ArgumentNullException(nameof(function));
 
-            script.TrySetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function.Target, function.GetMethodInfo()), true);
+            script.TrySetValue(null, new SourceSpan(), member, DynamicCustomFunction.Create(function), true);
         }
 
         /// <summary>

@@ -51,12 +51,12 @@ namespace Scriban.Runtime
         protected readonly int _firstIndexOfUserParameters;
 
         [UnconditionalSuppressMessage("Trimming", "IL2075", Justification = "GetAwaiter is a well-known public method on Task-like types.")]
-        protected DynamicCustomFunction(MethodInfo method)
+        protected DynamicCustomFunction(MethodInfo method, ParameterInfo[] parameters = null)
         {
             Method = method ?? throw new ArgumentNullException(nameof(method));
             _returnType = method.ReturnType;
 
-            Parameters = method.GetParameters();
+            Parameters = parameters ?? method.GetParameters();
 #if !SCRIBAN_NO_ASYNC
             IsAwaitable = method.ReturnType.GetMethod(nameof(Task.GetAwaiter)) != null;
 #endif

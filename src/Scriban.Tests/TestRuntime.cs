@@ -21,6 +21,7 @@ using Scriban.Syntax;
 namespace Scriban.Tests
 {
     delegate string Args(object[] args);
+    delegate string OptionalTextDelegate(string text = "default");
 
     [TestFixture]
     public class TestRuntime
@@ -1176,6 +1177,29 @@ Tax: {{ 7 | match_tax }}";
                 Assert.That(obj, Does.ContainKey(nameof(MyObject.PropertyA)));
                 Assert.That(obj, Does.ContainKey(nameof(MyObject2.PropertyC)));
             }
+        }
+
+        [Test]
+        public void TestScriptObjectImportDelegateOptionalParameter()
+        {
+            var obj = new ScriptObject();
+            OptionalTextDelegate formatter = text => text.ToUpperInvariant();
+            obj.Import("formatter", formatter);
+
+            var function = (IScriptCustomFunction)obj["formatter"];
+            Assert.AreEqual(0, function.RequiredParameterCount);
+            Assert.AreEqual(1, function.ParameterCount);
+
+            var parameterInfo = function.GetParameterInfo(0);
+            Assert.That(parameterInfo.HasDefaultValue, Is.True);
+            Assert.AreEqual("default", parameterInfo.DefaultValue);
+
+            var context = new TemplateContext();
+            context.PushGlobal(obj);
+
+            var result = Template.Parse("{{ formatter() }}").Render(context);
+
+            Assert.AreEqual("DEFAULT", result);
         }
 
 

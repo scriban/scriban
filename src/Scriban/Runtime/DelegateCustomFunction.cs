@@ -25,7 +25,7 @@ namespace Scriban.Runtime
     {
         private readonly Delegate _del;
 
-        public DelegateCustomFunction(Delegate del) : base(del?.Method)
+        public DelegateCustomFunction(Delegate del) : base(del?.Method, GetDelegateParameterInfos(del))
         {
             _del = del ?? throw new ArgumentNullException(nameof(del));
             Target = del.Target;
@@ -165,6 +165,30 @@ namespace Scriban.Runtime
         protected virtual object InvokeImpl(TemplateContext context, SourceSpan span, object[] arguments)
         {
             return _del != null ? _del.DynamicInvoke(arguments) : Method.Invoke(Target, arguments);
+        }
+
+        private static ParameterInfo[] GetDelegateParameterInfos(Delegate del)
+        {
+            if (del == null) throw new ArgumentNullException(nameof(del));
+
+            var delegateInvokeMethod = del.GetType().GetMethod(nameof(Action.Invoke)) ?? throw new ArgumentException("Unable to resolve delegate Invoke method.", nameof(del));
+            var methodParameters = del.Method.GetParameters();
+            var invokeParameters = delegateInvokeMethod.GetParameters();
+
+            if (methodParameters.Length != invokeParameters.Length)
+            {
+                return methodParameters;
+            }
+
+            var mergedParameters = new ParameterInfo[methodParameters.Length];
+            for (int i = 0; i < methodParameters.Length; i++)
+            {
+                var methodParameter = methodParameters[i];
+                var invokeParameter = invokeParameters[i];
+                mergedParameters[i] = invokeParameter.HasDefaultValue && !methodParameter.HasDefaultValue ? invokeParameter : methodParameter;
+            }
+
+            return mergedParameters;
         }
 
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Array element type is known from the method's parameter type at import time.")]

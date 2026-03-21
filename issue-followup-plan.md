@@ -2,9 +2,9 @@
 
 This cleanup pass closed 55 old issues that were stale, already answered, resolved in current Scriban, or outside the scope of core Scriban.
 
-Issue `#625` is fixed locally by the documentation change in this pass.
+Issues `#625` and `#453` are fixed locally by the changes in this pass.
 
-The 10 issues below remain open because they were either reproduced on current head, still point to incorrect documentation, or need an explicit design decision before any code change is worth doing.
+The 9 issues below remain open because they were either reproduced on current head, still point to incorrect documentation, or need an explicit design decision before any code change is worth doing.
 
 Default stance for the next pass:
 
@@ -13,20 +13,6 @@ Default stance for the next pass:
 - Prefer narrowing or closing vague backlog items instead of keeping them open indefinitely.
 
 ## 1. Concrete docs and bug fixes
-
-### #453 Default arguments from a delegate definition are ignored
-
-Status: reproduced.
-
-Evidence:
-
-- An imported custom delegate with an optional parameter still fails when called without arguments.
-- `src/Scriban/Runtime/DelegateCustomFunction.cs` builds metadata from `del.Method`, which loses defaults from the delegate type's `Invoke` signature in this scenario.
-
-Suggested action:
-
-- Preserve optional/default parameter metadata from the delegate type's `Invoke` signature when wrapping a delegate.
-- Add a regression test for an imported custom delegate with an optional parameter.
 
 ### #529 Null-Conditional cannot be mixed with indexers
 
@@ -157,12 +143,11 @@ Suggested action:
 
 ## Suggested review order
 
-1. #453
-2. #529
-3. #553
-4. #209
-5. #188 and #405 together
-6. #368
-7. #513
-8. #284
-9. #446
+1. #529
+2. #553
+3. #209
+4. #188 and #405 together
+5. #368
+6. #513
+7. #284
+8. #446
