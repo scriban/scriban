@@ -2,6 +2,7 @@
 // Licensed under the BSD-Clause 2 license.
 // See license.txt file in the project root for full license information.
 
+#if !SCRIBAN_NO_SYSTEM_TEXT_JSON
 #nullable enable
 using System;
 using System.Text.Json;
@@ -46,3 +47,4 @@ namespace Scriban.Runtime {
         }
     }
 }
+#endif

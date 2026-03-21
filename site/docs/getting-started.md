@@ -219,10 +219,11 @@ To enable source embedding:
 > ```xml
 > <ItemGroup>
 >   <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
->   <PackageReference Include="System.Text.Json" Version="8.0.5" />
 >   <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
 > </ItemGroup>
 > ```
+>
+> `System.Text.Json`-based features are intentionally unavailable in source-embedding mode. This includes helpers such as `object.from_json`, `object.to_json`, and direct `JsonElement` import support.
 
 ## What's next?
 

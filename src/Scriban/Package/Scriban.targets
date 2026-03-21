@@ -1,4 +1,7 @@
 <Project>
+  <PropertyGroup Condition="'$(PackageScribanIncludeSource)' == 'true'">
+    <DefineConstants>$(DefineConstants);SCRIBAN_NO_SYSTEM_TEXT_JSON</DefineConstants>
+  </PropertyGroup>
   <ItemGroup Condition="'$(PackageScribanIncludeSource)' == 'true'">
     <EditorConfigFiles Include="$(MSBuildThisFileDirectory)../src/Scriban/.editorconfig" />
     <Compile Include="$(MSBuildThisFileDirectory)../src/**/*.cs" Visible="false"/>

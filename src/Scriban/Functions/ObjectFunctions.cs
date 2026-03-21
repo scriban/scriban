@@ -12,7 +12,9 @@ using System.IO;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
+#if !SCRIBAN_NO_SYSTEM_TEXT_JSON
 using System.Text.Json;
+#endif
 using Scriban.Helpers;
 using Scriban.Parsing;
 using Scriban.Runtime;
@@ -454,7 +456,11 @@ namespace Scriban.Functions
         /// </remarks>
         public static object FromJson(TemplateContext context, string json)
         {
+#if SCRIBAN_NO_SYSTEM_TEXT_JSON
+            throw new ScriptRuntimeException(context?.CurrentSpan ?? new SourceSpan(), "object.from_json is unavailable when System.Text.Json support is disabled.");
+#else
             return JsonSerializer.Deserialize<JsonElement>(json).ToScriban();
+#endif
         }
 
         /// <summary>
@@ -477,6 +483,9 @@ namespace Scriban.Functions
         /// </remarks>
         public static string ToJson(TemplateContext context, object value)
         {
+#if SCRIBAN_NO_SYSTEM_TEXT_JSON
+            throw new ScriptRuntimeException(context?.CurrentSpan ?? new SourceSpan(), "object.to_json is unavailable when System.Text.Json support is disabled.");
+#else
             if (value is IScriptCustomFunction) {
                 throw new ArgumentOutOfRangeException(nameof(value), "Can not serialize functions to JSON.");
             }
@@ -567,6 +576,7 @@ namespace Scriban.Functions
                     }
                 }
             }
+#endif
         }
 
         private sealed class ReferenceEqualityComparer : IEqualityComparer<object>

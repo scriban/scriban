@@ -129,13 +129,14 @@ If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, in order to co
 ```xml
 <ItemGroup>
     <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
 </ItemGroup>
 ```
 
 > [!NOTE]
 > In this mode, all Scriban types are marked as `internal`.
+>
+> `System.Text.Json`-based features are intentionally disabled in source-embedding mode. This includes helpers such as `object.from_json`, `object.to_json`, and direct `JsonElement` import support.
 >
 > You should see a Scriban folder and empty subfolders in your project. This is an issue with Visual Studio 2019 16.8.x (and before) and it will be fixed in VS 2019 16.9+
 

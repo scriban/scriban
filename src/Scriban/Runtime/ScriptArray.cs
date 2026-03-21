@@ -691,7 +691,7 @@ namespace Scriban.Runtime
         /// <summary>
         /// Creates a new <see cref="ScriptArray"/> from the specified object.
         /// </summary>
-        /// <param name="obj">The object to create the array from. Supports <see cref="IEnumerable"/> and <see cref="T:System.Text.Json.JsonElement"/> arrays.</param>
+        /// <param name="obj">The object to create the array from. Supports <see cref="IEnumerable"/> and, when System.Text.Json support is enabled, JsonElement arrays.</param>
         /// <returns>A new <see cref="ScriptArray"/> containing the elements from the specified object.</returns>
         /// <exception cref="ArgumentNullException">If <paramref name="obj"/> is null.</exception>
         /// <exception cref="ArgumentException">If <paramref name="obj"/> is not a supported type.</exception>
@@ -700,6 +700,7 @@ namespace Scriban.Runtime
         {
             if (obj == null) throw new ArgumentNullException(nameof(obj));
 
+#if !SCRIBAN_NO_SYSTEM_TEXT_JSON
             if (obj is System.Text.Json.JsonElement json)
             {
                 if (json.ValueKind == System.Text.Json.JsonValueKind.Array)
@@ -708,6 +709,7 @@ namespace Scriban.Runtime
                 }
                 throw new ArgumentException($"Unsupported JsonElement ValueKind `{json.ValueKind}`. Expecting Array.", nameof(obj));
             }
+#endif
 
             if (obj is IEnumerable enumerable)
             {
@@ -719,7 +721,11 @@ namespace Scriban.Runtime
                 return array;
             }
 
+#if !SCRIBAN_NO_SYSTEM_TEXT_JSON
             throw new ArgumentException($"Unsupported object type `{obj.GetType()}`. Expecting an IEnumerable or a JsonElement array.", nameof(obj));
+#else
+            throw new ArgumentException($"Unsupported object type `{obj.GetType()}`. Expecting an IEnumerable.", nameof(obj));
+#endif
         }
     }
 }
