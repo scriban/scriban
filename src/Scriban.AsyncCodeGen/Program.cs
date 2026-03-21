@@ -37,7 +37,11 @@ namespace Scriban.AsyncCodeGen
                 {"DefineConstants", "SCRIBAN_NO_ASYNC;SCRIBAN_PUBLIC" }
             });
 
-            var solution = await workspace.OpenSolutionAsync(Path.GetFullPath(Path.Combine(Environment.CurrentDirectory, @"../../../../Scriban.slnx")), new ConsoleProgressReporter());
+            var solutionPath = args.Length > 0
+                ? Path.GetFullPath(args[0])
+                : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, @"../../../../Scriban.slnx"));
+
+            var solution = await workspace.OpenSolutionAsync(solutionPath, new ConsoleProgressReporter());
             var project = solution.Projects.First(x => x.Name == "Scriban");
             var compilation = await project.GetCompilationAsync();
 
@@ -239,6 +243,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
