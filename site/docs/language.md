@@ -1418,7 +1418,7 @@ Note that variables declared outside the `with` block are accessible within.
 
 ### 9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> <begin?> <end?>`
 
-`include` is not a statement but rather a function that allows you to parse and render a specified template. To use this function, a delegate to a template loader must be setup on the [`TemplateOptions.TemplateLoader`](../runtime/includes#include-and-itemplateloader) property passed to the `Template.Parse` method.
+`include` is not a statement but rather a function that allows you to parse and render a specified template. To use this function, set a template loader on [`TemplateContext.TemplateLoader`](../runtime/includes#include-and-itemplateloader) before rendering the template.
  
 ```
 include 'myinclude.html'
