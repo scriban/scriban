@@ -8,7 +8,9 @@ Issue `#553` is being closed without a code change because `{{~ ... }}` shows th
 
 Issues `#284` and `#446` are also closed now as low-priority maintenance backlog items that are better handled outside the issue tracker.
 
-The 1 issue below remains open because it still needs an explicit design decision before any code change is worth doing.
+Issue `#513` is also being closed without a code change because its requested `DateOnly`/`TimeOnly` support is still too broad and undefined, while the maintainer guidance explicitly prefers not to expand the public date API without a concrete design.
+
+This follow-up plan is now complete: all currently open issues from this pass have been fixed or closed.
 
 Default stance for the next pass:
 
@@ -16,30 +18,16 @@ Default stance for the next pass:
 - Do not implement broad feature requests until the desired behavior is agreed.
 - Prefer narrowing or closing vague backlog items instead of keeping them open indefinitely.
 
-## 1. Concrete docs and bug fixes
-
-## 2. Docs cleanup that should be narrowed
-
-## 3. Feature and design decisions before implementation
-
 ### #513 Support For DateOnly and TimeOnly
 
-Status: partially covered only.
+Status: closed without implementation.
 
 Evidence:
 
 - Tests exist for JSON serialization involving `DateOnly`, but there is no obvious broader runtime/date builtin support for `DateOnly` and `TimeOnly`.
+- `src/Scriban/Functions/DateTimeFunctions.cs` is still heavily `DateTime`-shaped, so "support" would require a broader API/behavior design than a narrow bug fix.
 
-Suggested action:
+Reason for closing:
 
-- Clarify the intended scope before touching code:
-  - serialization/import only,
-  - or full runtime/date builtin support.
-
-Recommendation:
-
-- If broader support is not actually desired, close this instead of expanding the surface area.
-
-## Suggested review order
-
-1. #513
+- The desired behavior is still not defined clearly enough to implement safely.
+- The maintainer guidance on the issue already says not to broaden the date API without a concrete plan.
