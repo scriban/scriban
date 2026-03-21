@@ -66,7 +66,7 @@ array.add_range <list1> <list2>
 
 #### Description
 
-Concatenates two lists.
+Adds a range of values to the input list.
 
 #### Arguments
 

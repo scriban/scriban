@@ -51,9 +51,17 @@ namespace Scriban.Functions
         }
 
 
+        [ScriptMemberIgnore]
+        public static IEnumerable AddRange(IEnumerable list1, IEnumerable list2)
+        {
+            return Concat(list1, list2);
+        }
+
         /// <summary>
-        /// Concatenates two lists.
+        /// Adds a range of values to the input list.
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
         /// <param name="list1">The 1st input list</param>
         /// <param name="list2">The 2nd input list</param>
         /// <returns>The concatenation of the two input lists</returns>
@@ -65,20 +73,22 @@ namespace Scriban.Functions
         /// [1, 2, 3, 4, 5]
         /// ```
         /// </remarks>
-        [ScriptMemberIgnore]
-        public static IEnumerable AddRange(IEnumerable list1, IEnumerable list2)
-        {
-            return Concat(list1, list2);
-        }
-
         public static IEnumerable AddRange(TemplateContext context, SourceSpan span, IEnumerable list1, IEnumerable list2)
         {
             return Concat(context, span, list1, list2);
         }
 
+        [ScriptMemberIgnore]
+        public static IEnumerable Compact(IEnumerable list)
+        {
+            return ScriptRange.Compact(list);
+        }
+
         /// <summary>
         /// Removes any null values from the input list.
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
         /// <param name="list">An input list</param>
         /// <returns>Returns a list with null value removed</returns>
         /// <remarks>
@@ -89,20 +99,22 @@ namespace Scriban.Functions
         /// [1, 3]
         /// ```
         /// </remarks>
-        [ScriptMemberIgnore]
-        public static IEnumerable Compact(IEnumerable list)
-        {
-            return ScriptRange.Compact(list);
-        }
-
         public static IEnumerable Compact(TemplateContext context, SourceSpan span, IEnumerable list)
         {
             return ScriptRange.Compact(context, span, list);
         }
 
+        [ScriptMemberIgnore]
+        public static IEnumerable Concat(IEnumerable list1, IEnumerable list2)
+        {
+            return ScriptRange.Concat(list1, list2);
+        }
+
         /// <summary>
         /// Concatenates two lists.
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
         /// <param name="list1">The 1st input list</param>
         /// <param name="list2">The 2nd input list</param>
         /// <returns>The concatenation of the two input lists</returns>
@@ -114,12 +126,6 @@ namespace Scriban.Functions
         /// [1, 2, 3, 4, 5]
         /// ```
         /// </remarks>
-        [ScriptMemberIgnore]
-        public static IEnumerable Concat(IEnumerable list1, IEnumerable list2)
-        {
-            return ScriptRange.Concat(list1, list2);
-        }
-
         public static IEnumerable Concat(TemplateContext context, SourceSpan span, IEnumerable list1, IEnumerable list2)
         {
             return ScriptRange.Concat(context, span, list1, list2);
@@ -446,19 +452,6 @@ namespace Scriban.Functions
             }
         }
 
-        /// <summary>
-        /// Returns the last element of the input `list`.
-        /// </summary>
-        /// <param name="list">The input list</param>
-        /// <returns>The last element of the input `list`.</returns>
-        /// <remarks>
-        /// ```scriban-html
-        /// {{ [4, 5, 6] | array.last }}
-        /// ```
-        /// ```html
-        /// 6
-        /// ```
-        /// </remarks>
         [ScriptMemberIgnore]
         public static object Last(IEnumerable list)
         {
@@ -477,6 +470,21 @@ namespace Scriban.Functions
             return list.Cast<object>().LastOrDefault();
         }
 
+        /// <summary>
+        /// Returns the last element of the input `list`.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">The input list</param>
+        /// <returns>The last element of the input `list`.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6] | array.last }}
+        /// ```
+        /// ```html
+        /// 6
+        /// ```
+        /// </remarks>
         public static object Last(TemplateContext context, SourceSpan span, IEnumerable list)
         {
             if (list == null)
@@ -504,9 +512,17 @@ namespace Scriban.Functions
             return hasValue ? last : null;
         }
 
+        [ScriptMemberIgnore]
+        public static IEnumerable Limit(IEnumerable list, int count)
+        {
+            return ScriptRange.Limit(list, count);
+        }
+
         /// <summary>
         /// Returns a limited number of elments from the input list
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
         /// <param name="list">The input list</param>
         /// <param name="count">The number of elements to return from the input list</param>
         /// <remarks>
@@ -517,12 +533,6 @@ namespace Scriban.Functions
         /// [4, 5]
         /// ```
         /// </remarks>
-        [ScriptMemberIgnore]
-        public static IEnumerable Limit(IEnumerable list, int count)
-        {
-            return ScriptRange.Limit(list, count);
-        }
-
         public static IEnumerable Limit(TemplateContext context, SourceSpan span, IEnumerable list, int count)
         {
             return ScriptRange.Limit(context, span, list, count);
@@ -583,9 +593,17 @@ namespace Scriban.Functions
             }
         }
 
+        [ScriptMemberIgnore]
+        public static IEnumerable Offset(IEnumerable list, int index)
+        {
+            return ScriptRange.Offset(list, index);
+        }
+
         /// <summary>
         /// Returns the remaining of the list after the specified offset
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
         /// <param name="list">The input list</param>
         /// <param name="index">The index of a list to return elements</param>
         /// <remarks>
@@ -596,12 +614,6 @@ namespace Scriban.Functions
         /// [6, 7, 8]
         /// ```
         /// </remarks>
-        [ScriptMemberIgnore]
-        public static IEnumerable Offset(IEnumerable list, int index)
-        {
-            return ScriptRange.Offset(list, index);
-        }
-
         public static IEnumerable Offset(TemplateContext context, SourceSpan span, IEnumerable list, int index)
         {
             return ScriptRange.Offset(context, span, list, index);
@@ -650,9 +662,17 @@ namespace Scriban.Functions
             return list;
         }
 
+        [ScriptMemberIgnore]
+        public static IEnumerable Reverse(IEnumerable list)
+        {
+            return ScriptRange.Reverse(list);
+        }
+
         /// <summary>
         /// Reverses the input `list`
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
         /// <param name="list">The input list</param>
         /// <returns>A new list in reversed order.</returns>
         /// <remarks>
@@ -663,30 +683,11 @@ namespace Scriban.Functions
         /// [7, 6, 5, 4]
         /// ```
         /// </remarks>
-        [ScriptMemberIgnore]
-        public static IEnumerable Reverse(IEnumerable list)
-        {
-            return ScriptRange.Reverse(list);
-        }
-
         public static IEnumerable Reverse(TemplateContext context, SourceSpan span, IEnumerable list)
         {
             return ScriptRange.Reverse(context, span, list);
         }
 
-        /// <summary>
-        /// Returns the number of elements in the input `list`
-        /// </summary>
-        /// <param name="list">The input list</param>
-        /// <returns>A number of elements in the input `list`.</returns>
-        /// <remarks>
-        /// ```scriban-html
-        /// {{ [4, 5, 6] | array.size }}
-        /// ```
-        /// ```html
-        /// 3
-        /// ```
-        /// </remarks>
         [ScriptMemberIgnore]
         public static int Size(IEnumerable list)
         {
@@ -704,6 +705,21 @@ namespace Scriban.Functions
             return list.Cast<object>().Count();
         }
 
+        /// <summary>
+        /// Returns the number of elements in the input `list`
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">The input list</param>
+        /// <returns>A number of elements in the input `list`.</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [4, 5, 6] | array.size }}
+        /// ```
+        /// ```html
+        /// 3
+        /// ```
+        /// </remarks>
         public static int Size(TemplateContext context, SourceSpan span, IEnumerable list)
         {
             if (list == null)
@@ -811,9 +827,17 @@ namespace Scriban.Functions
             return new ScriptArray(realList);
         }
 
+        [ScriptMemberIgnore]
+        public static IEnumerable Uniq(IEnumerable list)
+        {
+            return ScriptRange.Uniq(list);
+        }
+
         /// <summary>
         /// Returns the unique elements of the input `list`.
         /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
         /// <param name="list">The input list</param>
         /// <returns>A list of unique elements of the input `list`.</returns>
         /// <remarks>
@@ -824,31 +848,11 @@ namespace Scriban.Functions
         /// [1, 4, 5, 8]
         /// ```
         /// </remarks>
-        [ScriptMemberIgnore]
-        public static IEnumerable Uniq(IEnumerable list)
-        {
-            return ScriptRange.Uniq(list);
-        }
-
         public static IEnumerable Uniq(TemplateContext context, SourceSpan span, IEnumerable list)
         {
             return ScriptRange.Uniq(context, span, list);
         }
 
-        /// <summary>
-        /// Returns if a `list` contains a specific `item`.
-        /// </summary>
-        /// <param name="list">The input list</param>
-        /// <param name="item">The input item</param>
-        /// <returns>**true** if `item` is in `list`; otherwise **false**</returns>
-        /// <remarks>
-        /// ```scriban-html
-        /// {{ [1, 2, 3, 4] | array.contains 4 }}
-        /// ```
-        /// ```html
-        /// true
-        /// ```
-        /// </remarks>
         [ScriptMemberIgnore]
         public static bool Contains(IEnumerable list, object item)
         {
@@ -866,6 +870,22 @@ namespace Scriban.Functions
             return false;
         }
 
+        /// <summary>
+        /// Returns if a `list` contains a specific `item`.
+        /// </summary>
+        /// <param name="context">The template context</param>
+        /// <param name="span">The source span</param>
+        /// <param name="list">The input list</param>
+        /// <param name="item">The input item</param>
+        /// <returns>**true** if `item` is in `list`; otherwise **false**</returns>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ [1, 2, 3, 4] | array.contains 4 }}
+        /// ```
+        /// ```html
+        /// true
+        /// ```
+        /// </remarks>
         public static bool Contains(TemplateContext context, SourceSpan span, IEnumerable list, object item)
         {
             if (list == null)
