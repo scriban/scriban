@@ -851,6 +851,54 @@ m
             StringAssert.Contains("The statement depth limit `10` was reached when parsing this statement", template.Messages[0].ToString());
         }
 
+        [Test]
+        public void EnsureExpressionDepthLimitAppliesToNestedBinaryExpressions()
+        {
+            // Build: 1+(1+(1+(1+(...))))  with 20 levels of nesting via parentheses
+            var builder = new StringBuilder();
+            for (var i = 0; i < 20; i++)
+            {
+                builder.Append("(1+");
+            }
+            builder.Append('1');
+            for (var i = 0; i < 20; i++)
+            {
+                builder.Append(')');
+            }
+
+            var template = Template.Parse($"{{{{ {builder} }}}}", parserOptions: new ParserOptions
+            {
+                ExpressionDepthLimit = 10
+            });
+
+            Assert.True(template.HasErrors);
+            StringAssert.Contains("The statement depth limit `10` was reached when parsing this statement", template.Messages[0].ToString());
+        }
+
+        [Test]
+        public void EnsureExpressionDepthLimitAppliesToNestedUnaryExpressions()
+        {
+            // Build: !(!(!(!(...true...))))  with 20 levels of nesting
+            var builder = new StringBuilder();
+            for (var i = 0; i < 20; i++)
+            {
+                builder.Append("!(");
+            }
+            builder.Append("true");
+            for (var i = 0; i < 20; i++)
+            {
+                builder.Append(')');
+            }
+
+            var template = Template.Parse($"{{{{ {builder} }}}}", parserOptions: new ParserOptions
+            {
+                ExpressionDepthLimit = 10
+            });
+
+            Assert.True(template.HasErrors);
+            StringAssert.Contains("The statement depth limit `10` was reached when parsing this statement", template.Messages[0].ToString());
+        }
+
         [TestCase(@"ab{{end}}c")]  // no blocks
         [TestCase(@"a{{if true}}b{{end}}{{end}}c")]  // one-level block
         [TestCase(@"a{{if true}}{{for i in 0..1}}b{{end}}{{end}}{{end}}c")]  // two-level block (nested)

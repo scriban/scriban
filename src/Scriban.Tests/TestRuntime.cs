@@ -1714,6 +1714,71 @@ end
             TextAssert.AreEqual("""["a#b"]""", context.ObjectToString(result));
         }
 
+        [Test]
+        public void RecursiveLimitShouldThrowAtConfiguredDepth()
+        {
+            // Recursive function that counts down — should be stopped by RecursiveLimit
+            var template = Template.Parse("{{ func f(n); if n > 0; f(n - 1); end; end; f(10) }}");
+            var context = new TemplateContext { RecursiveLimit = 5 };
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception!.Message, Does.Contain("recursive"));
+        }
+
+        [Test]
+        public void WhileLoopShouldRespectLoopLimit()
+        {
+            var template = Template.Parse("{{ x = 0; while x < 100; x = x + 1; end }}");
+            var context = new TemplateContext { LoopLimit = 10 };
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception!.Message, Does.Contain("iteration limit"));
+        }
+
+        [Test]
+        public void CircularIncludeShouldHitRecursiveLimit()
+        {
+            // Template that includes itself — caught by RecursiveLimit
+            var template = Template.Parse("{{ include 'self' }}");
+            var context = new TemplateContext
+            {
+                RecursiveLimit = 5,
+                TemplateLoader = new CircularIncludeLoader()
+            };
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception!.Message, Does.Contain("recursive"));
+        }
+
+        [Test]
+        public void ObjectEvalShouldRespectLoopLimit()
+        {
+            // Eval creates a template that loops — should inherit the existing LoopLimit
+            var template = Template.Parse(@"{{ ""for i in 1..100; i; end"" | object.eval }}");
+            var context = new TemplateContext { LoopLimit = 5 };
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            Assert.That(exception!.Message, Does.Contain("LoopLimit"));
+        }
+
+        private class CircularIncludeLoader : ITemplateLoader
+        {
+            public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+            {
+                return templateName;
+            }
+
+            public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                return "{{ include 'self' }}";
+            }
+
+            public ValueTask<string> LoadAsync(TemplateContext context, SourceSpan callerSpan, string templatePath)
+            {
+                return ValueTask.FromResult(Load(context, callerSpan, templatePath));
+            }
+        }
+
         private class MyObject : MyStaticObject
         {
             public string FieldA;
