@@ -43,22 +43,15 @@ Scriban can also be used in pure scripting context without templating (`{{` and 
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](https://scriban.github.io/docs/runtime/member-renamer/#member-renamer) delegate
 
-## New in 3.0+
+## Highlights
 
-- AST is now fully visitable with `ScriptVisitor`. You can now access `Parent` on any `ScriptNode` object and navigate the AST.
-  - Improve AST round-trip by preserving whitespaces around template enter`{{` and exit`}}` 
-- Several new language features:
-  - Hexadecimal/binary numbers: `0x1ef` or `0b101010`
-  - Support for large integers
-  - [New parametric functions](https://scriban.github.io/docs/language/#72-parametric-functions): `func sub(x,y = 1, z...); ret x - y - z[0]; end`
-  - [New inline functions](https://scriban.github.io/docs/language/#73-inline-functions): `sub(x,y) = x - y`
-  - Optional member access with `?.` instead of regular `.` (e.g `a?.b?.c`)
-  - Conditional expressions: `cond ? a : b`
-- Separate language mode (via `ScriptLang` enum) from template/scripting parsing mode (`ScriptMode`).
-- New language parsing mode `Scientific`, in addition to default Scriban and Liquid language mode.
-- More fine-grained options on the `TemplateContext` to define scripting behaviors (`EnableRelaxedTargetAccess`, `EnableRelaxedMemberAccess`, `EnableRelaxedFunctionAccess`, `EnableRelaxedIndexerAccess`, `EnableNullIndexer`)
-- New `object.eval` and `object.eval_template` function to evaluate Scriban expressions/templates at runtime.
-- Better support for `IFormattable` objects.   
+- Fully visitable AST with `ScriptVisitor`, parent links on `ScriptNode`, and round-trippable formatting with [`Template.ToText`](https://scriban.github.io/docs/runtime/ast/#ast-to-text).
+- Flexible language features including hexadecimal/binary numbers, large integers, parametric and inline functions, optional member access (`?.`), and conditional expressions.
+- Multiple parsing modes through `ScriptLang` and `ScriptMode`, including Scriban, Liquid, and Scientific parsing.
+- Fine-grained runtime control through `TemplateContext` options such as relaxed member, function, target, and indexer access.
+- Runtime evaluation helpers such as `object.eval` and `object.eval_template`.
+- Async rendering support with `Template.RenderAsync`.
+- Native AOT and trimming-friendly APIs on .NET 8+ when using the AOT-safe surface documented in the runtime guides.
   
 ## Features
 
@@ -93,22 +86,24 @@ You can install the [Scriban Extension for Visual Studio Code](https://marketpla
 
 The full documentation is available at **https://scriban.github.io**.
 
-## Binaries
+## Installation
 
 Scriban is available as a NuGet package: [![NuGet](https://img.shields.io/nuget/v/Scriban.svg)](https://www.nuget.org/packages/Scriban/)
 
-Compatible with the following .NET Standard 2.0+ (**New in 3.0**)
+```sh
+dotnet add package Scriban
+```
 
-For support for older framework (.NET 3.5, 4.0, 4.5, .NET Standard 1.1, 1.3, they are only provided in older Scriban 2.x, which is no longer supported. 
+The package targets `netstandard2.0` and `net8.0`, so it works with .NET 6+, .NET Framework 4.7.2+, and other compatible runtimes.
 
 Also the [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet package provides signed assemblies.
 
 ## Source Embedding
 
-Starting with Scriban 3.2.1+, the package comes with source included so that you can internalize your usage of Scriban into your project. This can be useful in an environment where you can't easily consume NuGet references (e.g Roslyn Source Generators).
+The package includes Scriban source files so that you can internalize Scriban into your project instead of consuming it only as a binary dependency. This is useful in environments where NuGet references are not convenient, such as Roslyn source generators.
 
 > [!WARNING]
->  Currently, the Scriban sources are not set as readonly, so you should not modify Scriban sources in that mode as it will modify the sources for other projects using Scriban on your machine. Use this feature at your own risks!
+> Currently, Scriban source files are not marked as read-only in this mode. Do not modify them unless you intend to affect other projects on the same machine that use the embedded sources. Use this feature at your own risk.
 
 In order to activate this feature you need to:
 
@@ -121,16 +116,16 @@ In order to activate this feature you need to:
 - Add the `IncludeAssets="Build"` to the NuGet PackageReference for Scriban:
   ```xml
   <ItemGroup>
-    <PackageReference Include="Scriban" Version="3.2.1" IncludeAssets="Build"/>
+    <PackageReference Include="Scriban" Version="x.y.z" IncludeAssets="Build" />
   </ItemGroup>
   ```
 
-If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, in order to compile Scriban you will need these NuGet package references (that can come from a dependency that you already have):
+If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, you will also need the supporting packages Scriban compiles against. They can already come from another dependency in your project:
 
 ```xml
 <ItemGroup>
-    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-    <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+  <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+  <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
 </ItemGroup>
 ```
 
@@ -138,8 +133,6 @@ If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, in order to co
 > In this mode, all Scriban types are marked as `internal`.
 >
 > `System.Text.Json`-based features are intentionally disabled in source-embedding mode. This includes helpers such as `object.from_json`, `object.to_json`, and direct `JsonElement` import support.
->
-> You should see a Scriban folder and empty subfolders in your project. This is an issue with Visual Studio 2019 16.8.x (and before) and it will be fixed in VS 2019 16.9+
 
 ## License
 
@@ -156,8 +149,8 @@ This software is released under the [BSD-Clause 2 license](https://opensource.or
   
 ## Online Demo
 
-* Latest: https://scriban.github.io directly
-* Legacy: https://scribanonline.azurewebsites.net/ ASP.NET Core Sample.
+* Main site and playground: https://scriban.github.io
+* Legacy sample: https://scribanonline.azurewebsites.net/ ASP.NET Core sample
 
 ## Sponsors
 
