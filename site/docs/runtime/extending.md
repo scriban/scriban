@@ -31,7 +31,7 @@ scriptObject1.Import("contextAccess", new Func<TemplateContext, string>(template
 ```
 
 
-## Hyper custom functions — `IScriptCustomFunction` 
+## Hyper custom functions - `IScriptCustomFunction` 
 
 Some custom functions can require deeper access to the internals for exposing a function. Scriban provides the interface [`IScriptCustomFunction`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Runtime/IScriptCustomFunction.cs) for this matter. If an object inherits from this interface and is accessed another `ScriptObject`, it will call the method `IScriptCustomFunction.Invoke`.
 

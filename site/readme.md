@@ -6,7 +6,7 @@ og_type: website
 
 <section class="text-center py-5">
   <div class="container">
-    <img src="{{site.basepath}}/img/scriban.svg" alt="Scriban — Fast, powerful text templating for .NET" class="img-fluid" style="width: min(100%, 12rem); height: auto;">
+    <img src="{{site.basepath}}/img/scriban.svg" alt="Scriban - Fast, powerful text templating for .NET" class="img-fluid" style="width: min(100%, 12rem); height: auto;">
     <h1 class="display-4 mt-4">Scriban</h1>
     <p class="lead mt-3 mb-4">
       A fast, powerful, safe and lightweight <strong>scripting language</strong> and <strong>text templating engine</strong> for .NET.
@@ -18,7 +18,7 @@ og_type: website
     </div>
     <div class="mt-4 text-start mx-auto" style="max-width: 48rem;">
       <pre class="language-shell-session"><code>dotnet add package Scriban</code></pre>
-      <p class="text-center text-secondary mt-2" style="font-size: 0.85rem;">Available on <a href="https://www.nuget.org/packages/Scriban/" class="text-secondary">NuGet</a> — .NET Standard 2.0+</p>
+      <p class="text-center text-secondary mt-2" style="font-size: 0.85rem;">Available on <a href="https://www.nuget.org/packages/Scriban/" class="text-secondary">NuGet</a> - .NET Standard 2.0+</p>
     </div>
   </div>
 </section>
@@ -92,7 +92,7 @@ og_type: website
         <div class="card-header display-6"><i class="bi bi-shield-check lunet-feature-icon lunet-icon--themes"></i> Safe sandbox</div>
         <div class="card-body">
           <p class="card-text">
-            By default, no .NET objects are exposed unless explicitly allowed. You control exactly what is available to templates — perfect for user-facing scenarios.
+            By default, no .NET objects are exposed unless explicitly allowed. You control exactly what is available to templates - perfect for user-facing scenarios.
           </p>
 
 [Runtime &amp; security](docs/runtime/readme.md) · [Safe runtime](docs/runtime/readme.md#safe-runtime)
@@ -131,7 +131,7 @@ og_type: website
         <div class="card-header display-6"><i class="bi bi-arrow-repeat lunet-feature-icon lunet-icon--chrome"></i> Async support</div>
         <div class="card-body">
           <p class="card-text">
-            Full <code>async</code>/<code>await</code> support with <code>Template.RenderAsync</code>. Evaluate templates without blocking — ideal for web servers and cloud functions.
+            Full <code>async</code>/<code>await</code> support with <code>Template.RenderAsync</code>. Evaluate templates without blocking - ideal for web servers and cloud functions.
           </p>
 
 [Getting started](docs/getting-started.md) · [Runtime API](docs/runtime/readme.md)
@@ -144,7 +144,7 @@ og_type: website
         <div class="card-header display-6"><i class="bi bi-filetype-cs lunet-feature-icon lunet-icon--binding"></i> Rich language</div>
         <div class="card-body">
           <p class="card-text">
-            Variables, expressions, conditionals, loops, functions, pipes, objects, arrays — all the constructs you need for powerful templating and scripting scenarios.
+            Variables, expressions, conditionals, loops, functions, pipes, objects, arrays - all the constructs you need for powerful templating and scripting scenarios.
           </p>
 
 [Language reference](docs/language.md) · [Examples](docs/getting-started.md)

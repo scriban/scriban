@@ -28,7 +28,7 @@ namespace Scriban.Tests
                 return;
             }
 
-            // Run dotnet publish with AOT — TreatWarningsAsErrors is enabled in the project
+            // Run dotnet publish with AOT - TreatWarningsAsErrors is enabled in the project
             var psi = new ProcessStartInfo
             {
                 FileName = "dotnet",

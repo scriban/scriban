@@ -4,11 +4,15 @@ title: "AOT Support"
 
 # AOT & Trimming Support
 
-Starting with Scriban 6.x, the library is marked as **AOT-compatible** (`IsAotCompatible`) on .NET 8+. This means that Scriban can be used in applications published with [Native AOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) or [trimming](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained) without producing linker warnings — provided you use the AOT-safe API surface.
+Starting with Scriban 7.x, the library is marked as **AOT-compatible** (`IsAotCompatible`) on .NET 8+. This means that Scriban can be used in applications published with [Native AOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) or [trimming](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained) without producing linker warnings - provided you use the AOT-safe API surface.
 
 - [AOT-safe APIs (no warnings)](#aot-safe-apis-no-warnings)
 - [APIs that require reflection](#apis-that-require-reflection)
 - [Quick example](#quick-example)
+  - [❌ Reflection-based (produces AOT warning)](#-reflection-based-produces-aot-warning)
+  - [✅ AOT-safe (no warning)](#-aot-safe-no-warning)
+  - [✅ Using built-in functions (AOT-safe)](#-using-built-in-functions-aot-safe)
+  - [✅ Nested objects (AOT-safe)](#-nested-objects-aot-safe)
 - [How to migrate existing code](#how-to-migrate-existing-code)
 - [Annotations reference](#annotations-reference)
 
@@ -41,9 +45,11 @@ Some Scriban APIs use .NET reflection to discover members on arbitrary .NET type
 | `scriptObject.Import(typeof(T), ...)` | Discovers static members from the type |
 | `ScriptObject.From(object)` | Creates a `ScriptObject` by reflecting on the source object |
 
-These APIs still work on non-AOT runtimes (e.g. standard .NET 8/9/10 without `PublishAot`). They are **not removed** — they are simply annotated so the compiler can warn you when AOT safety is required.
+These APIs still work on non-AOT runtimes (e.g. standard .NET 8/9/10 without `PublishAot`). They are **not removed** - they are simply annotated so the compiler can warn you when AOT safety is required.
 
-> **Note:** Passing `.NET objects` directly as the model (e.g. `template.Render(new { Name = "World" })`) relies on reflection to discover the `Name` property. In an AOT context, use `ScriptObject` to pass data explicitly.
+> [!NOTE]
+> 
+> Passing `.NET objects` directly as the model (e.g. `template.Render(new { Name = "World" })`) relies on reflection to discover the `Name` property. In an AOT context, use `ScriptObject` to pass data explicitly.
 
 ## Quick example
 
@@ -51,7 +57,7 @@ These APIs still work on non-AOT runtimes (e.g. standard .NET 8/9/10 without `Pu
 
 ```csharp
 var template = Template.Parse("Hello {{ "{{" }} name {{ "}}" }}!");
-// This calls the overload that takes `object model` — it uses reflection
+// This calls the overload that takes `object model` - it uses reflection
 // to discover properties on the anonymous type.
 var result = template.Render(new { Name = "World" });
 ```
@@ -123,7 +129,9 @@ context.PushGlobal(model);
 var result = template.Render(context);
 ```
 
-> **Note:** By default, Scriban converts PascalCase property names to snake_case (e.g. `FirstName` → `first_name`). When using `ScriptObject`, you set the keys directly, so use the snake_case form that your templates expect. Alternatively, configure a [member renamer](member-renamer.md) on the `TemplateContext`.
+> [!NOTE]
+> 
+> By default, Scriban converts PascalCase property names to snake_case (e.g. `FirstName` → `first_name`). When using `ScriptObject`, you set the keys directly, so use the snake_case form that your templates expect. Alternatively, configure a [member renamer](member-renamer.md) on the `TemplateContext`.
 
 **2. Replace `ScriptObject.From(obj)` with explicit construction:**
 
@@ -166,7 +174,7 @@ Scriban uses the following .NET trimming/AOT attributes to communicate compatibi
 | `[RequiresDynamicCode]` | The method generates code at runtime (e.g. `MakeGenericType`), which is not supported in Native AOT. |
 | `[DynamicallyAccessedMembers]` | Tells the trimmer which members of a type must be preserved. Used on parameters and fields to ensure reflected members are kept. |
 
-When you call an API annotated with `[RequiresUnreferencedCode]` from code that is being trimmed or AOT compiled, the compiler emits a warning. This is **by design** — it tells you the call may not work correctly at runtime.
+When you call an API annotated with `[RequiresUnreferencedCode]` from code that is being trimmed or AOT compiled, the compiler emits a warning. This is **by design** - it tells you the call may not work correctly at runtime.
 
 If you know the call is safe in your specific scenario (e.g. you are reflecting on types you control), you can suppress the warning with `[UnconditionalSuppressMessage]`:
 
@@ -179,4 +187,6 @@ static string RenderWithModel(Template template, MyModel model)
 }
 ```
 
-> **Caution:** Only suppress warnings when you are certain the reflected types will not be trimmed. Incorrect suppression can lead to runtime failures in AOT-published applications.
+> [!WARNING]
+> 
+> Only suppress warnings when you are certain the reflected types will not be trimmed. Incorrect suppression can lead to runtime failures in AOT-published applications.

@@ -41,7 +41,9 @@ The `TemplateContext` stack is setup like this:  `scriptObject2` => `scriptObjec
 
 As you can see the variable `var1` will be resolved from `scriptObject1` but the variable `var2` will be resolved from `scriptObject2` as there is an override here.
 
-> **NOTE** If a variable is not found, the runtime will not throw an error but will return `null` instead. It allows to check for a variable existence `if !page` for example. In case you want your script to throw an exception if a variable was not found, you can specify `TemplateContext.StrictVariables = true` to enforce checks. See the [safe runtime](safe-runtime#safe-runtime) section for more details.
+> [!NOTE]
+> 
+> If a variable is not found, the runtime will not throw an error but will return `null` instead. It allows to check for a variable existence `if !page` for example. In case you want your script to throw an exception if a variable was not found, you can specify `TemplateContext.StrictVariables = true` to enforce checks. See the [safe runtime](safe-runtime#safe-runtime) section for more details.
 
 When writing to a variable, only the `ScriptObject` at the top of the `TemplateContext` will be used. This top object is accessible through `TemplateContext.CurrentGlobal` property. It the previous example, if we had something like this in a template:
 

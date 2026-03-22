@@ -944,7 +944,7 @@ Tax: {{ 7 | match_tax }}";
 
             Assert.AreEqual("OK", result);
         }
-        
+
         [Test]
         public void TestCulture()
         {
@@ -1784,7 +1784,7 @@ end
         [Test]
         public void RecursiveLimitShouldThrowAtConfiguredDepth()
         {
-            // Recursive function that counts down — should be stopped by RecursiveLimit
+            // Recursive function that counts down - should be stopped by RecursiveLimit
             var template = Template.Parse("{{ func f(n); if n > 0; f(n - 1); end; end; f(10) }}");
             var context = new TemplateContext { RecursiveLimit = 5 };
 
@@ -1805,7 +1805,7 @@ end
         [Test]
         public void CircularIncludeShouldHitRecursiveLimit()
         {
-            // Template that includes itself — caught by RecursiveLimit
+            // Template that includes itself - caught by RecursiveLimit
             var template = Template.Parse("{{ include 'self' }}");
             var context = new TemplateContext
             {
@@ -1820,7 +1820,7 @@ end
         [Test]
         public void ObjectEvalShouldRespectLoopLimit()
         {
-            // Eval creates a template that loops — should inherit the existing LoopLimit
+            // Eval creates a template that loops - should inherit the existing LoopLimit
             var template = Template.Parse(@"{{ ""for i in 1..100; i; end"" | object.eval }}");
             var context = new TemplateContext { LoopLimit = 5 };
 

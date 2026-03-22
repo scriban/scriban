@@ -88,7 +88,7 @@ namespace Scriban.DocGen
                 {
                     var shortName = kvp.Key;
                     var titleCase = char.ToUpperInvariant(shortName[0]) + shortName.Substring(1);
-                    indexWriter.WriteLine($"- [`{shortName}` functions]({shortName}.md) — {titleCase} manipulation functions");
+                    indexWriter.WriteLine($"- [`{shortName}` functions]({shortName}.md) - {titleCase} manipulation functions");
                 }
 
                 indexWriter.WriteLine();
@@ -230,7 +230,7 @@ namespace Scriban.DocGen
 
                     var classWriter = _classWriters[shortName];
 
-                    // Write the toc — GitHub-style same-page anchor (dots stripped from heading)
+                    // Write the toc - GitHub-style same-page anchor (dots stripped from heading)
                     classWriter.Head.WriteLine($"- [`{shortName}.{methodShortName}`](#{shortName}{methodShortName})");
 
                     _writer = classWriter.Body;

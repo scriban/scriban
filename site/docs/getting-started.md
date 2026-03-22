@@ -16,7 +16,9 @@ dotnet add package Scriban
 
 Scriban targets **.NET Standard 2.0+**, so it works with .NET 6, .NET 7, .NET 8, .NET 9, .NET 10, .NET Framework 4.7.2+, and more.
 
-> **Tip:** A signed variant is also available as [`Scriban.Signed`](https://www.nuget.org/packages/Scriban.Signed/).
+> [!TIP]
+> 
+> A signed variant is also available as [`Scriban.Signed`](https://www.nuget.org/packages/Scriban.Signed/).
 
 ## Your first template
 
@@ -31,7 +33,7 @@ Console.WriteLine(result);
 // Output: Hello World!
 ```
 
-That's it — three lines to parse, render, and output a template.
+That's it - three lines to parse, render, and output a template.
 
 ### How it works
 
@@ -81,7 +83,7 @@ Scriban supports full control flow:
 ```scriban-html
 <ul>
 {{ "{{" }} for product in products {{ "}}" }}
-  <li>{{ "{{" }} product.name {{ "}}" }} — {{ "{{" }} product.price {{ "}}" }}€</li>
+  <li>{{ "{{" }} product.name {{ "}}" }} - {{ "{{" }} product.price {{ "}}" }}€</li>
 {{ "{{" }} end {{ "}}" }}
 </ul>
 ```
@@ -89,7 +91,7 @@ Scriban supports full control flow:
 ```csharp
 var template = Template.Parse(@"<ul>
 {{ "{{" }} for product in products {{ "}}" }}
-  <li>{{ "{{" }} product.name {{ "}}" }} — {{ "{{" }} product.price {{ "}}" }}€</li>
+  <li>{{ "{{" }} product.name {{ "}}" }} - {{ "{{" }} product.price {{ "}}" }}€</li>
 {{ "{{" }} end {{ "}}" }}
 </ul>");
 
@@ -106,9 +108,9 @@ Output:
 
 ```html
 <ul>
-  <li>Apple — 1.2€</li>
-  <li>Banana — 0.8€</li>
-  <li>Cherry — 2.5€</li>
+  <li>Apple - 1.2€</li>
+  <li>Banana - 0.8€</li>
+  <li>Cherry - 2.5€</li>
 </ul>
 ```
 
@@ -212,7 +214,9 @@ To enable source embedding:
 </ItemGroup>
 ```
 
-> **Note:** In source-embedding mode, all Scriban types become `internal`.
+> [!NOTE]
+> 
+> In source-embedding mode, all Scriban types become `internal`.
 >
 > If your project targets `netstandard2.0` or `.NET Framework 4.7.2+`, also add the supporting packages that Scriban's sources compile against:
 >
@@ -227,7 +231,7 @@ To enable source embedding:
 
 ## What's next?
 
-- **[Language reference](language.md)** — Learn all the syntax: variables, expressions, loops, functions, and more.
-- **[Built-in functions](builtins/readme.md)** — Explore the full list of string, array, date, math, and other functions.
-- **[Runtime API](runtime/readme.md)** — Dive deeper into `TemplateContext`, `ScriptObject`, custom functions, and advanced scenarios.
-- **[Liquid support](liquid-support.md)** — Migrate from Liquid or use Liquid templates with Scriban.
+- **[Language reference](language.md)** - Learn all the syntax: variables, expressions, loops, functions, and more.
+- **[Built-in functions](builtins/readme.md)** - Explore the full list of string, array, date, math, and other functions.
+- **[Runtime API](runtime/readme.md)** - Dive deeper into `TemplateContext`, `ScriptObject`, custom functions, and advanced scenarios.
+- **[Liquid support](liquid-support.md)** - Migrate from Liquid or use Liquid templates with Scriban.
