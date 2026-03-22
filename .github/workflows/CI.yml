@@ -3,9 +3,8 @@ name: ci
 on:
   push:
     paths-ignore:
-    - 'doc/**'
+    - 'site/**'
     - 'img/**'
-    - 'changelog.md'
     - 'readme.md'
   pull_request:
 
