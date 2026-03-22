@@ -19,7 +19,6 @@
     <PackageReference Include="Fluid.Core" />
     <PackageReference Include="Handlebars.Net" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Language" />
-    <PackageReference Include="Nustache" />
     <PackageReference Include="Stubble.Core" />
   </ItemGroup>
 </Project>

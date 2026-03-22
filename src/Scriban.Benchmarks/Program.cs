@@ -150,14 +150,6 @@ namespace Scriban.Benchmarks
             return new Stubble.Core.Settings.RendererSettingsBuilder().BuildSettings().Parser.Parse(TextTemplateMustache);
         }
 
-        [Benchmark(Description = "Nustache - Parser")]
-        public Nustache.Core.Template TestNustache()
-        {
-            var template = new Nustache.Core.Template();
-            template.Load(new StringReader(TextTemplateMustache));
-            return template;
-        }
-
         [Benchmark(Description = "Handlebars.NET - Parser")]
         public HandlebarsTemplate<object, object> TestHandlebars()
         {
@@ -196,7 +188,6 @@ namespace Scriban.Benchmarks
         private readonly DotLiquid.Template _dotLiquidTemplate;
         private readonly Stubble.Core.Settings.RendererSettings _stubbleSettings;
         private readonly Stubble.Core.Tokens.MustacheTemplate _stubbleTemplate;
-        private readonly Nustache.Core.Template _nustacheTemplate;
         private readonly HandlebarsTemplate<object, object> _handlebarsTemplate;
         private readonly Cottle.IDocument _cottleTemplate;
         private readonly Fluid.IFluidTemplate _fluidTemplate;
@@ -219,7 +210,6 @@ namespace Scriban.Benchmarks
             _dotLiquidTemplate = parsers.TestDotLiquid();
             _stubbleTemplate = parsers.TestStubble();
             _stubbleSettings = new Stubble.Core.Settings.RendererSettingsBuilder().BuildSettings();
-            _nustacheTemplate = parsers.TestNustache();
             _handlebarsTemplate = parsers.TestHandlebars();
             _cottleTemplate = Cottle.Document.CreateDefault(BenchParsers.TextTemplateCottle, default).DocumentOrThrow;
             _fluidTemplate = parsers.TestFluid();
@@ -297,17 +287,6 @@ namespace Scriban.Benchmarks
             int i = 0;
             props["truncate"] = new Func<string, object>((str) => Scriban.Functions.StringFunctions.Truncate(renderer.Render(str, _dotLiquidProducts[i++]), 15));
             return renderer.Render(BenchParsers.TextTemplateMustache, props);
-        }
-
-        [Benchmark(Description = "Nustache")]
-        public string TestNustache()
-        {
-            int i = 0;
-            return Nustache.Core.Render.StringToString(BenchParsers.TextTemplateMustache, new
-            {
-                products = _dotLiquidProducts,
-                truncate = new Func<string, object>((str) => Scriban.Functions.StringFunctions.Truncate(Nustache.Core.Render.StringToString(str, _dotLiquidProducts[i++]), 15))
-            });
         }
 
         [Benchmark(Description = "Handlebars")]
