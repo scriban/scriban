@@ -202,11 +202,13 @@ Scriban provides precise error messages with line and column numbers.
 
 Starting with Scriban 3.2.1+, you can embed Scriban sources directly into your project instead of referencing the NuGet package as a library. This is useful in contexts where NuGet references are not convenient (e.g., Roslyn Source Generators).
 
-To enable source embedding:
+To enable source embedding, make sure your project compiles the embedded sources with C# 9 or later and nullable annotations enabled:
 
 ```xml
 <PropertyGroup>
   <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
+  <LangVersion>9.0</LangVersion>
+  <Nullable>enable</Nullable>
 </PropertyGroup>
 
 <ItemGroup>
@@ -218,12 +220,18 @@ To enable source embedding:
 > 
 > In source-embedding mode, all Scriban types become `internal`.
 >
+> `Scriban.targets` already defines `SCRIBAN_NO_SYSTEM_TEXT_JSON` and `SCRIBAN_SOURCE_INCLUDE` when `PackageScribanIncludeSource` is `true`, so you do not need to add these constants manually.
+>
 > If your project targets `netstandard2.0` or `.NET Framework 4.7.2+`, also add the supporting packages that Scriban's sources compile against:
 >
 > ```xml
 > <ItemGroup>
 >   <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 >   <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+>   <PackageReference Include="PolySharp" Version="1.15.0">
+>     <PrivateAssets>all</PrivateAssets>
+>     <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+>   </PackageReference>
 > </ItemGroup>
 > ```
 >

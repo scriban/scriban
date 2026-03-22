@@ -119,6 +119,13 @@ In order to activate this feature you need to:
     <PackageReference Include="Scriban" Version="x.y.z" IncludeAssets="Build" />
   </ItemGroup>
   ```
+- Compile the embedded sources with C# 9 or later and nullable annotations enabled:
+  ```xml
+  <PropertyGroup>
+    <LangVersion>9.0</LangVersion>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+  ```
 
 If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, you will also need the supporting packages Scriban compiles against. They can already come from another dependency in your project:
 
@@ -126,10 +133,16 @@ If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, you will also 
 <ItemGroup>
   <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
   <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
+  <PackageReference Include="PolySharp" Version="1.15.0">
+    <PrivateAssets>all</PrivateAssets>
+    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+  </PackageReference>
 </ItemGroup>
 ```
 
 > [!NOTE]
+> `Scriban.targets` already defines `SCRIBAN_NO_SYSTEM_TEXT_JSON` and `SCRIBAN_SOURCE_INCLUDE` when `PackageScribanIncludeSource` is `true`, so you do not need to add these constants manually.
+>
 > In this mode, all Scriban types are marked as `internal`.
 >
 > `System.Text.Json`-based features are intentionally disabled in source-embedding mode. This includes helpers such as `object.from_json`, `object.to_json`, and direct `JsonElement` import support.
