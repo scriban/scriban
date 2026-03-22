@@ -3,7 +3,6 @@
     <File Path="../.editorconfig" />
     <File Path="../.gitattributes" />
     <File Path="../.github/workflows/CI.yml" />
-    <File Path="../changelog.md" />
     <File Path="../license.txt" />
     <File Path="../readme.md" />
     <File Path="Directory.Packages.props" />
