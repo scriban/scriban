@@ -29,10 +29,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptAnonymousFunction
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => Function;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -43,10 +47,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptArgumentBinary
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => OperatorToken;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -57,8 +65,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptArrayInitializerExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -70,7 +80,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -81,8 +93,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptAssignExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -94,7 +108,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -105,8 +121,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptBinaryExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -118,7 +136,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -129,10 +149,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptBlockStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => Statements;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -143,10 +167,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptBreakStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => BreakKeyword;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -157,8 +185,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptCaptureStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -170,7 +200,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -181,8 +213,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptCaseStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -194,7 +228,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -205,8 +241,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptConditionalExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 5;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -220,7 +258,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -231,10 +271,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptContinueStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => ContinueKeyword;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -245,8 +289,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptElseStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 2;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -257,7 +303,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -268,10 +316,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptEndStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => EndKeyword;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -282,10 +334,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptEscapeStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -296,10 +352,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptExpressionStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => Expression;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -310,8 +370,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptForStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 7;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -327,7 +389,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -338,8 +402,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptFrontMatter
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -351,7 +417,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -362,8 +430,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptFunction
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 7;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -379,7 +449,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -390,8 +462,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptFunctionCall
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 4;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -404,7 +478,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -415,10 +491,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptIdentifier
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -429,8 +509,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptIfStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 5;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -444,7 +526,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -455,8 +539,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptImportStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 2;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -467,7 +553,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -478,8 +566,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptIncrementDecrementExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 2;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -490,7 +580,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -501,8 +593,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptIndexerExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 4;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -515,7 +609,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -526,8 +622,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptInterpolatedExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -539,7 +637,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -550,10 +650,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptInterpolatedStringExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => Parts;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -564,8 +668,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptIsEmptyExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 4;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -578,7 +684,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -589,10 +697,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptKeyword
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -603,10 +715,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptLiteral
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -617,8 +733,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptMemberExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -630,7 +748,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -641,8 +761,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptNamedArgument
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -654,7 +776,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -665,8 +789,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptNestedExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -678,7 +804,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -689,10 +817,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptNopStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -703,8 +835,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptObjectInitializerExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -716,7 +850,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -727,8 +863,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptObjectMember
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -740,7 +878,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -751,8 +891,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptPage
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 2;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -763,7 +905,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -774,8 +918,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptParameter
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -787,7 +933,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -798,8 +946,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptPipeCall
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -811,7 +961,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -822,10 +974,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptRawStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -836,8 +992,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptReadOnlyStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 2;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -848,7 +1006,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -859,8 +1019,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptReturnStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 2;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -871,7 +1033,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -882,8 +1046,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptTableRowStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 7;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -899,7 +1065,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -910,10 +1078,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptThisExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 1;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => ThisKeyword;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -924,10 +1096,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptToken
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -938,8 +1114,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptUnaryExpression
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 2;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -950,7 +1128,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -961,10 +1141,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptVariableGlobal
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -975,10 +1159,14 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptVariableLocal
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 0;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -989,8 +1177,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptWhenStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 4;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -1003,7 +1193,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -1014,8 +1206,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptWhileStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -1027,7 +1221,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -1038,8 +1234,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptWithStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -1051,7 +1249,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -1062,8 +1262,10 @@ namespace Scriban.Syntax
 #endif
     partial class ScriptWrapStatement
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => 3;
 
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -1075,7 +1277,9 @@ namespace Scriban.Syntax
             };
         }
 
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -1087,18 +1291,21 @@ namespace Scriban.Syntax
 #endif
     abstract partial class ScriptRewriter
     {
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptAnonymousFunction node)
         {
             var newFunction = (ScriptFunction)Visit((ScriptNode)node.Function);
             return new ScriptAnonymousFunction() { Function = newFunction };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptArgumentBinary node)
         {
             var newOperatorToken = (ScriptToken)Visit((ScriptNode)node.OperatorToken);
             return new ScriptArgumentBinary() { OperatorToken = newOperatorToken, Operator = node.Operator };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptArrayInitializerExpression node)
         {
             var newOpenBracketToken = (ScriptToken)Visit((ScriptNode)node.OpenBracketToken);
@@ -1107,6 +1314,7 @@ namespace Scriban.Syntax
             return new ScriptArrayInitializerExpression() { OpenBracketToken = newOpenBracketToken, Values = newValues, CloseBracketToken = newCloseBracketToken };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptAssignExpression node)
         {
             var newTarget = (ScriptExpression)Visit((ScriptNode)node.Target);
@@ -1115,6 +1323,7 @@ namespace Scriban.Syntax
             return new ScriptAssignExpression() { Target = newTarget, EqualToken = newEqualToken, Value = newValue };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptBinaryExpression node)
         {
             var newLeft = (ScriptExpression)Visit((ScriptNode)node.Left);
@@ -1123,18 +1332,21 @@ namespace Scriban.Syntax
             return new ScriptBinaryExpression() { Left = newLeft, OperatorToken = newOperatorToken, Right = newRight, Operator = node.Operator };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptBlockStatement node)
         {
             var newStatements = VisitAll(node.Statements);
             return new ScriptBlockStatement() { Statements = newStatements };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptBreakStatement node)
         {
             var newBreakKeyword = (ScriptKeyword)Visit((ScriptNode)node.BreakKeyword);
             return new ScriptBreakStatement() { BreakKeyword = newBreakKeyword };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptCaptureStatement node)
         {
             var newCaptureKeyword = (ScriptKeyword)Visit((ScriptNode)node.CaptureKeyword);
@@ -1143,6 +1355,7 @@ namespace Scriban.Syntax
             return new ScriptCaptureStatement() { CaptureKeyword = newCaptureKeyword, Target = newTarget, Body = newBody };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptCaseStatement node)
         {
             var newCaseKeyword = (ScriptKeyword)Visit((ScriptNode)node.CaseKeyword);
@@ -1151,6 +1364,7 @@ namespace Scriban.Syntax
             return new ScriptCaseStatement() { CaseKeyword = newCaseKeyword, Value = newValue, Body = newBody };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptConditionalExpression node)
         {
             var newCondition = (ScriptExpression)Visit((ScriptNode)node.Condition);
@@ -1161,12 +1375,14 @@ namespace Scriban.Syntax
             return new ScriptConditionalExpression() { Condition = newCondition, QuestionToken = newQuestionToken, ThenValue = newThenValue, ColonToken = newColonToken, ElseValue = newElseValue };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptContinueStatement node)
         {
             var newContinueKeyword = (ScriptKeyword)Visit((ScriptNode)node.ContinueKeyword);
             return new ScriptContinueStatement() { ContinueKeyword = newContinueKeyword };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptElseStatement node)
         {
             var newElseKeyword = (ScriptKeyword)Visit((ScriptNode)node.ElseKeyword);
@@ -1174,23 +1390,27 @@ namespace Scriban.Syntax
             return new ScriptElseStatement() { ElseKeyword = newElseKeyword, Body = newBody };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptEndStatement node)
         {
             var newEndKeyword = (ScriptKeyword)Visit((ScriptNode)node.EndKeyword);
             return new ScriptEndStatement() { EndKeyword = newEndKeyword, ExpectEos = node.ExpectEos };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptEscapeStatement node)
         {
             return new ScriptEscapeStatement() { WhitespaceMode = node.WhitespaceMode, Indent = node.Indent, IsEntering = node.IsEntering, EscapeCount = node.EscapeCount };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptExpressionStatement node)
         {
             var newExpression = (ScriptExpression)Visit((ScriptNode)node.Expression);
             return new ScriptExpressionStatement() { Expression = newExpression };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptForStatement node)
         {
             var newForOrTableRowKeyword = (ScriptKeyword)Visit((ScriptNode)node.ForOrTableRowKeyword);
@@ -1203,6 +1423,7 @@ namespace Scriban.Syntax
             return new ScriptForStatement() { ForOrTableRowKeyword = newForOrTableRowKeyword, Variable = newVariable, InKeyword = newInKeyword, Iterator = newIterator, NamedArguments = newNamedArguments, Body = newBody, Else = newElse, SetContinue = node.SetContinue };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptFrontMatter node)
         {
             var newStartMarker = (ScriptToken)Visit((ScriptNode)node.StartMarker);
@@ -1211,6 +1432,7 @@ namespace Scriban.Syntax
             return new ScriptFrontMatter() { StartMarker = newStartMarker, Statements = newStatements, EndMarker = newEndMarker };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptFunction node)
         {
             var newFuncToken = (ScriptKeyword)Visit((ScriptNode)node.FuncToken);
@@ -1223,6 +1445,7 @@ namespace Scriban.Syntax
             return new ScriptFunction() { FuncToken = newFuncToken, NameOrDoToken = newNameOrDoToken, OpenParen = newOpenParen, Parameters = newParameters, CloseParen = newCloseParen, EqualToken = newEqualToken, Body = newBody };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptFunctionCall node)
         {
             var newTarget = (ScriptExpression)Visit((ScriptNode)node.Target);
@@ -1232,11 +1455,13 @@ namespace Scriban.Syntax
             return new ScriptFunctionCall() { Target = newTarget, OpenParent = newOpenParent, Arguments = newArguments, CloseParen = newCloseParen, ExplicitCall = node.ExplicitCall };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptIdentifier node)
         {
             return new ScriptIdentifier() { Value = node.Value };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptIfStatement node)
         {
             var newElseKeyword = (ScriptKeyword)Visit((ScriptNode)node.ElseKeyword);
@@ -1247,6 +1472,7 @@ namespace Scriban.Syntax
             return new ScriptIfStatement() { ElseKeyword = newElseKeyword, IfKeyword = newIfKeyword, Condition = newCondition, Then = newThen, Else = newElse };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptImportStatement node)
         {
             var newImportKeyword = (ScriptKeyword)Visit((ScriptNode)node.ImportKeyword);
@@ -1254,6 +1480,7 @@ namespace Scriban.Syntax
             return new ScriptImportStatement() { ImportKeyword = newImportKeyword, Expression = newExpression };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptIncrementDecrementExpression node)
         {
             var newOperatorToken = (ScriptToken)Visit((ScriptNode)node.OperatorToken);
@@ -1261,6 +1488,7 @@ namespace Scriban.Syntax
             return new ScriptIncrementDecrementExpression() { OperatorToken = newOperatorToken, Right = newRight, Operator = node.Operator, Post = node.Post };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptIndexerExpression node)
         {
             var newTarget = (ScriptExpression)Visit((ScriptNode)node.Target);
@@ -1270,6 +1498,7 @@ namespace Scriban.Syntax
             return new ScriptIndexerExpression() { Target = newTarget, OpenBracket = newOpenBracket, Index = newIndex, CloseBracket = newCloseBracket };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptInterpolatedExpression node)
         {
             var newOpenBrace = (ScriptToken)Visit((ScriptNode)node.OpenBrace);
@@ -1278,12 +1507,14 @@ namespace Scriban.Syntax
             return new ScriptInterpolatedExpression() { OpenBrace = newOpenBrace, Expression = newExpression, CloseBrace = newCloseBrace };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptInterpolatedStringExpression node)
         {
             var newParts = VisitAll(node.Parts);
             return new ScriptInterpolatedStringExpression() { Parts = newParts };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptIsEmptyExpression node)
         {
             var newTarget = (ScriptExpression)Visit((ScriptNode)node.Target);
@@ -1293,16 +1524,19 @@ namespace Scriban.Syntax
             return new ScriptIsEmptyExpression() { Target = newTarget, DotToken = newDotToken, Member = newMember, QuestionToken = newQuestionToken };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptKeyword node)
         {
             return new ScriptKeyword() { Value = node.Value };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptLiteral node)
         {
             return new ScriptLiteral() { Value = node.Value, StringQuoteType = node.StringQuoteType, StringTokenType = node.StringTokenType };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptMemberExpression node)
         {
             var newTarget = (ScriptExpression)Visit((ScriptNode)node.Target);
@@ -1311,6 +1545,7 @@ namespace Scriban.Syntax
             return new ScriptMemberExpression() { Target = newTarget, DotToken = newDotToken, Member = newMember };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptNamedArgument node)
         {
             var newName = (ScriptVariable)Visit((ScriptNode)node.Name);
@@ -1319,6 +1554,7 @@ namespace Scriban.Syntax
             return new ScriptNamedArgument() { Name = newName, ColonToken = newColonToken, Value = newValue };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptNestedExpression node)
         {
             var newOpenParen = (ScriptToken)Visit((ScriptNode)node.OpenParen);
@@ -1327,11 +1563,13 @@ namespace Scriban.Syntax
             return new ScriptNestedExpression() { OpenParen = newOpenParen, Expression = newExpression, CloseParen = newCloseParen };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptNopStatement node)
         {
             return new ScriptNopStatement() { };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptObjectInitializerExpression node)
         {
             var newOpenBrace = (ScriptToken)Visit((ScriptNode)node.OpenBrace);
@@ -1340,6 +1578,7 @@ namespace Scriban.Syntax
             return new ScriptObjectInitializerExpression() { OpenBrace = newOpenBrace, Members = newMembers, CloseBrace = newCloseBrace };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptObjectMember node)
         {
             var newName = (ScriptExpression)Visit((ScriptNode)node.Name);
@@ -1348,6 +1587,7 @@ namespace Scriban.Syntax
             return new ScriptObjectMember() { Name = newName, ColonToken = newColonToken, Value = newValue };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptPage node)
         {
             var newFrontMatter = (ScriptFrontMatter)Visit((ScriptNode)node.FrontMatter);
@@ -1355,6 +1595,7 @@ namespace Scriban.Syntax
             return new ScriptPage() { FrontMatter = newFrontMatter, Body = newBody };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptParameter node)
         {
             var newName = (ScriptVariable)Visit((ScriptNode)node.Name);
@@ -1363,6 +1604,7 @@ namespace Scriban.Syntax
             return new ScriptParameter() { Name = newName, EqualOrTripleDotToken = newEqualOrTripleDotToken, DefaultValue = newDefaultValue };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptPipeCall node)
         {
             var newFrom = (ScriptExpression)Visit((ScriptNode)node.From);
@@ -1371,11 +1613,13 @@ namespace Scriban.Syntax
             return new ScriptPipeCall() { From = newFrom, PipeToken = newPipeToken, To = newTo };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptRawStatement node)
         {
             return new ScriptRawStatement() { Text = node.Text, IsEscape = node.IsEscape };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptReadOnlyStatement node)
         {
             var newReadOnlyKeyword = (ScriptKeyword)Visit((ScriptNode)node.ReadOnlyKeyword);
@@ -1383,6 +1627,7 @@ namespace Scriban.Syntax
             return new ScriptReadOnlyStatement() { ReadOnlyKeyword = newReadOnlyKeyword, Variable = newVariable };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptReturnStatement node)
         {
             var newRetKeyword = (ScriptKeyword)Visit((ScriptNode)node.RetKeyword);
@@ -1390,6 +1635,7 @@ namespace Scriban.Syntax
             return new ScriptReturnStatement() { RetKeyword = newRetKeyword, Expression = newExpression };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptTableRowStatement node)
         {
             var newForOrTableRowKeyword = (ScriptKeyword)Visit((ScriptNode)node.ForOrTableRowKeyword);
@@ -1402,17 +1648,20 @@ namespace Scriban.Syntax
             return new ScriptTableRowStatement() { ForOrTableRowKeyword = newForOrTableRowKeyword, Variable = newVariable, InKeyword = newInKeyword, Iterator = newIterator, NamedArguments = newNamedArguments, Body = newBody, Else = newElse, SetContinue = node.SetContinue };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptThisExpression node)
         {
             var newThisKeyword = (ScriptKeyword)Visit((ScriptNode)node.ThisKeyword);
             return new ScriptThisExpression() { ThisKeyword = newThisKeyword };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptToken node)
         {
             return new ScriptToken() { Value = node.Value, TokenType = node.TokenType };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptUnaryExpression node)
         {
             var newOperatorToken = (ScriptToken)Visit((ScriptNode)node.OperatorToken);
@@ -1420,6 +1669,7 @@ namespace Scriban.Syntax
             return new ScriptUnaryExpression() { OperatorToken = newOperatorToken, Right = newRight, Operator = node.Operator };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptWhenStatement node)
         {
             var newWhenKeyword = (ScriptKeyword)Visit((ScriptNode)node.WhenKeyword);
@@ -1429,6 +1679,7 @@ namespace Scriban.Syntax
             return new ScriptWhenStatement() { WhenKeyword = newWhenKeyword, Values = newValues, Body = newBody, Next = newNext };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptWhileStatement node)
         {
             var newWhileKeyword = (ScriptKeyword)Visit((ScriptNode)node.WhileKeyword);
@@ -1437,6 +1688,7 @@ namespace Scriban.Syntax
             return new ScriptWhileStatement() { WhileKeyword = newWhileKeyword, Condition = newCondition, Body = newBody };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptWithStatement node)
         {
             var newWithKeyword = (ScriptKeyword)Visit((ScriptNode)node.WithKeyword);
@@ -1445,6 +1697,7 @@ namespace Scriban.Syntax
             return new ScriptWithStatement() { WithKeyword = newWithKeyword, Name = newName, Body = newBody };
         }
 
+        /// <inheritdoc/>
         public override ScriptNode Visit(ScriptWrapStatement node)
         {
             var newWrapKeyword = (ScriptKeyword)Visit((ScriptNode)node.WrapKeyword);
@@ -1462,56 +1715,107 @@ namespace Scriban.Syntax
 #endif
     abstract partial class ScriptVisitor
     {
+        /// <summary>Visits ScriptAnonymousFunction.</summary>
         public virtual void Visit(ScriptAnonymousFunction node) => DefaultVisit(node);
+        /// <summary>Visits ScriptArgumentBinary.</summary>
         public virtual void Visit(ScriptArgumentBinary node) => DefaultVisit(node);
+        /// <summary>Visits ScriptArrayInitializerExpression.</summary>
         public virtual void Visit(ScriptArrayInitializerExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptAssignExpression.</summary>
         public virtual void Visit(ScriptAssignExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptBinaryExpression.</summary>
         public virtual void Visit(ScriptBinaryExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptBlockStatement.</summary>
         public virtual void Visit(ScriptBlockStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptBreakStatement.</summary>
         public virtual void Visit(ScriptBreakStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptCaptureStatement.</summary>
         public virtual void Visit(ScriptCaptureStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptCaseStatement.</summary>
         public virtual void Visit(ScriptCaseStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptConditionalExpression.</summary>
         public virtual void Visit(ScriptConditionalExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptContinueStatement.</summary>
         public virtual void Visit(ScriptContinueStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptElseStatement.</summary>
         public virtual void Visit(ScriptElseStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptEndStatement.</summary>
         public virtual void Visit(ScriptEndStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptEscapeStatement.</summary>
         public virtual void Visit(ScriptEscapeStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptExpressionStatement.</summary>
         public virtual void Visit(ScriptExpressionStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptForStatement.</summary>
         public virtual void Visit(ScriptForStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptFrontMatter.</summary>
         public virtual void Visit(ScriptFrontMatter node) => DefaultVisit(node);
+        /// <summary>Visits ScriptFunction.</summary>
         public virtual void Visit(ScriptFunction node) => DefaultVisit(node);
+        /// <summary>Visits ScriptFunctionCall.</summary>
         public virtual void Visit(ScriptFunctionCall node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIdentifier.</summary>
         public virtual void Visit(ScriptIdentifier node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIfStatement.</summary>
         public virtual void Visit(ScriptIfStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptImportStatement.</summary>
         public virtual void Visit(ScriptImportStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIncrementDecrementExpression.</summary>
         public virtual void Visit(ScriptIncrementDecrementExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIndexerExpression.</summary>
         public virtual void Visit(ScriptIndexerExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptInterpolatedExpression.</summary>
         public virtual void Visit(ScriptInterpolatedExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptInterpolatedStringExpression.</summary>
         public virtual void Visit(ScriptInterpolatedStringExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIsEmptyExpression.</summary>
         public virtual void Visit(ScriptIsEmptyExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptKeyword.</summary>
         public virtual void Visit(ScriptKeyword node) => DefaultVisit(node);
+        /// <summary>Visits ScriptLiteral.</summary>
         public virtual void Visit(ScriptLiteral node) => DefaultVisit(node);
+        /// <summary>Visits ScriptMemberExpression.</summary>
         public virtual void Visit(ScriptMemberExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptNamedArgument.</summary>
         public virtual void Visit(ScriptNamedArgument node) => DefaultVisit(node);
+        /// <summary>Visits ScriptNestedExpression.</summary>
         public virtual void Visit(ScriptNestedExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptNopStatement.</summary>
         public virtual void Visit(ScriptNopStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptObjectInitializerExpression.</summary>
         public virtual void Visit(ScriptObjectInitializerExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptObjectMember.</summary>
         public virtual void Visit(ScriptObjectMember node) => DefaultVisit(node);
+        /// <summary>Visits ScriptPage.</summary>
         public virtual void Visit(ScriptPage node) => DefaultVisit(node);
+        /// <summary>Visits ScriptParameter.</summary>
         public virtual void Visit(ScriptParameter node) => DefaultVisit(node);
+        /// <summary>Visits ScriptPipeCall.</summary>
         public virtual void Visit(ScriptPipeCall node) => DefaultVisit(node);
+        /// <summary>Visits ScriptRawStatement.</summary>
         public virtual void Visit(ScriptRawStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptReadOnlyStatement.</summary>
         public virtual void Visit(ScriptReadOnlyStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptReturnStatement.</summary>
         public virtual void Visit(ScriptReturnStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptTableRowStatement.</summary>
         public virtual void Visit(ScriptTableRowStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptThisExpression.</summary>
         public virtual void Visit(ScriptThisExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptToken.</summary>
         public virtual void Visit(ScriptToken node) => DefaultVisit(node);
+        /// <summary>Visits ScriptUnaryExpression.</summary>
         public virtual void Visit(ScriptUnaryExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptVariableGlobal.</summary>
         public virtual void Visit(ScriptVariableGlobal node) => DefaultVisit(node);
+        /// <summary>Visits ScriptVariableLocal.</summary>
         public virtual void Visit(ScriptVariableLocal node) => DefaultVisit(node);
+        /// <summary>Visits ScriptWhenStatement.</summary>
         public virtual void Visit(ScriptWhenStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptWhileStatement.</summary>
         public virtual void Visit(ScriptWhileStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptWithStatement.</summary>
         public virtual void Visit(ScriptWithStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptWrapStatement.</summary>
         public virtual void Visit(ScriptWrapStatement node) => DefaultVisit(node);
     }
 
@@ -1522,56 +1826,107 @@ namespace Scriban.Syntax
 #endif
     abstract partial class ScriptVisitor<TResult>
     {
+        /// <summary>Visits ScriptAnonymousFunction.</summary>
         public virtual TResult Visit(ScriptAnonymousFunction node) => DefaultVisit(node);
+        /// <summary>Visits ScriptArgumentBinary.</summary>
         public virtual TResult Visit(ScriptArgumentBinary node) => DefaultVisit(node);
+        /// <summary>Visits ScriptArrayInitializerExpression.</summary>
         public virtual TResult Visit(ScriptArrayInitializerExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptAssignExpression.</summary>
         public virtual TResult Visit(ScriptAssignExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptBinaryExpression.</summary>
         public virtual TResult Visit(ScriptBinaryExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptBlockStatement.</summary>
         public virtual TResult Visit(ScriptBlockStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptBreakStatement.</summary>
         public virtual TResult Visit(ScriptBreakStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptCaptureStatement.</summary>
         public virtual TResult Visit(ScriptCaptureStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptCaseStatement.</summary>
         public virtual TResult Visit(ScriptCaseStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptConditionalExpression.</summary>
         public virtual TResult Visit(ScriptConditionalExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptContinueStatement.</summary>
         public virtual TResult Visit(ScriptContinueStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptElseStatement.</summary>
         public virtual TResult Visit(ScriptElseStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptEndStatement.</summary>
         public virtual TResult Visit(ScriptEndStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptEscapeStatement.</summary>
         public virtual TResult Visit(ScriptEscapeStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptExpressionStatement.</summary>
         public virtual TResult Visit(ScriptExpressionStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptForStatement.</summary>
         public virtual TResult Visit(ScriptForStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptFrontMatter.</summary>
         public virtual TResult Visit(ScriptFrontMatter node) => DefaultVisit(node);
+        /// <summary>Visits ScriptFunction.</summary>
         public virtual TResult Visit(ScriptFunction node) => DefaultVisit(node);
+        /// <summary>Visits ScriptFunctionCall.</summary>
         public virtual TResult Visit(ScriptFunctionCall node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIdentifier.</summary>
         public virtual TResult Visit(ScriptIdentifier node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIfStatement.</summary>
         public virtual TResult Visit(ScriptIfStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptImportStatement.</summary>
         public virtual TResult Visit(ScriptImportStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIncrementDecrementExpression.</summary>
         public virtual TResult Visit(ScriptIncrementDecrementExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIndexerExpression.</summary>
         public virtual TResult Visit(ScriptIndexerExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptInterpolatedExpression.</summary>
         public virtual TResult Visit(ScriptInterpolatedExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptInterpolatedStringExpression.</summary>
         public virtual TResult Visit(ScriptInterpolatedStringExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptIsEmptyExpression.</summary>
         public virtual TResult Visit(ScriptIsEmptyExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptKeyword.</summary>
         public virtual TResult Visit(ScriptKeyword node) => DefaultVisit(node);
+        /// <summary>Visits ScriptLiteral.</summary>
         public virtual TResult Visit(ScriptLiteral node) => DefaultVisit(node);
+        /// <summary>Visits ScriptMemberExpression.</summary>
         public virtual TResult Visit(ScriptMemberExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptNamedArgument.</summary>
         public virtual TResult Visit(ScriptNamedArgument node) => DefaultVisit(node);
+        /// <summary>Visits ScriptNestedExpression.</summary>
         public virtual TResult Visit(ScriptNestedExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptNopStatement.</summary>
         public virtual TResult Visit(ScriptNopStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptObjectInitializerExpression.</summary>
         public virtual TResult Visit(ScriptObjectInitializerExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptObjectMember.</summary>
         public virtual TResult Visit(ScriptObjectMember node) => DefaultVisit(node);
+        /// <summary>Visits ScriptPage.</summary>
         public virtual TResult Visit(ScriptPage node) => DefaultVisit(node);
+        /// <summary>Visits ScriptParameter.</summary>
         public virtual TResult Visit(ScriptParameter node) => DefaultVisit(node);
+        /// <summary>Visits ScriptPipeCall.</summary>
         public virtual TResult Visit(ScriptPipeCall node) => DefaultVisit(node);
+        /// <summary>Visits ScriptRawStatement.</summary>
         public virtual TResult Visit(ScriptRawStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptReadOnlyStatement.</summary>
         public virtual TResult Visit(ScriptReadOnlyStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptReturnStatement.</summary>
         public virtual TResult Visit(ScriptReturnStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptTableRowStatement.</summary>
         public virtual TResult Visit(ScriptTableRowStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptThisExpression.</summary>
         public virtual TResult Visit(ScriptThisExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptToken.</summary>
         public virtual TResult Visit(ScriptToken node) => DefaultVisit(node);
+        /// <summary>Visits ScriptUnaryExpression.</summary>
         public virtual TResult Visit(ScriptUnaryExpression node) => DefaultVisit(node);
+        /// <summary>Visits ScriptVariableGlobal.</summary>
         public virtual TResult Visit(ScriptVariableGlobal node) => DefaultVisit(node);
+        /// <summary>Visits ScriptVariableLocal.</summary>
         public virtual TResult Visit(ScriptVariableLocal node) => DefaultVisit(node);
+        /// <summary>Visits ScriptWhenStatement.</summary>
         public virtual TResult Visit(ScriptWhenStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptWhileStatement.</summary>
         public virtual TResult Visit(ScriptWhileStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptWithStatement.</summary>
         public virtual TResult Visit(ScriptWithStatement node) => DefaultVisit(node);
+        /// <summary>Visits ScriptWrapStatement.</summary>
         public virtual TResult Visit(ScriptWrapStatement node) => DefaultVisit(node);
     }
 }

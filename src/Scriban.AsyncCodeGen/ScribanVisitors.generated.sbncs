@@ -30,13 +30,17 @@ namespace Scriban.Syntax
 #endif
     partial class {{ node.Name }}
     {
+        /// <inheritdoc/>
         public override int ChildrenCount => {{ node.ScriptNodePropertyCount }};
 
         {{~ if node.ScriptNodePropertyCount == 0 ~}}
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => null;
         {{~ else if node.ScriptNodePropertyCount == 1 ~}}
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index) => {{ node.Properties[0].Name }};
         {{~ else ~}}
+        /// <inheritdoc/>
         protected override ScriptNode GetChildrenImpl(int index)
         {
             return index switch
@@ -49,7 +53,9 @@ namespace Scriban.Syntax
         }
 
         {{~ end ~}}
+        /// <inheritdoc/>
         public override void Accept(ScriptVisitor visitor) => visitor.Visit(this);
+        /// <inheritdoc/>
         public override TResult Accept<TResult>(ScriptVisitor<TResult> visitor) => visitor.Visit(this);
     }
 
@@ -64,6 +70,7 @@ namespace Scriban.Syntax
     {
     {{~ for node in nodes ~}}
         {{~ if !node.CanRewrite; continue; end ~}}
+        /// <inheritdoc/>
         public override ScriptNode Visit({{ node.Name }} node)
         {
             {{~ for prop in node.Properties ~}}
@@ -92,6 +99,7 @@ namespace Scriban.Syntax
     abstract partial class ScriptVisitor
     {
     {{~ for node in nodes ~}}
+        /// <summary>Visits {{ node.Name }}.</summary>
         public virtual void Visit({{ node.Name }} node) => DefaultVisit(node);
     {{~ end ~}}
     }
@@ -104,6 +112,7 @@ namespace Scriban.Syntax
     abstract partial class ScriptVisitor<TResult>
     {
     {{~ for node in nodes ~}}
+        /// <summary>Visits {{ node.Name }}.</summary>
         public virtual TResult Visit({{ node.Name }} node) => DefaultVisit(node);
     {{~ end ~}}
     }
