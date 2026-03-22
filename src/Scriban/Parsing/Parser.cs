@@ -47,7 +47,7 @@ namespace Scriban.Parsing
         private IScriptTerminal? _lastTerminalWithTrivias;
 
         private Stack<char> _interpolatedNestedStringChars;
-        
+
 
         /// <summary>
         /// Initializes a new instance of the <see cref="Parser"/> class.
@@ -64,7 +64,7 @@ namespace Scriban.Parsing
             Messages = new LogMessageBag();
             _trivias = new List<ScriptTrivia>();
 
-            Options = options ?? new ParserOptions();
+            Options = options ?? ParserOptions.Default;
             CurrentParsingMode = lexer.Options.Mode;
 
             _isKeepTrivia = lexer.Options.KeepTrivia;

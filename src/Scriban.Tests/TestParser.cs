@@ -978,7 +978,7 @@ m
 
             if (isRoundtripTest)
             {
-                lexerOptions.KeepTrivia = true;
+                lexerOptions = lexerOptions with { KeepTrivia = true };
             }
 
 #if EnableTokensOutput
@@ -1007,7 +1007,7 @@ m
                     Console.WriteLine("Roundtrip");
                     Console.WriteLine("======================================");
                     Console.WriteLine(checkedRoundtripText);
-                    lexerOptions.Lang = lang == ScriptLang.Scientific ? lang : ScriptLang.Default;
+                    lexerOptions = lexerOptions with { Lang = lang == ScriptLang.Scientific ? lang : ScriptLang.Default };
 
                     if (!isLiquid && supportExactRoundtrip)
                     {
@@ -1059,7 +1059,7 @@ m
                         {
                             // Dumps the roundtrip version
                             var lexerOptionsForTrivia = lexerOptions;
-                            lexerOptionsForTrivia.KeepTrivia = true;
+                            lexerOptionsForTrivia = lexerOptionsForTrivia with { KeepTrivia = true };
                             var templateWithTrivia = Template.Parse(input, "input",  parserOptions, lexerOptionsForTrivia);
                             roundtripText = templateWithTrivia.ToText();
                         }

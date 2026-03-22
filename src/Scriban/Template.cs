@@ -25,8 +25,8 @@ namespace Scriban
     {
         private Template(ParserOptions? parserOptions, LexerOptions? lexerOptions, string? sourceFilePath)
         {
-            ParserOptions = parserOptions ?? new ParserOptions();
-            LexerOptions = lexerOptions ?? new LexerOptions();
+            ParserOptions = parserOptions ?? ParserOptions.Default;
+            LexerOptions = lexerOptions ?? LexerOptions.Default;;
             Messages = new LogMessageBag();
             this.SourceFilePath = sourceFilePath;
         }
@@ -86,8 +86,8 @@ namespace Scriban
         /// <returns>A template</returns>
         public static Template ParseLiquid(string text, string? sourceFilePath = null, ParserOptions? parserOptions = null, LexerOptions? lexerOptions = null)
         {
-            var localLexerOptions = lexerOptions ?? new LexerOptions();
-            localLexerOptions.Lang = ScriptLang.Liquid;
+            var localLexerOptions = lexerOptions ?? LexerOptions.Default;
+            localLexerOptions = localLexerOptions with { Lang = ScriptLang.Liquid };
             return Parse(text, sourceFilePath, parserOptions, localLexerOptions);
         }
 

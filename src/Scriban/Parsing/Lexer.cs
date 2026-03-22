@@ -48,7 +48,7 @@ namespace Scriban.Parsing
         private readonly char _stripWhiteSpaceRestrictedSpecialChar;
         private const char RawEscapeSpecialChar = '%';
         private readonly Queue<Token> _pendingTokens;
-        private readonly TryMatchCustomTokenDelegate _tryMatchCustomToken;
+        private readonly TryMatchCustomTokenDelegate? _tryMatchCustomToken;
 
         /// <summary>
         /// Lexer options.
@@ -69,10 +69,6 @@ namespace Scriban.Parsing
 
             // Setup options
             var localOptions = options ?? LexerOptions.Default;
-            if (localOptions.FrontMatterMarker is null)
-            {
-                localOptions.FrontMatterMarker = LexerOptions.DefaultFrontMatterMarker;
-            }
             Options = localOptions;
 
             _tryMatchCustomToken = Options.TryMatchCustomToken;
@@ -1098,37 +1094,32 @@ namespace Scriban.Parsing
 
         private bool TryMatchCustomToken(TextPosition start)
         {
-            if (_tryMatchCustomToken is not null)
+            if (_tryMatchCustomToken is null) return false;
+            if (!_tryMatchCustomToken(Text, _position, out var matchLength, out var matchTokenType)) return false;
+
+            if (matchLength <= 0) throw new InvalidOperationException($"Invalid match length ({matchLength}) for custom token must be > 0");
+            if (_position.Offset + matchLength > Text.Length) throw new InvalidOperationException($"Invalid match length ({matchLength}) out of range of the input text.");
+            if (matchTokenType < TokenType.Custom && matchTokenType > TokenType.Custom9)
+                throw new InvalidOperationException($"Invalid token type {matchTokenType}. Expecting between {nameof(TokenType)}.{TokenType.Custom} ... {nameof(TokenType)}.{TokenType.Custom9}.");
+
+            TextPosition matchEnd = _position;
+            while (matchLength > 0)
             {
-                if (_tryMatchCustomToken(Text, _position, out var matchLength, out var matchTokenType))
+                NextChar();
+
+                if (_position.Line != start.Line)
                 {
-                    if (matchLength <= 0) throw new InvalidOperationException($"Invalid match length ({matchLength}) for custom token must be > 0");
-                    if (_position.Offset + matchLength > Text.Length) throw new InvalidOperationException($"Invalid match length ({matchLength}) out of range of the input text.");
-                    if (matchTokenType < TokenType.Custom && matchTokenType > TokenType.Custom9)
-                        throw new InvalidOperationException($"Invalid token type {matchTokenType}. Expecting between {nameof(TokenType)}.{TokenType.Custom} ... {nameof(TokenType)}.{TokenType.Custom9}.");
-
-                    TextPosition matchEnd = _position;
-                    while (matchLength > 0)
-                    {
-                        NextChar();
-
-                        if (_position.Line != start.Line)
-                        {
-                            throw new InvalidOperationException($"Invalid match, cannot match between new lines at {_position}");
-                        }
-
-                        matchEnd = _position;
-
-                        matchLength--;
-                    }
-
-                    _token = new Token(matchTokenType, start, matchEnd);
-
-                    return true;
+                    throw new InvalidOperationException($"Invalid match, cannot match between new lines at {_position}");
                 }
+
+                matchEnd = _position;
+
+                matchLength--;
             }
 
-            return false;
+            _token = new Token(matchTokenType, start, matchEnd);
+
+            return true;
         }
 
         private bool ReadCodeLiquid()

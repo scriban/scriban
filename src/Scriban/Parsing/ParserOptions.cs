@@ -12,8 +12,13 @@ namespace Scriban.Parsing
 #else
     internal
 #endif
-    class ParserOptions
+    record ParserOptions
     {
+        /// <summary>
+        /// Gets the default parser options.
+        /// </summary>
+        public static readonly ParserOptions Default = new ParserOptions();
+
         /// <summary>
         /// Sets the depth limit of nested statements (e.g nested if/else) to disallow deep/potential stack-overflow exploits. Default is 250.
         /// </summary>
