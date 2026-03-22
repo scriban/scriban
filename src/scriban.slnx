@@ -12,6 +12,7 @@
   <Project Path="liquid2scriban/liquid2scriban.csproj" />
   <Project Path="Scriban.AsyncCodeGen/Scriban.AsyncCodeGen.csproj" />
   <Project Path="Scriban.Benchmarks/Scriban.Benchmarks.csproj" />
+  <Project Path="Scriban.CheckSourceEmbedded/Scriban.CheckSourceEmbedded.csproj" />
   <Project Path="Scriban.DelegateCodeGen/Scriban.DelegateCodeGen.csproj" />
   <Project Path="Scriban.AppService/Scriban.AppService.csproj" />
   <Project Path="Scriban.DocGen/Scriban.DocGen.csproj" />
