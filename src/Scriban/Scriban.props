@@ -11,7 +11,7 @@
     <PackageTags>templating;handlebars;liquid</PackageTags>
     <PackageIcon>scriban.png</PackageIcon>
     <PackageReadmeFile>readme.md</PackageReadmeFile>
-    <PackageProjectUrl>https://github.com/lunet-io/scriban</PackageProjectUrl>
+    <PackageProjectUrl>https://scriban.github.io</PackageProjectUrl>
     <PackageLicenseExpression>BSD-2-Clause</PackageLicenseExpression>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     <IsAotCompatible Condition="$([MSBuild]::IsTargetFrameworkCompatible('$(TargetFramework)', 'net8.0'))">true</IsAotCompatible>
@@ -24,7 +24,7 @@
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
-  <ItemGroup>
+  <ItemGroup Condition="'$(PackageId)' == 'Scriban'">
     <!-- Pack sources in the nuget packages -->
     <None Remove="$(MSBuildThisFileDirectory)Package\Scriban.*" />
     <Content Include="Package\Scriban.*">
@@ -42,7 +42,8 @@
       <PackagePath>src\Scriban\</PackagePath>
       <PackageCopyToOutput>true</PackageCopyToOutput>
     </Content>
-
+  </ItemGroup>
+  <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)../../img/scriban.png" Pack="true" PackagePath="" />
     <None Include="$(MSBuildThisFileDirectory)../../readme.md" Pack="true" PackagePath="/" />
 
