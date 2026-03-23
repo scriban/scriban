@@ -157,9 +157,9 @@ namespace Scriban.Functions
         /// Test
         /// ```
         /// </remarks>
-        public static string Capitalize(string text)
+        public static string Capitalize(string? text)
         {
-            if (string.IsNullOrEmpty(text) || char.IsUpper(text[0]))
+            if (text is null || string.IsNullOrEmpty(text) || char.IsUpper(text[0]))
             {
                 return text ?? string.Empty;
             }
@@ -253,7 +253,7 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool Empty(string text)
+        public static bool Empty(string? text)
         {
             return string.IsNullOrEmpty(text);
         }
@@ -271,7 +271,7 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool Whitespace(string text)
+        public static bool Whitespace(string? text)
         {
             return string.IsNullOrWhiteSpace(text);
         }
@@ -332,7 +332,7 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool EqualsIgnoreCase(string text, string value)
+        public static bool EqualsIgnoreCase(string? text, string? value)
         {
             return text?.Equals(value, StringComparison.InvariantCultureIgnoreCase) ?? false;
         }
@@ -1061,7 +1061,7 @@ namespace Scriban.Functions
         /// 098f6bcd4621d373cade4e832627b4f6
         /// ```
         /// </remarks>
-        public static string Md5(string text)
+        public static string Md5(string? text)
         {
             text = text ?? string.Empty;
             using (var md5 = System.Security.Cryptography.MD5.Create())
@@ -1083,7 +1083,7 @@ namespace Scriban.Functions
         /// a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
         /// ```
         /// </remarks>
-        public static string Sha1(string text)
+        public static string Sha1(string? text)
         {
             using (var sha1 = System.Security.Cryptography.SHA1.Create())
             {
@@ -1104,7 +1104,7 @@ namespace Scriban.Functions
         /// 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
         /// ```
         /// </remarks>
-        public static string Sha256(string text)
+        public static string Sha256(string? text)
         {
             using (var sha256 = System.Security.Cryptography.SHA256.Create())
             {
@@ -1125,7 +1125,7 @@ namespace Scriban.Functions
         /// ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff
         /// ```
         /// </remarks>
-        public static string Sha512(string text)
+        public static string Sha512(string? text)
         {
             using (var sha512 = System.Security.Cryptography.SHA512.Create())
             {
@@ -1147,7 +1147,7 @@ namespace Scriban.Functions
         /// 1aa349585ed7ecbd3b9c486a30067e395ca4b356
         /// ```
         /// </remarks>
-        public static string HmacSha1(string text, string secretKey)
+        public static string HmacSha1(string? text, string? secretKey)
         {
             using (var hsha1 = new System.Security.Cryptography.HMACSHA1(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
             {
@@ -1169,7 +1169,7 @@ namespace Scriban.Functions
         /// 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
         /// ```
         /// </remarks>
-        public static string HmacSha256(string text, string secretKey)
+        public static string HmacSha256(string? text, string? secretKey)
         {
             using (var hsha256 = new System.Security.Cryptography.HMACSHA256(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
             {
@@ -1191,7 +1191,7 @@ namespace Scriban.Functions
         /// f8a4f0a209167bc192a1bffaa01ecdb09e06c57f96530d92ec9ccea0090d290e55071306d6b654f26ae0c8721f7e48a2d7130b881151f2cec8d61d941a6be88a
         /// ```
         /// </remarks>
-        public static string HmacSha512(string text, string secretKey)
+        public static string HmacSha512(string? text, string? secretKey)
         {
             using (var hsha512 = new System.Security.Cryptography.HMACSHA512(Encoding.UTF8.GetBytes(secretKey ?? string.Empty)))
             {
@@ -1199,7 +1199,7 @@ namespace Scriban.Functions
             }
         }
 
-        private static string Hash(System.Security.Cryptography.HashAlgorithm algo, string text)
+        private static string Hash(System.Security.Cryptography.HashAlgorithm algo, string? text)
         {
             text = text ?? string.Empty;
             var bytes = Encoding.UTF8.GetBytes(text);
@@ -1216,7 +1216,7 @@ namespace Scriban.Functions
         }
 
         [ScriptMemberIgnore]
-        public static string PadLeft(string text, int width)
+        public static string PadLeft(string? text, int width)
         {
             return (text ?? string.Empty).PadLeft(width);
         }
@@ -1236,14 +1236,14 @@ namespace Scriban.Functions
         /// hello     world
         /// ```
         /// </remarks>
-        public static string PadLeft(TemplateContext context, string text, int width)
+        public static string PadLeft(TemplateContext context, string? text, int width)
         {
             VerifyPaddingWidth(context, width);
             return PadLeft(text, width);
         }
 
         [ScriptMemberIgnore]
-        public static string PadRight(string text, int width)
+        public static string PadRight(string? text, int width)
         {
             return (text ?? string.Empty).PadRight(width);
         }
@@ -1263,7 +1263,7 @@ namespace Scriban.Functions
         /// hello     world
         /// ```
         /// </remarks>
-        public static string PadRight(TemplateContext context, string text, int width)
+        public static string PadRight(TemplateContext context, string? text, int width)
         {
             VerifyPaddingWidth(context, width);
             return PadRight(text, width);
@@ -1303,7 +1303,7 @@ namespace Scriban.Functions
         /// aGVsbG8=
         /// ```
         /// </remarks>
-        public static string Base64Encode(string text)
+        public static string Base64Encode(string? text)
         {
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(text ?? string.Empty));
         }
@@ -1322,7 +1322,7 @@ namespace Scriban.Functions
         /// hello
         /// ```
         /// </remarks>
-        public static string Base64Decode(string text)
+        public static string Base64Decode(string? text)
         {
             var decoded = Convert.FromBase64String(text ?? string.Empty);
             return Encoding.UTF8.GetString(decoded);

@@ -284,9 +284,9 @@ namespace Scriban.Functions
             return builder.ToString();
         }
 
-        private static DateTime? ParseDateTime(TemplateContext context, string text, string? pattern = null, string? culture = null)
+        private static DateTime? ParseDateTime(TemplateContext context, string? text, string? pattern = null, string? culture = null)
         {
-            if (string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0)
             {
                 return null;
             }
@@ -352,7 +352,7 @@ namespace Scriban.Functions
         /// 20 Jan 2022
         /// ```
         /// </remarks>
-        public static DateTime? Parse(TemplateContext context, string text, string? pattern = null, string? culture = null)
+        public static DateTime? Parse(TemplateContext context, string? text, string? pattern = null, string? culture = null)
         {
             return ParseDateTime(context, text, pattern, culture);
         }
@@ -381,7 +381,7 @@ namespace Scriban.Functions
         /// 2025-03-01
         /// ```
         /// </remarks>
-        public static string? ParseToString(TemplateContext context, string text, string? output_pattern = null, string? output_culture = null, string? input_pattern = null, string? input_culture = null)
+        public static string? ParseToString(TemplateContext context, string? text, string? output_pattern = null, string? output_culture = null, string? input_pattern = null, string? input_culture = null)
         {
             var datetime = ParseDateTime(context, text, input_pattern, input_culture);
             if (datetime is null)

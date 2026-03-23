@@ -185,7 +185,7 @@ namespace Scriban.Functions
         /// 00FF
         /// ```
         /// </remarks>
-        public static string Format(TemplateContext context, SourceSpan span, object value, string format, string? culture = null)
+        public static string Format(TemplateContext context, SourceSpan span, object? value, string? format, string? culture = null)
         {
             if (value is null)
             {

@@ -135,7 +135,7 @@ namespace Scriban.Functions
         /// %3Chello%3E%20&amp;%20%3Cscriban%3E
         /// ```
         /// </remarks>
-        public static string UrlEscape(string text)
+        public static string? UrlEscape(string? text)
         {
             if (string.IsNullOrEmpty(text))
             {

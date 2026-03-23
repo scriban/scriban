@@ -179,7 +179,7 @@ namespace Scriban.Functions
         /// 1,523.00
         /// ```
         /// </remarks>
-        public static string Format(TemplateContext context, SourceSpan span, object value, string format, string? culture = null)
+        public static string Format(TemplateContext context, SourceSpan span, object? value, string? format, string? culture = null)
         {
             if (value is null)
             {
@@ -208,7 +208,7 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool HasKey(IDictionary<string, object?> value, string key)
+        public static bool HasKey(IDictionary<string, object?>? value, string? key)
         {
             if (value is null || key is null)
             {
@@ -232,7 +232,7 @@ namespace Scriban.Functions
         /// true
         /// ```
         /// </remarks>
-        public static bool HasValue(IDictionary<string, object?> value, string key)
+        public static bool HasValue(IDictionary<string, object?>? value, string? key)
         {
             if (value is null || key is null)
             {

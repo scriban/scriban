@@ -167,10 +167,44 @@ namespace Scriban.Tests
             {
                 TestParser.AssertTemplate("text(1,16) : error : Invalid number of arguments `0` passed to `string.slice` while expecting `2` arguments", "{{ string.slice }}");
             }
+
             [Test]
             public void TestSliceAtError()
             {
                 TestParser.AssertTemplate("text(1,17) : error : Invalid number of arguments `0` passed to `string.slice1` while expecting `2` arguments", "{{ string.slice1 }}");
+            }
+
+            [Test]
+            public void TestNullFriendlyStringFunctionsDoNotRejectNullArguments()
+            {
+                Assert.That(Render("{{ null | string.capitalize }}"), Is.EqualTo(StringFunctions.Capitalize(null)));
+                Assert.That(Render("{{ null | string.empty }}"), Is.EqualTo(ToTemplateBoolean(StringFunctions.Empty(null))));
+                Assert.That(Render("{{ null | string.whitespace }}"), Is.EqualTo(ToTemplateBoolean(StringFunctions.Whitespace(null))));
+                Assert.That(Render("{{ null | string.equals_ignore_case null }}"), Is.EqualTo(ToTemplateBoolean(StringFunctions.EqualsIgnoreCase(null, null))));
+                Assert.That(Render("{{ null | string.md5 }}"), Is.EqualTo(StringFunctions.Md5(null)));
+                Assert.That(Render("{{ null | string.sha1 }}"), Is.EqualTo(StringFunctions.Sha1(null)));
+                Assert.That(Render("{{ null | string.sha256 }}"), Is.EqualTo(StringFunctions.Sha256(null)));
+                Assert.That(Render("{{ null | string.sha512 }}"), Is.EqualTo(StringFunctions.Sha512(null)));
+                Assert.That(Render("{{ null | string.hmac_sha1 null }}"), Is.EqualTo(StringFunctions.HmacSha1(null, null)));
+                Assert.That(Render("{{ null | string.hmac_sha256 null }}"), Is.EqualTo(StringFunctions.HmacSha256(null, null)));
+                Assert.That(Render("{{ null | string.hmac_sha512 null }}"), Is.EqualTo(StringFunctions.HmacSha512(null, null)));
+                Assert.That(Render("{{ null | string.pad_left 3 }}"), Is.EqualTo(StringFunctions.PadLeft(null, 3)));
+                Assert.That(Render("{{ null | string.pad_right 3 }}"), Is.EqualTo(StringFunctions.PadRight(null, 3)));
+                Assert.That(Render("{{ null | string.base64_encode }}"), Is.EqualTo(StringFunctions.Base64Encode(null)));
+                Assert.That(Render("{{ null | string.base64_decode }}"), Is.EqualTo(StringFunctions.Base64Decode(null)));
+            }
+
+            [Test]
+            public void TestNullFriendlyBuiltinStringArgumentsDoNotRejectNull()
+            {
+                TestParser.AssertTemplate("true", "{{ (null | html.url_escape) == null }}");
+                TestParser.AssertTemplate("true", "{{ (null | date.parse) == null }}");
+                TestParser.AssertTemplate("true", "{{ (null | date.parse_to_string) == null }}");
+                TestParser.AssertTemplate("123", "{{ [1, 2, 3] | array.join null }}");
+                TestParser.AssertTemplate("42", "{{ 42 | object.format null }}");
+                TestParser.AssertTemplate("42", "{{ 42 | math.format null }}");
+                TestParser.AssertTemplate("false", "{{ null | object.has_key null }}");
+                TestParser.AssertTemplate("false", "{{ null | object.has_value null }}");
             }
 
             public record IndexOfTestCase(
@@ -352,6 +386,15 @@ namespace Scriban.Tests
                 var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
                 StringAssert.Contains("LimitToString", exception!.Message);
             }
+
+            private static string Render(string script)
+            {
+                var template = Template.Parse(script);
+                Assert.That(template.HasErrors, Is.False, template.Messages?.ToString());
+                return template.Render();
+            }
+
+            private static string ToTemplateBoolean(bool value) => value ? "true" : "false";
         }
 
         public class Math

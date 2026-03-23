@@ -403,7 +403,7 @@ namespace Scriban.Functions
         /// 1|2|3
         /// ```
         /// </remarks>
-        public static string Join(TemplateContext context, SourceSpan span, IEnumerable? list, string delimiter, object? function = null)
+        public static string Join(TemplateContext context, SourceSpan span, IEnumerable? list, string? delimiter, object? function = null)
         {
             if (list is null)
             {
