@@ -5,6 +5,8 @@
 // Polyfill trimming/AOT attributes for netstandard2.0 where they are not available in the BCL.
 // These attributes are metadata-only; the trimmer and AOT compiler read them on supported runtimes.
 
+#nullable enable
+
 #if !NET5_0_OR_GREATER
 namespace System.Diagnostics.CodeAnalysis
 {
