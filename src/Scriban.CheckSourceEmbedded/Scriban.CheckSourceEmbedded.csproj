@@ -1,9 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
-
     <PropertyGroup>
-        <TargetFramework>netstandard2.0</TargetFramework>
-        <DefineConstants>$(DefineConstants);SCRIBAN_NO_SYSTEM_TEXT_JSON;SCRIBAN_SOURCE_INCLUDE</DefineConstants>
-        <LangVersion>9.0</LangVersion>
+      <TargetFramework>netstandard2.0</TargetFramework>
+      <DefineConstants>$(DefineConstants);SCRIBAN_NO_SYSTEM_TEXT_JSON;SCRIBAN_SOURCE_INCLUDE</DefineConstants>
+      <LangVersion>9.0</LangVersion>
+      <IsPackable>false</IsPackable>
     </PropertyGroup>
 
     <ItemGroup>
