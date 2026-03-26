@@ -424,6 +424,7 @@ namespace Scriban
             var result = string.Empty;
             EnterRecursive(callerContext);
             var previousIndent = CurrentIndent;
+            var previousTextWasNewLine = _previousTextWasNewLine;
             CurrentIndent = null;
             PushOutput();
             // Fetch any named argument values before pushing a new local scope, i.e. use the current context for evaluating the named arguments
@@ -445,20 +446,17 @@ namespace Scriban
                 }
                 if (previousIndent is not null)
                 {
-                    // We reset before and after the fact that we have a new line
+                    // Isolate the included template output from the caller newline state.
                     ResetPreviousNewLine();
                 }
                 result = await template.RenderAsync(this).ConfigureAwait(false);
-                if (previousIndent is not null)
-                {
-                    ResetPreviousNewLine();
-                }
             }
             finally
             {
                 PopLocal();
                 PopOutput();
                 CurrentIndent = previousIndent;
+                _previousTextWasNewLine = previousTextWasNewLine;
                 ExitRecursive(callerContext);
             }
             return result;

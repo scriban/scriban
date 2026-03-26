@@ -193,6 +193,64 @@ This is a header
             TextAssert.AreEqual(expected, text);
         }
 
+        [Test]
+        public void TestIncludeShouldIndentFirstLineAfterNewLineInAutoIndentedBlock()
+        {
+            var template = Template.Parse("""
+                namespace Demo {
+                    {{
+                        "\n"
+                        include 'multilines'
+                    -}}
+                }
+                """);
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                AutoIndent = true
+            };
+
+            var text = template.Render(context).Replace("\r\n", "\n");
+            var expected = """
+                namespace Demo {
+                    
+                    Line 1
+                    Line 2
+                    Line 3}
+                """.Replace("\r\n", "\n");
+
+            TextAssert.AreEqual(expected, text);
+        }
+
+        [Test]
+        public async Task TestIncludeShouldIndentFirstLineAfterNewLineInAutoIndentedBlock_Async()
+        {
+            var template = Template.Parse("""
+                namespace Demo {
+                    {{
+                        "\n"
+                        include 'multilines'
+                    -}}
+                }
+                """);
+            var context = new TemplateContext
+            {
+                TemplateLoader = new CustomTemplateLoader(),
+                AutoIndent = true
+            };
+
+            var text = (await template.RenderAsync(context)).Replace("\r\n", "\n");
+            var expected = """
+                namespace Demo {
+                    
+                    Line 1
+                    Line 2
+                    Line 3}
+                """.Replace("\r\n", "\n");
+
+            TextAssert.AreEqual(expected, text);
+        }
+
         [TestCase(false)]
         [TestCase(true)]
         public void TestIncludeNamedArguments(bool strictVariables)
