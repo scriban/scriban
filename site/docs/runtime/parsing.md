@@ -2,7 +2,7 @@
 title: "Parsing a template"
 ---
 
-# Parsing a template
+## Parsing a template
 
 The `Scriban.Template` class is a main entry point to easily parse a template and renders it. The action of parsing consist of compiling the template to a faster runtime representation, suitable later for rendering the template.
 

@@ -2,7 +2,7 @@
 title: "Safe runtime"
 ---
 
-# Safe runtime and `TemplateContext`
+## Safe runtime and `TemplateContext`
 
 Scriban's safe runtime has two complementary parts:
 
@@ -18,7 +18,7 @@ The practical sandbox boundary is therefore:
 - whether you configure `TemplateContext.TemplateLoader` for `include`
 - which `TemplateContext` execution limits and relaxed-access switches you enable
 
-# Evaluating an expression
+## Evaluating an expression
 
 It is sometimes convenient to evaluate a script expression without rendering it to a string.
 
@@ -42,7 +42,7 @@ Console.WriteLine(result);
 When using `Template.Evaluate`, the underlying code will use the `ScriptMode.ScriptOnly` when compiling the expression and will disable the output on the `TemplateContext`.
 
 
-# Changing the culture
+## Changing the culture
 
 The default culture when running a template is `CultureInfo.InvariantCulture`
 
@@ -60,7 +60,7 @@ context.PopCulture();
 
 
 
-# Important `TemplateContext` runtime properties
+## Important `TemplateContext` runtime properties
 
 The following table lists the main `TemplateContext` properties that influence runtime safety, permissiveness, or rendering behavior. These are the defaults for a new `TemplateContext()`:
 

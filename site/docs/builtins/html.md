@@ -2,7 +2,7 @@
 title: "Html functions"
 ---
 
-# `html` functions
+## `html` functions
 
 Html functions available through the builtin object 'html'.
 
@@ -12,7 +12,7 @@ Html functions available through the builtin object 'html'.
 - [`html.url_encode`](#htmlurl_encode)
 - [`html.url_escape`](#htmlurl_escape)
 
-## `html.strip`
+### `html.strip`
 
 ```
 html.strip <text>
@@ -45,7 +45,7 @@ strip these HTML tags.
 This is a paragraph
 ```
 
-## `html.escape`
+### `html.escape`
 
 ```
 html.escape <text>
@@ -74,7 +74,7 @@ The input string removed with any HTML tags
 &lt;p&gt;This is a paragraph&lt;/p&gt;
 ```
 
-## `html.newline_to_br`
+### `html.newline_to_br`
 
 ```
 html.newline_to_br <text>
@@ -104,7 +104,7 @@ Hello<br />
 world
 ```
 
-## `html.url_encode`
+### `html.url_encode`
 
 ```
 html.url_encode <text>
@@ -133,7 +133,7 @@ The input string url encoded
 john%40liquid.com
 ```
 
-## `html.url_escape`
+### `html.url_escape`
 
 ```
 html.url_escape <text>

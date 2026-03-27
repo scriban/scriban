@@ -2,7 +2,7 @@
 title: "Rendering a template"
 ---
 
-# Rendering a template
+## Rendering a template
 
 ## Overview
 

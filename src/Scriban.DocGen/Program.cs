@@ -79,7 +79,7 @@ namespace Scriban.DocGen
                 indexWriter.WriteLine("title: \"Built-in functions\"");
                 indexWriter.WriteLine("---");
                 indexWriter.WriteLine();
-                indexWriter.WriteLine("# Built-in functions");
+                indexWriter.WriteLine("## Built-in functions");
                 indexWriter.WriteLine();
                 indexWriter.WriteLine("Scriban provides a rich set of built-in functions organized into groups. Click on a group below to see all available functions.");
                 indexWriter.WriteLine();
@@ -117,20 +117,15 @@ namespace Scriban.DocGen
                 var titleCase = char.ToUpperInvariant(shortName[0]) + shortName.Substring(1);
                 var filePath = Path.Combine(siteDir, $"{shortName}.md");
 
-                // Get the raw content and adjust heading levels for standalone pages:
-                // - "## `x` functions" -> "# `x` functions" (h2 -> h1)
-                // - "### `x.method`" -> "## `x.method`" (h3 -> h2)
-                // - Remove [:top:](#builtins) links
+                // Get the raw content for standalone pages and remove [:top:](#builtins) links.
                 var headContent = classWriter.Head.ToString();
                 var bodyContent = classWriter.Body.ToString();
 
                 headContent = headContent.Replace("[:top:](#builtins)\r\n\r\n", "");
                 headContent = headContent.Replace("[:top:](#builtins)\n\n", "");
-                headContent = Regex.Replace(headContent, @"^## ", "# ", RegexOptions.Multiline);
 
                 bodyContent = bodyContent.Replace("[:top:](#builtins)\r\n", "");
                 bodyContent = bodyContent.Replace("[:top:](#builtins)\n", "");
-                bodyContent = Regex.Replace(bodyContent, @"^### ", "## ", RegexOptions.Multiline);
 
                 // Escape {{ and }} so they are not interpreted by the Lunet Scriban engine
                 headContent = EscapeForSite(headContent);

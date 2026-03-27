@@ -2,7 +2,7 @@
 title: "Timespan functions"
 ---
 
-# `timespan` functions
+## `timespan` functions
 
 A timespan object represents a time interval.
 
@@ -26,7 +26,7 @@ A timespan object represents a time interval.
 - [`timespan.from_milliseconds`](#timespanfrom_milliseconds)
 - [`timespan.parse`](#timespanparse)
 
-## `timespan.from_days`
+### `timespan.from_days`
 
 ```
 timespan.from_days <days>
@@ -55,7 +55,7 @@ A timespan object
 5
 ```
 
-## `timespan.from_hours`
+### `timespan.from_hours`
 
 ```
 timespan.from_hours <hours>
@@ -84,7 +84,7 @@ A timespan object
 5
 ```
 
-## `timespan.from_minutes`
+### `timespan.from_minutes`
 
 ```
 timespan.from_minutes <minutes>
@@ -113,7 +113,7 @@ A timespan object
 5
 ```
 
-## `timespan.from_seconds`
+### `timespan.from_seconds`
 
 ```
 timespan.from_seconds <seconds>
@@ -142,7 +142,7 @@ A timespan object
 5
 ```
 
-## `timespan.from_milliseconds`
+### `timespan.from_milliseconds`
 
 ```
 timespan.from_milliseconds <millis>
@@ -171,7 +171,7 @@ A timespan object
 5
 ```
 
-## `timespan.parse`
+### `timespan.parse`
 
 ```
 timespan.parse <text>

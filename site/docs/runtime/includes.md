@@ -2,7 +2,7 @@
 title: "Include and ITemplateLoader"
 ---
 
-# Include and `ITemplateLoader`
+## Include and `ITemplateLoader`
 
 The `include` directives requires that a template loader is setup on the `TemplateContext.TemplateLoader` property
 

@@ -2,7 +2,7 @@
 title: "Math functions"
 ---
 
-# `math` functions
+## `math` functions
 
 Math functions available through the object 'math' in scriban.
 
@@ -20,7 +20,7 @@ Math functions available through the object 'math' in scriban.
 - [`math.uuid`](#mathuuid)
 - [`math.random`](#mathrandom)
 
-## `math.abs`
+### `math.abs`
 
 ```
 math.abs <value>
@@ -51,7 +51,7 @@ The absolute value of the input value
 5
 ```
 
-## `math.ceil`
+### `math.ceil`
 
 ```
 math.ceil <value>
@@ -82,7 +82,7 @@ The smallest integer greater than or equal to the specified number.
 5
 ```
 
-## `math.divided_by`
+### `math.divided_by`
 
 ```
 math.divided_by <value> <divisor>
@@ -115,7 +115,7 @@ The division of `value` by `divisor`.
 4
 ```
 
-## `math.floor`
+### `math.floor`
 
 ```
 math.floor <value>
@@ -146,7 +146,7 @@ The largest integer less than or equal to the specified number.
 4
 ```
 
-## `math.format`
+### `math.format`
 
 ```
 math.format <value> <format> <culture>?
@@ -177,7 +177,7 @@ The largest integer less than or equal to the specified number.
 00FF
 ```
 
-## `math.is_number`
+### `math.is_number`
 
 ```
 math.is_number <value>
@@ -208,7 +208,7 @@ true
 false
 ```
 
-## `math.minus`
+### `math.minus`
 
 ```
 math.minus <value> <with>
@@ -238,7 +238,7 @@ The results of the subtraction: `value` - `with`
 250
 ```
 
-## `math.modulo`
+### `math.modulo`
 
 ```
 math.modulo <value> <with>
@@ -268,7 +268,7 @@ The results of the modulo: `value` % `with`
 1
 ```
 
-## `math.plus`
+### `math.plus`
 
 ```
 math.plus <value> <with>
@@ -298,7 +298,7 @@ The results of the addition: `value` + `with`
 3
 ```
 
-## `math.round`
+### `math.round`
 
 ```
 math.round <value> <precision: 0>?
@@ -332,7 +332,7 @@ A value rounded to the nearest integer or to the specified number of fractional 
 4.56
 ```
 
-## `math.times`
+### `math.times`
 
 ```
 math.times <value> <with>
@@ -362,7 +362,7 @@ The results of the multiplication: `value` * `with`
 6
 ```
 
-## `math.uuid`
+### `math.uuid`
 
 ```
 math.uuid
@@ -390,7 +390,7 @@ The created UUID, ex. 2dc55d50-3f6c-446a-87d0-a5a4eed23269
 1c0a4aa8-680e-4bd6-95e9-cdbec45ef057
 ```
 
-## `math.random`
+### `math.random`
 
 ```
 math.random <minValue> <maxValue>

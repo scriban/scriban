@@ -2,7 +2,7 @@
 title: "Variable stack"
 ---
 
-# The stack of `ScriptObject`
+## The stack of `ScriptObject`
 
 A `TemplateContext` maintains a stack of `ScriptObject` that defines the state of the variables accessible from the current template. 
 

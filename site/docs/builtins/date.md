@@ -2,7 +2,7 @@
 title: "Date functions"
 ---
 
-# `date` functions
+## `date` functions
 
 A datetime object represents an instant in time, expressed as a date and time of day.
 
@@ -38,7 +38,7 @@ A `timespan` and also the added to a `datetime` object.
 - [`date.parse_to_string`](#dateparse_to_string)
 - [`date.to_string`](#dateto_string)
 
-## `date.now`
+### `date.now`
 
 ```
 date.now
@@ -66,7 +66,7 @@ Returns a datetime object of the current time, including the hour, minutes, seco
 2026
 ```
 
-## `date.add_days`
+### `date.add_days`
 
 ```
 date.add_days <date> <days>
@@ -96,7 +96,7 @@ A new date
 06 Jan 2016
 ```
 
-## `date.add_months`
+### `date.add_months`
 
 ```
 date.add_months <date> <months>
@@ -126,7 +126,7 @@ A new date
 05 Feb 2016
 ```
 
-## `date.add_years`
+### `date.add_years`
 
 ```
 date.add_years <date> <years>
@@ -156,7 +156,7 @@ A new date
 05 Jan 2017
 ```
 
-## `date.add_hours`
+### `date.add_hours`
 
 ```
 date.add_hours <date> <hours>
@@ -179,7 +179,7 @@ A new date
 
 
 
-## `date.add_minutes`
+### `date.add_minutes`
 
 ```
 date.add_minutes <date> <minutes>
@@ -202,7 +202,7 @@ A new date
 
 
 
-## `date.add_seconds`
+### `date.add_seconds`
 
 ```
 date.add_seconds <date> <seconds>
@@ -225,7 +225,7 @@ A new date
 
 
 
-## `date.add_milliseconds`
+### `date.add_milliseconds`
 
 ```
 date.add_milliseconds <date> <millis>
@@ -248,7 +248,7 @@ A new date
 
 
 
-## `date.parse`
+### `date.parse`
 
 ```
 date.parse <text> <pattern>? <culture>?
@@ -285,7 +285,7 @@ A date object
 20 Jan 2022
 ```
 
-## `date.parse_to_string`
+### `date.parse_to_string`
 
 ```
 date.parse_to_string <text> <output_pattern>? <output_culture>? <input_pattern>? <input_culture>?
@@ -324,7 +324,7 @@ Mar 14, 16
 2025-03-01
 ```
 
-## `date.to_string`
+### `date.to_string`
 
 ```
 date.to_string <datetime> <pattern> <culture>

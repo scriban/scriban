@@ -1,8 +1,8 @@
-﻿---
+---
 title: "Language reference"
 ---
 
-# Language reference
+## Language reference
 
 This document describes the syntax of the scriban language in a templating context (within `{{ "{{" }}` and `{{ "}}" }}`).
 

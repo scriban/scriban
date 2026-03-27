@@ -1,8 +1,8 @@
-﻿---
+---
 title: "Liquid support"
 ---
 
-# Liquid support
+## Liquid support
 
 Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/) types, operators, tags and filters.
 

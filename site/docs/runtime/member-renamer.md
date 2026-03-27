@@ -2,7 +2,7 @@
 title: "Member renamer and filter"
 ---
 
-# Member renamer
+## Member renamer
 
 By default, .NET objects accessed through a `ScriptObject` are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of `liquid` templates.
 
@@ -57,7 +57,7 @@ template.Render(new MyObject(), member => member.Name);
 ```
 
 
-# Member filter
+## Member filter
 
 Similar to the member renamer, by default, .NET objects accessed through a `ScriptObject` are automatically exposing all public instance fields and properties of .NET objects.
 

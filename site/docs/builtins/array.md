@@ -2,7 +2,7 @@
 title: "Array functions"
 ---
 
-# `array` functions
+## `array` functions
 
 Array functions available through the object 'array' in scriban.
 
@@ -28,7 +28,7 @@ Array functions available through the object 'array' in scriban.
 - [`array.uniq`](#arrayuniq)
 - [`array.contains`](#arraycontains)
 
-## `array.add`
+### `array.add`
 
 ```
 array.add <list> <value>
@@ -58,7 +58,7 @@ A new list with the value added
 [1, 2, 3, 4]
 ```
 
-## `array.add_range`
+### `array.add_range`
 
 ```
 array.add_range <list1> <list2>
@@ -88,7 +88,7 @@ The concatenation of the two input lists
 [1, 2, 3, 4, 5]
 ```
 
-## `array.compact`
+### `array.compact`
 
 ```
 array.compact <list>
@@ -117,7 +117,7 @@ Returns a list with null value removed
 [1, 3]
 ```
 
-## `array.concat`
+### `array.concat`
 
 ```
 array.concat <list1> <list2>
@@ -147,7 +147,7 @@ The concatenation of the two input lists
 [1, 2, 3, 4, 5]
 ```
 
-## `array.cycle`
+### `array.cycle`
 
 ```
 array.cycle <list> <group>?
@@ -185,7 +185,7 @@ one
 `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template.
 If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
 
-## `array.any`
+### `array.any`
 
 ```
 array.any <list> <function> <args>
@@ -218,7 +218,7 @@ true
 false
 ```
 
-## `array.each`
+### `array.each`
 
 ```
 array.each <list> <function>
@@ -248,7 +248,7 @@ Returns a list with each item being transformed by the function.
 ["a", "5", "6"]
 ```
 
-## `array.filter`
+### `array.filter`
 
 ```
 array.filter <list> <function>
@@ -278,7 +278,7 @@ Returns a new list which contains only those elements which match the filter fun
 ["", ""]
 ```
 
-## `array.first`
+### `array.first`
 
 ```
 array.first <list>
@@ -307,7 +307,7 @@ The first element of the input `list`.
 4
 ```
 
-## `array.insert_at`
+### `array.insert_at`
 
 ```
 array.insert_at <list> <index> <value>
@@ -338,7 +338,7 @@ A new list with the element inserted.
 ["a", "b", "Yo", "c"]
 ```
 
-## `array.join`
+### `array.join`
 
 ```
 array.join <list> <delimiter> <function>?
@@ -369,7 +369,7 @@ A new list with the element inserted.
 1|2|3
 ```
 
-## `array.last`
+### `array.last`
 
 ```
 array.last <list>
@@ -398,7 +398,7 @@ The last element of the input `list`.
 6
 ```
 
-## `array.limit`
+### `array.limit`
 
 ```
 array.limit <list> <count>
@@ -428,7 +428,7 @@ Returns a limited number of elments from the input list
 [4, 5]
 ```
 
-## `array.map`
+### `array.map`
 
 ```
 array.map <list> <member>
@@ -460,7 +460,7 @@ products | array.map "type" | array.uniq | array.sort {{ "}}" }}
 ["electronics", "fruit", "furniture"]
 ```
 
-## `array.offset`
+### `array.offset`
 
 ```
 array.offset <list> <index>
@@ -490,7 +490,7 @@ Returns the remaining of the list after the specified offset
 [6, 7, 8]
 ```
 
-## `array.remove_at`
+### `array.remove_at`
 
 ```
 array.remove_at <list> <index>
@@ -529,7 +529,7 @@ If the `index` is negative, removes at the end of the list (notice that we need 
 [4, 5, 6, 7]
 ```
 
-## `array.reverse`
+### `array.reverse`
 
 ```
 array.reverse <list>
@@ -558,7 +558,7 @@ A new list in reversed order.
 [7, 6, 5, 4]
 ```
 
-## `array.size`
+### `array.size`
 
 ```
 array.size <list>
@@ -587,7 +587,7 @@ A number of elements in the input `list`.
 3
 ```
 
-## `array.sort`
+### `array.sort`
 
 ```
 array.sort <list> <member>?
@@ -633,7 +633,7 @@ products | array.sort "title" | array.map "title"
 ["computer", "orange", "sofa"]
 ```
 
-## `array.uniq`
+### `array.uniq`
 
 ```
 array.uniq <list>
@@ -662,7 +662,7 @@ A list of unique elements of the input `list`.
 [1, 4, 5, 8]
 ```
 
-## `array.contains`
+### `array.contains`
 
 ```
 array.contains <list> <item>

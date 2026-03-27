@@ -2,7 +2,7 @@
 title: "AOT Support"
 ---
 
-# AOT & Trimming Support
+## AOT & Trimming Support
 
 Starting with Scriban 7.x, the library is marked as **AOT-compatible** (`IsAotCompatible`) on .NET 8+. This means that Scriban can be used in applications published with [Native AOT](https://learn.microsoft.com/en-us/dotnet/core/deploying/native-aot/) or [trimming](https://learn.microsoft.com/en-us/dotnet/core/deploying/trimming/trim-self-contained) without producing linker warnings - provided you use the AOT-safe API surface.
 

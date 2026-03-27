@@ -2,7 +2,7 @@
 title: "Scriban - User Guide"
 ---
 
-# Scriban - User Guide
+## Scriban - User Guide
 
 Welcome to the Scriban documentation. Whether you are new to Scriban or an experienced user, this guide will help you make the most of the library.
 

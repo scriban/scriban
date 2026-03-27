@@ -2,7 +2,7 @@
 title: "Built-in functions"
 ---
 
-# Built-in functions
+## Built-in functions
 
 Scriban provides a rich set of built-in functions organized into groups. Click on a group below to see all available functions.
 

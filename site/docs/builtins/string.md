@@ -2,7 +2,7 @@
 title: "String functions"
 ---
 
-# `string` functions
+## `string` functions
 
 String functions available through the builtin object 'string`.
 
@@ -54,7 +54,7 @@ String functions available through the builtin object 'string`.
 - [`string.base64_decode`](#stringbase64_decode)
 - [`string.index_of`](#stringindex_of)
 
-## `string.escape`
+### `string.escape`
 
 ```
 string.escape <text>
@@ -83,7 +83,7 @@ The two strings concatenated
 Hel\tlo\n\"W\\orld
 ```
 
-## `string.append`
+### `string.append`
 
 ```
 string.append <text> <with>
@@ -113,7 +113,7 @@ The two strings concatenated
 Hello World
 ```
 
-## `string.capitalize`
+### `string.capitalize`
 
 ```
 string.capitalize <text>
@@ -142,7 +142,7 @@ The capitalized input string
 Test
 ```
 
-## `string.capitalizewords`
+### `string.capitalizewords`
 
 ```
 string.capitalizewords <text>
@@ -171,7 +171,7 @@ The capitalized input string
 This Is Easy
 ```
 
-## `string.contains`
+### `string.contains`
 
 ```
 string.contains <text> <value>
@@ -201,7 +201,7 @@ Returns a boolean indicating whether the input string contains the specified str
 true
 ```
 
-## `string.empty`
+### `string.empty`
 
 ```
 string.empty <text>
@@ -230,7 +230,7 @@ Returns a boolean indicating whether the input string is an empty string.
 true
 ```
 
-## `string.whitespace`
+### `string.whitespace`
 
 ```
 string.whitespace <text>
@@ -259,7 +259,7 @@ Returns a boolean indicating whether the input string is empty or contains only 
 true
 ```
 
-## `string.downcase`
+### `string.downcase`
 
 ```
 string.downcase <text>
@@ -288,7 +288,7 @@ The input string lower case
 test
 ```
 
-## `string.ends_with`
+### `string.ends_with`
 
 ```
 string.ends_with <text> <value>
@@ -318,7 +318,7 @@ Returns a boolean indicating whether the input string ends with the specified st
 true
 ```
 
-## `string.equals_ignore_case`
+### `string.equals_ignore_case`
 
 ```
 string.equals_ignore_case <text> <value>
@@ -348,7 +348,7 @@ Returns a boolean indicating whether the input string is equal to specified stri
 true
 ```
 
-## `string.handleize`
+### `string.handleize`
 
 ```
 string.handleize <text>
@@ -377,7 +377,7 @@ A url handle
 100-m-ms
 ```
 
-## `string.literal`
+### `string.literal`
 
 ```
 string.literal <text>
@@ -407,7 +407,7 @@ If the input string has non printable characters or they need contain a double q
 "Hello\n\"World\""
 ```
 
-## `string.lstrip`
+### `string.lstrip`
 
 ```
 string.lstrip <text>
@@ -437,7 +437,7 @@ The input string without any left whitespace characters
 too many spaces
 ```
 
-## `string.pluralize`
+### `string.pluralize`
 
 ```
 string.pluralize <number> <singular> <plural>
@@ -468,7 +468,7 @@ The singular or plural string based on number
 7 products
 ```
 
-## `string.prepend`
+### `string.prepend`
 
 ```
 string.prepend <text> <by>
@@ -498,7 +498,7 @@ The two strings concatenated
 Hello World
 ```
 
-## `string.remove`
+### `string.remove`
 
 ```
 string.remove <text> <remove>
@@ -528,7 +528,7 @@ The input string with the all occurence of a substring removed
 Hello, . Goodbye, .
 ```
 
-## `string.remove_first`
+### `string.remove_first`
 
 ```
 string.remove_first <text> <remove>
@@ -558,7 +558,7 @@ The input string with the first occurence of a substring removed
 Hello, . Goodbye, world.
 ```
 
-## `string.remove_last`
+### `string.remove_last`
 
 ```
 string.remove_last <text> <remove>
@@ -588,7 +588,7 @@ The input string with the first occurence of a substring removed
 Hello, world. Goodbye, .
 ```
 
-## `string.replace`
+### `string.replace`
 
 ```
 string.replace <text> <match> <replace>
@@ -619,7 +619,7 @@ The input string replaced
 Hello, buddy. Goodbye, buddy.
 ```
 
-## `string.replace_first`
+### `string.replace_first`
 
 ```
 string.replace_first <text> <match> <replace> <fromEnd: False>?
@@ -651,7 +651,7 @@ The input string replaced
 Hello, buddy. Goodbye, world.
 ```
 
-## `string.rstrip`
+### `string.rstrip`
 
 ```
 string.rstrip <text>
@@ -681,7 +681,7 @@ The input string without any left whitespace characters
    too many spaces
 ```
 
-## `string.size`
+### `string.size`
 
 ```
 string.size <text>
@@ -710,7 +710,7 @@ The length of the input string
 4
 ```
 
-## `string.slice`
+### `string.slice`
 
 ```
 string.slice <text> <start> <length>?
@@ -748,7 +748,7 @@ ell
 ell
 ```
 
-## `string.slice1`
+### `string.slice1`
 
 ```
 string.slice1 <text> <start> <length: 1>?
@@ -786,7 +786,7 @@ ell
 ell
 ```
 
-## `string.split`
+### `string.split`
 
 ```
 string.split <text> <match>
@@ -823,7 +823,7 @@ you
 today?
 ```
 
-## `string.starts_with`
+### `string.starts_with`
 
 ```
 string.starts_with <text> <value>
@@ -853,7 +853,7 @@ Returns a boolean indicating whether the input string starts with the specified 
 true
 ```
 
-## `string.strip`
+### `string.strip`
 
 ```
 string.strip <text>
@@ -883,7 +883,7 @@ The input string without any left and right whitespace characters
 too many spaces
 ```
 
-## `string.strip_newlines`
+### `string.strip_newlines`
 
 ```
 string.strip_newlines <text>
@@ -912,7 +912,7 @@ The input string without any breaks/newlines characters
 This is a string. With another string
 ```
 
-## `string.to_int`
+### `string.to_int`
 
 ```
 string.to_int <text>
@@ -941,7 +941,7 @@ A 32 bit integer or null if conversion failed
 124
 ```
 
-## `string.to_long`
+### `string.to_long`
 
 ```
 string.to_long <text>
@@ -970,7 +970,7 @@ A 64 bit integer or null if conversion failed
 123678912345679
 ```
 
-## `string.to_float`
+### `string.to_float`
 
 ```
 string.to_float <text>
@@ -999,7 +999,7 @@ A 32 bit float or null if conversion failed
 124.4
 ```
 
-## `string.to_double`
+### `string.to_double`
 
 ```
 string.to_double <text>
@@ -1028,7 +1028,7 @@ A 64 bit float or null if conversion failed
 124.4
 ```
 
-## `string.truncate`
+### `string.truncate`
 
 ```
 string.truncate <text> <length> <ellipsis>?
@@ -1060,7 +1060,7 @@ The truncated input string
 The cat ca...
 ```
 
-## `string.truncatewords`
+### `string.truncatewords`
 
 ```
 string.truncatewords <text> <count> <ellipsis>?
@@ -1092,7 +1092,7 @@ The truncated input string
 The cat came back...
 ```
 
-## `string.upcase`
+### `string.upcase`
 
 ```
 string.upcase <text>
@@ -1121,7 +1121,7 @@ The input string upper case
 TEST
 ```
 
-## `string.md5`
+### `string.md5`
 
 ```
 string.md5 <text>
@@ -1150,7 +1150,7 @@ The `md5` hash of the input string
 098f6bcd4621d373cade4e832627b4f6
 ```
 
-## `string.sha1`
+### `string.sha1`
 
 ```
 string.sha1 <text>
@@ -1179,7 +1179,7 @@ The `sha1` hash of the input string
 a94a8fe5ccb19ba61c4c0873d391e987982fbbd3
 ```
 
-## `string.sha256`
+### `string.sha256`
 
 ```
 string.sha256 <text>
@@ -1208,7 +1208,7 @@ The `sha256` hash of the input string
 9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08
 ```
 
-## `string.sha512`
+### `string.sha512`
 
 ```
 string.sha512 <text>
@@ -1237,7 +1237,7 @@ The `sha512` hash of the input string
 ee26b0dd4af7e749aa1a8ee3c10ae9923f618980772e473f8819a5d4940e0db27ac185f8a0e1d5f84f88bc887fd67b143732c304cc5fa9ad8e6f57f50028a8ff
 ```
 
-## `string.hmac_sha1`
+### `string.hmac_sha1`
 
 ```
 string.hmac_sha1 <text> <secretKey>
@@ -1267,7 +1267,7 @@ The `SHA-1` hash of the input string using a hash message authentication code (H
 1aa349585ed7ecbd3b9c486a30067e395ca4b356
 ```
 
-## `string.hmac_sha256`
+### `string.hmac_sha256`
 
 ```
 string.hmac_sha256 <text> <secretKey>
@@ -1297,7 +1297,7 @@ The `SHA-256` hash of the input string using a hash message authentication code 
 0329a06b62cd16b33eb6792be8c60b158d89a2ee3a876fce9a881ebb488c0914
 ```
 
-## `string.hmac_sha512`
+### `string.hmac_sha512`
 
 ```
 string.hmac_sha512 <text> <secretKey>
@@ -1327,7 +1327,7 @@ The `SHA-512` hash of the input string using a hash message authentication code 
 f8a4f0a209167bc192a1bffaa01ecdb09e06c57f96530d92ec9ccea0090d290e55071306d6b654f26ae0c8721f7e48a2d7130b881151f2cec8d61d941a6be88a
 ```
 
-## `string.pad_left`
+### `string.pad_left`
 
 ```
 string.pad_left <text> <width>
@@ -1357,7 +1357,7 @@ hello{{ "{{" }} "world" | string.pad_left 10 {{ "}}" }}
 hello     world
 ```
 
-## `string.pad_right`
+### `string.pad_right`
 
 ```
 string.pad_right <text> <width>
@@ -1387,7 +1387,7 @@ The input string padded
 hello     world
 ```
 
-## `string.base64_encode`
+### `string.base64_encode`
 
 ```
 string.base64_encode <text>
@@ -1417,7 +1417,7 @@ The encoded string
 aGVsbG8=
 ```
 
-## `string.base64_decode`
+### `string.base64_decode`
 
 ```
 string.base64_decode <text>
@@ -1447,7 +1447,7 @@ The decoded string
 hello
 ```
 
-## `string.index_of`
+### `string.index_of`
 
 ```
 string.index_of <text> <search> <startIndex>? <count>? <stringComparison>?

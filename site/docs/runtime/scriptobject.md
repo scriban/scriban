@@ -2,7 +2,7 @@
 title: "The ScriptObject"
 ---
 
-# The `ScriptObject`
+## The `ScriptObject`
 
 The `ScriptObject` is a special implementation of a `Dictionary<string, object>` that runtime properties and functions accessible to a template:
 

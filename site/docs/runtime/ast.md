@@ -2,7 +2,7 @@
 title: "Lexer, Parser and AST"
 ---
 
-# The Lexer and Parser
+## The Lexer and Parser
 
 - The [`Lexer`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/Lexer.cs) class is responsible for extracting `Tokens` from a text template.
 - The [`Parser`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/Parser.cs) class is responsible for creating `ScriptNode` AST from input tokens (extracted from the `Lexer`)
@@ -12,7 +12,7 @@ The lexer has a few [`LexerOptions`](https://github.com/lunet-io/scriban/blob/ma
 The parser has a [`ParserOptions`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/ParserOptions.cs) only used for securing nested statements/blocks to avoid any stack overflow exceptions while parsing a document.
 
 
-# Abstract Syntax Tree
+## Abstract Syntax Tree
 
 The base object used by the syntax for all scriban elements is the class `Scriban.Syntax.ScriptNode`:
 

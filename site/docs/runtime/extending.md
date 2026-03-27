@@ -2,7 +2,7 @@
 title: "Extending and custom functions"
 ---
 
-# Extending `TemplateContext`
+## Extending `TemplateContext`
 
 You may need to extend a `TemplateContext` to overrides some methods there, typically in cases you want:
 
@@ -13,7 +13,7 @@ You may need to extend a `TemplateContext` to overrides some methods there, typi
 - ...etc.
 
 
-# `ScriptObject` advanced usages
+## `ScriptObject` advanced usages
 
 It is sometimes required for a custom function to have access to the current `TemplateContext` or to the access to original location of the text code, where a particular expression is occurring (via a `SourceSpan` that gives a `line`, `column` and `sourcefile` )
 

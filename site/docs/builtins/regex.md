@@ -2,7 +2,7 @@
 title: "Regex functions"
 ---
 
-# `regex` functions
+## `regex` functions
 
 Functions exposed through `regex` builtin object.
 
@@ -19,7 +19,7 @@ Functions exposed through `regex` builtin object.
 - [`regex.split`](#regexsplit)
 - [`regex.unescape`](#regexunescape)
 
-## `regex.escape`
+### `regex.escape`
 
 ```
 regex.escape <pattern>
@@ -50,7 +50,7 @@ A string of characters with metacharacters converted to their escaped form.
 \(abc\.\*\)
 ```
 
-## `regex.match`
+### `regex.match`
 
 ```
 regex.match <text> <pattern> <options>?
@@ -86,7 +86,7 @@ An array that contains all the match groups. The first group contains the entire
 ```
 Notice that the first element returned in the array is the entire regex match, followed by the regex group matches.
 
-## `regex.matches`
+### `regex.matches`
 
 ```
 regex.matches <text> <pattern> <options>?
@@ -122,7 +122,7 @@ An array of matches that contains all the match groups. The first group contains
 ```
 Notice that the first element returned in the sub array is the entire regex match, followed by the regex group matches.
 
-## `regex.replace`
+### `regex.replace`
 
 ```
 regex.replace <text> <pattern> <replace> <options>?
@@ -158,7 +158,7 @@ A new string that is identical to the input string, except that the replacement 
 a-Yo-d
 ```
 
-## `regex.split`
+### `regex.split`
 
 ```
 regex.split <text> <pattern> <options>?
@@ -193,7 +193,7 @@ A string array.
 ["a", "b", "c", "d"]
 ```
 
-## `regex.unescape`
+### `regex.unescape`
 
 ```
 regex.unescape <pattern>

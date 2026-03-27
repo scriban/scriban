@@ -1,8 +1,8 @@
-﻿---
+---
 title: "Runtime API"
 ---
 
-# Runtime API
+## Runtime API
 
 This document describes the runtime API to manipulate scriban text templating.
 

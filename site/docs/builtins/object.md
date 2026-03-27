@@ -2,7 +2,7 @@
 title: "Object functions"
 ---
 
-# `object` functions
+## `object` functions
 
 Object functions available through the builtin object 'object'.
 
@@ -20,7 +20,7 @@ Object functions available through the builtin object 'object'.
 - [`object.from_json`](#objectfrom_json)
 - [`object.to_json`](#objectto_json)
 
-## `object.default`
+### `object.default`
 
 ```
 object.default <value> <default>
@@ -50,7 +50,7 @@ The `default` value is returned if the input `value` is null or an empty string 
 Yo
 ```
 
-## `object.eval`
+### `object.eval`
 
 ```
 object.eval <value>
@@ -79,7 +79,7 @@ The evaluation of the input value.
 3
 ```
 
-## `object.eval_template`
+### `object.eval_template`
 
 ```
 object.eval_template <value>
@@ -108,7 +108,7 @@ The evaluation of the input value.
 This is a template text 3
 ```
 
-## `object.format`
+### `object.format`
 
 ```
 object.format <value> <format> <culture>?
@@ -141,7 +141,7 @@ Formats an object using specified format.
 1,523.00
 ```
 
-## `object.has_key`
+### `object.has_key`
 
 ```
 object.has_key <value> <key>
@@ -171,7 +171,7 @@ Checks if the specified object as the member `key`
 true
 ```
 
-## `object.has_value`
+### `object.has_value`
 
 ```
 object.has_value <value> <key>
@@ -201,7 +201,7 @@ Checks if the specified object as a value for the member `key`
 true
 ```
 
-## `object.keys`
+### `object.keys`
 
 ```
 object.keys <value>
@@ -230,7 +230,7 @@ A list with the member names/key of the input object
 ["title", "type"]
 ```
 
-## `object.size`
+### `object.size`
 
 ```
 object.size <value>
@@ -262,7 +262,7 @@ The size of the input object.
 3
 ```
 
-## `object.typeof`
+### `object.typeof`
 
 ```
 object.typeof <value>
@@ -307,7 +307,7 @@ object
 object
 ```
 
-## `object.kind`
+### `object.kind`
 
 ```
 object.kind <value>
@@ -355,7 +355,7 @@ object
 object
 ```
 
-## `object.values`
+### `object.values`
 
 ```
 object.values <value>
@@ -384,7 +384,7 @@ A list with the member values of the input object
 ["fruit", "Orange"]
 ```
 
-## `object.from_json`
+### `object.from_json`
 
 ```
 object.from_json <json>
@@ -416,7 +416,7 @@ Returns the scriban value
 123
 ```
 
-## `object.to_json`
+### `object.to_json`
 
 ```
 object.to_json <value>

@@ -1,8 +1,8 @@
-﻿---
+---
 title: "Getting started"
 ---
 
-# Getting started
+## Getting started
 
 This guide walks you through installing Scriban, writing your first template, and rendering output from C#.
 
