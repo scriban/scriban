@@ -162,4 +162,5 @@ The input string url escaped
 %3Chello%3E%20&%20%3Cscriban%3E
 ```
 
-> Note: This document was automatically generated from the source code using `Scriban.DocGen`.
+> [!NOTE]
+> This document was automatically generated from the source code using `Scriban.DocGen`.

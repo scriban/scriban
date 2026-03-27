@@ -55,7 +55,8 @@ context.PushCulture(CultureInfo.CurrentCulture);
 context.PopCulture();
 ```
 
-> Notice that the parsing of numbers in the language is not culture dependent but is baked into the language specs instead.
+> [!NOTE]
+> The parsing of numbers in the language is not culture dependent but is baked into the language specs instead.
 
 
 

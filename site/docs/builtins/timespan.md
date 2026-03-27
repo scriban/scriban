@@ -193,4 +193,5 @@ A timespan object parsed from timespan
 
 
 
-> Note: This document was automatically generated from the source code using `Scriban.DocGen`.
+> [!NOTE]
+> This document was automatically generated from the source code using `Scriban.DocGen`.

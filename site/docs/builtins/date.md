@@ -418,4 +418,5 @@ A  that represents this instance.
 
 
 
-> Note: This document was automatically generated from the source code using `Scriban.DocGen`.
+> [!NOTE]
+> This document was automatically generated from the source code using `Scriban.DocGen`.

@@ -12,9 +12,11 @@ namespace Scriban.Functions
     /// <summary>
     /// Functions exposed through `regex` builtin object.
     ///
-    /// >*Note:* If your regular expression contains backslashes (` \ `), you will need to do one of the following:
-    /// >- Anywhere you would use a ` \ `, use two.  For example: `"\d+\.\d+"` becomes `"\\d+\\.\\d+"`
-    /// >- Use [verbatim strings](language.md#31-strings).  For example: `"\d+\.\d+"` becomes `` `\d+\.\d+` ``
+    /// > [!TIP]
+    /// > If your regular expression contains backslashes (` \ `), you will need to do one of the following:
+    /// >
+    /// > - Anywhere you would use a ` \ `, use two. For example: `"\d+\.\d+"` becomes `"\\d+\\.\\d+"`
+    /// > - Use [verbatim strings](language.md#31-strings). For example: `"\d+\.\d+"` becomes `` `\d+\.\d+` ``
     /// </summary>
     /// <seealso cref="Scriban.Runtime.ScriptObject" />
 #if SCRIBAN_PUBLIC

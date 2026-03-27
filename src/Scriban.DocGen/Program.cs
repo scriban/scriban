@@ -92,7 +92,8 @@ namespace Scriban.DocGen
                 }
 
                 indexWriter.WriteLine();
-                indexWriter.WriteLine("> Note: This document was automatically generated from the source code using `Scriban.DocGen`.");
+                indexWriter.WriteLine("> [!NOTE]");
+                indexWriter.WriteLine("> This document was automatically generated from the source code using `Scriban.DocGen`.");
             }
 
             // --- Write menu.yml ---
@@ -143,7 +144,8 @@ namespace Scriban.DocGen
                 fileWriter.Write(headContent);
                 fileWriter.Write(bodyContent);
                 fileWriter.WriteLine();
-                fileWriter.WriteLine("> Note: This document was automatically generated from the source code using `Scriban.DocGen`.");
+                fileWriter.WriteLine("> [!NOTE]");
+                fileWriter.WriteLine("> This document was automatically generated from the source code using `Scriban.DocGen`.");
             }
         }
 

@@ -8,7 +8,8 @@ This document describes the syntax of the scriban language in a templating conte
 
 The language rules are the same in a pure scripting context.
 
-> NOTE: This document does not describe the `liquid` language. Check the [`liquid website`](https://shopify.github.io/liquid/) directly.
+> [!NOTE]
+> This document does not describe the `liquid` language. Check the [`liquid website`](https://shopify.github.io/liquid/) directly.
 
 ## Table of Contents
 
@@ -401,7 +402,8 @@ The following text are valid variable names:
 - `var9`
 - `_var`
 
-> NOTE: In liquid, the character `-` is allowed in a variable name, but when translating it to a scriban, you will have to enclose it into a quoted string
+> [!NOTE]
+> In liquid, the character `-` is allowed in a variable name, but when translating it to a scriban, you will have to enclose it into a quoted string
 
 A **local variable** like `{{ "{{" }} $name {{ "}}" }}` is an identifier starting with `$`. A local variable is only accessible within the same include page or function body.
 
@@ -518,7 +520,7 @@ If the object is a "pure" scriban objects (created with a `{...}` or  instantiat
 may be
 ``` 
 
-> **NOTICE**
+> [!NOTE]
 >
 > By default, Properties and methods of .NET objects are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of liquid templates.
 > If you want to change this behavior, you need to use a [`MemberRenamer`](../runtime/member-renamer#member-renamer) delegate
@@ -583,7 +585,7 @@ If the array is a "pure" scriban array (created with a `[...]` or  instantiated 
 
 You can also manipulate arrays with the [`array` builtin object](#array-builtin).
 
-> **Important notice**
+> [!IMPORTANT]
 > 
 > While whitespace characters are mostly not relevant while parsing in scriban, there is a case where a **whitespace helps to disambiguate between an array  indexer and an array initializer**.
 >  
@@ -684,7 +686,8 @@ Note that a function can have mixed text statements as well:
 {{ "{{" }}end{{ "}}" }}
 ```
 
-> NOTE: Setting a non-local variable (e.g `a = 10`) in a simple function will be set at the global level and not at the function level.
+> [!NOTE]
+> Setting a non-local variable (e.g `a = 10`) in a simple function will be set at the global level and not at the function level.
 >
 > Parametric functions are solving this behavior by introducing a new variable scope inside the function that includes parameters. 
  
@@ -794,7 +797,8 @@ end{{ "}}" }}
 5
 ```
 
-> NOTE: The special variable `$` is still accessible in parametric functions and represent the direct list of arguments. In the example above, `$ =  [5, [1, -1]]` 
+> [!NOTE]
+> The special variable `$` is still accessible in parametric functions and represent the direct list of arguments. In the example above, `$ =  [5, [1, -1]]` 
  
 ### 7.4 Inline functions
 
@@ -937,7 +941,8 @@ The conditional expression `cond ? left : right` allow to return `left` if `cond
 | `<variable> ++`     | Increments the variable.  Expression is evaluated to the value *before* it is incremented.
 | `<variable> --`     | Decrements the variable.  Expression is evaluated to the value *before* it is decremented.
 
-> *Note:* For the increment an decrement operators, the operand must be a variable, property or indexer
+> [!NOTE]
+> For the increment an decrement operators, the operand must be a variable, property or indexer
 
 
 ### 8.7 Range expressions
@@ -968,7 +973,8 @@ The pipe operator `|` can also be used to pipe the result of an expression to a 
 
 `{{ "{{" }} date.parse '2016/01/05' | date.to_string '%g' {{ "}}" }}` will output `06 Jan 2016`
 
-> Notice that when a function receives the result of a pipe call (e.g `date.to_string` in the example above), it is passed as the **first argument of the call**. This is valid for both .NET custom functions as well as for Scriban integrated functions.
+> [!NOTE]
+> When a function receives the result of a pipe call (e.g `date.to_string` in the example above), it is passed as the **first argument of the call**. This is valid for both .NET custom functions as well as for Scriban integrated functions.
 
 Pipes are *greedy* with respect to whitespace.  This allow them to be chained across multiple lines:  
 
@@ -1006,7 +1012,8 @@ with a pipe we could rewrite this to:
 ```scriban-html
 {{ "{{" }} "Hello" | my_processor "World" count: 15 options: "optimized" {{ "}}" }}
 ```
-> Note that once arguments are named, the following arguments must be all named.
+> [!NOTE]
+> Once arguments are named, the following arguments must be all named.
 
 In a custom function declared with `func` named arguments are accessible through the variable arguments variable `$`, but as properties (and not as part of the default array arguments):
 
@@ -1067,7 +1074,8 @@ The following compound assignment operators are supported for **numbers**:
 
 If left or right is a float and the other is an integer, the result of the operation will be a float.
 
-> *Note:* The left-hand side of the assignment statement must be a variable, property or indexer
+> [!NOTE]
+> The left-hand side of the assignment statement must be a variable, property or indexer
 
 
 ### 9.3 `if <expression>`, `else`, `else if <expression>`

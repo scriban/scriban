@@ -6,9 +6,11 @@ title: "Regex functions"
 
 Functions exposed through `regex` builtin object.
 
->*Note:* If your regular expression contains backslashes (` \ `), you will need to do one of the following:
->- Anywhere you would use a ` \ `, use two.  For example: `"\d+\.\d+"` becomes `"\\d+\\.\\d+"`
->- Use [verbatim strings](language.md#31-strings).  For example: `"\d+\.\d+"` becomes `` `\d+\.\d+` ``
+> [!TIP]
+> If your regular expression contains backslashes (` \ `), you will need to do one of the following:
+>
+> - Anywhere you would use a ` \ `, use two. For example: `"\d+\.\d+"` becomes `"\\d+\\.\\d+"`
+> - Use [verbatim strings](language.md#31-strings). For example: `"\d+\.\d+"` becomes `` `\d+\.\d+` ``
 
 - [`regex.escape`](#regexescape)
 - [`regex.match`](#regexmatch)
@@ -220,4 +222,5 @@ A string of characters with any escaped characters converted to their unescaped 
 (abc.*)
 ```
 
-> Note: This document was automatically generated from the source code using `Scriban.DocGen`.
+> [!NOTE]
+> This document was automatically generated from the source code using `Scriban.DocGen`.

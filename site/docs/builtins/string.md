@@ -1479,4 +1479,5 @@ The zero-based index position of the  parameter from the start of if  is found, 
 
 
 
-> Note: This document was automatically generated from the source code using `Scriban.DocGen`.
+> [!NOTE]
+> This document was automatically generated from the source code using `Scriban.DocGen`.

@@ -420,4 +420,5 @@ A random number greater or equal to minValue and less than maxValue
 7
 ```
 
-> Note: This document was automatically generated from the source code using `Scriban.DocGen`.
+> [!NOTE]
+> This document was automatically generated from the source code using `Scriban.DocGen`.

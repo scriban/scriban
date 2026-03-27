@@ -26,7 +26,8 @@ Scriban supports all the [core liquid syntax](https://shopify.github.io/liquid/)
 
 ## Known issues
 
-> NOTE: The liquid syntax has never been strictly formalized, and custom tags implementation can choose whatever syntax for their arguments.
+> [!WARNING]
+> The liquid syntax has never been strictly formalized, and custom tags implementation can choose whatever syntax for their arguments.
 >
 > This is a known issue in liquid itself, for example:
 >  - [issue 507: Custom tags: what’s the preferred method of providing arguments containing quotes](https://github.com/Shopify/liquid/issues/507)
@@ -86,7 +87,8 @@ In addition to this, scriban supports:
 
 In the following sections, you will find a list of the supported liquid tags and how scriban translates a liquid template into a scriban template. 
 
-> NOTE: All the following examples are using the feature [**Ast to text**](runtime/ast#ast-to-text) that
+> [!NOTE]
+> All the following examples are using the feature [**Ast to text**](runtime/ast#ast-to-text) that
 allowed to translate liquid code into scriban code automatically
 
 
@@ -238,7 +240,8 @@ Liquid `for <variable> in <expression>`/`endfor` tags translate to the same [`fo
 {{ "{{" }} end {{ "}}" }}
 ```
 
-> NOTE: Scriban supports all tags arguments: `limit`, `offset`, `reversed`
+> [!NOTE]
+> Scriban supports all tags arguments: `limit`, `offset`, `reversed`
 
 
 ### `tablerow` tag
@@ -259,7 +262,8 @@ Liquid `tablerow <variable> in <expression>`/`endtablerow` tags translate to the
 {{ "{{" }} end {{ "}}" }}
 ```
 
-> NOTE: Scriban supports all tags arguments for `tablerow`: `cols`, `limit`, `offset`, `reversed`
+> [!NOTE]
+> Scriban supports all tags arguments for `tablerow`: `cols`, `limit`, `offset`, `reversed`
 
 
 ### `capture` tag

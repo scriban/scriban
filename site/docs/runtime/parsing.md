@@ -42,7 +42,8 @@ The parse method can take an additional argument `sourceFilePath` used when repo
 var template = Template.Parse(File.ReadAllText(filePath), filePath);
 ```
 
-> Note that the `sourceFilePath` is not used for accessing the disk (it could be a logical path to a zip file, or the name of tab opened in an editor...etc.). It is only a logical name that is used when reporting errors, but also you will see with the include directive and the setup of the [Template Loader](includes#include-and-itemplateloader) that this value can be used to perform an include operation in the relative context to the template path being processed.
+> [!NOTE]
+> The `sourceFilePath` is not used for accessing the disk (it could be a logical path to a zip file, or the name of tab opened in an editor...etc.). It is only a logical name that is used when reporting errors, but also you will see with the include directive and the setup of the [Template Loader](includes#include-and-itemplateloader) that this value can be used to perform an include operation in the relative context to the template path being processed.
 
 
 ## Parsing modes

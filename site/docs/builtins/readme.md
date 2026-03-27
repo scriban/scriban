@@ -15,4 +15,5 @@ Scriban provides a rich set of built-in functions organized into groups. Click o
 - [`string` functions](string.md) - String manipulation functions
 - [`timespan` functions](timespan.md) - Timespan manipulation functions
 
-> Note: This document was automatically generated from the source code using `Scriban.DocGen`.
+> [!NOTE]
+> This document was automatically generated from the source code using `Scriban.DocGen`.

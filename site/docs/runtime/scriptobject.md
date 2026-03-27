@@ -107,7 +107,8 @@ This function can be imported into a ScriptObject:
   Console.WriteLine(result);
   ```
 
-> Notice that when using a function with pipe calls like `{{ "{{" }}description | string.strip {{ "}}" }}`, the result of the previous pipe becomes the first explicit argument passed to `string.strip`.
+> [!NOTE]
+> When using a function with pipe calls like `{{ "{{" }}description | string.strip {{ "}}" }}`, the result of the previous pipe becomes the first explicit argument passed to `string.strip`.
 > For example, `{{ "{{" }} date | format "dd.MM" {{ "}}" }}` calls `format(date, "dd.MM")` (or `format(context, date, "dd.MM")` for methods that declare a leading `TemplateContext`).
 
 > [!NOTE]
@@ -299,7 +300,8 @@ Also any objects inheriting from `IDictionary<TKey, TValue>` or `IDictionary` wi
 
 This is an important feature of scriban. Every .NET objects made accessible through a ScriptObject is directly accessible without importing it. It means that Scriban will directly work on the .NET object instance instead of a copy (e.g when we do a `ScriptObject.Import` instead)
 
-> Note that for security reason, only the properties of .NET objects accessed through another `ScriptObject` are made accessible from a Template. Methods and static methods are not automatically imported.
+> [!NOTE]
+> For security reason, only the properties of .NET objects accessed through another `ScriptObject` are made accessible from a Template. Methods and static methods are not automatically imported.
 
 For example, if we re-use the previous `MyObject` directly as a variable in a `ScriptObject`:
 

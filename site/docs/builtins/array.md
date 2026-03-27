@@ -692,4 +692,5 @@ Returns if a `list` contains a specific `item`.
 true
 ```
 
-> Note: This document was automatically generated from the source code using `Scriban.DocGen`.
+> [!NOTE]
+> This document was automatically generated from the source code using `Scriban.DocGen`.
