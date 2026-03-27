@@ -27,7 +27,7 @@ As we can see, we are passing an anonymous objects that has this field/property 
 
 While passing an anonymous object is nice for a hello world example, it is not always enough for more advanced data model scenarios. 
 
-In this case, you want to use more directly the `TemplateContext` (used by the method `Template.Render(object)`) and a [`ScriptObject`](scriptobject) which are both at the core of scriban rendering architecture to provide more powerful constructions & hooks of the data model exposed (variables but also functions...etc.).
+In this case, you want to use more directly the `TemplateContext` (used by the method `Template.Render(object)`) and a [`ScriptObject`](scriptobject.md) which are both at the core of scriban rendering architecture to provide more powerful constructions & hooks of the data model exposed (variables but also functions...etc.).
 
 
 ## The `TemplateContext` execution model
@@ -35,9 +35,11 @@ In this case, you want to use more directly the `TemplateContext` (used by the m
 The `TemplateContext` provides:
 
 - **an execution context** when evaluating a template. The same instance can be used with many different templates, depending on your requirements.
-- A **stack of [`ScriptObject`](variable-stack)** that provides the actual variables/functions accessible to the template, accessible through `Template.PushGlobal(scriptObj)` and `Template.PopGlobal()`. Why a stack and how to use this stack is described in the [variable stack](variable-stack) page.
+- A **stack of [`ScriptObject`](variable-stack.md)** that provides the actual variables/functions accessible to the template, accessible through `Template.PushGlobal(scriptObj)` and `Template.PopGlobal()`. Why a stack and how to use this stack is described in the [variable stack](variable-stack.md) page.
 - The **text output** when evaluating a template, which is accessible through the `Template.Output` property as a `StringBuilder` but because you can have nested rendering happening, it is possible to use `Template.PushOutput()` and `Template.PopOutput()` to redirect temporarily the output to a new output. This functionality is typically used by the [`capture` statement](../language.md#94-capture-variable--end).
-- Caching of templates previously loaded by an `include` directive (see [`include` and `ITemplateLoader`](includes#include-and-itemplateloader) section )
+- Caching of templates previously loaded by an `include` directive (see [`include` and `ITemplateLoader`](includes.md#include-and-itemplateloader) section )
 - Various possible overrides to allow fine grained extensibility (evaluation of an expression, conversion to a string, enter/exit/step into a loop...etc.)
+
+For the execution-related switches on `TemplateContext` itself, including runtime limits and relaxed-access behavior, see the [safe runtime](safe-runtime.md) page.
 
 Note that a `TemplateContext` is not thread safe, so it is recommended to have one `TemplateContext` per thread.

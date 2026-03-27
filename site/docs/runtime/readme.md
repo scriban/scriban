@@ -17,12 +17,12 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
 
 | Topic | Description |
 |-------|-------------|
-| [Parsing a template](parsing) | Parse templates, choose parsing modes and languages, Liquid support |
-| [Rendering a template](rendering) | Render templates and understand the `TemplateContext` execution model |
-| [The `ScriptObject`](scriptobject) | Import variables, delegates, .NET classes/objects, JSON, and builtins |
-| [Variable stack](variable-stack) | How the stack of `ScriptObject` works, the `with` statement, accessing variables from functions |
-| [Member renamer and filter](member-renamer) | Customize how .NET member names are exposed and filtered |
-| [Include and `ITemplateLoader`](includes) | Load templates dynamically with the `include` directive |
-| [Lexer, Parser and AST](ast) | Low-level parsing, the Abstract Syntax Tree and AST-to-text round-tripping |
-| [Extending and custom functions](extending) | Extend `TemplateContext`, advanced and hyper custom functions |
-| [Safe runtime](safe-runtime) | Evaluate expressions, change culture, configure runtime safety limits |
+| [Parsing a template](parsing.md) | Parse templates, choose parsing modes and languages, Liquid support |
+| [Rendering a template](rendering.md) | Render templates and understand the `TemplateContext` execution model |
+| [The `ScriptObject`](scriptobject.md) | Import variables, delegates, .NET classes/objects, JSON, and builtins |
+| [Variable stack](variable-stack.md) | How the stack of `ScriptObject` works, the `with` statement, accessing variables from functions |
+| [Member renamer and filter](member-renamer.md) | Customize how .NET member names are exposed and filtered |
+| [Include and `ITemplateLoader`](includes.md) | Load templates dynamically with the `include` directive |
+| [Lexer, Parser and AST](ast.md) | Low-level parsing, the Abstract Syntax Tree and AST-to-text round-tripping |
+| [Extending and custom functions](extending.md) | Extend `TemplateContext`, advanced and hyper custom functions |
+| [Safe runtime](safe-runtime.md) | Understand Scriban's sandbox model, evaluate expressions, and configure `TemplateContext` runtime limits and execution switches |
