@@ -225,6 +225,9 @@ To enable source embedding, make sure your project compiles the embedded sources
 > If your project targets `netstandard2.0` or `.NET Framework 4.7.2+`, also add the supporting packages that Scriban's sources compile against:
 >
 > ```xml
+> <PropertyGroup>
+>   <PolySharpIncludeRuntimeSupportedAttributes>true</PolySharpIncludeRuntimeSupportedAttributes>
+> </PropertyGroup>
 > <ItemGroup>
 >   <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
 >   <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
@@ -234,6 +237,8 @@ To enable source embedding, make sure your project compiles the embedded sources
 >   </PackageReference>
 > </ItemGroup>
 > ```
+>
+> `PolySharp` provides polyfills for C# language features. You can use similar polyfill packages if you target other frameworks or want to avoid `PolySharp` for any reason.
 >
 > `System.Text.Json`-based features are intentionally unavailable in source-embedding mode. This includes helpers such as `object.from_json`, `object.to_json`, and direct `JsonElement` import support.
 
