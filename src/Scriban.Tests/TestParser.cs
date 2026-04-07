@@ -391,6 +391,24 @@ raw
         }
 
         [Test]
+        public void TestUtcDateNow()
+        {
+            // default is dd MM yyyy
+            var dateNow = DateTime.Now.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+            var template = ParseTemplate(@"{{ date.utc_now }}");
+            var result = template.Render();
+            Assert.AreEqual(dateNow, result);
+
+            template = ParseTemplate(@"{{ date.format = '%Y'; date.utc_now }}");
+            result = template.Render();
+            Assert.AreEqual(DateTime.Now.ToString("yyyy", CultureInfo.InvariantCulture), result);
+
+            template = ParseTemplate(@"{{ date.format = '%Y'; date.utc_now | date.add_years 1 }}");
+            result = template.Render();
+            Assert.AreEqual(DateTime.Now.AddYears(1).ToString("yyyy", CultureInfo.InvariantCulture), result);
+        }
+
+        [Test]
         public void TestHelloWorld()
         {
             var template = ParseTemplate(@"This is a {{ text }} World from scriban!");

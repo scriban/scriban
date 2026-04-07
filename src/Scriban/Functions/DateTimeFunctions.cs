@@ -123,7 +123,7 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Returns a datetime object of the current time, including the hour, minutes, seconds and milliseconds.
+        /// Returns a datetime object of the current local time, including the hour, minutes, seconds and milliseconds.
         /// </summary>
         /// <remarks>
         /// ```scriban-html
@@ -134,6 +134,19 @@ namespace Scriban.Functions
         /// ```
         /// </remarks>
         public static DateTime Now() => DateTime.Now;
+
+        /// <summary>
+        /// Returns a datetime object of the current utc time, including the hour, minutes, seconds and milliseconds in.
+        /// </summary>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ date.utc_now.year }}
+        /// ```
+        /// ```html
+        /// 2026
+        /// ```
+        /// </remarks>
+        public static DateTime UtcNow() => DateTime.UtcNow;
 
         /// <summary>
         /// Adds the specified number of days to the input date.

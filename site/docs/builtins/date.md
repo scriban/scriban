@@ -27,6 +27,7 @@ Other comparison operators(`==`, `!=`, `<=`, `>=`, `<`, `>`) are also working wi
 A `timespan` and also the added to a `datetime` object.
 
 - [`date.now`](#datenow)
+- [`date.utc_now`](#datenow)
 - [`date.add_days`](#dateadd_days)
 - [`date.add_months`](#dateadd_months)
 - [`date.add_years`](#dateadd_years)
@@ -46,7 +47,7 @@ date.now
 
 #### Description
 
-Returns a datetime object of the current time, including the hour, minutes, seconds and milliseconds.
+Returns a datetime object of the current local time, including the hour, minutes, seconds and milliseconds.
 
 #### Arguments
 
@@ -60,6 +61,34 @@ Returns a datetime object of the current time, including the hour, minutes, seco
 > **input** [Try out](/?template=%7B%7B%20date.now.year%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} date.now.year {{ "}}" }}
+```
+> **output**
+```html
+2026
+```
+
+### `date.utc_now`
+
+```
+date.utc_now
+```
+
+#### Description
+
+Returns a datetime object of the current utc time, including the hour, minutes, seconds and milliseconds.
+
+#### Arguments
+
+
+#### Returns
+
+
+
+#### Examples
+
+> **input** [Try out](/?template=%7B%7B%20date.utc_now.year%20%7D%7D&model=%7B%7D)
+```scriban-html
+{{ "{{" }} date.utc_now.year {{ "}}" }}
 ```
 > **output**
 ```html
