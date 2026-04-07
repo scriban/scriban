@@ -99,6 +99,7 @@ List of all the builtin <date> functions:
  parse
  parse_to_string
  to_string
+ utc_now
 
 List of all the builtin <timespan> functions:
  from_days
