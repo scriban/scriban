@@ -34,7 +34,7 @@ namespace Scriban.AsyncCodeGen
             var workspace = MSBuildWorkspace.Create(new Dictionary<string, string>()
             {
                 {"TargetFramework", "netstandard2.0"},
-                {"DefineConstants", "SCRIBAN_NO_ASYNC;SCRIBAN_PUBLIC" }
+                {"DefineConstants", "SCRIBAN_PUBLIC" }
             });
 
             var solutionPath = args.Length > 0
