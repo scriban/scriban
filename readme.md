@@ -102,50 +102,7 @@ Also the [Scriban.Signed](https://www.nuget.org/packages/Scriban.Signed/) NuGet 
 
 The package includes Scriban source files so that you can internalize Scriban into your project instead of consuming it only as a binary dependency. This is useful in environments where NuGet references are not convenient, such as Roslyn source generators.
 
-> [!WARNING]
-> Currently, Scriban source files are not marked as read-only in this mode. Do not modify them unless you intend to affect other projects on the same machine that use the embedded sources. Use this feature at your own risk.
-
-In order to activate this feature you need to:
-
-- Set the property `PackageScribanIncludeSource` to `true` in your project:
-  ```xml
-  <PropertyGroup>
-    <PackageScribanIncludeSource>true</PackageScribanIncludeSource>
-  </PropertyGroup>
-  ```
-- Add the `IncludeAssets="Build"` to the NuGet PackageReference for Scriban:
-  ```xml
-  <ItemGroup>
-    <PackageReference Include="Scriban" Version="x.y.z" IncludeAssets="Build" />
-  </ItemGroup>
-  ```
-- Compile the embedded sources with C# 9 or later and nullable annotations enabled:
-  ```xml
-  <PropertyGroup>
-    <LangVersion>9.0</LangVersion>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
-  ```
-
-If you are targeting `netstandard2.0` or `.NET Framework 4.7.2+`, you will also need the supporting packages Scriban compiles against. They can already come from another dependency in your project:
-
-```xml
-<ItemGroup>
-  <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
-  <PackageReference Include="System.Threading.Tasks.Extensions" Version="4.6.3" />
-  <PackageReference Include="PolySharp" Version="1.15.0">
-    <PrivateAssets>all</PrivateAssets>
-    <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
-  </PackageReference>
-</ItemGroup>
-```
-
-> [!NOTE]
-> `Scriban.targets` already defines `SCRIBAN_NO_SYSTEM_TEXT_JSON` and `SCRIBAN_SOURCE_INCLUDE` when `PackageScribanIncludeSource` is `true`, so you do not need to add these constants manually.
->
-> In this mode, all Scriban types are marked as `internal`.
->
-> `System.Text.Json`-based features are intentionally disabled in source-embedding mode. This includes helpers such as `object.from_json`, `object.to_json`, and direct `JsonElement` import support.
+Check the documentation [here](https://scriban.github.io/docs/getting-started/#source-embedding)
 
 ## License
 
