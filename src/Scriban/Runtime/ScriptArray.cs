@@ -501,9 +501,28 @@ namespace Scriban.Runtime
                         return true;
                     }
 
-                    var newArray = new ScriptArray<T>(intModifier * array.Count);
+                    if (array.Count == 0)
+                    {
+                        result = new ScriptArray<T>();
+                        return true;
+                    }
+
+                    var resultLength = (long)intModifier * array.Count;
+                    if (resultLength > int.MaxValue)
+                    {
+                        throw new ScriptRuntimeException(span, "Array multiplication result length exceeds the maximum supported array length.");
+                    }
+
+                    if (context.LoopLimit > 0 && resultLength > context.LoopLimit)
+                    {
+                        throw new ScriptRuntimeException(span, $"Exceeding number of iteration limit `{context.LoopLimit}` for internal iteration.");
+                    }
+
+                    var newArray = new ScriptArray<T>((int)resultLength);
+                    var loopStep = 0;
                     for (int i = 0; i < intModifier; i++)
                     {
+                        context.StepLoop(span, ref loopStep);
                         newArray.AddRange(array);
                     }
 

@@ -357,6 +357,34 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void ArrayMultiplyShouldRespectLoopLimitForInternalIteration()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 10
+            };
+            var template = Template.Parse("{{ ([1, 2, 3, 4, 5] * 50000000) | array.size }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("iteration limit `10`", exception!.Message);
+        }
+
+        [Test]
+        public void ArrayMultiplyShouldRejectOverflowingResultLength()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 0
+            };
+            var template = Template.Parse("{{ [1, 2, 3, 4, 5] * 429496730 }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("maximum supported array length", exception!.Message);
+        }
+
+        [Test]
         public void InternalArrayEnumerationShouldCheckCancellation()
         {
             using var cancellation = new CancellationTokenSource();

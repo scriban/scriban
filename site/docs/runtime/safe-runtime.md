@@ -67,7 +67,7 @@ The following table lists the main `TemplateContext` properties that influence r
 | Property | Default | Used for |
 |----------|---------|----------|
 | `StrictVariables` | `false` | Throws a `ScriptRuntimeException` when a variable lookup fails instead of returning `null`. This only affects unresolved variables; relaxed member/indexer settings still control member access behavior on resolved objects. |
-| `LoopLimit` | `1000` | Caps loop iterations and also limits range expressions such as `1..100000`. Set to `0` to disable this limit. |
+| `LoopLimit` | `1000` | Caps loop iterations and also limits internal iteration/allocation work such as range expressions (`1..100000`) and array multiplication. Set to `0` to disable this limit. |
 | `LoopLimitQueryable` | `null` | Optional separate loop limit for `IQueryable` enumerations. When `null`, Scriban uses `LoopLimit`. Set to `0` to disable the `IQueryable`-specific limit. |
 | `RecursiveLimit` | `100` | Caps recursive function calls. Set to `0` to disable recursion-depth checks. |
 | `LimitToString` | `1048576` | Caps string materialization and rendered output growth. Scriban truncates output with `...` when the limit is reached, and some builtins throw if an operation would create a string larger than this limit. Set to `0` to disable the limit. |
