@@ -7,6 +7,7 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Scriban.Functions;
 using Scriban.Runtime;
 using Scriban.Syntax;
@@ -1208,12 +1209,26 @@ namespace Scriban.Parsing
 
         private void EnterExpression()
         {
+            try
+            {
+                RuntimeHelpers.EnsureSufficientExecutionStack();
+            }
+            catch (InsufficientExecutionStackException)
+            {
+                LogError(GetSpanForToken(Previous), "The parser recursive depth limit was reached near a stack overflow", true);
+                throw FatalParserException.Instance;
+            }
+
             _expressionDepth++;
             var limit = Options.ExpressionDepthLimit;
-            if (limit > 0 && !_isExpressionDepthLimitReached && _expressionDepth > limit)
+            if (limit > 0 && _expressionDepth > limit)
             {
-                LogError(GetSpanForToken(Previous), $"The statement depth limit `{limit}` was reached when parsing this statement");
-                _isExpressionDepthLimitReached = true;
+                if (!_isExpressionDepthLimitReached)
+                {
+                    LogError(GetSpanForToken(Previous), $"The statement depth limit `{limit}` was reached when parsing this statement", true);
+                    _isExpressionDepthLimitReached = true;
+                }
+                throw FatalParserException.Instance;
             }
         }
 

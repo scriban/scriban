@@ -104,65 +104,73 @@ namespace Scriban.Parsing
             HasErrors = false;
             _blockLevel = 0;
             _isExpressionDepthLimitReached = false;
+            _hasFatalError = false;
+            _expressionDepth = 0;
             Blocks.Clear();
 
             var page = Open<ScriptPage>();
-            var parsingMode = CurrentParsingMode;
-            switch (parsingMode)
+            try
             {
-                case ScriptMode.FrontMatterAndContent:
-                case ScriptMode.FrontMatterOnly:
-                    if (Current.Type != TokenType.FrontMatterMarker)
-                    {
-                        LogError($"When `{CurrentParsingMode}` is enabled, expecting a `{_lexer.Options.FrontMatterMarker}` at the beginning of the text instead of `{Current.GetText(_lexer.Text)}`");
-                        return null;
-                    }
+                var parsingMode = CurrentParsingMode;
+                switch (parsingMode)
+                {
+                    case ScriptMode.FrontMatterAndContent:
+                    case ScriptMode.FrontMatterOnly:
+                        if (Current.Type != TokenType.FrontMatterMarker)
+                        {
+                            LogError($"When `{CurrentParsingMode}` is enabled, expecting a `{_lexer.Options.FrontMatterMarker}` at the beginning of the text instead of `{Current.GetText(_lexer.Text)}`");
+                            return null;
+                        }
 
-                    _inFrontMatter = true;
-                    _inCodeSection = true;
+                        _inFrontMatter = true;
+                        _inCodeSection = true;
 
-                    _frontmatter = Open<ScriptFrontMatter>();
+                        _frontmatter = Open<ScriptFrontMatter>();
 
-                    // Parse the frontmatter start=-marker
-                    ExpectAndParseTokenTo(_frontmatter.StartMarker, TokenType.FrontMatterMarker);
+                        // Parse the frontmatter start=-marker
+                        ExpectAndParseTokenTo(_frontmatter.StartMarker, TokenType.FrontMatterMarker);
 
-                    // Parse front-marker statements
-                    _frontmatter.Statements = ParseBlockStatement(_frontmatter);
+                        // Parse front-marker statements
+                        _frontmatter.Statements = ParseBlockStatement(_frontmatter);
 
-                    // We should not be in a frontmatter after parsing the statements
-                    if (_inFrontMatter)
-                    {
-                        LogError($"End of frontmatter `{_lexer.Options.FrontMatterMarker}` not found");
-                    }
+                        // We should not be in a frontmatter after parsing the statements
+                        if (_inFrontMatter)
+                        {
+                            LogError($"End of frontmatter `{_lexer.Options.FrontMatterMarker}` not found");
+                        }
 
-                    page.FrontMatter = _frontmatter;
-                    page.Span = _frontmatter.Span;
+                        page.FrontMatter = _frontmatter;
+                        page.Span = _frontmatter.Span;
 
-                    if (parsingMode == ScriptMode.FrontMatterOnly)
-                    {
-                        return page;
-                    }
-                    break;
-                case ScriptMode.ScriptOnly:
-                    _inCodeSection = true;
-                    break;
+                        if (parsingMode == ScriptMode.FrontMatterOnly)
+                        {
+                            return page;
+                        }
+                        break;
+                    case ScriptMode.ScriptOnly:
+                        _inCodeSection = true;
+                        break;
+                }
+
+                page.Body = ParseBlockStatement(page);
+                if (page.Body is not null)
+                {
+                    page.Span = page.Body.Span;
+                }
+
+                // Flush any pending trivias
+                if (_isKeepTrivia && _lastTerminalWithTrivias is not null)
+                {
+                    FlushTriviasToLastTerminal();
+                }
+
+                if (page.FrontMatter is not null)
+                {
+                    FixRawStatementAfterFrontMatter(page);
+                }
             }
-
-            page.Body = ParseBlockStatement(page);
-            if (page.Body is not null)
+            catch (FatalParserException)
             {
-                page.Span = page.Body.Span;
-            }
-
-            // Flush any pending trivias
-            if (_isKeepTrivia && _lastTerminalWithTrivias is not null)
-            {
-                FlushTriviasToLastTerminal();
-            }
-
-            if (page.FrontMatter is not null)
-            {
-                FixRawStatementAfterFrontMatter(page);
             }
 
             if (_lexer.HasErrors)
@@ -174,6 +182,15 @@ namespace Scriban.Parsing
             }
 
             return page;
+        }
+
+        private sealed class FatalParserException : Exception
+        {
+            public static readonly FatalParserException Instance = new FatalParserException();
+
+            private FatalParserException()
+            {
+            }
         }
 
         private void PushTokenToTrivia()

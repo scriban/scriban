@@ -9,7 +9,7 @@ title: "Lexer, Parser and AST"
 
 The lexer has a few [`LexerOptions`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/LexerOptions.cs) to control the way the lexer is behaving, as described with the [parsing modes](parsing#parsing-modes)
 
-The parser has a [`ParserOptions`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/ParserOptions.cs) only used for securing nested statements/blocks to avoid any stack overflow exceptions while parsing a document.
+The parser has [`ParserOptions`](https://github.com/lunet-io/scriban/blob/master/src/Scriban/Parsing/ParserOptions.cs) used for securing nested statements/blocks and expressions to avoid stack overflow exceptions while parsing a document. `ExpressionDepthLimit` defaults to `250`; when the limit is reached, parsing stops and the returned template contains a parser error.
 
 
 ## Abstract Syntax Tree

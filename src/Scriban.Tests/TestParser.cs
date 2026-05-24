@@ -927,6 +927,55 @@ m
             StringAssert.Contains("The statement depth limit `10` was reached when parsing this statement", template.Messages[0].ToString());
         }
 
+        [TestCase("parentheses")]
+        [TestCase("arrays")]
+        [TestCase("objects")]
+        [TestCase("unary")]
+        public void ExpressionDepthLimitStopsDeepNestedExpressionsBeforeStackOverflow(string expressionKind)
+        {
+            var expression = CreateDeepExpression(expressionKind, 10000);
+
+            var template = Template.Parse($"{{{{ {expression} }}}}");
+
+            Assert.True(template.HasErrors);
+            StringAssert.Contains("The statement depth limit `250` was reached when parsing this statement", template.Messages[0].ToString());
+        }
+
+        [Test]
+        public void ExpressionDepthLimitStopsDeepLiquidExpressionsBeforeStackOverflow()
+        {
+            var expression = CreateDeepExpression("parentheses", 10000);
+
+            var template = Template.ParseLiquid($"{{{{ {expression} }}}}");
+
+            Assert.True(template.HasErrors);
+            StringAssert.Contains("The statement depth limit `250` was reached when parsing this statement", template.Messages[0].ToString());
+        }
+
+        private static string CreateDeepExpression(string expressionKind, int depth)
+        {
+            switch (expressionKind)
+            {
+                case "parentheses":
+                    return new string('(', depth) + "1" + new string(')', depth);
+                case "arrays":
+                    return new string('[', depth) + "1" + new string(']', depth);
+                case "objects":
+                    var objectBuilder = new StringBuilder();
+                    for (var i = 0; i < depth; i++)
+                    {
+                        objectBuilder.Append("{x:");
+                    }
+                    objectBuilder.Append('1');
+                    objectBuilder.Append('}', depth);
+                    return objectBuilder.ToString();
+                case "unary":
+                    return new string('!', depth) + "true";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(expressionKind), expressionKind, "Unsupported expression kind.");
+            }
+        }
+
         [TestCase(@"ab{{end}}c")]  // no blocks
         [TestCase(@"a{{if true}}b{{end}}{{end}}c")]  // one-level block
         [TestCase(@"a{{if true}}{{for i in 0..1}}b{{end}}{{end}}{{end}}c")]  // two-level block (nested)
