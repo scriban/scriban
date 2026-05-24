@@ -46,8 +46,8 @@ namespace Scriban.Runtime
         /// </summary>
         /// <param name="script">The script object to import into</param>
         /// <param name="obj">The object.</param>
-        /// <param name="filter">Optional member filterer</param>
-        /// <param name="renamer">Optional renamer</param>
+        /// <param name="filter">Optional reflected member filterer. This is not applied when importing dictionary data.</param>
+        /// <param name="renamer">Optional reflected member renamer. This is not applied when importing dictionary data.</param>
         /// <remarks>
         /// <ul>
         /// <li>If <paramref name="obj"/> is a <see cref="System.Type"/>, this method will import only the static field/properties of the specified object.</li>
@@ -60,14 +60,14 @@ namespace Scriban.Runtime
         {
             if (obj is IScriptObject scriptObj)
             {
-                // TODO: Add support for filter, member renamer
+                // ScriptObject entries are data, not reflected members, so filter/renamer do not apply.
                 script.Import(scriptObj);
                 return;
             }
 
             if (obj is IDictionary dictionary)
             {
-                // TODO: Add support for filter, member renamer
+                // Dictionary entries are data, not reflected members, so filter/renamer do not apply.
                 script.ImportDictionary(dictionary);
                 return;
             }
@@ -209,8 +209,8 @@ namespace Scriban.Runtime
         /// <param name="script">The script object to import into</param>
         /// <param name="obj">The object.</param>
         /// <param name="flags">The import flags.</param>
-        /// <param name="filter">A filter applied on each member</param>
-        /// <param name="renamer">The member renamer.</param>
+        /// <param name="filter">A filter applied on each reflected member.</param>
+        /// <param name="renamer">The reflected member renamer.</param>
         /// <exception cref="System.ArgumentOutOfRangeException"></exception>
         [RequiresUnreferencedCode("This method uses reflection to discover and import fields, properties, and methods from the specified object or type.")]
         public static void Import(this IScriptObject script, object? obj, ScriptMemberImportFlags flags, MemberFilterDelegate? filter = null, MemberRenamerDelegate? renamer = null)

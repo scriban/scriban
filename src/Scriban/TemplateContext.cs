@@ -274,12 +274,14 @@ namespace Scriban
         public LexerOptions TemplateLoaderLexerOptions { get; set; }
 
         /// <summary>
-        /// A global settings used to rename property names of exposed .NET objects.
+        /// A global setting used to rename reflected field/property names of exposed .NET objects.
+        /// This does not rename dictionary keys or <see cref="ScriptObject"/> entries.
         /// </summary>
         public MemberRenamerDelegate MemberRenamer { get; set; }
 
         /// <summary>
-        /// A global settings used to filter field/property names of exposed .NET objects.
+        /// A global setting used to filter reflected field/property names of exposed .NET objects.
+        /// This does not filter dictionary keys or <see cref="ScriptObject"/> entries.
         /// </summary>
         public MemberFilterDelegate? MemberFilter { get; set; }
 

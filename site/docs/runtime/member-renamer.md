@@ -4,7 +4,7 @@ title: "Member renamer and filter"
 
 ## Member renamer
 
-By default, .NET objects accessed through a `ScriptObject` are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of `liquid` templates.
+By default, reflection-backed .NET objects accessed through a `ScriptObject` are automatically exposed with lowercase and `_` names. It means that a property like `MyMethodIsNice` will be exposed as `my_method_is_nice`. This is the default convention, originally to match the behavior of `liquid` templates.
 
 A renamer is simply a delegate that takes an input MemberInfo and return a new member name:
 
@@ -45,7 +45,9 @@ Note that renaming can be changed at two levels:
   var context = new TemplateContext {MemberRenamer = member => member.Name};
   ```
 
-  It is important to setup this on the `TemplateContext` for any .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the correct naming convention. 
+  It is important to setup this on the `TemplateContext` for any reflection-backed .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the correct naming convention.
+
+Member renamers apply to reflected .NET members. They do not rename dictionary keys or `ScriptObject` entries; those keys are template data and are exposed with their existing names.
 
 The method `Template.Render(object, renamer)` takes also a member renamer, imports the object model with the renamer and setup correctly the renamer on the underlying `TemplateContext`.
 
@@ -59,7 +61,7 @@ template.Render(new MyObject(), member => member.Name);
 
 ## Member filter
 
-Similar to the member renamer, by default, .NET objects accessed through a `ScriptObject` are automatically exposing all public instance fields and properties of .NET objects.
+Similar to the member renamer, by default, reflection-backed .NET objects accessed through a `ScriptObject` are automatically exposing all public instance fields and properties of .NET objects.
 
 A filter is simply a delegate that takes an input MemberInfo and return a boolean to indicate whether to expose the member (`true`) or discard the member (`false`)
 
@@ -84,11 +86,13 @@ namespace Scriban.Runtime
   // Imports only properties that contains the word "Yo"
   scriptObject1.Import(new MyObject(), filter: member => member is PropertyInfo && member.Name.Contains("Yo"));
   ```
-- By setting the default member filter on the `TemplateContext`, so that .NET objects automatically exposed via a `ScriptObject` will follow the global filtering rules defined on the context:
+- By setting the default member filter on the `TemplateContext`, so that reflection-backed .NET objects automatically exposed via a `ScriptObject` will follow the global filtering rules defined on the context:
 
   ```csharp
   // Setup a default filter at the `TemplateContext` level
   var context = new TemplateContext {MemberFilter = member => member is PropertyInfo && member.Name.Contains("Yo") };
   ```
 
-As for the member renamer, it is important to setup this on the `TemplateContext` for any .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the same filtering convention 
+Member filters apply to reflected .NET members only. They do not filter dictionary keys or `ScriptObject` entries because these are data entries, not `MemberInfo` reflection members. If a template should not see some dictionary data, project or sanitize that dictionary before exposing it to Scriban.
+
+As for the member renamer, it is important to setup this on the `TemplateContext` for any reflection-backed .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the same filtering convention.

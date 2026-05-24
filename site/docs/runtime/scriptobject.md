@@ -24,7 +24,7 @@ A `ScriptObject` is mainly an extended version of a `IDictionary<string, object>
   Console.WriteLine(result);
   ```
 
-Note that any `IDictionary<string, object>` put as a property will be accessible as well.
+Note that any `IDictionary<string, object>` put as a property will be accessible as well. Dictionary keys are treated as data and are not affected by `MemberRenamer` or `MemberFilter`.
 
 ## Imports System.Text.Json.JsonElement
 
@@ -289,7 +289,7 @@ and import the properties/functions of this object into a ScriptObject, via `Scr
   ```
 
 
-Also any objects inheriting from `IDictionary<TKey, TValue>` or `IDictionary` will be also accessible automatically. Typically, you can usually access directly any generic JSON objects that was parsed by a JSON library.
+Also any objects inheriting from `IDictionary<TKey, TValue>` or `IDictionary` will be also accessible automatically. Typically, you can usually access directly any generic JSON objects that was parsed by a JSON library. Dictionary keys are used as data keys and are not renamed or filtered by `MemberRenamer` or `MemberFilter`; project or sanitize dictionaries before exposing them if some keys should not be available to templates.
 
 > [!NOTE]
 > 
