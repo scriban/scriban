@@ -392,9 +392,11 @@ When resolving to a string output, the null value will output an empty string:
 
 ## 4 Variables
 
-Scriban supports the concept of **global** and **local** variables
+Scriban supports the concept of **global/property** and **local** variables.
 
-A **global/property variable** like `{{ "{{" }} name {{ "}}" }}` is a liquid like handle, starting by a letter or underscore `_` and following by a letter `A-Z a-z`, a digit `0-9`, an underscore `_`
+A **global/property variable** like `{{ "{{" }} name {{ "}}" }}` is a liquid like handle, starting by a letter or underscore `_` and following by a letter `A-Z a-z`, a digit `0-9`, an underscore `_`.
+
+Global/property variables are resolved against the current object context first, then against any outer object contexts. These object contexts are stacked by constructs such as `with` blocks, parametric functions, the template model, and the builtins. An assignment to a global/property variable writes to the current object context; it does not search for and update a variable with the same name in an outer object context.
 
 The following text are valid variable names:
 
@@ -405,7 +407,7 @@ The following text are valid variable names:
 > [!NOTE]
 > In liquid, the character `-` is allowed in a variable name, but when translating it to a scriban, you will have to enclose it into a quoted string
 
-A **local variable** like `{{ "{{" }} $name {{ "}}" }}` is an identifier starting with `$`. A local variable is only accessible within the same include page or function body.
+A **local variable** like `{{ "{{" }} $name {{ "}}" }}` is an identifier starting with `$`. A local variable is only accessible within the same include page or function body. Local variables are stored in a separate local scope, so assigning `$name` does not create or update the global/property variable `name`, and both can coexist.
 
 The **special local variable** `$` alone is an array containing the arguments passed to the current function or include page.
 
@@ -687,9 +689,11 @@ Note that a function can have mixed text statements as well:
 ```
 
 > [!NOTE]
-> Setting a non-local variable (e.g `a = 10`) in a simple function will be set at the global level and not at the function level.
+> Simple functions create a local scope for local variables (e.g `$a`) and for the special `$` arguments variable, but they do not create a new object/global context.
 >
-> Parametric functions are solving this behavior by introducing a new variable scope inside the function that includes parameters. 
+> Setting a non-local variable (e.g `a = 10`) in a simple function writes to the current object/global context of the caller.
+>
+> Parametric functions differ by introducing a new object/global context inside the function that includes parameters. 
  
 ### 7.2 Anonymous functions
 
@@ -725,6 +729,8 @@ end
 They are similar to simple functions but they are declared with parenthesis, while also supporting declaration of different kind of parameters (normal, optional, variable).
 
 Another difference with simple functions is that they require function calls and arguments to match the expected function parameters. 
+
+Parametric functions open a new object/global context for each invocation. The parameter names are global/property variables in that new context. Assigning to an unprefixed name inside the function writes to this function context, so it will not update an outer global/property variable with the same name. Local variables prefixed with `$` still use the separate local scope, as with simple functions.
 
 - A function with normal parameters:
 
@@ -1383,7 +1389,7 @@ Note that `readonly` variables won't be override.
 
 ### 9.9 `with <variable> ... end`
 
-The `with <variable> ... end` statement will open a new object context with the passed variable, all assignment will result in setting the members of the passed object. 
+The `with <variable> ... end` statement opens a new object/global context with the passed variable. Unprefixed assignments write to the passed object, even if an outer context contains a variable with the same name. Variables declared outside the `with` block are still readable from inside the block when the current object does not contain a member with that name.
 
 ```
 myobject = {}
@@ -1420,9 +1426,6 @@ will output:
 3 -> This is inside the wrap!
 4 -> This is inside the wrap!
 ```
-
-Note that variables declared outside the `with` block are accessible within.
-
 
 ### 9.11 `include <name> arg1?...argn?` and `include_join <names> <separator> <begin?> <end?>`
 
