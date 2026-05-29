@@ -6,6 +6,8 @@ title: "The ScriptObject"
 
 The `ScriptObject` is a special implementation of a `Dictionary<string, object>` that runtime properties and functions accessible to a template:
 
+For security-sensitive or untrusted templates, prefer exposing an explicit `ScriptObject` / `ScriptArray` data model containing only approved values and functions instead of passing rich .NET objects directly to the `TemplateContext`. Avoid storing sensitive .NET objects inside a `ScriptObject`, because templates can access exposed object graphs. Building the model explicitly also keeps rendering compatible with Native AOT/trimming by avoiding reflection-based member discovery.
+
 ## Accessing as regular dictionary objects
 
 A `ScriptObject` is mainly an extended version of a `IDictionary<string, object>`:

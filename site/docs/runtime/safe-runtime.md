@@ -9,12 +9,15 @@ Scriban's safe runtime has two complementary parts:
 - **Exposure control**: templates can only access the builtin functions plus the objects, members, and functions that your application explicitly exposes.
 - **Execution control**: `TemplateContext` lets you put limits on loops, recursion, string/output growth, regex execution, and how permissive the runtime should be when values are missing or null.
 
-This is not a process-level sandbox. If you expose a .NET object that can access the file system or network, or configure an [`ITemplateLoader`](includes.md#include-and-itemplateloader) that reads from disk, templates can use those capabilities.
+This is not a process-level sandbox or a security boundary around arbitrary .NET objects. If you expose a .NET object that can access the file system, network, secrets, or other sensitive state, or configure an [`ITemplateLoader`](includes.md#include-and-itemplateloader) that reads from disk, templates can use those capabilities.
 
-The practical sandbox boundary is therefore:
+For untrusted templates, the host application is responsible for exposing only data and functions that the template is allowed to use. Prefer building the context from explicit, sanitized [`ScriptObject`](scriptobject.md) and `ScriptArray` values instead of passing rich .NET objects directly. This also keeps the data model compatible with Native AOT/trimming because Scriban does not need reflection to discover members. Do not rely on `MemberFilter`, `MemberRenamer`, relaxed access switches, or individual builtins as a complete sandbox for objects that contain sensitive members.
+
+The practical exposure boundary is therefore:
 
 - which globals and builtins you expose through [`ScriptObject`](scriptobject.md)
-- which .NET members you allow through the [member renamer and filter](member-renamer.md)
+- which .NET objects and values you choose to put in the context; project or sanitize sensitive data before exposure
+- which .NET members you allow through the [member renamer and filter](member-renamer.md), as a convenience exposure mechanism rather than a security guarantee
 - whether you configure `TemplateContext.TemplateLoader` for `include`
 - which `TemplateContext` execution limits and relaxed-access switches you enable
 

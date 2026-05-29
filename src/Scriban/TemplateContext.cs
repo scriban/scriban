@@ -285,7 +285,8 @@ namespace Scriban
 
         /// <summary>
         /// A global setting used to filter reflected field/property names of exposed .NET objects.
-        /// This does not filter dictionary keys or <see cref="ScriptObject"/> entries.
+        /// This does not filter dictionary keys or <see cref="ScriptObject"/> entries and is not a security boundary for sensitive object graphs.
+        /// For untrusted templates, prefer pushing explicit, sanitized <see cref="ScriptObject"/> / <see cref="ScriptArray"/> models instead of exposing .NET objects directly.
         /// </summary>
         public MemberFilterDelegate? MemberFilter { get; set; }
 

@@ -63,6 +63,9 @@ template.Render(new MyObject(), member => member.Name);
 
 Similar to the member renamer, by default, reflection-backed .NET objects accessed through a `ScriptObject` are automatically exposing all public instance fields and properties of .NET objects.
 
+> [!IMPORTANT]
+> `MemberFilter` is an exposure convenience for reflected .NET members; it is not a security sandbox. If a template must not access a value, do not put that value (or an object graph that can reveal it) in the Scriban context. For security-sensitive or untrusted templates, prefer constructing a sanitized `ScriptObject` / `ScriptArray` model containing only approved values and functions, and push that into the `TemplateContext` instead of exposing .NET objects directly. This explicit model is also the Native AOT/trimming-friendly path.
+
 A filter is simply a delegate that takes an input MemberInfo and return a boolean to indicate whether to expose the member (`true`) or discard the member (`false`)
 
 ```csharp
@@ -93,6 +96,6 @@ namespace Scriban.Runtime
   var context = new TemplateContext {MemberFilter = member => member is PropertyInfo && member.Name.Contains("Yo") };
   ```
 
-Member filters apply to reflected .NET members only. They do not filter dictionary keys or `ScriptObject` entries because these are data entries, not `MemberInfo` reflection members. If a template should not see some dictionary data, project or sanitize that dictionary before exposing it to Scriban.
+Member filters apply to reflected .NET members only. They do not filter dictionary keys or `ScriptObject` entries because these are data entries, not `MemberInfo` reflection members. They also do not affect code paths that deliberately serialize or format a value outside Scriban's member-accessor layer; for example, `object.to_json` uses `System.Text.Json` directly for primitive/scalar values and values implementing `IFormattable`. If a template should not see some data, project or sanitize that data before exposing it to Scriban.
 
 As for the member renamer, it is important to setup this on the `TemplateContext` for any reflection-backed .NET objects that might be accessed indirectly through another `ScriptObject` so that when a .NET object is exposed, it is exposed with the same filtering convention.

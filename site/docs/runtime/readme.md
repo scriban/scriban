@@ -6,7 +6,7 @@ title: "Runtime API"
 
 This document describes the runtime API to manipulate scriban text templating.
 
-Scriban provides a **safe runtime**, meaning it doesn't expose any .NET objects that haven't been made explicitly available to a Template. 
+Scriban provides a **safe runtime**, meaning it doesn't expose any .NET objects that haven't been made explicitly available to a Template. This is an exposure-control model, not a complete security sandbox for arbitrary objects: the host application must avoid exposing objects, properties, functions, loaders, or data that an untrusted template must not use. For security-sensitive or untrusted templates, prefer pushing explicit, sanitized `ScriptObject` / `ScriptArray` data into the `TemplateContext` instead of exposing .NET objects directly; this is also the Native AOT/trimming-friendly approach.
 
 The runtime is composed of two main parts:
 
@@ -25,4 +25,4 @@ The scriban runtime was designed to provide an easy, powerful and extensible inf
 | [Include and `ITemplateLoader`](includes.md) | Load templates dynamically with the `include` directive |
 | [Lexer, Parser and AST](ast.md) | Low-level parsing, the Abstract Syntax Tree and AST-to-text round-tripping |
 | [Extending and custom functions](extending.md) | Extend `TemplateContext`, advanced and hyper custom functions |
-| [Safe runtime](safe-runtime.md) | Understand Scriban's sandbox model, evaluate expressions, and configure `TemplateContext` runtime limits and execution switches |
+| [Safe runtime](safe-runtime.md) | Understand Scriban's exposure model, evaluate expressions, and configure `TemplateContext` runtime limits and execution switches |

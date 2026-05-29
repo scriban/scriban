@@ -448,6 +448,7 @@ A JSON representation of the value
 true
 null
 ```
+`object.to_json` serializes primitive/scalar values and values implementing `IFormattable` directly with System.Text.Json. For these values, serialization does not use `TemplateContext.MemberFilter` or `TemplateContext.MemberRenamer`. Do not expose objects containing data that templates must not access; prefer explicit `ScriptObject` / `ScriptArray` models for untrusted templates.
 
 > [!NOTE]
 > This document was automatically generated from the source code using `Scriban.DocGen`.

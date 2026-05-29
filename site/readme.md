@@ -89,10 +89,10 @@ og_type: website
     </div>
     <div class="col">
       <div class="card h-100">
-        <div class="card-header display-6"><i class="bi bi-shield-check lunet-feature-icon lunet-icon--themes"></i> Safe sandbox</div>
+        <div class="card-header display-6"><i class="bi bi-shield-check lunet-feature-icon lunet-icon--themes"></i> Safe runtime</div>
         <div class="card-body">
           <p class="card-text">
-            By default, no .NET objects are exposed unless explicitly allowed. You control exactly what is available to templates - perfect for user-facing scenarios.
+            By default, no .NET objects are exposed unless explicitly allowed. For untrusted templates, prefer explicit <code>ScriptObject</code> data with only sanitized values and safe functions.
           </p>
 
 [Runtime &amp; security](docs/runtime/readme.md) · [Safe runtime](docs/runtime/readme.md#safe-runtime)

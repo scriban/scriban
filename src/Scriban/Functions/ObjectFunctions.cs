@@ -555,6 +555,7 @@ namespace Scriban.Functions
         /// true
         /// null
         /// ```
+        /// `object.to_json` serializes primitive/scalar values and values implementing `IFormattable` directly with System.Text.Json. For these values, serialization does not use `TemplateContext.MemberFilter` or `TemplateContext.MemberRenamer`. Do not expose objects containing data that templates must not access; prefer explicit `ScriptObject` / `ScriptArray` models for untrusted templates.
         /// </remarks>
         [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Serializing known primitive types, strings, and IFormattable values.")]
         [UnconditionalSuppressMessage("AOT", "IL3050", Justification = "Serializing known primitive types, strings, and IFormattable values.")]
