@@ -194,14 +194,8 @@ namespace Scriban.Syntax
         public object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
         {
             bool hasParams = HasParameters;
-            if (hasParams)
-            {
-                context.PushGlobal(new ScriptObject());
-            }
-            else
-            {
-                context.PushLocal();
-            }
+            var functionVariables = hasParams ? new ScriptObject() : null;
+            context.PushFunction(functionVariables, !IsAnonymous);
             try
             {
                 if (NameOrDoToken is ScriptVariableLocal localVariable)
@@ -213,8 +207,7 @@ namespace Scriban.Syntax
 
                 if (hasParams)
                 {
-                    var glob = context.CurrentGlobal;
-                    if (glob is null)
+                    if (functionVariables is null)
                     {
                         throw new ScriptRuntimeException(Span, "Missing global scope for function invocation.");
                     }
@@ -233,7 +226,7 @@ namespace Scriban.Syntax
                             throw new ScriptRuntimeException(param.Span, "Missing function parameter name.");
                         }
 
-                        glob.SetValue(parameterName, arguments[i], false);
+                        functionVariables.SetValue(parameterName, arguments[i], false);
                     }
                 }
 
@@ -248,14 +241,7 @@ namespace Scriban.Syntax
             }
             finally
             {
-                if (hasParams)
-                {
-                    context.PopGlobal();
-                }
-                else
-                {
-                    context.PopLocal();
-                }
+                context.PopFunction();
             }
         }
 

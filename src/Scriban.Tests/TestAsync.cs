@@ -100,6 +100,27 @@ v.value}}";
         Assert.That(result, Is.EqualTo("hello"));
     }
 
+    [Test]
+    public async Task RenderAsyncShouldUseFunctionScopeForParametricFunctions()
+    {
+        var template = Template.Parse(@"
+{{-
+my_global_var = 1
+
+func mutate_global(x)
+    my_global_var += 1
+end
+
+mutate_global 0
+my_global_var
+-}}
+");
+
+        var result = await template.RenderAsync();
+
+        Assert.That(result, Is.EqualTo("2"));
+    }
+
     public class ValueWrapper
     {
         public string Value { get; set; }

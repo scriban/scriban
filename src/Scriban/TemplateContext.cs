@@ -43,6 +43,7 @@ namespace Scriban
         private FastStack<ScriptObject> _availableStores;
         internal FastStack<ScriptBlockStatement> BlockDelegates;
         private FastStack<VariableContext> _globalContexts;
+        private FastStack<VariableContext> _functionContexts;
         private FastStack<CultureInfo> _cultures;
         private readonly Dictionary<Type, IListAccessor> _listAccessors;
         private FastStack<ScriptLoopStatementBase> _loops;
@@ -58,6 +59,7 @@ namespace Scriban
         private int _loopStep;
         private int _getOrSetValueLevel;
         private FastStack<VariableContext> _availableGlobalContexts;
+        private FastStack<VariableContext> _availableFunctionContexts;
         private FastStack<VariableContext> _availableLocalContexts;
         private FastStack<ScriptPipeArguments> _availablePipeArguments;
         private FastStack<ScriptPipeArguments> _pipeArguments;
@@ -167,7 +169,9 @@ namespace Scriban
             _outputs.Push(_output);
 
             _globalContexts = new FastStack<VariableContext>(4);
+            _functionContexts = new FastStack<VariableContext>(4);
             _availableGlobalContexts = new FastStack<VariableContext>(4);
+            _availableFunctionContexts = new FastStack<VariableContext>(4);
             _availableLocalContexts = new FastStack<VariableContext>(4);
             _localContexts = new FastStack<VariableContext>(4);
             _availableStores = new FastStack<ScriptObject>(4);

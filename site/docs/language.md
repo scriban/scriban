@@ -396,7 +396,7 @@ Scriban supports the concept of **global/property** and **local** variables.
 
 A **global/property variable** like `{{ "{{" }} name {{ "}}" }}` is a liquid like handle, starting by a letter or underscore `_` and following by a letter `A-Z a-z`, a digit `0-9`, an underscore `_`.
 
-Global/property variables are resolved against the current object context first, then against any outer object contexts. These object contexts are stacked by constructs such as `with` blocks, parametric functions, the template model, and the builtins. An assignment to a global/property variable writes to the current object context; it does not search for and update a variable with the same name in an outer object context.
+Global/property variables are resolved against the current function variable scope first (when applicable), then against the current object context and any outer object contexts. Object contexts are stacked by constructs such as `with` blocks, the template model, and the builtins. An assignment to a global/property variable writes to the current object context; it does not search for and update a variable with the same name in an outer object context.
 
 The following text are valid variable names:
 
@@ -693,7 +693,7 @@ Note that a function can have mixed text statements as well:
 >
 > Setting a non-local variable (e.g `a = 10`) in a simple function writes to the current object/global context of the caller.
 >
-> Parametric functions differ by introducing a new object/global context inside the function that includes parameters. 
+> Named function calls do not inherit the function variable scope of the caller. Parametric functions differ by introducing a function variable scope that includes parameters.
  
 ### 7.2 Anonymous functions
 
@@ -730,7 +730,7 @@ They are similar to simple functions but they are declared with parenthesis, whi
 
 Another difference with simple functions is that they require function calls and arguments to match the expected function parameters. 
 
-Parametric functions open a new object/global context for each invocation. The parameter names are global/property variables in that new context. Assigning to an unprefixed name inside the function writes to this function context, so it will not update an outer global/property variable with the same name. Local variables prefixed with `$` still use the separate local scope, as with simple functions.
+Parametric functions open a new function variable scope for each invocation. The parameter names are global/property variables in that function scope. Assigning to a parameter or to a variable created only inside the function writes to the function scope, so it will not leak to the caller. Assigning to an unprefixed name that already exists in an available object/global scope writes to the current object/global context; for example, a `with` block still receives the assignment instead of updating an outer object context. Local variables prefixed with `$` still use the separate local scope, as with simple functions.
 
 - A function with normal parameters:
 

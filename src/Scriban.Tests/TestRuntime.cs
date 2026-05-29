@@ -961,6 +961,130 @@ end -}}
             TextAssert.AreEqual("12300", result);
         }
 
+        [Test]
+        public void TestParametricFunctionCanMutateGlobalVariableScope()
+        {
+            var template = Template.Parse(@"
+{{-
+my_global_var = 1
+
+func mutate_global(x)
+    my_global_var += 1
+end
+
+mutate_global 0
+my_global_var
+-}}
+");
+
+            var result = template.Render();
+            TextAssert.AreEqual("2", result);
+        }
+
+        [Test]
+        public void TestParametricFunctionVariablesDoNotLeakToGlobalScope()
+        {
+            var template = Template.Parse(@"
+{{-
+func set_function_variable(x)
+    function_variable = x
+end
+
+set_function_variable 42
+function_variable
+-}}
+");
+
+            var result = template.Render();
+            TextAssert.AreEqual(string.Empty, result);
+        }
+
+        [Test]
+        public void TestParametricFunctionDoesNotExposeCallerFunctionScope()
+        {
+            var template = Template.Parse(@"
+{{-
+func read_x(y)
+    ret x
+end
+
+func caller(x)
+    ret read_x 0
+end
+
+caller 42
+-}}
+");
+
+            var result = template.Render();
+            TextAssert.AreEqual(string.Empty, result);
+        }
+
+        [Test]
+        public void TestParameterlessFunctionDoesNotExposeCallerFunctionScope()
+        {
+            var template = Template.Parse(@"
+{{-
+func read_x
+    ret x
+end
+
+func caller(x)
+    ret read_x
+end
+
+caller 42
+-}}
+");
+
+            var result = template.Render();
+            TextAssert.AreEqual(string.Empty, result);
+        }
+
+        [Test]
+        public void TestWithStatementWritesToCurrentGlobalScope()
+        {
+            var template = Template.Parse(@"
+{{-
+my_global_var = 1
+target = {}
+
+with target
+    my_global_var = 2
+end
+
+my_global_var; '|'; target.my_global_var
+-}}
+");
+
+            var result = template.Render();
+            TextAssert.AreEqual("1|2", result);
+        }
+
+        [Test]
+        public void TestParametricFunctionWritesToWithScope()
+        {
+            var template = Template.Parse(@"
+{{-
+my_global_var = 1
+target = {}
+
+with target
+    func mutate_global(x)
+        my_global_var += 1
+    end
+
+    mutate_global 0
+end
+
+my_global_var; '|'; target.my_global_var
+-}}
+");
+
+            var result = template.Render();
+            TextAssert.AreEqual("1|2", result);
+        }
+
 
         [Test]
         public void TestPipeAndFunctionAndLoop()
