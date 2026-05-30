@@ -15,8 +15,9 @@ A template loader is responsible for providing the text template from an include
 public interface ITemplateLoader
 {
     /// <summary>
-    /// Gets an absolute path for the specified include template name. Note that it is not necessarely a path on a disk, 
-    /// but an absolute path that can be used as a dictionary key for caching)
+    /// Gets an absolute path for the specified include template name. Note that it is not necessarily a path on a disk,
+    /// but an absolute path that can be used as a dictionary key for caching). If the loader maps template names to
+    /// files, it is responsible for validating and normalizing names against its allowed template roots.
     /// </summary>
     /// <param name="context">The current context called from</param>
     /// <param name="callerSpan">The current span called from</param>
@@ -37,26 +38,50 @@ public interface ITemplateLoader
 
 In order to use the `include` directive, the template loader should provide:
 
-- The `GetPath` method translates a `templateName` (the argument passed to the `include <templateName>` directive) to a logical/phyisical path that the `ITemplateLoader.Load` method will understand. 
+- The `GetPath` method translates a `templateName` (the argument passed to the `include <templateName>` directive) to a logical/physical path that the `ITemplateLoader.Load` method will understand.
 - The `Load` method to actually load the the text template code from the specified `templatePath` (previously returned by `GetPath` method)
 
 
 The 2 step methods, `GetPath` and then `Load` allows to cache intermediate results. If a template loader returns the same `template path` for a `template name` any existing cached templates will be returned instead. Cached templates are stored in the `TemplateContext.CachedTemplates` property.
 
-A typical implementation of `ITemplateLoader` could read data from the disk:
+A template name is application-defined: Scriban passes the value from `include` to the loader, but it does not normalize or restrict it because a loader might use logical names, database keys, embedded resources, or another non-file scheme. If a loader maps template names to files, the loader should normalize the candidate path and verify that it stays under the intended template root before reading from disk:
 
 ```csharp
 /// <summary>
-/// A very simple ITemplateLoader loading directly from the disk, without any checks...etc.
+/// A simple ITemplateLoader loading templates from a configured directory.
 /// </summary>
 public class MyIncludeFromDisk : ITemplateLoader
 {
-    string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+    private static readonly StringComparison PathComparison =
+        OperatingSystem.IsWindows()
+            ? StringComparison.OrdinalIgnoreCase
+            : StringComparison.Ordinal;
+
+    private readonly string _templateRoot;
+
+    public MyIncludeFromDisk(string templateRoot)
     {
-        return Path.Combine(Environment.CurrentDirectory, templateName);
+        _templateRoot = Path.GetFullPath(templateRoot);
+
+        if (!_templateRoot.EndsWith(Path.DirectorySeparatorChar.ToString(), StringComparison.Ordinal))
+        {
+            _templateRoot += Path.DirectorySeparatorChar;
+        }
     }
 
-    string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
+    public string GetPath(TemplateContext context, SourceSpan callerSpan, string templateName)
+    {
+        var templatePath = Path.GetFullPath(Path.Combine(_templateRoot, templateName));
+
+        if (!templatePath.StartsWith(_templateRoot, PathComparison))
+        {
+            throw new ScriptRuntimeException(callerSpan, $"Include `{templateName}` is outside the template root.");
+        }
+
+        return templatePath;
+    }
+
+    public string Load(TemplateContext context, SourceSpan callerSpan, string templatePath)
     {
         // Template path was produced by the `GetPath` method above in case the Template has 
         // not been loaded yet

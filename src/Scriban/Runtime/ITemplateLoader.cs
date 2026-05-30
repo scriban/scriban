@@ -21,8 +21,9 @@ namespace Scriban.Runtime
     interface ITemplateLoader
     {
         /// <summary>
-        /// Gets an absolute path for the specified include template name. Note that it is not necessarely a path on a disk,
-        /// but an absolute path that can be used as a dictionary key for caching)
+        /// Gets an absolute path for the specified include template name. Note that it is not necessarily a path on a disk,
+        /// but an absolute path that can be used as a dictionary key for caching). If the loader maps template names to
+        /// files, it is responsible for validating and normalizing names against its allowed template roots.
         /// </summary>
         /// <param name="context">The current context called from</param>
         /// <param name="callerSpan">The current span called from</param>
