@@ -99,6 +99,11 @@ namespace Scriban.Runtime.Accessors
             {
                 return false;
             }
+            var setMethod = _indexer.GetSetMethod(false);
+            if (setMethod is null || IsInitOnly(setMethod))
+            {
+                return false;
+            }
             _indexer.SetValue(target, value, new[] { index });
             return true;
         }
@@ -112,11 +117,22 @@ namespace Scriban.Runtime.Accessors
 
             if (memberAccessor is FieldInfo fieldAccessor)
             {
+                if (fieldAccessor.IsInitOnly || fieldAccessor.IsLiteral)
+                {
+                    return false;
+                }
+
                 fieldAccessor.SetValue(target, context.ToObject(span, value, fieldAccessor.FieldType));
                 return true;
             }
 
             var propertyAccessor = (PropertyInfo)memberAccessor;
+            var setMethod = propertyAccessor.GetSetMethod(false);
+            if (setMethod is null || IsInitOnly(setMethod))
+            {
+                return false;
+            }
+
             propertyAccessor.SetValue(target, context.ToObject(span, value, propertyAccessor.PropertyType));
 
             return true;
@@ -188,6 +204,19 @@ namespace Scriban.Runtime.Accessors
         private string Rename(MemberInfo member)
         {
             return _renamer(member);
+        }
+
+        private static bool IsInitOnly(MethodInfo setMethod)
+        {
+            foreach (var modifier in setMethod.ReturnParameter.GetRequiredCustomModifiers())
+            {
+                if (modifier.FullName == "System.Runtime.CompilerServices.IsExternalInit")
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

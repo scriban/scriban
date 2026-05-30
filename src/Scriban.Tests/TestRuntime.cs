@@ -41,6 +41,13 @@ namespace Scriban.Tests
             return Assert.Throws<TException>(code) ?? throw new AssertionException($"Expected {typeof(TException).Name}.");
         }
 
+        private static string RenderWithObject(string script, object value)
+        {
+            var context = new TemplateContext();
+            context.PushGlobal(new ScriptObject { ["obj"] = value });
+            return Template.Parse(script).Render(context);
+        }
+
         [Test]
         public void TestFunctionPointerWithPath()
         {
@@ -1594,6 +1601,39 @@ Tax: {{ 7 | match_tax }}";
         }
 
         [Test]
+        public void TestTypedObjectAccessorSetterVisibility()
+        {
+            var obj = new ObjectWithRestrictedSetters { InitOnlyValue = "init" };
+
+            RenderWithObject("{{ obj.public_value = 'changed' }}", obj);
+            Assert.AreEqual("changed", obj.PublicValue);
+
+            RenderWithObject("{{ obj.public_field = 'changed' }}", obj);
+            Assert.AreEqual("changed", obj.PublicField);
+
+            AssertReadonly("{{ obj.private_set_value = 'changed' }}");
+            Assert.AreEqual("private", obj.PrivateSetValue);
+
+            AssertReadonly("{{ obj.internal_set_value = 'changed' }}");
+            Assert.AreEqual("internal", obj.InternalSetValue);
+
+            AssertReadonly("{{ obj.init_only_value = 'changed' }}");
+            Assert.AreEqual("init", obj.InitOnlyValue);
+
+            AssertReadonly("{{ obj.read_only_field = 'changed' }}");
+            Assert.AreEqual("readonly", obj.ReadOnlyField);
+
+            AssertReadonly("{{ obj['key'] = 'changed' }}");
+            Assert.AreEqual("indexer", obj["key"]);
+
+            void AssertReadonly(string script)
+            {
+                var exception = Assert.Throws<ScriptRuntimeException>(() => RenderWithObject(script, obj));
+                StringAssert.Contains("readonly", exception!.Message);
+            }
+        }
+
+        [Test]
         public void TestNullableArgument()
         {
             var template = Template.Parse("{{ tester 'input1' 1 }}");
@@ -2136,6 +2176,27 @@ end
         private class MyObject2 : MyObject
         {
             public string? PropertyC { get; set; }
+        }
+
+        private class ObjectWithRestrictedSetters
+        {
+            public string PublicField = "public";
+
+            public readonly string ReadOnlyField = "readonly";
+
+            public string PublicValue { get; set; } = "public";
+
+            public string PrivateSetValue { get; private set; } = "private";
+
+            public string InternalSetValue { get; internal set; } = "internal";
+
+            public string InitOnlyValue { get; init; } = "init";
+
+            public string this[string key]
+            {
+                get => "indexer";
+                private set { }
+            }
         }
 
         private class MyStaticObject

@@ -13,6 +13,8 @@ This is not a process-level sandbox or a security boundary around arbitrary .NET
 
 For untrusted templates, the host application is responsible for exposing only data and functions that the template is allowed to use. Prefer building the context from explicit, sanitized [`ScriptObject`](scriptobject.md) and `ScriptArray` values instead of passing rich .NET objects directly. This also keeps the data model compatible with Native AOT/trimming because Scriban does not need reflection to discover members. Do not rely on `MemberFilter`, `MemberRenamer`, relaxed access switches, or individual builtins as a complete sandbox for objects that contain sensitive members.
 
+When a template accesses a reflected .NET object directly, it can assign to public fields and public non-`init` property or indexer setters. Properties with private, internal, protected, or `init` setters are read-only to templates. `MemberFilter` controls which reflected members are exposed, but it does not provide separate read and write filtering.
+
 The practical exposure boundary is therefore:
 
 - which globals and builtins you expose through [`ScriptObject`](scriptobject.md)
