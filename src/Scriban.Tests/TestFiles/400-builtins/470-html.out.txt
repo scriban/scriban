@@ -1,6 +1,8 @@
 &lt;p&gt;test&lt;/p&gt;
 john%40liquid.com
+a%20b%26c%3Dd%2Fe
 %3Chello%3E%20&%20%3Cscriban%3E
+https://example.com/a%20path/?q=%3Ctag%3E&ok=true#frag
  and test
  and test
  and test 

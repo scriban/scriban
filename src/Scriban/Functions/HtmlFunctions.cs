@@ -5,6 +5,7 @@
 #nullable enable
 
 using System;
+using System.Text;
 using System.Text.RegularExpressions;
 using Scriban.Runtime;
 
@@ -101,10 +102,13 @@ namespace Scriban.Functions
 
 
         /// <summary>
-        /// Converts any URL-unsafe characters in a string into percent-encoded characters.
+        /// Percent-encodes a string for use as a URL component.
+        /// This function encodes URL syntax characters such as `:`, `/`, `?`, `#`, `&amp;`, `=`, and `'`. Spaces are encoded as `%20`.
+        /// It does not validate complete URLs and does not make arbitrary input safe for every output context. When writing a value
+        /// into an HTML attribute, validate complete URLs separately and HTML-escape the attribute value.
         /// </summary>
         /// <param name="text">The input string</param>
-        /// <returns>The input string url encoded</returns>
+        /// <returns>The input string URL encoded</returns>
         /// <remarks>
         /// ```scriban-html
         /// {{ "john@liquid.com" | html.url_encode }}
@@ -123,10 +127,13 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Identifies all characters in a string that are not allowed in URLS, and replaces the characters with their escaped variants.
+        /// Escapes characters that are not valid in a complete URL while preserving URL syntax characters.
+        /// This function is intended for already-formed, trusted or validated URLs and paths. It preserves reserved URL syntax
+        /// characters such as `:`, `/`, `?`, `#`, `&amp;`, `=`, and `'`. It does not validate schemes or hosts and must not be used
+        /// as a sanitizer for untrusted `href` or `src` values. Use `html.url_encode` for untrusted URL components or query values.
         /// </summary>
         /// <param name="text">The input string</param>
-        /// <returns>The input string url escaped</returns>
+        /// <returns>The input string URL escaped</returns>
         /// <remarks>
         /// ```scriban-html
         /// {{ "&lt;hello&gt; &amp; &lt;scriban&gt;" | html.url_escape }}
@@ -137,13 +144,60 @@ namespace Scriban.Functions
         /// </remarks>
         public static string? UrlEscape(string? text)
         {
-            if (string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0)
             {
                 return text;
             }
-#pragma warning disable SYSLIB0013
-            return Uri.EscapeUriString(text);
-#pragma warning restore SYSLIB0013
+
+            StringBuilder? builder = null;
+            var unescapedStart = 0;
+            var escapeStart = -1;
+
+            for (var i = 0; i < text.Length; i++)
+            {
+                if (IsAllowedInEscapedUrl(text[i]))
+                {
+                    if (escapeStart >= 0)
+                    {
+                        builder ??= new StringBuilder(text.Length);
+                        builder.Append(text, unescapedStart, escapeStart - unescapedStart);
+                        builder.Append(Uri.EscapeDataString(text.Substring(escapeStart, i - escapeStart)));
+                        unescapedStart = i;
+                        escapeStart = -1;
+                    }
+                }
+                else if (escapeStart < 0)
+                {
+                    escapeStart = i;
+                }
+            }
+
+            if (escapeStart >= 0)
+            {
+                builder ??= new StringBuilder(text.Length);
+                builder.Append(text, unescapedStart, escapeStart - unescapedStart);
+                builder.Append(Uri.EscapeDataString(text.Substring(escapeStart)));
+            }
+            else if (builder is not null)
+            {
+                builder.Append(text, unescapedStart, text.Length - unescapedStart);
+            }
+
+            return builder?.ToString() ?? text;
+        }
+
+        private static bool IsAllowedInEscapedUrl(char c)
+        {
+            if ((c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9'))
+            {
+                return true;
+            }
+
+            return c is '-' or '.' or '_' or '~'
+                // Reserved URL syntax characters that must be preserved when escaping a complete URL.
+                or ':' or '/' or '?' or '#' or '[' or ']' or '@'
+                or '!' or '$' or '&' or '\'' or '(' or ')' or '*'
+                or '+' or ',' or ';' or '=';
         }
     }
 }

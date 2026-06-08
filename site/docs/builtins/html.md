@@ -112,7 +112,10 @@ html.url_encode <text>
 
 #### Description
 
-Converts any URL-unsafe characters in a string into percent-encoded characters.
+Percent-encodes a string for use as a URL component.
+This function encodes URL syntax characters such as `:`, `/`, `?`, `#`, `&`, `=`, and `'`. Spaces are encoded as `%20`.
+It does not validate complete URLs and does not make arbitrary input safe for every output context. When writing a value
+into an HTML attribute, validate complete URLs separately and HTML-escape the attribute value.
 
 #### Arguments
 
@@ -120,7 +123,7 @@ Converts any URL-unsafe characters in a string into percent-encoded characters.
 
 #### Returns
 
-The input string url encoded
+The input string URL encoded
 
 #### Examples
 
@@ -141,7 +144,10 @@ html.url_escape <text>
 
 #### Description
 
-Identifies all characters in a string that are not allowed in URLS, and replaces the characters with their escaped variants.
+Escapes characters that are not valid in a complete URL while preserving URL syntax characters.
+This function is intended for already-formed, trusted or validated URLs and paths. It preserves reserved URL syntax
+characters such as `:`, `/`, `?`, `#`, `&`, `=`, and `'`. It does not validate schemes or hosts and must not be used
+as a sanitizer for untrusted `href` or `src` values. Use `html.url_encode` for untrusted URL components or query values.
 
 #### Arguments
 
@@ -149,7 +155,7 @@ Identifies all characters in a string that are not allowed in URLS, and replaces
 
 #### Returns
 
-The input string url escaped
+The input string URL escaped
 
 #### Examples
 

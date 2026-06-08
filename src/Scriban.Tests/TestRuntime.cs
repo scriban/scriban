@@ -36,7 +36,7 @@ namespace Scriban.Tests
             return context.CurrentGlobal ?? throw new AssertionException("Expected a current global script object.");
         }
 
-        private static TException AssertThrows<TException>(TestDelegate code) where TException : Exception
+        private static TException AssertThrows<TException>(Action code) where TException : Exception
         {
             return Assert.Throws<TException>(code) ?? throw new AssertionException($"Expected {typeof(TException).Name}.");
         }
