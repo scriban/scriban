@@ -178,7 +178,7 @@ namespace Scriban.Functions
         /// `cycle` accepts a parameter called cycle group in cases where you need multiple cycle blocks in one template.
         /// If no name is supplied for the cycle group, then it is assumed that multiple calls with the same parameters are one group.
         /// </remarks>
-        public static object? Cycle(TemplateContext context, SourceSpan span, IList list, object? group = null)
+        public static object? Cycle(TemplateContext context, SourceSpan span, IList? list, object? group = null)
         {
             if (list is null)
             {

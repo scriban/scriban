@@ -8,4 +8,11 @@
 true
 true
 false
+false
 4.24
+null | math.plus 1:
+1 | math.plus null:
+null | math.minus 1:
+1 | math.times null:
+1 | math.divided_by null:
+1 | math.modulo null:

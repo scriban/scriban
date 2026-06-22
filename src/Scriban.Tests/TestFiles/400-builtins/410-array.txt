@@ -57,6 +57,7 @@ Multiple cycle:
     array.cycle []
 end
 }}
+null cycle:{{ array.cycle null }}
 Multiple cycle group:
 {{for x in 1..4
     array.cycle ["a", "b", "c", "d"] "group1" 

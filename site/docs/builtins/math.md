@@ -197,14 +197,16 @@ Returns a boolean indicating if the input value is a number
 
 #### Examples
 
-> **input** [Try out](/?template=%7B%7B%20255%20%7C%20math.is_number%20%7D%7D%0A%7B%7B%20%22yo%22%20%7C%20math.is_number%20%7D%7D&model=%7B%7D)
+> **input** [Try out](/?template=%7B%7B%20255%20%7C%20math.is_number%20%7D%7D%0A%7B%7B%20%22yo%22%20%7C%20math.is_number%20%7D%7D%0A%7B%7B%20null%20%7C%20math.is_number%20%7D%7D&model=%7B%7D)
 ```scriban-html
 {{ "{{" }} 255 | math.is_number {{ "}}" }}
 {{ "{{" }} "yo" | math.is_number {{ "}}" }}
+{{ "{{" }} null | math.is_number {{ "}}" }}
 ```
 > **output**
 ```html
 true
+false
 false
 ```
 

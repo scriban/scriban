@@ -129,7 +129,7 @@ namespace Scriban.Functions
         /// 4
         /// ```
         /// </remarks>
-        public static object? DividedBy(TemplateContext context, SourceSpan span, double value, object divisor)
+        public static object? DividedBy(TemplateContext context, SourceSpan span, double value, object? divisor)
         {
             var result = ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Divide, value, divisor);
 
@@ -209,13 +209,15 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ 255 | math.is_number }}
         /// {{ "yo" | math.is_number }}
+        /// {{ null | math.is_number }}
         /// ```
         /// ```html
         /// true
         /// false
+        /// false
         /// ```
         /// </remarks>
-        public static bool IsNumber(object value)
+        public static bool IsNumber(object? value)
         {
             return value is sbyte
                    || value is byte
@@ -247,7 +249,7 @@ namespace Scriban.Functions
         /// 250
         /// ```
         /// </remarks>
-        public static object? Minus(TemplateContext context, SourceSpan span, object value, object with)
+        public static object? Minus(TemplateContext context, SourceSpan span, object? value, object? with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Subtract, value, with);
         }
@@ -268,7 +270,7 @@ namespace Scriban.Functions
         /// 1
         /// ```
         /// </remarks>
-        public static object? Modulo(TemplateContext context, SourceSpan span, object value, object with)
+        public static object? Modulo(TemplateContext context, SourceSpan span, object? value, object? with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Modulus, value, with);
         }
@@ -289,7 +291,7 @@ namespace Scriban.Functions
         /// 3
         /// ```
         /// </remarks>
-        public static object? Plus(TemplateContext context, SourceSpan span, object value, object with)
+        public static object? Plus(TemplateContext context, SourceSpan span, object? value, object? with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Add, value, with);
         }
@@ -333,7 +335,7 @@ namespace Scriban.Functions
         /// 6
         /// ```
         /// </remarks>
-        public static object? Times(TemplateContext context, SourceSpan span, object value, object with)
+        public static object? Times(TemplateContext context, SourceSpan span, object? value, object? with)
         {
             return ScriptBinaryExpression.Evaluate(context, span, ScriptBinaryOperator.Multiply, value, with);
         }

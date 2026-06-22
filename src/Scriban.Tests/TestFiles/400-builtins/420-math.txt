@@ -8,4 +8,11 @@
 {{ 4.5 | math.is_number }}
 {{ 4 | math.is_number }}
 {{ "toto" | math.is_number }}
+{{ null | math.is_number }}
 {{ 4.2435 | math.format "0.##" }}
+null | math.plus 1:{{ null | math.plus 1 }}
+1 | math.plus null:{{ 1 | math.plus null }}
+null | math.minus 1:{{ null | math.minus 1 }}
+1 | math.times null:{{ 1 | math.times null }}
+1 | math.divided_by null:{{ 1 | math.divided_by null }}
+1 | math.modulo null:{{ 1 | math.modulo null }}
