@@ -8,4 +8,5 @@
 {{ 4.5 | math.is_number }}
 {{ 4 | math.is_number }}
 {{ "toto" | math.is_number }}
+{{ null | math.is_number }}
 {{ 4.2435 | math.format "0.##" }}

@@ -215,7 +215,7 @@ namespace Scriban.Functions
         /// false
         /// ```
         /// </remarks>
-        public static bool IsNumber(object value)
+        public static bool IsNumber(object? value)
         {
             return value is sbyte
                    || value is byte
