@@ -938,7 +938,15 @@ m
             var template = Template.Parse($"{{{{ {expression} }}}}");
 
             Assert.True(template.HasErrors);
-            StringAssert.Contains("The statement depth limit `250` was reached when parsing this statement", template.Messages[0].ToString());
+            if (expressionKind == "objects")
+            {
+                StringAssert.Contains("The parser recursive depth limit was reached near a stack overflow", template.Messages[0].ToString());
+            }
+            else
+            {
+                StringAssert.Contains("The statement depth limit `250` was reached when parsing this statement", template.Messages[0].ToString());
+
+            }
         }
 
         [Test]
@@ -1272,7 +1280,7 @@ m
             var builtinDocFile = Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "site", "docs", "builtins", $"{functionObject}.md"));
             var lines = File.ReadAllLines(builtinDocFile);
 
-            var matchFunctionSection = new Regex($@"^##\s+`({functionObject}\.\w+)`");
+            var matchFunctionSection = new Regex($@"^###\s+`({functionObject}\.\w+)`");
 
             var tests = new List<TestCaseData>();
 
