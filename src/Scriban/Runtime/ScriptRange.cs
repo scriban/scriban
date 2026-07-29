@@ -367,13 +367,15 @@ namespace Scriban.Runtime
 
         private static IEnumerable MultiplyImpl(TemplateContext context, SourceSpan span, IEnumerable left, int count)
         {
-            int loopStep = 0;
+            int repetitionLoopStep = 0;
+            int itemLoopStep = 0;
             var loopType = GetLoopType(left);
             for (int i = 0; i < count; i++)
             {
+                context.StepLoop(span, ref repetitionLoopStep);
                 foreach (var value in left)
                 {
-                    context.StepLoop(span, ref loopStep, loopType);
+                    context.StepLoop(span, ref itemLoopStep, loopType);
                     yield return value;
                 }
             }

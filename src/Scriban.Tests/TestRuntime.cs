@@ -378,6 +378,32 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void LazyArrayMultiplyShouldRespectLoopLimitForEmptySequence()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 10
+            };
+            var template = Template.Parse("{{ (([] | array.reverse) * 11) | array.size }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("iteration limit `10`", exception!.Message);
+        }
+
+        [Test]
+        public void LazyArrayMultiplyShouldAllowWorkWithinLoopLimit()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 10
+            };
+            var template = Template.Parse("{{ (([1] | array.reverse) * 10) | array.size }}");
+
+            Assert.AreEqual("10", template.Render(context));
+        }
+
+        [Test]
         public void ArrayMultiplyShouldRejectOverflowingResultLength()
         {
             var context = new TemplateContext
