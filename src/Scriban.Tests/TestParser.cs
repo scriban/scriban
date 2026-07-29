@@ -938,15 +938,10 @@ m
             var template = Template.Parse($"{{{{ {expression} }}}}");
 
             Assert.True(template.HasErrors);
-            if (expressionKind == "objects")
-            {
-                StringAssert.Contains("The parser recursive depth limit was reached near a stack overflow", template.Messages[0].ToString());
-            }
-            else
-            {
-                StringAssert.Contains("The statement depth limit `250` was reached when parsing this statement", template.Messages[0].ToString());
-
-            }
+            // Available stack space varies by platform and test runner, so either safety guard may stop parsing first.
+            Assert.That(template.Messages[0].ToString(),
+                Does.Contain("The statement depth limit `250` was reached when parsing this statement")
+                    .Or.Contain("The parser recursive depth limit was reached near a stack overflow"));
         }
 
         [Test]
