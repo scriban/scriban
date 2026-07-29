@@ -160,6 +160,14 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void EmptyStringMultiplicationShouldReturnWithoutRepeating()
+        {
+            var template = Template.Parse("{{ '' * 2147483647 }}");
+
+            Assert.AreEqual(string.Empty, template.Render());
+        }
+
+        [Test]
         public void BigIntegerShiftShouldRejectOversizedAmounts()
         {
             var template = Template.Parse("{{ 1 << 1048577 }}");

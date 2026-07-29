@@ -338,7 +338,12 @@ namespace Scriban.Syntax
                         throw new ScriptRuntimeException(spanMultiplier, $"Expecting an integer. The operator `{op.ToText()}` is not supported for the expression. Only working on string x int or int x string"); // unit test: 112-binary-string-error1
                     }
                     var leftText = context.ObjectToString(left) ?? string.Empty;
-                    if (context.LimitToString > 0 && value > 0 && leftText.Length > 0 && (long)leftText.Length * value > context.LimitToString)
+                    if (value <= 0 || leftText.Length == 0)
+                    {
+                        return string.Empty;
+                    }
+
+                    if (context.LimitToString > 0 && (long)leftText.Length * value > context.LimitToString)
                     {
                         throw new ScriptRuntimeException(spanMultiplier, $"String multiplication exceeds LimitToString `{context.LimitToString}`.");
                     }
