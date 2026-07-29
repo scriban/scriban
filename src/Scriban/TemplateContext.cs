@@ -56,7 +56,8 @@ namespace Scriban
         private FastStack<object?> _caseValues;
         private int _callDepth;
         private bool _isFunctionCallDisabled;
-        private int _loopStep;
+        private int _loopDepth;
+        private long _loopStep;
         private int _getOrSetValueLevel;
         private FastStack<VariableContext> _availableGlobalContexts;
         private FastStack<VariableContext> _availableFunctionContexts;
@@ -291,7 +292,8 @@ namespace Scriban
         public MemberFilterDelegate? MemberFilter { get; set; }
 
         /// <summary>
-        /// A loop limit that can be used at runtime to limit the number of loops. Default is 1000.
+        /// A loop limit that caps cumulative iterations across each dynamically nested iteration tree. Default is 1000.
+        /// Language loops and internal iteration share the same budget until the outermost iteration exits.
         /// Set to 0 to disable checking loop limit.
         /// </summary>
         public int LoopLimit { get; set; }
@@ -1099,6 +1101,7 @@ namespace Scriban
             _loops.Push(loop);
             PushVariableScope(VariableScope.Loop);
             OnEnterLoop(loop);
+            EnterLoopScopeCore();
         }
 
         /// <summary>
@@ -1122,10 +1125,7 @@ namespace Scriban
             {
                 PopVariableScope(VariableScope.Loop);
                 _loops.Pop();
-                if (!IsInLoop)
-                {
-                    _loopStep = 0;
-                }
+                ExitLoopScopeCore();
             }
         }
 
@@ -1143,16 +1143,52 @@ namespace Scriban
             Queryable
         }
 
-        internal void StepLoop(SourceSpan span, ref int loopStep, LoopType loopType = LoopType.Default)
+        internal LoopScope EnterLoopScope()
         {
+            EnterLoopScopeCore();
+            return new LoopScope(this);
+        }
+
+        private void EnterLoopScopeCore()
+        {
+            if (_loopDepth == 0)
+            {
+                _loopStep = 0;
+            }
+            _loopDepth++;
+        }
+
+        private void ExitLoopScopeCore()
+        {
+            Debug.Assert(_loopDepth > 0);
+            _loopDepth--;
+            if (_loopDepth == 0)
+            {
+                _loopStep = 0;
+            }
+        }
+
+        internal void StepLoop(SourceSpan span, LoopType loopType = LoopType.Default)
+        {
+            StepLoop(span, 1, loopType);
+        }
+
+        internal void StepLoop(SourceSpan span, long stepCount, LoopType loopType = LoopType.Default)
+        {
+            Debug.Assert(_loopDepth > 0);
             CheckAbort();
 
-            loopStep++;
+            if (stepCount < 0)
+            {
+                throw new ArgumentOutOfRangeException(nameof(stepCount));
+            }
+
+            _loopStep = long.MaxValue - _loopStep < stepCount ? long.MaxValue : _loopStep + stepCount;
             var loopLimit = loopType == LoopType.Queryable
                 ? LoopLimitQueryable.GetValueOrDefault(LoopLimit)
                 : LoopLimit;
 
-            if (loopLimit != 0 && loopStep > loopLimit)
+            if (loopLimit != 0 && _loopStep > loopLimit)
             {
                 throw new ScriptRuntimeException(span, $"Exceeding number of iteration limit `{loopLimit}` for internal iteration.");
             }
@@ -1161,6 +1197,7 @@ namespace Scriban
         internal bool StepLoop(ScriptLoopStatementBase loop, LoopType loopType = LoopType.Default)
         {
             Debug.Assert(_loops.Count > 0);
+            Debug.Assert(_loopDepth > 0);
 
             _loopStep++;
 
@@ -1185,6 +1222,21 @@ namespace Scriban
                 throw new ScriptRuntimeException(currentLoopStatement.Span, $"Exceeding number of iteration limit `{loopLimit}` for loop statement."); // unit test: 215-for-statement-error1.txt
             }
             return OnStepLoop(loop);
+        }
+
+        internal readonly struct LoopScope : IDisposable
+        {
+            private readonly TemplateContext _context;
+
+            public LoopScope(TemplateContext context)
+            {
+                _context = context;
+            }
+
+            public void Dispose()
+            {
+                _context.ExitLoopScopeCore();
+            }
         }
 
         /// <summary>

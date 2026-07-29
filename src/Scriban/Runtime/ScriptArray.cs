@@ -513,16 +513,11 @@ namespace Scriban.Runtime
                         throw new ScriptRuntimeException(span, "Array multiplication result length exceeds the maximum supported array length.");
                     }
 
-                    if (context.LoopLimit > 0 && resultLength > context.LoopLimit)
-                    {
-                        throw new ScriptRuntimeException(span, $"Exceeding number of iteration limit `{context.LoopLimit}` for internal iteration.");
-                    }
-
+                    using var loopScope = context.EnterLoopScope();
+                    context.StepLoop(span, resultLength + intModifier);
                     var newArray = new ScriptArray<T>((int)resultLength);
-                    var loopStep = 0;
                     for (int i = 0; i < intModifier; i++)
                     {
-                        context.StepLoop(span, ref loopStep);
                         newArray.AddRange(array);
                     }
 

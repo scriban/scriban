@@ -466,13 +466,13 @@ namespace Scriban.Functions
 #pragma warning restore CS0108
         {
             if (value is null) return new ScriptArray();
+            using var loopScope = context.EnterLoopScope();
             if (value is IDictionary<string, object?> dictStringObject)
             {
                 var values = new ScriptArray();
-                var loopStep = 0;
                 foreach (var memberValue in dictStringObject.Values)
                 {
-                    context.StepLoop(context.CurrentSpan, ref loopStep);
+                    context.StepLoop(context.CurrentSpan);
                     values.Add(memberValue);
                 }
                 return values;
@@ -482,10 +482,9 @@ namespace Scriban.Functions
 
             var accessor = context.GetMemberAccessor(value);
             var scriptArray = new ScriptArray();
-            var memberLoopStep = 0;
             foreach(var member in accessor.GetMembers(context, context.CurrentSpan, value))
             {
-                context.StepLoop(context.CurrentSpan, ref memberLoopStep);
+                context.StepLoop(context.CurrentSpan);
                 _ = accessor.TryGetValue(context, context.CurrentSpan, value, member, out var memberValue);
                 scriptArray.Add(memberValue);
             }
@@ -495,11 +494,11 @@ namespace Scriban.Functions
         private static ScriptArray ToScriptArray(TemplateContext context, SourceSpan span, IEnumerable values)
         {
             var result = new ScriptArray();
-            var loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(values);
             foreach (var value in values)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 result.Add(value);
             }
 
@@ -573,6 +572,7 @@ namespace Scriban.Functions
             using var stream = new MemoryStream();
             var writer = new Utf8JsonWriter(stream, writerOptions);
             var path = new HashSet<object>(ReferenceEqualityComparer.Default);
+            using var loopScope = context.EnterLoopScope();
 
             WriteValue(context, writer, value, 0, path);
             writer.Flush();
@@ -630,6 +630,7 @@ namespace Scriban.Functions
                         {
                             foreach (var x in list)
                             {
+                                context.StepLoop(context.CurrentSpan);
                                 WriteValue(context, writer, x, depth, path);
                             }
                         }
@@ -641,6 +642,7 @@ namespace Scriban.Functions
                         var accessor = context.GetMemberAccessor(value);
                         foreach (var member in accessor.GetMembers(context, context.CurrentSpan, value))
                         {
+                            context.StepLoop(context.CurrentSpan);
                             if (accessor.TryGetValue(context, context.CurrentSpan, value, member, out var memberValue))
                             {
                                 writer.WritePropertyName(member);

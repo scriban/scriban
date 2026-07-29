@@ -111,11 +111,11 @@ namespace Scriban.Runtime
 
         private static IEnumerable OffsetImpl(TemplateContext context, SourceSpan span, IEnumerable list, int index)
         {
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(list);
             foreach (var item in list)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 if (index <= 0)
                 {
                     yield return item;
@@ -153,11 +153,11 @@ namespace Scriban.Runtime
 
         private static IEnumerable LimitImpl(TemplateContext context, SourceSpan span, IEnumerable list, int count)
         {
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(list);
             foreach (var item in list)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 if (count <= 0)
                 {
                     break;
@@ -225,11 +225,11 @@ namespace Scriban.Runtime
         {
             if (list is null) yield break;
 
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(list);
             foreach (var item in list)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 if (item is not null)
                 {
                     yield return item;
@@ -239,12 +239,12 @@ namespace Scriban.Runtime
 
         private static IEnumerable UniqImpl(TemplateContext context, SourceSpan span, IEnumerable list)
         {
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(list);
             var distinct = new HashSet<object?>();
             foreach (var item in list)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 if (distinct.Add(item))
                 {
                     yield return item;
@@ -255,11 +255,11 @@ namespace Scriban.Runtime
         private static IEnumerable ReverseImpl(TemplateContext context, SourceSpan span, IEnumerable list)
         {
             var items = new List<object?>();
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(list);
             foreach (var item in list)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 items.Add(item);
             }
 
@@ -308,11 +308,11 @@ namespace Scriban.Runtime
 
         private static IEnumerable ShiftLeftImpl(TemplateContext context, SourceSpan span, IEnumerable left, object? value)
         {
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(left);
             foreach (var o in left)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 yield return o;
             }
             yield return value;
@@ -336,13 +336,13 @@ namespace Scriban.Runtime
 
         private static IEnumerable ShiftRightImpl(TemplateContext context, SourceSpan span, object? value, IEnumerable right)
         {
+            using var loopScope = context.EnterLoopScope();
             yield return value;
 
-            int loopStep = 0;
             var loopType = GetLoopType(right);
             foreach (var o in right)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 yield return o;
             }
         }
@@ -367,15 +367,14 @@ namespace Scriban.Runtime
 
         private static IEnumerable MultiplyImpl(TemplateContext context, SourceSpan span, IEnumerable left, int count)
         {
-            int repetitionLoopStep = 0;
-            int itemLoopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(left);
             for (int i = 0; i < count; i++)
             {
-                context.StepLoop(span, ref repetitionLoopStep);
+                context.StepLoop(span);
                 foreach (var value in left)
                 {
-                    context.StepLoop(span, ref itemLoopStep, loopType);
+                    context.StepLoop(span, loopType);
                     yield return value;
                 }
             }
@@ -413,11 +412,11 @@ namespace Scriban.Runtime
 
         private static IEnumerable DivideImpl(TemplateContext context, SourceSpan span, IEnumerable left, int count)
         {
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(left);
             foreach (var value in left)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 if (count < 0) break;
                 yield return value;
                 count--;
@@ -437,11 +436,11 @@ namespace Scriban.Runtime
         private static IEnumerable ModulusImpl(TemplateContext context, SourceSpan span, IEnumerable left, int modulus)
         {
             int index = 0;
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(left);
             foreach (var value in left)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 if ((index % modulus) == 0) yield return value;
                 index++;
             }
@@ -495,18 +494,18 @@ namespace Scriban.Runtime
 
         private static IEnumerable ConcatImpl(TemplateContext context, SourceSpan span, IEnumerable left, IEnumerable right)
         {
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var leftLoopType = GetLoopType(left);
             foreach (var value in left)
             {
-                context.StepLoop(span, ref loopStep, leftLoopType);
+                context.StepLoop(span, leftLoopType);
                 yield return value;
             }
 
             var rightLoopType = GetLoopType(right);
             foreach (var value in right)
             {
-                context.StepLoop(span, ref loopStep, rightLoopType);
+                context.StepLoop(span, rightLoopType);
                 yield return value;
             }
         }
@@ -707,6 +706,7 @@ namespace Scriban.Runtime
 
         private static bool CompareTo(TemplateContext context, SourceSpan span, ScriptBinaryOperator op, IEnumerable<object?> left, IEnumerable<object?> right)
         {
+            using var loopScope = context.EnterLoopScope();
             var leftItems = MaterializeValues(context, span, left);
             var rightItems = MaterializeValues(context, span, right);
 
@@ -742,6 +742,7 @@ namespace Scriban.Runtime
             // Otherwise we need to compare each element
             for (var i = 0; i < leftItems.Count; i++)
             {
+                context.StepLoop(span);
                 var leftValue = leftItems[i];
                 var rightValue = rightItems[i];
                 if (ScriptBinaryExpression.Evaluate(context, span, op, leftValue, rightValue) is not true)
@@ -756,11 +757,11 @@ namespace Scriban.Runtime
         private static IEnumerable<object?> BinaryOrImpl(TemplateContext context, SourceSpan span, IEnumerable<object?> left, IEnumerable<object?> right)
         {
             var seen = new HashSet<object?>();
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var leftLoopType = GetLoopType(left);
             foreach (var item in left)
             {
-                context.StepLoop(span, ref loopStep, leftLoopType);
+                context.StepLoop(span, leftLoopType);
                 if (seen.Add(item))
                 {
                     yield return item;
@@ -770,7 +771,7 @@ namespace Scriban.Runtime
             var rightLoopType = GetLoopType(right);
             foreach (var item in right)
             {
-                context.StepLoop(span, ref loopStep, rightLoopType);
+                context.StepLoop(span, rightLoopType);
                 if (seen.Add(item))
                 {
                     yield return item;
@@ -782,18 +783,18 @@ namespace Scriban.Runtime
         {
             var rightValues = new HashSet<object?>();
             var yielded = new HashSet<object?>();
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var rightLoopType = GetLoopType(right);
             foreach (var item in right)
             {
-                context.StepLoop(span, ref loopStep, rightLoopType);
+                context.StepLoop(span, rightLoopType);
                 rightValues.Add(item);
             }
 
             var leftLoopType = GetLoopType(left);
             foreach (var item in left)
             {
-                context.StepLoop(span, ref loopStep, leftLoopType);
+                context.StepLoop(span, leftLoopType);
                 if (rightValues.Contains(item) && yielded.Add(item))
                 {
                     yield return item;
@@ -804,11 +805,11 @@ namespace Scriban.Runtime
         private static List<object?> MaterializeValues(TemplateContext context, SourceSpan span, IEnumerable<object?> values)
         {
             var items = new List<object?>();
-            int loopStep = 0;
+            using var loopScope = context.EnterLoopScope();
             var loopType = GetLoopType(values);
             foreach (var value in values)
             {
-                context.StepLoop(span, ref loopStep, loopType);
+                context.StepLoop(span, loopType);
                 items.Add(value);
             }
 

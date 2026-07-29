@@ -6,6 +6,7 @@ using System;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using Scriban.Runtime;
+using Scriban.Syntax;
 
 namespace Scriban.Tests;
 
@@ -119,6 +120,20 @@ my_global_var
         var result = await template.RenderAsync();
 
         Assert.That(result, Is.EqualTo("2"));
+    }
+
+    [Test]
+    public void RenderAsyncShouldShareNestedIterationLoopLimit()
+    {
+        var context = new TemplateContext
+        {
+            LoopLimit = 10
+        };
+        var template = Template.Parse("{{ for i in 1..2; [1, 2, 3, 4, 5] | array.reverse | array.size; end }}");
+
+        var exception = Assert.ThrowsAsync<ScriptRuntimeException>(async () => await template.RenderAsync(context));
+
+        StringAssert.Contains("iteration limit `10`", exception!.Message);
     }
 
     public class ValueWrapper
