@@ -5,3 +5,6 @@ user = "scriban"
 repo = "scriban"
 [changelog]
 owners = ["xoofx"]
+[nuget]
+user = "xoofx"
+trusted_publishing = true
