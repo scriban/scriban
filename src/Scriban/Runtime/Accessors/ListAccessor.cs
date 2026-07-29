@@ -48,8 +48,10 @@ namespace Scriban.Runtime.Accessors
                 return;
             }
             // Auto-expand the array in case of accessing a range outside the current value
+            var loopStep = 0;
             for (int i = list.Count; i <= index; i++)
             {
+                context.StepLoop(span, ref loopStep);
                 // TODO: If the array doesn't support null value, we shoud add a default value or throw an error?
                 list.Add(null);
             }

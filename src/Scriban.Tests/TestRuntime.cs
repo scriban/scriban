@@ -372,6 +372,20 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void ArrayIndexedAssignmentShouldRespectLoopLimitForExpansion()
+        {
+            var context = new TemplateContext
+            {
+                LoopLimit = 10
+            };
+            var template = Template.Parse("{{ values = []; values[11] = 1; values.size }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("iteration limit `10`", exception!.Message);
+        }
+
+        [Test]
         public void ArrayMultiplyShouldRespectLoopLimitForInternalIteration()
         {
             var context = new TemplateContext
