@@ -8,6 +8,14 @@ namespace Scriban.Tests;
 
 public class TestDateParseCulturePatterns
 {
+    [TestCase("%x%g")]
+    [TestCase("%g%x")]
+    public void ParseInvariantShortDate(string pattern)
+    {
+        TestParser.AssertTemplate("2016-01-05",
+            "{{ date.parse '01/05/2016' '" + pattern + "' culture:'fr-FR' | date.to_string '%Y-%m-%d' }}");
+    }
+
     [TestCase("%g%x %X", "01/05/2016 21:22:23", "fr-FR")]
     [TestCase("%x %g%X", "01/05/2016 21:22:23", "fr-FR")]
     [TestCase("%x %X%g", "01/05/2016 21:22:23", "fr-FR")]

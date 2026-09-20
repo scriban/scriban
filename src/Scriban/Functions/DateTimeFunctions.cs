@@ -62,7 +62,7 @@ namespace Scriban.Functions
             { 'a', ((dateTime, cultureInfo) => dateTime.ToString("ddd", cultureInfo), "ddd") },
             { 'A', ((dateTime, cultureInfo) => dateTime.ToString("dddd", cultureInfo), "dddd") },
             { 'b', ((dateTime, cultureInfo) => dateTime.ToString("MMM", cultureInfo), "MMM") },
-            { 'B', ((dateTime, cultureInfo) => dateTime.ToString("MMMM", cultureInfo), "MMM") },
+            { 'B', ((dateTime, cultureInfo) => dateTime.ToString("MMMM", cultureInfo), "MMMM") },
             { 'c', ((dateTime, cultureInfo) => dateTime.ToString("ddd MMM dd HH:mm:ss yyyy", cultureInfo), "ddd MMM dd HH:mm:ss yyyy") },
             { 'C', ((dateTime, cultureInfo) => (dateTime.Year / 100).ToString("D2", cultureInfo), null) },
             { 'd', ((dateTime, cultureInfo) => dateTime.ToString("dd", cultureInfo), "dd") },
@@ -428,14 +428,8 @@ namespace Scriban.Functions
             {
                 return null;
             }
-            if (output_pattern is null)
-            {
-                return datetime.Value.ToString(DefaultFormat);
-            }
-            var defaultOutputCulture = (output_culture is not null ? CultureInfo.GetCultureInfo(output_culture) : context.CurrentCulture) ?? context.CurrentCulture;
-            var outputCustomFormat = ParseCustomFormat(defaultOutputCulture, output_pattern, out var outputCulture);
-
-            return datetime.Value.ToString(outputCustomFormat, outputCulture);
+            var outputCulture = (output_culture is not null ? CultureInfo.GetCultureInfo(output_culture) : context.CurrentCulture) ?? context.CurrentCulture;
+            return FormatDateTime(datetime.Value, output_pattern ?? DefaultFormat, outputCulture);
         }
 
         public override IScriptObject Clone(bool deep)
@@ -534,6 +528,11 @@ namespace Scriban.Functions
                 pattern = "%g " + Format;
             }
 
+            return FormatDateTime(datetime.Value, pattern, culture);
+        }
+
+        private static string FormatDateTime(DateTime datetime, string pattern, CultureInfo culture)
+        {
             var builder = new StringBuilder();
 
             for (int i = 0; i < pattern.Length; i++)
@@ -554,7 +553,7 @@ namespace Scriban.Functions
                     if (Formats.TryGetValue(format, out var formatterPair))
                     {
                         var formatter = formatterPair.Item1;
-                        builder.Append(formatter.Invoke(datetime.Value, culture));
+                        builder.Append(formatter.Invoke(datetime, culture));
                     }
                     else
                     {
@@ -569,7 +568,6 @@ namespace Scriban.Functions
             }
 
             return builder.ToString();
-
         }
 
         public virtual object? Invoke(TemplateContext context, ScriptNode? callerContext, ScriptArray arguments, ScriptBlockStatement? blockStatement)
