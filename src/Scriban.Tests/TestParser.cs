@@ -394,18 +394,18 @@ raw
         public void TestUtcDateNow()
         {
             // default is dd MM yyyy
-            var dateNow = DateTime.Now.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
+            var utcNow = DateTime.UtcNow.ToString("dd MMM yyyy", CultureInfo.InvariantCulture);
             var template = ParseTemplate(@"{{ date.utc_now }}");
             var result = template.Render();
-            Assert.AreEqual(dateNow, result);
+            Assert.AreEqual(utcNow, result);
 
             template = ParseTemplate(@"{{ date.format = '%Y'; date.utc_now }}");
             result = template.Render();
-            Assert.AreEqual(DateTime.Now.ToString("yyyy", CultureInfo.InvariantCulture), result);
+            Assert.AreEqual(DateTime.UtcNow.ToString("yyyy", CultureInfo.InvariantCulture), result);
 
             template = ParseTemplate(@"{{ date.format = '%Y'; date.utc_now | date.add_years 1 }}");
             result = template.Render();
-            Assert.AreEqual(DateTime.Now.AddYears(1).ToString("yyyy", CultureInfo.InvariantCulture), result);
+            Assert.AreEqual(DateTime.UtcNow.AddYears(1).ToString("yyyy", CultureInfo.InvariantCulture), result);
         }
 
         [Test]
