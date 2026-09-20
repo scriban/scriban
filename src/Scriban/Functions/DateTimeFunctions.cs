@@ -372,6 +372,9 @@ namespace Scriban.Functions
         /// Parses the specified input string to a date object.
         /// The patterns `%x` and `%X` use the culture's short date and long time patterns and can be combined.
         /// The modifier `%g` selects invariant culture for the entire input pattern, regardless of its position.
+        /// Inputs with `Z` or an explicit UTC offset are converted to the host's local time, which can change the calendar date.
+        /// For example, `2021/11/30 09:50:23Z` and `20/01/2022 08:32:48 +00:00` (with culture `en-GB`) represent UTC instants,
+        /// but their rendered dates depend on the host's time zone. The examples below omit offsets so their dates do not depend on the time zone.
         /// </summary>
         /// <param name="context">The template context.</param>
         /// <param name="text">A text representing a date.</param>
@@ -382,8 +385,8 @@ namespace Scriban.Functions
         /// ```scriban-html
         /// {{ date.parse '2016/01/05' }}
         /// {{ date.parse '2018--06--17' '%Y--%m--%d' }}
-        /// {{ date.parse '2021/11/30 09:50:23Z' }}
-        /// {{ date.parse '20/01/2022 08:32:48 +00:00' culture:'en-GB' }}
+        /// {{ date.parse '2021/11/30 09:50:23' }}
+        /// {{ date.parse '20/01/2022 08:32:48' culture:'en-GB' }}
         /// ```
         /// ```html
         /// 05 Jan 2016
