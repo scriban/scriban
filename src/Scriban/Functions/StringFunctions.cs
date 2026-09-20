@@ -1000,6 +1000,7 @@ namespace Scriban.Functions
         /// </remarks>
         public static string Truncatewords(string? text, int count, string? ellipsis = null)
         {
+            ellipsis = ellipsis ?? "...";
             if (string.IsNullOrEmpty(text))
             {
                 return string.Empty;
@@ -1024,7 +1025,7 @@ namespace Scriban.Functions
                 isFirstWord = false;
                 count--;
             }
-            builder.Append("...");
+            builder.Append(ellipsis);
             var result = builder.ToString();
             ReleaseBuilder(builder);
             return result;
