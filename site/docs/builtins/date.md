@@ -286,6 +286,8 @@ date.parse <text> <pattern>? <culture>?
 #### Description
 
 Parses the specified input string to a date object.
+The patterns `%x` and `%X` use the culture's short date and long time patterns and can be combined.
+The modifier `%g` selects invariant culture for the entire input pattern, regardless of its position.
 
 #### Arguments
 
