@@ -281,7 +281,7 @@ namespace Scriban.Functions
                         {
                             throw new ArgumentException($"The pattern %{format} is not supported for the parse method", nameof(pattern));
                         }
-                        builder.Append(formatterPair.Item2);
+                        builder.Append(ExpandStandardFormat(formatterPair.Item2, cultureOverride));
                     }
                     else
                     {
@@ -296,6 +296,17 @@ namespace Scriban.Functions
             }
             return builder.ToString();
         }
+
+        /// <summary>
+        /// Standard format specifiers only keep their meaning when they are the entire format string, so they are
+        /// expanded to the equivalent custom pattern before being combined with other specifiers.
+        /// </summary>
+        private static string ExpandStandardFormat(string format, CultureInfo culture) => format switch
+        {
+            "d" => culture.DateTimeFormat.ShortDatePattern,
+            "T" => culture.DateTimeFormat.LongTimePattern,
+            _ => format,
+        };
 
         private static DateTime? ParseDateTime(TemplateContext context, string? text, string? pattern = null, string? culture = null)
         {
