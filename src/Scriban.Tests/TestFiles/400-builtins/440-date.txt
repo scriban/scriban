@@ -57,3 +57,5 @@ This page was last updated at {{ "2025-09-22 19:10:00" | date.parse_to_string "%
 {{ '2016/01/05' | date.parse_to_string 'Day %d of %B' }}
 {{ '2016/01/05' | date.parse_to_string }}
 {{ '2016/01/05' | date.parse_to_string '%j' }}
+{{ date.parse '05 January 2016' '%d %B %Y' | date.to_string '%g' }}
+{{ '2016/01/05' | date.parse_to_string '%d %B %Y' }}

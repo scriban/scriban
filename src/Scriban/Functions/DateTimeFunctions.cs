@@ -62,7 +62,7 @@ namespace Scriban.Functions
             { 'a', ((dateTime, cultureInfo) => dateTime.ToString("ddd", cultureInfo), "ddd") },
             { 'A', ((dateTime, cultureInfo) => dateTime.ToString("dddd", cultureInfo), "dddd") },
             { 'b', ((dateTime, cultureInfo) => dateTime.ToString("MMM", cultureInfo), "MMM") },
-            { 'B', ((dateTime, cultureInfo) => dateTime.ToString("MMMM", cultureInfo), "MMM") },
+            { 'B', ((dateTime, cultureInfo) => dateTime.ToString("MMMM", cultureInfo), "MMMM") },
             { 'c', ((dateTime, cultureInfo) => dateTime.ToString("ddd MMM dd HH:mm:ss yyyy", cultureInfo), "ddd MMM dd HH:mm:ss yyyy") },
             { 'C', ((dateTime, cultureInfo) => (dateTime.Year / 100).ToString("D2", cultureInfo), null) },
             { 'd', ((dateTime, cultureInfo) => dateTime.ToString("dd", cultureInfo), "dd") },
