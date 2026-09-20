@@ -54,3 +54,5 @@
 {{ "2026-04-26" | date.parse_to_string "%Y" }}
 This page was last updated at {{ "2025-09-22 19:10:00" | date.parse_to_string "%Y-%m-%d %H:%M" }}.
 {{ "03 14, 2016" | date.parse_to_string "%b %d, %y" input_pattern: "%m %d, %Y" }}
+{{ date.parse '05 January 2016' '%d %B %Y' | date.to_string '%g' }}
+{{ '2016/01/05' | date.parse_to_string '%d %B %Y' }}
