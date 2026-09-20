@@ -36,6 +36,34 @@ namespace Scriban.Tests
             }
 
             [Test]
+            public void TestSortMixedNumberTypes()
+            {
+                var context = new TemplateContext();
+                var items = new ScriptArray { 3, 1.5, 2L, (decimal)0.5 };
+
+                var sorted = ArrayFunctions.Sort(context, new SourceSpan(), items).Cast<object>().ToArray();
+
+                Assert.That(sorted, Is.EqualTo(new object[] { (decimal)0.5, 1.5, 2L, 3 }));
+            }
+
+            [Test]
+            public void TestSortMixedNumberTypesByMember()
+            {
+                var context = new TemplateContext();
+                var items = new ScriptArray
+                {
+                    new ScriptObject { { "name", "int" }, { "key", 3 } },
+                    new ScriptObject { { "name", "double" }, { "key", 1.5 } },
+                    new ScriptObject { { "name", "long" }, { "key", 2L } },
+                };
+
+                var sorted = ArrayFunctions.Sort(context, new SourceSpan(), items, "key");
+                var orderedNames = sorted.Cast<ScriptObject>().Select(item => item["name"]?.ToString()).ToArray();
+
+                Assert.That(orderedNames, Is.EqualTo(new[] { "double", "long", "int" }));
+            }
+
+            [Test]
             public void TestSortIsStableAcrossChainedSorts()
             {
                 var context = new TemplateContext();

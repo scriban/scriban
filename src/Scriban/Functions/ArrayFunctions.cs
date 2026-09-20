@@ -899,16 +899,46 @@ namespace Scriban.Functions
                 return new ScriptArray();
 
             var sortMember = member ?? string.Empty;
+            var comparer = new SortComparer(context, span);
             if (string.IsNullOrEmpty(sortMember))
             {
-                realList = realList.OrderBy(item => item, Comparer<object?>.Default).ToList();
+                realList = realList.OrderBy(item => item, comparer).ToList();
             }
             else
             {
-                realList = realList.OrderBy(item => GetSortValue(context, span, item, sortMember), Comparer<object?>.Default).ToList();
+                realList = realList.OrderBy(item => GetSortValue(context, span, item, sortMember), comparer).ToList();
             }
 
             return new ScriptArray(realList);
+        }
+
+        private sealed class SortComparer : IComparer<object?>
+        {
+            private readonly TemplateContext _context;
+            private readonly SourceSpan _span;
+
+            public SortComparer(TemplateContext context, SourceSpan span)
+            {
+                _context = context;
+                _span = span;
+            }
+
+            public int Compare(object? x, object? y)
+            {
+                if (x is not null && y is not null && x.GetType() != y.GetType() && MathFunctions.IsNumber(x) && MathFunctions.IsNumber(y))
+                {
+                    if (IsTrue(ScriptBinaryOperator.CompareLess, x, y)) return -1;
+                    if (IsTrue(ScriptBinaryOperator.CompareGreater, x, y)) return 1;
+                    return 0;
+                }
+
+                return Comparer<object?>.Default.Compare(x, y);
+            }
+
+            private bool IsTrue(ScriptBinaryOperator op, object x, object y)
+            {
+                return ScriptBinaryExpression.Evaluate(_context, _span, op, x, y) is bool result && result;
+            }
         }
 
         private static object? GetSortValue(TemplateContext context, SourceSpan span, object? target, string member)
