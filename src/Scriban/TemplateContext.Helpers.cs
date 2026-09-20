@@ -80,7 +80,7 @@ namespace Scriban
 
         private int _objectToStringLevel;
         private int _currentToStringLength;
-        private int _currentOutputLength;
+        private long _currentOutputLength;
         private bool _hasOutputLimitEllipsis;
         private int _renderDepth;
 
@@ -90,6 +90,7 @@ namespace Scriban
         /// <param name="value">The object value to print</param>
         /// <param name="nested">True if value is a string, the string should be escaped</param>
         /// <returns>A string representing the object value</returns>
+        /// <exception cref="ScriptRuntimeException">The string conversion limit is reached and <see cref="OnStringLimit"/> is <see cref="ScriptLimitBehavior.Throw"/>.</exception>
         public virtual string? ObjectToString(object? value, bool nested = false)
         {
             if (_objectToStringLevel == 0)
@@ -104,6 +105,10 @@ namespace Scriban
                 var result = ObjectToStringImpl(value, nested);
                 if (LimitToString > 0 && _objectToStringLevel == 1 && result is not null && result.Length >= LimitToString)
                 {
+                    if (OnStringLimit == ScriptLimitBehavior.Throw)
+                    {
+                        throw new ScriptRuntimeException(CurrentSpan, $"String conversion reaches LimitToString `{LimitToString}`.");
+                    }
                     return result + "...";
                 }
                 return result;

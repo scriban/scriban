@@ -244,9 +244,47 @@ namespace Scriban
         }
 
         /// <summary>
-        /// Gets or sets the buffer limit in characters for a ToString in a list/string. Default is 1048576 (1 MB).
+        /// Gets or sets the string conversion buffer limit in UTF-16 characters. Default is 1048576 characters.
+        /// A value less than or equal to zero disables the limit.
         /// </summary>
+        /// <remarks>
+        /// Controls individual <see cref="ObjectToString"/> conversions and allocation guards in string-producing operations.
+        /// Also limits cumulative rendered output unless <see cref="OutputLimit"/> is explicitly set.
+        /// Conversion truncation is controlled by <see cref="OnStringLimit"/>; allocation guards always throw.
+        /// </remarks>
         public int LimitToString { get; set; }
+
+        /// <summary>
+        /// Gets or sets the cumulative rendered output limit in UTF-16 characters.
+        /// Default is <c>null</c>, which uses <see cref="LimitToString"/> for backward compatibility.
+        /// Set to a positive value for an independent limit, or to zero to disable only the output limit.
+        /// </summary>
+        /// <remarks>
+        /// Values less than or equal to zero disable the limit. The budget is reset for each top-level render
+        /// and is shared by nested renders and temporary outputs (such as captures).
+        /// The truncation ellipsis is not included in the limit. See <see cref="OnOutputLimit"/>.
+        /// </remarks>
+        public int? OutputLimit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the behavior when an <see cref="ObjectToString"/> conversion reaches <see cref="LimitToString"/>.
+        /// Default is <see cref="ScriptLimitBehavior.Truncate"/>.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="ScriptLimitBehavior.Throw"/> raises a <see cref="ScriptRuntimeException"/> instead of appending
+        /// an ellipsis. This does not change allocation guards in string-producing operations, which always throw.
+        /// </remarks>
+        public ScriptLimitBehavior OnStringLimit { get; set; }
+
+        /// <summary>
+        /// Gets or sets the behavior when a write would exceed the effective <see cref="OutputLimit"/>.
+        /// Default is <see cref="ScriptLimitBehavior.Truncate"/>.
+        /// </summary>
+        /// <remarks>
+        /// <see cref="ScriptLimitBehavior.Throw"/> raises a <see cref="ScriptRuntimeException"/> before writing the
+        /// overflowing chunk. Previously written output is not rolled back.
+        /// </remarks>
+        public ScriptLimitBehavior OnOutputLimit { get; set; }
 
         /// <summary>
         /// Gets or sets the maximum recursion depth while traversing an object graph during the ToString operation.  Default is 20.
@@ -765,18 +803,23 @@ namespace Scriban
 
         private int GetAllowedOutputCount(int requestedCount)
         {
-            if (LimitToString <= 0)
+            var outputLimit = OutputLimit ?? LimitToString;
+            if (outputLimit <= 0)
             {
                 return requestedCount;
             }
 
-            var remaining = LimitToString - _currentOutputLength;
+            var remaining = outputLimit - _currentOutputLength;
+            if (requestedCount > remaining && OnOutputLimit == ScriptLimitBehavior.Throw)
+            {
+                throw new ScriptRuntimeException(CurrentSpan, $"Rendered output exceeds OutputLimit `{outputLimit}`.");
+            }
             if (remaining <= 0)
             {
                 return 0;
             }
 
-            return Math.Min(requestedCount, remaining);
+            return (int)Math.Min(requestedCount, remaining);
         }
 
         private void WriteOutputLimitEllipsis()

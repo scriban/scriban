@@ -129,6 +129,136 @@ namespace Scriban.Tests
         }
 
         [Test]
+        public void OutputLimitShouldFollowLimitToStringUnlessOverridden()
+        {
+            var context = new TemplateContext { LimitToString = 5 };
+            var template = Template.Parse("abcdefgh");
+
+            Assert.IsNull(context.OutputLimit);
+            Assert.AreEqual(ScriptLimitBehavior.Truncate, context.OnStringLimit);
+            Assert.AreEqual(ScriptLimitBehavior.Truncate, context.OnOutputLimit);
+            Assert.AreEqual("abcde...", template.Render(context));
+            context.LimitToString = 3;
+            Assert.AreEqual("abc...", template.Render(context));
+            context.OutputLimit = 6;
+            Assert.AreEqual("abcdef...", template.Render(context));
+            context.LimitToString = 1;
+            Assert.AreEqual("abcdef...", template.Render(context));
+            context.OutputLimit = null;
+            Assert.AreEqual("a...", template.Render(context));
+        }
+
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(20)]
+        public void OutputLimitShouldAllowIndependentStringTruncation(int outputLimit)
+        {
+            var context = new TemplateContext { LimitToString = 3, OutputLimit = outputLimit };
+
+            Assert.AreEqual("abc...abc...", Template.Parse("{{ 'abcd' }}{{ 'abcd' }}").Render(context));
+        }
+
+        [TestCase(-1)]
+        [TestCase(0)]
+        [TestCase(20)]
+        public void OutputLimitShouldApplyIndependentlyOfStringLimit(int stringLimit)
+        {
+            var context = new TemplateContext { LimitToString = stringLimit, OutputLimit = 5 };
+
+            Assert.AreEqual("abcde...", Template.Parse("ab{{ 'cdef' }}gh").Render(context));
+            Assert.AreEqual("abcde", Template.Parse("abcde").Render(context));
+            Assert.AreEqual("abcde...", Template.Parse("abcdefgh").Render(context));
+        }
+
+        [Test]
+        public void OutputLimitShouldThrowBeforeWritingTheOverflowingChunk()
+        {
+            var context = new TemplateContext { OutputLimit = 5, OnOutputLimit = ScriptLimitBehavior.Throw };
+            var template = Template.Parse("abc{{ 'def' }}");
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+
+            StringAssert.Contains("OutputLimit `5`", exception!.Message);
+            Assert.AreEqual("abc", context.Output.ToString());
+            context.Reset();
+            Assert.AreEqual("abcde", Template.Parse("abcde").Render(context));
+        }
+
+        [Test]
+        public void OutputLimitShouldCountUtf16CharactersForCustomOutputs()
+        {
+            using var writer = new System.IO.StringWriter();
+            var context = new TemplateContext { OutputLimit = 4 };
+            context.PushOutput(new TextWriterOutput(writer));
+
+            Template.Parse("é😀z!").Render(context);
+
+            Assert.AreEqual("é😀z...", writer.ToString());
+        }
+
+        [Test]
+        public void OutputLimitShouldIncludeIndentation()
+        {
+            var context = new TemplateContext { OutputLimit = 5, CurrentIndent = "  " };
+
+            context.Write("ab\ncd");
+
+            Assert.AreEqual("ab\n  ...", context.Output.ToString());
+        }
+
+        [TestCase("abcd{{ include 'test' }}", 12)]
+        [TestCase("{{ capture x }}abcd{{ end }}ef", 5)]
+        public void OutputLimitShouldBeSharedWithNestedOutputs(string text, int outputLimit)
+        {
+            var context = new TemplateContext
+            {
+                OutputLimit = outputLimit,
+                OnOutputLimit = ScriptLimitBehavior.Throw,
+                TemplateLoader = new TestIncludes.DummyLoader()
+            };
+
+            Assert.Throws<ScriptRuntimeException>(() => Template.Parse(text).Render(context));
+        }
+
+        [Test]
+        public void OutputLimitThrowPolicyShouldRespectFallbackAndDisabledLimits()
+        {
+            var context = new TemplateContext { LimitToString = 3, OnOutputLimit = ScriptLimitBehavior.Throw };
+            var template = Template.Parse("abcd");
+
+            Assert.Throws<ScriptRuntimeException>(() => template.Render(context));
+            context.OutputLimit = 0;
+            Assert.AreEqual("abcd", template.Render(context));
+            context.OutputLimit = null;
+            context.LimitToString = 0;
+            Assert.AreEqual("abcd", template.Render(context));
+        }
+
+        [Test]
+        public void StringLimitPolicyShouldPreserveTheExistingConversionBoundary()
+        {
+            var context = new TemplateContext { LimitToString = 3, OutputLimit = 0 };
+
+            Assert.AreEqual("abc...", context.ObjectToString("abc"));
+            context.OnStringLimit = ScriptLimitBehavior.Throw;
+            Assert.Throws<ScriptRuntimeException>(() => context.ObjectToString("abc"));
+        }
+
+        [Test]
+        public void StringLimitShouldThrowInsteadOfTruncatingWhenRequested()
+        {
+            var context = new TemplateContext { LimitToString = 3, OutputLimit = 0, OnStringLimit = ScriptLimitBehavior.Throw };
+
+            var exception = Assert.Throws<ScriptRuntimeException>(() => context.ObjectToString("abcd"));
+
+            StringAssert.Contains("LimitToString `3`", exception!.Message);
+            Assert.AreEqual("ab", context.ObjectToString("ab"));
+            Assert.Throws<ScriptRuntimeException>(() => context.ObjectToString(new[] { "ab", "cd" }));
+            context.LimitToString = 0;
+            Assert.AreEqual("abcd", context.ObjectToString("abcd"));
+        }
+
+        [Test]
         public void ResetShouldClearCumulativeRenderOutputTracking()
         {
             var context = new TemplateContext

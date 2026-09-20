@@ -150,6 +150,40 @@ my_global_var
         Assert.That(await smallTemplate.RenderAsync(context), Is.EqualTo("xy"));
     }
 
+    [TestCase(0, "abc...abc...")]
+    [TestCase(8, "abc...ab...")]
+    public async Task RenderAsyncShouldUseIndependentOutputLimit(int outputLimit, string expected)
+    {
+        var context = new TemplateContext { LimitToString = 3, OutputLimit = outputLimit };
+        var template = Template.Parse("{{ 'abcd' }}{{ 'abcd' }}");
+
+        Assert.That(await template.RenderAsync(context), Is.EqualTo(expected));
+        Assert.That(await template.RenderAsync(context), Is.EqualTo(expected));
+    }
+
+    [Test]
+    public async Task RenderAsyncShouldThrowOnOutputLimitAndRecover()
+    {
+        var context = new TemplateContext { OutputLimit = 5, OnOutputLimit = ScriptLimitBehavior.Throw };
+
+        var exception = Assert.ThrowsAsync<ScriptRuntimeException>(async () => await Template.Parse("abc{{ 'def' }}").RenderAsync(context));
+
+        StringAssert.Contains("OutputLimit `5`", exception!.Message);
+        Assert.That(context.Output.ToString(), Is.EqualTo("abc"));
+        context.Reset();
+        Assert.That(await Template.Parse("abcde").RenderAsync(context), Is.EqualTo("abcde"));
+    }
+
+    [Test]
+    public void RenderAsyncShouldThrowOnStringLimit()
+    {
+        var context = new TemplateContext { LimitToString = 3, OutputLimit = 0, OnStringLimit = ScriptLimitBehavior.Throw };
+
+        var exception = Assert.ThrowsAsync<ScriptRuntimeException>(async () => await Template.Parse("{{ 'abcd' }}").RenderAsync(context));
+
+        StringAssert.Contains("LimitToString `3`", exception!.Message);
+    }
+
     public class ValueWrapper
     {
         public string Value { get; set; }

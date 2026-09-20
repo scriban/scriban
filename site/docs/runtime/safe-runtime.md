@@ -75,7 +75,10 @@ The following table lists the main `TemplateContext` properties that influence r
 | `LoopLimit` | `1000` | Caps cumulative iterations across each dynamically nested iteration tree, including language loops and internal array/range work. Nested operations share one budget; a separate top-level operation starts a new budget. Set to `0` to disable this limit. |
 | `LoopLimitQueryable` | `null` | Optional separate loop limit for `IQueryable` enumerations. When `null`, Scriban uses `LoopLimit`. Set to `0` to disable the `IQueryable`-specific limit. |
 | `RecursiveLimit` | `100` | Caps recursive function calls. Set to `0` to disable recursion-depth checks. |
-| `LimitToString` | `1048576` | Caps string materialization and rendered output growth. Scriban truncates output with `...` when the limit is reached, and some builtins throw if an operation would create a string larger than this limit. Set to `0` to disable the limit. |
+| `LimitToString` | `1048576` | String conversion buffer limit in UTF-16 characters, also used by allocation guards in string-producing operations. By default this also caps cumulative rendered output, including the final output. Set to `0` to disable this limit. |
+| `OutputLimit` | `null` | Cumulative rendered output limit in UTF-16 characters. `null` follows `LimitToString` for backward compatibility. Set a positive value to decouple it from `LimitToString`, or `0` to disable only the output limit. |
+| `OnStringLimit` | `ScriptLimitBehavior.Truncate` | Controls `ObjectToString` conversions that reach `LimitToString`: append `...`, or throw `ScriptRuntimeException` with `ScriptLimitBehavior.Throw`. Allocation guards in builtins and string multiplication still throw regardless of this setting. |
+| `OnOutputLimit` | `ScriptLimitBehavior.Truncate` | Controls writes that would exceed the effective `OutputLimit`: truncate and append `...` once, or throw `ScriptRuntimeException` with `ScriptLimitBehavior.Throw`. |
 | `ObjectRecursionLimit` | `20` | Caps recursion depth when walking object graphs for string/JSON-style conversion, helping avoid very deep structures and reference loops. Set to `0` to disable the limit. |
 | `RegexTimeOut` | `10s` | Maximum execution time for built-in regex operations. Set it to `System.Text.RegularExpressions.Regex.InfiniteMatchTimeout` to disable regex timeouts. |
 | `CancellationToken` | `CancellationToken.None` | Allows rendering/evaluation to be cancelled. Scriban checks this token during evaluation and throws `ScriptAbortException` when cancellation is requested. |
@@ -97,3 +100,38 @@ Two defaults change when using `LiquidTemplateContext` instead of `TemplateConte
 - `EnableRelaxedTargetAccess = true`
 
 `LiquidTemplateContext` also switches the include parser and lexer options to Liquid-compatible defaults.
+
+### Configuring string and output limits independently
+
+Existing configurations keep their behavior: if `OutputLimit` is left at `null`, changing
+`LimitToString` also changes the rendered output limit. To allow a larger document while keeping
+individual string conversions bounded, set `OutputLimit` explicitly:
+
+```csharp
+var context = new TemplateContext
+{
+    LimitToString = 1_048_576,
+    OutputLimit = 16_777_216,
+    OnStringLimit = ScriptLimitBehavior.Throw,
+    OnOutputLimit = ScriptLimitBehavior.Throw,
+};
+```
+
+Set `OutputLimit = 0` to allow unbounded rendered output without disabling string conversion
+and allocation guards. Conversely, `LimitToString = 0` with a positive `OutputLimit` disables
+the string limit but keeps the output bounded. Disable limits only for trusted workloads.
+Both limits treat negative values like `0`.
+
+These limits count UTF-16 characters, not encoded bytes: the default of 1,048,576 characters
+corresponds to 2 MiB of UTF-16 character data, not 1 MiB. Each truncation ellipsis is additional
+to its own limit; an ellipsis from string conversion still counts toward the output budget
+when written. The output budget counts writes across the entire render,
+including indentation, nested includes, and temporary outputs such as captures, not just the
+length of the final returned string. It resets for each top-level render and on `Reset()`.
+
+For compatibility, string conversion retains its existing boundary behavior: it reports the
+limit when the converted buffer reaches the limit (even an exactly-sized string gets `...`
+in truncation mode). `OnStringLimit = ScriptLimitBehavior.Throw` reports that same condition
+as an exception. The output limit, in contrast, allows an exactly-sized output and reports
+only a write that would exceed it. In throw mode, the overflowing output chunk is not written;
+earlier writes remain in the output, so streaming output is not transactional.
