@@ -8,6 +8,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Text;
 using Scriban.Parsing;
@@ -855,6 +856,8 @@ namespace Scriban.Functions
         /// <remarks>
         /// Equal values preserve their original relative order.
         /// Exact member names still take precedence over dotted-path fallback.
+        /// Numbers of different types are compared by their exact value, so no precision is lost when integers, floating-point numbers and decimals are mixed.
+        /// NaN sorts before negative infinity, which sorts before finite numbers, which sort before positive infinity.
         ///
         /// Sorts by element's value:
         /// ```scriban-html
@@ -899,7 +902,7 @@ namespace Scriban.Functions
                 return new ScriptArray();
 
             var sortMember = member ?? string.Empty;
-            var comparer = new SortComparer(context, span);
+            var comparer = SortComparer.Instance;
             if (string.IsNullOrEmpty(sortMember))
             {
                 realList = realList.OrderBy(item => item, comparer).ToList();
@@ -912,32 +915,123 @@ namespace Scriban.Functions
             return new ScriptArray(realList);
         }
 
-        private sealed class SortComparer : IComparer<object?>
+        internal sealed class SortComparer : IComparer<object?>
         {
-            private readonly TemplateContext _context;
-            private readonly SourceSpan _span;
+            public static readonly SortComparer Instance = new SortComparer();
 
-            public SortComparer(TemplateContext context, SourceSpan span)
+            private const int NaNOrder = -2;
+            private const int NegativeInfinityOrder = -1;
+            private const int FiniteOrder = 0;
+            private const int PositiveInfinityOrder = 1;
+
+            private SortComparer()
             {
-                _context = context;
-                _span = span;
             }
 
             public int Compare(object? x, object? y)
             {
                 if (x is not null && y is not null && x.GetType() != y.GetType() && MathFunctions.IsNumber(x) && MathFunctions.IsNumber(y))
                 {
-                    if (IsTrue(ScriptBinaryOperator.CompareLess, x, y)) return -1;
-                    if (IsTrue(ScriptBinaryOperator.CompareGreater, x, y)) return 1;
-                    return 0;
+                    return CompareNumbers(x, y);
                 }
 
                 return Comparer<object?>.Default.Compare(x, y);
             }
 
-            private bool IsTrue(ScriptBinaryOperator op, object x, object y)
+            private static int CompareNumbers(object x, object y)
             {
-                return ScriptBinaryExpression.Evaluate(_context, _span, op, x, y) is bool result && result;
+                var xOrder = GetOrder(x);
+                var yOrder = GetOrder(y);
+                if (xOrder != FiniteOrder || yOrder != FiniteOrder)
+                {
+                    return xOrder.CompareTo(yOrder);
+                }
+
+                GetExactValue(x, out var xNumerator, out var xDenominator);
+                GetExactValue(y, out var yNumerator, out var yDenominator);
+                return (xNumerator * yDenominator).CompareTo(yNumerator * xDenominator);
+            }
+
+            private static int GetOrder(object value)
+            {
+                switch (value)
+                {
+                    case double d:
+                        return double.IsNaN(d) ? NaNOrder
+                            : double.IsNegativeInfinity(d) ? NegativeInfinityOrder
+                            : double.IsPositiveInfinity(d) ? PositiveInfinityOrder
+                            : FiniteOrder;
+                    case float f:
+                        return float.IsNaN(f) ? NaNOrder
+                            : float.IsNegativeInfinity(f) ? NegativeInfinityOrder
+                            : float.IsPositiveInfinity(f) ? PositiveInfinityOrder
+                            : FiniteOrder;
+                    default:
+                        return FiniteOrder;
+                }
+            }
+
+            private static void GetExactValue(object value, out BigInteger numerator, out BigInteger denominator)
+            {
+                denominator = BigInteger.One;
+                switch (value)
+                {
+                    case sbyte v: numerator = v; break;
+                    case byte v: numerator = v; break;
+                    case short v: numerator = v; break;
+                    case ushort v: numerator = v; break;
+                    case int v: numerator = v; break;
+                    case uint v: numerator = v; break;
+                    case long v: numerator = v; break;
+                    case ulong v: numerator = v; break;
+                    case BigInteger v: numerator = v; break;
+                    case decimal v: GetExactDecimalValue(v, out numerator, out denominator); break;
+                    case float v: GetExactDoubleValue(v, out numerator, out denominator); break;
+                    case double v: GetExactDoubleValue(v, out numerator, out denominator); break;
+                    default: throw new ArgumentOutOfRangeException(nameof(value), $"The type `{value.GetType()}` is not a supported number.");
+                }
+            }
+
+            private static void GetExactDecimalValue(decimal value, out BigInteger numerator, out BigInteger denominator)
+            {
+                var bits = decimal.GetBits(value);
+                var mantissa = new BigInteger((uint)bits[0]);
+                mantissa |= (BigInteger)(uint)bits[1] << 32;
+                mantissa |= (BigInteger)(uint)bits[2] << 64;
+
+                numerator = (bits[3] & int.MinValue) != 0 ? -mantissa : mantissa;
+                denominator = BigInteger.Pow(10, (bits[3] >> 16) & 0xFF);
+            }
+
+            private static void GetExactDoubleValue(double value, out BigInteger numerator, out BigInteger denominator)
+            {
+                var bits = BitConverter.DoubleToInt64Bits(value);
+                var exponent = (int)((bits >> 52) & 0x7FF);
+                var mantissa = bits & 0xFFFFFFFFFFFFFL;
+
+                if (exponent == 0)
+                {
+                    exponent = 1;
+                }
+                else
+                {
+                    mantissa |= 1L << 52;
+                }
+
+                exponent -= 1075;
+
+                var result = bits < 0 ? -new BigInteger(mantissa) : new BigInteger(mantissa);
+
+                if (exponent >= 0)
+                {
+                    numerator = result << exponent;
+                    denominator = BigInteger.One;
+                }
+                else
+                {
+                    numerator = result;
+                    denominator = BigInteger.One << -exponent;
+                }
             }
         }
 
