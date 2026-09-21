@@ -610,6 +610,8 @@ A stably sorted list according to the value of each element or the value of the 
 
 Equal values preserve their original relative order.
 Exact member names still take precedence over dotted-path fallback.
+Numbers of different types are compared by their exact value, so no precision is lost when integers, floating-point numbers and decimals are mixed.
+NaN sorts before negative infinity, which sorts before finite numbers, which sort before positive infinity.
 
 Sorts by element's value:
 > **input** [Try out](/?template=%7B%7B%20%5B10%2C%202%2C%206%5D%20%7C%20array.sort%20%7D%7D&model=%7B%7D)
