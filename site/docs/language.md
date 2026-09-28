@@ -907,6 +907,20 @@ The following literals are converted to plain strings:
 * `false -> "false"`
 
 
+#### On dates
+
+The following binary operators are supported for **dates** and **timespans**:
+
+|Operator            | Description
+|--------------------|------------
+| `<date> + <timespan>` | returns the date moved forward by the timespan
+| `<date> - <timespan>` | returns the date moved back by the timespan
+| `<date> - <date>` | returns the timespan between the two dates
+
+See the [`date`](builtins/date.md) and [`timespan`](builtins/timespan.md) built-in functions for
+creating these values.
+
+
 ### 8.5 Conditional expressions
 
 A boolean expression produces a boolean by comparing a left and right value.
