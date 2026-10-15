@@ -1069,6 +1069,8 @@ namespace Scriban.Syntax
             {
                 case ScriptBinaryOperator.Add:
                     return left + right;
+                case ScriptBinaryOperator.Subtract:
+                    return left - right;
             }
 
             throw new ScriptRuntimeException(span, $"The operator `{op}` is not supported for between <DateTime> and <TimeSpan>");

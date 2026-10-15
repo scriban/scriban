@@ -573,5 +573,26 @@ namespace Scriban.Tests
                 TestParser.AssertTemplate("text(1,4) : error : minValue must be greater than maxValue", "{{ math.random 11 10 }}");
             }
         }
+
+        public class Dates
+        {
+            [Test]
+            public void TestAddTimeSpanToDate()
+            {
+                TestParser.AssertTemplate("2026-01-02", @"{{ ((date.parse ""2026-01-01"") + (timespan.from_days 1)) | date.to_string ""%Y-%m-%d"" }}");
+            }
+
+            [Test]
+            public void TestSubtractTimeSpanFromDate()
+            {
+                TestParser.AssertTemplate("2026-01-01", @"{{ ((date.parse ""2026-01-02"") - (timespan.from_days 1)) | date.to_string ""%Y-%m-%d"" }}");
+            }
+
+            [Test]
+            public void TestSubtractTimeSpanFromDateKeepsTime()
+            {
+                TestParser.AssertTemplate("2026-01-01 22:30", @"{{ ((date.parse ""2026-01-02 00:00"") - (timespan.from_minutes 90)) | date.to_string ""%Y-%m-%d %H:%M"" }}");
+            }
+        }
     }
 }
