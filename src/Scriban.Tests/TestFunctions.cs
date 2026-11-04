@@ -572,6 +572,14 @@ namespace Scriban.Tests
             {
                 TestParser.AssertTemplate("text(1,4) : error : minValue must be greater than maxValue", "{{ math.random 11 10 }}");
             }
+
+            [Test]
+            public void TestFormatWithCulture()
+            {
+                TestParser.AssertTemplate("1,234.50|1.234,50", @"{{ 1234.5 | math.format ""N2"" ""en-US"" }}|{{ 1234.5 | math.format ""N2"" ""de-DE"" }}");
+                TestParser.AssertTemplate("1,234.50|1.234,50", @"{{ 1234.5 | object.format ""N2"" ""en-US"" }}|{{ 1234.5 | object.format ""N2"" ""de-DE"" }}");
+                TestParser.AssertTemplate("1,5;2,5;1,5;", @"{{ for x in [1.5, 2.5, 1.5] }}{{ x | math.format ""N1"" ""de-DE"" }};{{ end }}");
+            }
         }
 
         public class Dates
