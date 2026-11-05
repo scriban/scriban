@@ -207,7 +207,7 @@ namespace Scriban.Functions
             }
 
             StringFunctions.VerifyFormatPrecision(context, format);
-            return formattable.ToString(format, culture is not null ? new CultureInfo(culture) : context.CurrentCulture);
+            return formattable.ToString(format, culture is not null ? MathFunctions.GetFormatCulture(culture) : context.CurrentCulture);
         }
 
         /// <summary>

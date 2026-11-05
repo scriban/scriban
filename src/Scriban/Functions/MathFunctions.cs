@@ -5,6 +5,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Numerics;
 using System.Reflection;
@@ -168,6 +169,12 @@ namespace Scriban.Functions
             return Math.Floor(value);
         }
 
+        // A new CultureInfo rebuilds its NumberFormatInfo on first use, which costs far more than formatting a number,
+        // so keep one read-only instance per culture name (same data and user overrides as new CultureInfo(name)).
+        private static readonly ConcurrentDictionary<string, CultureInfo> _formatCultures = new(StringComparer.Ordinal);
+
+        internal static CultureInfo GetFormatCulture(string culture) => _formatCultures.GetOrAdd(culture, static name => CultureInfo.ReadOnly(new CultureInfo(name)));
+
         /// <summary>
         /// Formats a number value with specified [.NET standard numeric format strings](https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings)
         /// </summary>
@@ -198,7 +205,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable number");
             }
             StringFunctions.VerifyFormatPrecision(context, format);
-            return formattable.ToString(format, culture is not null ? new CultureInfo(culture) : context.CurrentCulture);
+            return formattable.ToString(format, culture is not null ? GetFormatCulture(culture) : context.CurrentCulture);
         }
 
         /// <summary>
