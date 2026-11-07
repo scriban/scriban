@@ -74,10 +74,10 @@ The following table lists the main `TemplateContext` properties that influence r
 | Property | Default | Used for |
 |----------|---------|----------|
 | `StrictVariables` | `false` | Throws a `ScriptRuntimeException` when a variable lookup fails instead of returning `null`. This only affects unresolved variables; relaxed member/indexer settings still control member access behavior on resolved objects. |
-| `LoopLimit` | `1000` | Caps cumulative iterations across each dynamically nested iteration tree, including language loops and internal array/range work. Nested operations share one budget; a separate top-level operation starts a new budget. Set to `0` to disable this limit. |
+| `LoopLimit` | `1000` | Caps cumulative iterations across each dynamically nested iteration tree, including language loops, internal array/range work, and JSON serialization/deserialization. Nested operations share one budget; a separate top-level operation starts a new budget. Object/array string formatting uses its string budget and cancellation checks without consuming the enclosing loop's budget. Set to `0` to disable this limit. |
 | `LoopLimitQueryable` | `null` | Optional separate loop limit for `IQueryable` enumerations. When `null`, Scriban uses `LoopLimit`. Set to `0` to disable the `IQueryable`-specific limit. |
 | `RecursiveLimit` | `100` | Caps the depth of recursive function calls, `include`, `object.eval` and `object.eval_template`. It limits depth, not the total number of calls. Set to `0` to disable recursion-depth checks. |
-| `LimitToString` | `1048576` | String conversion buffer limit in UTF-16 characters, also used by allocation guards in string-producing operations: string multiplication, `array.join`, `string.append`/`prepend`/`replace`/`replace_first`/`pad_left`/`pad_right`/`escape`, `regex.replace`/`escape`, the precision specifier of standard formats in `math.format`/`object.format` (e.g. `F2`), and `date.to_string`/`parse_to_string`. These guards throw a `ScriptRuntimeException` before building a longer string. By default this also caps cumulative rendered output, including the final output. Set to `0` to disable this limit. |
+| `LimitToString` | `1048576` | String conversion buffer limit in UTF-16 characters, also used by allocation guards in string-producing operations: string multiplication, `array.join`, `string.append`/`prepend`/`replace`/`replace_first`/`pad_left`/`pad_right`/`escape`/`literal`/`base64_encode`, `html.escape`/`newline_to_br`/`url_encode`/`url_escape`, `object.to_json`, `regex.replace`/`escape`, the precision specifier of standard formats in `math.format`/`object.format` (e.g. `F2`), and `date.to_string`/`parse_to_string`. These guards throw a `ScriptRuntimeException` before returning a longer string. Internal encoding buffers can be a constant multiple of the limit, not an exact allocation ceiling. By default this also caps cumulative rendered output, including the final output. Set to `0` to disable this limit. |
 | `OutputLimit` | `null` | Cumulative rendered output limit in UTF-16 characters. `null` follows `LimitToString` for backward compatibility. Set a positive value to decouple it from `LimitToString`, or `0` to disable only the output limit. |
 | `OnStringLimit` | `ScriptLimitBehavior.Truncate` | Controls `ObjectToString` conversions that reach `LimitToString`: append `...`, or throw `ScriptRuntimeException` with `ScriptLimitBehavior.Throw`. Allocation guards in builtins and string multiplication still throw regardless of this setting. |
 | `OnOutputLimit` | `ScriptLimitBehavior.Truncate` | Controls writes that would exceed the effective `OutputLimit`: truncate and append `...` once, or throw `ScriptRuntimeException` with `ScriptLimitBehavior.Throw`. |
@@ -137,3 +137,25 @@ in truncation mode). `OnStringLimit = ScriptLimitBehavior.Throw` reports that sa
 as an exception. The output limit, in contrast, allows an exactly-sized output and reports
 only a write that would exceed it. In throw mode, the overflowing output chunk is not written;
 earlier writes remain in the output, so streaming output is not transactional.
+
+Object and array formatting share the remaining conversion budget with their nested values
+and stop reading members once that budget is exhausted. JSON serialization checks the encoded
+output incrementally and throws rather than returning truncated, invalid JSON. JSON escape
+sequences count toward `LimitToString`, while UTF-8 encoding bytes are not counted as extra
+UTF-16 characters.
+Internal HTML and JSON escape buffers can be up to about six times the input length.
+Host-provided formatters and serializer hooks remain trusted .NET code and can allocate
+outside these bounds.
+
+### Reusing a context
+
+Call `TemplateContext.Reset()` between independent uses of a pooled context on the same thread.
+It clears builtin-owned render state, including `array.cycle` group positions and the
+`math.random` generator, so later renders do not inherit it and cycle group strings are not
+retained across resets. The public `Tags` dictionary is host-owned and remains unchanged;
+clear any per-request host entries yourself.
+
+The context-aware C# overloads of `StringFunctions.Literal` / `Base64Encode` and
+`HtmlFunctions.Escape` / `NewlineToBr` / `UrlEncode` / `UrlEscape` apply `LimitToString`.
+Templates automatically use these guarded overloads. The original contextless C# overloads
+remain available for binary compatibility and do not apply a context's resource limits.

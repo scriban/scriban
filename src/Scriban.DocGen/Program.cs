@@ -156,6 +156,7 @@ namespace Scriban.DocGen
             private StringWriter _writerReturns;
             private StringWriter _writerSummary;
             private StringWriter _writerRemarks;
+            private StringWriter _writerExceptions = new StringWriter();
 
 
             public class ClassWriter
@@ -221,7 +222,8 @@ namespace Scriban.DocGen
                     // Write the toc
                     _writerToc.WriteLine($"- [`{shortName}` functions](#{shortName}-functions)");
                 }
-                else if (methodInfo is not null && IsBuiltinType(methodInfo.DeclaringType, out shortName) && shortName is not null && methodInfo.IsPublic)
+                else if (methodInfo is not null && IsBuiltinType(methodInfo.DeclaringType, out shortName) && shortName is not null && methodInfo.IsPublic
+                    && !methodInfo.IsDefined(typeof(ScriptMemberIgnoreAttribute), false))
                 {
                     var methodShortName = StandardMemberRenamer.Default(methodInfo);
 
@@ -285,6 +287,12 @@ namespace Scriban.DocGen
                     _writer.WriteLine();
                     _writer.WriteLine(_writerReturns);
                     _writer.WriteLine();
+                    if (_writerExceptions.GetStringBuilder().Length > 0)
+                    {
+                        _writer.WriteLine("#### Exceptions");
+                        _writer.WriteLine();
+                        _writer.WriteLine(_writerExceptions);
+                    }
                     _writer.WriteLine("#### Examples");
                     _writer.WriteLine();
                     _writer.WriteLine(_writerRemarks);
@@ -294,6 +302,7 @@ namespace Scriban.DocGen
                 _writerParameters = new StringWriter();
                 _writerReturns = new StringWriter();
                 _writerRemarks = new StringWriter();
+                _writerExceptions = new StringWriter();
             }
 
             public override void VisitSummary(Summary summary)
@@ -340,6 +349,15 @@ namespace Scriban.DocGen
             {
                 _writer = _writerReturns;
                 base.VisitReturns(returns);
+            }
+
+            public override void VisitException(NuDoq.Exception exception)
+            {
+                _writer = _writerExceptions;
+                var name = exception.Cref.StartsWith("T:") ? exception.Cref.Substring(2) : exception.Cref;
+                _writer.Write($"- `{name}`: ");
+                base.VisitException(exception);
+                _writer.WriteLine();
             }
 
             public override void VisitCode(Code code)

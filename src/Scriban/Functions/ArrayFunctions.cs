@@ -192,7 +192,7 @@ namespace Scriban.Functions
             var cycleKey = new CycleKey(strGroup);
 
             object? cycleValue;
-            var currentTags = context.Tags;
+            var currentTags = context.BuiltinState;
             if (!currentTags.TryGetValue(cycleKey, out cycleValue) || !(cycleValue is int))
             {
                 cycleValue = 0;

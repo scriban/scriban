@@ -385,15 +385,19 @@ string.literal <text>
 
 #### Description
 
-Return a string literal enclosed with double quotes of the input string.
+Converts a string to a quoted literal, enforcing the context's string allocation limit.
 
 #### Arguments
 
-- `text`: The string to return a literal from.
+- `text`: The input string.
 
 #### Returns
 
-The literal of a string.
+The quoted and escaped string, or null.
+
+#### Exceptions
+
+- `System.InvalidOperationException`: The result exceeds LimitToString.
 
 #### Examples
 
@@ -1395,16 +1399,19 @@ string.base64_encode <text>
 
 #### Description
 
-Encodes a string to its Base64 representation.
-Its character encoded will be UTF-8.
+Encodes a string as Base64 using UTF-8, enforcing the context's string allocation limit.
 
 #### Arguments
 
-- `text`: The string to encode
+- `text`: The input string.
 
 #### Returns
 
-The encoded string
+The Base64 representation.
+
+#### Exceptions
+
+- `System.InvalidOperationException`: The result exceeds LimitToString.
 
 #### Examples
 

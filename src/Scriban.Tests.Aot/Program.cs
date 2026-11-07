@@ -51,5 +51,13 @@ foreach (IScriptObject value in new IScriptObject[] { new ScriptObject(), new Sc
     }
 }
 
+// 6. Guarded encoding builtins use precompiled delegates, including under Native AOT.
+var encoded = Template.Parse("{{ 'x' | string.literal }}|{{ 'abcd' | string.base64_encode }}|{{ '&' | html.escape }}|{{ 'a b' | html.url_encode }}|{{ 'a b' | html.url_escape }}|{{ 'a\\n' | html.newline_to_br }}")
+    .Render(new TemplateContext());
+if (encoded != "\"x\"|YWJjZA==|&amp;|a%20b|a%20b|a<br />\n")
+{
+    throw new InvalidOperationException("Guarded encoding builtin failed.");
+}
+
 Console.WriteLine("AOT test passed!");
 return 0;

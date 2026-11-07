@@ -362,44 +362,63 @@ namespace Scriban.Runtime
         public virtual string ToString(string? format, IFormatProvider? formatProvider)
         {
             var context = formatProvider as TemplateContext;
+            if (context is not null && !context.IsObjectToStringActive)
+            {
+                // Bypass host overrides that may themselves call this formatter.
+                return context.ObjectToStringCore(this, false, formatScriptObject: true) ?? string.Empty;
+            }
+            return ToStringCore(formatProvider);
+        }
+
+        internal string ToStringCore(IFormatProvider? formatProvider)
+        {
+            var context = formatProvider as TemplateContext;
             var result = new StringBuilder();
-            result.Append("{");
+            if (!Append("{")) return result.ToString();
             bool isFirst = true;
             foreach (var item in this)
             {
+                context?.CheckAbort();
                 if (!isFirst)
                 {
-                    result.Append(", ");
+                    if (!Append(", ")) return result.ToString();
                 }
                 if (IsSimpleKey(item.Key))
                 {
-                    result.Append(item.Key);
+                    if (!Append(item.Key)) return result.ToString();
                 }
                 else
                 {
-                    result.Append(context is not null ? context.ObjectToString(item.Key, true) : $"\"{StringFunctions.Escape(item.Key)}\"");
+                    if (!Append(context is not null ? context.ObjectToStringNested(item.Key, result.Length) : $"\"{StringFunctions.Escape(item.Key)}\"")) return result.ToString();
                 }
-                result.Append(": ");
+                if (!Append(": ")) return result.ToString();
                 if (context is not null)
                 {
-                    result.Append(context.ObjectToString(item.Value, true));
+                    if (!Append(context.ObjectToStringNested(item.Value, result.Length))) return result.ToString();
                 }
                 else
                 {
                     var value = item.Value;
                     if (value is IFormattable formattable)
                     {
-                        result.Append(formattable.ToString(null, formatProvider));
+                        Append(formattable.ToString(null, formatProvider));
                     }
                     else
                     {
-                        result.Append(value);
+                        Append(value?.ToString());
                     }
                 }
                 isFirst = false;
             }
-            result.Append("}");
+            Append("}");
             return result.ToString();
+
+            bool Append(string? text)
+            {
+                if (context is not null) return context.TryAppendToString(result, text);
+                result.Append(text);
+                return true;
+            }
         }
 
         public string ToString(IFormatProvider formatProvider)

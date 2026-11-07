@@ -402,7 +402,14 @@ Converts the json to a scriban value. Object, Array, string, etc.
 
 Returns the scriban value
 
+#### Exceptions
+
+- `Scriban.Syntax.ScriptRuntimeException`: The shared iteration limit is exceeded.
+- `Scriban.Syntax.ScriptAbortException`: The context's cancellation token is cancelled.
+
 #### Examples
+
+Array elements and object properties, including nested values, share the context's iteration budget.
 
 > **input** [Try out](/?template=%7B%7B%0A%20%20%20obj%20%3D%20%60%7B%20%22foo%22%3A%20123%20%7D%60%20%7C%20object.from_json%0A%20%20%20obj.foo%0A%7D%7D&model=%7B%7D)
 ```scriban-html
@@ -433,6 +440,10 @@ Converts the scriban value to JSON.
 #### Returns
 
 A JSON representation of the value
+
+#### Exceptions
+
+- `System.InvalidOperationException`: The JSON output exceeds LimitToString or the object graph is recursive or too deep.
 
 #### Examples
 

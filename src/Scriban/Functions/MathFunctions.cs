@@ -381,7 +381,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(span, "minValue must be greater than maxValue");
             }
 
-            var currentTags = context.Tags;
+            var currentTags = context.BuiltinState;
             if (!currentTags.TryGetValue(RandomTagKey, out var randomObject))
             {
                 randomObject = new Random();

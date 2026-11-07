@@ -407,9 +407,11 @@ namespace Scriban
         public TryGetMemberDelegate? TryGetMember { get; set; }
 
         /// <summary>
-        /// Allows to store data within this context.
+        /// Allows to store host data within this context. Entries are preserved by <see cref="Reset"/>.
         /// </summary>
         public Dictionary<object, object> Tags { get; }
+
+        internal Dictionary<object, object> BuiltinState { get; } = new Dictionary<object, object>();
 
         /// <summary>
         /// Store the current stack of pipe arguments used by <see cref="ScriptPipeCall"/> and <see cref="ScriptFunctionCall"/>
@@ -1022,6 +1024,7 @@ namespace Scriban
         /// - Remove all global stored pushed via <see cref="PushGlobal"/> expect the builtin top level one.
         /// - Remove all cultures pushed via <see cref="PushCulture"/>.
         /// - Remove all source files pushed via <see cref="PushSourceFile"/>.
+        /// - Clears per-run builtin state, including array cycles and the random number generator. Host <see cref="Tags"/> are preserved.
         /// </remarks>
         public virtual void Reset()
         {
@@ -1051,6 +1054,7 @@ namespace Scriban
 
             CachedTemplates.Clear();
             _memberAccessors.Clear();
+            BuiltinState.Clear();
             ResetOutputLimitTracking();
         }
 

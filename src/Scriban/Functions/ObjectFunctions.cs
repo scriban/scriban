@@ -528,10 +528,14 @@ namespace Scriban.Functions
         /// <summary>
         /// Converts the json to a scriban value. Object, Array, string, etc.
         /// </summary>
-        /// <param name="context">The template context</param>
+        /// <param name="context">The template context, or null for host conversion without runtime budgets.</param>
         /// <param name="json">The json to deserialize.</param>
         /// <returns>Returns the scriban value</returns>
+        /// <exception cref="ScriptRuntimeException">The shared iteration limit is exceeded.</exception>
+        /// <exception cref="ScriptAbortException">The context's cancellation token is cancelled.</exception>
         /// <remarks>
+        /// Array elements and object properties, including nested values, share the context's iteration budget.
+        ///
         /// ```scriban-html
         /// {{
         ///    obj = `{ "foo": 123 }` | object.from_json
@@ -542,13 +546,14 @@ namespace Scriban.Functions
         /// 123
         /// ```
         /// </remarks>
-        public static object? FromJson(TemplateContext context, string json)
+        public static object? FromJson(TemplateContext? context, string json)
         {
 #if SCRIBAN_NO_SYSTEM_TEXT_JSON
             throw new ScriptRuntimeException(context?.CurrentSpan ?? new SourceSpan(), "object.from_json is unavailable when System.Text.Json support is disabled.");
 #else
+            context?.CheckAbort();
             using var doc = JsonDocument.Parse(json);
-            return doc.RootElement.Clone().ToScriban();
+            return doc.RootElement.ToScriban(context);
 #endif
         }
 
@@ -558,6 +563,7 @@ namespace Scriban.Functions
         /// <param name="context">The template context</param>
         /// <param name="value">The input object.</param>
         /// <returns>A JSON representation of the value</returns>
+        /// <exception cref="InvalidOperationException">The JSON output exceeds LimitToString or the object graph is recursive or too deep.</exception>
         /// <remarks>
         /// ```scriban-html
         /// {{ { foo: "bar", baz: [1, 2, 3] } | object.to_json }}
@@ -584,7 +590,10 @@ namespace Scriban.Functions
 
             var writerOptions = new JsonWriterOptions { Indented = false };
 
-            using var stream = new MemoryStream();
+            using var stream = new JsonLimitStream(context);
+            // Dispose would flush pending tokens on failure and could mask the original
+            // cancellation/iteration exception with a second string-limit exception.
+            // This stream-backed writer only owns managed buffers.
             var writer = new Utf8JsonWriter(stream, writerOptions);
             var path = new HashSet<object>(ReferenceEqualityComparer.Default);
             using var loopScope = context.EnterLoopScope();
@@ -592,11 +601,12 @@ namespace Scriban.Functions
             WriteValue(context, writer, value, 0, path);
             writer.Flush();
 
-            var json = Encoding.UTF8.GetString(stream.ToArray());
+            var json = Encoding.UTF8.GetString(stream.GetBuffer(), 0, checked((int)stream.Length));
             return json;
 
             static void WriteValue(TemplateContext context, Utf8JsonWriter writer, object? value, int depth, HashSet<object> path)
             {
+                context.CheckAbort();
                 try
                 {
                     RuntimeHelpers.EnsureSufficientExecutionStack();
@@ -627,12 +637,18 @@ namespace Scriban.Functions
 
                 try
                 {
+                    // Bound a single string token before Utf8JsonWriter reserves its escape buffer.
+                    if (value is string text)
+                    {
+                        StringFunctions.VerifyResultStringLength(context, text.Length);
+                    }
+
                     if (
                         value is null ||
                         value is string ||
                         value is bool ||
                         type.IsPrimitiveOrDecimal() ||
-                        value is IFormattable // handles types like System.DateTime and 99 more types. see: https://learn.microsoft.com/en-us/dotnet/api/system.iformattable?view=net-8.0
+                        value is IFormattable && !(value is IScriptObject) // handles types like System.DateTime
                     )
                     {
                         JsonSerializer.Serialize(writer, value, type);
@@ -660,12 +676,16 @@ namespace Scriban.Functions
                             context.StepLoop(context.CurrentSpan);
                             if (accessor.TryGetValue(context, context.CurrentSpan, value, member, out var memberValue))
                             {
+                                StringFunctions.VerifyResultStringLength(context, member.Length);
                                 writer.WritePropertyName(member);
+                                writer.Flush();
                                 WriteValue(context, writer, memberValue, depth, path);
                             }
                         }
                         writer.WriteEndObject();
                     }
+                    // Flush each token/container so the writer cannot accumulate an unbounded document.
+                    writer.Flush();
                 }
                 finally
                 {
@@ -680,6 +700,36 @@ namespace Scriban.Functions
             }
 #endif
         }
+
+#if !SCRIBAN_NO_SYSTEM_TEXT_JSON
+        private sealed class JsonLimitStream : MemoryStream
+        {
+            private readonly TemplateContext _context;
+            private long _characterCount;
+
+            public JsonLimitStream(TemplateContext context)
+            {
+                _context = context;
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                // Utf8JsonWriter emits valid UTF-8. Count UTF-16 code units by leading bytes,
+                // including writes split in the middle of a multi-byte sequence.
+                long characters = 0;
+                for (var i = offset; i < offset + count; i++)
+                {
+                    var b = buffer[i];
+                    if (b < 0x80 || b >= 0xc0) characters++;
+                    if (b >= 0xf0) characters++;
+                }
+                StringFunctions.VerifyResultStringLength(_context, _characterCount + characters);
+                base.Write(buffer, offset, count);
+                _characterCount += characters;
+            }
+
+        }
+#endif
 
         private sealed class ReferenceEqualityComparer : IEqualityComparer<object>
         {

@@ -13,11 +13,12 @@ namespace Scriban.Runtime {
     /// Extensions attached to an <see cref="JsonElement"/>.
     /// </summary>
     internal static class JsonElementExtensions {
-        internal static object? ToScriban(this JsonElement model)
+        internal static object? ToScriban(this JsonElement model, TemplateContext? context = null)
         {
+            context?.CheckAbort();
             return model.ValueKind switch {
-                JsonValueKind.Array => model.CopyToScriptArray(new ScriptArray()),
-                JsonValueKind.Object => model.CopyToScriptObject(new ScriptObject()),
+                JsonValueKind.Array => model.CopyToScriptArray(new ScriptArray(), context),
+                JsonValueKind.Object => model.CopyToScriptObject(new ScriptObject(), context),
                 JsonValueKind.False => false,
                 JsonValueKind.True => true,
                 JsonValueKind.Null => null,
@@ -28,19 +29,23 @@ namespace Scriban.Runtime {
             };
         }
 
-        internal static IScriptObject CopyToScriptObject(this JsonElement json, IScriptObject obj)
+        internal static IScriptObject CopyToScriptObject(this JsonElement json, IScriptObject obj, TemplateContext? context = null)
         {
+            using var loopScope = context?.EnterLoopScope();
             foreach (var property in json.EnumerateObject()) {
-                obj.SetValue(property.Name, property.Value.ToScriban(), false);
+                context?.StepLoop(context.CurrentSpan);
+                obj.SetValue(property.Name, property.Value.ToScriban(context), false);
             }
 
             return obj;
         }
 
-        internal static ScriptArray CopyToScriptArray(this JsonElement json, ScriptArray array)
+        internal static ScriptArray CopyToScriptArray(this JsonElement json, ScriptArray array, TemplateContext? context = null)
         {
+            using var loopScope = context?.EnterLoopScope();
             foreach (var value in json.EnumerateArray()) {
-                array.Add(value.ToScriban());
+                context?.StepLoop(context.CurrentSpan);
+                array.Add(value.ToScriban(context));
             }
 
             return array;

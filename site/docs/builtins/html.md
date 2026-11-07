@@ -53,15 +53,19 @@ html.escape <text>
 
 #### Description
 
-Escapes a HTML input string (replacing `&` by `&amp;`)
+HTML-encodes a string without exceeding the context's string allocation limit.
 
 #### Arguments
 
-- `text`: The input string
+- `text`: The input string.
 
 #### Returns
 
-The input string removed with any HTML tags
+The HTML-encoded string, or null.
+
+#### Exceptions
+
+- `System.InvalidOperationException`: The result exceeds LimitToString.
 
 #### Examples
 
@@ -82,15 +86,19 @@ html.newline_to_br <text>
 
 #### Description
 
-Inserts an HTML line break (`<br />` in front of each newline (`\r\n`, `\r`, `\n`) in a string
+Inserts HTML line breaks, enforcing the context's string allocation limit.
 
 #### Arguments
 
-- `text`: The input string
+- `text`: The input string.
 
 #### Returns
 
-The input string with HTML line breaks
+The string with HTML line breaks, or null.
+
+#### Exceptions
+
+- `System.InvalidOperationException`: The result exceeds LimitToString.
 
 #### Examples
 
@@ -112,18 +120,22 @@ html.url_encode <text>
 
 #### Description
 
-Percent-encodes a string for use as a URL component.
+Percent-encodes a string for use as a URL component, enforcing the context's string allocation limit.
 This function encodes URL syntax characters such as `:`, `/`, `?`, `#`, `&`, `=`, and `'`. Spaces are encoded as `%20`.
 It does not validate complete URLs and does not make arbitrary input safe for every output context. When writing a value
 into an HTML attribute, validate complete URLs separately and HTML-escape the attribute value.
 
 #### Arguments
 
-- `text`: The input string
+- `text`: The input string.
 
 #### Returns
 
-The input string URL encoded
+The encoded component, or null.
+
+#### Exceptions
+
+- `System.InvalidOperationException`: The result exceeds LimitToString.
 
 #### Examples
 
@@ -144,18 +156,22 @@ html.url_escape <text>
 
 #### Description
 
-Escapes characters that are not valid in a complete URL while preserving URL syntax characters.
+Escapes a complete URL while preserving its syntax and enforcing the context's string allocation limit.
 This function is intended for already-formed, trusted or validated URLs and paths. It preserves reserved URL syntax
 characters such as `:`, `/`, `?`, `#`, `&`, `=`, and `'`. It does not validate schemes or hosts and must not be used
 as a sanitizer for untrusted `href` or `src` values. Use `html.url_encode` for untrusted URL components or query values.
 
 #### Arguments
 
-- `text`: The input string
+- `text`: The input URL.
 
 #### Returns
 
-The input string URL escaped
+The escaped URL, or null.
+
+#### Exceptions
+
+- `System.InvalidOperationException`: The result exceeds LimitToString.
 
 #### Examples
 

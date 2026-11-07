@@ -427,9 +427,35 @@ namespace Scriban.Functions
         /// "Hello\n\"World\""
         /// ```
         /// </remarks>
+        [ScriptMemberIgnore]
         public static string? Literal(string? text)
         {
             return text is null ? null : $"\"{Escape(text)}\"";
+        }
+
+        /// <summary>
+        /// Converts a string to a quoted literal, enforcing the context's string allocation limit.
+        /// </summary>
+        /// <param name="context">The template context.</param>
+        /// <param name="text">The input string.</param>
+        /// <returns>The quoted and escaped string, or null.</returns>
+        /// <exception cref="InvalidOperationException">The result exceeds LimitToString.</exception>
+        /// <remarks>
+        /// If the input string has non printable characters or they need contain a double quote, they will be escaped.
+        /// ```scriban-html
+        /// {{ 'Hello\n"World"' | string.literal }}
+        /// ```
+        /// ```html
+        /// "Hello\n\"World\""
+        /// ```
+        /// </remarks>
+        public static string? Literal(TemplateContext context, string? text)
+        {
+            if (text is not null)
+            {
+                VerifyResultStringLength(context, GetEscapedLength(text) + 2);
+            }
+            return Literal(text);
         }
 
         /// <summary>
@@ -1395,9 +1421,32 @@ namespace Scriban.Functions
         /// aGVsbG8=
         /// ```
         /// </remarks>
+        [ScriptMemberIgnore]
         public static string Base64Encode(string? text)
         {
             return Convert.ToBase64String(Encoding.UTF8.GetBytes(text ?? string.Empty));
+        }
+
+        /// <summary>
+        /// Encodes a string as Base64 using UTF-8, enforcing the context's string allocation limit.
+        /// </summary>
+        /// <param name="context">The template context.</param>
+        /// <param name="text">The input string.</param>
+        /// <returns>The Base64 representation.</returns>
+        /// <exception cref="InvalidOperationException">The result exceeds LimitToString.</exception>
+        /// <remarks>
+        /// ```scriban-html
+        /// {{ "hello" | string.base64_encode }}
+        /// ```
+        /// ```html
+        /// aGVsbG8=
+        /// ```
+        /// </remarks>
+        public static string Base64Encode(TemplateContext context, string? text)
+        {
+            var byteCount = Encoding.UTF8.GetByteCount(text ?? string.Empty);
+            VerifyResultStringLength(context, ((long)byteCount + 2) / 3 * 4);
+            return Base64Encode(text);
         }
 
         /// <summary>

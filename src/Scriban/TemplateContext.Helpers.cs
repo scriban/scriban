@@ -112,30 +112,74 @@ namespace Scriban
         /// <exception cref="ScriptRuntimeException">The string conversion limit is reached and <see cref="OnStringLimit"/> is <see cref="ScriptLimitBehavior.Throw"/>.</exception>
         public virtual string? ObjectToString(object? value, bool nested = false)
         {
+            return ObjectToStringCore(value, nested);
+        }
+
+        internal string? ObjectToStringCore(object? value, bool nested, bool formatScriptObject = false)
+        {
             if (_objectToStringLevel == 0)
             {
                 _currentToStringLength = 0;
             }
+            var previousLength = _currentToStringLength;
             try
             {
                 _objectToStringLevel++;
                 if (ObjectRecursionLimit != 0 && _objectToStringLevel > ObjectRecursionLimit)
                     throw new InvalidOperationException("Structure is too deeply nested or contains reference loops.");
-                var result = ObjectToStringImpl(value, nested);
-                if (LimitToString > 0 && _objectToStringLevel == 1 && result is not null && result.Length >= LimitToString)
+                var result = formatScriptObject && value is ScriptObject scriptObject
+                    ? scriptObject.ToStringCore(this)
+                    : ObjectToStringImpl(value, nested);
+                var remaining = Math.Max(0, LimitToString - previousLength);
+                if (LimitToString > 0 && result is not null && result.Length >= remaining)
                 {
                     if (OnStringLimit == ScriptLimitBehavior.Throw)
                     {
                         throw new ScriptRuntimeException(CurrentSpan, $"String conversion reaches LimitToString `{LimitToString}`.");
                     }
-                    return result + "...";
+                    result = result.Substring(0, remaining);
+                    return _objectToStringLevel == 1 ? result + "..." : result;
                 }
                 return result;
             }
             finally
             {
                 _objectToStringLevel--;
+                _currentToStringLength = previousLength;
             }
+        }
+
+        internal bool IsObjectToStringActive => _objectToStringLevel != 0;
+
+        // Reserve the parent's already formatted prefix while converting a nested value.
+        internal string? ObjectToStringNested(object? value, int prefixLength)
+        {
+            var previousLength = _currentToStringLength;
+            try
+            {
+                _currentToStringLength += prefixLength;
+                return ObjectToString(value, true);
+            }
+            finally
+            {
+                _currentToStringLength = previousLength;
+            }
+        }
+
+        internal bool TryAppendToString(StringBuilder builder, string? text)
+        {
+            var remaining = (long)LimitToString - _currentToStringLength - builder.Length;
+            if (LimitToString > 0 && (text?.Length ?? 0) >= remaining)
+            {
+                if (OnStringLimit == ScriptLimitBehavior.Throw)
+                {
+                    throw new ScriptRuntimeException(CurrentSpan, $"String conversion reaches LimitToString `{LimitToString}`.");
+                }
+                if (remaining > 0 && text is not null) builder.Append(text, 0, (int)remaining);
+                return false;
+            }
+            builder.Append(text);
+            return true;
         }
 
         [UnconditionalSuppressMessage("Trimming", "IL2026", Justification = "Reflecting on KeyValuePair, a well-known BCL type whose members are always preserved.")]
@@ -145,7 +189,7 @@ namespace Scriban
 
             if (value is string str)
             {
-                if (LimitToString > 0 && _currentToStringLength + str.Length >= LimitToString)
+                if (LimitToString > 0 && (long)_currentToStringLength + str.Length >= LimitToString)
                 {
                     var index = LimitToString - _currentToStringLength;
                     if (index <= 0) return string.Empty;
@@ -199,31 +243,22 @@ namespace Scriban
             if (value is IEnumerable enumerable)
             {
                 var result = new StringBuilder();
-                result.Append("[");
-                _currentToStringLength++;
+                if (!TryAppendToString(result, "[")) return result.ToString();
                 bool isFirst = true;
                 foreach (var item in enumerable)
                 {
+                    CheckAbort();
                     if (!isFirst)
                     {
-                        result.Append(", ");
-                        _currentToStringLength += 2;
+                        if (!TryAppendToString(result, ", ")) return result.ToString();
                     }
 
-                    var itemStr = ObjectToString(item, true);
-                    result.Append(itemStr);
-                    if (itemStr is not null) _currentToStringLength += itemStr.Length;
-
-                    // Limit to size
-                    if (LimitToString > 0 && _currentToStringLength >= LimitToString)
-                    {
-                        return result.ToString();
-                    }
+                    var itemStr = ObjectToStringNested(item, result.Length);
+                    if (!TryAppendToString(result, itemStr)) return result.ToString();
 
                     isFirst = false;
                 }
-                result.Append("]");
-                _currentToStringLength += 1;
+                TryAppendToString(result, "]");
                 return result.ToString();
             }
 
