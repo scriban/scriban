@@ -579,6 +579,7 @@ namespace Scriban.Tests
                 TestParser.AssertTemplate("1,234.50|1.234,50", @"{{ 1234.5 | math.format ""N2"" ""en-US"" }}|{{ 1234.5 | math.format ""N2"" ""de-DE"" }}");
                 TestParser.AssertTemplate("1,234.50|1.234,50", @"{{ 1234.5 | object.format ""N2"" ""en-US"" }}|{{ 1234.5 | object.format ""N2"" ""de-DE"" }}");
                 TestParser.AssertTemplate("1,5;2,5;1,5;", @"{{ for x in [1.5, 2.5, 1.5] }}{{ x | math.format ""N1"" ""de-DE"" }};{{ end }}");
+                TestParser.AssertTemplate("1.234,50|1,234.50", @"{{ 1234.5 | math.format ""N2"" ""DE-de"" }}|{{ 1234.5 | math.format ""N2"" ""EN-us"" }}");
             }
         }
 
