@@ -5,6 +5,7 @@
 #nullable enable
 
 using System;
+using System.Collections.Concurrent;
 using System.Globalization;
 using System.Numerics;
 using System.Reflection;
@@ -168,6 +169,23 @@ namespace Scriban.Functions
             return Math.Floor(value);
         }
 
+        // A new CultureInfo rebuilds its NumberFormatInfo on first use, which costs far more than formatting a number,
+        // so keep one read-only instance per culture name (same data and user overrides as new CultureInfo(name)).
+        // Culture names come from templates: the cache is bounded so that untrusted names cannot grow it indefinitely.
+        private const int MaxFormatCultures = 128;
+        private static readonly ConcurrentDictionary<string, CultureInfo> _formatCultures = new(StringComparer.OrdinalIgnoreCase);
+
+        internal static CultureInfo GetFormatCulture(string culture)
+        {
+            if (_formatCultures.TryGetValue(culture, out var cultureInfo))
+            {
+                return cultureInfo;
+            }
+
+            cultureInfo = CultureInfo.ReadOnly(new CultureInfo(culture));
+            return _formatCultures.Count < MaxFormatCultures ? _formatCultures.GetOrAdd(culture, cultureInfo) : cultureInfo;
+        }
+
         /// <summary>
         /// Formats a number value with specified [.NET standard numeric format strings](https://docs.microsoft.com/en-us/dotnet/standard/base-types/standard-numeric-format-strings)
         /// </summary>
@@ -198,7 +216,7 @@ namespace Scriban.Functions
                 throw new ScriptRuntimeException(span, $"Unexpected `{value}`. Must be a formattable number");
             }
             StringFunctions.VerifyFormatPrecision(context, format);
-            return formattable.ToString(format, culture is not null ? new CultureInfo(culture) : context.CurrentCulture);
+            return formattable.ToString(format, culture is not null ? GetFormatCulture(culture) : context.CurrentCulture);
         }
 
         /// <summary>

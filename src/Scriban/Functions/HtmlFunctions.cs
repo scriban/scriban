@@ -49,8 +49,8 @@ namespace Scriban.Functions
             {
                 return text;
             }
-            var stripHtml = new Regex(RegexMatchHtml, RegexOptions.IgnoreCase|RegexOptions.Singleline, context.RegexTimeOut);
-            return stripHtml.Replace(text, string.Empty);
+            // The static Regex.Replace uses the Regex cache instead of parsing the pattern on every call.
+            return Regex.Replace(text, RegexMatchHtml, string.Empty, RegexOptions.IgnoreCase|RegexOptions.Singleline, context.RegexTimeOut);
         }
 
         /// <summary>
