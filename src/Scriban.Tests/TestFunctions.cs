@@ -324,6 +324,15 @@ namespace Scriban.Tests
             }
 
             [Test]
+            [SetCulture("tr-TR")]
+            public void TestCapitalizeIsCultureInvariant()
+            {
+                // In the Turkish culture char.ToUpper('i') is 'İ'; string.upcase is already culture invariant.
+                Assert.That(StringFunctions.Capitalize("is"), Is.EqualTo("Is"));
+                Assert.That(StringFunctions.Capitalizewords("this is easy"), Is.EqualTo("This Is Easy"));
+            }
+
+            [Test]
             public void TestNullFriendlyStringFunctionsDoNotRejectNullArguments()
             {
                 Assert.That(Render("{{ null | string.capitalize }}"), Is.EqualTo(StringFunctions.Capitalize(null)));
