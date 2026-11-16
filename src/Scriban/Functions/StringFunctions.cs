@@ -201,7 +201,7 @@ namespace Scriban.Functions
             }
 
             var builder = GetTempStringBuilder();
-            builder.Append(char.ToUpper(text[0]));
+            builder.Append(char.ToUpperInvariant(text[0]));
             if (text.Length > 1)
             {
                 builder.Append(text, 1, text.Length - 1);
@@ -242,8 +242,7 @@ namespace Scriban.Functions
                 }
                 else if (previousSpace && char.IsLetter(c))
                 {
-                    // TODO: Handle culture
-                    c = char.ToUpper(c);
+                    c = char.ToUpperInvariant(c);
                     previousSpace = false;
                 }
                 builder.Append(c);
