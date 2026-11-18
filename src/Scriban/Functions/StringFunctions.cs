@@ -835,6 +835,10 @@ namespace Scriban.Functions
 
             if (start < 0)
             {
+                if (start + length <= 0)
+                {
+                    return string.Empty;
+                }
                 length = length + start;
                 start = 0;
             }
