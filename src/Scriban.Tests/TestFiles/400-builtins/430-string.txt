@@ -36,6 +36,8 @@ slice1:{{ "test" | string.slice1 1 }}
 {{ "test" | string.slice1 10 }}
 {{ "test" | string.slice1 (-2) }}
 {{ "test" | string.slice1 10 }}
+{{ "test" | string.slice1 (-10) }}
+{{ "test" | string.slice1 (-10) 3 }}
 {{ "a/b/c/d/e//f" | string.split '/' | array.join ' | ' }}
 {{ null | string.split '/' }}
 {{ "test" | string.starts_with 'test'}}
