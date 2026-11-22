@@ -255,11 +255,30 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Converts a character to upper case independently of the current culture.
-        /// Unlike <see cref="char.ToUpperInvariant(char)"/>, it converts the dotless i (U+0131) to `I`,
-        /// as the Unicode default case mapping and every culture do.
+        /// The casing of a culture without the Turkic i rules, used to upper-case independently of the current culture.
+        /// <see cref="char.ToUpperInvariant(char)"/> is not enough: it leaves the dotless i (U+0131) unchanged, and with NLS
+        /// also characters such as the final sigma or the long s, which every named culture converts.
+        /// It is <c>null</c> when named cultures are not available (invariant globalization mode).
         /// </summary>
-        private static char ToUpperCultureIndependent(char c) => c == '\u0131' ? 'I' : char.ToUpperInvariant(c);
+        private static readonly TextInfo? _nonTurkicTextInfo = GetNonTurkicTextInfo();
+
+        private static TextInfo? GetNonTurkicTextInfo()
+        {
+            try
+            {
+                return CultureInfo.GetCultureInfo("en-US").TextInfo;
+            }
+            catch (CultureNotFoundException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Converts a character to upper case independently of the current culture, as every culture
+        /// except the Turkish and Azerbaijani ones does: the dotless i (U+0131) also becomes `I`.
+        /// </summary>
+        private static char ToUpperCultureIndependent(char c) => c == '\u0131' ? 'I' : _nonTurkicTextInfo?.ToUpper(c) ?? char.ToUpperInvariant(c);
 
         /// <summary>
         /// Returns a boolean indicating whether the input string contains the specified string `value`.

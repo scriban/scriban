@@ -334,12 +334,14 @@ namespace Scriban.Tests
                 CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(cultureName);
                 try
                 {
-                    // char.ToUpper('i') is 'İ' in the Turkish and Azerbaijani cultures,
-                    // and char.ToUpperInvariant leaves the dotless 'ı' unchanged.
+                    // char.ToUpper('i') is 'İ' in the Turkish and Azerbaijani cultures; char.ToUpperInvariant leaves
+                    // the dotless 'ı' unchanged, and with NLS (DOTNET_SYSTEM_GLOBALIZATION_USENLS=1) also 'ς' and 'ſ'.
                     Assert.That(StringFunctions.Capitalize("is"), Is.EqualTo("Is"));
                     Assert.That(StringFunctions.Capitalize("ılık"), Is.EqualTo("Ilık"));
+                    Assert.That(StringFunctions.Capitalize("ſs"), Is.EqualTo("Ss"));
                     Assert.That(StringFunctions.Capitalizewords("this is easy"), Is.EqualTo("This Is Easy"));
                     Assert.That(StringFunctions.Capitalizewords("ılık ışık"), Is.EqualTo("Ilık Işık"));
+                    Assert.That(StringFunctions.Capitalizewords("ςs ſs"), Is.EqualTo("Σs Ss"));
                 }
                 finally
                 {
