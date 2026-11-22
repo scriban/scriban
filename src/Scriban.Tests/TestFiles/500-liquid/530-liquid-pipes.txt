@@ -1,3 +1,4 @@
 {% assign test = "abcdef" %}
 {{ test | truncate: 5 }}
 {{ "The cat came back the very next day" | truncatewords: 4, " --" }}
+{% assign pos = -10 %}[{{ "test" | slice: pos }}][{{ "test" | slice: pos, 3 }}]
