@@ -121,7 +121,8 @@ string.capitalize <text>
 
 #### Description
 
-Converts the first character of the passed string to a upper case character.
+Converts the first character of the passed string to an upper case character.
+The conversion does not depend on the current culture: `i` becomes `I` also in the Turkish and Azerbaijani cultures, and the dotless i (U+0131) becomes `I`.
 
 #### Arguments
 
@@ -150,7 +151,8 @@ string.capitalizewords <text>
 
 #### Description
 
-Converts the first character of each word in the passed string to a upper case character.
+Converts the first character of each word in the passed string to an upper case character.
+The conversion does not depend on the current culture: `i` becomes `I` also in the Turkish and Azerbaijani cultures, and the dotless i (U+0131) becomes `I`.
 
 #### Arguments
 

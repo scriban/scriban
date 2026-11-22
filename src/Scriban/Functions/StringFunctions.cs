@@ -181,7 +181,8 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Converts the first character of the passed string to a upper case character.
+        /// Converts the first character of the passed string to an upper case character.
+        /// The conversion does not depend on the current culture: `i` becomes `I` also in the Turkish and Azerbaijani cultures, and the dotless i (U+0131) becomes `I`.
         /// </summary>
         /// <param name="text">The input string</param>
         /// <returns>The capitalized input string</returns>
@@ -201,7 +202,7 @@ namespace Scriban.Functions
             }
 
             var builder = GetTempStringBuilder();
-            builder.Append(char.ToUpper(text[0]));
+            builder.Append(ToUpperCultureIndependent(text[0]));
             if (text.Length > 1)
             {
                 builder.Append(text, 1, text.Length - 1);
@@ -212,7 +213,8 @@ namespace Scriban.Functions
         }
 
         /// <summary>
-        /// Converts the first character of each word in the passed string to a upper case character.
+        /// Converts the first character of each word in the passed string to an upper case character.
+        /// The conversion does not depend on the current culture: `i` becomes `I` also in the Turkish and Azerbaijani cultures, and the dotless i (U+0131) becomes `I`.
         /// </summary>
         /// <param name="text">The input string</param>
         /// <returns>The capitalized input string</returns>
@@ -242,8 +244,7 @@ namespace Scriban.Functions
                 }
                 else if (previousSpace && char.IsLetter(c))
                 {
-                    // TODO: Handle culture
-                    c = char.ToUpper(c);
+                    c = ToUpperCultureIndependent(c);
                     previousSpace = false;
                 }
                 builder.Append(c);
@@ -252,6 +253,32 @@ namespace Scriban.Functions
             ReleaseBuilder(builder);
             return result;
         }
+
+        /// <summary>
+        /// The casing of a culture without the Turkic i rules, used to upper-case independently of the current culture.
+        /// <see cref="char.ToUpperInvariant(char)"/> is not enough: it leaves the dotless i (U+0131) unchanged, and with NLS
+        /// also characters such as the final sigma or the long s, which every named culture converts.
+        /// It is <c>null</c> when named cultures are not available (invariant globalization mode).
+        /// </summary>
+        private static readonly TextInfo? _nonTurkicTextInfo = GetNonTurkicTextInfo();
+
+        private static TextInfo? GetNonTurkicTextInfo()
+        {
+            try
+            {
+                return CultureInfo.GetCultureInfo("en-US").TextInfo;
+            }
+            catch (CultureNotFoundException)
+            {
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Converts a character to upper case independently of the current culture, as every culture
+        /// except the Turkish and Azerbaijani ones does: the dotless i (U+0131) also becomes `I`.
+        /// </summary>
+        private static char ToUpperCultureIndependent(char c) => c == '\u0131' ? 'I' : _nonTurkicTextInfo?.ToUpper(c) ?? char.ToUpperInvariant(c);
 
         /// <summary>
         /// Returns a boolean indicating whether the input string contains the specified string `value`.
