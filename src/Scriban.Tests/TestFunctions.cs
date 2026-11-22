@@ -4,6 +4,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Numerics;
 using NUnit.Framework;
@@ -323,13 +324,27 @@ namespace Scriban.Tests
                 TestParser.AssertTemplate("text(1,17) : error : Invalid number of arguments `0` passed to `string.slice1` while expecting `2` arguments", "{{ string.slice1 }}");
             }
 
-            [Test]
-            [SetCulture("tr-TR")]
-            public void TestCapitalizeIsCultureInvariant()
+            [TestCase("tr-TR")]
+            [TestCase("az-Latn-AZ")]
+            [TestCase("en-US")]
+            [TestCase("")]
+            public void TestCapitalizeIsCultureInvariant(string cultureName)
             {
-                // In the Turkish culture char.ToUpper('i') is 'İ'; string.upcase is already culture invariant.
-                Assert.That(StringFunctions.Capitalize("is"), Is.EqualTo("Is"));
-                Assert.That(StringFunctions.Capitalizewords("this is easy"), Is.EqualTo("This Is Easy"));
+                var previousCulture = CultureInfo.CurrentCulture;
+                CultureInfo.CurrentCulture = CultureInfo.GetCultureInfo(cultureName);
+                try
+                {
+                    // char.ToUpper('i') is 'İ' in the Turkish and Azerbaijani cultures,
+                    // and char.ToUpperInvariant leaves the dotless 'ı' unchanged.
+                    Assert.That(StringFunctions.Capitalize("is"), Is.EqualTo("Is"));
+                    Assert.That(StringFunctions.Capitalize("ılık"), Is.EqualTo("Ilık"));
+                    Assert.That(StringFunctions.Capitalizewords("this is easy"), Is.EqualTo("This Is Easy"));
+                    Assert.That(StringFunctions.Capitalizewords("ılık ışık"), Is.EqualTo("Ilık Işık"));
+                }
+                finally
+                {
+                    CultureInfo.CurrentCulture = previousCulture;
+                }
             }
 
             [Test]
