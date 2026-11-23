@@ -1093,7 +1093,7 @@ namespace Scriban.Functions
 
         /// <summary>
         /// Truncates a string down to the number of words passed as the first parameter.
-        /// An ellipsis (...) is appended to the truncated string.
+        /// An ellipsis (...) is appended to the truncated string. A string with no more words than `count` is returned unchanged.
         /// </summary>
         /// <param name="text">The input string</param>
         /// <param name="count">The number of words to keep from the input `text` string before appending the `ellipsis`</param>
@@ -1110,29 +1110,26 @@ namespace Scriban.Functions
         public static string Truncatewords(string? text, int count, string? ellipsis = null)
         {
             ellipsis = ellipsis ?? "...";
-            if (string.IsNullOrEmpty(text))
+            if (text is null || text.Length == 0)
             {
                 return string.Empty;
             }
 
-            var builder = GetTempStringBuilder();
-            bool isFirstWord = true;
-            foreach (var word in Regex.Split(text, @"\s+"))
+            var words = Regex.Split(text.Trim(), @"\s+");
+            if (words.Length <= count)
             {
-                if (count <= 0)
-                {
-                    break;
-                }
+                return text;
+            }
 
-                if (!isFirstWord)
+            var builder = GetTempStringBuilder();
+            for (int i = 0; i < count; i++)
+            {
+                if (i > 0)
                 {
                     builder.Append(' ');
                 }
 
-                builder.Append(word);
-
-                isFirstWord = false;
-                count--;
+                builder.Append(words[i]);
             }
             builder.Append(ellipsis);
             var result = builder.ToString();

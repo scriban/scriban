@@ -54,6 +54,9 @@ This is a test truncated...
 This is a test truncated (...)
 This is a test truncated
 
+Only three words
+Exactly five words in here
+Leading spaces...
 TEST
 This Will Capitalize Words
 

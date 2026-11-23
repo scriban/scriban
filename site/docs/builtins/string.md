@@ -1075,7 +1075,7 @@ string.truncatewords <text> <count> <ellipsis>?
 #### Description
 
 Truncates a string down to the number of words passed as the first parameter.
-An ellipsis (...) is appended to the truncated string.
+An ellipsis (...) is appended to the truncated string. A string with no more words than `count` is returned unchanged.
 
 #### Arguments
 
