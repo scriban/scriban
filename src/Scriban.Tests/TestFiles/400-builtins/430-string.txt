@@ -54,6 +54,9 @@ truncate: {{ "This is a long test with several chars in it but going to be trunc
 {{ "This is a test truncated at 5" | string.truncatewords 5 " (...)" }}
 {{ "This is a test truncated at 5" | string.truncatewords 5 "" }}
 {{ "" | string.truncatewords 5 }}
+{{ "Only three words" | string.truncatewords 5 }}
+{{ "Exactly five words in here" | string.truncatewords 5 }}
+{{ "  Leading spaces are not a word" | string.truncatewords 2 }}
 {{ "test" | string.upcase }}
 {{ "This will capitalize words" | string.capitalizewords }}
 {{ null | string.capitalizewords }}
