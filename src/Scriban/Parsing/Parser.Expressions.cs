@@ -198,7 +198,7 @@ namespace Scriban.Parsing
                     default:
                         if (IsStartingAsUnaryExpression())
                         {
-                            leftOperand = ParseUnaryExpression();
+                            leftOperand = ParseUnaryExpression(mode);
                         }
                         break;
                 }
@@ -1126,7 +1126,7 @@ namespace Scriban.Parsing
             return Close(expression);
         }
 
-        private ScriptExpression ParseUnaryExpression()
+        private ScriptExpression ParseUnaryExpression(ParseExpressionMode mode)
         {
             // unit test: 113-unary.txt
             var unaryExpression = Open<ScriptUnaryExpression>();
@@ -1165,8 +1165,11 @@ namespace Scriban.Parsing
             }
             newPrecedence = GetDefaultUnaryOperatorPrecedence(unaryExpression.Operator);
 
+            // The operand ends at the `:` of a conditional expression
+            var operandMode = mode == ParseExpressionMode.DefaultNoNamedArgument ? mode : ParseExpressionMode.Default;
+
             // unit test: 115-unary-error1.txt
-            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence) ;
+            unaryExpression.Right = ExpectAndParseExpression(unaryExpression, null, newPrecedence, mode: operandMode);
             return Close(unaryExpression);
         }
 
