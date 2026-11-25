@@ -67,6 +67,20 @@ namespace Scriban.Tests
             AssertRoundtrip(text);
         }
 
+        [TestCase("{{ x ? !y : z }}", "true")]
+        [TestCase("{{ x ? -z : z }}", "-3")]
+        [TestCase("{{ x ? -1 : 1 }}", "-1")]
+        [TestCase("{{ y ? 1 : !y }}", "true")]
+        [TestCase("{{ x ? !y ? -z : z : 1 }}", "-3")]
+        [TestCase("{{ x ? z * -z : 1 }}", "-9")]
+        [TestCase("{{ x ? !(y && x) : 1 }}", "true")]
+        public void TestConditionalWithUnaryValue(string input, string expected)
+        {
+            var template = Template.Parse(input);
+            Assert.False(template.HasErrors, $"Template has errors: {template.Messages}");
+            Assert.AreEqual(expected, template.Render(new { x = true, y = false, z = 3 }));
+        }
+
         [Test]
         public void TestScribanIfElseFunction()
         {
